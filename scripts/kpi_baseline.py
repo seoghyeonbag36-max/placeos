@@ -21,6 +21,15 @@ KPI① 이 "AI 정확도 70%+" 한 줄이라 **임계값만 넘으면 달성**�
    ±11%p 를 무시하게 된다(70.8% 의 구간은 [58.8%, 80.4%] 라 목표 70% 를 품는다).
 3. **쌍대 검정** — 같은 홀드아웃 위의 비교라 독립표본 검정이 아니라 McNemar 정확검정을
    쓴다. "유의하지 않다"는 "차이가 없다"가 아니라 "이 표본으로는 못 가른다"는 뜻이다.
+4. **세 갈래 판정(`verdict`)** — `실력` · `구분불가` · `열위` (+ 표본 수가 없으면
+   `검정불가`). **통과는 `실력` 하나뿐이다.** 실력(모델 − 베이스라인)의 95% 구간이 0 을
+   품으면 부호가 양수여도 `구분불가`다 — KPI 규칙 2("구간이 목표를 품으면 구분 불가이지
+   달성이 아니다")를 판정 안에 박아 둔 것이다.
+
+   ⚠ 2026-09-26 에 넣었다. 그 전까지는 `beats_*`(점추정의 부호)가 곧 판정이었고,
+   09-24 누수 차단 재학습 뒤 방향 축이 +4.6%p · McNemar p=0.460 · 구간이 베이스라인을
+   품는 상태로 **게이트가 닫혀 있었다**. 같은 날 finding 이 "이겼다로 읽지 말 것"이라
+   적었는데 게이트는 이겼다고 세고 있었다. `beats_*` 는 부호 관측으로 남긴다.
 
 ## 베이스라인을 어떻게 고르나
 
@@ -34,7 +43,7 @@ KPI① 이 "AI 정확도 70%+" 한 줄이라 **임계값만 넘으면 달성**�
 
 실행: python scripts/kpi_baseline.py          사람용
       python scripts/kpi_baseline.py --json   기계 판독용
-반환 코드: 0 = 전부 베이스라인 초과 · 1 = 하나라도 미달(CI 에서 잡으라고 비-0)
+반환 코드: 0 = 전 축 `실력` · 1 = 하나라도 `실력` 아님(CI 에서 잡으라고 비-0)
 """
 from __future__ import annotations
 
@@ -79,13 +88,17 @@ def mcnemar_exact(b: int, c: int) -> float:
     return min(1.0, 2.0 * tail)
 
 
-def cluster_bootstrap_ci(hits_by_cluster: list[list[bool]], reps: int = 2000,
+def cluster_bootstrap_ci(hits_by_cluster: list[list[float]], reps: int = 2000,
                          seed: int = 42) -> tuple[float, float]:
-    """거점 단위 군집 부트스트랩 95% 구간.
+    """거점 단위 군집 부트스트랩 95% 구간 — 표본 평균의 구간.
 
     롤링 오리진으로 거점당 표본이 여럿이면 **이항 공식을 쓰면 안 된다** — 같은 거점의
     이웃 분기는 상관돼 있어 표본이 독립이 아니고, Wilson 구간은 그만큼 좁게 나온다.
     거점(군집)을 복원추출해 구간을 낸다. 거점당 1건이면 보통 부트스트랩과 같아진다.
+
+    원소는 적중(bool)이면 정확도 구간, **쌍대 차이**(모델 − 베이스라인, 표본마다)면
+    실력 구간이 된다. 같은 표본 위의 비교라 두 구간을 따로 내서 겹치는지 보는 것보다
+    차이 하나의 구간을 보는 쪽이 옳다.
     """
     import random
 
@@ -103,6 +116,31 @@ def cluster_bootstrap_ci(hits_by_cluster: list[list[bool]], reps: int = 2000,
         return (0.0, 0.0)
     accs.sort()
     return (accs[int(0.025 * len(accs))], accs[min(len(accs) - 1, int(0.975 * len(accs)))])
+
+
+ALPHA = 0.05
+
+SKILL = "실력"            # 통과는 이것 하나뿐
+UNRESOLVED = "구분불가"   # 부호와 무관하게 구간이 0 을 품는다 — 달성도 미달도 아니다
+WORSE = "열위"            # 베이스라인이 유의하게 낫다
+UNTESTABLE = "검정불가"   # 표본 수가 산출물에 없어 구간을 못 낸다 — 추정으로 대신하지 않는다
+
+
+def verdict(ci: tuple[float, float] | list[float], p: float | None = None) -> str:
+    """실력 구간(모델 − 베이스라인)으로 세 갈래 판정을 낸다.
+
+    구간이 0 위에 있어야 `실력`, 아래에 있어야 `열위`, 0 을 품으면 `구분불가`다.
+    `p` 를 주면 그 검정도 유의해야 한다(방향 축: 군집 구간 + McNemar 둘 다) —
+    McNemar 는 표본 독립을 가정하고 군집 구간은 거점 상관을 반영하므로, 가정이 다른
+    두 절차가 **둘 다** 동의할 때만 가른다. 보수적인 쪽을 택한 것이다.
+    """
+    lo, hi = ci
+    sig = p is None or p < ALPHA
+    if lo > 0 and sig:
+        return SKILL
+    if hi < 0 and sig:
+        return WORSE
+    return UNRESOLVED
 
 
 def skew_robust(tp: int, fp: int, fn: int, tn: int) -> dict:
@@ -137,8 +175,10 @@ def _sgn(x: float) -> int:
 def lstm_skill(forecast: dict) -> dict:
     """공실 예측 — 방향정확도·오차 두 축을 각각 베이스라인에 댄다.
 
-    방향은 베이스라인을 못 이기고(실력 음수), 오차는 이긴다. **두 축이 갈리므로
-    하나만 인용하면 어느 쪽이든 거짓이 된다** — 그래서 둘 다 돌려준다.
+    **두 축의 답이 갈릴 수 있어 하나만 인용하면 어느 쪽이든 거짓이 된다** — 그래서
+    둘 다 돌려준다. 실제로 갈렸고, 09-24 누수 차단 재학습에서는 **서로 자리를 바꿨다**
+    (방향 −7.7%p → +4.6%p · 오차 +20.5% → −86.9%). 그래서 여기엔 어느 축이 이긴다고
+    적지 않는다 — 그런 문장이 낡는 것이 이 저장소의 주된 실패 양식이다.
     """
     hold = forecast.get("holdout") or {}
     # 키는 `거점@분기`(롤링 오리진) 또는 `거점`(단일 원점). 군집 단위는 **거점**이라
@@ -176,16 +216,28 @@ def lstm_skill(forecast: dict) -> dict:
     fn = sum(1 for _, p, a, pr in rows if p - pr <= 0 and a - pr > 0)
     tn = n - tp - fp - fn
 
-    # 군집(거점) 단위 적중 목록 → 부트스트랩 구간
+    # 군집(거점) 단위 목록 → 부트스트랩 구간. 셋을 같은 군집 구조로 모은다:
+    #   적중(정확도 구간) · 방향 쌍대 차이(실력 구간) · 절대오차 쌍대 차이(오차 실력 구간)
     by_hub: dict[str, list[bool]] = {}
+    dir_diff: dict[str, list[int]] = {}
+    err_diff: dict[str, list[float]] = {}
     for hub, p, a, pr in rows:
-        by_hub.setdefault(hub, []).append(_sgn(p - pr) == _sgn(a - pr))
+        m_hit = _sgn(p - pr) == _sgn(a - pr)
+        base_hit = (a - pr < 0) if base_down else (a - pr > 0)
+        by_hub.setdefault(hub, []).append(m_hit)
+        dir_diff.setdefault(hub, []).append(int(m_hit) - int(base_hit))
+        # 양수 = 모델이 지속성보다 가깝다
+        err_diff.setdefault(hub, []).append(abs(pr - a) - abs(p - a))
     n_hubs = len(by_hub)
     per_hub = n / n_hubs if n_hubs else 0.0
     # 거점당 1건이면 Wilson 과 사실상 같으므로 굳이 부트스트랩을 돌리지 않는다.
     ci_kind = "wilson" if per_hub <= 1.0 else "cluster_bootstrap"
     ci = (list(wilson(hits, n)) if ci_kind == "wilson"
           else list(cluster_bootstrap_ci(list(by_hub.values()))))
+    # 실력 구간은 거점당 건수와 무관하게 군집 부트스트랩이다(거점당 1건이면 보통 부트스트랩).
+    skill_ci = cluster_bootstrap_ci(list(dir_diff.values()))
+    p_mc = mcnemar_exact(b, c)
+    mae_diff_ci = cluster_bootstrap_ci(list(err_diff.values()))
 
     acc, base_acc = hits / n, base_hits / n
     return {
@@ -198,10 +250,13 @@ def lstm_skill(forecast: dict) -> dict:
             "baseline_label": base_label, "baseline_hits": base_hits,
             "baseline_acc": base_acc, "baseline_ci95": list(wilson(base_hits, n)),
             "skill_pp": (acc - base_acc) * 100.0,
+            "skill_ci95_pp": [skill_ci[0] * 100.0, skill_ci[1] * 100.0],
             "mcnemar": {"b_model_only": b, "c_baseline_only": c,
-                        "p_two_sided": mcnemar_exact(b, c)},
+                        "p_two_sided": p_mc},
             "actual_up": up, "actual_down": down,
+            # 점추정의 **부호**다 — 판정이 아니다. 판정은 아래 verdict.
             "beats_baseline": acc > base_acc,
+            "verdict": verdict(skill_ci, p_mc),
             # 관측 전용 — 판정에 쓰지 않는다(위 skew_robust 독스트링 참조)
             "observed": skew_robust(tp, fp, fn, tn),
         },
@@ -211,7 +266,12 @@ def lstm_skill(forecast: dict) -> dict:
             # 기술점수(skill score) — 1 − 모델/베이스라인. 양수면 베이스라인보다 낫다.
             "mae_skill": (1.0 - mae_m / mae_p) if mae_p else 0.0,
             "rmse_skill": (1.0 - rmse_m / rmse_p) if rmse_p else 0.0,
+            # MAE 기술점수의 구간 = (지속성 − 모델) 절대오차 차이의 구간 ÷ 지속성 MAE
+            "mae_skill_ci95": ([mae_diff_ci[0] / mae_p, mae_diff_ci[1] / mae_p]
+                               if mae_p else [0.0, 0.0]),
+            # 점추정의 **부호**다 — 판정이 아니다. 판정은 아래 verdict.
             "beats_persistence": mae_m < mae_p,
+            "verdict": verdict(mae_diff_ci),
         },
     }
 
@@ -257,10 +317,18 @@ def gnn_skill(recommend: dict) -> dict:
     det = detectability(top3, n_test) if n_test else {"n": None, "se_pp": None,
                                                       "min_detectable_pp": None}
     mdp = det.get("min_detectable_pp")
+    # 판정 — 노드별 예측이 없어 쌍대 검정은 못 한다. 대신 분해능(단일 팔 SE 의 2배)을
+    # 구간 반폭으로 쓴다. test 표본 수가 없으면 **추정하지 않고** 검정불가로 물러난다.
+    if mdp is None:
+        v = UNTESTABLE
+    else:
+        v = verdict((skill_pp - mdp, skill_pp + mdp))
     out = {
         "available": True,
         "top3": top3, "baseline_top3": b3, "skill_pp_top3": skill_pp,
+        # 점추정의 **부호**다 — 판정이 아니다. 판정은 verdict.
         "beats_baseline": top3 > b3,
+        "verdict": v,
         "detectability": det,
         # 실력이 양수라도 그 크기가 분해능 아래면 **말할 수 없는 차이**다.
         "skill_is_detectable": (abs(skill_pp) >= mdp) if mdp is not None else None,
@@ -292,20 +360,35 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
     lstm = lstm_skill(fc) if fc else {"available": False, "reason": f"{forecast_path.name} 없음"}
     gnn = gnn_skill(rec) if rec else {"available": False, "reason": f"{recommend_path.name} 없음"}
 
+    # 실패는 **verdict 가 실력이 아닌 모든 축**이다. 부호가 양수여도 구분불가면 적는다 —
+    # 그게 규칙 2 다. 문구는 무엇에 졌는지(베이스라인 이름)와 판정을 함께 말한다.
     failures: list[str] = []
     if lstm.get("available"):
         d = lstm["direction"]
-        if not d["beats_baseline"]:
+        if d["verdict"] != SKILL:
+            lo, hi = d["skill_ci95_pp"]
             failures.append(
-                f"LSTM 방향정확도 {d['model_acc']:.1%} < 베이스라인({d['baseline_label']}) "
-                f"{d['baseline_acc']:.1%} — 실력 {d['skill_pp']:+.1f}%p")
-        if not lstm["error"]["beats_persistence"]:
-            failures.append("LSTM MAE 가 지속성 베이스라인보다 나쁘다")
-    if gnn.get("available") and not gnn["beats_baseline"]:
+                f"LSTM 방향정확도 {d['model_acc']:.1%} vs 베이스라인({d['baseline_label']}) "
+                f"{d['baseline_acc']:.1%} — 실력 {d['skill_pp']:+.1f}%p "
+                f"[{lo:+.1f}, {hi:+.1f}] · McNemar p={d['mcnemar']['p_two_sided']:.3f} "
+                f"→ {d['verdict']}")
+        e = lstm["error"]
+        if e["verdict"] != SKILL:
+            lo, hi = e["mae_skill_ci95"]
+            failures.append(
+                f"LSTM MAE {e['model_mae']:.3f} vs 지속성 베이스라인 {e['persistence_mae']:.3f} "
+                f"— 기술점수 {e['mae_skill']:+.1%} [{lo:+.1%}, {hi:+.1%}] → {e['verdict']}")
+    if gnn.get("available") and gnn["verdict"] != SKILL:
+        why = ("test 표본 수가 산출물에 없어 가를 수 없다" if gnn["verdict"] == UNTESTABLE
+               else f"분해능 ±{gnn['detectability']['min_detectable_pp']}%p")
         failures.append(
-            f"GNN Top-3 {gnn['top3']:.1%} ≤ 거점 사전분포 {gnn['baseline_top3']:.1%}")
+            f"GNN Top-3 {gnn['top3']:.1%} vs 거점 사전분포 {gnn['baseline_top3']:.1%} "
+            f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['verdict']}")
 
     return {"lstm": lstm, "gnn": gnn, "failures": failures, "ok": not failures}
+
+
+_MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠"}
 
 
 def _fmt(res: dict) -> str:
@@ -320,12 +403,13 @@ def _fmt(res: dict) -> str:
     else:
         d, e = lstm["direction"], lstm["error"]
         lo, hi = d["model_ci95"]
-        mark = "✅" if d["beats_baseline"] else "❌"
+        slo, shi = d["skill_ci95_pp"]
         out.append(f"   방향정확도  모델 {d['model_acc']:.1%} "
                    f"({d['model_hits']}/{lstm['n']}) · 95%CI [{lo:.1%}, {hi:.1%}]")
         out.append(f"               베이스라인({d['baseline_label']}) {d['baseline_acc']:.1%} "
                    f"({d['baseline_hits']}/{lstm['n']})")
-        out.append(f"   {mark} 실력 {d['skill_pp']:+.1f}%p · McNemar "
+        out.append(f"   {_MARK[d['verdict']]} {d['verdict']} — 실력 {d['skill_pp']:+.1f}%p "
+                   f"[{slo:+.1f}, {shi:+.1f}] · McNemar "
                    f"b={d['mcnemar']['b_model_only']} c={d['mcnemar']['c_baseline_only']} "
                    f"p={d['mcnemar']['p_two_sided']:.3f}")
         out.append(f"      실제 방향 상승 {d['actual_up']} · 하락 {d['actual_down']} "
@@ -342,27 +426,30 @@ def _fmt(res: dict) -> str:
                        f"({c['tn']}/{c['tn'] + c['fp']})")
             out.append("          → 상수 규칙은 균형정확도 50%·MCC 0 이다. 이 둘이 그보다 "
                        "높으면 **모델에 신호는 있다**는 뜻이고,")
-            out.append("            원시 정확도가 지는 것은 표본 쏠림 탓이다. "
+            out.append("            원시 정확도로 상수와 못 가르는 것은 표본 쏠림 탓일 수 있다. "
                        "⚠ 관측일 뿐 판정 지표가 아니다(결과를 보고 바꾸면 metric shopping)")
         if lstm.get("samples_per_hub", 0) > 1:
             out.append(f"   [분할] 거점 {lstm['n_hubs']}곳 × 거점당 "
                        f"{lstm['samples_per_hub']:.1f}건 (롤링 오리진) · "
                        f"구간은 {d['ci_kind']} — 같은 거점의 이웃 분기는 독립이 아니다")
-        mark2 = "✅" if e["beats_persistence"] else "❌"
+        elo, ehi = e["mae_skill_ci95"]
         out.append(f"   오차        모델 MAE {e['model_mae']:.3f} · "
                    f"지속성 {e['persistence_mae']:.3f}")
-        out.append(f"   {mark2} 기술점수 MAE {e['mae_skill']:+.1%} · RMSE {e['rmse_skill']:+.1%}"
-                   f"  ← **여기에 실력이 있다**")
+        out.append(f"   {_MARK[e['verdict']]} {e['verdict']} — 기술점수 MAE "
+                   f"{e['mae_skill']:+.1%} [{elo:+.1%}, {ehi:+.1%}] · "
+                   f"RMSE {e['rmse_skill']:+.1%}")
+        if d["verdict"] != e["verdict"]:
+            out.append("      두 축의 판정이 다르다 — 하나만 인용하면 어느 쪽이든 거짓이 된다")
 
     gnn = res["gnn"]
     out.append("\n[GNN] 업종 추천")
     if not gnn.get("available"):
         out.append(f"   재지 못했다 — {gnn.get('reason')}")
     else:
-        mark = "✅" if gnn["beats_baseline"] else "❌"
         out.append(f"   Top-3       모델 {gnn['top3']:.1%} · "
                    f"거점 사전분포 {gnn['baseline_top3']:.1%}")
-        out.append(f"   {mark} 실력 {gnn['skill_pp_top3']:+.2f}%p")
+        out.append(f"   {_MARK[gnn['verdict']]} {gnn['verdict']} — "
+                   f"실력 {gnn['skill_pp_top3']:+.2f}%p")
         det = gnn.get("detectability") or {}
         if det.get("min_detectable_pp") is not None:
             verdict = ("가를 수 있다" if gnn.get("skill_is_detectable")
@@ -387,9 +474,9 @@ def _fmt(res: dict) -> str:
 
     out.append("\n" + "=" * 78)
     if res["ok"]:
-        out.append("✅ 두 모델 모두 베이스라인을 넘는다(넘는 축 기준).")
+        out.append("✅ 전 축이 베이스라인을 구간 기준으로 넘는다.")
     else:
-        out.append("❌ 베이스라인 미달 — 이 축의 '목표 달성' 표기는 근거가 없다:")
+        out.append("❌ 실력 미확인 — 이 축의 '목표 달성' 표기는 근거가 없다:")
         out.extend(f"   · {f}" for f in res["failures"])
     out.append("\n⚠ 임계값(70%)만 넘긴 것은 달성이 아니다. 같은 홀드아웃에서 무정보 규칙이")
     out.append("  그 임계값을 넘는지 먼저 본다 — 넘으면 그 게이트는 모델을 보증하지 못한다.")

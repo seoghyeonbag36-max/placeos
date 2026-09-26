@@ -22,6 +22,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from kpi_baseline import (  # noqa: E402
+    SKILL,
+    UNRESOLVED,
+    UNTESTABLE,
+    WORSE,
     check,
     cluster_bootstrap_ci,
     detectability,
@@ -29,6 +33,7 @@ from kpi_baseline import (  # noqa: E402
     lstm_skill,
     mcnemar_exact,
     skew_robust,
+    verdict,
     wilson,
 )
 
@@ -99,6 +104,98 @@ def test_lstm_error_axis_is_measured_against_persistence() -> None:
     assert d["error"]["mae_skill"] > 0
 
 
+# ─────────────────────────── 세 갈래 판정 (2026-09-26) ───────────────────────────
+#
+# 09-24 누수 차단 재학습 뒤 방향 축이 +4.6%p · McNemar p=0.460 · 실력 구간이 0 을 품는
+# 상태였는데 게이트는 부호(`beats_baseline`)만 보고 100% 로 닫혀 있었다. 여기서 잠그는
+# 것은 **부호와 판정이 다른 값이라는 성질**이다 — 둘이 다시 한 값으로 묶이면 이 구멍이
+# 돌아온다.
+
+def test_verdict_needs_the_interval_to_clear_zero() -> None:
+    assert verdict((0.01, 0.10)) == SKILL
+    assert verdict((-0.10, -0.01)) == WORSE
+    assert verdict((-0.05, 0.14)) == UNRESOLVED       # 부호 양수여도
+    # 구간이 0 위여도 쌍대 검정이 유의하지 않으면 가르지 않는다(가정이 다른 두 절차의 합의)
+    assert verdict((0.01, 0.10), p=0.2) == UNRESOLVED
+
+
+def test_positive_skill_whose_interval_contains_zero_is_not_a_pass() -> None:
+    """**핵심 잠금.** 점추정이 베이스라인을 넘어도 구간이 0 을 품으면 통과가 아니다.
+
+    상승 6 · 하락 4 에서 모델이 7 을 맞히고 '항상 상승' 이 6 을 맞힌다 — 부호는 +10%p
+    지만 표본 10 개로는 가를 수 없다.
+    """
+    rows = ([(1.0, 1.0, 0.0)] * 5 + [(-1.0, 1.0, 0.0)]          # 상승 6: 5 적중
+            + [(-1.0, -1.0, 0.0)] * 2 + [(1.0, -1.0, 0.0)] * 2)   # 하락 4: 2 적중
+    d = lstm_skill(_holdout(rows))["direction"]
+    assert d["beats_baseline"] is True
+    assert d["verdict"] == UNRESOLVED
+    lo, hi = d["skill_ci95_pp"]
+    assert lo < 0 < hi
+
+
+def test_clear_direction_skill_is_skill() -> None:
+    """표본이 충분하고 전부 맞히면 판정이 실력이어야 한다(구간·McNemar 둘 다)."""
+    rows = [(1.0, 1.0, 0.0)] * 20 + [(-1.0, -1.0, 0.0)] * 20
+    d = lstm_skill(_holdout(rows))["direction"]
+    assert d["verdict"] == SKILL
+
+
+def test_clear_loss_to_constant_rule_is_worse() -> None:
+    rows = [(2.0, -1.0, 0.0)] * 20 + [(-2.0, -1.0, 0.0)] * 20   # 절반 틀림, 상수는 전부
+    d = lstm_skill(_holdout(rows))["direction"]
+    assert d["verdict"] == WORSE
+
+
+def test_error_verdict_comes_from_the_paired_interval() -> None:
+    better = lstm_skill(_holdout([(-0.9, -1.0, 0.0)] * 8))["error"]
+    assert better["verdict"] == SKILL
+    lo, hi = better["mae_skill_ci95"]
+    assert lo - 1e-9 <= better["mae_skill"] <= hi + 1e-9
+    worse = lstm_skill(_holdout([(-3.0, -1.0, 0.0)] * 8))["error"]    # 지속성 1.0 · 모델 2.0
+    assert worse["beats_persistence"] is False
+    assert worse["verdict"] == WORSE
+
+
+def test_gnn_verdict_follows_detectability() -> None:
+    base = {"test_top3": 0.9167, "baseline_district_prior_top3": 0.8935}
+    assert gnn_skill({"metrics": base})["verdict"] == UNTESTABLE           # n 없음
+    assert gnn_skill({"metrics": {**base, "test_nodes": 300}})["verdict"] == UNRESOLVED
+    assert gnn_skill({"metrics": {**base, "test_nodes": 9493}})["verdict"] == SKILL
+
+
+def test_failures_list_every_axis_that_is_not_skill() -> None:
+    res = check()
+    verdicts = []
+    if res["lstm"].get("available"):
+        verdicts += [res["lstm"]["direction"]["verdict"], res["lstm"]["error"]["verdict"]]
+    if res["gnn"].get("available"):
+        verdicts.append(res["gnn"]["verdict"])
+    assert len(res["failures"]) == sum(v != SKILL for v in verdicts)
+    for msg in res["failures"]:
+        assert any(v in msg for v in (UNRESOLVED, WORSE, UNTESTABLE)), (
+            f"실패 문구가 판정을 말하지 않는다: {msg}")
+
+
+def test_status_gates_close_only_on_skill_verdict() -> None:
+    """진행률 게이트는 **판정**으로 닫힌다 — 부호로 닫히면 09-24 의 구멍이 돌아온다.
+
+    근거 문구도 그 판정을 말해야 한다. 고정 문장("여기엔 실력이 있다")이 재학습 뒤
+    정반대가 된 것이 이 테스트를 만든 두 번째 이유다.
+    """
+    from pppp_status import platform_track
+
+    res = check()
+    gates = platform_track().gates
+    pairs = [("KPI 공실예측 **방향**", res["lstm"]["direction"]["verdict"]),
+             ("KPI 공실예측 **오차**", res["lstm"]["error"]["verdict"]),
+             ("KPI 업종추천 Top-3 실력", res["gnn"]["verdict"])]
+    for prefix, v in pairs:
+        g = next(g for g in gates if g.name.startswith(prefix))
+        assert g.value == (1.0 if v == SKILL else 0.0), f"{prefix}: 판정 {v} 인데 {g.value}"
+        assert v in g.detail, f"{prefix}: 근거 문구가 판정({v})을 말하지 않는다"
+
+
 def test_lstm_reports_unavailable_instead_of_guessing() -> None:
     """홀드아웃이 없으면 '못 쟀다'로 물러난다 — 0% 도 100% 도 아니다."""
     res = lstm_skill({"holdout": {}})
@@ -167,17 +264,21 @@ def test_observed_block_is_not_used_for_the_verdict() -> None:
     assert "observed" in d
     assert "balanced_acc" in d["observed"] and "mcc" in d["observed"]
 
-    # 판정은 **원시 정확도 vs 베이스라인** 하나로만 나온다.
+    # 부호는 **원시 정확도 vs 베이스라인** 하나로만 나온다.
     assert d["beats_baseline"] is (d["model_acc"] > d["baseline_acc"])
+    # 판정은 원시 적중의 **쌍대 차이 구간**(+McNemar)에서만 나온다 — 관측 블록은 입력이 아니다.
+    assert d["verdict"] == verdict(
+        (d["skill_ci95_pp"][0] / 100, d["skill_ci95_pp"][1] / 100),
+        d["mcnemar"]["p_two_sided"])
 
     # 관측이 좋은데 판정이 미달인 상태를 **표현할 수 있어야** 한다(그 반대도).
     # 둘이 한 값으로 묶여 있으면 관측이 판정에 새고 있다는 뜻이다.
     assert isinstance(d["observed"]["balanced_acc"], float)
     assert isinstance(d["beats_baseline"], bool)
 
-    # 두 축 중 하나라도 미달이면 실패 메시지가 있어야 한다.
-    any_fail = not d["beats_baseline"] or not res["lstm"]["error"]["beats_persistence"]
-    assert bool(res["failures"]) is any_fail
+    # 두 축 중 하나라도 실력이 아니면 실패 메시지가 있어야 한다(2026-09-26 부호 → 판정).
+    any_fail = d["verdict"] != SKILL or res["lstm"]["error"]["verdict"] != SKILL
+    assert bool(res["failures"]) is (any_fail or res["gnn"].get("verdict") != SKILL)
 
 
 # ─────────────────────────── 롤링 오리진 · 군집 구간 ───────────────────────────

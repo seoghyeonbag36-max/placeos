@@ -406,10 +406,17 @@ def platform_track() -> Track:
     # (78.5% 를 넘기면 그건 "상수보다 낫다"를 에둘러 쓴 것이라 처음부터 실력을
     # 재는 게 맞다).
     #
-    # 그래서 축을 둘로 가른다. **두 축의 답이 서로 다르기 때문**이다:
+    # 그래서 축을 둘로 가른다. **두 축의 답이 서로 다르기 때문**이다(09-16 당시):
     #   · 방향 — 상수 베이스라인에 진다(실력 −7.7%p). 실패로 센다.
     #   · 오차 — 지속성(예측=직전값) 대비 MAE +20.5%. 여기엔 실력이 있다.
     # 하나만 인용하면 어느 쪽이든 거짓이 된다. 둘 다 게이트로 둔다.
+    # → 09-24 누수 차단 재학습에서 두 축이 **자리를 바꿨다**(방향 +4.6%p · 오차 −86.9%).
+    #
+    # 2026-09-26: 게이트 값은 `beats_*`(점추정 부호)가 아니라 kpi_baseline 의 **verdict**
+    # 에서 나온다. 09-24 방향 축은 +4.6%p 였지만 실력 구간이 0 을 품고 McNemar p=0.460
+    # 이라 규칙 2 로는 `구분불가`인데, 부호만 보고 100% 로 닫혀 있었다. 같은 날 finding 이
+    # "이겼다로 읽지 말 것"이라 적었는데 게이트는 이겼다고 셌다. 근거 문구도 결과에
+    # 따라 갈리게 했다 — 고정 문장("여기엔 실력이 있다")이 재학습 뒤 정반대가 됐었다.
     #
     # 임계값을 새로 **발명하지 않는다**: 기준은 전부 같은 홀드아웃에서 유도된
     # 베이스라인이다(off-prior 목표 0.50 을 값싼 규칙 42.4% 에서 유도한 것과 같은 방식).
@@ -435,29 +442,50 @@ def platform_track() -> Track:
         d = kb["lstm"]["direction"]
         e = kb["lstm"]["error"]
         lo, hi = d["model_ci95"]
+        slo, shi = d["skill_ci95_pp"]
         mc = d["mcnemar"]
+        ob = d.get("observed") or {}
+        dv = d["verdict"]
+        head = (f"모델 {d['model_acc']:.1%}({d['model_hits']}/{kb['lstm']['n']}) vs "
+                f"베이스라인 '{d['baseline_label']}' {d['baseline_acc']:.1%} → "
+                f"실력 **{d['skill_pp']:+.1f}%p** · 실력 95%CI [{slo:+.1f}, {shi:+.1f}]%p "
+                f"· McNemar b={mc['b_model_only']} c={mc['c_baseline_only']} "
+                f"p={mc['p_two_sided']:.3f} → **{dv}**. ")
+        if dv == "실력":
+            body = "구간이 0 위에 있고 쌍대 검정도 유의하다 — 상수 규칙보다 낫다고 말할 수 있다"
+        elif dv == "열위":
+            body = ("구간이 0 아래에 있고 쌍대 검정도 유의하다 — **상수 규칙이 모델보다 "
+                    "낫다**는 것이 증명됐다")
+        else:
+            body = ("부호와 무관하게 구간이 0 을 품는다 — 이 표본으로는 모델과 상수 규칙을 "
+                    "**못 가른다**. 점추정의 부호로 닫지 않는다(KPI 규칙 2)")
+        tail = (f". 실제 방향 하락 {d['actual_down']}·상승 {d['actual_up']} · "
+                f"모델 정확도 95%CI [{lo:.1%}, {hi:.1%}] (n={kb['lstm']['n']})")
+        if ob:
+            tail += (f" · [관측] 균형정확도 {ob['balanced_acc']:.1%}(상수 50%) · "
+                     f"MCC {ob['mcc']:+.3f}(상수 0) — 판정 지표가 아니다")
         t.gates.append(Gate(
             "KPI 공실예측 **방향** 실력 (vs 무정보 상수)",
-            1.0 if d["beats_baseline"] else 0.0,
-            f"모델 {d['model_acc']:.1%}({d['model_hits']}/{kb['lstm']['n']}) vs "
-            f"베이스라인 '{d['baseline_label']}' {d['baseline_acc']:.1%} → "
-            f"실력 **{d['skill_pp']:+.1f}%p**. "
-            f"모델 95%CI [{lo:.1%}, {hi:.1%}] 는 옛 목표 70% 를 품는다 — 점추정으로 "
-            f"달성/미달을 가를 수 없는 표본이다(n={kb['lstm']['n']}). "
-            f"McNemar b={mc['b_model_only']} c={mc['c_baseline_only']} "
-            f"p={mc['p_two_sided']:.3f} 이라 '모델이 더 나쁘다'까지 증명되지는 "
-            f"않는다 — 증명된 것은 '더 낫다고 말할 근거가 없다' 쪽이다. "
-            f"실제 방향 하락 {d['actual_down']}·상승 {d['actual_up']} 쏠림이 원인이고, "
-            f"쏠림이 풀리기 전에는 이 축에서 상수를 이기기 어렵다",
+            1.0 if dv == "실력" else 0.0,
+            head + body + tail,
         ))
+        elo, ehi = e["mae_skill_ci95"]
+        ev = e["verdict"]
+        head = (f"MAE {e['model_mae']:.3f} vs 지속성 {e['persistence_mae']:.3f} → "
+                f"기술점수 **{e['mae_skill']:+.1%}** [{elo:+.1%}, {ehi:+.1%}] "
+                f"(RMSE {e['rmse_skill']:+.1%}) → **{ev}**. ")
+        if ev == "실력":
+            body = "직전 분기값을 그대로 내미는 것보다 구간 전체가 낫다"
+        elif ev == "열위":
+            body = ("**직전 분기값을 그대로 내미는 쪽이 유의하게 낫다** — 제품이 파는 "
+                    "공실 압력의 크기에서 모델이 아직 기여하지 못한다. 후보는 "
+                    "docs/finding-lstm-leakfree-retrain-2026-09-24.md §남은 것")
+        else:
+            body = "구간이 0 을 품는다 — 지속성과 못 가른다"
         t.gates.append(Gate(
             "KPI 공실예측 **오차** 실력 (vs 지속성)",
-            1.0 if e["beats_persistence"] else 0.0,
-            f"MAE {e['model_mae']:.3f} vs 지속성 {e['persistence_mae']:.3f} → "
-            f"기술점수 **{e['mae_skill']:+.1%}** (RMSE {e['rmse_skill']:+.1%}). "
-            f"직전 분기값을 그대로 내미는 것보다 낫다는 뜻이고, 방향 축과 달리 "
-            f"여기엔 실력이 있다. 제품이 파는 것도 '오를까 내릴까' 이분법이 아니라 "
-            f"공실 압력의 크기다",
+            1.0 if ev == "실력" else 0.0,
+            head + body,
         ))
 
     rec = _load(GOLD / "platform_industry_recommend.json")
@@ -490,11 +518,24 @@ def platform_track() -> Track:
         # "KPI 달성"으로 찍히는 근거가 실제로는 사전분포였다. 기준을 그 사전분포로
         # 옮긴다 — 임계값을 발명하는 대신 같은 test 분할에서 유도된 값을 쓴다.
         b3 = m.get("baseline_district_prior_top3")
+        # 2026-09-26: 판정은 kpi_baseline 의 verdict 를 그대로 쓴다(방향 축과 같은 규칙 2).
+        # test 표본 수가 산출물에 없으면 `검정불가` 라 닫지 않는다 — 부호만으로 100% 를
+        # 주던 것이 방향 축과 같은 구멍이었다. 재학습하면 train_gnn 이 test_nodes 를 남긴다.
+        gv = ((kb or {}).get("gnn") or {}).get("verdict")
         if b3 is not None:
+            gdet = ((kb or {}).get("gnn") or {}).get("detectability") or {}
+            gnote = {
+                "실력": f"분해능 ±{gdet.get('min_detectable_pp')}%p 밖이다",
+                "구분불가": f"분해능 ±{gdet.get('min_detectable_pp')}%p 안이라 못 가른다",
+                "열위": "사전분포가 유의하게 낫다",
+                "검정불가": ("test 표본 수(`test_nodes`)가 산출물에 없어 구간을 못 낸다 — "
+                             "추정으로 대신하지 않는다. 재학습하면 채워진다"),
+            }.get(gv, "kpi_baseline 을 못 읽어 판정을 못 낸다")
             t.gates.append(Gate(
                 "KPI 업종추천 Top-3 실력 (vs 거점 사전분포)",
-                1.0 if top3 > b3 else 0.0,
-                f"모델 {top3:.1%} vs 사전분포 {b3:.1%} → 실력 **{(top3 - b3) * 100:+.2f}%p**. "
+                1.0 if gv == "실력" else 0.0,
+                f"모델 {top3:.1%} vs 사전분포 {b3:.1%} → 실력 **{(top3 - b3) * 100:+.2f}%p** "
+                f"→ **{gv or '판정 없음'}** — {gnote}. "
                 f"옛 게이트(≥70%)는 사전분포가 이미 {b3 - 0.70:+.1%}p 로 넘겨 놓아 "
                 f"모델을 보증하지 못했다"
                 + (f" · Top-1 {top1:.1%} vs {m.get('baseline_district_prior_top1', 0):.1%} "
