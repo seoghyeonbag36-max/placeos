@@ -22,12 +22,14 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from kpi_baseline import (  # noqa: E402
+    PENDING,
     SKILL,
     UNRESOLVED,
     UNTESTABLE,
     WORSE,
     check,
     cluster_bootstrap_ci,
+    cluster_bootstrap_ratio_ci,
     detectability,
     gnn_skill,
     lstm_skill,
@@ -168,12 +170,13 @@ def test_failures_list_every_axis_that_is_not_skill() -> None:
     res = check()
     verdicts = []
     if res["lstm"].get("available"):
-        verdicts += [res["lstm"]["direction"]["verdict"], res["lstm"]["error"]["verdict"]]
+        verdicts += [res["lstm"]["direction"]["gate_verdict"],
+                     res["lstm"]["error"]["gate_verdict"]]
     if res["gnn"].get("available"):
-        verdicts.append(res["gnn"]["verdict"])
+        verdicts.append(res["gnn"]["gate_verdict"])
     assert len(res["failures"]) == sum(v != SKILL for v in verdicts)
     for msg in res["failures"]:
-        assert any(v in msg for v in (UNRESOLVED, WORSE, UNTESTABLE)), (
+        assert any(v in msg for v in (UNRESOLVED, WORSE, UNTESTABLE, PENDING)), (
             f"실패 문구가 판정을 말하지 않는다: {msg}")
 
 
@@ -187,9 +190,10 @@ def test_status_gates_close_only_on_skill_verdict() -> None:
 
     res = check()
     gates = platform_track().gates
-    pairs = [("KPI 공실예측 **방향**", res["lstm"]["direction"]["verdict"]),
-             ("KPI 공실예측 **오차**", res["lstm"]["error"]["verdict"]),
-             ("KPI 업종추천 Top-3 실력", res["gnn"]["verdict"])]
+    # 2026-09-27: 닫는 것은 **게이트 판정**이다(확정 표본 규칙이 있으면 참고 판정과 다르다).
+    pairs = [("KPI 공실예측 **방향**", res["lstm"]["direction"]["gate_verdict"]),
+             ("KPI 공실예측 **오차**", res["lstm"]["error"]["gate_verdict"]),
+             ("KPI 업종추천 Top-3 실력", res["gnn"]["gate_verdict"])]
     for prefix, v in pairs:
         g = next(g for g in gates if g.name.startswith(prefix))
         assert g.value == (1.0 if v == SKILL else 0.0), f"{prefix}: 판정 {v} 인데 {g.value}"
@@ -276,9 +280,10 @@ def test_observed_block_is_not_used_for_the_verdict() -> None:
     assert isinstance(d["observed"]["balanced_acc"], float)
     assert isinstance(d["beats_baseline"], bool)
 
-    # 두 축 중 하나라도 실력이 아니면 실패 메시지가 있어야 한다(2026-09-26 부호 → 판정).
-    any_fail = d["verdict"] != SKILL or res["lstm"]["error"]["verdict"] != SKILL
-    assert bool(res["failures"]) is (any_fail or res["gnn"].get("verdict") != SKILL)
+    # 두 축 중 하나라도 실력이 아니면 실패 메시지가 있어야 한다(2026-09-26 부호 → 판정 ·
+    # 09-27 판정 → 게이트 판정).
+    any_fail = d["gate_verdict"] != SKILL or res["lstm"]["error"]["gate_verdict"] != SKILL
+    assert bool(res["failures"]) is (any_fail or res["gnn"].get("gate_verdict") != SKILL)
 
 
 # ─────────────────────────── 롤링 오리진 · 군집 구간 ───────────────────────────
@@ -397,3 +402,98 @@ def test_failures_name_the_baseline_not_just_the_threshold() -> None:
     res = check()
     for msg in res["failures"]:
         assert "베이스라인" in msg or "사전분포" in msg or "지속성" in msg
+
+
+# ─────────────────────────── 확정 표본 · GNN 쌍대 (2026-09-27) ───────────────────────────
+# → docs/finding-lstm-delta-target-2026-09-26.md §0-B ③
+
+def _forecast_with(quarters_rows: dict[str, list[tuple[float, float, float]]],
+                   confirm_after: str | None) -> dict:
+    hold = {}
+    for q, rows in quarters_rows.items():
+        for i, (p, a, v) in enumerate(rows):
+            hold[f"h{i}@{q}"] = {"hub": f"h{i}", "quarter": q, "pred": p, "actual": a, "prev": v}
+    proto = {"confirm_after": confirm_after} if confirm_after else {}
+    return {"protocol": proto, "holdout": hold}
+
+
+def _check_with(tmp_path, fc: dict) -> dict:
+    import json
+    fp = tmp_path / "fc.json"
+    fp.write_text(json.dumps(fc), encoding="utf-8")
+    return check(forecast_path=fp, recommend_path=tmp_path / "없음.json")
+
+
+_PERFECT = [(1.0, 1.0, 0.0)] * 20 + [(-1.0, -1.0, 0.0)] * 20   # 방향·오차 둘 다 실력
+
+
+def test_seen_quarters_alone_leave_the_gate_pending(tmp_path) -> None:
+    """**핵심 잠금.** 이미 본 분기로만 이루어진 holdout 은 아무리 좋아도 확정이 아니다."""
+    res = _check_with(tmp_path, _forecast_with({"20262": _PERFECT}, "20262"))
+    d, e = res["lstm"]["direction"], res["lstm"]["error"]
+    assert d["verdict"] == SKILL                 # 참고 판정은 실력이지만
+    assert d["gate_verdict"] == PENDING          # 게이트는 확인대기
+    assert e["gate_verdict"] == PENDING
+    assert res["lstm"]["confirmation"]["n_fresh"] == 0
+    assert not res["ok"]
+
+
+def test_fresh_quarter_decides_the_gate(tmp_path) -> None:
+    """본 적 없는 분기가 들어오면 그 부분표본만으로 게이트를 판정한다."""
+    bad = [(2.0, -1.0, 0.0)] * 20 + [(-2.0, -1.0, 0.0)] * 20      # 상수에 지는 분기
+    res = _check_with(tmp_path, _forecast_with({"20262": bad, "20263": _PERFECT}, "20262"))
+    d = res["lstm"]["direction"]
+    assert d["verdict"] != d["gate_verdict"], "전체 판정과 확정 판정이 같은 표본에서 나왔다"
+    assert d["gate_verdict"] == SKILL
+    assert res["lstm"]["confirmation"]["n_fresh"] == len(_PERFECT)
+
+
+def test_artifact_without_confirm_rule_is_not_retroactively_pending(tmp_path) -> None:
+    """규칙이 생기기 전 산출물에는 소급하지 않는다 — 게이트 판정 = 전체 판정."""
+    res = _check_with(tmp_path, _forecast_with({"20262": _PERFECT}, None))
+    d = res["lstm"]["direction"]
+    assert d["gate_verdict"] == d["verdict"] == SKILL
+    assert "confirmation" not in res["lstm"]
+
+
+def test_ratio_bootstrap_matches_the_expanded_bootstrap() -> None:
+    """합·건수로 돌린 구간이 원소를 펼쳐 돌린 구간과 같아야 한다(같은 시드·같은 재표본)."""
+    clusters = [[1, 1, 0, -1], [0, 0], [1, -1, -1], [1, 1, 1, 0, 0]]
+    a = cluster_bootstrap_ci([[float(x) for x in c] for c in clusters])
+    b = cluster_bootstrap_ratio_ci([(sum(c), len(c)) for c in clusters])
+    assert a == pytest.approx(b)
+
+
+def _gnn_paired(by_d: dict[str, list[int]]) -> dict:
+    n = sum(v[2] for v in by_d.values())
+    b = sum(v[0] for v in by_d.values())
+    c = sum(v[1] for v in by_d.values())
+    prior = 0.89
+    return {"metrics": {"test_top3": prior + (b - c) / n,
+                        "baseline_district_prior_top3": prior, "test_nodes": n,
+                        "test_top3_paired": {"b_model_only": b, "c_prior_only": c, "n": n,
+                                             "by_district": by_d}}}
+
+
+def test_gnn_uses_the_paired_table_when_present() -> None:
+    """쌍대 표가 있으면 분해능 근사가 아니라 그것으로 판정한다(LSTM 방향 축과 같은 규칙)."""
+    strong = {f"d{i}": [30, 5, 120] for i in range(40)}
+    res = gnn_skill(_gnn_paired(strong))
+    assert res["verdict_basis"] == "paired"
+    assert res["verdict"] == SKILL
+    lo, hi = res["skill_ci95_pp"]
+    assert lo <= res["skill_pp_top3"] <= hi
+
+
+def test_gnn_paired_table_can_say_unresolved() -> None:
+    """부호가 양수여도 군집 사이에서 뒤집히면 구분불가다."""
+    mixed = {f"d{i}": ([12, 2, 50] if i % 2 else [2, 11, 50]) for i in range(20)}
+    res = gnn_skill(_gnn_paired(mixed))
+    assert res["beats_baseline"] is True
+    assert res["verdict"] == UNRESOLVED
+
+
+def test_train_gnn_writes_the_paired_table_and_full_test_dump() -> None:
+    src = (ROOT / "ml" / "training" / "train_gnn.py").read_text(encoding="utf-8")
+    assert '"test_top3_paired"' in src, "쌍대 표가 산출물에서 빠졌다 — 분해능 근사로 되돌아간다"
+    assert '"test_rows"' in src, "덤프가 off-prior 만 남긴다 — 쌍대 표를 다시 셀 수 없다"

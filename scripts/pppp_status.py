@@ -446,6 +446,14 @@ def platform_track() -> Track:
         mc = d["mcnemar"]
         ob = d.get("observed") or {}
         dv = d["verdict"]
+        # 2026-09-27 사전등록 ③: 게이트는 **본 적 없는 분기**의 판정(gate_verdict)으로
+        # 닫힌다. 전체 holdout 판정(dv)은 참고다. confirm_after 가 없는 옛 산출물은 둘이 같다.
+        cf = kb["lstm"].get("confirmation")
+        conf_note = (
+            f" ⏳ **위 판정은 참고다** — 사전등록(docs/finding-lstm-delta-target-2026-09-26.md "
+            f"§0-B ③)에 따라 게이트는 {cf['after']} **이후** 분기 holdout {cf['n_fresh']}건으로 "
+            f"판정한다 → 방향 **{d['gate_verdict']}** · 오차 **{e['gate_verdict']}**"
+            if cf else "")
         head = (f"모델 {d['model_acc']:.1%}({d['model_hits']}/{kb['lstm']['n']}) vs "
                 f"베이스라인 '{d['baseline_label']}' {d['baseline_acc']:.1%} → "
                 f"실력 **{d['skill_pp']:+.1f}%p** · 실력 95%CI [{slo:+.1f}, {shi:+.1f}]%p "
@@ -466,8 +474,8 @@ def platform_track() -> Track:
                      f"MCC {ob['mcc']:+.3f}(상수 0) — 판정 지표가 아니다")
         t.gates.append(Gate(
             "KPI 공실예측 **방향** 실력 (vs 무정보 상수)",
-            1.0 if dv == "실력" else 0.0,
-            head + body + tail,
+            1.0 if d.get("gate_verdict", dv) == "실력" else 0.0,
+            head + body + tail + conf_note,
         ))
         elo, ehi = e["mae_skill_ci95"]
         ev = e["verdict"]
@@ -484,8 +492,8 @@ def platform_track() -> Track:
             body = "구간이 0 을 품는다 — 지속성과 못 가른다"
         t.gates.append(Gate(
             "KPI 공실예측 **오차** 실력 (vs 지속성)",
-            1.0 if ev == "실력" else 0.0,
-            head + body,
+            1.0 if e.get("gate_verdict", ev) == "실력" else 0.0,
+            head + body + conf_note,
         ))
 
     rec = _load(GOLD / "platform_industry_recommend.json")
@@ -524,13 +532,23 @@ def platform_track() -> Track:
         gv = ((kb or {}).get("gnn") or {}).get("verdict")
         if b3 is not None:
             gdet = ((kb or {}).get("gnn") or {}).get("detectability") or {}
-            gnote = {
-                "실력": f"분해능 ±{gdet.get('min_detectable_pp')}%p 밖이다",
-                "구분불가": f"분해능 ±{gdet.get('min_detectable_pp')}%p 안이라 못 가른다",
-                "열위": "사전분포가 유의하게 낫다",
-                "검정불가": ("test 표본 수(`test_nodes`)가 산출물에 없어 구간을 못 낸다 — "
-                             "추정으로 대신하지 않는다. 재학습하면 채워진다"),
-            }.get(gv, "kpi_baseline 을 못 읽어 판정을 못 낸다")
+            gk = (kb or {}).get("gnn") or {}
+            if gk.get("verdict_basis") == "paired":
+                # 2026-09-27~ 학습본 — 쌍대 표로 판정했다(LSTM 방향 축과 같은 규칙)
+                glo, ghi = gk["skill_ci95_pp"]
+                gm = gk["mcnemar"]
+                gnote = (f"쌍대 표(test {gk.get('test_nodes')}자리 · 거점 군집 부트스트랩) "
+                         f"실력 95%CI [{glo:+.2f}, {ghi:+.2f}]%p · McNemar "
+                         f"b={gm['b_model_only']} c={gm['c_prior_only']} "
+                         f"p={gm['p_two_sided']:.3f}")
+            else:
+                gnote = {
+                    "실력": f"분해능 ±{gdet.get('min_detectable_pp')}%p 밖이다",
+                    "구분불가": f"분해능 ±{gdet.get('min_detectable_pp')}%p 안이라 못 가른다",
+                    "열위": "사전분포가 유의하게 낫다",
+                    "검정불가": ("test 표본 수(`test_nodes`)가 산출물에 없어 구간을 못 낸다 — "
+                                 "추정으로 대신하지 않는다. 재학습하면 채워진다"),
+                }.get(gv, "kpi_baseline 을 못 읽어 판정을 못 낸다")
             t.gates.append(Gate(
                 "KPI 업종추천 Top-3 실력 (vs 거점 사전분포)",
                 1.0 if gv == "실력" else 0.0,

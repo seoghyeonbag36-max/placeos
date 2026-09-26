@@ -49,6 +49,7 @@ except (AttributeError, ValueError):  # 재설정 불가 스트림이면 그대�
     pass
 
 from ml.models.lstm.vacancy_lstm import VacancyLSTM  # noqa: E402
+from ml.training.selection import select_trial  # noqa: E402
 from ml.training.datasets import (  # noqa: E402
     SEQ_FEATURES,
     TARGET,
@@ -152,12 +153,19 @@ def _log_mlflow(res: dict, run_name: str) -> None:
 # 학습 규약 표기 — 산출물을 읽는 쪽이 **어느 규약으로 잰 값인지** 알 수 있어야 한다.
 # 이 블록이 없는 산출물은 2026-09-16 이전 규약(표준화·선택 모두 홀드아웃 포함)이다.
 _PROTOCOL = {
-    "version": "2026-09-16",
+    "version": "2026-09-27",
     "scaling": "train_only",       # mu/sd/y_mu/y_sd 를 train 행에서만 적합
     "selection": "val",            # 하이퍼파라미터는 val 로 고른다
     "test_used_once": True,        # test 는 보고에만 쓴다(임계값 조기중단 없음)
     "baselines": ["majority_direction", "persistence"],
     "split": "rolling_origin",     # 거점마다 뒤쪽 K분기를 차례로 홀드아웃 원점으로
+    # 2026-09-27 사전등록(docs/finding-lstm-delta-target-2026-09-26.md §0-B):
+    # ① 선택 규칙 — ml/training/selection.py
+    "selection_rule": "val_mae_beats_persistence_then_val_direction",
+    # ③ 이미 본 test 분기의 마지막. kpi_baseline 은 이 **이후** 분기 holdout 만으로
+    #   게이트를 판정하고, 그런 표본이 없으면 `확인대기` 다. 이 값은 올리지 않는다 —
+    #   올리면 본 분기를 다시 확정 표본으로 쓰게 된다.
+    "confirm_after": "20262",
 }
 
 _MAX_HORIZON = 4  # 재귀 예측 최대 분기 수
@@ -266,21 +274,25 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
     #
     # 그래서: ① 선택 기준을 val 로 옮기고 ② 임계값 조기중단을 없앤다. 모든 조합을
     # 끝까지 돌려야 test 가 **한 번만** 쓰인다.
-    best = None
+    # 2026-09-27: 선택 규칙을 `ml/training/selection.py` 로 옮겼다(사전등록 §0-B ①) —
+    # val 에서 지속성을 이긴 시행 중 방향 최대, 없으면 val MAE 최소. test 는 안 읽는다.
+    results: list[dict] = []
     for i, hp in enumerate(trials):
         res = _train_once(**hp, test_quarters=test_quarters, val_quarters=val_quarters)
         v = res["val"]
-        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} 방향 {v['dir_acc']:.1%} "
-              f"(상수 {v['baseline_dir_acc']:.1%})")
+        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} (지속성 {v['persistence_mae']:.3f}) "
+              f"방향 {v['dir_acc']:.1%} (상수 {v['baseline_dir_acc']:.1%})")
         _log_mlflow(res, run_name=f"trial{i}")
-        # val 방향정확도 우선, 동률이면 val MAE 가 낮은 쪽. (동률에 부등호만 쓰면 먼저
-        # 나온 trial 이 계속 남아 MAE 가 더 나쁜 모델이 채택된다 — 2026-07-22 실측)
-        key = (v["dir_acc"], -v["mae"])
-        if best is None or key > (best["val"]["dir_acc"], -best["val"]["mae"]):
-            best = res
+        results.append(res)
 
+    chosen, selection = select_trial([r["val"] for r in results])
+    best = results[chosen]
     bt, bv = best["test"], best["val"]
-    print(f"[best] {best['params']} (val 방향 {bv['dir_acc']:.1%} 로 선택)")
+    print(f"[best] trial {chosen} {best['params']} — 후보 {selection['eligible']}/"
+          f"{selection['trials']} (val MAE {bv['mae']:.3f} vs 지속성 "
+          f"{bv['persistence_mae']:.3f} · val 방향 {bv['dir_acc']:.1%})")
+    if selection["fallback"]:
+        print("  ⚠ val 단계에서 이미 지속성 미달 — 지속성을 이긴 시행이 없어 val MAE 최소로 골랐다")
     print(f"  test MAE {bt['mae']:.3f} (지속성 {bt['persistence_mae']:.3f}) · "
           f"RMSE {bt['rmse']:.3f} · 방향 {bt['dir_acc']:.1%} "
           f"(무정보 상수 {bt['baseline_dir_acc']:.1%})")
@@ -347,6 +359,7 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
         "protocol": {**_PROTOCOL, "test_quarters": test_quarters,
                      "val_quarters": val_quarters, "target_modes_searched": list(TARGET_MODES)},
         "params": best["params"],
+        "selection": selection,
         "holdout": per_district,
         "forecasts": fc,
     }

@@ -1089,27 +1089,56 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
         **_offprior_top3(logits, y_np, did, tr, te),
     }
 
+    # ── Top-3 실력 게이트의 **쌍대 표** (2026-09-27) ─────────────────────────
+    # 게이트는 모델 Top-3 vs 거점 사전분포 Top-3 을 **같은 test 자리** 위에서 비교한다.
+    # 종전 산출물은 두 비율만 남겨 kpi_baseline 이 분해능 근사(단일 팔 SE×2)로 판정했다.
+    # 자리마다 (모델 적중, 사전분포 적중) 을 세어 두면 LSTM 방향 축과 같은 판정 —
+    # 군집(거점) 부트스트랩 실력 구간 + McNemar — 을 낼 수 있다. 거점별로 [b, c, n] 을
+    # 남기는 것은 같은 거점 자리들이 독립이 아니기 때문이다(군집 단위 재표본).
+    # 사전분포 적중은 `_baselines` 와 **같은 표**(`_district_top3`, train 라벨만)로 센다 —
+    # 그래서 (b − c)/n 이 test_top3 − baseline_district_prior_top3 과 맞아떨어진다.
+    top3_by_d, major = _district_top3(y_np, did, tr)
+    k = min(TOP_K, logits.shape[1])
+    topk_idx = logits.topk(k, dim=1).indices.numpy()
+    m_hit = np.array([y_np[i] in topk_idx[i] for i in range(len(y_np))])
+    p_hit = np.array([yt in top3_by_d.get(d, [major]) for yt, d in zip(y_np, did)])
+    by_d: dict[str, list[int]] = {}
+    for d in np.unique(did[te]):
+        s = te & (did == d)
+        by_d[str(d)] = [int((m_hit & ~p_hit & s).sum()),    # b — 모델만 적중
+                        int((p_hit & ~m_hit & s).sum()),    # c — 사전분포만 적중
+                        int(s.sum())]                       # n
+    metrics["test_top3_paired"] = {
+        "b_model_only": sum(v[0] for v in by_d.values()),
+        "c_prior_only": sum(v[1] for v in by_d.values()),
+        "n": int(te.sum()),
+        "by_district": by_d,
+    }
+
     if dump_preds:
         # McNemar 쌍대검정용 노드별 예측 — 두 팔이 **같은 test 분할**(SEED 고정, 라벨만
-        # 의존)이라 node_id 로 정렬하면 그대로 짝지어진다. off-prior 자리만 남긴다 —
-        # 게이트 지표가 그 부분집합이고, 전체 test 는 거점 사전분포 몫(97.7%)에 묻힌다.
-        top3_by_d, major = _district_top3(y_np, did, tr)
-        off = np.array([yt not in top3_by_d.get(d, [major])
-                        for yt, d in zip(y_np, did)]) & te
-        k = min(TOP_K, logits.shape[1])
-        topk_idx = logits.topk(k, dim=1).indices.numpy()
+        # 의존)이라 node_id 로 정렬하면 그대로 짝지어진다. `rows` 는 off-prior 자리만
+        # 남긴다 — 레버 실험(scripts/mcnemar_gnn_arms.py)의 지표가 그 부분집합이다.
+        # `test_rows` 는 test **전체**와 사전분포 적중을 함께 싣는다(2026-09-27) — 위
+        # `test_top3_paired` 의 노드 단위 근거라서, 요약이 맞는지 다시 셀 수 있다.
+        off = ~p_hit & te
         node_ids = nodes["node_id"].astype(str).to_numpy()
         rows = [{"node_id": node_ids[i], "district": did[i], "y": int(y_np[i]),
-                "hit_top3": bool(y_np[i] in topk_idx[i])}
+                "hit_top3": bool(m_hit[i])}
                for i in np.flatnonzero(off)]
+        test_rows = [{"node_id": node_ids[i], "district": did[i], "y": int(y_np[i]),
+                      "hit_top3": bool(m_hit[i]), "prior_hit_top3": bool(p_hit[i])}
+                     for i in np.flatnonzero(te)]
         out_p = Path(dump_preds)
         out_p.parent.mkdir(parents=True, exist_ok=True)
         out_p.write_text(json.dumps({
             "offprior_nodes": len(rows), "features": len(feat_names),
             "hit_rate": round(sum(r["hit_top3"] for r in rows) / len(rows), 4) if rows else None,
             "rows": rows,
+            "test_nodes": len(test_rows),
+            "test_rows": test_rows,
         }, ensure_ascii=False), encoding="utf-8")
-        print(f"[gnn] 예측 덤프 → {out_p} ({len(rows)}행)")
+        print(f"[gnn] 예측 덤프 → {out_p} (off-prior {len(rows)}행 · test {len(test_rows)}행)")
     base = metrics["baseline_district_prior_top1"]
     metrics["lift_vs_district_prior_pct"] = (
         round((metrics["test_top1"] - base) / base * 100, 1) if base else None)

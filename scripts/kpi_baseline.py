@@ -118,12 +118,40 @@ def cluster_bootstrap_ci(hits_by_cluster: list[list[float]], reps: int = 2000,
     return (accs[int(0.025 * len(accs))], accs[min(len(accs) - 1, int(0.975 * len(accs)))])
 
 
+def cluster_bootstrap_ratio_ci(clusters: list[tuple[float, int]], reps: int = 2000,
+                               seed: int = 42) -> tuple[float, float]:
+    """군집별 (값의 합, 건수) 로 낸 **비율**의 군집 부트스트랩 95% 구간.
+
+    `cluster_bootstrap_ci` 와 같은 재표본(군집 복원추출 → Σ합/Σ건수)인데 원소를 펼치지
+    않는다. GNN test 는 수천 자리라 펼치면 판정 한 번에 수천만 번을 돈다 — 쌍대 차이는
+    {+1, −1, 0} 이라 군집마다 합과 건수만 있으면 같은 값이 나온다.
+    """
+    import random
+
+    cl = [(float(s), int(n)) for s, n in clusters if n > 0]
+    k = len(cl)
+    if k == 0:
+        return (0.0, 0.0)
+    rng = random.Random(seed)
+    ratios: list[float] = []
+    for _ in range(reps):
+        tot_s = tot_n = 0.0
+        for _ in range(k):
+            s, n = cl[rng.randrange(k)]
+            tot_s += s
+            tot_n += n
+        ratios.append(tot_s / tot_n)
+    ratios.sort()
+    return (ratios[int(0.025 * reps)], ratios[min(reps - 1, int(0.975 * reps))])
+
+
 ALPHA = 0.05
 
 SKILL = "실력"            # 통과는 이것 하나뿐
 UNRESOLVED = "구분불가"   # 부호와 무관하게 구간이 0 을 품는다 — 달성도 미달도 아니다
 WORSE = "열위"            # 베이스라인이 유의하게 낫다
 UNTESTABLE = "검정불가"   # 표본 수가 산출물에 없어 구간을 못 낸다 — 추정으로 대신하지 않는다
+PENDING = "확인대기"      # 본 적 없는 분기의 표본이 아직 없다 — 참고 판정만 있다(2026-09-27)
 
 
 def verdict(ci: tuple[float, float] | list[float], p: float | None = None) -> str:
@@ -317,18 +345,33 @@ def gnn_skill(recommend: dict) -> dict:
     det = detectability(top3, n_test) if n_test else {"n": None, "se_pp": None,
                                                       "min_detectable_pp": None}
     mdp = det.get("min_detectable_pp")
-    # 판정 — 노드별 예측이 없어 쌍대 검정은 못 한다. 대신 분해능(단일 팔 SE 의 2배)을
-    # 구간 반폭으로 쓴다. test 표본 수가 없으면 **추정하지 않고** 검정불가로 물러난다.
-    if mdp is None:
-        v = UNTESTABLE
+    # 판정 — 우선순위: ① 쌍대 표(`test_top3_paired`, 2026-09-27~ 학습본) → 거점 군집
+    # 부트스트랩 실력 구간 + McNemar, LSTM 방향 축과 같은 규칙. ② 쌍대 표가 없는 옛
+    # 산출물 → 분해능(단일 팔 SE 의 2배)을 구간 반폭으로 쓰는 근사. ③ test 표본 수도
+    # 없으면 **추정하지 않고** 검정불가로 물러난다.
+    paired = m.get("test_top3_paired") or {}
+    by_d = paired.get("by_district") or {}
+    skill_ci_pp = mc = None
+    if by_d:
+        lo, hi = cluster_bootstrap_ratio_ci([(v[0] - v[1], v[2]) for v in by_d.values()])
+        skill_ci_pp = [lo * 100.0, hi * 100.0]
+        mc = {"b_model_only": paired["b_model_only"],
+              "c_prior_only": paired["c_prior_only"],
+              "p_two_sided": mcnemar_exact(paired["b_model_only"], paired["c_prior_only"])}
+        v, basis = verdict((lo, hi), mc["p_two_sided"]), "paired"
+    elif mdp is not None:
+        v, basis = verdict((skill_pp - mdp, skill_pp + mdp)), "detectability"
     else:
-        v = verdict((skill_pp - mdp, skill_pp + mdp))
+        v, basis = UNTESTABLE, "none"
     out = {
         "available": True,
         "top3": top3, "baseline_top3": b3, "skill_pp_top3": skill_pp,
         # 점추정의 **부호**다 — 판정이 아니다. 판정은 verdict.
         "beats_baseline": top3 > b3,
         "verdict": v,
+        "verdict_basis": basis,
+        "skill_ci95_pp": skill_ci_pp,
+        "mcnemar": mc,
         "detectability": det,
         # 실력이 양수라도 그 크기가 분해능 아래면 **말할 수 없는 차이**다.
         "skill_is_detectable": (abs(skill_pp) >= mdp) if mdp is not None else None,
@@ -347,6 +390,40 @@ def gnn_skill(recommend: dict) -> dict:
     return out
 
 
+# ─────────────────────────── 확정 표본 (2026-09-27) ───────────────────────────
+
+def _apply_confirmation(lstm: dict, forecast: dict) -> None:
+    """`protocol.confirm_after` 가 있으면 **그 이후 분기** holdout 만으로 게이트를 판정한다.
+
+    사전등록 §0-B ③: 이미 본 test 분기로는 `실력`을 확정하지 않는다. 전체 holdout 판정
+    (`verdict`)은 **참고**로 남기고, 게이트 판정(`gate_verdict`)은 본 적 없는 분기의
+    부분표본에서 낸다. 그런 표본이 0건이면 `확인대기` 다.
+
+    `confirm_after` 가 없는 산출물(09-26 이전 학습본)은 종전대로 전체 판정이 곧 게이트
+    판정이다 — 그 규칙이 생기기 전에 만든 산출물에 소급하지 않는다.
+    분기 문자열은 `YYYYQ` 5자리라 사전식 비교가 곧 시간순이다.
+    """
+    d, e = lstm["direction"], lstm["error"]
+    after = ((forecast or {}).get("protocol") or {}).get("confirm_after")
+    if not after:
+        d["gate_verdict"], e["gate_verdict"] = d["verdict"], e["verdict"]
+        return
+    fresh = {k: v for k, v in (forecast.get("holdout") or {}).items()
+             if str(v.get("quarter") or "") > str(after)}
+    conf = lstm_skill({"holdout": fresh}) if fresh else {"available": False}
+    if conf.get("available"):
+        d["gate_verdict"] = conf["direction"]["verdict"]
+        e["gate_verdict"] = conf["error"]["verdict"]
+    else:
+        d["gate_verdict"] = e["gate_verdict"] = PENDING
+    lstm["confirmation"] = {
+        "after": str(after),
+        "n_fresh": conf.get("n", 0) if conf.get("available") else 0,
+        "direction": conf.get("direction") if conf.get("available") else None,
+        "error": conf.get("error") if conf.get("available") else None,
+    }
+
+
 # ─────────────────────────── 종합 ───────────────────────────
 
 def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> dict:
@@ -359,28 +436,42 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
     fc, rec = _load(forecast_path), _load(recommend_path)
     lstm = lstm_skill(fc) if fc else {"available": False, "reason": f"{forecast_path.name} 없음"}
     gnn = gnn_skill(rec) if rec else {"available": False, "reason": f"{recommend_path.name} 없음"}
+    if lstm.get("available"):
+        _apply_confirmation(lstm, fc)
+    if gnn.get("available"):
+        gnn["gate_verdict"] = gnn["verdict"]
 
-    # 실패는 **verdict 가 실력이 아닌 모든 축**이다. 부호가 양수여도 구분불가면 적는다 —
-    # 그게 규칙 2 다. 문구는 무엇에 졌는지(베이스라인 이름)와 판정을 함께 말한다.
+    # 실패는 **게이트 판정(gate_verdict)이 실력이 아닌 모든 축**이다. 부호가 양수여도
+    # 구분불가면 적는다 — 그게 규칙 2 다. 문구는 무엇에 졌는지(베이스라인 이름)와
+    # 판정을 함께 말한다. 확인대기면 참고 판정을 옆에 붙인다.
     failures: list[str] = []
     if lstm.get("available"):
         d = lstm["direction"]
-        if d["verdict"] != SKILL:
+        cf = lstm.get("confirmation")
+        pend = (f" · 확정은 {cf['after']} 이후 분기 표본 필요(현재 {cf['n_fresh']}건)"
+                if cf and d["gate_verdict"] == PENDING else "")
+        if d["gate_verdict"] != SKILL:
             lo, hi = d["skill_ci95_pp"]
             failures.append(
                 f"LSTM 방향정확도 {d['model_acc']:.1%} vs 베이스라인({d['baseline_label']}) "
                 f"{d['baseline_acc']:.1%} — 실력 {d['skill_pp']:+.1f}%p "
                 f"[{lo:+.1f}, {hi:+.1f}] · McNemar p={d['mcnemar']['p_two_sided']:.3f} "
-                f"→ {d['verdict']}")
+                f"→ {d['gate_verdict']}" + (f"(참고 {d['verdict']})" if pend else "") + pend)
         e = lstm["error"]
-        if e["verdict"] != SKILL:
+        if e["gate_verdict"] != SKILL:
             lo, hi = e["mae_skill_ci95"]
             failures.append(
                 f"LSTM MAE {e['model_mae']:.3f} vs 지속성 베이스라인 {e['persistence_mae']:.3f} "
-                f"— 기술점수 {e['mae_skill']:+.1%} [{lo:+.1%}, {hi:+.1%}] → {e['verdict']}")
-    if gnn.get("available") and gnn["verdict"] != SKILL:
-        why = ("test 표본 수가 산출물에 없어 가를 수 없다" if gnn["verdict"] == UNTESTABLE
-               else f"분해능 ±{gnn['detectability']['min_detectable_pp']}%p")
+                f"— 기술점수 {e['mae_skill']:+.1%} [{lo:+.1%}, {hi:+.1%}] → {e['gate_verdict']}"
+                + (f"(참고 {e['verdict']})" if pend else "") + pend)
+    if gnn.get("available") and gnn["gate_verdict"] != SKILL:
+        if gnn["verdict_basis"] == "paired":
+            lo, hi = gnn["skill_ci95_pp"]
+            why = f"[{lo:+.2f}, {hi:+.2f}] · McNemar p={gnn['mcnemar']['p_two_sided']:.3f}"
+        elif gnn["verdict"] == UNTESTABLE:
+            why = "test 표본 수가 산출물에 없어 가를 수 없다"
+        else:
+            why = f"분해능 ±{gnn['detectability']['min_detectable_pp']}%p"
         failures.append(
             f"GNN Top-3 {gnn['top3']:.1%} vs 거점 사전분포 {gnn['baseline_top3']:.1%} "
             f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['verdict']}")
@@ -388,7 +479,7 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
     return {"lstm": lstm, "gnn": gnn, "failures": failures, "ok": not failures}
 
 
-_MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠"}
+_MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠", PENDING: "⏳"}
 
 
 def _fmt(res: dict) -> str:
@@ -440,6 +531,11 @@ def _fmt(res: dict) -> str:
                    f"RMSE {e['rmse_skill']:+.1%}")
         if d["verdict"] != e["verdict"]:
             out.append("      두 축의 판정이 다르다 — 하나만 인용하면 어느 쪽이든 거짓이 된다")
+        cf = lstm.get("confirmation")
+        if cf:
+            out.append(f"   [확정] 위 판정은 **참고**다 — 게이트는 {cf['after']} 이후 분기 holdout "
+                       f"{cf['n_fresh']}건으로 판정: 방향 {_MARK[d['gate_verdict']]} "
+                       f"{d['gate_verdict']} · 오차 {_MARK[e['gate_verdict']]} {e['gate_verdict']}")
 
     gnn = res["gnn"]
     out.append("\n[GNN] 업종 추천")
@@ -448,8 +544,13 @@ def _fmt(res: dict) -> str:
     else:
         out.append(f"   Top-3       모델 {gnn['top3']:.1%} · "
                    f"거점 사전분포 {gnn['baseline_top3']:.1%}")
-        out.append(f"   {_MARK[gnn['verdict']]} {gnn['verdict']} — "
-                   f"실력 {gnn['skill_pp_top3']:+.2f}%p")
+        line = f"   {_MARK[gnn['verdict']]} {gnn['verdict']} — 실력 {gnn['skill_pp_top3']:+.2f}%p"
+        if gnn.get("verdict_basis") == "paired":
+            glo, ghi = gnn["skill_ci95_pp"]
+            gm = gnn["mcnemar"]
+            line += (f" [{glo:+.2f}, {ghi:+.2f}] · McNemar b={gm['b_model_only']} "
+                     f"c={gm['c_prior_only']} p={gm['p_two_sided']:.3f} (쌍대 · 거점 군집)")
+        out.append(line)
         det = gnn.get("detectability") or {}
         if det.get("min_detectable_pp") is not None:
             verdict = ("가를 수 있다" if gnn.get("skill_is_detectable")

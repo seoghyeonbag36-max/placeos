@@ -259,12 +259,69 @@ def test_unknown_target_mode_is_rejected(monkeypatch) -> None:
         m.build_dataset(look_back=4, target_mode="ratio")
 
 
-def test_selection_key_did_not_change_with_the_delta_arm() -> None:
-    """Δ 팔을 넣으면서 선택 기준을 바꾸면 metric shopping 이다 — 사전등록대로 고정."""
+def test_main_selects_through_the_preregistered_rule() -> None:
+    """선택은 사전등록한 규칙 함수 하나로만 한다(2026-09-27 §0-B ①).
+
+    09-26 에는 "Δ 팔을 넣으며 기준을 바꾸면 metric shopping" 이라 옛 키를 고정했다.
+    09-27 에 Δ 팔이 **한 시행도 돌기 전에** 규칙을 바꿔 사전등록했으므로 잠금 대상을
+    그 규칙으로 옮긴다. 여기서 막는 것은 main 이 규칙 함수를 우회해 다시 손으로 고르는 것이다.
+    """
     src = TRAIN.read_text(encoding="utf-8")
     body = src.split('def main(')[-1]
-    assert 'key = (v["dir_acc"], -v["mae"])' in body, "선택 기준(val 방향 → val MAE)이 바뀌었다"
+    assert "select_trial(" in body, "main 이 사전등록한 선택 규칙을 쓰지 않는다"
+    assert 'key = (v["dir_acc"], -v["mae"])' not in body, "옛 규칙(방향 최대)이 되돌아왔다"
     assert "TARGET_MODES" in body, "타깃 모수화가 그리드에서 빠졌다"
+
+
+def _select():
+    sys.path.insert(0, str(ROOT))
+    from ml.training import selection
+    return selection
+
+
+def _v(mae: float, pers: float, dir_acc: float) -> dict:
+    return {"mae": mae, "persistence_mae": pers, "dir_acc": dir_acc}
+
+
+def test_selection_prefers_trials_that_beat_persistence_on_val() -> None:
+    """09-24 의 실패 양식: 방향이 가장 높은 시행이 지속성에 진다면 고르지 않는다."""
+    sel = _select()
+    vals = [_v(1.7, 1.5, 0.69),     # 방향 최고지만 지속성에 짐
+            _v(1.4, 1.5, 0.60),     # 지속성을 이김
+            _v(1.45, 1.5, 0.62)]    # 지속성을 이기고 방향이 더 높음 → 이것
+    idx, rec = sel.select_trial(vals)
+    assert idx == 2
+    assert rec["eligible"] == 2 and rec["fallback"] is False
+
+
+def test_selection_falls_back_to_min_val_mae_and_says_so() -> None:
+    """후보가 없으면 val MAE 최소로 고르고, 그 사실을 기록한다(조용히 넘어가지 않는다)."""
+    sel = _select()
+    idx, rec = sel.select_trial([_v(2.0, 1.2, 0.70), _v(1.6, 1.2, 0.50)])
+    assert idx == 1
+    assert rec["fallback"] is True and rec["eligible"] == 0
+
+
+def test_selection_never_sees_test_metrics() -> None:
+    """선택 ≠ 보고(KPI 규칙 3) — 규칙 함수가 test 블록을 받지 않는다."""
+    src = (ROOT / "ml" / "training" / "selection.py").read_text(encoding="utf-8")
+    code = "\n".join(ln for ln in src.splitlines()
+                     if not ln.lstrip().startswith("#") and '"""' not in ln)
+    assert '"test"' not in code and "['test']" not in code
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    assert 'select_trial([r["val"] for r in results])' in body
+
+
+def test_protocol_pins_the_last_seen_test_quarter() -> None:
+    """확정 표본 규칙(§0-B ③)의 기준점. **올리면 본 분기를 확정 표본으로 다시 쓰게 된다.**
+
+    09-24 재학습이 test 로 본 분기는 20254·20261·20262 다. 이 값은 고정이다.
+    """
+    tree = ast.parse(TRAIN.read_text(encoding="utf-8"))
+    proto = next(ast.literal_eval(n.value) for n in tree.body
+                 if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "_PROTOCOL")
+    assert proto["confirm_after"] == "20262"
+    assert proto["selection_rule"] == "val_mae_beats_persistence_then_val_direction"
 
 
 def test_serving_reads_the_target_mode_from_the_checkpoint() -> None:
