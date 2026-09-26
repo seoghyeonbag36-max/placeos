@@ -119,6 +119,7 @@ except (AttributeError, ValueError):  # 재설정 불가 스트림이면 그대�
     pass
 
 from ml.models.gnn.industry_gnn import IndustryGNN  # noqa: E402
+from ml.training.graph_dedup import one_row_per_store  # noqa: E402
 
 _GOLD = _REPO / "data" / "gold"
 _ARTIFACT = _REPO / "ml" / "artifacts" / "industry_gnn.pt"
@@ -198,7 +199,15 @@ def load_graph() -> tuple[pd.DataFrame, pd.DataFrame]:
         edges = _GOLD / slug / "platform_store_graph_edges.parquet"
         if nodes.exists() and edges.exists():
             print(f"[gnn] 그래프 소스: gold/{slug}")
-            return pd.read_parquet(nodes), pd.read_parquet(edges)
+            # 2026-09-27: 겹치는 거점의 같은 점포를 1점포 1행으로(가장 가까운 거점 중심).
+            # 안 하면 같은 점포가 train·test 양쪽에 들어가는 누수가 난다 — graph_dedup 독스트링.
+            from data.config.page_hubs import ALL_HUBS
+            centers = {slug_: (h.cx, h.cy) for slug_, h in ALL_HUBS.items()}
+            n_df, dropped = one_row_per_store(pd.read_parquet(nodes), centers)
+            if dropped:
+                print(f"[gnn] 겹치는 거점 중복 {dropped:,}행 제거 → 1점포 1행 "
+                      f"{len(n_df):,}노드 (가장 가까운 거점 중심에 귀속)")
+            return n_df, pd.read_parquet(edges)
     raise FileNotFoundError(
         "그래프 gold 없음 — build_gold + build_store_graph_edges 먼저 실행")
 
@@ -410,8 +419,13 @@ def _building_block(nodes: pd.DataFrame) -> tuple[np.ndarray, list[str]] | None:
         print(f"[gnn] 건물 테이블에 컬럼 없음 {missing} — 건물 피처 없이 진행")
         return None
 
-    # node_id 로 정렬 결합한다. 좌표 재조인이 아니라 키 조인이라 순서가 어긋날 수 없다.
-    m = tbl.set_index("node_id").reindex(nodes["node_id"].to_numpy())
+    # (node_id, 거점) 으로 결합한다. 좌표 재조인이 아니라 키 조인이라 순서가 어긋날 수 없다.
+    # 2026-09-27: 표는 gold 그래프를 따라 겹치는 점포를 거점마다 한 행씩 갖는다 —
+    # node_id 하나로 색인하면 중복 색인으로 죽는다. 노드가 귀속된 거점의 행을 집는다.
+    key = pd.MultiIndex.from_arrays([nodes["node_id"].to_numpy(),
+                                     nodes["district_id"].to_numpy()])
+    m = (tbl.drop_duplicates(["node_id", "district_id"])
+            .set_index(["node_id", "district_id"]).reindex(key))
     block = m[_BUILDING_COLS].astype(float).to_numpy()
     block = np.nan_to_num(block)          # 테이블에 없는 노드 = 미조인(전부 0)
 
