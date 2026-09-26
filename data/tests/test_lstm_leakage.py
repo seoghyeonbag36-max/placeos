@@ -223,3 +223,58 @@ def _prep(m, df):
         out.append(g)
     import pandas as pd
     return pd.concat(out, ignore_index=True)
+
+
+# ─────────────── Δ 타깃 (2026-09-26) ───────────────
+# → docs/finding-lstm-delta-target-2026-09-26.md
+
+def test_delta_target_reconstructs_the_level_target(monkeypatch) -> None:
+    """Δ 데이터셋은 같은 윈도우 위에서 `직전값 + Δ = 다음값` 이어야 한다.
+
+    어긋나면 Δ 모델의 예측을 수준으로 되돌릴 때 채점 단위가 level 과 달라져, 두 팔을
+    같은 지속성 베이스라인에 대는 비교 자체가 무너진다.
+    """
+    m = _dataset_module()
+    np = pytest.importorskip("numpy")
+    prepared = _prep(m, _synthetic())
+    monkeypatch.setattr(m, "load_gold", lambda: prepared)
+    lv = m.build_dataset(look_back=4)
+    dt = m.build_dataset(look_back=4, target_mode="delta")
+    assert lv.target_mode == "level" and dt.target_mode == "delta"
+    assert np.array_equal(lv.X, dt.X), "입력 윈도우는 타깃 모수화와 무관해야 한다"
+    assert np.array_equal(lv.sample_is_last, dt.sample_is_last)
+    level = lv.y * lv.y_sd + lv.y_mu
+    delta = dt.y * dt.y_sd + dt.y_mu
+    assert np.allclose(dt.y_prev + delta, level, atol=1e-3)
+    # Δ 의 표준화 통계도 train 행에서만 — 누수 차단 규약이 두 팔에 똑같이 걸린다.
+    train = ~(dt.sample_is_last | dt.sample_is_val)
+    assert dt.y_mu == pytest.approx(float(delta[train].mean()), abs=1e-3)
+
+
+def test_unknown_target_mode_is_rejected(monkeypatch) -> None:
+    m = _dataset_module()
+    prepared = _prep(m, _synthetic())
+    monkeypatch.setattr(m, "load_gold", lambda: prepared)
+    with pytest.raises(ValueError):
+        m.build_dataset(look_back=4, target_mode="ratio")
+
+
+def test_selection_key_did_not_change_with_the_delta_arm() -> None:
+    """Δ 팔을 넣으면서 선택 기준을 바꾸면 metric shopping 이다 — 사전등록대로 고정."""
+    src = TRAIN.read_text(encoding="utf-8")
+    body = src.split('def main(')[-1]
+    assert 'key = (v["dir_acc"], -v["mae"])' in body, "선택 기준(val 방향 → val MAE)이 바뀌었다"
+    assert "TARGET_MODES" in body, "타깃 모수화가 그리드에서 빠졌다"
+
+
+def test_serving_reads_the_target_mode_from_the_checkpoint() -> None:
+    """체크포인트가 target_mode 를 싣고, 서빙이 그 값으로 복원 방식을 골라야 한다.
+
+    한쪽만 있으면 Δ 모델 출력(변화량)을 수준으로 읽어 **에러 없이** 틀린 값을 낸다 —
+    09-24 holdout 키 결함과 같은 모양이다.
+    """
+    train_src = TRAIN.read_text(encoding="utf-8")
+    pred_src = (ROOT / "ml" / "inference" / "predictor.py").read_text(encoding="utf-8")
+    assert '"target_mode": ds.target_mode' in train_src, "체크포인트에 target_mode 가 없다"
+    assert 'ckpt.get("target_mode", "level") == "delta"' in pred_src, (
+        "서빙이 Δ 체크포인트를 수준으로 읽는다")

@@ -105,6 +105,10 @@ def _predict_with_model(district_id: str) -> dict | None:
         with torch.no_grad():
             pred = float(model(torch.from_numpy(win[None])).item()) * ckpt["y_sd"] + ckpt["y_mu"]
         last = float(g[TARGET].iloc[-1])
+        # Δ 타깃 모델(2026-09-26~)은 출력이 변화량이다 — 직전값에 더해 수준으로 되돌린다.
+        # 키가 없는 옛 체크포인트는 level 이다.
+        if ckpt.get("target_mode", "level") == "delta":
+            pred = last + pred
         return {
             "district_id": district_id,
             "forecast_vac_proxy": round(pred, 3),
