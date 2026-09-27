@@ -39,7 +39,7 @@
 어휘 점검(예: 서빙 추천 1순위 중 미분류 비율 상한, 또는 `label_level` 이 결정된 어휘와
 일치하는지)을 붙일지는 어휘 결정과 함께 정할 일이다 — 기준을 먼저 정해야 한다.
 
-## 남은 결정 — 라벨 어휘 (09-15 문서 §2·§3)
+## 결정 — 라벨 어휘 (09-15 문서 §2·§3) → **(b) `group_mapped`** (창업자 2026-09-27)
 
 | 안 | 내용 | 서빙 어휘 | 비고 |
 |---|---|---|---|
@@ -58,3 +58,9 @@ sig 에 들어 있어 (a) 의 것을 잘못 물지 않는다.
 - **학습 중에 재개 파일을 열지 말 것.** 진행을 보려고 `torch.load` 로 읽는 동안 학습기의
   원자적 교체(`.tmp → .pt`)가 Windows 파일 잠금에 걸려 `PermissionError` 로 죽었다(10:38).
   진행은 로그(50에포크마다)로만 본다.
+
+## 재학습 (b) — 진행
+
+`python -u scripts/run_gnn_retry.py --epochs 600 --patience 80 --label-level group_mapped
+--dump-preds reports/gnn_test_preds_group-mapped_2026-09-27.json` 를 세션 밖에서 돌린다
+(세그폴트 재시도 래퍼를 저장소로 옮겼다 — `scripts/run_gnn_retry.py`). 결과는 끝나면 채운다.
