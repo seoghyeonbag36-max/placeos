@@ -1089,8 +1089,9 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
           {promoted ? lstmBody : (
             <>
               <div className="evidnote">{foldReason(skill)}</div>
+              {/* 접힌 요약에 예측값을 올리지 않는다 — 올리면 접은 값이 기본 표시로 새어 나온다(09-28 화면 실측) */}
               <Fold title="실험 모델 — LSTM 예측" badge="접음"
-                summary={<>{fc.forecast_vac_proxy.toFixed(3)} vac_proxy ({signed(fc.delta)})</>}>
+                summary={`+1~${fc.horizons.length}분기 vac_proxy · 펼쳐서 보기`}>
                 {lstmBody}
               </Fold>
             </>
