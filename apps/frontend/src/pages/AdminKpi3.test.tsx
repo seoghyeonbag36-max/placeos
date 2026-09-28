@@ -8,12 +8,13 @@
  *   - 내부·테스트 조직을 뺀 수(excluded_orgs)가 화면에서 사라지는 것
  *   - 전체 org id 가 화면에 나오는 것(이름 + id 앞 8자만)
  *   - 겹친 조회에서 늦게 온 옛 응답이 최신을 덮는 것(#45 규칙)
+ *   - W4 판정(`/admin/pilot-w4`)이 사라지거나 "아마"가 합격선에 섞여 보이는 것
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import AdminCoverage from "@/pages/AdminCoverage";
 import AdminKpi3 from "@/pages/AdminKpi3";
-import { getAdminPmf, getAdminUsage } from "@/lib/api";
+import { getAdminPilotW4, getAdminPmf, getAdminUsage } from "@/lib/api";
 import { installFetchStub } from "@/test/fetchStub";
 
 const FULL_ID = "0123456789abcdef0123456789abcdef";
@@ -35,12 +36,27 @@ const PMF_INSUFFICIENT = {
   excluded_orgs: 1, excluded: [INTERNAL], exclusion_rules: RULES,
 };
 
+const W4_JUDGED = {
+  verdict: "미달",
+  rules: { pilot_days: 28, min_active_weeks: 2, min_response_rate_pct: 60, min_responses: 5,
+           nps_target: 30, pay_target_pct: 30, source: "docs" },
+  orgs_in_progress: 1, orgs_ended_inactive: 2, orgs_ended_active: 5,
+  responded: 5, response_rate_pct: 100, nps: 20, would_pay_pct: 20, would_pay_maybe_pct: 40,
+  one_response_swing_nps: 40,
+  orgs: [{ id_prefix: "bbbbbbbb", name: "Gamma 카페 창업 준비", signup_at: "2026-10-01T09:00:00+00:00",
+           w4_end: "2026-10-29T09:00:00+00:00", status: "활성", active_weeks: [1, 3], responded: true }],
+  note: "방향 신호이지 'PMF 달성'이 아니다.",
+  excluded_orgs: 1, excluded: [INTERNAL], exclusion_rules: RULES,
+};
+
 afterEach(() => { try { window.sessionStorage.clear(); } catch { /* 막힌 환경 */ } });
 
-function stubBoth(usage: unknown = USAGE, pmf: unknown = PMF_INSUFFICIENT, status = 200) {
+function stubBoth(usage: unknown = USAGE, pmf: unknown = PMF_INSUFFICIENT, status = 200,
+                  w4: unknown = W4_JUDGED) {
   return installFetchStub([
     { match: /\/admin\/usage\?days=30$/, status, body: usage },
     { match: /\/admin\/pmf$/, status, body: pmf },
+    { match: /\/admin\/pilot-w4$/, status, body: w4 },
   ]);
 }
 
@@ -54,7 +70,39 @@ describe("getAdminUsage · getAdminPmf — api.ts", () => {
   });
 });
 
+describe("getAdminPilotW4 — api.ts", () => {
+  it("X-Admin-Token 을 싣고 /admin/pilot-w4 를 부른다", async () => {
+    const api = stubBoth();
+    await expect(getAdminPilotW4("tok")).resolves.toEqual(W4_JUDGED);
+    expect(api.urls()).toEqual(["GET /api/v1/admin/pilot-w4"]);
+    expect(api.calls[0].headers["X-Admin-Token"]).toBe("tok");
+  });
+});
+
 describe("AdminKpi3 — #admin KPI③ 칸", () => {
+  it("W4 판정 → 판정·분모·응답률을 보이고 '아마'는 합격선 밖이라고 적는다", async () => {
+    stubBoth();
+    render(<AdminKpi3 request={{ token: "tok", seq: 1 }} />);
+    expect(await screen.findByText("미달")).toBeTruthy();
+    expect(screen.getByText("방향 신호 · PMF 달성 아님")).toBeTruthy();
+    expect(screen.getByText("5곳")).toBeTruthy();
+    expect(screen.getByText("비활성 2 · 진행중 1")).toBeTruthy();
+    expect(screen.getByText("100%")).toBeTruthy();
+    expect(screen.getByText('"아마" 40% (합격선 밖)')).toBeTruthy();
+    expect(screen.getByText("활성 · W4 2026-10-29 · 접근 주 1,3 · 응답")).toBeTruthy();
+  });
+
+  it("W4 표본부족 → 수치는 '—' 로 둔다", async () => {
+    stubBoth(USAGE, { ...PMF_INSUFFICIENT, verdict: "충족" }, 200,
+             { ...W4_JUDGED, verdict: "표본부족", nps: null, response_rate_pct: null,
+               would_pay_pct: undefined, would_pay_maybe_pct: undefined,
+               one_response_swing_nps: undefined, orgs_ended_active: 0, responded: 0, orgs: [] });
+    render(<AdminKpi3 request={{ token: "tok", seq: 1 }} />);
+    expect(await screen.findByText("표본부족")).toBeTruthy();
+    expect(screen.getByText("응답 0 / 최소 5")).toBeTruthy();
+    expect(screen.getByText("파일럿 조직이 없습니다.")).toBeTruthy();
+  });
+
   it("토큰 없음 → 요청을 보내지 않고 안내만 한다", () => {
     const api = stubBoth();
     render(<AdminKpi3 request={null} />);
@@ -115,7 +163,8 @@ describe("AdminKpi3 — #admin KPI③ 칸", () => {
     // 옛 토큰의 응답(403)은 gate 가 열릴 때까지 붙잡아 두고, 새 토큰은 바로 답한다.
     vi.stubGlobal("fetch", vi.fn((url: string, init?: { headers?: Record<string, string> }) => {
       const old = init?.headers?.["X-Admin-Token"] === "old";
-      const body = /\/admin\/usage/.test(url) ? USAGE : PMF_INSUFFICIENT;
+      const body = /\/admin\/usage/.test(url) ? USAGE
+        : /\/admin\/pilot-w4/.test(url) ? W4_JUDGED : PMF_INSUFFICIENT;
       return old ? gate.then(() => respond(body, 403)) : Promise.resolve(respond(body));
     }));
 
@@ -136,13 +185,14 @@ describe("AdminCoverage 안의 KPI③ — 기존 토큰 입력을 그대로 쓴�
       { match: /\/admin\/coverage$/, status: 403, body: { detail: "x" } },
       { match: /\/admin\/usage\?days=30$/, body: USAGE },
       { match: /\/admin\/pmf$/, body: PMF_INSUFFICIENT },
+      { match: /\/admin\/pilot-w4$/, body: W4_JUDGED },
     ]);
     render(<AdminCoverage />);
     expect(screen.getByText("관리자 토큰을 넣고 조회하면 KPI③ 이 나옵니다.")).toBeTruthy();
     fireEvent.change(screen.getByPlaceholderText("ADMIN_TOKEN"), { target: { value: "tok" } });
     fireEvent.click(screen.getByRole("button", { name: "조회" }));
     expect(await screen.findByText("표본부족")).toBeTruthy();
-    await waitFor(() => expect(api.count(/\/admin\/(usage|pmf)/)).toBe(2));
+    await waitFor(() => expect(api.count(/\/admin\/(usage|pmf|pilot-w4)/)).toBe(3));
     expect(api.matching(/\/admin\//).every((c) => c.headers["X-Admin-Token"] === "tok")).toBe(true);
   });
 });
