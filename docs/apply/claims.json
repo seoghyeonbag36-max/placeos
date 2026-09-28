@@ -1,20 +1,30 @@
 {
   "_설명": "신청서·논문 공모에 쓸 수 있는 수치의 전부. 이 파일에 없는 수치는 docs/apply/ 원고에 쓰지 않는다. scripts/check_application.py 가 이 파일로 판정한다.",
   "_원본": "docs/papers/evidence-index.md · scripts/pppp_status.py · docs/feature-*.md. 원본이 바뀌면 여기를 먼저 고치고 원고를 고친다.",
-  "_주의": "모집단이 다른 값을 섞지 말 것. 54거점 실험값과 66거점 서빙값은 비교 가능하지 않다.",
-  "updated": "2026-09-16",
+  "_주의": "모집단이 다른 값을 섞지 말 것. 현재값은 서빙 81거점(data/config/page_hubs.ACTIVE_HUBS) · LSTM 누수 차단 재학습본(홀드아웃 240) · GNN 81거점 재학습본(09-27 · test 17,650자리)이다. 66거점 시절(09-05~09-16) 값과 09-06 동결 검사 묶음(PAGE-D01~D07, 66거점 기준) 값은 이들과 비교 가능하지 않다. LSTM 판정은 이미 본 test 분기로 낸 **참고** 판정이고 확정은 2026Q3 이후 표본 뒤다(확인대기).",
+  "updated": "2026-09-28",
   "allow": [
     {
-      "id": "HUB66",
-      "value": "66거점",
+      "id": "HUB_SERVED",
+      "value": "81거점",
       "aliases": [
-        "66개 거점",
-        "66/66",
-        "서울 66"
+        "81개 거점",
+        "81/81",
+        "서울 81"
       ],
       "condition": "건축물대장",
-      "why": "Tier1 판정·대표 집계 커버리지·R-ONE 앵커 대조가 모두 66/66. '건축물대장 기반'이라는 한정 없이 쓰면 실측 정확도 주장으로 읽힌다",
-      "source": "scripts/pppp_status.py"
+      "why": "서빙 거점 수. Tier1 판정·대표 집계 커버리지·R-ONE 앵커 대조가 모두 81/81. '건축물대장 기반'이라는 한정 없이 쓰면 실측 정확도 주장으로 읽힌다. ⚠ coverage.json 을 세면 88 이 나온다 — 경기 보류 산출물이 섞인 수라 서빙 수가 아니다",
+      "source": "scripts/pppp_status.py (Page · Tier1 대장 실측 거점 81/81)"
+    },
+    {
+      "id": "UNITS",
+      "value": "840유닛",
+      "aliases": [
+        "840"
+      ],
+      "condition": "81거점",
+      "why": "서빙 81거점의 실제 공실 유닛 인벤토리. 54거점 528유닛 · 66거점 664유닛과 섞지 않는다 — 거점이 늘어난 상위집합이지 같은 모집단이 아니다",
+      "source": "scripts/pppp_status.py (Posting · 실제 공실 유닛 인벤토리 81/81거점 · 840유닛)"
     },
     {
       "id": "POLY",
@@ -22,8 +32,8 @@
       "aliases": [
         "52642"
       ],
-      "condition": "동결",
-      "why": "마스터 폴리곤 수. 동결한 입력 묶음(audits/page-inventory-20260906)에 대한 값이다",
+      "condition": "09-06 동결",
+      "why": "마스터 폴리곤 수. 2026-09-06 동결한 검사 묶음(audits/page-inventory-20260906)의 값이고 그 묶음은 **66거점 기준**이다. 서빙 81거점의 폴리곤 수로 읽히게 쓰지 않는다 — 조건을 '09-06 동결' 로 걸어 날짜를 함께 적게 한다",
       "source": "docs/papers/evidence-index.md PAGE-D01"
     },
     {
@@ -32,8 +42,8 @@
       "aliases": [
         "30912"
       ],
-      "condition": "동결",
-      "why": "층 정보 검사 대상 폴리곤 수. 해당 분모에서의 계산 일관성 확인이지 현실 정답이 아니다",
+      "condition": "09-06 동결",
+      "why": "층 정보 검사 대상 폴리곤 수. 2026-09-06 동결 검사 묶음(66거점 기준)의 분모에서의 계산 일관성 확인이지 현실 정답이 아니다. 서빙 81거점 값이 아니다",
       "source": "docs/papers/evidence-index.md PAGE-D02"
     },
     {
@@ -46,97 +56,6 @@
       "condition": "범위",
       "why": "층 배정 범위 폭 중앙값. 정보 부족에 따른 범위이지 통계적 신뢰구간이나 현실 공실 오차가 아니다",
       "source": "docs/papers/evidence-index.md PAGE-D06"
-    },
-    {
-      "id": "GNN_TOP1",
-      "value": "64.9%",
-      "aliases": [],
-      "condition": "66거점",
-      "why": "GNN 업종추천 Top-1. 조건 A(66거점 서빙본, 2026-09-05)",
-      "source": "docs/papers/evidence-index.md P1"
-    },
-    {
-      "id": "GNN_TOP3",
-      "value": "91.7%",
-      "aliases": [],
-      "condition": "66거점",
-      "why": "GNN 업종추천 Top-3. 조건 A(66거점 서빙본, 2026-09-05)",
-      "source": "docs/papers/evidence-index.md P1"
-    },
-    {
-      "id": "GNN_LIFT",
-      "value": "5.3%",
-      "aliases": [
-        "+5.3%"
-      ],
-      "condition": "기준선",
-      "why": "거점 사전분포 기준선(Top-1 61.7% / Top-3 89.4%) 대비 lift. 기준선을 밝히지 않으면 절대 성능으로 오독된다",
-      "source": "docs/papers/evidence-index.md P1"
-    },
-    {
-      "id": "GNN_NODES",
-      "value": "47,442",
-      "aliases": [
-        "47442"
-      ],
-      "condition": "",
-      "why": "그래프 노드 수",
-      "source": "docs/feature-platform.md 0"
-    },
-    {
-      "id": "GNN_EDGES",
-      "value": "188,673",
-      "aliases": [
-        "188673"
-      ],
-      "condition": "",
-      "why": "그래프 엣지 수",
-      "source": "docs/feature-platform.md 0"
-    },
-    {
-      "id": "GNN_OFFPRIOR",
-      "value": "33.8%",
-      "aliases": [],
-      "condition": "66거점",
-      "why": "off-prior Top-3 (n=1,011). 54거점 실험군의 37.6% 와 절대 섞지 않는다 — 성능 저하가 아니라 모집단이 바뀐 것",
-      "source": "docs/papers/evidence-index.md P1"
-    },
-    {
-      "id": "LSTM_DIR",
-      "value": "70.8%",
-      "aliases": [
-        "46/65",
-        "70.77%"
-      ],
-      "condition": "78.5%",
-      "why": "공실 예측 방향 정확도(66거점 홀드아웃 · 2026-09-04 서빙본). ⚠ 같은 홀드아웃에서 **입력을 안 보는 상수 규칙('항상 하락')이 78.5%** 라 이 값은 베이스라인보다 7.7%p 낮다. 베이스라인 없이 쓰면 '목표 70% 달성'으로 읽히는데 그건 성과가 아니다. 그래서 조건을 '78.5%' 로 걸어 **같은 절에 베이스라인이 함께 적히지 않으면 통과하지 못하게** 한다",
-      "source": "scripts/kpi_baseline.py · docs/finding-kpi-leak-2026-09-16.md"
-    },
-    {
-      "id": "LSTM_MAE",
-      "value": "1.061",
-      "aliases": [],
-      "condition": "66거점",
-      "why": "vac_proxy 원단위 MAE",
-      "source": "docs/feature-platform.md 0"
-    },
-    {
-      "id": "LSTM_RMSE",
-      "value": "1.387",
-      "aliases": [],
-      "condition": "66거점",
-      "why": "vac_proxy 원단위 RMSE",
-      "source": "docs/feature-platform.md 0"
-    },
-    {
-      "id": "UNITS",
-      "value": "664유닛",
-      "aliases": [
-        "664"
-      ],
-      "condition": "66거점",
-      "why": "서빙 66거점의 실제 공실 유닛 인벤토리 (2026-09-05 실측). 배선 당시 54거점 528유닛이었으므로 옛 값과 섞지 않는다",
-      "source": "AGENTS.md 0 · services/vacant_inventory"
     },
     {
       "id": "SAMPLE211",
@@ -162,91 +81,234 @@
       "id": "TARGET70",
       "value": "70%",
       "aliases": [],
-      "condition": "",
-      "why": "KPI 목표선(AI 정확도 70%+, Phase1). 달성값이 아니라 목표다 — 성과로 인용하지 않는다",
-      "source": "CLAUDE.md KPI Priorities · docs/feature-platform.md 0"
+      "condition": "폐기",
+      "why": "옛 KPI 목표선(AI 정확도 70%+). 2026-09-16 폐기했다 — 같은 홀드아웃에서 입력을 안 보는 규칙이 이미 그 선을 넘고 있어 모델을 보증하지 못했다. 폐기 사실을 서술할 때만 쓴다",
+      "source": "CLAUDE.md KPI Priorities · docs/finding-kpi-leak-2026-09-16.md"
     },
     {
-      "id": "LSTM_MARGIN",
-      "value": "0.8%p",
-      "aliases": [
-        "0.8%"
-      ],
-      "condition": "78.5%",
-      "why": "⚠ 인용 금지에 가깝다 — 목표선 70% 대비 초과폭(70.8% − 70%)인데, 그 목표선 자체가 무정보 상수(78.5%) 아래라 초과폭에 의미가 없다. 성과로 쓰려면 이 값이 아니라 아래 LSTM_SKILL(지속성 대비 MAE 개선)을 쓴다",
-      "source": "docs/feature-platform.md 0"
-    },
-    {
-      "id": "GNN_BASE",
-      "value": "89.4%",
-      "aliases": [
-        "61.7%"
-      ],
-      "condition": "기준선",
-      "why": "거점 사전분포 기준선 (Top-3 89.4% / Top-1 61.7%). Top-3 91.7% 를 이 값 없이 쓰면 절대 성능으로 오독된다 — 둘은 반드시 함께 간다",
-      "source": "docs/papers/evidence-index.md P1"
-    },
-    {
-      "id": "LSTM_SKILL",
-      "value": "+20.5%",
-      "aliases": [
-        "20.5%"
-      ],
-      "condition": "지속성",
-      "why": "공실 예측 오차의 **기술점수** — 지속성 베이스라인(예측=직전 분기값) MAE 1.333 대비 모델 1.061. 방향 축과 달리 여기엔 실력이 있고, 베이스라인 대비 값이라 임계값 없이도 해석된다. 조건 '지속성' 은 무엇에 댄 값인지 밝히게 한다",
+      "id": "CI95",
+      "value": "95%",
+      "aliases": [],
+      "condition": "신뢰구간",
+      "why": "신뢰수준 표기. 구간 값과 함께만 쓴다",
       "source": "scripts/kpi_baseline.py"
     },
     {
-      "id": "LSTM_BASE",
-      "value": "78.5%",
+      "id": "LSTM_MAE",
+      "value": "2.065",
+      "aliases": [],
+      "condition": "지속성",
+      "why": "공실 예측 MAE(vac_proxy 원단위, 홀드아웃 240). 지속성 1.190 보다 **크다** — 베이스라인 없이 쓰면 성과로 읽힌다",
+      "source": "scripts/kpi_baseline.py · docs/finding-lstm-leakfree-retrain-2026-09-24.md · docs/finding-lstm-delta-target-2026-09-26.md §0-B ③"
+    },
+    {
+      "id": "LSTM_PERSIST",
+      "value": "1.190",
+      "aliases": [],
+      "condition": "",
+      "why": "지속성 베이스라인(예측=직전 분기값) MAE. LSTM_MAE 의 비교 대상",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "LSTM_SKILL",
+      "value": "−73.5%",
       "aliases": [
-        "51/65"
+        "-73.5%",
+        "73.5%"
+      ],
+      "condition": "확인대기",
+      "why": "오차 축 기술점수(1 − 모델MAE/지속성MAE). **음수 = 지속성보다 못하다** · 참고 판정 열위. 이미 본 test 분기로 낸 참고값이라 확정은 2026Q3 이후 표본 뒤 — 조건 '확인대기' 로 그 상태를 함께 적게 한다",
+      "source": "scripts/kpi_baseline.py · docs/finding-lstm-leakfree-retrain-2026-09-24.md · docs/finding-lstm-delta-target-2026-09-26.md §0-B ③"
+    },
+    {
+      "id": "LSTM_SKILL_VERDICT",
+      "value": "−73.5%",
+      "aliases": [
+        "-73.5%",
+        "73.5%"
+      ],
+      "condition": "열위",
+      "why": "같은 값의 두 번째 조건 — 참고 판정이 '열위' 라는 사실을 떼고 옮기지 않게 한다",
+      "source": "scripts/kpi_baseline.py · docs/finding-lstm-leakfree-retrain-2026-09-24.md · docs/finding-lstm-delta-target-2026-09-26.md §0-B ③"
+    },
+    {
+      "id": "LSTM_SKILL_CI_LO",
+      "value": "100.4%",
+      "aliases": [
+        "−100.4%",
+        "-100.4%"
+      ],
+      "condition": "신뢰구간",
+      "why": "오차 기술점수 95% 구간 하한(거점 군집 부트스트랩). 상한 −47.9% 와 짝으로 쓴다 — 구간 전체가 0 아래라 '열위'다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "LSTM_SKILL_CI_HI",
+      "value": "47.9%",
+      "aliases": [
+        "−47.9%",
+        "-47.9%"
+      ],
+      "condition": "신뢰구간",
+      "why": "오차 기술점수 95% 구간 상한. 하한과 짝으로 쓴다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "LSTM_DIR",
+      "value": "55.8%",
+      "aliases": [
+        "134/240"
+      ],
+      "condition": "55.0%",
+      "why": "공실 예측 방향 정확도(홀드아웃 240). 같은 표본의 '항상 하락' 상수가 55.0% 라 **같은 절에 베이스라인이 없으면 통과하지 못하게** 조건을 '55.0%' 로 건다",
+      "source": "scripts/kpi_baseline.py · docs/finding-lstm-leakfree-retrain-2026-09-24.md · docs/finding-lstm-delta-target-2026-09-26.md §0-B ③"
+    },
+    {
+      "id": "LSTM_BASE",
+      "value": "55.0%",
+      "aliases": [
+        "132/240"
       ],
       "condition": "",
-      "why": "무정보 상수 규칙('항상 하락')의 방향 정확도. LSTM_DIR 의 조건값이라 이 수치 자체는 조건 없이 쓸 수 있다",
+      "why": "무정보 상수 규칙('항상 하락')의 방향 정확도. LSTM_DIR 의 조건값",
       "source": "scripts/kpi_baseline.py"
     },
     {
       "id": "LSTM_DIR_SKILL",
-      "value": "-7.7%p",
+      "value": "+0.8%p",
       "aliases": [
-        "7.7%p",
-        "−7.7%p",
-        "7.7%"
+        "0.8%p",
+        "0.8%"
       ],
-      "condition": "78.5%",
-      "why": "방향 축의 실력 = 모델 70.8% − 무정보 상수 78.5%. **음수다** — 이 축은 아직 성과가 아니라는 사실 자체를 적는 수치이므로 베이스라인과 함께만 쓴다",
+      "condition": "구분불가",
+      "why": "방향 축 실력 = 55.8% − 55.0%. 95% 구간 [−7.9, +9.6]%p 가 0 을 품고 McNemar p=0.938 이라 **구분불가**(참고). 부호가 양수라고 실력으로 쓰지 않는다 — 조건 '구분불가' 를 함께 적게 한다. ⚠ 09-16 판의 LSTM_MARGIN(70.8%−70%)과 숫자가 우연히 같다 — 뜻이 다르다",
+      "source": "scripts/kpi_baseline.py · docs/finding-lstm-leakfree-retrain-2026-09-24.md · docs/finding-lstm-delta-target-2026-09-26.md §0-B ③"
+    },
+    {
+      "id": "LSTM_DIR_CI_LO",
+      "value": "7.9%",
+      "aliases": [
+        "−7.9%p",
+        "-7.9%p",
+        "7.9%p"
+      ],
+      "condition": "신뢰구간",
+      "why": "방향 실력 95% 구간 하한(%p). 상한 +9.6%p 와 짝으로 쓴다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "LSTM_DIR_CI_HI",
+      "value": "9.6%",
+      "aliases": [
+        "+9.6%p",
+        "9.6%p"
+      ],
+      "condition": "신뢰구간",
+      "why": "방향 실력 95% 구간 상한(%p). 하한과 짝으로 쓴다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_TOP3",
+      "value": "92.0%",
+      "aliases": [],
+      "condition": "88.7%",
+      "why": "업종추천 Top-3(81거점 · 09-27 재학습 · test 17,650자리). 사전분포 기준선 88.7% 없이 쓰면 절대 성능으로 오독된다 — 조건을 '88.7%' 로 건다",
+      "source": "scripts/kpi_baseline.py · docs/finding-gnn-81hub-retrain-2026-09-27.md"
+    },
+    {
+      "id": "GNN_BASE",
+      "value": "88.7%",
+      "aliases": [],
+      "condition": "사전분포",
+      "why": "거점 사전분포 기준선(Top-3). 무엇의 기준선인지 밝히게 한다",
       "source": "scripts/kpi_baseline.py"
     },
     {
       "id": "GNN_TOP3_SKILL",
-      "value": "2.3%p",
+      "value": "+3.36%p",
       "aliases": [
-        "+2.3%p",
-        "2.3%",
-        "2.32%p"
+        "3.36%p",
+        "3.36%"
       ],
-      "condition": "기준선",
-      "why": "업종추천 Top-3 실력 = 모델 91.7% − 거점 사전분포 기준선 89.4%. 절대 수치가 아니라 이 차이가 모델이 더한 몫이다",
-      "source": "scripts/kpi_baseline.py"
+      "condition": "88.7%",
+      "why": "업종추천 Top-3 실력 = 92.0% − 88.7%. 95% 구간 [+2.78, +3.95]%p · McNemar b=851 c=258 → **실력**. 모델이 더한 몫은 절대 수치가 아니라 이 차이다",
+      "source": "scripts/kpi_baseline.py · docs/finding-gnn-81hub-retrain-2026-09-27.md"
     },
     {
-      "id": "LSTM_CI",
-      "value": "58.8%",
+      "id": "GNN_CI_LO",
+      "value": "2.78%",
       "aliases": [
-        "95%"
+        "+2.78%p",
+        "2.78%p"
       ],
       "condition": "신뢰구간",
-      "why": "방향 정확도 70.8%(n=65)의 Wilson 95% 신뢰구간 하한. 구간이 [58.8%, 80.4%] 로 넓어 점추정으로 목표선을 가를 수 없다는 근거다. 별칭 '95%' 는 신뢰수준 표기라 같은 조건('신뢰구간')을 공유한다",
+      "why": "Top-3 실력 95% 구간 하한(거점 군집 부트스트랩). 상한과 짝으로 쓴다",
       "source": "scripts/kpi_baseline.py"
     },
     {
-      "id": "LSTM_CI_HI",
-      "value": "80.4%",
+      "id": "GNN_CI_HI",
+      "value": "3.95%",
+      "aliases": [
+        "+3.95%p",
+        "3.95%p"
+      ],
+      "condition": "신뢰구간",
+      "why": "Top-3 실력 95% 구간 상한. 하한과 짝으로 쓴다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_TEST_N",
+      "value": "17,650",
+      "aliases": [
+        "17650"
+      ],
+      "condition": "자리",
+      "why": "GNN 시험 표본 크기(점포 자리 단위). 단위를 떼면 무엇을 센 수인지 모른다",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_TOP1",
+      "value": "67.0%",
       "aliases": [],
-      "condition": "신뢰구간",
-      "why": "위 신뢰구간의 상한. 하한과 반드시 짝으로 쓴다",
+      "condition": "64.1%",
+      "why": "업종추천 Top-1(관측 · 게이트 폐기). 사전분포 64.1% 와 함께만 쓴다",
       "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_BASE_TOP1",
+      "value": "64.1%",
+      "aliases": [],
+      "condition": "사전분포",
+      "why": "거점 사전분포 기준선(Top-1)",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_OFFPRIOR",
+      "value": "42.5%",
+      "aliases": [],
+      "condition": "관측",
+      "why": "off-prior Top-3(2,000자리) — 관측 전용(게이트 폐기 2026-08-26). 66거점 33.8%(1,011자리)·54거점 37.6% 와 모집단이 달라 비교 불가",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_OFFPRIOR_N",
+      "value": "2,000",
+      "aliases": [
+        "2000"
+      ],
+      "condition": "off-prior",
+      "why": "off-prior 표본 자리 수",
+      "source": "scripts/kpi_baseline.py"
+    },
+    {
+      "id": "GNN_NODES",
+      "value": "88,238",
+      "aliases": [
+        "88238"
+      ],
+      "condition": "",
+      "why": "그래프 노드 수(81거점 재학습본)",
+      "source": "scripts/pppp_status.py (GNN 업종추천 학습·서빙)"
     }
   ],
   "forbid": [
@@ -259,20 +321,20 @@
     {
       "id": "F_HUB73",
       "pattern": "73\\s*(개\\s*)?거점",
-      "why": "data/gold/*/coverage.json 을 세면 나오는 수다. 서빙 목록 밖(경기 보류)의 산출물이 섞인다",
-      "instead": "66거점 (data/config/page_hubs.py 의 ACTIVE_HUBS)"
+      "why": "data/gold/*/coverage.json 을 세면 나오는 옛 수다(지금 세면 88). 서빙 목록 밖(경기 보류)의 산출물이 섞인다",
+      "instead": "81거점 (data/config/page_hubs.py 의 ACTIVE_HUBS)"
     },
     {
       "id": "F_LSTM_OLD",
       "pattern": "84\\.6\\s*%|74\\.1\\s*%|72\\.2\\s*%",
-      "why": "13·27·54거점 시절 값이다. 표본이 클수록 신뢰구간이 좁으므로 66거점 값만 인용한다",
-      "instead": "70.8% (66거점) — 단 같은 절에 무정보 상수 베이스라인 78.5% 를 반드시 함께 쓴다. 성과로 쓸 값은 LSTM_SKILL(+20.5%, 지속성 대비)이다"
+      "why": "13·27·54거점 시절 LSTM 방향 정확도다. 지금 값은 누수 차단 재학습본이다",
+      "instead": "방향 55.8% — 같은 절에 무정보 상수 55.0% 와 '구분불가' 를 함께 쓴다. LSTM 에 성과로 쓸 값은 지금 없다"
     },
     {
       "id": "F_OFFPRIOR_MIX",
       "pattern": "37\\.6[0-9]?\\s*%",
-      "why": "54거점 실험군(조건 B) 값이다. 신청서에는 66거점 서빙본만 쓴다 — 두 값을 한 문서에 두면 모집단이 섞인다",
-      "instead": "33.8% (66거점 · 조건 A)"
+      "why": "54거점 실험군(조건 B) 값이다. 신청서에는 현재 서빙본만 쓴다 — 두 값을 한 문서에 두면 모집단이 섞인다",
+      "instead": "42.5% (81거점 · 09-27 · 2,000자리 · 관측 전용)"
     },
     {
       "id": "F_DEAD_STACK",
@@ -290,7 +352,7 @@
       "id": "F_VERCEL",
       "pattern": "Vercel|vercel",
       "why": "2026-08-28 프로덕션에서 내려왔다(무료 플랜 상업적 사용 금지). 현재 프로덕션은 Cloud Run + Firebase Hosting 이다",
-      "instead": "spaceos-twin.web.app (Cloud Run + Firebase Hosting)"
+      "instead": "placeos.web.app (Cloud Run + Firebase Hosting)"
     },
     {
       "id": "F_PILOT_CLAIM",
@@ -307,8 +369,44 @@
     {
       "id": "F_LSTM_ACHIEVED",
       "pattern": "방향\\s*정확도[^.\\n]{0,40}(목표|KPI)\\s*70\\s*%?\\s*(를)?\\s*(달성|넘|초과|상회)",
-      "why": "목표 70% 를 넘긴 것은 사실이나 **같은 홀드아웃의 무정보 상수가 78.5%** 라 '달성' 은 성과 주장이 된다. 임계값을 넘겼다는 사실에는 정보가 없다",
-      "instead": "'방향 축은 상수 베이스라인(78.5%)을 넘지 못했고, 실력은 오차 축에서 나온다(지속성 대비 MAE +20.5%)' 로 적는다"
+      "why": "옛 목표 70% 는 2026-09-16 폐기됐고, 지금 방향 정확도(55.8%)는 그 선 아래이며 상수 55.0% 와도 구분불가다. '달성' 은 두 겹으로 거짓이다",
+      "instead": "'방향 축은 상수 베이스라인(55.0%)과 구분불가, 오차 축은 지속성보다 못하다(참고 판정 · 확인대기)' 로 적는다"
+    },
+    {
+      "id": "F_HUB66",
+      "pattern": "(?<!\\d)66\\s*(개\\s*)?거점|서울\\s*66(?!\\d)|(?<!\\d)66/66",
+      "why": "09-16 판 서빙 거점 수다. 지금 서빙은 81거점이다 — 옛 원고를 복사하면 그대로 딸려 온다",
+      "instead": "81거점 (건축물대장 기반 · page_hubs.ACTIVE_HUBS)"
+    },
+    {
+      "id": "F_UNITS664",
+      "pattern": "(?<![\\d,.])664(?![\\d,])",
+      "why": "66거점 시절 공실 유닛 인벤토리다. 지금은 81거점 840유닛이다",
+      "instead": "840유닛 (81거점)"
+    },
+    {
+      "id": "F_LSTM_0916",
+      "pattern": "(?<![\\d.])(20\\.5|70\\.8|70\\.77|78\\.5|58\\.8|80\\.4)\\s*%|(?<![\\d.])(1\\.061|1\\.333|1\\.387)(?!\\d)|46/65|51/65|(?<![\\d.])7\\.7\\s*%",
+      "why": "LSTM 09-16 판 값(MAE 1.061 vs 지속성 1.333 · 오차 20.5% 감소 · 방향 70.8% vs 78.5% · −7.7%p · 구간 58.8~80.4%)이다. 09-24 누수 차단 재학습(과 09-27 81거점 재학습) 뒤 사실이 아니다 — 누수 차단 뒤 모델은 지속성보다 오차가 크다(참고 판정 열위)",
+      "instead": "MAE 2.065 vs 지속성 1.190 · 기술점수 −73.5% (참고 열위 · 확인대기) / 방향 55.8% vs 55.0% · +0.8%p (구분불가)"
+    },
+    {
+      "id": "F_GNN_0916",
+      "pattern": "(?<![\\d.])(91\\.7|89\\.4|64\\.9|33\\.8|5\\.3|2\\.32?)\\s*%|47,442|188,673",
+      "why": "GNN 66거점 서빙본(09-05) 값(Top-3 91.7% vs 89.4% · +2.3%p · Top-1 64.9% · lift 5.3% · off-prior 33.8% · 노드 47,442 · 엣지 188,673)이다. 09-27 81거점 재학습 뒤 사실이 아니다",
+      "instead": "Top-3 92.0% vs 사전분포 88.7% · +3.36%p [+2.78, +3.95] · 실력 · test 17,650자리"
+    },
+    {
+      "id": "F_LSTM_ERR_GAIN",
+      "pattern": "오차\\s*(를|가|는)?\\s*[\\d.]*\\s*%?\\s*(감소|개선|낮춰|낮췄|줄였|줄어)",
+      "why": "LSTM 을 성과로 읽히게 하는 표현이다. 누수 차단 재학습 뒤 모델 오차는 지속성보다 **크다**(참고 판정 열위). '오차 감소·개선' 은 지금 사실이 아니다",
+      "instead": "'공실 예측은 아직 지속성(직전 분기값) 기준선을 넘지 못했다(참고 판정 · 확인대기)'"
+    },
+    {
+      "id": "F_LSTM_PRED_CLAIM",
+      "pattern": "공실\\s*(추세|률|율)?\\s*[을를]?\\s*예측(합니다|한다|해\\s*줍니다|해\\s*드립니다)|예측\\s*정확도\\s*\\d",
+      "why": "화면은 지속성(다음 분기 = 직전 분기값)을 기본으로 보이고 LSTM 은 접힌 '실험 모델' 칸에 있다(09-28 PR #48). 'AI 가 공실을 예측한다'·'예측 정확도 N%' 는 지금 화면과 다르다",
+      "instead": "'직전 분기값 기준 추세를 보이고, AI 예측은 실험 모델로 접어 둔다'"
     }
   ],
   "ignore": [
