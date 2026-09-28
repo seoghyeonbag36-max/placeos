@@ -36,6 +36,14 @@ GNN 노드의 라벨은 **카카오 `category_group_name` 7종**(음식점·카�
 **어휘 교체는 재학습·게이트 재산정이 따르는 별도 판단이다.** 이 파일은 그 판단을
 강제하지 않는다.
 
+⚠ **2026-09-27 — 그 판단이 내려졌다: 어휘 (b) `group_mapped`**(7종에 사상된 점포만,
+미분류 제외)로 81거점 재학습해 서빙을 교체했다. 이 파일이 내는 **사상 어휘는 여전히
+7종**(`CATEGORY_GROUPS`)이지만, 위 문단의 "서빙 체크포인트 `classes` 가 7종 어휘에
+맞춰져 있다"는 더 이상 참이 아니다 — 서빙 어휘는 **6종**(문화시설로 사상되는 점포가 그
+모집단에 없었다)이고, 몇 종인지는 코드가 아니라 **산출물이 정한다**
+(`apps/backend/app/services/business_fit.served_labels()`). 사상 어휘(여기) ⊇ 서빙 어휘.
+→ docs/finding-gnn-81hub-retrain-2026-09-27.md
+
 ## 어휘 확정 상태 — 중분류는 실측했다 (2026-09-15 감사)
 
 Bronze 는 커밋되지 않아 `--audit` 가 셀 것이 없었다. 대신 **커밋된 Gold 산출물**에서
@@ -122,8 +130,9 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-# ── 7종 라벨 어휘 — 카카오 category_group_name 과 문자열까지 같아야 한다 ──────
-# 체크포인트 classes 와 대조: python -c "import torch; print(torch.load(
+# ── 7종 사상 어휘 — 카카오 category_group_name 과 문자열까지 같아야 한다 ──────
+# 서빙 체크포인트 classes 는 이 7종의 **부분집합**이다(2026-09-27 재학습 6종 — 문화시설 없음).
+# 대조: python -c "import torch; print(torch.load(
 #   'ml/artifacts/industry_gnn.pt', map_location='cpu', weights_only=False)['classes'])"
 GROUP_FOOD = "음식점"
 GROUP_CAFE = "카페"
