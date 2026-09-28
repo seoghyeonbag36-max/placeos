@@ -600,10 +600,13 @@ POST 공통 함수는 `method: "POST"`, JSON 형식을 나타내는 `Content-Typ
 | `listApiKeys` | GET `/auth/api-keys` | 조직 API 키 목록. 원문 없음 |
 | `createApiKey` | POST `/auth/api-keys` | 키 발급(관리자만). 원문은 이 응답에만 한 번 실린다 |
 | `revokeApiKey` | DELETE `/auth/api-keys/{id}` | 키 폐기(관리자만) |
+| `submitFeedback` | POST `/feedback` | 파일럿 피드백(KPI③) — NPS 0~10 · 유료 전환 의향 · 한 줄. **인증 필수**, 계정 창의 「파일럿 피드백」 카드가 부른다(09-28) |
 | `sendClientMetric` | POST `/metrics/client` | 화면 구간 시간 비콘(KPI②). `keepalive`, 실패해도 던지지 않는다 |
 | `getAdminCoverage` | GET `/admin/coverage` | 관리자 커버리지(`#admin`). `X-Admin-Token` 사용. `totals` 는 서빙 거점만 세고 보류 거점은 `held` 로 따로 온다 |
 
-계정 함수 여섯(`signup`~`revokeApiKey`)은 공통 `getJSON`·`postJSON` 이 아니라 `authRequest` 를 거친다. 액세스 토큰은 이 함수들에만 인자로 넘기고 공개 분석 API 에는 붙이지 않는다 — 만료된 토큰이 붙으면 서버가 익명으로 강등하지 않고 401 로 거절해 지도·네 트랙이 선다(`src/lib/api.ts` 계정 절 머리말).
+계정 함수 여섯(`signup`~`revokeApiKey`)과 `submitFeedback` 은 공통 `getJSON`·`postJSON` 이 아니라 `tokenRequest` 를 거치고, 토큰을 **인자로** 받는다(401 을 화면이 스스로 다룬다).
+
+공개 분석 API(`getJSON`·`postJSON`·`getBuildingHistory`)는 **2026-09-28 부터 세션 토큰을 싣는다**(`analysisFetch`). 백엔드는 자격증명이 온 분석 요청만 조직별 사용량으로 세므로(`services/usage.record_access`), 싣지 않으면 로그인한 파일럿의 사용량이 0 으로 샌다(KPI③). 서버는 만료된 토큰을 익명으로 강등하지 않고 401 로 거절한다 — 그래서 `analysisFetch` 는 401 을 받으면 토큰을 지우고 **익명으로 한 번만** 다시 불러 지도·네 트랙이 서지 않게 한다. 09-23 B9 가 토큰을 안 실었던 이유가 이 401 하나였다.
 
 `URLSearchParams`는 검색 조건을 URL 질의 문자열로 만들고, `encodeURIComponent`는 가게명·주소의 공백·한글·특수문자가 URL 구조와 섞이지 않도록 인코딩한다. 일반적인 웹 인코딩 기능이며 암호화는 아니다.
 

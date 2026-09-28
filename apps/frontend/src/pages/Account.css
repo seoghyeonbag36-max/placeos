@@ -121,6 +121,30 @@
 .acct-confirm { flex: 0 1 280px; margin: 0; }
 .acct-confirm p { margin: 0 0 var(--sp-2); }
 
+/* ── 파일럿 피드백 카드 (2026-09-28 P2) — 고르는 칸은 라디오를 감춘 칩이다. 켜진 칩만 브랜드색 ── */
+.acct-feedback { margin: 0 0 var(--sp-4); }
+.acct-feedback > p { margin: 0 0 var(--sp-3); }
+.acct-choice { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.acct-choice legend { padding: 0; margin-bottom: var(--sp-1); font-size: var(--fs-caption); font-weight: var(--fw-semibold); }
+.acct-choice-row { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.acct-choice-row label {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; padding: 0 var(--sp-3); box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--bg); color: var(--ink); cursor: pointer;
+}
+.acct-nps label { padding: 0; }
+.acct-choice-row label.is-on { border-color: var(--brand); background: var(--surface); font-weight: var(--fw-bold); }
+.acct-choice-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.acct-choice-row label:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 2px; }
+.acct-field textarea {
+  box-sizing: border-box; width: 100%; min-height: 72px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--bg); color: var(--ink); font: inherit; resize: vertical;
+}
+.acct-field textarea:focus { border-color: var(--brand); background: var(--surface); }
+
 @media (max-width: 768px) {
   .acct-dialog { padding: var(--sp-4); }
   .acct h2 { font-size: var(--fs-heading); line-height: var(--lh-heading); }

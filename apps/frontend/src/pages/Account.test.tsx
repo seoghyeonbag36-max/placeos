@@ -6,7 +6,9 @@
  *   - 실패 응답(401 · 409 · 403 · 404)에 화면 문구가 없거나, 로그인 실패가 "어느 쪽이 틀렸는지"를 흘리는 것
  *   - API 키 원문이 발급 직후 밖에서 보이거나 브라우저 저장소에 남는 것
  *   - 폐기가 확인 없이 한 번에 나가는 것
- *   - 로그인 토큰이 공개 분석 API 에까지 붙는 것(만료되면 지도 전체가 401 로 선다 — api.ts 계정 절 머리말)
+ *   - (2026-09-28 뒤집음) 로그인했는데 분석 API 에 토큰이 **안** 붙는 것 — 파일럿 사용량이 0 으로 샌다(KPI③ P1).
+ *     대신 만료 토큰의 401 이 지도를 세우지 않아야 한다(익명 재시도 — api.ts `analysisFetch`)
+ *   - 피드백(NPS)이 토큰 없이 나가거나, 고르지 않은 점수로 나가는 것(KPI③ P2)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
@@ -209,6 +211,43 @@ describe("ApiKeys — #account", () => {
     expect(screen.queryByRole("button", { name: "본사 BI 폐기" })).toBeNull();
   });
 
+  it("피드백은 고른 값만 Bearer 로 /feedback 에 보내고, 점수를 안 고르면 보내지 않는다", async () => {
+    saveToken(TOKEN);
+    const api = installFetchStub(keysRoutes([{ match: /\/feedback$/, status: 201,
+      body: { id: "f1", org_id: "o1", nps_score: 9, would_pay: "yes", created_at: "2026-09-28T00:00:00Z" } }]));
+    render(<ApiKeys go={vi.fn()} />);
+    expect(await screen.findByText("테스트자산운용")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "피드백 보내기" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("추천 점수");
+    expect(api.count(/\/feedback$/)).toBe(0);
+
+    fireEvent.click(screen.getByRole("radio", { name: "9" }));
+    fireEvent.click(screen.getByRole("radio", { name: "예" }));
+    type("한 줄 (선택)", "  층별 빈 자리가 좋았다  ");
+    fireEvent.click(screen.getByRole("button", { name: "피드백 보내기" }));
+
+    expect(await screen.findByText("응답을 받았습니다. 고맙습니다.")).toBeTruthy();
+    const [call] = api.matching(/\/feedback$/);
+    expect(call.method).toBe("POST");
+    expect(call.url).toBe("/api/v1/feedback");
+    expect(call.body).toEqual({ nps_score: 9, would_pay: "yes", comment: "층별 빈 자리가 좋았다" });
+    expect(call.headers.Authorization).toBe(`Bearer ${TOKEN}`);
+  });
+
+  it("피드백이 401 이면 토큰을 버리고 로그인 안내로 돌아간다", async () => {
+    saveToken(TOKEN);
+    installFetchStub(keysRoutes([{ match: /\/feedback$/, status: 401, body: { detail: "토큰이 유효하지 않습니다" } }]));
+    render(<ApiKeys go={vi.fn()} />);
+    expect(await screen.findByText("테스트자산운용")).toBeTruthy();
+    fireEvent.click(screen.getByRole("radio", { name: "3" }));
+    fireEvent.click(screen.getByRole("radio", { name: "아니오" }));
+    fireEvent.click(screen.getByRole("button", { name: "피드백 보내기" }));
+
+    expect(await screen.findByText("로그인이 만료됐습니다. 다시 로그인해 주세요.")).toBeTruthy();
+    expect(loadToken()).toBeNull();
+  });
+
   it("토큰이 만료(401)되면 토큰을 버리고 다시 로그인하라고 말한다", async () => {
     saveToken(TOKEN);
     installFetchStub([
@@ -252,13 +291,38 @@ describe("App — 레일 「계정」과 #account", { timeout: 60000 }, () => {
     expect(window.location.hash).toBe("");
   });
 
-  it("로그인해 있어도 공개 분석 API 에는 토큰을 붙이지 않는다", async () => {
+  // 분석 API = 사용량 계측(_tracked)이 걸린 라우터. 비콘(/metrics)·계정(/auth)은 뺀다.
+  const isAnalysis = (c: ApiCall) => !c.url.includes("/auth/") && !c.url.includes("/metrics/");
+
+  it("로그인해 있으면 분석 API 에 토큰을 실어 조직을 밝힌다(KPI③ P1)", async () => {
     saveToken(TOKEN);
     const api = installFetchStub(routes);
     render(<App />);
     await waitFor(() => expect(api.count(/commercial-districts$/)).toBeGreaterThan(0), ACCOUNT_LOAD);
-    const analysis = api.calls.filter((c) => !c.url.includes("/auth/"));
+    const analysis = api.calls.filter(isAnalysis);
     expect(analysis.length).toBeGreaterThan(0);
-    for (const c of analysis) expect(c.headers.Authorization).toBeUndefined();
+    for (const c of analysis) expect(c.headers.Authorization).toBe(`Bearer ${TOKEN}`);
+  });
+
+  it("로그인하지 않았으면 분석 API 에 아무 자격증명도 싣지 않는다", async () => {
+    const api = installFetchStub(routes);
+    render(<App />);
+    await waitFor(() => expect(api.count(/commercial-districts$/)).toBeGreaterThan(0), ACCOUNT_LOAD);
+    for (const c of api.calls.filter(isAnalysis)) expect(c.headers.Authorization).toBeUndefined();
+  });
+
+  it("만료된 토큰이 401 을 받으면 토큰을 지우고 익명으로 다시 불러 지도가 서지 않는다", async () => {
+    saveToken(TOKEN);
+    // 백엔드처럼 굴린다 — 잘못된 토큰은 익명으로 강등하지 않고 401(security.get_optional_principal)
+    const expired = (c: ApiCall) => (c.headers.Authorization ? 401 : 200);
+    const api = installFetchStub(routes.map((r) => ({ ...r, status: expired })));
+    render(<App />);
+    await waitFor(() => expect(
+      api.matching(/commercial-districts$/).some((c) => !c.headers.Authorization)).toBe(true), ACCOUNT_LOAD);
+    const districts = api.matching(/commercial-districts$/);
+    expect(districts[0].headers.Authorization).toBe(`Bearer ${TOKEN}`);   // 처음엔 실었고
+    expect(loadToken()).toBeNull();                                        // 401 에 버렸고
+    const last = districts[districts.length - 1];
+    expect(last.headers.Authorization).toBeUndefined();                    // 익명으로 다시 불렀다
   });
 });

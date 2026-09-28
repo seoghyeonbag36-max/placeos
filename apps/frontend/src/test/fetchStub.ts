@@ -24,8 +24,9 @@ export interface ApiCall {
 export interface Route {
   /** 경로 매칭 — 질의 문자열까지 포함해 검사한다 */
   match: RegExp;
-  /** 기본 200. 404 를 주면 화면의 폴백 분기를 태울 수 있다 */
-  status?: number;
+  /** 기본 200. 404 를 주면 화면의 폴백 분기를 태울 수 있다.
+   *  함수면 요청(헤더 포함)을 보고 고른다 — "토큰이 실리면 401" 같은 만료 토큰 재현용(2026-09-28) */
+  status?: number | ((call: ApiCall) => number);
   /** 응답 본문. 함수면 매칭 결과를 받아 만든다(거점 id 별 응답 등) */
   body?: unknown | ((m: RegExpExecArray, call: ApiCall) => unknown);
 }
@@ -55,7 +56,8 @@ export function installFetchStub(routes: Route[]): FetchStub {
     for (const r of routes) {
       const m = new RegExp(r.match.source, r.match.flags.replace("g", "")).exec(url);
       if (!m) continue;
-      const status = r.status ?? 200;
+      const status = typeof r.status === "function"
+        ? r.status({ method, url, body, headers }) : (r.status ?? 200);
       const payload = typeof r.body === "function"
         ? (r.body as (mm: RegExpExecArray, call: ApiCall) => unknown)(m, { method, url, body, headers })
         : r.body;

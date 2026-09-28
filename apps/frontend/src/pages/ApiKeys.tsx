@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
+import { PilotFeedback } from "@/components/PilotFeedback";
 import {
   createApiKey, getMe, listApiKeys, revokeApiKey,
   type ApiKeyCreated, type ApiKeyInfo, type AuthMe,
@@ -184,6 +185,9 @@ export default function ApiKeys({ go }: AccountScreenProps) {
         </div>
         <Button variant="ghost" onClick={logout}>로그아웃</Button>
       </div>
+
+      {/* 2026-09-28 P2 — KPI③ 입력. 토큰이 있는 ready 상태에서만 서므로 익명 응답이 생기지 않는다 */}
+      {token && <PilotFeedback token={token} onExpired={expire} />}
 
       {issued && (
         <Card className="acct-reveal">

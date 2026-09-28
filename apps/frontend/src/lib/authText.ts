@@ -44,6 +44,14 @@ export const isAlreadyRegistered = (err: unknown) => err instanceof ApiError && 
 export const isSessionExpired = (err: unknown) => err instanceof ApiError && err.status === 401;
 export const SESSION_EXPIRED_TEXT = "로그인이 만료됐습니다. 다시 로그인해 주세요.";
 
+/** 파일럿 피드백 실패(2026-09-28). 401 은 isSessionExpired 로 따로 처리한다. */
+export function feedbackErrorText(err: unknown): string {
+  if (err instanceof ApiError && err.status === 422) {
+    return "입력값을 서버가 받지 않았습니다. 추천 점수(0~10)와 의향을 고르고, 한 줄은 2000자 안으로 적어 주세요.";
+  }
+  return common(err, "피드백을 보내지");
+}
+
 /** 키 목록·발급·폐기 실패. 401 은 여기 오기 전에 isSessionExpired 로 따로 처리한다. */
 export function apiKeyErrorText(err: unknown, action: "불러오지" | "발급하지" | "폐기하지"): string {
   if (err instanceof ApiError) {
