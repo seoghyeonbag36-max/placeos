@@ -44,6 +44,8 @@ def test_withheld_hub_serves_no_representative_number():
         assert s["vacancy_withheld"] is True, slug
         assert s["vacancy_rate"] is None, slug
         assert s["anchor_gap_pp"] is None, slug
+        # 정렬 대조(2026-09-28)도 함께 내린다 — 내린 이유(재고 극소 표본)가 그대로 걸린다.
+        assert s["aligned_gap_pp"] is None and s["aligned_vacancy_pct"] is None, slug
         assert s["predicted_rate"] is None and s["predicted_delta"] is None, slug
         # 앵커(R-ONE)는 외부 관측이라 남는다 — 우리 대표값과 무관하다.
         assert s["anchor_pct"] is not None, slug
@@ -53,6 +55,7 @@ def test_withheld_hub_serves_no_representative_number():
         # 히트맵도 같은 규칙이다. 요약만 막고 여기를 열어 두면 `앵커 + 격차` 로 내린
         # 수가 그대로 되살아난다 — 실제로 그렇게 한 번 새어 나갔다.
         assert hm["anchor_gap_pp"] is None, slug
+        assert hm["aligned_gap_pp"] is None and hm["aligned_vacancy_pct"] is None, slug
         assert hm["anchor_pct"] is not None, slug
         assert hm["predicted_rate"] is None, slug
         # 내린 것은 대표값뿐이다. 셀·건물은 그대로 서야 지도가 빈 채로 뜨지 않는다.

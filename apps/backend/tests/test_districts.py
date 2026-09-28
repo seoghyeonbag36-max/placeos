@@ -379,6 +379,59 @@ def test_gold_anchor_comparison_attached():
         assert s["anchor_pct"] == hm["anchor_pct"] and s["anchor_gap_pp"] == hm["anchor_gap_pp"], slug
 
 
+def test_aligned_gap_uses_rone_aligned_not_primary():
+    """정렬 격차 = 대조 지표(rone_aligned.mid) − 앵커. 주 지표(avg_vacancy)에서 빼지 않는다.
+
+    2026-09-28, docs/finding-anchor-gap-2026-09.md §4-2. calibration.json 을 직접 읽어
+    기대값을 세운다 — 서비스가 읽는 경로를 그대로 흉내 내면 같은 버그를 같이 통과한다.
+    대조 지표가 없으면 격차는 None 이다(주 지표로 대신 빼면 옛 격차가 새 이름으로 샌다).
+    """
+    checked = 0
+    for slug in _gold_slugs():
+        hm = client.get(f"{V1}/heatmap/vacancy", params={"district": slug}).json()
+        s = client.get(f"{V1}/commercial-districts/{slug}/summary").json()
+        keys = ("aligned_vacancy_pct", "aligned_floor_hi_pct", "aligned_floor_lo_pct", "aligned_gap_pp")
+        # 두 응답이 같은 값을 낸다 — 요약만 고치고 히트맵을 빼먹는 누수를 막는다.
+        assert {k: s[k] for k in keys} == {k: hm[k] for k in keys}, slug
+        if hm["vacancy_withheld"]:
+            assert all(hm[k] is None for k in keys), f"{slug}: 대표값을 내린 거점에 정렬 대조가 남았다"
+            continue
+        cal_path = GOLD_DIR / slug / "calibration.json"
+        mid = {}
+        if cal_path.exists():
+            mid = (json.loads(cal_path.read_text(encoding="utf-8")).get("rone_aligned") or {}).get("mid") or {}
+        rep = mid.get("vacancy_area_pct")
+        if rep is None:
+            rep = mid.get("vacancy_floor_hi_pct")
+        if rep is None or hm["anchor_pct"] is None:
+            assert hm["aligned_gap_pp"] is None, f"{slug}: 대조 지표·앵커 없이 격차가 섰다"
+            continue
+        assert hm["aligned_vacancy_pct"] == rep, slug
+        assert hm["aligned_floor_hi_pct"] == mid.get("vacancy_floor_hi_pct"), slug
+        assert hm["aligned_floor_lo_pct"] == mid.get("vacancy_floor_lo_pct"), slug
+        assert hm["aligned_gap_pp"] == pytest.approx(rep - hm["anchor_pct"], abs=0.005), slug
+        # calibrate_vacancy 가 1자리로 적어 둔 mid.gap_pp 와도 반올림 폭 안에서 맞아야 한다.
+        if mid.get("gap_pp") is not None:
+            assert hm["aligned_gap_pp"] == pytest.approx(mid["gap_pp"], abs=0.051), slug
+        # 옛 필드는 값을 바꾸지 않았다(deprecated · 하위호환).
+        assert hm["anchor_gap_pp"] == pytest.approx(hm["avg_vacancy"] - hm["anchor_pct"], abs=0.01), slug
+        checked += 1
+    assert checked > 0, "정렬 격차를 검사한 거점이 0 — 산출물 구조가 바뀌었는지 확인"
+
+
+def test_aligned_gap_known_hubs():
+    """09-08 판정의 대표 사례(연남) — 옛 격차(+7.5)와 정렬 격차(+15.8)가 갈린다.
+
+    값이 재수집으로 움직이면 이 테스트를 고친다. 격차가 **작아지는 방향으로** 고칠 때는
+    calibration.json 이 실제로 그렇게 바뀌었는지 먼저 확인할 것.
+    """
+    hm = client.get(f"{V1}/heatmap/vacancy", params={"district": "yeonnam"}).json()
+    assert hm["aligned_vacancy_pct"] == pytest.approx(20.8)
+    assert hm["anchor_pct"] == pytest.approx(5.0)
+    assert hm["aligned_gap_pp"] == pytest.approx(15.8, abs=0.01)
+    assert hm["anchor_gap_pp"] == pytest.approx(7.53, abs=0.01)
+
+
 def test_polygon_only_never_counted():
     """polygon_only(점포 미매칭·공실률 100% 고정)는 집계에 들어가면 안 된다.
 
