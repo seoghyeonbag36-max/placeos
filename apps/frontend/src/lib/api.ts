@@ -955,7 +955,13 @@ export interface AdminCoverageHub {
   excluded_unknown: number;
   excluded_non_commercial: number;
   coverage_pct: number | null;
+  /** @deprecated coverage.json 의 옛 대표값(집합건물 호실 포함) — 공개 화면의 어느 수와도 다르다. 화면은 읽지 않는다 */
   reference_vacancy_pct: number | null;
+  /** 공개 화면과 같은 수(2026-09-28) — 거점 전체 공실률 · 대표값 미제공 여부 · 대조 지표(R-ONE 정렬).
+   *  서빙 보류 거점은 null / false */
+  vacancy_rate: number | null;
+  vacancy_withheld: boolean;
+  aligned_vacancy_pct: number | null;
   /** 공개 API 가 내는 거점인가(2026-09-28). false = 산출물만 있는 서빙 보류 거점 */
   served: boolean;
 }

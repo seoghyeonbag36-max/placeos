@@ -75,3 +75,24 @@ def test_still_requires_the_admin_token(monkeypatch):
     monkeypatch.setenv("ADMIN_TOKEN", "t")
     assert client.get(URL).status_code == 403
     assert client.get(URL, headers={"X-Admin-Token": "wrong"}).status_code == 403
+
+
+def test_vacancy_columns_match_the_public_summary(headers):
+    """표의 공실률은 공개 요약과 같은 수다 — coverage.json 의 옛 대표값이 아니다(2026-09-28)."""
+    from app.services.districts import get_summary
+    body = client.get(URL, headers=headers).json()
+    checked = 0
+    for h in body["hubs"]:
+        if not h["served"]:
+            assert h["vacancy_rate"] is None and h["aligned_vacancy_pct"] is None, h["slug"]
+            continue
+        s = get_summary(h["slug"])
+        assert h["vacancy_rate"] == s["vacancy_rate"], h["slug"]
+        assert h["vacancy_withheld"] == s["vacancy_withheld"], h["slug"]
+        assert h["aligned_vacancy_pct"] == s["aligned_vacancy_pct"], h["slug"]
+        checked += 1
+    by_slug = {h["slug"]: h for h in body["hubs"]}
+    if "banpo" in by_slug:
+        # 공개 화면이 내린 수를 운영 표가 다시 그리면 안 된다 — 옛 값(74%대)이 새지 않는다.
+        assert by_slug["banpo"]["vacancy_rate"] is None and by_slug["banpo"]["vacancy_withheld"] is True
+    assert checked > 0
