@@ -1,5 +1,8 @@
 /** PlaceOS 백엔드 API 클라이언트 (골격). */
 
+// 타입만 가져온다(런타임 순환 없음) — 정의는 clientTiming.ts 에 둔다(백엔드 드리프트 테스트가 거기서 읽는다).
+import type { ClientMetric } from "@/lib/clientTiming";
+
 const BASE = "/api/v1";
 
 export interface Health {
@@ -876,8 +879,6 @@ export const revokeApiKey = (token: string, keyId: string) =>
  * 동작은 그대로 옮겼다 — 경로·헤더·keepalive·실패 처리 모두 같다.
  */
 
-/** 화면 구간 이름 — 서버 `ALLOWED`(app/api/v1/metrics.py)와 같은 목록. 늘릴 때는 양쪽을 같이 고친다. */
-export type ClientMetric = "map_ready" | "building_detail";
 
 /**
  * 화면 계측 비콘 — POST /metrics/client. **절대 throw 하지 않고 기다리지 않는다.**

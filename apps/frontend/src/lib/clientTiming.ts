@@ -17,9 +17,11 @@
  *   접두사로 구분해 저장한다(apps/backend/app/api/v1/metrics.py §신뢰 경계).
  */
 
-import { sendClientMetric, type ClientMetric } from "@/lib/api";
+import { sendClientMetric } from "@/lib/api";
 
-export type { ClientMetric };
+/** 서버 `ALLOWED` 와 같은 목록. 늘릴 때는 양쪽을 같이 고친다.
+ *  ⚠ 정의는 이 파일에 둔다 — 백엔드 tests/test_latency.py 가 이 파일에서 이름을 읽어 대조한다. */
+export type ClientMetric = "map_ready" | "building_detail";
 
 const started = new Map<ClientMetric, number>();
 const sent = new Set<ClientMetric>();
