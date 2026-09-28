@@ -591,7 +591,7 @@ POST 공통 함수는 `method: "POST"`, JSON 형식을 나타내는 `Content-Typ
 | `lookupStoreReviews` | GET `/marketing/reviews?...` | 가게 언급 블로그 스니펫 |
 | `generateStoreMarketing` | POST `/marketing/generate` | 공개 데모 마케팅 생성 |
 | `generateCommercialStoreMarketing` | POST `/marketing/onboarding/generate` | 조직 API 키·동의 계약을 포함한 상용 생성 |
-| `AdminCoverage.load` | GET `/api/v1/admin/coverage` | 관리자 화면의 직접 요청. `X-Admin-Token` 사용 |
+| `getAdminCoverage` | GET `/admin/coverage` | 관리자 커버리지(`#admin`). `X-Admin-Token` 사용. `totals` 는 서빙 거점만 세고 보류 거점은 `held` 로 따로 온다(2026-09-28) |
 
 `URLSearchParams`는 검색 조건을 URL 질의 문자열로 만들고, `encodeURIComponent`는 가게명·주소의 공백·한글·특수문자가 URL 구조와 섞이지 않도록 인코딩한다. 일반적인 웹 인코딩 기능이며 암호화는 아니다.
 
