@@ -2,8 +2,48 @@
 
 // 타입만 가져온다(런타임 순환 없음) — 정의는 clientTiming.ts 에 둔다(백엔드 드리프트 테스트가 거기서 읽는다).
 import type { ClientMetric } from "@/lib/clientTiming";
+import { clearToken, loadToken } from "@/lib/session";
 
 const BASE = "/api/v1";
+
+/**
+ * 로그인 세션이 분석 요청 도중 만료·폐기됐다는 신호(2026-09-28 P1). `App` 이 받아 알림을 띄운다.
+ * detail 없음 — 받는 쪽은 "세션이 끝났다" 하나만 알면 된다.
+ */
+export const SESSION_EXPIRED_EVENT = "placeos:session-expired";
+
+/**
+ * 분석 API 요청 — 로그인해 있으면 토큰을 싣는다(2026-09-28 P1 · KPI③ 파일럿 사용량).
+ *
+ * ## 왜 싣나
+ * 백엔드 `deps.track_access` → `usage.record_access` 는 **익명 요청을 세지 않는다.** 토큰을
+ * `/auth/*` 에만 붙이던 동안은 파일럿이 로그인한 채 화면을 써도 `active_orgs` 가 0 이었다
+ * (docs/pilot-outreach-founders-2026-10.md §0 P1).
+ *
+ * ## 만료 토큰이 지도를 세우지 않게 — 종전에 전역으로 안 붙였던 이유를 여기서 막는다
+ * `get_optional_principal` 은 만료·위조 토큰을 익명으로 **강등하지 않고 401 로 거절한다**(키가
+ * 죽은 파일럿이 사용량에서 조용히 사라지지 않게 하려는 백엔드 설계라 그대로 둔다). 그래서
+ * 토큰을 실은 요청이 401 이면: 토큰을 버리고 · `SESSION_EXPIRED_EVENT` 로 알리고 · **익명으로
+ * 한 번 다시 부른다.** 화면은 계속 돌고, 세션이 끝났다는 사실은 알림으로 드러난다.
+ * 분석 경로는 공개라 토큰 말고는 401 을 낼 이유가 없다.
+ *
+ * `X-API-Key` 를 직접 실은 호출에는 토큰을 섞지 않는다 — 그 401 은 키의 실패이지 세션의 실패가 아니다.
+ */
+async function analysisFetch(path: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}): Promise<Response> {
+  const url = `${BASE}${path}`;
+  const token = loadToken();
+  const hasApiKey = Object.keys(init.headers ?? {}).some((h) => h.toLowerCase() === "x-api-key");
+  if (!token || hasApiKey) return fetch(url, init);
+
+  const res = await fetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } });
+  if (res.status !== 401) return res;
+  // 동시에 나간 여러 요청이 함께 401 을 받아도 알림은 한 번만 — 먼저 도착한 쪽이 치운다
+  if (loadToken() === token) {
+    clearToken();
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
+  return fetch(url, init);
+}
 
 export interface Health {
   status: string;
@@ -17,7 +57,7 @@ export async function getHealth(): Promise<Health> {
 }
 
 export async function getBuildingHistory(buildingId: string) {
-  const res = await fetch(`${BASE}/buildings/${buildingId}/history`);
+  const res = await analysisFetch(`/buildings/${buildingId}/history`);
   if (!res.ok) throw new Error("failed to load history");
   return res.json();
 }
@@ -31,7 +71,7 @@ export async function getBuildingHistory(buildingId: string) {
 /** 공실 수치의 출처 — 합성값을 실측처럼 표시하지 않기 위한 구분자 */
 export type VacancySource = "gold" | "synthetic";
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const res = await analysisFetch(path);
   if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -472,7 +512,7 @@ async function postJSON<T>(
   body: unknown,
   extraHeaders: Record<string, string> = {},
 ): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await analysisFetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...extraHeaders },
     body: JSON.stringify(body),
@@ -850,9 +890,10 @@ export const generateProgram = (brief: ProgramBriefInput) =>
  * 계약의 정본은 백엔드다: app/api/v1/auth.py · app/schemas/auth.py. 필드를 여기서 짓지 않는다.
  * 가입은 곧 **조직 생성**이다(개인 계정 없음) — 가입한 사람이 그 조직의 admin 이 된다.
  *
- * ⚠ 액세스 토큰은 **이 함수들에만** 인자로 넘긴다. 공개 분석 API(getJSON·postJSON)에 전역으로
- *   붙이지 말 것 — security.get_optional_principal 은 잘못되거나 만료된 토큰을 익명으로 강등하지
- *   않고 **401 로 거절한다.** 전역으로 붙이면 토큰이 만료되는 순간 지도·네 트랙이 전부 401 로 선다.
+ * ⚠ 계정 함수는 토큰을 **인자로** 받는다. 공개 분석 API(getJSON·postJSON)는 2026-09-28 부터
+ *   세션 토큰을 스스로 싣는데(P1 — 파일럿 사용량), 그 경로는 `analysisFetch` 한 곳뿐이고 401 이면
+ *   익명으로 물러난다. security.get_optional_principal 은 만료 토큰을 **401 로 거절**하므로, 이
+ *   물러남 없이 토큰을 붙이면 토큰이 만료되는 순간 지도·네 트랙이 전부 401 로 선다.
  * ⚠ 비밀번호는 JSON 본문으로만 보낸다(경로·쿼리스트링 금지). 이 파일은 요청·응답을 로그로 남기지 않는다.
  */
 
@@ -878,7 +919,8 @@ export interface ApiKeyInfo { id: string; name: string; created_at: string; revo
 /** 발급 응답(ApiKeyCreatedResponse). `key` 는 이 응답에서만 볼 수 있고 서버에도 남지 않는다 */
 export interface ApiKeyCreated extends ApiKeyInfo { key: string }
 
-async function authRequest<T>(
+/** 계정층 요청 — 토큰을 **인자로** 받아 싣고, 실패를 `ApiError` 로 던진다(401 에 물러나지 않는다). */
+async function accountRequest<T>(
   method: "GET" | "POST" | "DELETE",
   path: string,
   opt: { body?: unknown; token?: string } = {},
@@ -888,11 +930,11 @@ async function authRequest<T>(
   if (opt.token) headers.Authorization = `Bearer ${opt.token}`;
   let res: Response;
   try {
-    res = await fetch(`${BASE}/auth${path}`, {
+    res = await fetch(`${BASE}${path}`, {
       method, headers, body: opt.body === undefined ? undefined : JSON.stringify(opt.body),
     });
   } catch {
-    throw new ApiError(0, null, `API /auth${path} unreachable`);
+    throw new ApiError(0, null, `API ${path} unreachable`);
   }
   if (!res.ok) {
     let detail: string | null = null;
@@ -900,10 +942,13 @@ async function authRequest<T>(
       const j = (await res.json()) as { detail?: unknown };
       if (typeof j?.detail === "string") detail = j.detail;
     } catch { /* 본문이 JSON 이 아니면 상태 코드만으로 문구를 고른다 */ }
-    throw new ApiError(res.status, detail, `API /auth${path} failed: ${res.status}`);
+    throw new ApiError(res.status, detail, `API ${path} failed: ${res.status}`);
   }
   return res.json() as Promise<T>;
 }
+
+const authRequest = <T>(method: "GET" | "POST" | "DELETE", path: string, opt: { body?: unknown; token?: string } = {}) =>
+  accountRequest<T>(method, `/auth${path}`, opt);
 
 /** 조직 가입 — 201 · 409(이미 가입된 이메일) · 422(검증: 비밀번호 8~200자 · 조직명 1~200자) */
 export const signup = (req: { org_name: string; email: string; password: string }) =>
@@ -921,6 +966,23 @@ export const createApiKey = (token: string, name: string) =>
 /** 키 폐기 — 조직 관리자만(403) · 404(없는 키) */
 export const revokeApiKey = (token: string, keyId: string) =>
   authRequest<ApiKeyInfo>("DELETE", `/api-keys/${encodeURIComponent(keyId)}`, { token });
+
+/* ===== 파일럿 피드백 — KPI③ NPS · 유료 전환 의향 (2026-09-28 P2) =====
+ * 계약의 정본: app/schemas/feedback.py · app/api/v1/feedback.py. **인증 필수**(익명 401) —
+ * 공개 데모 만족도가 B2B PMF 로 둔갑하지 않게 백엔드가 막는다. 같은 조직이 다시 내면 덮어쓰지
+ * 않고 쌓이며, 지표는 조직당 최신 1건으로 센다(services/pmf).
+ */
+
+/** 돈을 낼 **의향**(계약이 아니다) — 백엔드 Literal 과 같은 세 값 */
+export type WouldPay = "yes" | "maybe" | "no";
+/** POST /feedback 본문(FeedbackIn). nps_score 0~10 · comment 최대 2000자 */
+export interface FeedbackInput { nps_score: number; would_pay: WouldPay; comment?: string }
+/** POST /feedback 응답(FeedbackOut) */
+export interface FeedbackSaved { id: string; org_id: string; nps_score: number; would_pay: WouldPay; created_at: string }
+
+/** 피드백 1건 저장 — 201 · 401(세션 만료) · 422(범위 밖) */
+export const submitFeedback = (token: string, body: FeedbackInput) =>
+  accountRequest<FeedbackSaved>("POST", "/feedback", { token, body });
 
 /* ===== 계측 비콘 · 관리자 커버리지 (2026-09-28 api.ts 일원화) =====
  * 둘 다 원래 호출부(lib/clientTiming.ts · pages/AdminCoverage.tsx)에서 fetch 를 직접 불렀다.
@@ -976,16 +1038,75 @@ export interface AdminCoverage {
 }
 
 /**
- * 관리자 커버리지 — GET /admin/coverage + `X-Admin-Token`.
- * 실패는 `ApiError` 로 던진다: 403(토큰 불일치·서버 ADMIN_TOKEN 미설정) · 그 밖 상태 · 0(서버에 못 닿음).
+ * 관리자 GET — `X-Admin-Token` 을 싣는다. 실패는 `ApiError` 로 던진다:
+ * 403(토큰 불일치·서버 ADMIN_TOKEN 미설정) · 그 밖 상태 · 0(서버에 못 닿음).
  */
-export async function getAdminCoverage(adminToken: string): Promise<AdminCoverage> {
+async function adminGet<T>(path: string, adminToken: string): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${BASE}/admin/coverage`, { headers: { "X-Admin-Token": adminToken } });
+    res = await fetch(`${BASE}${path}`, { headers: { "X-Admin-Token": adminToken } });
   } catch {
-    throw new ApiError(0, null, "API /admin/coverage unreachable");
+    throw new ApiError(0, null, `API ${path} unreachable`);
   }
-  if (!res.ok) throw new ApiError(res.status, null, `API /admin/coverage failed: ${res.status}`);
-  return res.json() as Promise<AdminCoverage>;
+  if (!res.ok) throw new ApiError(res.status, null, `API ${path} failed: ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+/** 관리자 커버리지 — GET /admin/coverage + `X-Admin-Token`. */
+export function getAdminCoverage(adminToken: string): Promise<AdminCoverage> {
+  return adminGet<AdminCoverage>("/admin/coverage", adminToken);
+}
+
+/**
+ * KPI③ 표본에서 뺀 내부·테스트 조직(2026-09-28 · 백엔드 `services/kpi_scope`).
+ * 규칙은 이름 접두사 `[내부]` ∪ 환경변수 `KPI_EXCLUDE_ORG_IDS`. 조직은 이름과 id 앞 8자만 온다.
+ */
+export interface KpiExclusion {
+  /** 이 표본에서 실제로 뺀 조직 수 */
+  excluded_orgs: number;
+  excluded: { id_prefix: string; name: string; reasons: ("name_prefix" | "env")[] }[];
+  exclusion_rules: {
+    name_prefix: string;
+    env_var: string;
+    env_ids_configured: number;
+    /** 환경변수에 적혔는데 DB 에 없는 id(앞 8자) — 오타 신호 */
+    env_ids_unmatched: string[];
+  };
+}
+
+/** GET /admin/usage — 파일럿 활성도. `by_org` 는 전체 id 키라 화면은 `orgs` 만 읽는다 */
+export interface AdminUsage extends KpiExclusion {
+  window_days: number;
+  active_orgs: number;
+  total_accesses: number;
+  excluded_accesses: number;
+  by_org: Record<string, number>;
+  orgs: { id_prefix: string; name: string; accesses: number }[];
+}
+
+/** GET /admin/pmf — NPS · 유료 전환 의향. n=0 이면 수치 필드가 null 이거나 빠진다 */
+export interface AdminPmf extends KpiExclusion {
+  n_orgs: number;
+  nps: number | null;
+  would_pay_pct: number | null;
+  promoters?: number;
+  passives?: number;
+  detractors?: number;
+  would_pay_yes?: number;
+  nps_target: number;
+  pay_target_pct: number;
+  min_responses: number;
+  verdict: "표본부족" | "충족" | "미달";
+  one_response_swing_nps?: number;
+  note: string;
+}
+
+/** KPI③ 사용량 — GET /admin/usage + `X-Admin-Token`. */
+export function getAdminUsage(adminToken: string, days = 30): Promise<AdminUsage> {
+  return adminGet<AdminUsage>(`/admin/usage?days=${days}`, adminToken);
+}
+
+/** KPI③ PMF — GET /admin/pmf + `X-Admin-Token`. */
+export function getAdminPmf(adminToken: string): Promise<AdminPmf> {
+  return adminGet<AdminPmf>("/admin/pmf", adminToken);
 }

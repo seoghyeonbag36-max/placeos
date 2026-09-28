@@ -23,6 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.feedback import PilotFeedback
+from app.services import kpi_scope
 
 # NPS 목표(KPI③). 바꾸려면 CLAUDE.md §KPI Priorities 와 함께 바꾼다.
 NPS_TARGET = 30.0
@@ -52,16 +53,27 @@ def _latest_per_org(db: Session) -> list[PilotFeedback]:
 
 
 def pmf_summary(db: Session) -> dict:
-    """NPS + 유료 전환 의향. 읽기만 한다."""
-    latest = _latest_per_org(db)
+    """NPS + 유료 전환 의향. 읽기만 한다.
+
+    내부·테스트 조직(`services/kpi_scope`)의 응답은 표본에서 빼고, 뺀 수를
+    `excluded_orgs` 에 싣는다. 판정 기준(`MIN_RESPONSES` 등)은 그대로다.
+    """
+    scope = kpi_scope.resolve_scope(db)
+    all_latest = _latest_per_org(db)
+    latest = [r for r in all_latest if not scope.is_excluded(r.org_id)]
+    exclusion = scope.report(r.org_id for r in all_latest if scope.is_excluded(r.org_id))
     n = len(latest)
     if n == 0:
         return {
+            **exclusion,
             "n_orgs": 0, "nps": None, "would_pay_pct": None,
             "nps_target": NPS_TARGET, "pay_target_pct": PAY_TARGET_PCT,
             "min_responses": MIN_RESPONSES,
             "verdict": "표본부족",
-            "note": ("응답 0건. 계측 배선은 섰지만 **배선 100% 는 파일럿 0건과 "
+            "note": ("응답 0건"
+                     + (f"(내부·테스트 조직 {exclusion['excluded_orgs']}곳의 응답은 뺐다)"
+                        if exclusion["excluded_orgs"] else "")
+                     + ". 계측 배선은 섰지만 **배선 100% 는 파일럿 0건과 "
                      "양립한다** — 이 값은 실적이지 배선이 아니다."),
         }
 
@@ -80,6 +92,7 @@ def pmf_summary(db: Session) -> dict:
         verdict = "미달"
 
     return {
+        **exclusion,
         "n_orgs": n,
         "nps": round(nps, 1),
         "promoters": promoters,

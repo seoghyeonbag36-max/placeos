@@ -18,7 +18,7 @@
 
 ## 안 (a) 결과 — 실험 근거로만 남긴다
 
-`reports/gnn_label_a_2026-09-27.json` (노드별 덤프는 로컬 `reports/gnn_test_preds_label-a_2026-09-27.json`, 4.5MB · 미추적)
+`reports/gnn_label_a_2026-09-27.json` (노드별 덤프는 `reports/gnn_test_preds_label-a_2026-09-27.json`, 4.5MB · 09-28 부터 추적)
 
 | 지표 | 값 |
 |---|---|

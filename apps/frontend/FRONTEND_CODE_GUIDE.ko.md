@@ -543,7 +543,7 @@ Posting과 Program은 요청 번호·버전도 사용한다. 현재 번호와 �
 const BASE = "/api/v1";
 
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const res = await analysisFetch(path);   // 로그인해 있으면 토큰을 싣는다(아래 계정 절)
   if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -554,7 +554,7 @@ async function getJSON<T>(path: string): Promise<T> {
 | `BASE` | 공통 API 경로 앞부분 |
 | `path: string` | 추가 경로를 문자열로 받음 |
 | `Promise<T>` | 나중에 T 형식의 결과를 반환하는 비동기 함수 |
-| `fetch(...)` | 브라우저에서 HTTP 요청. 별도 method가 없으면 GET |
+| `analysisFetch(...)` | 내부에서 `fetch` 로 HTTP 요청. 별도 method가 없으면 GET. 로그인 토큰이 있으면 싣고, 401 이면 토큰을 버리고 익명으로 다시 부른다 |
 | `await` | 응답이 올 때까지 이 함수의 다음 진행을 기다림 |
 | `res.ok` | HTTP 상태가 성공 범위인지 확인 |
 | `throw new Error(...)` | 실패를 예외로 전달해 화면이 오류를 처리하게 함 |
@@ -600,10 +600,11 @@ POST 공통 함수는 `method: "POST"`, JSON 형식을 나타내는 `Content-Typ
 | `listApiKeys` | GET `/auth/api-keys` | 조직 API 키 목록. 원문 없음 |
 | `createApiKey` | POST `/auth/api-keys` | 키 발급(관리자만). 원문은 이 응답에만 한 번 실린다 |
 | `revokeApiKey` | DELETE `/auth/api-keys/{id}` | 키 폐기(관리자만) |
+| `submitFeedback` | POST `/feedback` | 파일럿 피드백(`#feedback` · KPI③). 본문 `nps_score` 0~10 · `would_pay` yes/maybe/no · `comment`(선택). 인증 필수 |
 | `sendClientMetric` | POST `/metrics/client` | 화면 구간 시간 비콘(KPI②). `keepalive`, 실패해도 던지지 않는다 |
 | `getAdminCoverage` | GET `/admin/coverage` | 관리자 커버리지(`#admin`). `X-Admin-Token` 사용. `totals` 는 서빙 거점만 세고 보류 거점은 `held` 로 따로 온다 |
 
-계정 함수 여섯(`signup`~`revokeApiKey`)은 공통 `getJSON`·`postJSON` 이 아니라 `authRequest` 를 거친다. 액세스 토큰은 이 함수들에만 인자로 넘기고 공개 분석 API 에는 붙이지 않는다 — 만료된 토큰이 붙으면 서버가 익명으로 강등하지 않고 401 로 거절해 지도·네 트랙이 선다(`src/lib/api.ts` 계정 절 머리말).
+계정 함수 일곱(`signup`~`revokeApiKey` · `submitFeedback`)은 공통 `getJSON`·`postJSON` 이 아니라 `accountRequest` 를 거치고, 토큰을 **인자로** 받는다. 공개 분석 API(`getJSON`·`postJSON`·건물 이력)는 2026-09-28 부터 `analysisFetch` 가 세션 토큰을 스스로 싣는다 — 로그인한 파일럿의 사용량이 조직으로 잡혀야 해서다(KPI③). 서버는 만료 토큰을 익명으로 강등하지 않고 **401 로 거절**하므로, `analysisFetch` 는 401 이면 토큰을 버리고 `SESSION_EXPIRED_EVENT` 를 알린 뒤 익명으로 한 번 다시 부른다. 이 물러남 없이 토큰을 붙이면 토큰이 만료되는 순간 지도·네 트랙이 선다(`src/lib/api.ts` `analysisFetch` 머리말).
 
 `URLSearchParams`는 검색 조건을 URL 질의 문자열로 만들고, `encodeURIComponent`는 가게명·주소의 공백·한글·특수문자가 URL 구조와 섞이지 않도록 인코딩한다. 일반적인 웹 인코딩 기능이며 암호화는 아니다.
 

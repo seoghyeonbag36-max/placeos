@@ -6,7 +6,8 @@ import MapHost from "@/components/MapHost";
 import TrackMapFrame from "@/components/TrackMapFrame";
 import BusinessSetup from "@/components/BusinessSetup";
 import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
-import { listDistricts, listIndustries, type DistrictSummary, type IndustryOption } from "@/lib/api";
+import { Button } from "@/design/components/Button";
+import { listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
 import { businessChipText, findIndustry, loadBusiness, saveBusiness, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import "./App.css";
@@ -25,7 +26,10 @@ const ProgramStudio = lazy(loadProgram);
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
 const ApiKeys = lazy(() => import("@/pages/ApiKeys"));
-const ACCOUNT_SCREENS: Record<string, AccountScreen> = { "#login": "login", "#signup": "signup", "#account": "account" };
+const Feedback = lazy(() => import("@/pages/Feedback"));
+const ACCOUNT_SCREENS: Record<string, AccountScreen> = {
+  "#login": "login", "#signup": "signup", "#account": "account", "#feedback": "feedback",
+};
 
 /** 첫 화면이 선 뒤 나머지 트랙 청크를 미리 받아 둔다(2026-09-13 로컬 실화면 확인).
  *  아직 안 받은 트랙 탭을 누르면 React 가 Suspense 폴백을 띄우는 동안 **이전 탭 화면을 지우지 않고
@@ -69,6 +73,9 @@ const PRELOAD_DELAY_MS = 1500;
  * 2026-09-23(B9): **계정 화면 3종**은 해시로 연다 — #login · #signup · #account(API 키).
  *   화면을 갈아끼우지 않고 지도 위 모달(AccountDialog)로 띄운다. 트랙 패널도 그대로 남아,
  *   닫으면 보던 자리로 돌아온다. 레일 맨 아래 「계정」이 입구다.
+ *   2026-09-28(P2): #feedback(파일럿 피드백 — NPS·결제 의향)을 같은 틀에 더했다. 입구는 #account 화면.
+ *   2026-09-28(P1): 로그인해 있으면 분석 요청에도 토큰이 실린다(lib/api.ts analysisFetch). 그 토큰이
+ *   만료되면 분석은 익명으로 계속 돌고, 여기서 「로그인이 만료됐습니다」 한 줄을 띄운다.
  *
  * #admin 해시는 관리자 커버리지 패널로 간다. 네비게이션에 버튼을 두지 않는다 —
  * 지도에서 제외된 건물 수는 공개 대상이 아니다(2026-07-26). 데이터 자체도
@@ -187,6 +194,13 @@ export default function App() {
   const isAdmin = hash === "#admin";
   const isBoard = hash === "#board";
   const accountScreen = ACCOUNT_SCREENS[hash];
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    const onExpired = () => setSessionExpired(true);
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, []);
 
   useEffect(() => {
     const onHash = () => setHash(window.location.hash);
@@ -198,6 +212,11 @@ export default function App() {
   const openAccount = useCallback(() => {
     window.location.hash = "#account";
     setHash("#account");
+  }, []);
+  const relogin = useCallback(() => {
+    setSessionExpired(false);
+    window.location.hash = "#login";
+    setHash("#login");
   }, []);
   const goAccount = useCallback((screen: AccountScreen) => {
     window.history.replaceState(null, "", `#${screen}`);
@@ -274,12 +293,20 @@ export default function App() {
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} />
       </MapHost>
       <span className="sr-only" aria-live="polite">{bizAnnounce}</span>
+      {sessionExpired && !accountScreen && (
+        <p className="caveat-note caveat-withheld session-note" role="status">
+          로그인이 만료됐습니다. 지도는 그대로 쓸 수 있지만 사용 기록이 조직에 남지 않습니다.
+          <Button variant="ghost" onClick={relogin}>다시 로그인</Button>
+          <Button variant="ghost" aria-label="알림 닫기" onClick={() => setSessionExpired(false)}>닫기</Button>
+        </p>
+      )}
       {accountScreen && (
         <AccountDialog onClose={closeAccount}>
           <Suspense fallback={<p className="acct-lede">불러오는 중…</p>}>
             {accountScreen === "login" && <Login go={goAccount} />}
             {accountScreen === "signup" && <Signup go={goAccount} />}
             {accountScreen === "account" && <ApiKeys go={goAccount} />}
+            {accountScreen === "feedback" && <Feedback go={goAccount} />}
           </Suspense>
         </AccountDialog>
       )}
