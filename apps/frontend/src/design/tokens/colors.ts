@@ -36,6 +36,13 @@ export const colors = {
     warn: { soft: "#FFFBEB", line: "#FDE68A", ink: "#78350F" },
     caution: { soft: "#FDF5E3", line: "#F0DCAE", ink: "#8A5A00" },
     note: { soft: "#FDF8EC", line: "#F3E6C4", ink: "#8A6D3B" },
+    // 3차 이관 — inkAlt·lineAlt 는 대시보드 계열의 지역 ink/line(전역 ink·line 과 값이 다르다)
+    inkAlt: "#1F2937",
+    lineAlt: "#E5E7EB",
+    textTertiary: "#8A93A0",
+    surfaceMuted: "#F6F7F9",
+    blue: "#2E6FB7",
+    navyDeep: "#1E3A5F",
   },
   // 공실 히트맵 색계열 (저위험→고위험)
   vacancy: ["#22B07D", "#9CCB3B", "#EFA50F", "#F2682C", "#E03E36"],

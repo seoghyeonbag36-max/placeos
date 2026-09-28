@@ -20,7 +20,7 @@
 .progstudio .field{display:block;margin-bottom:11px}
 .progstudio .field>label{display:block}
 .progstudio .flabel{display:flex;align-items:baseline;gap:5px;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:5px}
-.progstudio .flabel i{font-style:normal;color:#e03e36}
+.progstudio .flabel i{font-style:normal;color:var(--danger)}
 .progstudio .flabel em{font-style:normal;margin-left:auto;font-size:10.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:5px;padding:1px 6px}
 /* 접힌 입력 규칙 — 일곱 칸의 설명이 동시에 펴져 있으면 정작 입력칸이 안 보인다 */
 .progstudio .fhint{display:block;margin-top:var(--sp-1)}

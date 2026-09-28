@@ -1,8 +1,8 @@
 /* PlaceOS Posting 콘솔 — 스코프 .postconsole (ProgramStudio 2단 레이아웃 계승).
    왼쪽은 입력(sticky), 오른쪽은 결과. 결과 옆에는 늘 **그 값의 출처**가 붙는다 —
    R-ONE 실측 임대료와 시드 프록시가 같은 숫자처럼 보이면 안 된다. */
-.postconsole{--card:var(--surface);--ink:#1f2937;--sub:var(--muted);--line:#e5e7eb;--blue:#2E6FB7;
- --pos:#22B07D;--neg:#E03E36;
+.postconsole{--card:var(--surface);--ink:var(--ink-alt);--sub:var(--muted);--line:var(--line-alt);--blue:var(--ui-blue);
+ --pos:var(--success);--neg:var(--danger);
  font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink);background:#eef1f4;padding:20px;line-height:1.4}
 .postconsole *{box-sizing:border-box}
 .postconsole .wrap{max-width:1240px;margin:0 auto}
@@ -70,7 +70,7 @@
  border-radius:6px;padding:3px var(--sp-2)}
 .postconsole .isrc i{font-style:normal;font-size:9.5px;font-weight:700}
 .postconsole .isrc.is-real{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
-.postconsole .isrc.is-proxy{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
+.postconsole .isrc.is-proxy{color:var(--text-tertiary);background:var(--surface-muted);border:1px dashed #cfd5dd}
 .postconsole .isrc.is-absent{color:var(--caution-ink);background:var(--caution-soft);border:1px dashed var(--caution-line)}
 
 .postconsole .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px}

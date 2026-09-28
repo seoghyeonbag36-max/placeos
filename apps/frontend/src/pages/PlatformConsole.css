@@ -1,8 +1,8 @@
 /* PlaceOS Platform 콘솔 — 스코프 .platconsole (PageDashboard 톤 계승).
    레이아웃이 곧 근거의 서열이다: 모델 둘은 위쪽 2단 카드, 시드인 감성은 아래 점선 영역.
    색으로도 갈린다 — 모델 카드는 흰 배경·실선, 시드 영역은 회색 배경·점선이다. */
-.platconsole{--card:var(--surface);--ink:#1f2937;--sub:var(--muted);--line:#e5e7eb;--blue:#2E6FB7;
- --up:#E03E36;--down:#22B07D;
+.platconsole{--card:var(--surface);--ink:var(--ink-alt);--sub:var(--muted);--line:var(--line-alt);--blue:var(--ui-blue);
+ --up:var(--danger);--down:var(--success);
  font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink);background:#eef1f4;padding:20px;line-height:1.4}
 .platconsole *{box-sizing:border-box}
 .platconsole .wrap{max-width:1240px;margin:0 auto}
@@ -26,7 +26,7 @@
 /* 공실 수치 출처 — PageDashboard .srcbadge 와 같은 규칙(실측 초록 채움 / 합성 점선) */
 .platconsole .chip .src{font-style:normal;font-size:9.5px;font-weight:700;border-radius:4px;padding:1px var(--sp-1)}
 .platconsole .chip .src.is-gold{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
-.platconsole .chip .src.is-syn{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
+.platconsole .chip .src.is-syn{color:var(--text-tertiary);background:var(--surface-muted);border:1px dashed #cfd5dd}
 
 /* 섹션 제목은 Fold 의 요약줄(.vfold summary)이 대신한다 — 접힌 채로도 안에 든 것을 말한다 */
 .platconsole .loading{padding:34px 0;text-align:center;color:var(--sub);font-size:13px}
@@ -35,7 +35,7 @@
 .platconsole .herotop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
  padding-bottom:13px;border-bottom:1px solid var(--line)}
 .platconsole .herolabel{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-subtle)}
-.platconsole .heroarch{font-size:26px;font-weight:700;letter-spacing:-.7px;margin:var(--sp-1) 0 5px;color:#1e3a5f}
+.platconsole .heroarch{font-size:26px;font-weight:700;letter-spacing:-.7px;margin:var(--sp-1) 0 5px;color:var(--ui-navy-deep)}
 .platconsole .herorule{font-size:10.5px;color:var(--text-subtle);line-height:1.55;max-width:560px}
 .platconsole .herokpis{display:flex;gap:9px;flex-wrap:wrap}
 .platconsole .herokpis .kpi{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:var(--sp-2) var(--sp-3);min-width:96px}
@@ -81,7 +81,7 @@
 .platconsole .bbar{display:flex;flex-direction:column;gap:2px}
 .platconsole .bbar i{display:block;height:5px;border-radius:3px;min-width:1px}
 .platconsole .bbar .f{background:#7C9BC7}
-.platconsole .bbar .s{background:#22B07D}
+.platconsole .bbar .s{background:var(--success)}
 
 /* 블로그 키워드 */
 .platconsole .kwcloud{display:flex;gap:5px;flex-wrap:wrap;align-items:baseline}
@@ -95,7 +95,7 @@
 .platconsole .trdir{font-size:11px;font-weight:700}
 .platconsole .trdir.up{color:var(--up)}
 .platconsole .trdir.down{color:var(--blue)}
-.platconsole .trdir.flat{color:#8a93a0}
+.platconsole .trdir.flat{color:var(--text-tertiary)}
 .platconsole .spark{width:100%;height:28px;display:block;margin:var(--sp-1) 0 2px}
 .platconsole .trmeta{font-size:10px;color:var(--text-subtle)}
 
@@ -120,7 +120,7 @@
 .platconsole .snorec{margin-top:9px;font-size:10.5px;color:var(--text-subtle);background:var(--surface-subtle);border:1px dashed var(--line);border-radius:7px;padding:7px var(--sp-2);line-height:1.55}
 .platconsole .sdistinct{margin-top:9px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--sub);
  background:#f2f6fb;border:1px solid #e2eaf4;border-radius:7px;padding:5px var(--sp-2)}
-.platconsole .sdistinct b{color:#1e3a5f;font-weight:700}
+.platconsole .sdistinct b{color:var(--ui-navy-deep);font-weight:700}
 .platconsole .sdistinct span{margin-left:auto;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
 .platconsole .swas{margin-top:9px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--text-subtle)}
 .platconsole .swas b{color:var(--sub)}
@@ -174,7 +174,7 @@
 .platconsole .badge.is-model{color:var(--surface);background:var(--ui-navy)}
 .platconsole .badge.is-ground{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
 .platconsole .badge.is-warn{color:var(--caution-ink);background:var(--caution-soft);border:1px solid var(--caution-line)}
-.platconsole .badge.is-seed{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
+.platconsole .badge.is-seed{color:var(--text-tertiary);background:var(--surface-muted);border:1px dashed #cfd5dd}
 .platconsole .badge.is-measured{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
 
 /* 분기 세그먼트 */
@@ -200,7 +200,7 @@
 
 /* %는 파생 근사다 — 대표 수치와 다른 상자에 둔다 */
 .platconsole .approx{background:#f5f8fc;border:1px solid #dbe6f3;border-radius:9px;padding:9px 11px;margin-bottom:var(--sp-3)}
-.platconsole .approxv{font-size:13px;font-weight:700;color:#1e3a5f}
+.platconsole .approxv{font-size:13px;font-weight:700;color:var(--ui-navy-deep)}
 .platconsole .approxv b{font-weight:700}
 .platconsole .approx .note{font-size:10.5px;color:var(--text-secondary);line-height:1.55;margin-top:var(--sp-1)}
 
@@ -248,8 +248,8 @@
    서열을 갈라 두었다. 지금은 값이 실측이라 실선으로 올린다 — 다만 **감성만은
    여전히 없고**, 그 사실은 배경색이 아니라 카드 안의 "감성 실측 없음"이 말한다. */
 .platconsole .zonenote{font-size:11.5px;color:var(--sub);line-height:1.65;max-width:860px}
-.platconsole .zonesum{font-size:11px;font-weight:700;color:#8a93a0;margin-top:var(--sp-2)}
-.platconsole .zones+.empty,.platconsole .zonenote~.empty{background:#f6f7f9;margin-top:10px}
+.platconsole .zonesum{font-size:11px;font-weight:700;color:var(--text-tertiary);margin-top:var(--sp-2)}
+.platconsole .zones+.empty,.platconsole .zonenote~.empty{background:var(--surface-muted);margin-top:10px}
 .platconsole .zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;margin-top:11px}
 .platconsole .zone{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 11px}
 .platconsole .zhead{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-2)}
@@ -260,7 +260,7 @@
 .platconsole .zmeta{font-size:10.5px;color:var(--text-subtle);margin-top:3px}
 .platconsole .zsent{font-size:10.5px;color:var(--text-subtle);margin-top:5px;padding-top:5px;border-top:1px dashed #eceff2}
 .platconsole .zkw{display:flex;gap:var(--sp-1);flex-wrap:wrap;margin-top:7px}
-.platconsole .kw{font-size:10px;font-weight:700;color:#8a93a0;background:#f6f7f9;border:1px solid #eceff2;border-radius:5px;padding:1px 5px}
+.platconsole .kw{font-size:10px;font-weight:700;color:var(--text-tertiary);background:var(--surface-muted);border:1px solid #eceff2;border-radius:5px;padding:1px 5px}
 
 /* Platform → Page 인계 버튼(2026-09-13, 화면설계서 2판) — 트랙 색 테두리 버튼 */
 .platconsole .site-open-page{margin-top:var(--sp-3);width:100%;min-height:40px;border:1px solid var(--track-page);border-radius:var(--radius-md);background:var(--surface);color:var(--track-page);font:inherit;font-size:var(--fs-caption);font-weight:700;cursor:pointer}
