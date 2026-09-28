@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.services.districts import PAGES_BY_ID
+from app.services.districts import PAGES_BY_ID, get_summary
 from app.services import latency as latency_service
 from app.services import pmf as pmf_service
 from app.services import usage as usage_service
@@ -39,6 +39,24 @@ def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
         raise HTTPException(status_code=403, detail="관리자 토큰이 올바르지 않습니다")
 
 
+def _served_vacancy(slug: str | None) -> dict:
+    """공개 화면과 **같은 수**를 싣는다 — 거점 전체 공실률(주 지표) · 대조 지표(R-ONE 정렬).
+
+    2026-09-28: 이 표는 `coverage.json` 의 `reference_vacancy_pct` 를 "참고 공실률"로 그렸다.
+    그 값은 집합건물 호실(expos_units)을 섞은 옛 대표값이라 공개 화면의 어느 수와도
+    다르고(banpo 74.0% — 공개 화면은 대표값을 내렸다), 연남(20.7%)처럼 대조 지표와
+    우연히 겹쳐 헷갈렸다. 화면은 아래 두 필드만 읽는다. `reference_vacancy_pct` 는
+    coverage.json 을 그대로 옮기는 필드라 응답에는 남는다.
+    서빙 보류 거점은 공개 응답이 없으니 None 이다.
+    """
+    s = get_summary(slug) if slug else None
+    return {
+        "vacancy_rate": s["vacancy_rate"] if s else None,
+        "vacancy_withheld": bool(s and s["vacancy_withheld"]),
+        "aligned_vacancy_pct": s["aligned_vacancy_pct"] if s else None,
+    }
+
+
 @router.get("/coverage", dependencies=[Depends(require_admin)])
 def coverage() -> dict:
     """거점별 지도 커버리지 — 표시 동수와 제외 동수(대장 미확인/비상업).
@@ -56,7 +74,9 @@ def coverage() -> dict:
             hub = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        hub["served"] = hub.get("slug", path.parent.name) in PAGES_BY_ID
+        slug = hub.get("slug", path.parent.name)
+        hub["served"] = slug in PAGES_BY_ID
+        hub |= _served_vacancy(slug if hub["served"] else None)
         hubs.append(hub)
 
     served = [h for h in hubs if h["served"]]

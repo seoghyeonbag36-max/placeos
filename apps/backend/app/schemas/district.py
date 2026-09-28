@@ -54,7 +54,15 @@ class DistrictSummary(BaseModel):
     # 모집단·단위가 달라(우리는 호실·전수, R-ONE 은 면적·표본) 격차 0 이 정상이 아니다.
     # 절대값이 아니라 거점 간 비교·추세 감시에 쓴다.
     anchor_pct: float | None = None
+    # ⚠ deprecated(2026-09-28) — 주 지표(거점 전체·호실) − 앵커. 모집단이 달라 격차가 아니다.
     anchor_gap_pp: float | None = None
+    # R-ONE 정렬 대조(docs/finding-anchor-gap-2026-09.md §4-2) — 대조 지표(rone_aligned.mid
+    # 대표값)·불확실 구간(층 밴드 낙관/비관)·정렬 격차(= 대조 지표 − 앵커). 대조 지표가
+    # 없거나 대표값을 내린 거점은 None.
+    aligned_vacancy_pct: float | None = None
+    aligned_floor_hi_pct: float | None = None
+    aligned_floor_lo_pct: float | None = None
+    aligned_gap_pp: float | None = None
     # Platform·LSTM 다음 분기 예측 (forecast json 부재 시 None)
     predicted_rate: float | None = None
     predicted_delta: float | None = None
@@ -139,7 +147,15 @@ class VacancyHeatmap(BaseModel):
     excluded_mall: int | None = None
     # 앵커 대조 — 거점별 R-ONE 중대형상가 공실률과 격차(%p). DistrictSummary 와 동일 의미.
     anchor_pct: float | None = None
+    # ⚠ deprecated(2026-09-28) — 주 지표(거점 전체·호실) − 앵커. 모집단이 달라 격차가 아니다.
     anchor_gap_pp: float | None = None
+    # R-ONE 정렬 대조(docs/finding-anchor-gap-2026-09.md §4-2) — 대조 지표(rone_aligned.mid
+    # 대표값)·불확실 구간(층 밴드 낙관/비관)·정렬 격차(= 대조 지표 − 앵커). 대조 지표가
+    # 없거나 대표값을 내린 거점은 None.
+    aligned_vacancy_pct: float | None = None
+    aligned_floor_hi_pct: float | None = None
+    aligned_floor_lo_pct: float | None = None
+    aligned_gap_pp: float | None = None
     # Platform·LSTM 다음 분기 예측 (거점 단위, forecast json 부재 시 None)
     predicted_rate: float | None = None
     predicted_delta: float | None = None

@@ -20,7 +20,8 @@ const PAYLOAD = {
   hubs: [{
     slug: "garosu", hub_name: "신사동 가로수길", tier: "Tier1", built_at: "2026-09-27",
     shown: 120, excluded_unknown: 3, excluded_non_commercial: 5,
-    coverage_pct: 97.5, reference_vacancy_pct: null, served: true,
+    coverage_pct: 97.5, reference_vacancy_pct: 18.9, served: true,
+    vacancy_rate: 15.84, vacancy_withheld: false, aligned_vacancy_pct: 19.0,
   }],
   totals: { hubs: 1, shown: 120, excluded_unknown: 3, excluded_non_commercial: 5, coverage_pct: 97.5 },
   held: { hubs: 0, slugs: [] },
@@ -106,6 +107,24 @@ describe("AdminCoverage — #admin 화면 문구", () => {
     expect(screen.queryByText("보류")).toBeNull();                 // 보류 거점이 없으면 표기도 없다
   });
 
+  it("공실률 열은 공개 화면과 같은 두 수를 §4-2 라벨로 싣는다 — 옛 '참고 공실률' 값은 그리지 않는다", async () => {
+    const withheld = { ...PAYLOAD.hubs[0], slug: "banpo", hub_name: "반포", reference_vacancy_pct: 74.0,
+      vacancy_rate: null, vacancy_withheld: true, aligned_vacancy_pct: 3.6 };
+    installFetchStub([{ match: /\/admin\/coverage$/, body: { ...PAYLOAD, hubs: [PAYLOAD.hubs[0], withheld] } }]);
+    render(<AdminCoverage />);
+    query("good");
+    expect(await screen.findByText("신사동 가로수길")).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "거점 전체 공실률 (실측·호실 기준)" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "중대형 상가 공실률 (R-ONE 정렬)" })).toBeTruthy();
+    expect(screen.queryByText("참고 공실률")).toBeNull();
+    expect(screen.getByText("15.8%")).toBeTruthy();
+    expect(screen.getByText("19.0%")).toBeTruthy();
+    // 공개 화면이 내린 수는 운영 표에서도 되살아나지 않는다
+    expect(screen.getByText("대표값 미제공")).toBeTruthy();
+    expect(screen.queryByText("74%")).toBeNull();
+    expect(screen.queryByText("18.9%")).toBeNull();
+  });
+
   it("요약은 서빙 거점 수 · 보류 거점은 합계 밖으로 빼고 「보류」로 표시한다(2026-09-28 「거점 88곳」)", async () => {
     installFetchStub([{ match: /\/admin\/coverage$/, body: {
       ...PAYLOAD,
@@ -113,6 +132,7 @@ describe("AdminCoverage — #admin 화면 문구", () => {
         slug: "hwajeong", hub_name: "화정", tier: "Tier1", built_at: "2026-08-30",
         shown: 391, excluded_unknown: 142, excluded_non_commercial: 228,
         coverage_pct: 51.4, reference_vacancy_pct: null, served: false,
+        vacancy_rate: null, vacancy_withheld: false, aligned_vacancy_pct: null,
       }],
       held: { hubs: 1, slugs: ["hwajeong"] },
     } }]);

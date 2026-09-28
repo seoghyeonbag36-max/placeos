@@ -405,7 +405,11 @@ describe("MapShell — 사이드패널", () => {
     expect(screen.getByText("가로수 A")).toBeTruthy();
     expect(screen.getByText("가로수 C")).toBeTruthy();
     // 거점 대표값도 같이 밝힌다.
-    expect(screen.getByText(/거점 12\.3%/)).toBeTruthy();
+    // 주 지표는 §4-2 라벨로 적는다(2026-09-28) — 대조 지표와 같은 "공실률" 이름을 쓰지 않는다.
+    expect(screen.getByText(/거점 전체 공실률 \(실측·호실 기준\) 12\.3%/)).toBeTruthy();
+    // 격차는 정렬 격차(대조 지표 − 앵커)만 싣는다 — 옛 `앵커 9.9% +2.4%p` 는 사라졌다.
+    expect(screen.getByText(/정렬 격차 \+4\.2%p/)).toBeTruthy();
+    expect(screen.queryByText(/\+2\.4%p/)).toBeNull();
   });
 
   it("목록은 빈 건물부터 선다 — 지도의 빨간 점과 목록 첫 줄이 같은 답을 말한다", async () => {

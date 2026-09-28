@@ -49,8 +49,25 @@ build_page_master 는 자기 리포트에서 이미 같은 이유로 지번 중�
 
 ## 앵커 대조
 Gold 에 calibration.json 이 있으면 그 거점의 R-ONE 중대형상가 공실률(`anchor_pct`)과
-격차(`anchor_gap_pp`)를 응답에 붙인다. 우리 지표는 호실 기준·전수라 R-ONE(면적 기준·표본)
-과 모집단이 달라 격차가 0 이 될 수 없다 — 절대값이 아니라 **거점 간 비교와 추세 감시**에 쓴다.
+정렬 격차(`aligned_gap_pp`)를 응답에 붙인다.
+
+⚠ 격차는 **대조 지표 − 앵커**다(2026-09-28, docs/finding-anchor-gap-2026-09.md §4-2).
+주 지표(`avg_vacancy` — 거점 전체·호실 기준·전수)는 R-ONE(중대형·면적 기준·표본)과
+모집단이 달라 둘을 빼면 격차가 아니라 모집단 차이가 섞인다. 같은 모집단·단위로 다시 잰
+값이 calibration.json 의 `rone_aligned.mid` 에 이미 있다 — 그것을 대조 지표로 싣는다.
+
+  주 지표   avg_vacancy          거점 전체 공실률 (실측·호실 기준)
+  대조 지표 aligned_vacancy_pct  중대형 상가 공실률 (R-ONE 정렬) — rone_aligned.mid 대표값
+  앵커      anchor_pct           R-ONE 중대형 (최신 분기)
+  격차      aligned_gap_pp       정렬 격차 = 대조 지표 − 앵커
+  폭        aligned_floor_hi/lo  불확실 구간 — rone_aligned.mid.vacancy_floor_hi/lo_pct
+
+대조 지표 대표값은 calibrate_vacancy._rone_aligned 가 앵커와 뺄 때 쓰는 값과 같은 규칙이다
+(`vacancy_area_pct`, 없으면 `vacancy_floor_hi_pct`). 대조 지표가 없는 거점은 격차를 None 으로
+둔다 — 주 지표로 대신 빼지 않는다.
+
+`anchor_gap_pp`(= 주 지표 − 앵커)는 **deprecated** 다. 외부 소비자가 있을 수 있어 값을
+바꾸지 않고 당분간 남긴다. 화면은 읽지 않는다.
 
 건물 폴리곤 레이어(`/heatmap/buildings`)는 floor_approx 도 그대로 그린다. 거기서는
 건물 한 동의 표시값이고, 여기서는 거점을 대표하는 **통계**라 기준을 다르게 둔다.
@@ -80,6 +97,7 @@ _EXCLUDED_SOURCES = {"polygon_only"}
 _GOLD_DIR = Path(__file__).resolve().parents[4] / "data" / "gold"
 _TTL_SECONDS = 300.0
 _anchor_cache: dict[str, Any] = {}
+_aligned_cache: dict[str, Any] = {}
 
 
 def _centroid(ring: list[list[float]]) -> tuple[float, float]:
@@ -115,6 +133,34 @@ def anchor_of(district_id: str) -> float | None:
         pct = json.loads(path.read_text(encoding="utf-8")).get("anchor_pct")
     _anchor_cache[slug] = {"at": now, "pct": pct}
     return pct
+
+
+def aligned_of(district_id: str) -> dict | None:
+    """거점의 R-ONE 정렬 대조 지표(`rone_aligned.mid`). calibration.json 이나 mid 가 없으면 None.
+
+    반환: {"pct": 대표값, "hi": 층 밴드 낙관, "lo": 층 밴드 비관}. 대표값 규칙은
+    calibrate_vacancy._rone_aligned 가 앵커와 뺄 때 쓰는 것과 같다 — 면적가중
+    (`vacancy_area_pct`), 없으면 층 점유 상한(`vacancy_floor_hi_pct`).
+    ⚠ 면적가중 대표값은 층 수 기준 밴드(hi~lo) 밖에 떨어질 수 있다(가중이 다르다).
+    """
+    slug = _resolve(district_id)
+    now = time.monotonic()
+    hit = _aligned_cache.get(slug)
+    if hit and now - hit["at"] < _TTL_SECONDS:
+        return hit["val"]
+    path = _GOLD_DIR / slug / "calibration.json"
+    val = None
+    if path.exists():
+        cal = json.loads(path.read_text(encoding="utf-8"))
+        mid = (cal.get("rone_aligned") or {}).get("mid") or {}
+        pct = mid.get("vacancy_area_pct")
+        if pct is None:
+            pct = mid.get("vacancy_floor_hi_pct")
+        if pct is not None:
+            val = {"pct": pct, "hi": mid.get("vacancy_floor_hi_pct"),
+                   "lo": mid.get("vacancy_floor_lo_pct")}
+    _aligned_cache[slug] = {"at": now, "val": val}
+    return val
 
 
 def build_cells(district_id: str, grid: dict) -> dict | None:
@@ -201,6 +247,7 @@ def build_cells(district_id: str, grid: dict) -> dict | None:
     sum_vac = sum_capacity - sum_stores
     avg = round(sum_vac / sum_capacity * 100, 2)
     anchor = anchor_of(district_id)
+    aligned = aligned_of(district_id)
     return {
         "cells": cells,
         "sum_stores": sum_stores,
@@ -230,6 +277,17 @@ def build_cells(district_id: str, grid: dict) -> dict | None:
         "anchor_pct": anchor,
         # 자릿수를 피연산자(avg 2자리 · anchor_pct 2자리)에 맞춘다. 1자리로 줄이면
         # 격차가 실제 차이와 최대 0.05%p 어긋나 "gap == avg - anchor" 가 성립하지 않는다.
+        # ⚠ deprecated(2026-09-28) — 주 지표(거점 전체·호실)에서 앵커(중대형·면적)를
+        # 뺀 값이라 모집단이 다르다. 값은 바꾸지 않고 하위호환으로만 남긴다. 화면은
+        # aligned_gap_pp 를 읽는다(모듈 상단 "앵커 대조").
         "anchor_gap_pp": round(avg - anchor, 2) if anchor is not None else None,
+        # 정렬 대조 — R-ONE 과 같은 모집단·단위로 잰 값과 그 격차. 대조 지표가 없으면
+        # 격차도 None 이다(주 지표로 대신 빼지 않는다).
+        "aligned_vacancy_pct": aligned["pct"] if aligned else None,
+        "aligned_floor_hi_pct": aligned["hi"] if aligned else None,
+        "aligned_floor_lo_pct": aligned["lo"] if aligned else None,
+        # 자릿수는 피연산자 중 긴 쪽(anchor 2자리)에 맞춘다 — gap == aligned − anchor 가 성립한다.
+        "aligned_gap_pp": (round(aligned["pct"] - anchor, 2)
+                           if aligned and anchor is not None else None),
         "source": "gold",
     }
