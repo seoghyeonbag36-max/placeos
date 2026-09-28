@@ -31,3 +31,32 @@
   .admin-cov { padding: var(--sp-4); }
   .admin-cov-scroll-hint { display: block; }
 }
+
+/* ── KPI③ 칸 (2026-09-28 · AdminKpi3.tsx) ─────────────────────────────────────
+ * 폰에서 읽는 것이 목적이라 표 대신 타일 + 목록이다(가로 스크롤 없음).
+ * ⚠ 경고색은 토큰에 아직 없다 — 위 오류 상자(AdminCoverage.tsx 인라인)와 같은 값을 쓴다.
+ *   토큰이 생기면 두 곳을 함께 바꿀 것. */
+.admin-kpi3 {
+  margin: 0 0 var(--sp-5); padding: var(--sp-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
+}
+.admin-kpi3-title { font-size: 15px; margin: 0 0 var(--sp-3); }
+.admin-kpi3-tiles {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sp-2); margin-bottom: var(--sp-3);
+}
+.admin-kpi3-tile { padding: 10px var(--sp-3); border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.admin-kpi3-tile.is-warn { border-color: #fecaca; background: #fef2f2; }
+.admin-kpi3-tile-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.admin-kpi3-tile-value { font-size: 17px; font-weight: var(--fw-bold); color: var(--ink); overflow-wrap: anywhere; }
+.admin-kpi3-tile.is-warn .admin-kpi3-tile-value { color: #b91c1c; }
+.admin-kpi3-tile-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.admin-kpi3-error {
+  padding: 10px var(--sp-3); border-radius: 8px; margin-bottom: var(--sp-3);
+  background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+}
+.admin-kpi3-list h3 { font-size: 13px; margin: var(--sp-3) 0 var(--sp-1); }
+.admin-kpi3-list ul { margin: 0; padding-left: 18px; }
+.admin-kpi3-list li { margin: 2px 0; overflow-wrap: anywhere; }
+.admin-kpi3-name { font-weight: var(--fw-semibold); }
+.admin-kpi3-meta { color: var(--muted); }

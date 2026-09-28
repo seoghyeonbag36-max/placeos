@@ -27,6 +27,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import Principal
 from app.models.auth import AuditLog
+from app.services import kpi_scope
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ def usage_summary(db: Session, days: int = 30) -> dict:
     """조직별 접근 요약 — 파일럿 활성도를 보는 최소 지표.
 
     `active_orgs` 가 곧 "살아 있는 파일럿 수"의 하한이다(KPI② 목표 5~10건).
+    내부·테스트 조직(`services/kpi_scope`)은 빼고 세며, 뺀 수는 `excluded_orgs` 에 싣는다.
     """
     since = datetime.now(timezone.utc) - timedelta(days=days)
     rows = db.execute(
@@ -70,10 +72,23 @@ def usage_summary(db: Session, days: int = 30) -> dict:
         .where(AuditLog.created_at >= since)
         .group_by(AuditLog.org_id)
     ).all()
-    by_org = {org_id: int(n) for org_id, n in rows if org_id}
+    raw = {org_id: int(n) for org_id, n in rows if org_id}
+    # 내부·테스트 조직은 뺀다 — 뺀 사실은 excluded_orgs 로 드러낸다(services/kpi_scope).
+    scope = kpi_scope.resolve_scope(db)
+    removed = [oid for oid in raw if scope.is_excluded(oid)]
+    by_org = {oid: n for oid, n in raw.items() if not scope.is_excluded(oid)}
+    names = kpi_scope.org_names(db, by_org)
     return {
         "window_days": days,
         "active_orgs": len(by_org),
         "total_accesses": sum(by_org.values()),
         "by_org": by_org,
+        # 화면용 — 이름과 id 앞 8자만. 접근 많은 순.
+        "orgs": [
+            {"id_prefix": oid[:kpi_scope.ID_PREFIX_LEN], "name": names.get(oid, ""),
+             "accesses": n}
+            for oid, n in sorted(by_org.items(), key=lambda kv: (-kv[1], kv[0]))
+        ],
+        "excluded_accesses": sum(raw[oid] for oid in removed),
+        **scope.report(removed),
     }

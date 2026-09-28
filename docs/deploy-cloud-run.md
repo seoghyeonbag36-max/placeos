@@ -229,3 +229,29 @@ URL 의 `&`(`...sslmode=require&channel_binding=require`)를 cmd 래퍼가 명�
 ⚠ 한글이 든 JSON 을 curl 로 보낼 때 Windows 셸이 cp949 로 인코딩하면 서버가
 `There was an error parsing the body`(400)로 거절한다. UTF-8 파일로 만들어
 `--data-binary @파일` 로 보낼 것.
+
+## KPI③ 표본에서 내부·테스트 조직 빼기 (2026-09-28)
+
+`/admin/usage` · `/admin/pmf` 는 아래 두 규칙의 **합집합**에 걸린 조직을 표본에서 빼고,
+뺀 수를 `excluded_orgs` 로 싣는다(`apps/backend/app/services/kpi_scope.py`).
+
+| 규칙 | 대상 | 바꾸는 곳 |
+|---|---|---|
+| 조직 이름이 `[내부]` 로 시작(반각 대괄호 · 앞 공백 무시) | 앞으로의 시험 가입 | 가입 화면의 조직 이름 — 코드·배포 없이 폰에서 끝난다 |
+| `KPI_EXCLUDE_ORG_IDS` (쉼표 구분 org id, 32자 hex · 하이픈 허용) | 이미 있는 조직(이름 변경 API 없음) | Cloud Run 환경변수 — 노트북 |
+
+넣는 법(PowerShell — 위 ⚠ 두 개 그대로: `--set-env-vars` 금지, `gcloud.cmd` 대신 ps1 래퍼):
+
+```powershell
+# 1) 뺄 조직의 전체 id — by_org 의 키가 전체 id 다(#admin 화면은 앞 8자만 보인다)
+curl.exe -s -H "X-Admin-Token: <토큰>" "https://placeos.web.app/api/v1/admin/usage?days=365"
+# 2) 더한다(기존 환경변수는 그대로 남는다)
+& "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.ps1" run services update spaceos `
+    --region=us-central1 --project=spaceos-digital-twin `
+    --update-env-vars=KPI_EXCLUDE_ORG_IDS=<id1>
+```
+
+⚠ id 가 둘 이상이면 값의 쉼표가 gcloud 구분자와 부딪친다 — `--update-env-vars="^@^KPI_EXCLUDE_ORG_IDS=<id1>,<id2>"`
+처럼 구분자를 바꾸거나, 공백으로 구분해 넣는다(코드는 쉼표·공백 둘 다 받는다).
+⚠ 적었는데 DB 에 없는 id 는 `exclusion_rules.env_ids_unmatched` 와 #admin 경고로 드러난다 —
+오타면 아무것도 빠지지 않는다.

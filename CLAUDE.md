@@ -136,6 +136,10 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 응답이 아니라 **조직**(조직당 최신 1건)이고, `min_responses`(5) 미만이면 계측기가
 `verdict: "표본부족"` 으로 물러난다. n 이 작을 때 한 응답이 NPS 를 몇 포인트 흔드는지
 (`one_response_swing_nps`)도 함께 나온다 — n=5 면 40포인트다.
+⚠ **내부·테스트 조직은 표본에서 뺀다**(2026-09-28 · `services/kpi_scope`). 규칙은 합집합 —
+① 조직 이름이 `[내부]` 로 시작(앞으로의 시험 가입) ② Cloud Run 환경변수 `KPI_EXCLUDE_ORG_IDS`
+(이미 있는 조직, 쉼표 구분 org id). 뺀 수는 두 응답의 `excluded_orgs` 로 드러나고, #admin 의
+「KPI③」 칸이 폰에서 그대로 보여 준다. 판정 기준(`min_responses` 등)은 바뀌지 않았다.
 
 ## Preferences
 - 결과물: **Word(.docx)** 선호 (표·그래프 포함, 핵심 요약 + 상세 분석)

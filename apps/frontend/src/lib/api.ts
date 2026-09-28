@@ -1038,16 +1038,75 @@ export interface AdminCoverage {
 }
 
 /**
- * 관리자 커버리지 — GET /admin/coverage + `X-Admin-Token`.
- * 실패는 `ApiError` 로 던진다: 403(토큰 불일치·서버 ADMIN_TOKEN 미설정) · 그 밖 상태 · 0(서버에 못 닿음).
+ * 관리자 GET — `X-Admin-Token` 을 싣는다. 실패는 `ApiError` 로 던진다:
+ * 403(토큰 불일치·서버 ADMIN_TOKEN 미설정) · 그 밖 상태 · 0(서버에 못 닿음).
  */
-export async function getAdminCoverage(adminToken: string): Promise<AdminCoverage> {
+async function adminGet<T>(path: string, adminToken: string): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${BASE}/admin/coverage`, { headers: { "X-Admin-Token": adminToken } });
+    res = await fetch(`${BASE}${path}`, { headers: { "X-Admin-Token": adminToken } });
   } catch {
-    throw new ApiError(0, null, "API /admin/coverage unreachable");
+    throw new ApiError(0, null, `API ${path} unreachable`);
   }
-  if (!res.ok) throw new ApiError(res.status, null, `API /admin/coverage failed: ${res.status}`);
-  return res.json() as Promise<AdminCoverage>;
+  if (!res.ok) throw new ApiError(res.status, null, `API ${path} failed: ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+/** 관리자 커버리지 — GET /admin/coverage + `X-Admin-Token`. */
+export function getAdminCoverage(adminToken: string): Promise<AdminCoverage> {
+  return adminGet<AdminCoverage>("/admin/coverage", adminToken);
+}
+
+/**
+ * KPI③ 표본에서 뺀 내부·테스트 조직(2026-09-28 · 백엔드 `services/kpi_scope`).
+ * 규칙은 이름 접두사 `[내부]` ∪ 환경변수 `KPI_EXCLUDE_ORG_IDS`. 조직은 이름과 id 앞 8자만 온다.
+ */
+export interface KpiExclusion {
+  /** 이 표본에서 실제로 뺀 조직 수 */
+  excluded_orgs: number;
+  excluded: { id_prefix: string; name: string; reasons: ("name_prefix" | "env")[] }[];
+  exclusion_rules: {
+    name_prefix: string;
+    env_var: string;
+    env_ids_configured: number;
+    /** 환경변수에 적혔는데 DB 에 없는 id(앞 8자) — 오타 신호 */
+    env_ids_unmatched: string[];
+  };
+}
+
+/** GET /admin/usage — 파일럿 활성도. `by_org` 는 전체 id 키라 화면은 `orgs` 만 읽는다 */
+export interface AdminUsage extends KpiExclusion {
+  window_days: number;
+  active_orgs: number;
+  total_accesses: number;
+  excluded_accesses: number;
+  by_org: Record<string, number>;
+  orgs: { id_prefix: string; name: string; accesses: number }[];
+}
+
+/** GET /admin/pmf — NPS · 유료 전환 의향. n=0 이면 수치 필드가 null 이거나 빠진다 */
+export interface AdminPmf extends KpiExclusion {
+  n_orgs: number;
+  nps: number | null;
+  would_pay_pct: number | null;
+  promoters?: number;
+  passives?: number;
+  detractors?: number;
+  would_pay_yes?: number;
+  nps_target: number;
+  pay_target_pct: number;
+  min_responses: number;
+  verdict: "표본부족" | "충족" | "미달";
+  one_response_swing_nps?: number;
+  note: string;
+}
+
+/** KPI③ 사용량 — GET /admin/usage + `X-Admin-Token`. */
+export function getAdminUsage(adminToken: string, days = 30): Promise<AdminUsage> {
+  return adminGet<AdminUsage>(`/admin/usage?days=${days}`, adminToken);
+}
+
+/** KPI③ PMF — GET /admin/pmf + `X-Admin-Token`. */
+export function getAdminPmf(adminToken: string): Promise<AdminPmf> {
+  return adminGet<AdminPmf>("/admin/pmf", adminToken);
 }

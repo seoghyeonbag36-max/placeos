@@ -149,11 +149,14 @@ describe("AdminCoverage — #admin 화면 문구", () => {
 });
 
 describe("AdminCoverage — 조회가 겹칠 때(마지막 조회만 반영)", () => {
-  /** 응답 시점을 테스트가 정한다 — 요청 순서대로 resolve 함수를 모은다 */
+  /** 응답 시점을 테스트가 정한다 — /admin/coverage 요청 순서대로 resolve 함수를 모은다.
+   *  같은 조회가 부르는 KPI③(/admin/usage · /admin/pmf, 2026-09-28)은 여기서 보지 않는다 — 404 로 바로 답한다. */
   function installDeferredFetch() {
     const pending: { token: string; resolve: (r: unknown) => void }[] = [];
-    vi.stubGlobal("fetch", vi.fn((_url: string, init?: { headers?: Record<string, string> }) =>
-      new Promise((resolve) => pending.push({ token: init?.headers?.["X-Admin-Token"] ?? "", resolve }))));
+    vi.stubGlobal("fetch", vi.fn((url: string, init?: { headers?: Record<string, string> }) =>
+      !/\/admin\/coverage$/.test(url)
+        ? Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve(null) })
+        : new Promise((resolve) => pending.push({ token: init?.headers?.["X-Admin-Token"] ?? "", resolve }))));
     return pending;
   }
   const ok = { ok: true, status: 200, json: () => Promise.resolve(PAYLOAD) };
