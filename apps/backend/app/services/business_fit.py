@@ -98,9 +98,11 @@ _cache: dict[str, tuple[float, object]] = {}
 
 
 # 적합도를 내지 않는 사유 — ①②를 화면·사람이 가를 수 있게 문구를 다르게 둔다.
-REASON_NO_MODEL_LABEL = "추천 모델이 다루지 않는 업종이라 입지 적합도를 내지 않음"
-REASON_NOT_IN_VOCAB = "현재 추천 모델 어휘에 없음('{label}') — 입지 적합도·순위를 내지 않음"
-REASON_NO_ARTIFACT = "추천 모델 산출물이 없어 입지 적합도를 내지 않음"
+# ⚠ "왜"만 적는다. "순위를 내지 않는다"는 화면 문장이 이미 말하므로 여기 넣으면 두 번 읽힌다.
+REASON_NO_MODEL_LABEL = "추천 모델이 다루지 않는 업종"
+REASON_NOT_IN_VOCAB = "현재 추천 모델 어휘에 없음('{label}')"
+REASON_NO_ARTIFACT = "추천 모델 산출물이 없음"
+REASON_NO_DISTRICT_ARTIFACT = "이 상권은 추천 모델 산출물이 없음"
 
 
 def public(item: dict) -> dict:
@@ -278,7 +280,7 @@ def industries_in_district(district_id: str) -> dict | None:
         fit = round(means.get(label, 0.0), 4) if (label and means is not None) else None
         reason = unavailable_reason(item)
         if reason is None and fit is None:
-            reason = "이 상권은 추천 모델 산출물이 없어 입지 적합도를 내지 않음"
+            reason = REASON_NO_DISTRICT_ARTIFACT
         rows.append({
             **public(item), "fit": fit, "fit_rank": None, "fit_unavailable_reason": reason,
             "same_n": same[0][item["key"]] if same else None,

@@ -29,7 +29,7 @@ const INDUSTRIES: IndustryOption[] = [
   { key: "bar", label: "술집", input: "주점", model_label: null },
   // 모델 라벨은 있으나 서빙 어휘에 없다(09-27 재학습으로 문화시설이 빠졌다)
   { key: "culture", label: "전시·공연", input: "문화시설", model_label: "문화시설",
-    fit_unavailable_reason: "현재 추천 모델 어휘에 없음('문화시설') — 입지 적합도·순위를 내지 않음" },
+    fit_unavailable_reason: "현재 추천 모델 어휘에 없음('문화시설')" },
 ];
 
 const fitRow = (id: string, name: string, fit: number | null, rank: number | null) => ({
@@ -149,8 +149,12 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
         districts: [fitRow("garosugil", "가로수길", null, null), fitRow("yeonnam", "연남동", null, null)] },
     }]);
     fireEvent.click(screen.getByRole("button", { name: "Platform" }));
-    await screen.findByText(/현재 추천 모델 어휘에 없음/, undefined, TAB_LOAD);
+    const msg = await screen.findByText(/현재 추천 모델 어휘에 없음/, undefined, TAB_LOAD);
+    // "순위를 내지 않는다"는 한 번만 읽힌다(사유는 "왜"만 싣는다)
+    expect(msg.textContent!.match(/내지 않/g)).toHaveLength(1);
     expect(screen.queryByRole("table", { name: /기준 상권 순위/ })).toBeNull();
     expect(screen.queryByText(/곳 중 \d+위/)).toBeNull();
+    // 순위가 없으면 "순위로만 읽으세요" 안내도 없다
+    expect(screen.queryByText(/순위로만 읽으세요/)).toBeNull();
   });
 });
