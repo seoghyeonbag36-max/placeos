@@ -32,6 +32,10 @@ const HELP = "정렬 격차 = 대조 지표 − 앵커. 대조 지표는 R-ONE �
   + " 불확실 구간은 층 점유 밴드(상가정보 층 공란에서 오는 폭)다."
   + " 대조 지표 대표값은 면적가중이라 층 수 기준 구간 밖에 떨어질 수 있다.";
 
+// 거점 대표값을 내린 거점(banpo)에도 대조 지표는 싣는다(2026-09-28) — 다른 모집단이라 내린 사유가 걸리지 않는다.
+const WITHHELD_NOTE = " 이 거점은 거점 전체 공실률(주 지표)을 내렸다. 여기 대조 지표는 집합건물을 뺀"
+  + " 중대형 모집단으로 따로 잰 값이라 거점 전체를 대표하지 않는다.";
+
 export default function AlignedAnchor({ src, className }: { src: AlignedAnchorSource; className?: string }) {
   const a = src.anchor_pct;
   if (a == null) return null;   // 앵커 없는 거점(합성·R-ONE 표본 밖)은 대조 자체가 없다
@@ -40,16 +44,14 @@ export default function AlignedAnchor({ src, className }: { src: AlignedAnchorSo
   if (v == null || gap == null) {
     return (
       <span className={className}
-        title={src.vacancy_withheld
-          ? "거점 대표값을 내린 거점이라 정렬 대조도 싣지 않는다. 앵커는 외부 관측이라 남긴다."
-          : "이 거점에는 R-ONE 과 같은 모집단으로 다시 잰 값이 없다. 거점 전체 공실률로 대신 빼지 않는다."}>
+        title="이 거점에는 R-ONE 과 같은 모집단으로 다시 잰 값이 없다. 거점 전체 공실률로 대신 빼지 않는다.">
         {anchor} · 정렬 대조 없음
       </span>
     );
   }
   const band = bandText(src.aligned_floor_hi_pct, src.aligned_floor_lo_pct);
   return (
-    <span className={className} title={HELP}>
+    <span className={className} title={src.vacancy_withheld ? `${HELP}${WITHHELD_NOTE}` : HELP}>
       {VACANCY_LABEL.contrast} {v.toFixed(1)}%
       {band && <> · {VACANCY_LABEL.band} {band}</>}
       {" · "}{anchor}

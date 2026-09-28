@@ -44,8 +44,10 @@ def test_withheld_hub_serves_no_representative_number():
         assert s["vacancy_withheld"] is True, slug
         assert s["vacancy_rate"] is None, slug
         assert s["anchor_gap_pp"] is None, slug
-        # 정렬 대조(2026-09-28)도 함께 내린다 — 내린 이유(재고 극소 표본)가 그대로 걸린다.
-        assert s["aligned_gap_pp"] is None and s["aligned_vacancy_pct"] is None, slug
+        # 정렬 대조(2026-09-28)는 남는다 — 주 지표와 다른 모집단(중대형·집합 제외)이라
+        # 내린 사유가 걸리지 않고, 내린 수를 되계산할 수도 없다.
+        assert s["aligned_vacancy_pct"] is not None and s["aligned_gap_pp"] is not None, slug
+        assert s["aligned_gap_pp"] != s["anchor_gap_pp"], slug
         assert s["predicted_rate"] is None and s["predicted_delta"] is None, slug
         # 앵커(R-ONE)는 외부 관측이라 남는다 — 우리 대표값과 무관하다.
         assert s["anchor_pct"] is not None, slug
@@ -55,7 +57,8 @@ def test_withheld_hub_serves_no_representative_number():
         # 히트맵도 같은 규칙이다. 요약만 막고 여기를 열어 두면 `앵커 + 격차` 로 내린
         # 수가 그대로 되살아난다 — 실제로 그렇게 한 번 새어 나갔다.
         assert hm["anchor_gap_pp"] is None, slug
-        assert hm["aligned_gap_pp"] is None and hm["aligned_vacancy_pct"] is None, slug
+        assert hm["aligned_gap_pp"] == s["aligned_gap_pp"], slug
+        assert hm["aligned_vacancy_pct"] == s["aligned_vacancy_pct"], slug
         assert hm["anchor_pct"] is not None, slug
         assert hm["predicted_rate"] is None, slug
         # 내린 것은 대표값뿐이다. 셀·건물은 그대로 서야 지도가 빈 채로 뜨지 않는다.

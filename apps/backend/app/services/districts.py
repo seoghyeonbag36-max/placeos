@@ -373,7 +373,7 @@ def _summary(d: dict) -> dict:
         "anchor_pct": ci.get("anchor_pct"),
         # ⚠ deprecated — 주 지표 − 앵커(모집단이 다르다). 화면은 aligned_* 를 읽는다.
         "anchor_gap_pp": None if withheld else ci.get("anchor_gap_pp"),
-        **_aligned(ci, withheld),
+        **_aligned(ci),
         **(_predicted_none() if withheld else _predicted(d["id"], ci["avg_vacancy"])),
     }
 
@@ -382,15 +382,14 @@ _ALIGNED_KEYS = ("aligned_vacancy_pct", "aligned_floor_hi_pct",
                  "aligned_floor_lo_pct", "aligned_gap_pp")
 
 
-def _aligned(ci: dict, withheld: bool) -> dict:
+def _aligned(ci: dict) -> dict:
     """R-ONE 정렬 대조(대조 지표·밴드·정렬 격차). Gold 가 아니면(합성) 전부 None.
 
-    대표값을 내린 거점(banpo)은 정렬 대조도 함께 내린다. 되계산 문제는 없지만(주 지표와
-    무관한 값이다) 내린 이유 — 거점 재고의 극히 일부 위에서 낸 수 — 가 대조 지표에도
-    그대로 걸린다. 앵커(anchor_pct)는 외부 관측이라 남는다.
+    대표값을 내린 거점(banpo)에도 **싣는다**(2026-09-28 결정). 내린 것은 거점 전체를
+    대표하는 주 지표이고, 대조 지표는 R-ONE 중대형과 같은 모집단(집합건물 제외)으로
+    따로 잰 값이라 그 사유 — 집합건물이 재고 대부분이라 거점 전체를 대표하지 못한다 —
+    가 걸리지 않는다. 주 지표와 무관해 내린 수를 되계산할 수도 없다.
     """
-    if withheld:
-        return {k: None for k in _ALIGNED_KEYS}
     return {k: ci.get(k) for k in _ALIGNED_KEYS}
 
 
@@ -433,7 +432,7 @@ def get_vacancy_heatmap(district_id: str) -> dict | None:
             # 그대로 되살린다 — 요약 응답만 막고 히트맵을 안 막은 채로 한 번 새어
             # 나갔다(2026-09-02, test_gold_anchor_comparison_attached 가 잡았다).
             "anchor_gap_pp": None if withheld else ci.get("anchor_gap_pp"),
-            **_aligned(ci, withheld),
+            **_aligned(ci),
             "vacancy_withheld": withheld,
             **(_predicted_none() if withheld
                else _predicted(district_id, ci["avg_vacancy"]))}

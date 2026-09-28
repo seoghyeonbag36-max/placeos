@@ -25,6 +25,12 @@ describe("AlignedAnchor", () => {
     expect(container.textContent).not.toContain("%p");
   });
 
+  it("대표값을 내린 거점에도 대조 지표·정렬 격차를 싣고, 툴팁에 그 사실을 적는다", () => {
+    const { container } = render(<AlignedAnchor src={{ ...base, vacancy_withheld: true }} />);
+    expect(container.textContent).toContain(`${VACANCY_LABEL.gap} +15.8%p`);
+    expect(container.firstElementChild?.getAttribute("title")).toContain("거점 전체 공실률(주 지표)을 내렸다");
+  });
+
   it("앵커가 없으면 아무것도 그리지 않는다", () => {
     const { container } = render(<AlignedAnchor src={{ ...base, anchor_pct: null }} />);
     expect(container.textContent).toBe("");

@@ -393,9 +393,7 @@ def test_aligned_gap_uses_rone_aligned_not_primary():
         keys = ("aligned_vacancy_pct", "aligned_floor_hi_pct", "aligned_floor_lo_pct", "aligned_gap_pp")
         # 두 응답이 같은 값을 낸다 — 요약만 고치고 히트맵을 빼먹는 누수를 막는다.
         assert {k: s[k] for k in keys} == {k: hm[k] for k in keys}, slug
-        if hm["vacancy_withheld"]:
-            assert all(hm[k] is None for k in keys), f"{slug}: 대표값을 내린 거점에 정렬 대조가 남았다"
-            continue
+        # 대표값을 내린 거점(banpo)도 정렬 대조는 싣는다(2026-09-28 결정) — 아래 검사를 똑같이 받는다.
         cal_path = GOLD_DIR / slug / "calibration.json"
         mid = {}
         if cal_path.exists():
@@ -413,8 +411,11 @@ def test_aligned_gap_uses_rone_aligned_not_primary():
         # calibrate_vacancy 가 1자리로 적어 둔 mid.gap_pp 와도 반올림 폭 안에서 맞아야 한다.
         if mid.get("gap_pp") is not None:
             assert hm["aligned_gap_pp"] == pytest.approx(mid["gap_pp"], abs=0.051), slug
-        # 옛 필드는 값을 바꾸지 않았다(deprecated · 하위호환).
-        assert hm["anchor_gap_pp"] == pytest.approx(hm["avg_vacancy"] - hm["anchor_pct"], abs=0.01), slug
+        # 옛 필드는 값을 바꾸지 않았다(deprecated · 하위호환). 대표값을 내린 거점은 옛 격차도 None.
+        if hm["vacancy_withheld"]:
+            assert hm["anchor_gap_pp"] is None, slug
+        else:
+            assert hm["anchor_gap_pp"] == pytest.approx(hm["avg_vacancy"] - hm["anchor_pct"], abs=0.01), slug
         checked += 1
     assert checked > 0, "정렬 격차를 검사한 거점이 0 — 산출물 구조가 바뀌었는지 확인"
 
