@@ -113,7 +113,8 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
         <p className="fit-diff">지금 가게 상권을 보고 있습니다 — 아래 표에서 다른 상권과 견주세요.</p>
       )}
       {here && <Facts row={here} seoulFit={fit.seoul_fit} covered={fit.model_covered} district={vac(districtId)} />}
-      <p className="fit-note">{FIT_NOTE}</p>
+      {/* 적합도·순위를 읽는 법이라 순위가 없으면 싣지 않는다 */}
+      {fit.model_covered && <p className="fit-note">{FIT_NOTE}</p>}
 
       {rows.length > 0 && (
         <div className="fit-table-wrap">
