@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
+import AdminKpi3, { type Kpi3Request } from "@/pages/AdminKpi3";
 import "./AdminCoverage.css";
 
 /**
@@ -22,6 +23,8 @@ export default function AdminCoverage() {
   const [data, setData] = useState<Payload | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  // KPI③ 칸은 같은 토큰으로 따로 부른다 — 커버리지가 실패해도 KPI③ 은 제 오류를 따로 낸다.
+  const [kpi3, setKpi3] = useState<Kpi3Request | null>(null);
 
   // 조회 순번 — 조회가 겹치면(조회 중 Enter · 개발 모드의 자동 조회 2회) 늦게 도착한 옛 응답이
   // 최신 결과를 덮어 오류 문구와 표가 함께 보이고 실패한 토큰이 저장됐다(2026-09-28 브라우저 실측).
@@ -31,6 +34,7 @@ export default function AdminCoverage() {
   async function load(t: string) {
     if (!t) return;
     const seq = ++latest.current;
+    setKpi3({ token: t, seq });
     setLoading(true);
     setError("");
     try {
@@ -83,6 +87,8 @@ export default function AdminCoverage() {
           {error}
         </div>
       )}
+
+      <AdminKpi3 request={kpi3} />
 
       {t && (
         <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
