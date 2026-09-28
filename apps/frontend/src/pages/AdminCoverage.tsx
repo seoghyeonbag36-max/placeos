@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
+
 /**
  * 관리자 전용 커버리지 패널 — 지도에 표시되지 않는 '제외 건물' 을 여기서만 본다.
  *
@@ -10,25 +12,6 @@ import { useEffect, useState } from "react";
  * 진입: URL 해시 #admin. 네비게이션에 링크를 두지 않는다 — 아는 사람만 들어온다.
  * 데이터는 X-Admin-Token 헤더가 있어야 오므로, 토큰 없이는 화면만 열리고 값은 안 나온다.
  */
-type Hub = {
-  slug: string;
-  hub_name: string;
-  tier: string;
-  built_at: string;
-  shown: number;
-  excluded_unknown: number;
-  excluded_non_commercial: number;
-  coverage_pct: number | null;
-  reference_vacancy_pct: number | null;
-};
-type Payload = {
-  hubs: Hub[];
-  totals: {
-    hubs: number; shown: number; excluded_unknown: number;
-    excluded_non_commercial: number; coverage_pct: number | null;
-  };
-};
-
 const TOKEN_KEY = "spaceos.adminToken";
 
 export default function AdminCoverage() {
@@ -43,19 +26,14 @@ export default function AdminCoverage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/v1/admin/coverage", { headers: { "X-Admin-Token": t } });
-      if (!res.ok) {
-        setData(null);
-        setError(res.status === 403
-          ? "토큰이 올바르지 않거나 서버에 ADMIN_TOKEN 이 설정되지 않았습니다."
-          : `요청 실패 (${res.status})`);
-        return;
-      }
-      setData(await res.json());
+      setData(await getAdminCoverage(t));
       sessionStorage.setItem(TOKEN_KEY, t);
-    } catch {
+    } catch (err) {
       setData(null);
-      setError("서버에 연결하지 못했습니다.");
+      const status = err instanceof ApiError ? err.status : 0;
+      setError(status === 403
+        ? "토큰이 올바르지 않거나 서버에 ADMIN_TOKEN 이 설정되지 않았습니다."
+        : status === 0 ? "서버에 연결하지 못했습니다." : `요청 실패 (${status})`);
     } finally {
       setLoading(false);
     }

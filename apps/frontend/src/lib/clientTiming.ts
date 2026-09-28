@@ -10,14 +10,17 @@
  * ## 규칙 — 계측이 화면을 해치지 않는다
  *
  * - **절대 throw 하지 않는다.** Performance API 가 없거나 비콘이 막혀도 화면은 그대로다.
- * - **기다리지 않는다.** `keepalive` fetch 로 띄워 보내고 결과를 안 본다.
+ * - **기다리지 않는다.** `keepalive` fetch 로 띄워 보내고 결과를 안 본다(전송은 api.ts `sendClientMetric`).
  * - **한 번만 보낸다.** 같은 이름은 첫 측정만 — 리렌더마다 쌓이면 표본이 오염된다.
  *
  * ⚠ 이 값은 **클라이언트 자가보고**라 서버 실측과 등급이 다르다. 서버가 `client:`
  *   접두사로 구분해 저장한다(apps/backend/app/api/v1/metrics.py §신뢰 경계).
  */
 
-/** 서버 `ALLOWED` 와 같은 목록. 늘릴 때는 양쪽을 같이 고친다. */
+import { sendClientMetric } from "@/lib/api";
+
+/** 서버 `ALLOWED` 와 같은 목록. 늘릴 때는 양쪽을 같이 고친다.
+ *  ⚠ 정의는 이 파일에 둔다 — 백엔드 tests/test_latency.py 가 이 파일에서 이름을 읽어 대조한다. */
 export type ClientMetric = "map_ready" | "building_detail";
 
 const started = new Map<ClientMetric, number>();
@@ -47,21 +50,7 @@ export function endTiming(metric: ClientMetric): void {
   if (t0 === undefined || t1 === null) return;
   sent.add(metric);
   started.delete(metric);
-  report(metric, Math.max(0, t1 - t0));
-}
-
-function report(metric: ClientMetric, ms: number): void {
-  try {
-    // api.ts 와 같은 상대경로 규약(`/api/v1`) — 오리진이 갈리지 않는다.
-    void fetch("/api/v1/metrics/client", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ metric, ms: Math.round(ms) }),
-      keepalive: true,
-    }).catch(() => undefined);
-  } catch {
-    /* 계측 실패는 화면과 무관하다 */
-  }
+  sendClientMetric(metric, Math.max(0, t1 - t0));
 }
 
 /** 테스트용 — 모듈 상태를 비운다. */
