@@ -870,3 +870,64 @@ export const createApiKey = (token: string, name: string) =>
 /** 키 폐기 — 조직 관리자만(403) · 404(없는 키) */
 export const revokeApiKey = (token: string, keyId: string) =>
   authRequest<ApiKeyInfo>("DELETE", `/api-keys/${encodeURIComponent(keyId)}`, { token });
+
+/* ===== 계측 비콘 · 관리자 커버리지 (2026-09-28 api.ts 일원화) =====
+ * 둘 다 원래 호출부(lib/clientTiming.ts · pages/AdminCoverage.tsx)에서 fetch 를 직접 불렀다.
+ * 동작은 그대로 옮겼다 — 경로·헤더·keepalive·실패 처리 모두 같다.
+ */
+
+/** 화면 구간 이름 — 서버 `ALLOWED`(app/api/v1/metrics.py)와 같은 목록. 늘릴 때는 양쪽을 같이 고친다. */
+export type ClientMetric = "map_ready" | "building_detail";
+
+/**
+ * 화면 계측 비콘 — POST /metrics/client. **절대 throw 하지 않고 기다리지 않는다.**
+ * `keepalive` 가 없으면 탭을 닫는 순간 비콘이 날아간다. 계측 실패는 화면과 무관하다.
+ */
+export function sendClientMetric(metric: ClientMetric, ms: number): void {
+  try {
+    void fetch(`${BASE}/metrics/client`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metric, ms: Math.round(ms) }),
+      keepalive: true,
+    }).catch(() => undefined);
+  } catch {
+    /* fetch 자체가 없어도 조용히 물러난다 */
+  }
+}
+
+/** 관리자 커버리지 — 거점 한 줄 */
+export interface AdminCoverageHub {
+  slug: string;
+  hub_name: string;
+  tier: string;
+  built_at: string;
+  shown: number;
+  excluded_unknown: number;
+  excluded_non_commercial: number;
+  coverage_pct: number | null;
+  reference_vacancy_pct: number | null;
+}
+/** GET /admin/coverage 응답 */
+export interface AdminCoverage {
+  hubs: AdminCoverageHub[];
+  totals: {
+    hubs: number; shown: number; excluded_unknown: number;
+    excluded_non_commercial: number; coverage_pct: number | null;
+  };
+}
+
+/**
+ * 관리자 커버리지 — GET /admin/coverage + `X-Admin-Token`.
+ * 실패는 `ApiError` 로 던진다: 403(토큰 불일치·서버 ADMIN_TOKEN 미설정) · 그 밖 상태 · 0(서버에 못 닿음).
+ */
+export async function getAdminCoverage(adminToken: string): Promise<AdminCoverage> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/admin/coverage`, { headers: { "X-Admin-Token": adminToken } });
+  } catch {
+    throw new ApiError(0, null, "API /admin/coverage unreachable");
+  }
+  if (!res.ok) throw new ApiError(res.status, null, `API /admin/coverage failed: ${res.status}`);
+  return res.json() as Promise<AdminCoverage>;
+}
