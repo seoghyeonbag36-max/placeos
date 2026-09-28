@@ -128,11 +128,14 @@ def get_forecast(district_id: str, quarters: int = 1) -> dict | None:
 def skill_summary() -> dict | None:
     """LSTM 이 베이스라인을 이기는가 — `scripts/kpi_baseline.py` 와 같은 판정(같은 코드).
 
-    화면용으로 줄인 요약이다. 두 축(오차: 지속성 · 방향: 무정보 상수)을 **둘 다** 준다 —
+    화면용으로 줄인 요약이다. 두 축(오차 · 방향)을 **둘 다** 준다 —
     하나만 인용하면 어느 쪽이든 거짓이 된다(`forecast_skill.lstm_skill` 독스트링).
     `verdict` 는 전체 holdout 의 **참고** 판정, `gate_verdict` 는 `protocol.confirm_after`
     이후(본 적 없는) 분기로만 낸 판정이다 — 그런 표본이 0건이면 `확인대기`.
     균형정확도·MCC 는 관측 전용이라 싣지 않는다(판정에 쓰지 않는다).
+    기준은 축마다 두 무정보 규칙 중 **강한 쪽**이고(오차: 지속성·거점 평균 · 방향: 다수방향
+    상수·'평균 쪽'), 어느 쪽이었는지 `baseline_label` 로 싣는다. 거점 평균(`clim`)이 없는
+    산출물(09-27 서빙본)은 종전 기준(지속성 · 상수)이고 `baseline_basis = legacy_no_clim`.
 
     산출물이 없거나 holdout 이 비면 None — 화면은 그때 문구를 **숨긴다**(옛 값 폴백 없음).
     부트스트랩(2000회)이 있어 산출물을 다시 읽을 때만 새로 계산한다.
@@ -154,9 +157,14 @@ def skill_summary() -> dict | None:
             "n_forecast_hubs": len(fc.get("forecasts") or {}),
             "confirm_after": cf.get("after"),
             "n_fresh": cf.get("n_fresh"),
+            # 2026-09-30: 두 기준 중 강한 쪽(strongest_of_two) · `clim` 없는 산출물은
+            # 종전 기준으로 물러난다(legacy_no_clim). 화면은 아래 `baseline_label` 을 읽는다
+            "baseline_basis": res["baseline_basis"],
             "error": {
                 "model_mae": e["model_mae"],
                 "persistence_mae": e["persistence_mae"],
+                "baseline_label": e["baseline_label"],
+                "baseline_mae": e["baseline_mae"],
                 "mae_skill": e["mae_skill"],
                 "mae_skill_ci95": e["mae_skill_ci95"],
                 "verdict": e["verdict"],

@@ -664,14 +664,20 @@ export type SkillVerdict = "실력" | "구분불가" | "열위" | "확인대기"
 export interface ForecastSkill {
   n: number; n_hubs: number; n_forecast_hubs: number;
   confirm_after: string | null; n_fresh: number | null;
-  /** 오차 축 — 베이스라인: 지속성(다음 분기 = 직전 분기값) */
+  /** 2026-09-30 개정 — `strongest_of_two`(두 무정보 규칙 중 강한 쪽) ·
+   *  `legacy_no_clim`(거점 평균이 없는 산출물 — 종전 기준). 옛 응답에는 없다 */
+  baseline_basis?: "strongest_of_two" | "legacy_no_clim";
+  /** 오차 축 — 베이스라인: 지속성(다음 분기 = 직전 분기값)·거점 평균 중 강한 쪽 */
   error: {
     model_mae: number; persistence_mae: number;
-    /** 1 − 모델/지속성. 음수면 지속성보다 못하다 */
+    /** 판정에 쓴 기준 — "지속성" | "거점 평균". 없으면 지속성(옛 응답) */
+    baseline_label?: string; baseline_mae?: number;
+    /** 1 − 모델/기준. 음수면 기준보다 못하다 */
     mae_skill: number; mae_skill_ci95: [number, number];
     verdict: SkillVerdict; gate_verdict: SkillVerdict;
   };
-  /** 방향 축 — 베이스라인: 무정보 상수(항상 하락/상승 중 holdout 에서 더 잘 맞는 쪽) */
+  /** 방향 축 — 베이스라인: 무정보 상수(항상 하락/상승 중 holdout 에서 더 잘 맞는 쪽)와
+   *  '평균 쪽'(거점 평균 방향) 중 강한 쪽. `baseline_label` 이 어느 쪽인지 말한다 */
   direction: {
     model_acc: number; baseline_acc: number; baseline_label: string;
     skill_pp: number; skill_ci95_pp: [number, number]; mcnemar_p: number;

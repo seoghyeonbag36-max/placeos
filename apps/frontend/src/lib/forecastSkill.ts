@@ -26,11 +26,19 @@ export function verdictLabel(axis: { verdict: SkillVerdict; gate_verdict: SkillV
     : `${axis.gate_verdict}(참고 ${axis.verdict})`;
 }
 
-/** 오차 축 한 줄 — MAE · 지속성 · 기술점수[95% 구간] → 판정 */
+/** 오차 축 기준 — 응답의 `baseline_label`(2026-09-30 개정: 지속성·거점 평균 중 강한 쪽).
+ *  옛 응답·`clim` 없는 산출물이면 지속성이다 — 그때 문구는 개정 전과 한 글자도 같다. */
+function errorBase(skill: ForecastSkill): { label: string; mae: number } {
+  const e = skill.error;
+  return { label: e.baseline_label ?? "지속성", mae: e.baseline_mae ?? e.persistence_mae };
+}
+
+/** 오차 축 한 줄 — MAE · 기준(지속성 또는 거점 평균) · 기술점수[95% 구간] → 판정 */
 export function errorLine(skill: ForecastSkill): string {
   const e = skill.error;
   const [lo, hi] = e.mae_skill_ci95;
-  return `오차 MAE ${e.model_mae.toFixed(3)} vs 지속성 ${e.persistence_mae.toFixed(3)}`
+  const base = errorBase(skill);
+  return `오차 MAE ${e.model_mae.toFixed(3)} vs ${base.label} ${base.mae.toFixed(3)}`
     + ` · 기술점수 ${pct1(e.mae_skill)} [${pct1(lo)}, ${pct1(hi)}] → ${verdictLabel(e)}`;
 }
 
@@ -49,13 +57,19 @@ export function pendingLine(skill: ForecastSkill): string | null {
   return `확정은 ${skill.confirm_after} 이후 분기 표본 필요(현재 ${skill.n_fresh ?? 0}건) · 홀드아웃 n=${skill.n}`;
 }
 
+/** 기준을 사람 말로 — 거점 평균이면 그렇게, 아니면 개정 전 문구 그대로 */
+function basePhrase(label: string): string {
+  return label === "거점 평균" ? "이 거점의 과거 평균(거점 평균)" : "직전 분기값 그대로(지속성)";
+}
+
 /** 오차 축을 사람 말로 — 예측을 왜 접었는지 한 줄에 쓴다 */
-function errorPhrase(v: SkillVerdict): string {
+function errorPhrase(v: SkillVerdict, label: string): string {
+  const b = basePhrase(label);
   switch (v) {
-    case "열위": return "직전 분기값 그대로(지속성)보다 오차가 크다";
-    case "구분불가": return "직전 분기값 그대로(지속성)와 오차 차이를 가를 수 없다";
-    case "실력": return "직전 분기값 그대로(지속성)보다 오차가 작다";
-    default: return "직전 분기값 그대로(지속성)와의 비교를 가를 수 없다";
+    case "열위": return `${b}보다 오차가 크다`;
+    case "구분불가": return `${b}와 오차 차이를 가를 수 없다`;
+    case "실력": return `${b}보다 오차가 작다`;
+    default: return `${b}와의 비교를 가를 수 없다`;
   }
 }
 
@@ -64,5 +78,5 @@ export function foldReason(skill: ForecastSkill | null | undefined): string {
   if (!skill) return "베이스라인 대비 판정을 읽지 못해 실험 모델로 접었다.";
   const ref = skill.error.verdict;
   const tag = skill.error.gate_verdict === ref ? ref : `참고 ${ref} · ${skill.error.gate_verdict}`;
-  return `LSTM 은 ${errorPhrase(ref)}(${tag}) — 베이스라인을 이긴다고 확인되기 전까지 실험 모델로 접었다.`;
+  return `LSTM 은 ${errorPhrase(ref, errorBase(skill).label)}(${tag}) — 베이스라인을 이긴다고 확인되기 전까지 실험 모델로 접었다.`;
 }

@@ -309,7 +309,9 @@ def test_selection_never_sees_test_metrics() -> None:
                      if not ln.lstrip().startswith("#") and '"""' not in ln)
     assert '"test"' not in code and "['test']" not in code
     body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
-    assert 'select_trial([r["val"] for r in results])' in body
+    # 2026-09-30: 기준 인자(`baseline=`)가 붙었다 — 넘기는 지표는 여전히 val 블록뿐이다
+    assert 'select_trial([r["val"] for r in results],' in body
+    assert "baseline=GRIDS[grid][\"selection_baseline\"]" in body
 
 
 def test_protocol_pins_the_last_seen_test_quarter() -> None:
@@ -335,3 +337,190 @@ def test_serving_reads_the_target_mode_from_the_checkpoint() -> None:
     assert '"target_mode": ds.target_mode' in train_src, "체크포인트에 target_mode 가 없다"
     assert 'ckpt.get("target_mode", "level") == "delta"' in pred_src, (
         "서빙이 Δ 체크포인트를 수준으로 읽는다")
+
+
+# ─────────────── 정규화·조기종료 그리드 (2026-09-28) ───────────────
+# → docs/finding-lstm-regularization-prereg-2026-09-28.md §2 · §3 · §4
+
+def _grids():
+    sys.path.insert(0, str(ROOT))
+    from ml.training import lstm_grids
+    return lstm_grids
+
+
+_MODES = ("level", "delta")   # datasets.TARGET_MODES — numpy 없이 돌도록 값으로 둔다
+
+
+def test_default_grid_is_unchanged_level_times_delta() -> None:
+    """기본 그리드는 09-26 사전등록 그대로 — 16 시행 · 400 epoch 고정 · 감쇠 없음.
+
+    순서도 잠근다: 선택 규칙의 마지막 동률 키가 인덱스라 순서가 곧 결과다.
+    """
+    g = _grids()
+    trials = g.build_trials("default", _MODES)
+    assert len(trials) == 16
+    assert [t["target_mode"] for t in trials] == ["level"] * 8 + ["delta"] * 8
+    assert all(t["weight_decay"] == 0.0 and t["patience"] is None for t in trials)
+    assert [{k: t[k] for k in ("hidden", "layers", "look_back")} for t in trials[:8]] \
+        == list(g.BASE_TRIALS)
+
+
+def test_reg_grid_matches_the_preregistration() -> None:
+    """§2: 8 조합 × weight_decay {0, 1e-3} = 16 · level 고정 · patience 20 공통."""
+    g = _grids()
+    trials = g.build_trials("reg-0928", _MODES)
+    assert len(trials) == 16, "§3 시행 수 상한 16"
+    assert {t["target_mode"] for t in trials} == {"level"}, "Δ 는 09-27 에 기각됐다"
+    assert [t["weight_decay"] for t in trials] == [0.0] * 8 + [1e-3] * 8
+    assert {t["patience"] for t in trials} == {20}
+    for arm in (trials[:8], trials[8:]):
+        assert [{k: t[k] for k in ("hidden", "layers", "look_back")} for t in arm] \
+            == list(g.BASE_TRIALS)
+
+
+def test_unknown_grid_is_rejected() -> None:
+    g = _grids()
+    with pytest.raises(ValueError):
+        g.build_trials("reg-0929", _MODES)
+
+
+def test_reg_grid_does_not_serve_a_rejected_lever() -> None:
+    """§4: 후보 0 이면 fallback 시행이 골라져도 서빙을 교체하지 않는다.
+
+    09-27(default)은 fallback 도 교체했다 — 그 동작은 기본 그리드에 남긴다.
+    """
+    g = _grids()
+    fallback = {"fallback": True, "eligible": 0, "trials": 16}
+    found = {"fallback": False, "eligible": 2, "trials": 16}
+    assert g.serves("reg-0928", fallback) is False
+    assert g.serves("reg-0928", found) is True
+    assert g.serves("default", fallback) is True
+
+
+def test_main_writes_the_report_before_the_serving_branch() -> None:
+    """기각돼도 기록은 남아야 한다 — 리포트를 쓰기 전에 return 하면 결과가 사라진다.
+
+    그리고 서빙 산출물(torch.save · FORECAST_JSON)은 서빙 분기 **뒤**에서만 쓴다.
+    """
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    i_report = body.index("report_path.write_text(")
+    i_branch = body.index("if not served:")
+    i_save = body.index("torch.save(")
+    i_fc = body.index("FORECAST_JSON.write_text(")
+    assert i_report < i_branch < i_save and i_branch < i_fc
+
+
+def test_report_carries_test_only_for_the_chosen_trial() -> None:
+    """시행 기록에 test 를 싣지 않는다 — 고르지 않은 시행의 test 는 사후 선택의 재료다."""
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    block = body[body.index('"trials": [{'):body.index("REPORTS.mkdir(")]
+    assert 'r["val"]' in block and 'r["test"]' not in block
+
+
+def test_early_stopping_restores_the_best_val_checkpoint(monkeypatch) -> None:
+    """조기종료 모드에서 돌려받는 모델의 val 손실 == 기록된 최선 val 손실(복원 확인).
+
+    patience=None 이면 종전 경로 그대로 — 멈추지 않고 최선 기록도 없다.
+    """
+    torch = pytest.importorskip("torch")
+    m = _dataset_module()
+    prepared = _prep(m, _synthetic(n_quarters=20))
+    monkeypatch.setattr(m, "load_gold", lambda: prepared)
+    from ml.training import train_lstm as t
+
+    plain = t._train_once(hidden=8, layers=1, look_back=4, epochs=30)
+    assert plain["params"]["patience"] is None
+    assert plain["params"]["stopped_epoch"] == plain["params"]["best_epoch"] == 30
+    assert plain["params"]["best_val_loss"] is None
+
+    res = t._train_once(hidden=8, layers=1, look_back=4, epochs=200, patience=3,
+                        weight_decay=1e-3)
+    p = res["params"]
+    assert p["weight_decay"] == 1e-3 and p["patience"] == 3
+    assert p["best_epoch"] <= p["stopped_epoch"] <= 200
+    ds, model = res["ds"], res["model"]
+    X = torch.from_numpy(ds.X[ds.sample_is_val])
+    y = torch.from_numpy(ds.y[ds.sample_is_val])
+    with torch.no_grad():
+        got = float(torch.nn.functional.mse_loss(model(X).squeeze(-1), y))
+    assert got == pytest.approx(p["best_val_loss"], rel=1e-4, abs=1e-6)
+
+
+# ─────────────── 두 기준 중 강한 쪽 — 후보 필터 (2026-09-30 개정) ───────────────
+# → docs/finding-lstm-regularization-prereg-2026-09-28.md §개정
+
+def _vc(mae: float, pers: float, clim: float | None, dir_acc: float) -> dict:
+    return {"mae": mae, "persistence_mae": pers, "climatology_mae": clim, "dir_acc": dir_acc}
+
+
+def test_strongest_filter_rejects_trials_that_only_beat_persistence() -> None:
+    """**핵심 잠금.** 지속성만 넘고 거점 평균을 못 넘는 시행은 후보가 아니다.
+
+    스모크의 모양 그대로(합성값): 거점 평균 0.905 · 지속성 1.338 · 평균 근처 모델 1.0.
+    """
+    sel = _select()
+    vals = [_vc(1.00, 1.338, 0.905, 0.76),    # 지속성만 이긴다 — 평균회귀
+            _vc(0.88, 1.338, 0.905, 0.70)]    # 둘 다 이긴다 → 이것
+    idx, rec = sel.select_trial(vals, baseline="strongest")
+    assert idx == 1 and rec["eligible"] == 1 and rec["fallback"] is False
+    assert rec["rule"] == sel.RULE_STRONGEST
+    assert rec["baseline_label"] == "climatology"
+    # 같은 val 을 종전 필터로 보면 첫 시행(방향 최대)이 골라졌다 — 개정이 바꾸는 자리
+    assert sel.select_trial(vals)[0] == 0
+
+
+def test_strongest_filter_uses_persistence_when_it_is_the_stronger_one() -> None:
+    sel = _select()
+    idx, rec = sel.select_trial([_vc(1.0, 1.2, 1.5, 0.6)], baseline="strongest")
+    assert rec["eligible"] == 1 and rec["baseline_label"] == "persistence"
+
+
+def test_strongest_filter_refuses_a_val_block_without_climatology() -> None:
+    """조용히 지속성으로 물러나면 개정 기준이 한 시행에서 빠져도 모른다 — 멈춘다."""
+    sel = _select()
+    with pytest.raises(ValueError):
+        sel.select_trial([_v(1.0, 1.2, 0.6)], baseline="strongest")
+
+
+def test_default_selection_is_unchanged_by_the_revision() -> None:
+    """기본(`persistence`)은 09-26 사전등록 그대로 — 거점 평균이 있어도 읽지 않는다."""
+    sel = _select()
+    idx, rec = sel.select_trial([_vc(1.0, 1.338, 0.905, 0.76)])
+    assert rec["eligible"] == 1 and rec["rule"] == sel.RULE
+    assert rec["baseline"] == "persistence"
+
+
+def test_grids_pin_their_selection_baseline() -> None:
+    """reg-0928 은 강한 쪽(개정) · default 는 지속성(09-26 사전등록 그대로)."""
+    g = _grids()
+    assert g.GRIDS["reg-0928"]["selection_baseline"] == "strongest"
+    assert g.GRIDS["default"]["selection_baseline"] == "persistence"
+
+
+def test_holdout_rows_carry_the_hub_mean() -> None:
+    """판정(forecast_skill)은 holdout 행의 `clim` 으로 강한 쪽을 잰다 — 산출물에 실려야 한다."""
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    assert '"clim": round(float(c), 3)' in body
+    src = TRAIN.read_text(encoding="utf-8")
+    assert "hub_climatology(ds.sample_district, level, train)" in src, (
+        "거점 평균을 train 행에서만 내지 않는다")
+
+
+def test_hub_climatology_reads_train_rows_only() -> None:
+    """거점 평균은 train 행 타깃의 평균이다 — val·test 타깃이 섞이면 누수다."""
+    np = pytest.importorskip("numpy")
+    sys.path.insert(0, str(ROOT))
+    from ml.training.lstm_baselines import climatology_block, hub_climatology
+
+    did = np.array([0, 0, 0, 1, 1, 2])
+    y = np.array([1.0, 3.0, 100.0, 4.0, -50.0, 7.0])
+    train = np.array([True, True, False, True, False, False])
+    clim = hub_climatology(did, y, train)
+    assert clim[:3].tolist() == [2.0, 2.0, 2.0]      # 100(홀드아웃)은 안 섞인다
+    assert clim[3:5].tolist() == [4.0, 4.0]
+    assert np.isnan(clim[5])                          # train 행 없는 거점 — 채우지 않는다
+
+    blk = climatology_block(np.array([0.0, 0.0]), np.array([0.5, -0.5]), np.array([2.0, -2.0]))
+    assert blk["climatology_mae"] == pytest.approx(0.5)
+    assert blk["meanward_dir_acc"] == pytest.approx(1.0)
+    assert climatology_block(clim, y, y)["climatology_mae"] is None   # NaN 이 있으면 재지 않는다

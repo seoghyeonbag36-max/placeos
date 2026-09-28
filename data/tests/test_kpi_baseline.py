@@ -576,3 +576,109 @@ def test_serving_artifact_passes_the_vocab_check() -> None:
     assert g["vocab"]["verdict"] == VOCAB_PASS, g["vocab"]["checks"]
     assert g["gate_verdict"] == g["verdict"]
 
+
+
+# ─────────────── 두 기준 중 강한 쪽 (2026-09-30 사전등록 개정) ───────────────
+# → docs/finding-lstm-regularization-prereg-2026-09-28.md §개정
+#   docs/finding-lstm-climatology-baseline-2026-09-28.md §2 · §3
+
+def _mean_reverting(model_offset: float = 0.5, with_clim: bool = True) -> dict:
+    """합성 평균회귀 시계열 — 실측값이 아니다.
+
+    거점 평균(clim)은 0, 직전값은 ±2 를 오가고 실제값은 평균 근처(±0.3)로 돌아온다.
+    그래서 지속성 MAE 는 ≈2, 거점 평균 MAE 는 0.3, '평균 쪽' 방향은 100%, 다수방향
+    상수는 50% 다. 모델은 **평균 근처를 내미는** 조기종료 모델의 모양(clim + offset)이다.
+    """
+    out = {}
+    for h in range(10):
+        for k in range(4):
+            prev = 2.0 if k % 2 == 0 else -2.0
+            actual = 0.3 if (h + k) % 2 == 0 else -0.3
+            row = {"hub": f"h{h}", "quarter": f"2025{k + 1}",
+                   "pred": 0.0 + model_offset, "actual": actual, "prev": prev}
+            if with_clim:
+                row["clim"] = 0.0
+            out[f"h{h}@{k}"] = row
+    return {"holdout": out}
+
+
+def test_hub_mean_becomes_the_error_baseline_when_it_beats_persistence() -> None:
+    """**핵심 잠금.** 평균회귀만으로 지속성을 이기는 모델이 오차 축 `실력`으로 새지 않는다.
+
+    모델 MAE 0.5 는 지속성(≈2)보다 훨씬 낮지만, 모델 없이 거점 평균만 내밀어도 0.3 이다.
+    """
+    res = lstm_skill(_mean_reverting())
+    e = res["error"]
+    assert res["baseline_basis"] == "strongest_of_two"
+    assert e["baseline_label"] == "거점 평균"
+    assert e["baseline_mae"] == pytest.approx(e["climatology_mae"]) == pytest.approx(0.3)
+    assert e["beats_persistence"] is True        # 종전 기준이었다면 이겼다
+    assert e["verdict"] != SKILL                  # 강한 쪽 기준에서는 아니다
+    assert e["mae_skill"] < 0
+
+
+def test_meanward_rule_becomes_the_direction_baseline_when_stronger() -> None:
+    """방향도 같다 — '평균 쪽'(100%)이 상수(50%)보다 강하면 그쪽에 댄다."""
+    d = lstm_skill(_mean_reverting())["direction"]
+    assert d["constant_acc"] == pytest.approx(0.5)
+    assert d["meanward_acc"] == pytest.approx(1.0)
+    assert d["baseline_label"] == "평균 쪽"
+    assert d["baseline_acc"] == pytest.approx(1.0)
+    assert d["verdict"] != SKILL                  # 상수(50%)에 댔다면 +50%p 로 통과했다
+
+
+def test_holdout_without_clim_falls_back_to_the_legacy_baselines() -> None:
+    """`clim` 없는 산출물(09-27 서빙본)은 종전 기준 그대로 — 그리고 그렇다고 밝힌다."""
+    res = lstm_skill(_mean_reverting(with_clim=False))
+    e, d = res["error"], res["direction"]
+    assert res["baseline_basis"] == "legacy_no_clim"
+    assert e["baseline_label"] == "지속성" and e["climatology_mae"] is None
+    assert e["baseline_mae"] == e["persistence_mae"]
+    assert d["baseline_label"] in ("항상 하락", "항상 상승") and d["meanward_acc"] is None
+    # 같은 표본을 종전 기준으로 재면 평균회귀가 두 축 모두 `실력`으로 통과한다 — 이 개정의 이유
+    assert e["verdict"] == SKILL and d["verdict"] == SKILL
+
+
+def test_partial_clim_is_not_a_partial_sample() -> None:
+    """한 행이라도 `clim` 이 없으면 전부 종전 기준 — 부분 표본으로 강한 쪽을 재지 않는다."""
+    fc = _mean_reverting()
+    first = next(iter(fc["holdout"].values()))
+    del first["clim"]
+    assert lstm_skill(fc)["baseline_basis"] == "legacy_no_clim"
+
+
+def test_persistence_stays_the_baseline_when_hub_mean_is_weaker() -> None:
+    """거점 평균이 더 약하면 기준은 지속성 그대로다 — '강한 쪽'이지 '거점 평균'이 아니다."""
+    fc = _mean_reverting()
+    for row in fc["holdout"].values():
+        row["actual"] = row["prev"] + 0.1          # 직전값 근처 — 지속성이 강하다
+        row["clim"] = 5.0
+    e = lstm_skill(fc)["error"]
+    assert e["baseline_label"] == "지속성"
+    assert e["baseline_mae"] == pytest.approx(e["persistence_mae"])
+    assert e["climatology_mae"] > e["persistence_mae"]
+
+
+def test_legacy_numbers_are_unchanged_by_the_revision() -> None:
+    """`clim` 이 없으면 판정에 쓰는 수가 개정 전 공식과 **한 자리도** 다르지 않다."""
+    fc = _mean_reverting(with_clim=False)
+    rows = list(fc["holdout"].values())
+    e = lstm_skill(fc)["error"]
+    mae_m = sum(abs(r["pred"] - r["actual"]) for r in rows) / len(rows)
+    mae_p = sum(abs(r["prev"] - r["actual"]) for r in rows) / len(rows)
+    assert e["mae_skill"] == 1.0 - mae_m / mae_p
+
+
+def test_serving_artifact_reads_on_the_legacy_baselines() -> None:
+    """09-27 서빙본에는 `clim` 이 없다 → 종전 기준. 판정 문구가 개정 전과 같아야 한다.
+
+    서빙 산출물이 새로 학습돼 `clim` 을 실으면 이 테스트는 **깨지는 것이 맞다** —
+    그때 판정은 강한 쪽 기준이고, 이 잠금을 새 산출물에 맞춰 옮긴다.
+    """
+    res = check()["lstm"]
+    if not res.get("available"):
+        pytest.skip("서빙 산출물 없음")
+    assert res["baseline_basis"] == "legacy_no_clim"
+    assert res["error"]["baseline_label"] == "지속성"
+    assert res["error"]["baseline_mae"] == res["error"]["persistence_mae"]
+    assert res["direction"]["baseline_label"] in ("항상 하락", "항상 상승")
