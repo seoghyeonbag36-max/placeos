@@ -221,11 +221,11 @@ def test_shipped_drafts_pass():
     중간 상태로 커밋하더라도 그 커밋은 통과해야 한다. FILL 잔여는 여기서 안 본다 —
     미완은 위반이 아니고, 제출 직전에만 `--require-complete` 로 본다.
     """
-    claims = json.loads(ca.CLAIMS.read_text(encoding="utf-8"))
     docs = sorted(p for p in ca.APPLY_DIR.rglob("*.md") if p.name not in ca.SKIP_NAMES)
     assert docs, "docs/apply/ 에 원고가 없다 — 검사 대상이 사라졌는지 확인할 것"
     bad = {}
     for d in docs:
+        claims = json.loads(ca.claims_path_for(d).read_text(encoding="utf-8"))
         res = ca.check_doc(d, claims, False)
         if not res["ok"]:
             bad[res["doc"]] = res["violations"]
@@ -236,3 +236,23 @@ def test_shipped_drafts_pass():
 def test_rules_and_index_are_not_scanned_as_drafts(name):
     """규칙 문서는 금지어를 예시로 담는다 — 원고로 세면 규칙이 스스로를 위반한다."""
     assert name in ca.SKIP_NAMES
+
+
+def test_past_drafts_map_to_existing_snapshots():
+    """과거본 매핑이 가리키는 원고·스냅샷이 실제로 있고, 현재 대장과 다른 파일이다.
+
+    매핑이 조용히 끊기면(경로 오타·스냅샷 삭제) 과거본이 현재 대장으로 재어지거나
+    SystemExit 로 죽는다 — 어느 쪽이든 여기서 먼저 잡는다.
+    """
+    assert ca.PAST_DRAFTS
+    for doc, snap in ca.PAST_DRAFTS.items():
+        assert (ROOT / doc).exists(), doc
+        cp = ca.claims_path_for(ROOT / doc)
+        assert cp.exists(), cp
+        assert cp != ca.CLAIMS
+
+
+def test_new_drafts_use_current_claims():
+    """과거본이 아닌 원고는 언제나 현재 대장으로 잰다 — 스냅샷으로 새 원고를 통과시키지 않는다."""
+    d = ROOT / "docs" / "apply" / "09-digitalsolveup" / "draft.md"
+    assert ca.claims_path_for(d) == ca.CLAIMS

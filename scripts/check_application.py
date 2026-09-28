@@ -15,6 +15,8 @@
   4. 빈 절 — `<!-- FILL -->` 만 지우고 내용을 안 채운 자리
   5. FILL 잔여 — 제출 직전에는 0 이어야 한다 (`--require-complete`)
 
+이미 제출한 과거본(PAST_DRAFTS)은 제출 당시의 대장 스냅샷(claims-YYYY-MM-DD.json)으로 잰다.
+
 HTML 주석과 코드펜스는 근거 검사(1~3)에서 제외한다. FILL 마커 자체가 금지어와 수치를
 지시문으로 담고 있어서, 주석까지 세면 지시문이 위반으로 잡힌다. 다만 '빈 절'(4) 은
 코드·표를 **내용으로 센다** — 근거에서 빼는 것과 절이 비었는지 세는 것은 다른 판정이다.
@@ -43,6 +45,15 @@ OUT = ROOT / "reports" / "application_check.json"
 
 # 검사 대상에서 빼는 파일 — 규칙 문서와 목차는 원고가 아니다.
 SKIP_NAMES = {"AGENTS.md", "README.md", "claims.json"}
+
+# 이미 제출한 과거본 → 제출 당시의 대장 스냅샷(docs/apply/ 기준 파일명).
+# 과거본은 고치지 않는다. 대신 **그때의 사실**로 계속 검사한다 — 새 대장의 forbid(옛 값)로
+# 재면 제출본이 전부 위반이 되고, 검사에서 빼면 아무것도 안 보게 된다. 둘 다 아니다.
+# 새 원고는 여기 없으므로 늘 현재 claims.json 으로 검사한다.
+PAST_DRAFTS = {
+    "docs/apply/01-spatial-info/draft.md": "claims-2026-09-16.json",   # 2026-09-18 제출
+    "docs/apply/02-govtech/draft.md": "claims-2026-09-16.json",        # 2026-09-21 제출
+}
 
 # 등재 대조 대상 수치: 퍼센트 · 천단위 콤마 · 4자리 이상 정수.
 # 2~3자리 맨숫자(배점 20점·절 번호)까지 잡으면 오탐이 실제 위반을 덮는다.
@@ -99,10 +110,16 @@ def _sections(masked: str) -> list[tuple[str, int, int, int]]:
     return out
 
 
-def _load_claims() -> dict:
-    if not CLAIMS.exists():
-        raise SystemExit(f"[apply] 대장이 없다: {_rel(CLAIMS)}")
-    return json.loads(CLAIMS.read_text(encoding="utf-8"))
+def _load_claims(path: Path = CLAIMS) -> dict:
+    if not path.exists():
+        raise SystemExit(f"[apply] 대장이 없다: {_rel(path)}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def claims_path_for(doc: Path) -> Path:
+    """원고를 잴 대장. 과거본(PAST_DRAFTS)은 제출 당시 스냅샷, 나머지는 현재 대장."""
+    snap = PAST_DRAFTS.get(_rel(doc.resolve()))
+    return APPLY_DIR / snap if snap else CLAIMS
 
 
 def check_doc(path: Path, claims: dict, require_complete: bool) -> dict:
@@ -223,8 +240,6 @@ def main() -> int:
                     help="FILL 마커가 남아 있으면 실패로 본다 (제출 직전용)")
     args = ap.parse_args()
 
-    claims = _load_claims()
-
     if args.doc:
         docs = [Path(d) if Path(d).is_absolute() else ROOT / d for d in args.doc]
         missing = [d for d in docs if not d.exists()]
@@ -243,12 +258,17 @@ def main() -> int:
                        encoding="utf-8")
         return 0
 
-    results = [check_doc(p, claims, args.require_complete) for p in docs]
+    results = []
+    for p in docs:
+        cp = claims_path_for(p)
+        r = check_doc(p, _load_claims(cp), args.require_complete)
+        r["claims"] = _rel(cp)
+        results.append(r)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
         "started": datetime.now().isoformat(timespec="seconds"),
-        "claims": _rel(CLAIMS),
+        "claims": _rel(CLAIMS),  # 현재 대장. 과거본은 docs[].claims 가 스냅샷을 가리킨다
         "require_complete": args.require_complete,
         "docs": results,
         "ok": all(r["ok"] for r in results),
@@ -259,7 +279,8 @@ def main() -> int:
         n = len(r["violations"])
         total += n
         mark = "OK  " if r["ok"] else "실패"
-        print(f"[{mark}] {r['doc']}  (위반 {n} · FILL 잔여 {r['fill_remaining']})", flush=True)
+        past = "" if r["claims"] == _rel(CLAIMS) else f" · 대장 {r['claims']}(제출 당시)"
+        print(f"[{mark}] {r['doc']}  (위반 {n} · FILL 잔여 {r['fill_remaining']}{past})", flush=True)
         for v in r["violations"]:
             head = f"  L{v['line']:>4} [{v['kind']}]"
             if v["id"]:

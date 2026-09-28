@@ -22,6 +22,11 @@ python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md
 python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md --require-complete
 ```
 
+**이미 제출한 과거본은 제출 당시의 대장으로 잰다.** 대장이 바뀌면 옛 값이 forbid 로 옮겨가서
+과거본이 전부 위반이 된다. 과거본은 고치지 않으므로 `scripts/check_application.py` 의 `PAST_DRAFTS`
+가 원고 → 스냅샷(`claims-YYYY-MM-DD.json`)을 잇는다. 지금은 01·02 → `claims-2026-09-16.json`.
+새 원고는 늘 현재 `claims.json` 으로 잰다.
+
 산출은 `reports/application_check.json`. `scripts/run_full_verify.py` 의 `application-check`
 스텝으로도 돈다.
 
