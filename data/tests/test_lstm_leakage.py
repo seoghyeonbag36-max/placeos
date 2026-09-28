@@ -335,3 +335,110 @@ def test_serving_reads_the_target_mode_from_the_checkpoint() -> None:
     assert '"target_mode": ds.target_mode' in train_src, "체크포인트에 target_mode 가 없다"
     assert 'ckpt.get("target_mode", "level") == "delta"' in pred_src, (
         "서빙이 Δ 체크포인트를 수준으로 읽는다")
+
+
+# ─────────────── 정규화·조기종료 그리드 (2026-09-28) ───────────────
+# → docs/finding-lstm-regularization-prereg-2026-09-28.md §2 · §3 · §4
+
+def _grids():
+    sys.path.insert(0, str(ROOT))
+    from ml.training import lstm_grids
+    return lstm_grids
+
+
+_MODES = ("level", "delta")   # datasets.TARGET_MODES — numpy 없이 돌도록 값으로 둔다
+
+
+def test_default_grid_is_unchanged_level_times_delta() -> None:
+    """기본 그리드는 09-26 사전등록 그대로 — 16 시행 · 400 epoch 고정 · 감쇠 없음.
+
+    순서도 잠근다: 선택 규칙의 마지막 동률 키가 인덱스라 순서가 곧 결과다.
+    """
+    g = _grids()
+    trials = g.build_trials("default", _MODES)
+    assert len(trials) == 16
+    assert [t["target_mode"] for t in trials] == ["level"] * 8 + ["delta"] * 8
+    assert all(t["weight_decay"] == 0.0 and t["patience"] is None for t in trials)
+    assert [{k: t[k] for k in ("hidden", "layers", "look_back")} for t in trials[:8]] \
+        == list(g.BASE_TRIALS)
+
+
+def test_reg_grid_matches_the_preregistration() -> None:
+    """§2: 8 조합 × weight_decay {0, 1e-3} = 16 · level 고정 · patience 20 공통."""
+    g = _grids()
+    trials = g.build_trials("reg-0928", _MODES)
+    assert len(trials) == 16, "§3 시행 수 상한 16"
+    assert {t["target_mode"] for t in trials} == {"level"}, "Δ 는 09-27 에 기각됐다"
+    assert [t["weight_decay"] for t in trials] == [0.0] * 8 + [1e-3] * 8
+    assert {t["patience"] for t in trials} == {20}
+    for arm in (trials[:8], trials[8:]):
+        assert [{k: t[k] for k in ("hidden", "layers", "look_back")} for t in arm] \
+            == list(g.BASE_TRIALS)
+
+
+def test_unknown_grid_is_rejected() -> None:
+    g = _grids()
+    with pytest.raises(ValueError):
+        g.build_trials("reg-0929", _MODES)
+
+
+def test_reg_grid_does_not_serve_a_rejected_lever() -> None:
+    """§4: 후보 0 이면 fallback 시행이 골라져도 서빙을 교체하지 않는다.
+
+    09-27(default)은 fallback 도 교체했다 — 그 동작은 기본 그리드에 남긴다.
+    """
+    g = _grids()
+    fallback = {"fallback": True, "eligible": 0, "trials": 16}
+    found = {"fallback": False, "eligible": 2, "trials": 16}
+    assert g.serves("reg-0928", fallback) is False
+    assert g.serves("reg-0928", found) is True
+    assert g.serves("default", fallback) is True
+
+
+def test_main_writes_the_report_before_the_serving_branch() -> None:
+    """기각돼도 기록은 남아야 한다 — 리포트를 쓰기 전에 return 하면 결과가 사라진다.
+
+    그리고 서빙 산출물(torch.save · FORECAST_JSON)은 서빙 분기 **뒤**에서만 쓴다.
+    """
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    i_report = body.index("report_path.write_text(")
+    i_branch = body.index("if not served:")
+    i_save = body.index("torch.save(")
+    i_fc = body.index("FORECAST_JSON.write_text(")
+    assert i_report < i_branch < i_save and i_branch < i_fc
+
+
+def test_report_carries_test_only_for_the_chosen_trial() -> None:
+    """시행 기록에 test 를 싣지 않는다 — 고르지 않은 시행의 test 는 사후 선택의 재료다."""
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    block = body[body.index('"trials": [{'):body.index("REPORTS.mkdir(")]
+    assert 'r["val"]' in block and 'r["test"]' not in block
+
+
+def test_early_stopping_restores_the_best_val_checkpoint(monkeypatch) -> None:
+    """조기종료 모드에서 돌려받는 모델의 val 손실 == 기록된 최선 val 손실(복원 확인).
+
+    patience=None 이면 종전 경로 그대로 — 멈추지 않고 최선 기록도 없다.
+    """
+    torch = pytest.importorskip("torch")
+    m = _dataset_module()
+    prepared = _prep(m, _synthetic(n_quarters=20))
+    monkeypatch.setattr(m, "load_gold", lambda: prepared)
+    from ml.training import train_lstm as t
+
+    plain = t._train_once(hidden=8, layers=1, look_back=4, epochs=30)
+    assert plain["params"]["patience"] is None
+    assert plain["params"]["stopped_epoch"] == plain["params"]["best_epoch"] == 30
+    assert plain["params"]["best_val_loss"] is None
+
+    res = t._train_once(hidden=8, layers=1, look_back=4, epochs=200, patience=3,
+                        weight_decay=1e-3)
+    p = res["params"]
+    assert p["weight_decay"] == 1e-3 and p["patience"] == 3
+    assert p["best_epoch"] <= p["stopped_epoch"] <= 200
+    ds, model = res["ds"], res["model"]
+    X = torch.from_numpy(ds.X[ds.sample_is_val])
+    y = torch.from_numpy(ds.y[ds.sample_is_val])
+    with torch.no_grad():
+        got = float(torch.nn.functional.mse_loss(model(X).squeeze(-1), y))
+    assert got == pytest.approx(p["best_val_loss"], rel=1e-4, abs=1e-6)
