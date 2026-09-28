@@ -15,7 +15,7 @@
   border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 12px; font-weight: var(--fw-semibold, 600);
   cursor: pointer; white-space: nowrap;
 }
-.fitcard-empty button:hover, .fit-table button:hover, .fit-link:hover { background: var(--track-platform); color: #fff; }
+.fitcard-empty button:hover, .fit-table button:hover, .fit-link:hover { background: var(--track-platform); color: var(--surface); }
 .fitcard :is(button):focus-visible { outline: 2px solid var(--track-platform); outline-offset: 2px; }
 
 .fit-eyebrow { font-size: 11px; font-weight: var(--fw-bold, 700); letter-spacing: .04em; color: var(--track-platform); }
@@ -45,7 +45,7 @@
 .fit-table tbody th small { display: block; font-size: 10.5px; font-weight: var(--fw-regular, 400); color: var(--muted); }
 .fit-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fit-table tr.is-current { background: color-mix(in srgb, var(--track-platform) 7%, var(--surface)); }
-.fit-tag { font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: var(--fw-bold, 700); background: var(--track-platform); color: #fff; }
+.fit-tag { font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: var(--fw-bold, 700); background: var(--track-platform); color: var(--surface); }
 .fit-here { font-size: 11px; color: var(--muted); white-space: nowrap; }
 
 @media (max-width: 560px) {

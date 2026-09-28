@@ -2,8 +2,8 @@
    PPPP 네 탭이 같은 자를 쓰므로 페이지 스코프(.platconsole 등) 밖에 둔다.
    글자 크기의 서열이 곧 읽는 순서다: 질문(27) → 결론(15.5) → 근거(12) → 출처(10.5). */
 .verdict{
- --vink:#1f2937;--vsub:#6b7280;--vline:#e5e7eb;--vblue:#2E6FB7;
- background:#fff;border:1px solid var(--vline);border-radius:13px;
+ --vink:#1f2937;--vsub:var(--muted);--vline:#e5e7eb;--vblue:#2E6FB7;
+ background:var(--surface);border:1px solid var(--vline);border-radius:13px;
  padding:15px 18px 13px;margin-bottom:14px;color:var(--vink)}
 .verdict *{box-sizing:border-box}
 
@@ -54,7 +54,7 @@
 
 /* ── 접는 상세 ─────────────────────────────────────────────────────────
    접은 것이지 지운 것이 아니다. 접힌 채로도 안에 무엇이 몇 개 있는지 요약줄이 말한다. */
-.vfold{background:#fff;border:1px solid #e5e7eb;border-radius:13px;margin-bottom:10px}
+.vfold{background:var(--surface);border:1px solid #e5e7eb;border-radius:13px;margin-bottom:10px}
 .vfold>summary{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
  padding:12px 16px;cursor:pointer;list-style:none;user-select:none}
 .vfold>summary::-webkit-details-marker{display:none}
