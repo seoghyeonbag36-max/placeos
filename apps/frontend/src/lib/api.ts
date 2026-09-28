@@ -7,27 +7,42 @@ import { clearToken, loadToken } from "@/lib/session";
 const BASE = "/api/v1";
 
 /**
- * 분석 API 요청 — 로그인해 있으면 조직을 밝힌다 (2026-09-28, KPI③ P1).
- *
- * 백엔드는 분석 API 에 자격증명이 오면 조직별 사용량을 남기고(`services/usage.record_access`)
- * 익명은 세지 않는다. 종전에는 토큰을 계정 API 에만 실어서 **로그인한 파일럿이 지도를 써도
- * `active_orgs` 가 0** 이었다 → docs/pilot-outreach-founders-2026-10.md §0 P1.
- *
- * B9 가 토큰을 여기 안 실은 이유는 하나였다 — 백엔드는 만료·폐기된 토큰을 익명으로 강등하지
- * 않고 **401 로 거절한다**(security.get_optional_principal). 그래서 401 이 오면 토큰을 지우고
- * (= 로그아웃) **익명으로 한 번만** 다시 부른다. 지도는 서지 않고, 계정 창은 다음에 열 때
- * 로그인 안내를 띄운다. 401 은 핸들러 앞(의존성)에서 나므로 POST 를 다시 불러도 부작용이
- * 두 번 생기지 않는다. X-API-Key 를 직접 싣는 호출에는 토큰을 더하지 않는다(키가 우선한다).
+ * 로그인 세션이 분석 요청 도중 만료·폐기됐다는 신호(2026-09-28 P1). `App` 이 받아 알림을 띄운다.
+ * detail 없음 — 받는 쪽은 "세션이 끝났다" 하나만 알면 된다.
  */
-async function analysisFetch(path: string, init: RequestInit = {}): Promise<Response> {
+export const SESSION_EXPIRED_EVENT = "placeos:session-expired";
+
+/**
+ * 분석 API 요청 — 로그인해 있으면 토큰을 싣는다(2026-09-28 P1 · KPI③ 파일럿 사용량).
+ *
+ * ## 왜 싣나
+ * 백엔드 `deps.track_access` → `usage.record_access` 는 **익명 요청을 세지 않는다.** 토큰을
+ * `/auth/*` 에만 붙이던 동안은 파일럿이 로그인한 채 화면을 써도 `active_orgs` 가 0 이었다
+ * (docs/pilot-outreach-founders-2026-10.md §0 P1).
+ *
+ * ## 만료 토큰이 지도를 세우지 않게 — 종전에 전역으로 안 붙였던 이유를 여기서 막는다
+ * `get_optional_principal` 은 만료·위조 토큰을 익명으로 **강등하지 않고 401 로 거절한다**(키가
+ * 죽은 파일럿이 사용량에서 조용히 사라지지 않게 하려는 백엔드 설계라 그대로 둔다). 그래서
+ * 토큰을 실은 요청이 401 이면: 토큰을 버리고 · `SESSION_EXPIRED_EVENT` 로 알리고 · **익명으로
+ * 한 번 다시 부른다.** 화면은 계속 돌고, 세션이 끝났다는 사실은 알림으로 드러난다.
+ * 분석 경로는 공개라 토큰 말고는 401 을 낼 이유가 없다.
+ *
+ * `X-API-Key` 를 직접 실은 호출에는 토큰을 섞지 않는다 — 그 401 은 키의 실패이지 세션의 실패가 아니다.
+ */
+async function analysisFetch(path: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}): Promise<Response> {
   const url = `${BASE}${path}`;
-  const headers = { ...(init.headers as Record<string, string> | undefined) };
-  const token = headers["X-API-Key"] ? null : loadToken();
-  if (!token) return fetch(url, { ...init, headers });
-  const res = await fetch(url, { ...init, headers: { ...headers, Authorization: `Bearer ${token}` } });
+  const token = loadToken();
+  const hasApiKey = Object.keys(init.headers ?? {}).some((h) => h.toLowerCase() === "x-api-key");
+  if (!token || hasApiKey) return fetch(url, init);
+
+  const res = await fetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } });
   if (res.status !== 401) return res;
-  clearToken();
-  return fetch(url, { ...init, headers });
+  // 동시에 나간 여러 요청이 함께 401 을 받아도 알림은 한 번만 — 먼저 도착한 쪽이 치운다
+  if (loadToken() === token) {
+    clearToken();
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
+  return fetch(url, init);
 }
 
 export interface Health {
@@ -875,9 +890,10 @@ export const generateProgram = (brief: ProgramBriefInput) =>
  * 계약의 정본은 백엔드다: app/api/v1/auth.py · app/schemas/auth.py. 필드를 여기서 짓지 않는다.
  * 가입은 곧 **조직 생성**이다(개인 계정 없음) — 가입한 사람이 그 조직의 admin 이 된다.
  *
- * ⚠ 계정 함수는 토큰을 **인자로** 받는다(세션에서 몰래 읽지 않는다 — 화면이 401 을 스스로 다룬다).
- *   공개 분석 API(getJSON·postJSON)는 2026-09-28 부터 세션 토큰을 싣는다 — 만료 토큰의 401 을
- *   `analysisFetch` 가 익명 재시도로 흡수하므로 지도가 서지 않는다(파일 머리 `analysisFetch` 참조).
+ * ⚠ 계정 함수는 토큰을 **인자로** 받는다. 공개 분석 API(getJSON·postJSON)는 2026-09-28 부터
+ *   세션 토큰을 스스로 싣는데(P1 — 파일럿 사용량), 그 경로는 `analysisFetch` 한 곳뿐이고 401 이면
+ *   익명으로 물러난다. security.get_optional_principal 은 만료 토큰을 **401 로 거절**하므로, 이
+ *   물러남 없이 토큰을 붙이면 토큰이 만료되는 순간 지도·네 트랙이 전부 401 로 선다.
  * ⚠ 비밀번호는 JSON 본문으로만 보낸다(경로·쿼리스트링 금지). 이 파일은 요청·응답을 로그로 남기지 않는다.
  */
 
@@ -903,8 +919,8 @@ export interface ApiKeyInfo { id: string; name: string; created_at: string; revo
 /** 발급 응답(ApiKeyCreatedResponse). `key` 는 이 응답에서만 볼 수 있고 서버에도 남지 않는다 */
 export interface ApiKeyCreated extends ApiKeyInfo { key: string }
 
-/** 토큰을 인자로 받는 요청 — 계정(/auth)과 파일럿 피드백(/feedback)이 쓴다. `path` 는 BASE 뒤 전체다 */
-async function tokenRequest<T>(
+/** 계정층 요청 — 토큰을 **인자로** 받아 싣고, 실패를 `ApiError` 로 던진다(401 에 물러나지 않는다). */
+async function accountRequest<T>(
   method: "GET" | "POST" | "DELETE",
   path: string,
   opt: { body?: unknown; token?: string } = {},
@@ -931,8 +947,8 @@ async function tokenRequest<T>(
   return res.json() as Promise<T>;
 }
 
-const authRequest = <T>(method: "GET" | "POST" | "DELETE", path: string,
-  opt: { body?: unknown; token?: string } = {}) => tokenRequest<T>(method, `/auth${path}`, opt);
+const authRequest = <T>(method: "GET" | "POST" | "DELETE", path: string, opt: { body?: unknown; token?: string } = {}) =>
+  accountRequest<T>(method, `/auth${path}`, opt);
 
 /** 조직 가입 — 201 · 409(이미 가입된 이메일) · 422(검증: 비밀번호 8~200자 · 조직명 1~200자) */
 export const signup = (req: { org_name: string; email: string; password: string }) =>
@@ -951,20 +967,22 @@ export const createApiKey = (token: string, name: string) =>
 export const revokeApiKey = (token: string, keyId: string) =>
   authRequest<ApiKeyInfo>("DELETE", `/api-keys/${encodeURIComponent(keyId)}`, { token });
 
-/* ===== 파일럿 피드백 — KPI③ 의 유일한 입력 (2026-09-28 P2) =====
- * 계약 정본: app/api/v1/feedback.py · app/schemas/feedback.py. **인증 필수**다 — 익명 응답을 받으면
- * 공개 데모 만족도가 파일럿 PMF 로 둔갑한다. 같은 조직이 다시 내면 덮어쓰지 않고 쌓이고,
- * 계측기(services/pmf)는 조직당 최신 1건만 센다.
+/* ===== 파일럿 피드백 — KPI③ NPS · 유료 전환 의향 (2026-09-28 P2) =====
+ * 계약의 정본: app/schemas/feedback.py · app/api/v1/feedback.py. **인증 필수**(익명 401) —
+ * 공개 데모 만족도가 B2B PMF 로 둔갑하지 않게 백엔드가 막는다. 같은 조직이 다시 내면 덮어쓰지
+ * 않고 쌓이며, 지표는 조직당 최신 1건으로 센다(services/pmf).
  */
-/** 유료 전환 **의향**(계약이 아니다) — 백엔드 Literal 과 같은 세 값 */
+
+/** 돈을 낼 **의향**(계약이 아니다) — 백엔드 Literal 과 같은 세 값 */
 export type WouldPay = "yes" | "maybe" | "no";
 /** POST /feedback 본문(FeedbackIn). nps_score 0~10 · comment 최대 2000자 */
-export interface PilotFeedbackIn { nps_score: number; would_pay: WouldPay; comment?: string }
-/** 201 응답(FeedbackOut) */
-export interface PilotFeedbackOut { id: string; org_id: string; nps_score: number; would_pay: string; created_at: string }
-/** 피드백 1건 — 201 · 401(토큰 만료) · 422(범위 밖) */
-export const submitFeedback = (token: string, body: PilotFeedbackIn) =>
-  tokenRequest<PilotFeedbackOut>("POST", "/feedback", { token, body });
+export interface FeedbackInput { nps_score: number; would_pay: WouldPay; comment?: string }
+/** POST /feedback 응답(FeedbackOut) */
+export interface FeedbackSaved { id: string; org_id: string; nps_score: number; would_pay: WouldPay; created_at: string }
+
+/** 피드백 1건 저장 — 201 · 401(세션 만료) · 422(범위 밖) */
+export const submitFeedback = (token: string, body: FeedbackInput) =>
+  accountRequest<FeedbackSaved>("POST", "/feedback", { token, body });
 
 /* ===== 계측 비콘 · 관리자 커버리지 (2026-09-28 api.ts 일원화) =====
  * 둘 다 원래 호출부(lib/clientTiming.ts · pages/AdminCoverage.tsx)에서 fetch 를 직접 불렀다.
