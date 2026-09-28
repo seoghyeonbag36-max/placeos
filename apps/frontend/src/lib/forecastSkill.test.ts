@@ -32,4 +32,25 @@ describe("forecastSkill", () => {
     expect(foldReason(s)).toContain("지속성)보다 오차가 크다");
     expect(pendingLine(skill("열위"))).toBeNull();
   });
+
+  it("09-27 서빙본(종전 기준 · legacy_no_clim)은 개정 전 응답과 문구가 한 글자도 같다", () => {
+    const old = skill("확인대기");
+    const legacy: ForecastSkill = {
+      ...old, baseline_basis: "legacy_no_clim",
+      error: { ...old.error, baseline_label: "지속성", baseline_mae: old.error.persistence_mae },
+    };
+    expect(errorLine(legacy)).toBe(errorLine(old));
+    expect(foldReason(legacy)).toBe(foldReason(old));
+  });
+
+  it("거점 평균이 기준이면 그 이름과 값을 옮긴다(2026-09-30 개정)", () => {
+    const old = skill("확인대기");
+    const s: ForecastSkill = {
+      ...old, baseline_basis: "strongest_of_two",
+      error: { ...old.error, baseline_label: "거점 평균", baseline_mae: 0.9 },
+    };
+    expect(errorLine(s)).toContain("MAE 2.000 vs 거점 평균 0.900");
+    expect(errorLine(s)).not.toContain("지속성");
+    expect(foldReason(s)).toContain("거점 평균)보다 오차가 크다");
+  });
 });

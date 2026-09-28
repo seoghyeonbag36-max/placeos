@@ -37,6 +37,11 @@ KPI① 이 "AI 정확도 70%+" 한 줄이라 **임계값만 넘으면 달성**�
   사후적 선택이라 모델에 불리하지만, 그래서 **모델이 이기면 진짜로 이긴 것**이다.
   방어선으로 쓰기에 이쪽이 옳다.
 - **LSTM 오차** — 지속성(persistence, 예측=직전 분기값). 시계열에서 표준 대조군이다.
+- **2026-09-30 개정 — LSTM 두 축 모두 '강한 쪽'.** holdout 행에 `clim`(그 거점 train 기간
+  타깃 평균)이 있으면 오차는 지속성·거점 평균 중 MAE 가 낮은 쪽, 방향은 위 상수·'평균 쪽'
+  (sign(clim − 직전값)) 중 정확도가 높은 쪽에 댄다. `vac_proxy` 는 평균회귀가 강해 거점
+  평균만 내밀어도 지속성을 이긴다(docs/finding-lstm-climatology-baseline-2026-09-28.md).
+  `clim` 이 없는 산출물(09-27 서빙본)은 **종전 기준으로 물러나고 출력에 그렇다고 적는다.**
 - **GNN** — 거점 사전분포(`baseline_district_prior_*`). 학습이 이미 남겨 둔 값을 읽는다.
 
 읽기만 한다. 네트워크·파일 쓰기 없음. 표준 라이브러리만 쓴다(numpy·torch 불필요).
@@ -307,7 +312,8 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
         if e["gate_verdict"] != SKILL:
             lo, hi = e["mae_skill_ci95"]
             failures.append(
-                f"LSTM MAE {e['model_mae']:.3f} vs 지속성 베이스라인 {e['persistence_mae']:.3f} "
+                f"LSTM MAE {e['model_mae']:.3f} vs {e['baseline_label']} 베이스라인 "
+                f"{e['baseline_mae']:.3f} "
                 f"— 기술점수 {e['mae_skill']:+.1%} [{lo:+.1%}, {hi:+.1%}] → {e['gate_verdict']}"
                 + (f"(참고 {e['verdict']})" if pend else "") + pend)
     if gnn.get("available") and gnn["gate_verdict"] != SKILL:
@@ -343,12 +349,21 @@ def _fmt(res: dict) -> str:
         out.append(f"   재지 못했다 — {lstm.get('reason')}")
     else:
         d, e = lstm["direction"], lstm["error"]
+        if lstm["baseline_basis"] == "legacy_no_clim":
+            out.append("   [기준] 종전 기준(지속성 · 다수방향 상수) — 이 산출물에 거점 평균(clim)이 "
+                       "없어 강한 쪽 기준으로 못 잰다(2026-09-30 개정 전 학습본)")
+        else:
+            out.append("   [기준] 축마다 두 무정보 규칙 중 강한 쪽 — 오차: 지속성·거점 평균 · "
+                       "방향: 다수방향 상수·평균 쪽(2026-09-30 개정)")
         lo, hi = d["model_ci95"]
         slo, shi = d["skill_ci95_pp"]
         out.append(f"   방향정확도  모델 {d['model_acc']:.1%} "
                    f"({d['model_hits']}/{lstm['n']}) · 95%CI [{lo:.1%}, {hi:.1%}]")
         out.append(f"               베이스라인({d['baseline_label']}) {d['baseline_acc']:.1%} "
                    f"({d['baseline_hits']}/{lstm['n']})")
+        if d["meanward_acc"] is not None:
+            out.append(f"               후보: {d['constant_label']} {d['constant_acc']:.1%} · "
+                       f"평균 쪽 {d['meanward_acc']:.1%} — 강한 쪽을 기준으로 쓴다")
         out.append(f"   {_MARK[d['verdict']]} {d['verdict']} — 실력 {d['skill_pp']:+.1f}%p "
                    f"[{slo:+.1f}, {shi:+.1f}] · McNemar "
                    f"b={d['mcnemar']['b_model_only']} c={d['mcnemar']['c_baseline_only']} "
@@ -374,8 +389,13 @@ def _fmt(res: dict) -> str:
                        f"{lstm['samples_per_hub']:.1f}건 (롤링 오리진) · "
                        f"구간은 {d['ci_kind']} — 같은 거점의 이웃 분기는 독립이 아니다")
         elo, ehi = e["mae_skill_ci95"]
-        out.append(f"   오차        모델 MAE {e['model_mae']:.3f} · "
-                   f"지속성 {e['persistence_mae']:.3f}")
+        if e["climatology_mae"] is None:
+            out.append(f"   오차        모델 MAE {e['model_mae']:.3f} · "
+                       f"지속성 {e['persistence_mae']:.3f}")
+        else:
+            out.append(f"   오차        모델 MAE {e['model_mae']:.3f} · "
+                       f"지속성 {e['persistence_mae']:.3f} · 거점 평균 "
+                       f"{e['climatology_mae']:.3f} → 기준 {e['baseline_label']}")
         out.append(f"   {_MARK[e['verdict']]} {e['verdict']} — 기술점수 MAE "
                    f"{e['mae_skill']:+.1%} [{elo:+.1%}, {ehi:+.1%}] · "
                    f"RMSE {e['rmse_skill']:+.1%}")
