@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.services.districts import PAGES_BY_ID
 from app.services import latency as latency_service
 from app.services import pmf as pmf_service
 from app.services import usage as usage_service
@@ -43,27 +44,38 @@ def coverage() -> dict:
     """거점별 지도 커버리지 — 표시 동수와 제외 동수(대장 미확인/비상업).
 
     build_page_master 가 남긴 gold/{slug}/coverage.json 을 모아서 돌려준다.
+
+    ⚠ **`coverage.json` 수는 서빙 거점 수가 아니다**(2026-09-28). 산출물은 서빙 보류 도시
+    (경기)의 거점에도 서 있어서, 전부 세면 서빙 81 + 보류 7 = 88 이 "거점 88곳"으로
+    찍혔다. 거점마다 `served`(= 공개 API 가 내는 거점인가, `districts.PAGES_BY_ID`)를
+    붙이고, `totals` 는 **서빙 거점만** 합산한다. 보류 거점은 `held` 에 따로 센다.
     """
     hubs = []
     for path in sorted(_GOLD_DIR.glob("*/coverage.json")):
         try:
-            hubs.append(json.loads(path.read_text(encoding="utf-8")))
+            hub = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
+        hub["served"] = hub.get("slug", path.parent.name) in PAGES_BY_ID
+        hubs.append(hub)
 
-    shown = sum(h.get("shown") or 0 for h in hubs)
-    unknown = sum(h.get("excluded_unknown") or 0 for h in hubs)
-    non_comm = sum(h.get("excluded_non_commercial") or 0 for h in hubs)
+    served = [h for h in hubs if h["served"]]
+    held = [h for h in hubs if not h["served"]]
+    shown = sum(h.get("shown") or 0 for h in served)
+    unknown = sum(h.get("excluded_unknown") or 0 for h in served)
+    non_comm = sum(h.get("excluded_non_commercial") or 0 for h in served)
     total = shown + unknown + non_comm
     return {
-        "hubs": sorted(hubs, key=lambda h: -(h.get("excluded_unknown") or 0)),
+        # 서빙 거점 먼저, 그 안에서 대장 미확인이 많은 순
+        "hubs": sorted(hubs, key=lambda h: (not h["served"], -(h.get("excluded_unknown") or 0))),
         "totals": {
-            "hubs": len(hubs),
+            "hubs": len(served),
             "shown": shown,
             "excluded_unknown": unknown,
             "excluded_non_commercial": non_comm,
             "coverage_pct": round(shown / total * 100, 1) if total else None,
         },
+        "held": {"hubs": len(held), "slugs": sorted(h.get("slug", "") for h in held)},
     }
 
 

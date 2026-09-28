@@ -908,14 +908,17 @@ export interface AdminCoverageHub {
   excluded_non_commercial: number;
   coverage_pct: number | null;
   reference_vacancy_pct: number | null;
+  /** 공개 API 가 내는 거점인가(2026-09-28). false = 산출물만 있는 서빙 보류 거점 */
+  served: boolean;
 }
-/** GET /admin/coverage 응답 */
+/** GET /admin/coverage 응답. `totals` 는 **서빙 거점만** 합산한다 — 보류 거점은 `held` */
 export interface AdminCoverage {
   hubs: AdminCoverageHub[];
   totals: {
     hubs: number; shown: number; excluded_unknown: number;
     excluded_non_commercial: number; coverage_pct: number | null;
   };
+  held: { hubs: number; slugs: string[] };
 }
 
 /**
