@@ -10,7 +10,7 @@
  *     오류 문구와 표가 함께 보이고 실패한 토큰이 저장됐다)
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import AdminCoverage from "@/pages/AdminCoverage";
 import { ApiError, getAdminCoverage } from "@/lib/api";
 import { installFetchStub } from "@/test/fetchStub";
@@ -20,9 +20,10 @@ const PAYLOAD = {
   hubs: [{
     slug: "garosu", hub_name: "신사동 가로수길", tier: "Tier1", built_at: "2026-09-27",
     shown: 120, excluded_unknown: 3, excluded_non_commercial: 5,
-    coverage_pct: 97.5, reference_vacancy_pct: null,
+    coverage_pct: 97.5, reference_vacancy_pct: null, served: true,
   }],
   totals: { hubs: 1, shown: 120, excluded_unknown: 3, excluded_non_commercial: 5, coverage_pct: 97.5 },
+  held: { hubs: 0, slugs: [] },
 };
 
 const FORBIDDEN_TEXT = "토큰이 올바르지 않거나 서버에 ADMIN_TOKEN 이 설정되지 않았습니다.";
@@ -102,6 +103,28 @@ describe("AdminCoverage — #admin 화면 문구", () => {
     expect(screen.queryByText(FORBIDDEN_TEXT)).toBeNull();
     expect(screen.queryByText(UNREACHABLE_TEXT)).toBeNull();
     expect(window.sessionStorage.getItem(TOKEN_KEY)).toBe("good");
+    expect(screen.queryByText("보류")).toBeNull();                 // 보류 거점이 없으면 표기도 없다
+  });
+
+  it("요약은 서빙 거점 수 · 보류 거점은 합계 밖으로 빼고 「보류」로 표시한다(2026-09-28 「거점 88곳」)", async () => {
+    installFetchStub([{ match: /\/admin\/coverage$/, body: {
+      ...PAYLOAD,
+      hubs: [...PAYLOAD.hubs, {
+        slug: "hwajeong", hub_name: "화정", tier: "Tier1", built_at: "2026-08-30",
+        shown: 391, excluded_unknown: 142, excluded_non_commercial: 228,
+        coverage_pct: 51.4, reference_vacancy_pct: null, served: false,
+      }],
+      held: { hubs: 1, slugs: ["hwajeong"] },
+    } }]);
+    render(<AdminCoverage />);
+    query("good");
+    expect(await screen.findByText("서빙 거점")).toBeTruthy();
+    expect(screen.getByText("1곳")).toBeTruthy();                    // totals.hubs — 보류 1곳은 안 센다
+    expect(screen.getByText(/서빙\s*보류 중인 거점 1곳은 합계에서 빼고/)).toBeTruthy();
+    const heldRow = screen.getByText("화정").closest("tr")!;
+    expect(heldRow.className).toContain("is-held");
+    expect(within(heldRow).getByText("보류")).toBeTruthy();
+    expect(screen.getByText("신사동 가로수길").closest("tr")!.className).not.toContain("is-held");
   });
 });
 

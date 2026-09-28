@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
+import "./AdminCoverage.css";
 
 /**
  * 관리자 전용 커버리지 패널 — 지도에 표시되지 않는 '제외 건물' 을 여기서만 본다.
@@ -52,19 +53,19 @@ export default function AdminCoverage() {
 
   const t = data?.totals;
   return (
-    <div style={{ padding: "24px 28px", maxWidth: 1000, margin: "0 auto", fontSize: 13 }}>
+    <div className="admin-cov">
       <h1 style={{ fontSize: 18, margin: "0 0 4px" }}>지도 커버리지 (관리자)</h1>
       <p style={{ color: "#6b7280", margin: "0 0 18px" }}>
         공개 지도에는 <strong>건축물대장으로 capacity 를 확인한 건물만</strong> 표시됩니다.
         아래 제외 동수는 이 화면에서만 확인할 수 있습니다.
       </p>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div className="admin-cov-form">
         <input
           type="password" value={token} placeholder="ADMIN_TOKEN"
           onChange={(e) => setToken(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") load(token); }}
-          style={{ flex: "0 0 260px", padding: "7px 10px", fontSize: 13,
+          style={{ padding: "7px 10px", fontSize: 13,
                    border: "1px solid #e5e7eb", borderRadius: 8 }}
         />
         <button onClick={() => load(token)} disabled={!token || loading}
@@ -84,7 +85,7 @@ export default function AdminCoverage() {
 
       {t && (
         <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
-          <Tile label="거점" value={`${t.hubs}곳`} />
+          <Tile label="서빙 거점" value={`${t.hubs}곳`} />
           <Tile label="지도 표시" value={`${t.shown.toLocaleString()}동`} />
           <Tile label="대장 미확인 제외" value={`${t.excluded_unknown.toLocaleString()}동`} warn />
           <Tile label="비상업 제외" value={`${t.excluded_non_commercial.toLocaleString()}동`} />
@@ -92,9 +93,20 @@ export default function AdminCoverage() {
         </div>
       )}
 
+      {data && data.held.hubs > 0 && (
+        <p className="admin-cov-note">
+          합계는 <strong>서빙 거점 {data.totals.hubs}곳</strong>만 셉니다. 산출물은 있지만 서빙
+          보류 중인 거점 {data.held.hubs}곳은 합계에서 빼고 표 맨 아래에 「보류」로 둡니다.
+        </p>
+      )}
+
       {data && (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", whiteSpace: "nowrap" }}>
+        <p className="admin-cov-scroll-hint">표를 옆으로 밀면 나머지 열이 보입니다 →</p>
+      )}
+
+      {data && (
+        <div className="admin-cov-table-wrap">
+          <table className="admin-cov-table">
             <thead>
               <tr style={{ textAlign: "right", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>거점</th>
@@ -108,9 +120,11 @@ export default function AdminCoverage() {
             </thead>
             <tbody>
               {data.hubs.map((h) => (
-                <tr key={h.slug} style={{ textAlign: "right", borderBottom: "1px solid #f3f4f6" }}>
+                <tr key={h.slug} className={h.served ? undefined : "is-held"}
+                  style={{ textAlign: "right", borderBottom: "1px solid #f3f4f6" }}>
                   <td style={{ textAlign: "left", padding: "8px 10px", fontWeight: 700 }}>
                     {h.hub_name} <span style={{ color: "#9ca3af", fontWeight: 400 }}>{h.slug}</span>
+                    {!h.served && <span className="admin-cov-held-badge">보류</span>}
                   </td>
                   <td style={{ padding: "8px 10px" }}>{h.shown.toLocaleString()}</td>
                   <td style={{ padding: "8px 10px", color: h.excluded_unknown > 300 ? "#b91c1c" : "#111" }}>
