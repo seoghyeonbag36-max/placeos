@@ -529,7 +529,11 @@ def platform_track() -> Track:
         # 2026-09-26: 판정은 kpi_baseline 의 verdict 를 그대로 쓴다(방향 축과 같은 규칙 2).
         # test 표본 수가 산출물에 없으면 `검정불가` 라 닫지 않는다 — 부호만으로 100% 를
         # 주던 것이 방향 축과 같은 구멍이었다. 재학습하면 train_gnn 이 test_nodes 를 남긴다.
-        gv = ((kb or {}).get("gnn") or {}).get("verdict")
+        # 2026-09-28: 게이트는 **gate_verdict** 로 닫는다 — 통계가 `실력`이어도 어휘 점검
+        # (label_level·미분류·어휘 폭)을 어기면 `어휘 불합격`이다. 판정은 kpi_baseline 한 곳.
+        gv = ((kb or {}).get("gnn") or {}).get("gate_verdict")
+        gstat = ((kb or {}).get("gnn") or {}).get("verdict")
+        gvc = ((kb or {}).get("gnn") or {}).get("vocab") or {}
         if b3 is not None:
             gdet = ((kb or {}).get("gnn") or {}).get("detectability") or {}
             gk = (kb or {}).get("gnn") or {}
@@ -548,12 +552,22 @@ def platform_track() -> Track:
                     "열위": "사전분포가 유의하게 낫다",
                     "검정불가": ("test 표본 수(`test_nodes`)가 산출물에 없어 구간을 못 낸다 — "
                                  "추정으로 대신하지 않는다. 재학습하면 채워진다"),
-                }.get(gv, "kpi_baseline 을 못 읽어 판정을 못 낸다")
+                }.get(gstat, "kpi_baseline 을 못 읽어 판정을 못 낸다")
+            if gvc:
+                gchk = gvc["checks"]
+                vnote = (f"어휘 점검 **{gvc['verdict']}** — ① label_level="
+                         f"{gchk['label_level']['value']} · ② 미분류 {gchk['no_unmapped']['value']}건 · "
+                         f"③ 라벨 {gchk['width']['value']}/{gchk['width']['of']}종"
+                         + (f"(빠짐: {', '.join(gvc['missing'])})" if gvc["missing"] else ""))
+                if gv != gstat:
+                    vnote += f" → 통계 판정 {gstat} 을 어휘 점검이 막았다"
+            else:
+                vnote = "어휘 점검을 못 읽었다"
             t.gates.append(Gate(
                 "KPI 업종추천 Top-3 실력 (vs 거점 사전분포)",
                 1.0 if gv == "실력" else 0.0,
                 f"모델 {top3:.1%} vs 사전분포 {b3:.1%} → 실력 **{(top3 - b3) * 100:+.2f}%p** "
-                f"→ **{gv or '판정 없음'}** — {gnote}. "
+                f"→ **{gv or '판정 없음'}** — {gnote} · {vnote}. "
                 f"옛 게이트(≥70%)는 사전분포가 이미 {b3 - 0.70:+.1%}p 로 넘겨 놓아 "
                 f"모델을 보증하지 못했다"
                 + (f" · Top-1 {top1:.1%} vs {m.get('baseline_district_prior_top1', 0):.1%} "
