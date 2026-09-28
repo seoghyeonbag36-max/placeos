@@ -24,6 +24,7 @@ export function district(id: string, over: Partial<DistrictSummary> = {}): Distr
     vacancy_source: "gold",
     building_count: 120, precision_pct: 88.5,
     anchor_pct: 9.9, anchor_gap_pp: 2.4,
+    aligned_vacancy_pct: 14.1, aligned_floor_hi_pct: 12.0, aligned_floor_lo_pct: 25.3, aligned_gap_pp: 4.2,
     predicted_rate: null, predicted_delta: null, predicted_direction: null,
     ...over,
   };
@@ -48,6 +49,7 @@ export function vacancyHeatmap(id: string, cells?: HeatCell[]): VacancyHeatmap {
     inventory_coverage_pct: 61.2, vacancy_source: "gold",
     capacity: 120, buildings: 40, buildings_total: 45, precision_pct: 88.5,
     excluded_mall: 1, anchor_pct: 9.9, anchor_gap_pp: 2.4,
+    aligned_vacancy_pct: 14.1, aligned_floor_hi_pct: 12.0, aligned_floor_lo_pct: 25.3, aligned_gap_pp: 4.2,
     predicted_rate: null, predicted_delta: null, predicted_direction: null,
   };
 }

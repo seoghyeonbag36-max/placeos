@@ -11,6 +11,8 @@ import type {
 } from "@/lib/api";
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
 import { directionLine, errorLine, foldReason, lstmPromoted, pendingLine } from "@/lib/forecastSkill";
+import AlignedAnchor from "@/components/AlignedAnchor";
+import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import { colors } from "@/design/tokens/colors";
 import "./PageDashboard.css";
 
@@ -192,7 +194,7 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
               <span>공실 {s.vacant_units}개</span>
               {s.risk_zones !== null && s.risk_zones !== undefined &&
                 <span className={s.risk_zones > 0 ? "risk" : ""}>위험구역 {s.risk_zones}</span>}
-              <Anchor pct={s.anchor_pct} gap={s.anchor_gap_pp} />
+              <AlignedAnchor src={s} className="anchorchip" />
               <Pred current={s.vacancy_rate} rate={s.predicted_rate} delta={s.predicted_delta} direction={s.predicted_direction} />
             </div>
             <div className="dtiers">
@@ -258,19 +260,6 @@ function Pred({ current, rate, delta, direction }: {
         + (detail ? `\n${detail}` : "")
         + "\nLSTM 예측은 Platform 「모델 근거」의 실험 모델 칸에 있다."}>
       다음 분기 {current.toFixed(1)}%<small> 지속성</small>
-    </span>
-  );
-}
-
-/** R-ONE 앵커 대조 — 우리 추정과 공식 통계의 격차(%p). 앵커 없는 거점(합성)은 표시하지 않는다 */
-function Anchor({ pct, gap }: { pct: number | null; gap: number | null }) {
-  if (pct == null || gap == null) return null;
-  return (
-    <span className="anchorchip"
-      title={`R-ONE 중대형상가 공실률 ${pct.toFixed(1)}% 대비 ${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%p.`
-        + " 모집단·단위가 달라(우리는 호실·전수, R-ONE 은 면적·표본) 격차 0 이 정상은 아니다."
-        + " 절대값이 아니라 거점 간 비교·추세 감시에 쓴다."}>
-      앵커 {pct.toFixed(1)}% {gap >= 0 ? "+" : ""}{gap.toFixed(1)}%p
     </span>
   );
 }
@@ -526,7 +515,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
             <span className="ml-ticks"><em>0%</em><em>{VAC_SCALE_MAX}%+</em></span>
             {hm && (
               <span className="ml-stat">
-                평균 {hm.avg_vacancy === null || hm.avg_vacancy === undefined
+                {VACANCY_LABEL.primary} {hm.avg_vacancy === null || hm.avg_vacancy === undefined
                   ? <b className="value-absent" title="쟀지만 거점을 대표하지 못해 내렸다">대표값 미제공</b>
                   : <b style={{ color: vacHex(hm.avg_vacancy) }}>{hm.avg_vacancy.toFixed(1)}%</b>}
                 {" "}<Pred current={hm.avg_vacancy} rate={hm.predicted_rate} delta={hm.predicted_delta} direction={hm.predicted_direction} />
@@ -537,7 +526,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
                     {hm.excluded_mall ? ` · 집합 ${hm.excluded_mall}동 제외` : ""}
                   </>
                 )}
-                {" "}<Anchor pct={hm.anchor_pct} gap={hm.anchor_gap_pp} />
+                {" "}<AlignedAnchor src={hm} className="anchorchip" />
               </span>
             )}
             <span className="ml-hint">셀 클릭 시 상세</span>
@@ -752,7 +741,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           <button className="back" onClick={onBack}>← 거점 보드</button>
           <h1>{summary.name}</h1>
           <div className="sub">
-            {detail?.sub ?? summary.note} · 공실률{" "}
+            {detail?.sub ?? summary.note} · {VACANCY_LABEL.primary}{" "}
             <MeasuredValue value={summary.vacancy_rate} unit="%"
               absent={summary.vacancy_withheld ? "대표값 미제공" : "실측 없음"} />
             {" "}<Pred current={summary.vacancy_rate} rate={summary.predicted_rate} delta={summary.predicted_delta} direction={summary.predicted_direction} />

@@ -25,6 +25,8 @@ import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatm
 import { colors } from "@/design/tokens/colors";
 import { topic } from "@/lib/businessProfile";
 import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/MapMarkerPin";
+import AlignedAnchor from "@/components/AlignedAnchor";
+import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "@/styles/tokens.css";
 import "./MapShell.css";
 
@@ -708,14 +710,11 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {/* 거점 대표값이 없으면 그 사실을 적는다 — 조용히 빠지면 있는 값을 못 본
                 것처럼 읽힌다. 아래 건물 목록은 그대로다(내린 것은 대표값뿐이다). */}
             {hub && (hub.vacancy_rate !== null && Number.isFinite(hub.vacancy_rate)
-              ? ` · 거점 ${hub.vacancy_rate.toFixed(1)}%`
+              ? ` · ${VACANCY_LABEL.primary} ${hub.vacancy_rate.toFixed(1)}%`
               : hub.vacancy_withheld ? " · 거점 대표값 미제공" : "")}
           </div>
-          {hub?.anchor_pct != null && hub.anchor_gap_pp != null && (
-            <div className="sp-anchor" title="R-ONE 중대형상가 공실률 대비. 모집단이 달라 격차 0 이 정상은 아니며 거점 간 비교용이다.">
-              앵커 {hub.anchor_pct.toFixed(1)}% {hub.anchor_gap_pp >= 0 ? "+" : ""}{hub.anchor_gap_pp.toFixed(1)}%p
-            </div>
-          )}
+          {/* 정렬 대조 — 격차는 대조 지표(R-ONE 정렬) − 앵커다. 주 지표에서 빼지 않는다. */}
+          {hub && <div><AlignedAnchor src={hub} className="sp-anchor" /></div>}
         </div>
         {/* 임대시세 레이어의 첫 답 — "이 상권, 층마다 평당 월 얼마인가". 격자 색이 아니라 숫자다. */}
         {layer === "rent" && currentRent && (
