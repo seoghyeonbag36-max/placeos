@@ -9,7 +9,8 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import "@/pages/Account.css";
 
-export type AccountScreen = "login" | "signup" | "account";
+/** "feedback" — 파일럿 피드백(NPS · 결제 의향). 2026-09-28 P2 */
+export type AccountScreen = "login" | "signup" | "account" | "feedback";
 
 /** 세 화면이 받는 공통 props — 화면끼리 옮겨 갈 때 해시를 바꾸는 한 가지 방법만 준다. */
 export interface AccountScreenProps {

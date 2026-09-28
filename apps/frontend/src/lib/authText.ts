@@ -53,3 +53,11 @@ export function apiKeyErrorText(err: unknown, action: "불러오지" | "발급�
   }
   return common(err, `키를 ${action}`);
 }
+
+/** 피드백 제출 실패. 401 은 isSessionExpired 로 따로 처리한다(토큰을 버리고 로그인 안내). */
+export function feedbackErrorText(err: unknown): string {
+  if (err instanceof ApiError && err.status === 422) {
+    return "입력값을 서버가 받지 않았습니다. 점수(0~10)와 결제 의향을 고르고, 한 줄은 2000자 안으로 적어 주세요.";
+  }
+  return common(err, "피드백을 보내지");
+}
