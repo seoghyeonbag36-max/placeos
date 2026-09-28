@@ -6,8 +6,8 @@
  *   · 업종 바꾸기        → 지금 상권에서 **무엇으로** 바꾸나(이 상권 업종 순위)
  *
  * ⚠ 입지 적합도는 매출·생존이 아니라 "비슷한 입지에 그 업종이 이미 모여 있는 정도"다(GNN 상권
- *   평균, Top-3 근사). 순위로만 읽는다 — 그 사실을 카드가 늘 한 줄로 적는다. 모델 7종 밖 업종은
- *   순위를 내지 않는다(가까운 업종 점수로 대신 채우지 않는다).
+ *   평균, Top-3 근사). 순위로만 읽는다 — 그 사실을 카드가 늘 한 줄로 적는다. 모델 라벨이 없거나 서빙
+ *   어휘(산출물이 정한다)에 없는 업종은 순위를 내지 않는다(가까운 업종 점수로 대신 채우지 않는다).
  */
 import { useEffect, useId, useState } from "react";
 import {
@@ -104,7 +104,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
           : <> <span className="fit-muted">순위 없음(이 상권은 모델 산출물이 없습니다)</span></>)}
       </h2>
       {!fit.model_covered && (
-        <p className="fit-uncovered">{topic(ind.label)} 모델 추천 대상(7종) 밖이라 적합도 순위를 내지 않습니다. 같은 업종 비중·임대료·공실률은 그대로 보여줍니다.</p>
+        <p className="fit-uncovered">{topic(ind.label)} 적합도 순위를 내지 않습니다{fit.fit_unavailable_reason ? ` — ${fit.fit_unavailable_reason}` : " — 모델 추천 대상 밖"}. 같은 업종 비중·임대료·공실률은 그대로 보여줍니다.</p>
       )}
       {diff != null && (
         <p className="fit-diff">지금 상권({home!.name}) 대비 적합도 <b>{diff > 0 ? "+" : ""}{diff.toFixed(1)}%p</b></p>
@@ -209,7 +209,7 @@ function PivotCard({ business, ind, districtId, districts, onDistrictChange, onT
         {hereName}에서 바꿔볼 업종
         <span className="fit-sub"> — 지금 업종 {mine?.fit_rank != null
           ? <>{topic(ind.label)} <b>{mine.fit_rank}위</b></>
-          : <>{topic(ind.label)} 모델 7종 밖이라 순위가 없습니다</>}</span>
+          : <>{topic(ind.label)} 순위가 없습니다{mine?.fit_unavailable_reason ? ` — ${mine.fit_unavailable_reason}` : ""}</>}</span>
       </h2>
       {homeId && homeId !== districtId && (
         <p className="fit-diff">
@@ -229,7 +229,9 @@ function PivotCard({ business, ind, districtId, districts, onDistrictChange, onT
                 <tr key={r.key} className={isMine ? "is-current" : undefined}>
                   <td className="num">{r.fit_rank ?? "—"}</td>
                   <th scope="row">{r.label}{isMine && <em className="fit-tag">지금</em>}</th>
-                  <td className="num">{r.model_label ? (pct1(r.fit) ?? "미제공") : <span className="fit-muted">모델 밖</span>}</td>
+                  <td className="num">{r.model_label && !r.fit_unavailable_reason
+                    ? (pct1(r.fit) ?? "미제공")
+                    : <span className="fit-muted" title={r.fit_unavailable_reason ?? undefined}>모델 밖</span>}</td>
                   <td className="num">{shareText({ ...r, sample_n: mix.sample_n })}</td>
                   <td>
                     {!isMine && onTryIndustry && (

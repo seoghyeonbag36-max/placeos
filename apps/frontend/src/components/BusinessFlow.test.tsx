@@ -27,6 +27,9 @@ const INDUSTRIES: IndustryOption[] = [
   { key: "cafe", label: "카페·디저트", input: "카페", model_label: "카페" },
   { key: "restaurant", label: "음식점", input: "음식점", model_label: "음식점" },
   { key: "bar", label: "술집", input: "주점", model_label: null },
+  // 모델 라벨은 있으나 서빙 어휘에 없다(09-27 재학습으로 문화시설이 빠졌다)
+  { key: "culture", label: "전시·공연", input: "문화시설", model_label: "문화시설",
+    fit_unavailable_reason: "현재 추천 모델 어휘에 없음('문화시설') — 입지 적합도·순위를 내지 않음" },
 ];
 
 const fitRow = (id: string, name: string, fit: number | null, rank: number | null) => ({
@@ -133,5 +136,21 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(screen.queryByText(/곳 중 \d+위/)).toBeNull();
     // 같은 업종 비중은 그대로 보여준다
     await waitFor(() => expect(screen.getAllByText("30.0% (30/100곳)").length).toBeGreaterThan(0));
+  });
+
+  it("PL-11b 모델 라벨이 있어도 서빙 어휘 밖이면 순위 없이 사유를 보인다", async () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      status: "set", profile: { goal: "start", industryKey: "culture", homeDistrictId: null },
+    }));
+    mount([{
+      match: /ai\/industry-fit\?industry=culture/,
+      body: { industry: INDUSTRIES[3], model_covered: false, seoul_fit: null, ranked_n: 0, source: "src", note: "note",
+        fit_unavailable_reason: INDUSTRIES[3].fit_unavailable_reason,
+        districts: [fitRow("garosugil", "가로수길", null, null), fitRow("yeonnam", "연남동", null, null)] },
+    }]);
+    fireEvent.click(screen.getByRole("button", { name: "Platform" }));
+    await screen.findByText(/현재 추천 모델 어휘에 없음/, undefined, TAB_LOAD);
+    expect(screen.queryByRole("table", { name: /기준 상권 순위/ })).toBeNull();
+    expect(screen.queryByText(/곳 중 \d+위/)).toBeNull();
   });
 });

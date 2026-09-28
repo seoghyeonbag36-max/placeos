@@ -76,7 +76,8 @@ async def list_industries() -> dict[str, object]:
 async def industry_fit_by_district(industry: str) -> dict[str, object]:
     """내 업종으로 서빙 상권 전체를 견준다 — 창업자·상권 옮기기 사업자용.
 
-    모델 7종 밖 업종은 `model_covered=False` 이고 순위(fit_rank)가 전부 None 이다.
+    모델 라벨이 없거나 서빙 어휘(산출물이 정한다)에 없는 업종은 `model_covered=False` 이고
+    순위(fit_rank)가 전부 None 이다. 사유는 `fit_unavailable_reason`.
     """
     out = fit_svc.fit_by_district(industry)
     if out is None:
