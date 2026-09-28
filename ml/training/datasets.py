@@ -96,12 +96,28 @@ class PooledDataset:
     sd: np.ndarray                   # 피처 표준화 표준편차 (F,) — 위와 같다
     y_mu: float
     y_sd: float
+    # "level" = y 가 다음 분기값 · "delta" = y 가 (다음 분기값 − 직전 분기값).
+    # delta 면 예측은 y_prev + 복원값이다 — 모델 출력 0 이 곧 지속성이다(2026-09-26).
+    target_mode: str = "level"
+    y_prev: np.ndarray | None = None  # 각 샘플의 직전 분기 타깃 원값 (N,)
+
+
+TARGET_MODES = ("level", "delta")
 
 
 def build_dataset(look_back: int | None = None,
                   test_quarters: int = TEST_QUARTERS,
-                  val_quarters: int = VAL_QUARTERS) -> PooledDataset:
+                  val_quarters: int = VAL_QUARTERS,
+                  target_mode: str = "level") -> PooledDataset:
     """Gold → pooled 윈도우. look_back 미지정 시 가용 분기 수에 맞춰 자동 조정.
+
+    ## target_mode (2026-09-26)
+
+    `level` 은 다음 분기값을, `delta` 는 **직전 분기 대비 변화량**을 타깃으로 둔다.
+    분기 공실 프록시는 자기상관이 강해 지속성(예측=직전값)이 센 대조군인데, level
+    모델은 신호가 없을 때 train 평균 근처로 끌린다. delta 모델은 출력 0 이 곧
+    지속성이라 그 대조군을 기본값으로 깔고 시작한다.
+    → docs/finding-lstm-delta-target-2026-09-26.md
 
     ## 홀드아웃이 둘인 이유 (2026-09-16 누수 차단)
 
@@ -127,6 +143,8 @@ def build_dataset(look_back: int | None = None,
     옛 규약(누수 포함)이다.** 산출물에 규약 표기를 남기는 것은 `train_lstm.main` 이
     한다(`protocol` 블록).
     """
+    if target_mode not in TARGET_MODES:
+        raise ValueError(f"target_mode 는 {TARGET_MODES} 중 하나여야 한다: {target_mode!r}")
     df = load_gold()
     dids = sorted(df["district_id"].unique())
     n_min = int(df.groupby("district_id").size().min())
@@ -156,7 +174,7 @@ def build_dataset(look_back: int | None = None,
     sd = np.nanstd(feats[train_row], axis=0)
     sd[sd == 0] = 1.0
 
-    Xs, ys, s_did, s_last, s_val, s_quarter = [], [], [], [], [], []
+    Xs, ys, s_did, s_last, s_val, s_quarter, s_prev = [], [], [], [], [], [], []
     dropped = 0
     for di, did in enumerate(dids):
         g = df[df["district_id"] == did]
@@ -167,6 +185,7 @@ def build_dataset(look_back: int | None = None,
         for end in range(look_back, n):  # 윈도우 [end-look_back, end) → 타깃 end
             src = z[end - look_back:end]
             tgt = g[TARGET].iloc[end]
+            prev = float(g[TARGET].iloc[end - 1])   # 윈도우 마지막 분기 = 지속성 예측값
             # 결측이 낀 윈도우는 **학습에서 뺀다** — 채워 넣지 않는다. 결측은 R-ONE
             # 시계열의 시작 시점 차이라 거점 앞쪽에 몰려 있고, 뒤쪽(예측 기준 윈도우)은
             # 온전하다. 그래서 버려도 예측을 잃는 거점은 없다(train_lstm._forecast_next
@@ -177,7 +196,8 @@ def build_dataset(look_back: int | None = None,
                 continue
             win = np.hstack([src, np.tile(onehot, (look_back, 1))])
             Xs.append(win)
-            ys.append(tgt)
+            ys.append(tgt - prev if target_mode == "delta" else tgt)
+            s_prev.append(prev)
             s_did.append(di)
             s_quarter.append(str(g["quarter"].iloc[end]))
             # 시간축 뒤에서부터 test → val 순. 겹치지 않는다.
@@ -203,6 +223,7 @@ def build_dataset(look_back: int | None = None,
         sample_district=np.asarray(s_did), sample_is_last=is_last, sample_is_val=is_val,
         sample_quarter=np.asarray(s_quarter, dtype=object),
         mu=mu, sd=sd, y_mu=y_mu, y_sd=y_sd,
+        target_mode=target_mode, y_prev=np.asarray(s_prev, dtype=np.float64),
     )
 
 

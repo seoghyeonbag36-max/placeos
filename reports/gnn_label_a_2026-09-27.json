@@ -1,0 +1,454 @@
+{
+  "run": "label_level=group (안 a · 7종+미분류) · 81거점 · 1점포 1행 · 2026-09-27",
+  "status": "실험 근거 — 서빙 불가(미분류가 1순위 추천의 74%). 서빙 산출물은 09-04 본으로 되돌렸다",
+  "metrics": {
+    "test_top1": 0.5643,
+    "test_top3": 0.9144,
+    "test_macro_f1": 0.1932,
+    "val_select_by": "top1",
+    "val_best": 0.564,
+    "baseline_major_top1": 0.5078,
+    "baseline_district_prior_top1": 0.5128,
+    "baseline_district_prior_top3": 0.8956,
+    "test_offprior_top3": 0.3099,
+    "offprior_nodes": 3743,
+    "test_top3_paired": {
+      "b_model_only": 1160,
+      "c_prior_only": 486,
+      "n": 35861,
+      "by_district": {
+        "anam": [
+          2,
+          0,
+          327
+        ],
+        "apgujeong-rodeo": [
+          5,
+          4,
+          512
+        ],
+        "bangbang": [
+          22,
+          8,
+          504
+        ],
+        "banpo": [
+          10,
+          7,
+          606
+        ],
+        "bonseobu": [
+          13,
+          6,
+          408
+        ],
+        "bulgwang": [
+          9,
+          5,
+          334
+        ],
+        "cheongdam": [
+          9,
+          3,
+          399
+        ],
+        "cheongnyangni": [
+          26,
+          12,
+          748
+        ],
+        "cheonho": [
+          20,
+          5,
+          566
+        ],
+        "chungmuro": [
+          14,
+          2,
+          329
+        ],
+        "cityhall": [
+          8,
+          2,
+          358
+        ],
+        "daerim": [
+          18,
+          5,
+          438
+        ],
+        "dangsan": [
+          7,
+          0,
+          177
+        ],
+        "dogok": [
+          3,
+          6,
+          294
+        ],
+        "doksan": [
+          1,
+          1,
+          194
+        ],
+        "dongdaemun": [
+          31,
+          9,
+          1082
+        ],
+        "dosan": [
+          13,
+          4,
+          564
+        ],
+        "euljiro": [
+          3,
+          2,
+          399
+        ],
+        "gangnam": [
+          24,
+          4,
+          905
+        ],
+        "garak": [
+          3,
+          2,
+          144
+        ],
+        "garosugil": [
+          20,
+          10,
+          639
+        ],
+        "gildong": [
+          25,
+          7,
+          582
+        ],
+        "gongdeok": [
+          30,
+          10,
+          410
+        ],
+        "gunja": [
+          13,
+          4,
+          329
+        ],
+        "gurodigital": [
+          14,
+          4,
+          431
+        ],
+        "gurojeonhwa": [
+          3,
+          2,
+          256
+        ],
+        "guui": [
+          22,
+          7,
+          433
+        ],
+        "gwangjang": [
+          6,
+          6,
+          509
+        ],
+        "hannam": [
+          2,
+          1,
+          221
+        ],
+        "hapjeong": [
+          7,
+          6,
+          314
+        ],
+        "hongdae": [
+          37,
+          19,
+          898
+        ],
+        "hwagok": [
+          15,
+          9,
+          400
+        ],
+        "hyehwa": [
+          14,
+          8,
+          366
+        ],
+        "ikseon": [
+          16,
+          5,
+          750
+        ],
+        "itaewon": [
+          14,
+          6,
+          386
+        ],
+        "jamsil": [
+          17,
+          10,
+          448
+        ],
+        "jamsil-tour": [
+          14,
+          6,
+          364
+        ],
+        "jamsilsaenae": [
+          17,
+          5,
+          428
+        ],
+        "jangan": [
+          7,
+          1,
+          302
+        ],
+        "kkachisan": [
+          22,
+          5,
+          344
+        ],
+        "konkuk": [
+          10,
+          5,
+          523
+        ],
+        "kyunghee": [
+          3,
+          4,
+          271
+        ],
+        "maebong": [
+          3,
+          1,
+          159
+        ],
+        "mangwon": [
+          10,
+          4,
+          506
+        ],
+        "miasageori": [
+          12,
+          5,
+          442
+        ],
+        "mokdong-yc": [
+          19,
+          8,
+          449
+        ],
+        "mullae": [
+          9,
+          7,
+          499
+        ],
+        "myeongdong": [
+          46,
+          7,
+          495
+        ],
+        "nambu": [
+          21,
+          4,
+          368
+        ],
+        "namdaemun": [
+          11,
+          7,
+          576
+        ],
+        "nokdu": [
+          10,
+          6,
+          224
+        ],
+        "nonhyeon": [
+          29,
+          8,
+          579
+        ],
+        "noryangjin": [
+          16,
+          6,
+          394
+        ],
+        "nowon": [
+          7,
+          2,
+          523
+        ],
+        "oryudong": [
+          12,
+          0,
+          217
+        ],
+        "poi": [
+          6,
+          2,
+          312
+        ],
+        "sadang": [
+          4,
+          5,
+          314
+        ],
+        "samcheong": [
+          11,
+          6,
+          181
+        ],
+        "sangbong": [
+          19,
+          8,
+          388
+        ],
+        "sanggye": [
+          7,
+          4,
+          396
+        ],
+        "seochon": [
+          14,
+          8,
+          314
+        ],
+        "seochoyeok": [
+          16,
+          12,
+          386
+        ],
+        "seolleung": [
+          28,
+          13,
+          895
+        ],
+        "seongsu": [
+          6,
+          4,
+          489
+        ],
+        "seoulsup": [
+          6,
+          1,
+          347
+        ],
+        "sharosugil": [
+          12,
+          7,
+          426
+        ],
+        "sillim": [
+          24,
+          11,
+          660
+        ],
+        "sinchon": [
+          55,
+          24,
+          727
+        ],
+        "songridan": [
+          12,
+          5,
+          350
+        ],
+        "sukmyung": [
+          7,
+          2,
+          299
+        ],
+        "sungshin": [
+          11,
+          8,
+          382
+        ],
+        "suyu": [
+          36,
+          16,
+          652
+        ],
+        "teheran": [
+          10,
+          11,
+          556
+        ],
+        "wangsimni": [
+          23,
+          10,
+          513
+        ],
+        "yangjae": [
+          11,
+          5,
+          243
+        ],
+        "ydp-gucheong": [
+          5,
+          6,
+          485
+        ],
+        "yeonhui": [
+          4,
+          4,
+          171
+        ],
+        "yeonnam": [
+          35,
+          15,
+          523
+        ],
+        "yeonsinnae": [
+          19,
+          5,
+          518
+        ],
+        "yeouido": [
+          2,
+          2,
+          609
+        ],
+        "yongsan": [
+          3,
+          0,
+          402
+        ]
+      }
+    },
+    "lift_vs_district_prior_pct": 10.0,
+    "nodes": 179290,
+    "edges_used": 913744,
+    "test_nodes": 35861,
+    "classes": 7,
+    "features": 132,
+    "label_level": "group",
+    "unmapped_nodes_dropped": 0,
+    "class_weight": 0,
+    "demand_features": 1,
+    "building_features": 1,
+    "neighbor_label_features": 0,
+    "adong_hour_features": 0,
+    "jipgyegu_features": 0,
+    "edge_types": "all"
+  },
+  "serving_check": {
+    "nodes": 179290,
+    "top1_counts": {
+      "미분류": 133453,
+      "음식점": 43896,
+      "병원": 1655,
+      "숙박": 286
+    },
+    "unclassified_in_top3_rate": 0.9999
+  },
+  "preds_dump": "reports/gnn_test_preds_label-a_2026-09-27.json (로컬 · 미추적 4.5MB)"
+}

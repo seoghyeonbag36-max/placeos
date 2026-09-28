@@ -630,8 +630,13 @@ export const recommendIndustry = (req: {
 /* ===== 내 업종으로 본 상권(화면설계서 3판) — GET /ai/industries · /ai/industry-fit · /ai/district-industries ===== */
 
 /** 「내 사업」이 고르는 업종 12종 중 하나. `key` 는 브라우저에 저장되는 안정 식별자다.
- *  `input` 은 Posting 업종칸·Program 카테고리칸에 채우는 말, `model_label` 은 GNN 7종 라벨(없으면 적합도 없음). */
-export interface IndustryOption { key: string; label: string; input: string; model_label: string | null; }
+ *  `input` 은 Posting 업종칸·Program 카테고리칸에 채우는 말, `model_label` 은 GNN 라벨(없으면 적합도 없음).
+ *  ⚠ `model_label` 이 있어도 서빙 어휘(산출물이 정한다)에 없으면 적합도가 없다 — 그때는
+ *     `fit_unavailable_reason` 에 사유가 온다. 적합도를 낼 수 있으면 null. */
+export interface IndustryOption {
+  key: string; label: string; input: string; model_label: string | null;
+  fit_unavailable_reason?: string | null;
+}
 
 export const listIndustries = () => getJSON<{ industries: IndustryOption[] }>("/ai/industries");
 
@@ -647,8 +652,10 @@ export interface IndustryFitRow {
 
 export interface IndustryFit {
   industry: IndustryOption;
-  /** 모델 7종 안 업종인가. false 면 순위·적합도가 전부 null 이다(가나다순) */
+  /** 서빙 모델 어휘 안 업종인가. false 면 순위·적합도가 전부 null 이다(가나다순) */
   model_covered: boolean;
+  /** model_covered=false 인 사유(모델 라벨 없음 / 서빙 어휘 밖 / 산출물 없음). true 면 null */
+  fit_unavailable_reason?: string | null;
   seoul_fit: number | null;
   ranked_n: number;
   districts: IndustryFitRow[];

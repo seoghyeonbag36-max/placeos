@@ -49,9 +49,11 @@ except (AttributeError, ValueError):  # 재설정 불가 스트림이면 그대�
     pass
 
 from ml.models.lstm.vacancy_lstm import VacancyLSTM  # noqa: E402
+from ml.training.selection import select_trial  # noqa: E402
 from ml.training.datasets import (  # noqa: E402
     SEQ_FEATURES,
     TARGET,
+    TARGET_MODES,
     TEST_QUARTERS,
     VAL_QUARTERS,
     build_dataset,
@@ -67,11 +69,11 @@ _SEED = 42
 
 def _train_once(hidden: int, layers: int, look_back: int | None, epochs: int = 400,
                 lr: float = 1e-3, test_quarters: int = TEST_QUARTERS,
-                val_quarters: int = VAL_QUARTERS) -> dict:
+                val_quarters: int = VAL_QUARTERS, target_mode: str = "level") -> dict:
     torch.manual_seed(_SEED)
     np.random.seed(_SEED)
     ds = build_dataset(look_back=look_back, test_quarters=test_quarters,
-                       val_quarters=val_quarters)
+                       val_quarters=val_quarters, target_mode=target_mode)
     # 2026-09-16 누수 차단: 학습에서 val·test 를 **둘 다** 뺀다. 종전에는 test 만 빼고
     # 그 test 로 하이퍼파라미터까지 골랐다(main 참조) — 보고값이 test 가 아니었다.
     holdout = ds.sample_is_last
@@ -99,7 +101,12 @@ def _train_once(hidden: int, layers: int, look_back: int | None, epochs: int = 4
         with torch.no_grad():
             pred = model(X).squeeze(-1).numpy() * ds.y_sd + ds.y_mu   # 원단위 복원
         actual = ytrue.numpy() * ds.y_sd + ds.y_mu
-        prev = ds.X[mask][:, -1, 0] * ds.sd[0] + ds.mu[0]
+        if ds.target_mode == "delta":
+            # Δ 모델 — 직전 원값에 더해 수준으로 되돌린다. 채점은 level 과 같은 단위다.
+            prev = ds.y_prev[mask]
+            pred, actual = prev + pred, prev + actual
+        else:
+            prev = ds.X[mask][:, -1, 0] * ds.sd[0] + ds.mu[0]
         # 베이스라인: 같은 분할에서 **입력을 안 보는** 상수 규칙(다수 방향)과 지속성.
         # 이것을 같이 내지 않으면 "70% 넘었다"가 실력인지 쏠림인지 구분할 수 없다
         # (2026-09-16 실측 — scripts/kpi_baseline.py).
@@ -126,7 +133,7 @@ def _train_once(hidden: int, layers: int, look_back: int | None, epochs: int = 4
         "params": {"hidden": hidden, "layers": layers, "look_back": int(ds.X.shape[1]),
                    "epochs": epochs, "lr": lr, "train_loss": float(loss.item()),
                    "test_quarters": test_quarters, "val_quarters": val_quarters,
-                   "n_train": int(train.sum())},
+                   "n_train": int(train.sum()), "target_mode": target_mode},
     }
 
 
@@ -146,12 +153,19 @@ def _log_mlflow(res: dict, run_name: str) -> None:
 # 학습 규약 표기 — 산출물을 읽는 쪽이 **어느 규약으로 잰 값인지** 알 수 있어야 한다.
 # 이 블록이 없는 산출물은 2026-09-16 이전 규약(표준화·선택 모두 홀드아웃 포함)이다.
 _PROTOCOL = {
-    "version": "2026-09-16",
+    "version": "2026-09-27",
     "scaling": "train_only",       # mu/sd/y_mu/y_sd 를 train 행에서만 적합
     "selection": "val",            # 하이퍼파라미터는 val 로 고른다
     "test_used_once": True,        # test 는 보고에만 쓴다(임계값 조기중단 없음)
     "baselines": ["majority_direction", "persistence"],
     "split": "rolling_origin",     # 거점마다 뒤쪽 K분기를 차례로 홀드아웃 원점으로
+    # 2026-09-27 사전등록(docs/finding-lstm-delta-target-2026-09-26.md §0-B):
+    # ① 선택 규칙 — ml/training/selection.py
+    "selection_rule": "val_mae_beats_persistence_then_val_direction",
+    # ③ 이미 본 test 분기의 마지막. kpi_baseline 은 이 **이후** 분기 holdout 만으로
+    #   게이트를 판정하고, 그런 표본이 없으면 `확인대기` 다. 이 값은 올리지 않는다 —
+    #   올리면 본 분기를 다시 확정 표본으로 쓰게 된다.
+    "confirm_after": "20262",
 }
 
 _MAX_HORIZON = 4  # 재귀 예측 최대 분기 수
@@ -197,6 +211,8 @@ def _forecast_next(res: dict) -> dict:
             x = np.hstack([win, np.tile(onehot, (lb, 1))]).astype(np.float32)
             with torch.no_grad():
                 p = float(model(torch.from_numpy(x[None])).item()) * ds.y_sd + ds.y_mu
+            if ds.target_mode == "delta":
+                p = prev + p        # Δ̂ → 수준. 재귀라 h2+ 는 앞 예측 위에 쌓인다
             q = _next_quarter(q)
             horizons.append({
                 "quarter": q,
@@ -234,7 +250,7 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
     # look_back 10/12 와 hidden 96 은 2026-07-22 27거점(Phase 2) 확장 때 추가.
     # 27거점에서는 기존 4-trial 그리드가 전부 66.7% 로 묶여 목표 미달이었다 — 거점이 늘어
     # 홀드아웃 표본도 27개가 되면서 더 긴 문맥·넓은 은닉이 필요해진 것으로 보인다.
-    trials = [
+    base_trials = [
         {"hidden": 32, "layers": 1, "look_back": None},
         {"hidden": 64, "layers": 1, "look_back": None},
         {"hidden": 64, "layers": 2, "look_back": None},
@@ -244,6 +260,11 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
         {"hidden": 96, "layers": 1, "look_back": 10},
         {"hidden": 64, "layers": 1, "look_back": 12},
     ]
+    # 2026-09-26: 타깃 모수화(level/delta)를 그리드의 한 축으로 넣는다. 선택 기준은
+    # **그대로**다(val 방향 → val MAE). Δ 가 val MAE 로 이겨도 val 방향에서 지면 채택되지
+    # 않는다 — 기준을 결과 보고 바꾸면 metric shopping 이다.
+    # → docs/finding-lstm-delta-target-2026-09-26.md §0 사전등록
+    trials = [{**hp, "target_mode": tm} for tm in TARGET_MODES for hp in base_trials]
     # ── 선택은 val, 보고는 test (2026-09-16 누수 차단) ─────────────────────
     # 종전 코드는 ① test 로 8개 조합을 고르고 ② `dir_acc >= 0.70` 이면 즉시 멈췄다.
     # 그러면 보고되는 방향정확도는 "이 모델의 성능"이 아니라 **"8번 뽑아 목표를 넘긴
@@ -253,21 +274,25 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
     #
     # 그래서: ① 선택 기준을 val 로 옮기고 ② 임계값 조기중단을 없앤다. 모든 조합을
     # 끝까지 돌려야 test 가 **한 번만** 쓰인다.
-    best = None
+    # 2026-09-27: 선택 규칙을 `ml/training/selection.py` 로 옮겼다(사전등록 §0-B ①) —
+    # val 에서 지속성을 이긴 시행 중 방향 최대, 없으면 val MAE 최소. test 는 안 읽는다.
+    results: list[dict] = []
     for i, hp in enumerate(trials):
         res = _train_once(**hp, test_quarters=test_quarters, val_quarters=val_quarters)
         v = res["val"]
-        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} 방향 {v['dir_acc']:.1%} "
-              f"(상수 {v['baseline_dir_acc']:.1%})")
+        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} (지속성 {v['persistence_mae']:.3f}) "
+              f"방향 {v['dir_acc']:.1%} (상수 {v['baseline_dir_acc']:.1%})")
         _log_mlflow(res, run_name=f"trial{i}")
-        # val 방향정확도 우선, 동률이면 val MAE 가 낮은 쪽. (동률에 부등호만 쓰면 먼저
-        # 나온 trial 이 계속 남아 MAE 가 더 나쁜 모델이 채택된다 — 2026-07-22 실측)
-        key = (v["dir_acc"], -v["mae"])
-        if best is None or key > (best["val"]["dir_acc"], -best["val"]["mae"]):
-            best = res
+        results.append(res)
 
+    chosen, selection = select_trial([r["val"] for r in results])
+    best = results[chosen]
     bt, bv = best["test"], best["val"]
-    print(f"[best] {best['params']} (val 방향 {bv['dir_acc']:.1%} 로 선택)")
+    print(f"[best] trial {chosen} {best['params']} — 후보 {selection['eligible']}/"
+          f"{selection['trials']} (val MAE {bv['mae']:.3f} vs 지속성 "
+          f"{bv['persistence_mae']:.3f} · val 방향 {bv['dir_acc']:.1%})")
+    if selection["fallback"]:
+        print("  ⚠ val 단계에서 이미 지속성 미달 — 지속성을 이긴 시행이 없어 val MAE 최소로 골랐다")
     print(f"  test MAE {bt['mae']:.3f} (지속성 {bt['persistence_mae']:.3f}) · "
           f"RMSE {bt['rmse']:.3f} · 방향 {bt['dir_acc']:.1%} "
           f"(무정보 상수 {bt['baseline_dir_acc']:.1%})")
@@ -305,6 +330,9 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
         "district_ids": ds.district_ids,
         "mu": ds.mu.tolist(), "sd": ds.sd.tolist(),
         "y_mu": ds.y_mu, "y_sd": ds.y_sd,
+        # 서빙(ml/inference/predictor.py)이 이 값으로 복원 방식을 고른다 — 빠지면 Δ 모델
+        # 출력을 수준으로 읽어 **조용히** 틀린 값을 낸다(09-24 holdout 키 결함과 같은 모양).
+        "target_mode": ds.target_mode,
         "protocol": _PROTOCOL,
     }, ARTIFACT)
     print(f"[artifact] {ARTIFACT}")
@@ -314,6 +342,7 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
     payload = {
         "model": "vacancy-lstm-pooled-v2",
         "target": "vac_proxy(공실 프록시) — R-ONE 실측(vac_small/vac_mid/rent_small)은 피처",
+        "target_mode": ds.target_mode,
         "trained_at": now,
         "metrics": {"holdout_mae": round(bt["mae"], 3), "holdout_rmse": round(bt["rmse"], 3),
                     "holdout_direction_acc": round(bt["dir_acc"], 3),
@@ -328,8 +357,9 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS) -
                     "val_direction_acc": round(bv["dir_acc"], 3),
                     "val_mae": round(bv["mae"], 3)},
         "protocol": {**_PROTOCOL, "test_quarters": test_quarters,
-                     "val_quarters": val_quarters},
+                     "val_quarters": val_quarters, "target_modes_searched": list(TARGET_MODES)},
         "params": best["params"],
+        "selection": selection,
         "holdout": per_district,
         "forecasts": fc,
     }

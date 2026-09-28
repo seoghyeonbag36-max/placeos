@@ -188,10 +188,11 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     [hub, districtId, prof, profErr, fc, rec, zones],
   );
 
-  // 창업·옮기기이고 내 업종이 모델 7종 안이면 자리를 **내 업종 점수 순**으로 세우고 칩도 그 점수를 말한다
-  // (화면설계서 3판 「자리 칩 · 자리 카드 — 내 업종이 있을 때」). 바꾸기·7종 밖이면 2판 규칙 그대로.
+  // 창업·옮기기이고 내 업종이 서빙 모델 어휘 안이면 자리를 **내 업종 점수 순**으로 세우고 칩도 그 점수를 말한다
+  // (화면설계서 3판 「자리 칩 · 자리 카드 — 내 업종이 있을 때」). 바꾸기·어휘 밖이면 2판 규칙 그대로.
   const myIndustry = findIndustry(industries, business?.industryKey);
-  const mySite = business?.goal !== "pivot" && myIndustry?.model_label
+  // 서빙 어휘 밖(fit_unavailable_reason)이면 모델 라벨이 있어도 점수가 없다 — 7종 밖과 똑같이 둔다.
+  const mySite = business?.goal !== "pivot" && myIndustry?.model_label && !myIndustry.fit_unavailable_reason
     ? { label: myIndustry.model_label, input: myIndustry.input } : null;
   const openingsHere = useMemo(() => {
     if (prof?.district_id !== districtId) return null;
