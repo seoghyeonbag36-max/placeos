@@ -562,36 +562,48 @@ async function getJSON<T>(path: string): Promise<T> {
 | `res.json()` | 응답 본문을 JSON으로 해석 |
 | `as Promise<T>` | 타입 단언. 서버 응답의 필드가 실제로 맞는지 런타임 검증하지는 않음 |
 
-POST 공통 함수는 `method: "POST"`, JSON 형식을 나타내는 `Content-Type`, `JSON.stringify(body)`를 추가한다. `extraHeaders`는 상용 Program의 조직 API 키 등 추가 헤더를 받는다.
+POST 공통 함수는 `method: "POST"`, JSON 형식을 나타내는 `Content-Type`, `JSON.stringify(body)`를 추가한다. `extraHeaders`는 추가 헤더를 받는 자리다. 이를 쓰던 상용 Program 온보딩은 2026-09-24 에 걷혀, 2026-09-28 현재 세 번째 인자를 넘기는 호출은 없다.
 
 ### 5.2 API 요청 목록
 
 아래 상대 경로 앞에는 보통 `/api/v1`이 붙는다. 함수명은 실제 코드 기준이다.
 
+> 이 표만 **2026-09-28 `src/lib/api.ts` 기준**으로 다시 맞췄다(문서 나머지는 머리말의 09-11 기준 그대로다). 09-24 Program 재정의로 사라진 `lookupStorePlaces`·`lookupStoreReviews`·`generateStoreMarketing`·`generateCommercialStoreMarketing` 을 지웠고, 그 뒤 생긴 함수를 더했다. `src/lib/api.ts` 밖에서 `fetch` 를 직접 부르는 곳은 없다(09-28).
+
 | 함수 | 메서드·경로 | 역할 |
 |---|---|---|
-| `getHealth` | GET `/health` | 상태 조회 보조 함수. 공통 `/api/v1` 바깥이며 현재 화면 호출은 확인되지 않음 |
-| `getBuildingHistory` | GET `/buildings/{id}/history` | 건물 이력 조회 보조 함수. 현재 화면 호출은 확인되지 않음 |
+| `getHealth` | GET `/health` | 상태 조회 보조 함수. 공통 `/api/v1` 바깥이며 현재 화면 호출은 없다 |
+| `getBuildingHistory` | GET `/buildings/{id}/history` | 건물 이력 조회 보조 함수. 현재 화면 호출은 없다 |
 | `listDistricts` | GET `/commercial-districts` | 거점 목록·요약 |
 | `getDistrict` | GET `/commercial-districts/{id}` | 기존 거점 심층 상세 |
 | `getSentiment` | GET `/commercial-districts/{id}/sentiment` | 이름은 과거 감성 API지만 현재 타입은 행정동 구역·결측 감성도 표현 |
 | `getVacancyHeatmap` | GET `/heatmap/vacancy?district=...` | 공실 격자·출처·앵커 등 |
-| `getBuildingVacancy` | GET `/heatmap/buildings?district=...` | 건물 GeoJSON |
 | `getRentHeatmap` | GET `/heatmap/rent?district=...` | 임대시세 격자 |
 | `getFootfallHeatmap` | GET `/heatmap/footfall?district=...&hour=...&daytype=...` | 시간대·평일/주말 유동인구 |
 | `getDensityHeatmap` | GET `/heatmap/density?district=...&metric=...` | 유동인구 또는 점포 밀도 |
+| `getBuildingVacancy` | GET `/heatmap/buildings?district=...` | 건물 GeoJSON |
 | `getPostings` | GET `/commercial-districts/{id}/postings` | 계산 가능한 공실 유닛과 시나리오 |
 | `getFloorVacancies` | GET `/commercial-districts/{id}/floor-vacancies?...` | 층별 매물. 계산 유닛과 구분 |
-| `getMarketing` | GET `/marketing/{id}` | 상권 행사·온라인 콘텐츠 |
+| `getMarketing` | GET `/marketing/{id}` | 상권 행사 + Gold 기반 온라인 콘텐츠 생성. 생성까지 돌므로 지도에서는 부르지 않는다 |
+| `getDistrictEvents` | GET `/marketing/events?district_id=...` | 상권 행사만(LLM 호출 없음). Program 지도의 오프라인 장소 |
+| `simulateRevenue` | POST `/ai/simulate-revenue` | 입점 비용·회수기간 시뮬레이션 |
 | `getPlatformProfile` | GET `/commercial-districts/{id}/platform` | 상권 정체성과 자리별 제안 |
 | `predictVacancy` | POST `/ai/predict-vacancy` | 공실 프록시 예측 요청 |
 | `recommendIndustry` | POST `/ai/recommend-industry` | 거점 또는 좌표 기준 업종 추천 |
-| `simulateRevenue` | POST `/ai/simulate-revenue` | 입점 비용·회수기간 시뮬레이션 |
-| `lookupStorePlaces` | GET `/marketing/places?...` | 상호 검색 후보 |
-| `lookupStoreReviews` | GET `/marketing/reviews?...` | 가게 언급 블로그 스니펫 |
-| `generateStoreMarketing` | POST `/marketing/generate` | 공개 데모 마케팅 생성 |
-| `generateCommercialStoreMarketing` | POST `/marketing/onboarding/generate` | 조직 API 키·동의 계약을 포함한 상용 생성 |
-| `getAdminCoverage` | GET `/admin/coverage` | 관리자 커버리지(`#admin`). `X-Admin-Token` 사용. `totals` 는 서빙 거점만 세고 보류 거점은 `held` 로 따로 온다(2026-09-28) |
+| `listIndustries` | GET `/ai/industries` | 업종 선택지 목록 |
+| `getIndustryFit` | GET `/ai/industry-fit?industry=...` | 업종 하나로 본 상권 순위. `fit` 은 순위로만 읽는다(절대값 아님) |
+| `getDistrictIndustries` | GET `/ai/district-industries/{id}` | 한 상권 안의 업종 순위(업종 바꾸기) |
+| `generateProgram` | POST `/marketing/generate` | 검증 브리프 → 검증 프로그램(모객·자리·연계·검증 지표). 09-24 이전 같은 경로의 `generateStoreMarketing` 을 대신한다 |
+| `signup` | POST `/auth/signup` | 조직 가입(= 조직 생성). 본문 `org_name`·`email`·`password` |
+| `login` | POST `/auth/login` | 로그인. 액세스 토큰(JWT)을 받는다 |
+| `getMe` | GET `/auth/me` | 토큰의 주인(조직·역할). 401 이면 토큰 만료 |
+| `listApiKeys` | GET `/auth/api-keys` | 조직 API 키 목록. 원문 없음 |
+| `createApiKey` | POST `/auth/api-keys` | 키 발급(관리자만). 원문은 이 응답에만 한 번 실린다 |
+| `revokeApiKey` | DELETE `/auth/api-keys/{id}` | 키 폐기(관리자만) |
+| `sendClientMetric` | POST `/metrics/client` | 화면 구간 시간 비콘(KPI②). `keepalive`, 실패해도 던지지 않는다 |
+| `getAdminCoverage` | GET `/admin/coverage` | 관리자 커버리지(`#admin`). `X-Admin-Token` 사용. `totals` 는 서빙 거점만 세고 보류 거점은 `held` 로 따로 온다 |
+
+계정 함수 여섯(`signup`~`revokeApiKey`)은 공통 `getJSON`·`postJSON` 이 아니라 `authRequest` 를 거친다. 액세스 토큰은 이 함수들에만 인자로 넘기고 공개 분석 API 에는 붙이지 않는다 — 만료된 토큰이 붙으면 서버가 익명으로 강등하지 않고 401 로 거절해 지도·네 트랙이 선다(`src/lib/api.ts` 계정 절 머리말).
 
 `URLSearchParams`는 검색 조건을 URL 질의 문자열로 만들고, `encodeURIComponent`는 가게명·주소의 공백·한글·특수문자가 URL 구조와 섞이지 않도록 인코딩한다. 일반적인 웹 인코딩 기능이며 암호화는 아니다.
 
