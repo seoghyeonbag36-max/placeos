@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
 
@@ -21,21 +21,30 @@ export default function AdminCoverage() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
+  // 조회 순번 — 조회가 겹치면(조회 중 Enter · 개발 모드의 자동 조회 2회) 늦게 도착한 옛 응답이
+  // 최신 결과를 덮어 오류 문구와 표가 함께 보이고 실패한 토큰이 저장됐다(2026-09-28 브라우저 실측).
+  // 마지막으로 보낸 조회의 응답만 화면에 반영한다.
+  const latest = useRef(0);
+
   async function load(t: string) {
     if (!t) return;
+    const seq = ++latest.current;
     setLoading(true);
     setError("");
     try {
-      setData(await getAdminCoverage(t));
+      const payload = await getAdminCoverage(t);
+      if (seq !== latest.current) return;
+      setData(payload);
       sessionStorage.setItem(TOKEN_KEY, t);
     } catch (err) {
+      if (seq !== latest.current) return;
       setData(null);
       const status = err instanceof ApiError ? err.status : 0;
       setError(status === 403
         ? "토큰이 올바르지 않거나 서버에 ADMIN_TOKEN 이 설정되지 않았습니다."
         : status === 0 ? "서버에 연결하지 못했습니다." : `요청 실패 (${status})`);
     } finally {
-      setLoading(false);
+      if (seq === latest.current) setLoading(false);
     }
   }
 
