@@ -26,12 +26,15 @@ from kpi_baseline import (  # noqa: E402
     SKILL,
     UNRESOLVED,
     UNTESTABLE,
+    VOCAB_FAIL,
+    VOCAB_PASS,
     WORSE,
     check,
     cluster_bootstrap_ci,
     cluster_bootstrap_ratio_ci,
     detectability,
     gnn_skill,
+    gnn_vocab_check,
     lstm_skill,
     mcnemar_exact,
     skew_robust,
@@ -176,7 +179,7 @@ def test_failures_list_every_axis_that_is_not_skill() -> None:
         verdicts.append(res["gnn"]["gate_verdict"])
     assert len(res["failures"]) == sum(v != SKILL for v in verdicts)
     for msg in res["failures"]:
-        assert any(v in msg for v in (UNRESOLVED, WORSE, UNTESTABLE, PENDING)), (
+        assert any(v in msg for v in (UNRESOLVED, WORSE, UNTESTABLE, PENDING, VOCAB_FAIL)), (
             f"실패 문구가 판정을 말하지 않는다: {msg}")
 
 
@@ -497,3 +500,79 @@ def test_train_gnn_writes_the_paired_table_and_full_test_dump() -> None:
     src = (ROOT / "ml" / "training" / "train_gnn.py").read_text(encoding="utf-8")
     assert '"test_top3_paired"' in src, "쌍대 표가 산출물에서 빠졌다 — 분해능 근사로 되돌아간다"
     assert '"test_rows"' in src, "덤프가 off-prior 만 남긴다 — 쌍대 표를 다시 셀 수 없다"
+
+
+# ─────────────────────────── GNN 어휘 점검 (2026-09-28) ───────────────────────────
+# → docs/finding-gnn-81hub-retrain-2026-09-27.md §판정기의 사각 · 기준 ①②③ 창업자 승인 09-28
+
+def _rec_with(label_level: str | None, tops: list[list[str]], metrics: dict | None = None) -> dict:
+    """추천 산출물 모양 — districts.{hub}.{node}.top[].industry 만 채운다."""
+    m = dict(metrics or {})
+    if label_level is not None:
+        m["label_level"] = label_level
+    nodes = {f"n{i}": {"top": [{"industry": lab, "score": 0.1} for lab in t]}
+             for i, t in enumerate(tops)}
+    return {"metrics": m, "districts": {"hub": nodes}}
+
+
+_SIX = [["음식점", "카페", "병원"], ["카페", "편의점", "약국"], ["숙박", "음식점", "카페"]]
+_UNMAPPED_74 = ([["미분류", "음식점", "카페"]] * 74 + [["음식점", "카페", "병원"]] * 26)
+
+
+def test_label_a_style_artifact_fails_vocab_even_when_stats_say_skill(tmp_path) -> None:
+    """**핵심 잠금.** 09-27 안 (a) — 1순위 74% 가 미분류인데 통계는 `실력`이었다.
+
+    쌍대 표가 강한 `실력`이어도 게이트는 `어휘 불합격`으로 닫히지 않아야 한다.
+    """
+    import json
+
+    strong = _gnn_paired({f"d{i}": [30, 5, 120] for i in range(40)})
+    rec = _rec_with("group", _UNMAPPED_74, strong["metrics"])
+    vc = gnn_vocab_check(rec)
+    assert vc["verdict"] == VOCAB_FAIL
+    assert not vc["checks"]["label_level"]["ok"]
+    assert vc["checks"]["no_unmapped"]["value"] == 74
+    assert vc["top1_lead"]["label"] == "미분류"
+
+    fp = tmp_path / "rec.json"
+    fp.write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
+    res = check(forecast_path=tmp_path / "없음.json", recommend_path=fp)
+    g = res["gnn"]
+    assert g["verdict"] == SKILL                 # 통계 판정은 실력이지만
+    assert g["gate_verdict"] == VOCAB_FAIL       # 게이트는 닫히지 않는다
+    assert not res["ok"]
+    assert any(VOCAB_FAIL in f and "미분류" in f for f in res["failures"])
+
+
+def test_unmapped_alone_fails_even_with_the_decided_label_level() -> None:
+    """② 는 ① 과 따로 선다 — label_level 이 맞아도 Top-3 에 미분류가 섞이면 불합격."""
+    vc = gnn_vocab_check(_rec_with("group_mapped", _SIX + [["음식점", "미분류", "카페"]]))
+    assert vc["checks"]["label_level"]["ok"]
+    assert vc["verdict"] == VOCAB_FAIL
+
+
+def test_missing_label_level_is_untestable_not_pass() -> None:
+    """① 기록이 없으면 추정하지 않고 `검정불가` — 옛 산출물을 합격으로 치지 않는다."""
+    vc = gnn_vocab_check(_rec_with(None, _SIX))
+    assert vc["verdict"] == UNTESTABLE
+
+
+def test_vocab_width_allows_one_missing_label_and_names_it() -> None:
+    """③ 7종 중 6종이면 합격하되 빠진 라벨을 싣는다. 5종이면 불합격."""
+    six = gnn_vocab_check(_rec_with("group_mapped", _SIX))
+    assert six["verdict"] == VOCAB_PASS
+    assert six["missing"] == ["문화시설"]
+    five = gnn_vocab_check(_rec_with("group_mapped", [["음식점", "카페", "병원"],
+                                                      ["카페", "편의점", "음식점"]]))
+    assert five["checks"]["width"]["value"] == 4
+    assert five["verdict"] == VOCAB_FAIL
+
+
+def test_serving_artifact_passes_the_vocab_check() -> None:
+    """현재 서빙본(09-27 · 어휘 (b))은 합격해야 한다 — 어휘 점검이 멀쩡한 게이트를 내리지 않는다."""
+    res = check()
+    g = res["gnn"]
+    assert g.get("available"), "platform_industry_recommend.json 이 필요하다"
+    assert g["vocab"]["verdict"] == VOCAB_PASS, g["vocab"]["checks"]
+    assert g["gate_verdict"] == g["verdict"]
+

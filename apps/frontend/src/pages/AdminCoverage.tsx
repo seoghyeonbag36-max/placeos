@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
+import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./AdminCoverage.css";
 
 /**
@@ -114,7 +115,10 @@ export default function AdminCoverage() {
                 <th style={{ padding: "8px 10px" }}>대장 미확인</th>
                 <th style={{ padding: "8px 10px" }}>비상업</th>
                 <th style={{ padding: "8px 10px" }}>커버리지</th>
-                <th style={{ padding: "8px 10px" }}>참고 공실률</th>
+                {/* 공개 화면과 같은 두 수를 §4-2 라벨로 싣는다(2026-09-28). 종전 "참고 공실률"은
+                    집합건물 호실을 섞은 옛 대표값이라 공개 화면의 어느 수와도 달랐다. */}
+                <th style={{ padding: "8px 10px" }}>{VACANCY_LABEL.primary}</th>
+                <th style={{ padding: "8px 10px" }}>{VACANCY_LABEL.contrast}</th>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>빌드</th>
               </tr>
             </thead>
@@ -135,7 +139,11 @@ export default function AdminCoverage() {
                   </td>
                   <td style={{ padding: "8px 10px" }}>{h.coverage_pct != null ? `${h.coverage_pct}%` : "—"}</td>
                   <td style={{ padding: "8px 10px" }}>
-                    {h.reference_vacancy_pct != null ? `${h.reference_vacancy_pct}%` : "—"}
+                    {h.vacancy_rate != null ? `${h.vacancy_rate.toFixed(1)}%`
+                      : h.vacancy_withheld ? "대표값 미제공" : "—"}
+                  </td>
+                  <td style={{ padding: "8px 10px" }}>
+                    {h.aligned_vacancy_pct != null ? `${h.aligned_vacancy_pct.toFixed(1)}%` : "—"}
                   </td>
                   <td style={{ textAlign: "left", padding: "8px 10px", color: "#9ca3af" }}>
                     {h.built_at.replace("T", " ")}

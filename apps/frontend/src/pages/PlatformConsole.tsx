@@ -21,6 +21,7 @@ import { useMapHost } from "@/components/MapHost";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import { boundaryBadge, computeHubBoundary, EMPTY_BOUNDARY, type HubBoundary } from "@/lib/hubBoundary";
 import type { BuildingSelection } from "@/lib/workspaceState";
+import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./PlatformConsole.css";
 
 /**
@@ -247,7 +248,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           <div className="chips">
             <span className="chip">{hub.type}</span>
             <span className="chip">
-              공실률{" "}
+              {VACANCY_LABEL.primary}{" "}
               <MeasuredValue value={hub.vacancy_rate} unit="%"
                 absent={hub.vacancy_withheld ? "대표값 미제공" : "실측 없음"} />
               <i className={`src ${hub.vacancy_source === "gold" ? "is-gold" : "is-syn"}`}>
@@ -511,8 +512,8 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
   if (fc?.ground_anchor) {
     const a = fc.ground_anchor;
     sources.push(
-      `R-ONE 앵커${a.anchor_street_pct != null ? ` ${a.anchor_street_pct.toFixed(1)}%` : ""}`
-      + ` · 건물 실측 ${a.estimated_vacancy_pct?.toFixed(1)}%`
+      `${VACANCY_LABEL.anchor}${a.anchor_street_pct != null ? ` ${a.anchor_street_pct.toFixed(1)}%` : ""}`
+      + ` · ${VACANCY_LABEL.contrast} ${a.estimated_vacancy_pct?.toFixed(1)}%`
       + `${a.buildings_used ? ` (${a.buildings_used.toLocaleString()}동)` : ""} · ${a.source} ${a.as_of}`,
     );
   }
@@ -1101,7 +1102,9 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
             <div className="anchor">
               <div className="evidh">지상검증 앵커 <span className="badge is-ground">실측</span></div>
               <div className="row">
-                <span>건물 실측 공실률</span>
+                {/* 이 값은 rone_aligned.mid(중대형·면적)다 — 거점 전체 공실률과 다른 수라
+                    같은 "공실률" 이름을 붙이지 않는다(2026-09-28). */}
+                <span>{VACANCY_LABEL.contrast}</span>
                 <span>
                   {fc.ground_anchor.estimated_vacancy_pct?.toFixed(1)}%
                   {fc.ground_anchor.buildings_used
@@ -1111,7 +1114,7 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
               </div>
               {fc.ground_anchor.anchor_street_pct != null && (
                 <div className="row">
-                  <span>R-ONE 앵커</span>
+                  <span>{VACANCY_LABEL.anchor}</span>
                   <span>{fc.ground_anchor.anchor_street_pct.toFixed(1)}%</span>
                 </div>
               )}

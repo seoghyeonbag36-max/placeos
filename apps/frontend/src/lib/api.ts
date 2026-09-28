@@ -91,11 +91,18 @@ export interface DistrictSummary {
   /** Gold 경로에서만 — 집계에 쓰인 건물 수 / 마스터 전체 대비 비율(%) */
   building_count: number | null;
   precision_pct: number | null;
-  /** 앵커 대조 — 거점별 R-ONE 중대형상가 공실률과 격차(%p).
-   *  모집단·단위가 달라(우리는 호실·전수, R-ONE 은 면적·표본) 격차 0 이 정상은 아니다.
-   *  절대값이 아니라 거점 간 비교·추세 감시용. */
+  /** 앵커 — 거점별 R-ONE 중대형상가 공실률(최신 분기). */
   anchor_pct: number | null;
+  /** @deprecated 주 지표(거점 전체·호실) − 앵커. 모집단이 달라 격차가 아니다 — aligned_gap_pp 를 읽는다. */
   anchor_gap_pp: number | null;
+  /** R-ONE 정렬 대조(2026-09-28, docs/finding-anchor-gap-2026-09.md §4-2).
+   *  대조 지표 = rone_aligned.mid 대표값(R-ONE 과 같은 모집단·면적 기준) · 불확실 구간 = 층 밴드
+   *  · 정렬 격차 = 대조 지표 − 앵커. 대조 지표가 없거나 대표값을 내린 거점은 null.
+   *  화면은 이것만 읽는다(components/AlignedAnchor). */
+  aligned_vacancy_pct: number | null;
+  aligned_floor_hi_pct: number | null;
+  aligned_floor_lo_pct: number | null;
+  aligned_gap_pp: number | null;
   /** Platform·LSTM 다음 분기 예측 — forecast 미배포 시 null */
   predicted_rate: number | null;
   predicted_delta: number | null;
@@ -224,8 +231,18 @@ export interface VacancyHeatmap {
   capacity: number | null; buildings: number | null;
   buildings_total: number | null; precision_pct: number | null;
   excluded_mall: number | null;
-  /** 앵커 대조 — R-ONE 중대형상가 공실률과 격차(%p). DistrictSummary 와 동일 의미 */
-  anchor_pct: number | null; anchor_gap_pp: number | null;
+  /** 앵커 · 정렬 대조 — DistrictSummary 와 동일 의미. anchor_gap_pp 는 deprecated */
+  anchor_pct: number | null;
+  /** @deprecated aligned_gap_pp 를 읽는다 */
+  anchor_gap_pp: number | null;
+  /** R-ONE 정렬 대조(2026-09-28, docs/finding-anchor-gap-2026-09.md §4-2).
+   *  대조 지표 = rone_aligned.mid 대표값(R-ONE 과 같은 모집단·면적 기준) · 불확실 구간 = 층 밴드
+   *  · 정렬 격차 = 대조 지표 − 앵커. 대조 지표가 없거나 대표값을 내린 거점은 null.
+   *  화면은 이것만 읽는다(components/AlignedAnchor). */
+  aligned_vacancy_pct: number | null;
+  aligned_floor_hi_pct: number | null;
+  aligned_floor_lo_pct: number | null;
+  aligned_gap_pp: number | null;
   /** Platform·LSTM 다음 분기 예측 (거점 단위) — forecast 미배포 시 null */
   predicted_rate: number | null;
   predicted_delta: number | null;
@@ -982,7 +999,13 @@ export interface AdminCoverageHub {
   excluded_unknown: number;
   excluded_non_commercial: number;
   coverage_pct: number | null;
+  /** @deprecated coverage.json 의 옛 대표값(집합건물 호실 포함) — 공개 화면의 어느 수와도 다르다. 화면은 읽지 않는다 */
   reference_vacancy_pct: number | null;
+  /** 공개 화면과 같은 수(2026-09-28) — 거점 전체 공실률 · 대표값 미제공 여부 · 대조 지표(R-ONE 정렬).
+   *  서빙 보류 거점은 null / false */
+  vacancy_rate: number | null;
+  vacancy_withheld: boolean;
+  aligned_vacancy_pct: number | null;
   /** 공개 API 가 내는 거점인가(2026-09-28). false = 산출물만 있는 서빙 보류 거점 */
   served: boolean;
 }
