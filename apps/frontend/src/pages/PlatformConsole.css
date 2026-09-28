@@ -9,8 +9,8 @@
 
 /* 머리말(eyebrow·질문·결론·근거 3줄·출처)은 공용 Verdict 가 그린다 — components/Verdict.css */
 
-.platconsole .err{background:#fef2f2;border:1px solid #fecaca;border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:#7f1d1d;margin:var(--sp-4) 0;line-height:1.7}
-.platconsole .errdetail{font-size:11px;color:#b91c1c;margin-top:6px;word-break:break-all}
+.platconsole .err{background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:var(--danger-ink);margin:var(--sp-4) 0;line-height:1.7}
+.platconsole .errdetail{font-size:11px;color:var(--danger-text);margin-top:6px;word-break:break-all}
 
 /* ── 거점 선택 ── */
 .platconsole .picker{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;
@@ -18,11 +18,11 @@
 .platconsole .pk{display:flex;align-items:center;gap:var(--sp-2)}
 .platconsole .pk>span{font-size:11.5px;font-weight:700;color:var(--sub)}
 .platconsole .pk select{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);
- background:#fafbfc;border:1px solid var(--line);border-radius:9px;padding:7px 10px;cursor:pointer;outline:none;max-width:280px}
+ background:var(--surface-subtle);border:1px solid var(--line);border-radius:9px;padding:7px 10px;cursor:pointer;outline:none;max-width:280px}
 .platconsole .pk select:focus{border-color:var(--blue);background:var(--surface)}
 .platconsole .chips{display:flex;gap:6px;flex-wrap:wrap}
 .platconsole .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
- color:#5a6b85;background:#f1f4f8;border-radius:6px;padding:var(--sp-1) var(--sp-2)}
+ color:var(--text-secondary);background:var(--surface-sunken);border-radius:6px;padding:var(--sp-1) var(--sp-2)}
 /* 공실 수치 출처 — PageDashboard .srcbadge 와 같은 규칙(실측 초록 채움 / 합성 점선) */
 .platconsole .chip .src{font-style:normal;font-size:9.5px;font-weight:700;border-radius:4px;padding:1px var(--sp-1)}
 .platconsole .chip .src.is-gold{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
@@ -34,9 +34,9 @@
 /* ── ① 정체성: 이 상권은 어떤 플랫폼인가 (Fold 안) ── */
 .platconsole .herotop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
  padding-bottom:13px;border-bottom:1px solid var(--line)}
-.platconsole .herolabel{font-size:11px;font-weight:700;letter-spacing:.5px;color:#9aa3af}
+.platconsole .herolabel{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-subtle)}
 .platconsole .heroarch{font-size:26px;font-weight:700;letter-spacing:-.7px;margin:var(--sp-1) 0 5px;color:#1e3a5f}
-.platconsole .herorule{font-size:10.5px;color:#9aa3af;line-height:1.55;max-width:560px}
+.platconsole .herorule{font-size:10.5px;color:var(--text-subtle);line-height:1.55;max-width:560px}
 .platconsole .herokpis{display:flex;gap:9px;flex-wrap:wrap}
 .platconsole .herokpis .kpi{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:var(--sp-2) var(--sp-3);min-width:96px}
 .platconsole .herokpis .l{font-size:10.5px;font-weight:700;color:var(--sub);margin-bottom:3px}
@@ -47,12 +47,12 @@
 @media (max-width:1100px){.platconsole .herogrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){.platconsole .herogrid{grid-template-columns:minmax(0,1fr)}}
 .platconsole .panel h3{font-size:13px;font-weight:700;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:9px}
-.platconsole .panel h3 small{font-size:10.5px;font-weight:700;color:#9aa3af}
-.platconsole .pnote{font-size:10.5px;color:#9aa3af;line-height:1.6;margin-top:var(--sp-2)}
+.platconsole .panel h3 small{font-size:10.5px;font-weight:700;color:var(--text-subtle)}
+.platconsole .pnote{font-size:10.5px;color:var(--text-subtle);line-height:1.6;margin-top:var(--sp-2)}
 .platconsole .pnote b{color:var(--sub)}
 
 /* 업종 구성 스택 */
-.platconsole .stack{display:flex;height:16px;border-radius:5px;overflow:hidden;background:#f1f4f8}
+.platconsole .stack{display:flex;height:16px;border-radius:5px;overflow:hidden;background:var(--surface-sunken)}
 .platconsole .stack i{display:block;height:100%}
 .platconsole .glegend{margin-top:9px;display:flex;flex-direction:column;gap:2px}
 .platconsole .gitem summary{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--sub);
@@ -69,15 +69,15 @@
 .platconsole .agebarwrap{flex:1;width:100%;display:flex;align-items:flex-end}
 .platconsole .agebarwrap i{display:block;width:100%;background:#7C9BC7;border-radius:3px 3px 0 0;min-height:2px}
 .platconsole .agev{font-size:10px;font-weight:700;color:var(--sub);margin-top:3px}
-.platconsole .agel{font-size:9.5px;color:#9aa3af;white-space:nowrap}
+.platconsole .agel{font-size:9.5px;color:var(--text-subtle);white-space:nowrap}
 .platconsole .minirow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
 
 /* 시간대 유동 vs 매출 */
 .platconsole .bandhd{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px}
 .platconsole .bandrow{display:grid;grid-template-columns:52px 1fr 34px;align-items:center;gap:7px;font-size:10.5px;color:var(--sub);padding:2px 0}
 .platconsole .bandrow.peak .bl,.platconsole .bandrow.gap .bl{font-weight:700;color:var(--ink)}
-.platconsole .bandrow .bv{font-size:9.5px;font-weight:700;color:#9aa3af;text-align:right}
-.platconsole .bandrow.gap .bv{color:#8a5a00}
+.platconsole .bandrow .bv{font-size:9.5px;font-weight:700;color:var(--text-subtle);text-align:right}
+.platconsole .bandrow.gap .bv{color:var(--caution-ink)}
 .platconsole .bbar{display:flex;flex-direction:column;gap:2px}
 .platconsole .bbar i{display:block;height:5px;border-radius:3px;min-width:1px}
 .platconsole .bbar .f{background:#7C9BC7}
@@ -85,21 +85,21 @@
 
 /* 블로그 키워드 */
 .platconsole .kwcloud{display:flex;gap:5px;flex-wrap:wrap;align-items:baseline}
-.platconsole .kwc{font-weight:700;color:#3a5a98;background:#f2f6fb;border:1px solid #e2eaf4;border-radius:6px;padding:2px 7px;line-height:1.5}
-.platconsole .kwc i{font-style:normal;font-size:9px;font-weight:700;color:#9aa3af;margin-left:var(--sp-1)}
+.platconsole .kwc{font-weight:700;color:var(--ui-navy);background:#f2f6fb;border:1px solid #e2eaf4;border-radius:6px;padding:2px 7px;line-height:1.5}
+.platconsole .kwc i{font-style:normal;font-size:9px;font-weight:700;color:var(--text-subtle);margin-left:var(--sp-1)}
 
 /* 검색 트렌드 */
 .platconsole .trends{margin-top:11px;display:flex;flex-direction:column;gap:10px}
-.platconsole .trend{background:#fafbfc;border:1px solid var(--line);border-radius:9px;padding:var(--sp-2) 10px}
+.platconsole .trend{background:var(--surface-subtle);border:1px solid var(--line);border-radius:9px;padding:var(--sp-2) 10px}
 .platconsole .trhd{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-2);font-size:12px}
 .platconsole .trdir{font-size:11px;font-weight:700}
 .platconsole .trdir.up{color:var(--up)}
 .platconsole .trdir.down{color:var(--blue)}
 .platconsole .trdir.flat{color:#8a93a0}
 .platconsole .spark{width:100%;height:28px;display:block;margin:var(--sp-1) 0 2px}
-.platconsole .trmeta{font-size:10px;color:#9aa3af}
+.platconsole .trmeta{font-size:10px;color:var(--text-subtle)}
 
-.platconsole .herosrc{font-size:10.5px;color:#9aa3af;line-height:1.6;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
+.platconsole .herosrc{font-size:10.5px;color:var(--text-subtle);line-height:1.6;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
 
 /* ── ② 자리 제안 ── */
 .platconsole .sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:11px}
@@ -107,22 +107,22 @@
 .platconsole .site{padding:var(--sp-3) 13px}
 .platconsole .sitehd{display:flex;align-items:baseline;gap:var(--sp-2)}
 .platconsole .sname{font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.platconsole .sname em{font-style:normal;font-weight:700;color:#9aa3af}
-.platconsole .sdist{font-size:9.5px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:5px;padding:1px 5px;flex:0 0 auto}
+.platconsole .sname em{font-style:normal;font-weight:700;color:var(--text-subtle)}
+.platconsole .sdist{font-size:9.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:5px;padding:1px 5px;flex:0 0 auto}
 .platconsole .smeta{font-size:10.5px;color:var(--sub);margin-top:3px}
 .platconsole .srecs{margin-top:9px;display:flex;flex-direction:column;gap:var(--sp-1)}
 .platconsole .srec{display:grid;grid-template-columns:58px 1fr 40px;align-items:center;gap:7px;font-size:11px;color:var(--sub)}
 .platconsole .srec.top{color:var(--ink);font-weight:700}
-.platconsole .srec .rb{height:8px;background:#f1f4f8;border-radius:4px;overflow:hidden}
+.platconsole .srec .rb{height:8px;background:var(--surface-sunken);border-radius:4px;overflow:hidden}
 .platconsole .srec .rb i{display:block;height:100%;background:#9db4d4;border-radius:4px}
 .platconsole .srec.top .rb i{background:var(--blue)}
 .platconsole .srec .rs{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.platconsole .snorec{margin-top:9px;font-size:10.5px;color:#9aa3af;background:#fafbfc;border:1px dashed var(--line);border-radius:7px;padding:7px var(--sp-2);line-height:1.55}
+.platconsole .snorec{margin-top:9px;font-size:10.5px;color:var(--text-subtle);background:var(--surface-subtle);border:1px dashed var(--line);border-radius:7px;padding:7px var(--sp-2);line-height:1.55}
 .platconsole .sdistinct{margin-top:9px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--sub);
  background:#f2f6fb;border:1px solid #e2eaf4;border-radius:7px;padding:5px var(--sp-2)}
 .platconsole .sdistinct b{color:#1e3a5f;font-weight:700}
 .platconsole .sdistinct span{margin-left:auto;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
-.platconsole .swas{margin-top:9px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:#9aa3af}
+.platconsole .swas{margin-top:9px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--text-subtle)}
 .platconsole .swas b{color:var(--sub)}
 .platconsole .more{display:block;margin:11px auto 0;font-family:inherit;font-size:12px;font-weight:700;color:var(--sub);
  background:var(--card);border:1px solid var(--line);border-radius:9px;padding:var(--sp-2) var(--sp-4);cursor:pointer}
@@ -130,7 +130,7 @@
    (0,3,0)/(0,2,0) 으로 새어 들어온다. 이 버튼들은 브랜드 teal 이 아니라
    콘솔 남색 계열이므로 상태색까지 화면 쪽에서 못박는다(요소선택자로 (0,3,1)). */
 .platconsole button.more:hover{color:var(--blue);border-color:var(--blue);background:var(--card)}
-.platconsole .sitesrc{font-size:10.5px;color:#9aa3af;line-height:1.7;margin-top:11px}
+.platconsole .sitesrc{font-size:10.5px;color:var(--text-subtle);line-height:1.7;margin-top:11px}
 .platconsole .sitesrc b{color:var(--sub)}
 
 /* 후보 선택과 비교는 동일 상권 안에서 유지한다. */
@@ -168,32 +168,32 @@
 .platconsole .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px var(--sp-4)}
 .platconsole .chead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:11px}
 .platconsole .chead h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px}
-.platconsole .cmeta{font-size:10.5px;color:#9aa3af;font-weight:700}
+.platconsole .cmeta{font-size:10.5px;color:var(--text-subtle);font-weight:700}
 
 .platconsole .badge{font-size:9.5px;font-weight:700;letter-spacing:.3px;border-radius:5px;padding:2px 6px}
-.platconsole .badge.is-model{color:var(--surface);background:#3a5a98}
+.platconsole .badge.is-model{color:var(--surface);background:var(--ui-navy)}
 .platconsole .badge.is-ground{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
-.platconsole .badge.is-warn{color:#8a5a00;background:#fdf5e3;border:1px solid #f0dcae}
+.platconsole .badge.is-warn{color:var(--caution-ink);background:var(--caution-soft);border:1px solid var(--caution-line)}
 .platconsole .badge.is-seed{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
 .platconsole .badge.is-measured{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
 
 /* 분기 세그먼트 */
 .platconsole .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;width:fit-content;margin-bottom:var(--sp-3)}
 .platconsole .seg button{font-family:inherit;font-size:12px;font-weight:700;padding:7px var(--sp-3);border:none;
- border-left:1px solid var(--line);background:#fafbfc;color:var(--sub);cursor:pointer}
+ border-left:1px solid var(--line);background:var(--surface-subtle);color:var(--sub);cursor:pointer}
 .platconsole .seg button:first-child{border-left:0}
 .platconsole .seg button.on{background:var(--blue);color:var(--surface)}
 
-.platconsole .empty{font-size:12.5px;color:var(--sub);background:#fafbfc;border:1px dashed var(--line);
+.platconsole .empty{font-size:12.5px;color:var(--sub);background:var(--surface-subtle);border:1px dashed var(--line);
  border-radius:9px;padding:14px;line-height:1.6}
 .platconsole .empty code{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11px}
 
 /* 대표 수치 */
 .platconsole .big{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:10px}
 .platconsole .bigval{font-size:34px;font-weight:700;letter-spacing:-1px;line-height:1}
-.platconsole .bigval small{display:block;font-size:10.5px;font-weight:700;color:#9aa3af;letter-spacing:0;margin-top:5px}
+.platconsole .bigval small{display:block;font-size:10.5px;font-weight:700;color:var(--text-subtle);letter-spacing:0;margin-top:5px}
 .platconsole .bigdelta{font-size:16px;font-weight:700;text-align:right}
-.platconsole .bigdelta small{display:block;font-size:10.5px;font-weight:700;color:#9aa3af;margin-top:var(--sp-1)}
+.platconsole .bigdelta small{display:block;font-size:10.5px;font-weight:700;color:var(--text-subtle);margin-top:var(--sp-1)}
 /* 공실은 오를수록 나쁘다 — vacancy 색축과 같은 방향 */
 .platconsole .bigdelta.up{color:var(--up)}
 .platconsole .bigdelta.down{color:var(--down)}
@@ -202,19 +202,19 @@
 .platconsole .approx{background:#f5f8fc;border:1px solid #dbe6f3;border-radius:9px;padding:9px 11px;margin-bottom:var(--sp-3)}
 .platconsole .approxv{font-size:13px;font-weight:700;color:#1e3a5f}
 .platconsole .approxv b{font-weight:700}
-.platconsole .approx .note{font-size:10.5px;color:#5a6b85;line-height:1.55;margin-top:var(--sp-1)}
+.platconsole .approx .note{font-size:10.5px;color:var(--text-secondary);line-height:1.55;margin-top:var(--sp-1)}
 
 /* 재귀 예측 4분기 */
 .platconsole .hz{margin-bottom:var(--sp-3)}
 .platconsole .hzrow{display:grid;grid-template-columns:74px 1fr 50px;align-items:center;gap:var(--sp-2);padding:3px 0;font-size:11px;color:var(--sub)}
 .platconsole .hzrow.recur{opacity:.6}
 .platconsole .hzrow.on{opacity:1;color:var(--ink);font-weight:700}
-.platconsole .hzbar{position:relative;height:14px;background:#f1f4f8;border-radius:4px;overflow:hidden}
+.platconsole .hzbar{position:relative;height:14px;background:var(--surface-sunken);border-radius:4px;overflow:hidden}
 .platconsole .hzbar .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#cbd5e1}
 .platconsole .hzbar .fill{position:absolute;top:2px;bottom:2px;background:#9db4d4;border-radius:3px}
 .platconsole .hzrow.on .hzbar .fill{background:var(--blue)}
 .platconsole .hzv{text-align:right;font-variant-numeric:tabular-nums}
-.platconsole .hznote{font-size:10.5px;color:#9aa3af;line-height:1.55;margin-top:7px}
+.platconsole .hznote{font-size:10.5px;color:var(--text-subtle);line-height:1.55;margin-top:7px}
 .platconsole .hznote b{color:var(--sub)}
 
 /* 검증 근거 — 값 옆에 한계를 같이 싣는 블록 */
@@ -226,21 +226,21 @@
 .platconsole .row span:last-child{font-weight:700;text-align:right}
 .platconsole .row .worse{color:var(--up)}
 .platconsole .row .better{color:var(--down)}
-.platconsole .evidnote{font-size:10.5px;color:#9aa3af;line-height:1.6;margin-top:var(--sp-2)}
+.platconsole .evidnote{font-size:10.5px;color:var(--text-subtle);line-height:1.6;margin-top:var(--sp-2)}
 .platconsole .evidnote b{color:var(--sub)}
 
 /* 추천 Top-3 */
 .platconsole .recs{margin-bottom:10px}
 .platconsole .recrow{display:grid;grid-template-columns:18px 78px 1fr 46px;align-items:center;gap:var(--sp-2);padding:5px 0;font-size:12px}
-.platconsole .rank{width:18px;height:18px;border-radius:6px;background:#f1f4f8;color:#5a6b85;
+.platconsole .rank{width:18px;height:18px;border-radius:6px;background:var(--surface-sunken);color:var(--text-secondary);
  font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.platconsole .recrow.top .rank{background:#3a5a98;color:var(--surface)}
+.platconsole .recrow.top .rank{background:var(--ui-navy);color:var(--surface)}
 .platconsole .rind{font-weight:700}
-.platconsole .rbar{height:10px;background:#f1f4f8;border-radius:5px;overflow:hidden}
+.platconsole .rbar{height:10px;background:var(--surface-sunken);border-radius:5px;overflow:hidden}
 .platconsole .rbar i{display:block;height:100%;background:#9db4d4;border-radius:5px}
 .platconsole .recrow.top .rbar i{background:var(--blue)}
 .platconsole .rsc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.platconsole .recnote{font-size:10.5px;color:#9aa3af;line-height:1.6}
+.platconsole .recnote{font-size:10.5px;color:var(--text-subtle);line-height:1.6}
 .platconsole .recnote b{color:var(--sub)}
 
 /* ── 구역(행정동 실측) ──────────────────────────────────────────────────
@@ -257,8 +257,8 @@
 /* 공실률은 **실측**이라 거점 카드와 같은 색축을 쓴다(색은 인라인 style 로 온다).
    ⚠ 이 자리에 감성을 넣지 말 것 — 못 잰 값에 실측의 시각적 권위를 주게 된다. */
 .platconsole .zscore{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-.platconsole .zmeta{font-size:10.5px;color:#9aa3af;margin-top:3px}
-.platconsole .zsent{font-size:10.5px;color:#9aa3af;margin-top:5px;padding-top:5px;border-top:1px dashed #eceff2}
+.platconsole .zmeta{font-size:10.5px;color:var(--text-subtle);margin-top:3px}
+.platconsole .zsent{font-size:10.5px;color:var(--text-subtle);margin-top:5px;padding-top:5px;border-top:1px dashed #eceff2}
 .platconsole .zkw{display:flex;gap:var(--sp-1);flex-wrap:wrap;margin-top:7px}
 .platconsole .kw{font-size:10px;font-weight:700;color:#8a93a0;background:#f6f7f9;border:1px solid #eceff2;border-radius:5px;padding:1px 5px}
 

@@ -97,7 +97,7 @@
 /* R-ONE 앵커 대조 — 판정이 아니라 참고 지표라 중립색(PageDashboard .anchorchip 과 동일 규칙) */
 .mapshell .side-panel .sp-anchor {
   display: inline-block; margin-top: 6px; padding: 1px 6px; border-radius: 5px;
-  background: #f1f4f8; color: #5a6b85; font-size: 11px; font-weight: 700;
+  background: var(--surface-sunken); color: var(--text-secondary); font-size: 11px; font-weight: 700;
 }
 .mapshell .side-panel .sp-list { flex: 1; overflow-y: auto; }
 
@@ -107,7 +107,7 @@
   background: transparent; cursor: pointer; text-align: left; font-family: inherit;
 }
 .mapshell .b-item:hover { background: #f7faff; }
-.mapshell .b-item.active { background: var(--brand-soft, #e6f7f9); }
+.mapshell .b-item.active { background: var(--brand-soft); }
 .mapshell .b-dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
 .mapshell .b-name { font-size: 13px; font-weight: 700; color: var(--ink); }
 .mapshell .b-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
@@ -130,7 +130,7 @@
 .mapshell .b-rec-badge {
   font-size: 10px; font-weight: 700; letter-spacing: .3px;
   padding: 1px 6px; border-radius: 999px;
-  background: var(--brand-soft, #e6f7f9); color: var(--brand-pressed);
+  background: var(--brand-soft); color: var(--brand-pressed);
 }
 /* 성능을 정직하게 — Top-3 만 보면 과대평가된다(베이스라인 0.89, lift +3.1%) */
 /* 3판 — 「내 사업」 업종 표식 */
@@ -387,7 +387,7 @@
 .mapshell .b-rent-table td b { color: var(--source-real); }
 /* 추정 공실(probable)은 흐리게 + 라벨 — 확정과 같은 모양이면 추정이 실측처럼 읽힌다. */
 .mapshell .b-rent-table tr.is-probable td { color: var(--muted); }
-.mapshell .b-rent-table tr.is-probable i { font-style: normal; font-size: 10px; color: #8a5a00; }
+.mapshell .b-rent-table tr.is-probable i { font-style: normal; font-size: 10px; color: var(--caution-ink); }
 .mapshell .legend .note b { color: var(--source-real); }
 @media (max-width: 768px) {
   .mapshell .rent-summary { padding: var(--sp-2) var(--sp-3); }

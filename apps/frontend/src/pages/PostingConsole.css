@@ -13,8 +13,8 @@
    이 저장소가 tailwind.config.ts·Storybook 에서 이미 겪은 일이다. 그래서 지운다.
    지금 헤더 스타일의 단일 출처는 `src/components/Verdict.css` 의 `.verdict` 다. */
 
-.postconsole .err{background:#fef2f2;border:1px solid #fecaca;border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:#7f1d1d;margin:14px 0;line-height:1.7}
-.postconsole .errdetail{font-size:11px;color:#b91c1c;margin-top:6px;word-break:break-all}
+.postconsole .err{background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:var(--danger-ink);margin:14px 0;line-height:1.7}
+.postconsole .errdetail{font-size:11px;color:var(--danger-text);margin-top:6px;word-break:break-all}
 
 .postconsole .cols{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:940px){.postconsole .cols{grid-template-columns:minmax(0,1fr)}}
@@ -24,26 +24,26 @@
 .postconsole .ptitle{font-size:14px;font-weight:700;margin-bottom:var(--sp-3)}
 .postconsole .field{display:block;margin-bottom:var(--sp-3)}
 .postconsole .flabel{display:flex;align-items:baseline;gap:5px;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:5px}
-.postconsole .flabel em{font-style:normal;margin-left:auto;font-size:10.5px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:5px;padding:1px 6px}
+.postconsole .flabel em{font-style:normal;margin-left:auto;font-size:10.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:5px;padding:1px 6px}
 .postconsole input,.postconsole select{
- width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);background:#fafbfc;
+ width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--surface-subtle);
  border:1px solid var(--line);border-radius:9px;padding:var(--sp-2) 10px;line-height:1.5}
 .postconsole input:focus,.postconsole select:focus{outline:none;border-color:var(--blue);background:var(--surface)}
-.postconsole .fhint{display:block;font-size:10.5px;color:#9aa3af;margin-top:5px;line-height:1.6}
+.postconsole .fhint{display:block;font-size:10.5px;color:var(--text-subtle);margin-top:5px;line-height:1.6}
 .postconsole .fhint b{color:var(--sub)}
-.postconsole .fhint code{background:#f1f4f8;border-radius:4px;padding:1px var(--sp-1);font-size:10px}
+.postconsole .fhint code{background:var(--surface-sunken);border-radius:4px;padding:1px var(--sp-1);font-size:10px}
 .postconsole .chips{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px}
-.postconsole .chip{font-family:inherit;font-size:11px;font-weight:700;color:#3a5a98;background:#f2f6fb;
+.postconsole .chip{font-family:inherit;font-size:11px;font-weight:700;color:var(--ui-navy);background:#f2f6fb;
  border:1px solid #e2eaf4;border-radius:6px;padding:3px var(--sp-2);cursor:pointer}
-.postconsole .chip.on{background:#3a5a98;border-color:#3a5a98;color:var(--surface)}
-.postconsole .chipnote{font-style:normal;font-size:10px;color:#9aa3af}
+.postconsole .chip.on{background:var(--ui-navy);border-color:var(--ui-navy);color:var(--surface)}
+.postconsole .chipnote{font-style:normal;font-size:10px;color:var(--text-subtle)}
 .postconsole .run{width:100%;margin-top:var(--sp-1);font-family:inherit;font-size:13px;font-weight:700;color:var(--surface);
- background:#3a5a98;border:0;border-radius:9px;padding:10px;cursor:pointer}
+ background:var(--ui-navy);border:0;border-radius:9px;padding:10px;cursor:pointer}
 .postconsole .run:disabled{background:#c8d2e0;cursor:not-allowed}
 /* Button(design/components) 병합 시 .ds-btn-* 의 hover/disabled 가
    (0,3,0)/(0,2,0) 으로 새어 들어온다. 이 버튼들은 브랜드 teal 이 아니라
    콘솔 남색 계열이므로 상태색까지 화면 쪽에서 못박는다(요소선택자로 (0,3,1)). */
-.postconsole button.run:hover:not(:disabled){background:#3a5a98}
+.postconsole button.run:hover:not(:disabled){background:var(--ui-navy)}
 .postconsole button.run:disabled{opacity:1}
 
 /* ── 결과 ── */
@@ -52,16 +52,16 @@
  padding:40px 20px;text-align:center;color:var(--sub);font-size:13px}
 .postconsole .rhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:9px}
 .postconsole .rtitle{font-size:17px;font-weight:700;display:flex;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
-.postconsole .rind{font-size:11px;font-weight:700;color:#3a5a98;background:#f2f6fb;border:1px solid #e2eaf4;border-radius:6px;padding:2px 7px}
+.postconsole .rind{font-size:11px;font-weight:700;color:var(--ui-navy);background:#f2f6fb;border:1px solid #e2eaf4;border-radius:6px;padding:2px 7px}
 .postconsole .rbadges{display:flex;gap:5px;flex-wrap:wrap}
 .postconsole .badge{font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px}
 .postconsole .badge.is-copilot{color:var(--surface);background:var(--source-real)}
-.postconsole .badge.is-fallback{color:#5a6b85;background:#f1f4f8;border:1px solid #dfe5ee}
-.postconsole .badge.is-q{color:#8a5a00;background:#fdf5e3;border:1px solid #f0dcae}
+.postconsole .badge.is-fallback{color:var(--text-secondary);background:var(--surface-sunken);border:1px solid #dfe5ee}
+.postconsole .badge.is-q{color:var(--caution-ink);background:var(--caution-soft);border:1px solid var(--caution-line)}
 
 .postconsole .note{border-radius:9px;padding:10px var(--sp-3);font-size:11.5px;line-height:1.6;margin-bottom:10px}
-.postconsole .note.is-warn{background:#fdf5e3;border:1px solid #f0dcae;color:#7a5200}
-.postconsole .note.is-bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.postconsole .note.is-warn{background:var(--caution-soft);border:1px solid var(--caution-line);color:#7a5200}
+.postconsole .note.is-bad{background:var(--danger-soft);border:1px solid var(--danger-line);color:var(--danger-ink)}
 .postconsole .notedetail{font-size:10.5px;margin-top:var(--sp-1);word-break:break-all;opacity:.85}
 
 /* 입력 출처 배지 — 실측 / 프록시 / 전제를 색으로 가른다 */
@@ -71,17 +71,17 @@
 .postconsole .isrc i{font-style:normal;font-size:9.5px;font-weight:700}
 .postconsole .isrc.is-real{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
 .postconsole .isrc.is-proxy{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
-.postconsole .isrc.is-absent{color:#8a5a00;background:#fdf5e3;border:1px dashed #f0dcae}
+.postconsole .isrc.is-absent{color:var(--caution-ink);background:var(--caution-soft);border:1px dashed var(--caution-line)}
 
 .postconsole .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px}
 /* 표면은 .ds-card(Card) 가 낸다. 여기는 상단 강조선과 여백만 — 티어 구분이 그 선이다. */
 .postconsole .tier{border-top:4px solid #d4dde6;padding:13px 14px}
-.postconsole .tier.rec{border-top-color:#3a5a98}
+.postconsole .tier.rec{border-top-color:var(--ui-navy)}
 .postconsole .tier.dead{opacity:.72;border-top-color:#e5b4b1}
 .postconsole .thd{display:flex;align-items:center;gap:7px}
 .postconsole .tname{font-size:15px;font-weight:700}
-.postconsole .trec{font-size:9.5px;font-weight:700;color:var(--surface);background:#3a5a98;border-radius:5px;padding:1px 6px}
-.postconsole .tsub{font-size:10.5px;color:#9aa3af;margin:3px 0 9px}
+.postconsole .trec{font-size:9.5px;font-weight:700;color:var(--surface);background:var(--ui-navy);border-radius:5px;padding:1px 6px}
+.postconsole .tsub{font-size:10.5px;color:var(--text-subtle);margin:3px 0 9px}
 .postconsole .trow{display:flex;justify-content:space-between;gap:var(--sp-2);font-size:11.5px;margin-top:5px;color:var(--sub)}
 .postconsole .trow span:last-child{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 .postconsole .trow.big{margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1px dashed var(--line);font-size:12.5px}
@@ -89,7 +89,7 @@
 .postconsole .trow .pos{color:var(--pos)}
 .postconsole .trow .neg{color:var(--neg)}
 
-.postconsole .rsrc{font-size:10.5px;color:#9aa3af;line-height:1.7;margin-top:var(--sp-3)}
+.postconsole .rsrc{font-size:10.5px;color:var(--text-subtle);line-height:1.7;margin-top:var(--sp-3)}
 .postconsole .rsrc b{color:var(--sub)}
 
 /* 비용을 이해하는 순서: 자리 → 조건 → 세 전략 → 입력 변경의 영향. */

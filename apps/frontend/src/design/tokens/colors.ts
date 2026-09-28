@@ -22,6 +22,21 @@ export const colors = {
   line: "#E3E9F2",
   surface: "#FFFFFF",
   bg: "#F4F7FB",
+  // UI 보조 색 (2026-09-28 · 2차 hex 이관) — styles/tokens.css 의 같은 블록과 1:1.
+  // pages/*.css 에 흩어져 있던 값을 그대로 이름만 붙였다(반올림·통합 없음).
+  // ⚠ ui.danger 는 semantic.danger(공실 축 빨강 #E03E36)와 다른 계열 — 오류 박스·문구용.
+  ui: {
+    textSecondary: "#5A6B85",
+    textSubtle: "#9AA3AF",
+    surfaceSunken: "#F1F4F8",
+    surfaceSubtle: "#FAFBFC",
+    navy: "#3A5A98",
+    onAccent: "#FFFFFF",
+    danger: { soft: "#FEF2F2", line: "#FECACA", text: "#B91C1C", ink: "#7F1D1D" },
+    warn: { soft: "#FFFBEB", line: "#FDE68A", ink: "#78350F" },
+    caution: { soft: "#FDF5E3", line: "#F0DCAE", ink: "#8A5A00" },
+    note: { soft: "#FDF8EC", line: "#F3E6C4", ink: "#8A6D3B" },
+  },
   // 공실 히트맵 색계열 (저위험→고위험)
   vacancy: ["#22B07D", "#9CCB3B", "#EFA50F", "#F2682C", "#E03E36"],
   semantic: { success: "#22B07D", warning: "#EFA50F", danger: "#E03E36", info: "#0EA5B7" },

@@ -4,15 +4,15 @@
 .pagedash *{box-sizing:border-box}
 .pagedash .wrap{max-width:1240px;margin:0 auto}
 .pagedash .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:10px}
-.pagedash .ey{font-size:11px;font-weight:700;letter-spacing:1.5px;color:#9aa3af;text-transform:uppercase}
+.pagedash .ey{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-subtle);text-transform:uppercase}
 .pagedash h1{font-size:27px;font-weight:700;margin:6px 0 var(--sp-1);letter-spacing:-.5px}
 .pagedash .sub{font-size:13px;color:var(--sub)}
 .pagedash .back{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px var(--sp-3);cursor:pointer;margin-bottom:var(--sp-2)}
 .pagedash .back:hover{color:var(--blue);border-color:var(--blue)}
 .pagedash .loading{padding:60px 0;text-align:center;color:var(--sub);font-size:14px}
-.pagedash .err{background:#fef2f2;border:1px solid #fecaca;border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:#7f1d1d;margin:var(--sp-4) 0;line-height:1.7}
-.pagedash .err code{background:var(--surface);border:1px solid #fecaca;border-radius:5px;padding:1px 6px;font-size:12px}
-.pagedash .errdetail{font-size:11px;color:#b91c1c;margin-top:6px;word-break:break-all}
+.pagedash .err{background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:13px;padding:var(--sp-4) 18px;font-size:13px;color:var(--danger-ink);margin:var(--sp-4) 0;line-height:1.7}
+.pagedash .err code{background:var(--surface);border:1px solid var(--danger-line);border-radius:5px;padding:1px 6px;font-size:12px}
+.pagedash .errdetail{font-size:11px;color:var(--danger-text);margin-top:6px;word-break:break-all}
 
 /* KPI */
 .pagedash .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:14px 0 var(--sp-1)}
@@ -27,16 +27,16 @@
 .pagedash .dcard{font-family:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-left:4px solid #d4dde6;border-radius:13px;padding:var(--sp-3) 13px;transition:.12s;cursor:pointer}
 .pagedash .dcard:hover{box-shadow:0 3px 12px rgba(0,0,0,.09);transform:translateY(-1px)}
 .pagedash .dtop{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.pagedash .dord{width:24px;height:24px;flex:0 0 24px;border-radius:7px;background:#f1f4f8;color:#5a6b85;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.pagedash .dord{width:24px;height:24px;flex:0 0 24px;border-radius:7px;background:var(--surface-sunken);color:var(--text-secondary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .pagedash .dname{font-size:14px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
-.pagedash .dpill{font-size:10px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:6px;padding:2px 7px;flex:0 0 auto}
+.pagedash .dpill{font-size:10px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:6px;padding:2px 7px;flex:0 0 auto}
 /* 공실 수치 출처 배지 — 실측(Gold)은 초록 채움, 합성은 회색 점선 테두리로 "임시"임을 드러낸다 */
 .pagedash .srcbadge{font-size:9.5px;font-weight:700;border-radius:5px;padding:1px 5px;flex:0 0 auto;letter-spacing:-.2px}
 .pagedash .srcbadge.is-gold{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
 .pagedash .srcbadge.is-syn{color:#8a93a0;background:#f6f7f9;border:1px dashed #cfd5dd}
 /* R-ONE 앵커 대조 칩 — 판정이 아니라 참고 지표라 중립색으로 둔다(빨강/초록으로 물들이면
    격차 0 이 목표처럼 읽힌다. 모집단이 달라 0 은 애초에 목표가 아니다). */
-.pagedash .anchorchip{font-size:10px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:5px;padding:1px 5px}
+.pagedash .anchorchip{font-size:10px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:5px;padding:1px 5px}
 .pagedash .dhot{font-size:11px;color:var(--sub);margin-bottom:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pagedash .brow{display:flex;align-items:center;gap:6px;margin:3px 0;font-size:10.5px;color:var(--sub)}
 .pagedash .brow .bk{flex:0 0 30px}
@@ -54,11 +54,11 @@
 .pagedash .pred-persist small{font-size:10px;margin-left:2px}
 .pagedash .dtiers{display:flex;gap:5px;margin-top:var(--sp-2);border-top:1px solid var(--line);padding-top:var(--sp-2)}
 .pagedash .tchip{font-size:10px;font-weight:700;border:1px solid;border-radius:6px;padding:1px 7px;background:var(--surface)}
-.pagedash .foot{text-align:center;font-size:11px;color:#9aa3af;margin-top:18px;line-height:1.6}
+.pagedash .foot{text-align:center;font-size:11px;color:var(--text-subtle);margin-top:18px;line-height:1.6}
 
 /* 심층 — 섹션 */
 .pagedash .sec{font-size:16px;font-weight:700;margin:22px 0 10px}
-.pagedash .sec small{font-size:11.5px;font-weight:700;color:#9aa3af;margin-left:var(--sp-2)}
+.pagedash .sec small{font-size:11.5px;font-weight:700;color:var(--text-subtle);margin-left:var(--sp-2)}
 
 /* 공실 히트맵 지도 */
 .pagedash .mapsec{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden}
@@ -66,19 +66,19 @@
 .pagedash .maplegend{display:flex;align-items:center;gap:9px;padding:9px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
 .pagedash .ml-label{font-size:11px;font-weight:700;color:var(--sub)}
 .pagedash .ml-grad{width:120px;height:9px;border-radius:5px;background:linear-gradient(90deg,#22B07D,#8f9a55,#E03E36)}
-.pagedash .ml-ticks{display:flex;justify-content:space-between;width:74px;font-size:9.5px;color:#9aa3af}
+.pagedash .ml-ticks{display:flex;justify-content:space-between;width:74px;font-size:9.5px;color:var(--text-subtle)}
 .pagedash .ml-ticks em{font-style:normal}
 .pagedash .ml-stat{font-size:11px;color:var(--sub);margin-left:auto}
 .pagedash .ml-stat b{font-weight:700}
-.pagedash .ml-hint{font-size:10px;color:#9aa3af}
-.pagedash .mapnotice{background:#fffbeb;border:1px solid #fde68a;border-radius:13px;padding:14px var(--sp-4);font-size:12.5px;color:#78350f;line-height:1.6}
+.pagedash .ml-hint{font-size:10px;color:var(--text-subtle)}
+.pagedash .mapnotice{background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:13px;padding:14px var(--sp-4);font-size:12.5px;color:var(--warn-ink);line-height:1.6}
 .pagedash .mapnotice-sub{font-size:11px;color:#a16207;margin-top:var(--sp-1)}
 @media(max-width:920px){.pagedash .mapcanvas{height:320px}}
 
 /* 지도 레이어 토글(건물 공실 ↔ 100m 그리드) */
 .pagedash .maptoggle{display:flex;align-items:center;gap:6px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.pagedash .maptoggle button{font:700 11.5px 'Pretendard','Malgun Gothic',sans-serif;cursor:pointer;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:#fafbfc;color:var(--sub)}
-.pagedash .maptoggle button.on{background:#3a5a98;border-color:#3a5a98;color:var(--surface)}
+.pagedash .maptoggle button{font:700 11.5px 'Pretendard','Malgun Gothic',sans-serif;cursor:pointer;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-subtle);color:var(--sub)}
+.pagedash .maptoggle button.on{background:var(--ui-navy);border-color:var(--ui-navy);color:var(--surface)}
 .pagedash .maptoggle button:disabled{opacity:.4;cursor:not-allowed}
 .pagedash .maptoggle .twinbtn{margin-left:auto;background:#111827;border-color:#111827;color:var(--surface)}
 /* 건물 공실 범례 칩 */
@@ -101,23 +101,23 @@
 .pagedash .zscore{font-size:17px;font-weight:700}
 .pagedash .zmeta{font-size:11px;color:var(--sub);margin:var(--sp-1) 0 var(--sp-2)}
 .pagedash .zkw{display:flex;flex-wrap:wrap;gap:5px}
-.pagedash .kw{font-size:10.5px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:6px;padding:2px 7px}
+.pagedash .kw{font-size:10.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:6px;padding:2px 7px}
 
 /* 공실 유닛 + 3-Tier */
 .pagedash .units{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:11px}
 .pagedash .unit{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px}
 .pagedash .uhead{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2)}
 .pagedash .uname{font-size:13.5px;font-weight:700}
-.pagedash .upill{font-size:10.5px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:6px;padding:2px var(--sp-2);flex:0 0 auto}
+.pagedash .upill{font-size:10.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:6px;padding:2px var(--sp-2);flex:0 0 auto}
 .pagedash .umeta{font-size:11px;color:var(--sub);margin:5px 0 2px}
 .pagedash .unote{font-size:11px;color:var(--blue);font-weight:700;margin-bottom:9px}
 /* 회수 불가 안내 — 숫자만 비워 두면 '데이터가 없다'로 읽힌다(2026-08-23). */
 .pagedash .unote.neg{color:#c2410c;background:#fff4ed;border:1px solid #fed7aa;border-radius:6px;padding:6px var(--sp-2);line-height:1.5}
 .pagedash .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.pagedash .tier{border:1px solid var(--line);border-radius:10px;padding:var(--sp-2) 9px;background:#fafbfc}
+.pagedash .tier{border:1px solid var(--line);border-radius:10px;padding:var(--sp-2) 9px;background:var(--surface-subtle)}
 .pagedash .tier.rec{background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .pagedash .tname{font-size:11.5px;font-weight:700;margin-bottom:5px}
-.pagedash .tname em{font-style:normal;font-size:9.5px;background:#f1f4f8;border-radius:5px;padding:1px 5px;margin-left:var(--sp-1);color:#5a6b85}
+.pagedash .tname em{font-style:normal;font-size:9.5px;background:var(--surface-sunken);border-radius:5px;padding:1px 5px;margin-left:var(--sp-1);color:var(--text-secondary)}
 .pagedash .trow{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sub);margin:2px 0}
 .pagedash .trow b{color:var(--ink);font-weight:700}
 .pagedash .trow b.neg{color:#c2410c}
@@ -132,15 +132,15 @@
 .pagedash .ewhen{font-size:11px;color:var(--sub);margin:var(--sp-1) 0 6px}
 .pagedash .edesc{font-size:12px;line-height:1.55}
 .pagedash .eroles{display:flex;flex-wrap:wrap;gap:5px;margin:var(--sp-2) 0}
-.pagedash .role{font-size:10px;font-weight:700;color:#5a6b85;background:#f1f4f8;border-radius:6px;padding:2px 7px}
-.pagedash .eha{font-size:10.5px;color:#8a6d3b;background:#fdf8ec;border:1px solid #f3e6c4;border-radius:8px;padding:6px 9px;line-height:1.5}
+.pagedash .role{font-size:10px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);border-radius:6px;padding:2px 7px}
+.pagedash .eha{font-size:10.5px;color:var(--note-ink);background:var(--note-soft);border:1px solid var(--note-line);border-radius:8px;padding:6px 9px;line-height:1.5}
 .pagedash .insta{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px;margin-top:11px}
 .pagedash .ig{background:var(--card);border:1px dashed var(--line);border-radius:11px;padding:10px 13px;font-size:12px;color:var(--sub)}
 /* HA 후처리 검증 표기 — 폐기와 경고를 색으로 가른다. 경고를 경고색으로 칠하면
    살아 있는 카피가 못 쓰는 것으로 읽힌다(오탐이 섞이는 등급이라 더 그렇다).
    ProgramStudio.css 의 .warn/.hawarn 과 같은 값 — 가게 단위와 상권 단위가 같은 판정을
    같은 모양으로 보여야 한다. */
-.pagedash .hablock{font-size:11.5px;color:#78350f;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:var(--sp-2) 10px;line-height:1.55;margin:6px 0}
+.pagedash .hablock{font-size:11.5px;color:var(--warn-ink);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:9px;padding:var(--sp-2) 10px;line-height:1.55;margin:6px 0}
 .pagedash .hawarn{font-size:11.5px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:var(--sp-2) 10px;line-height:1.55;margin:6px 0}
 .pagedash .hablock code,.pagedash .hawarn code{background:var(--surface);border-radius:4px;padding:0 var(--sp-1);font-size:11px}
 .pagedash .halist{margin:5px 0 0;padding-left:var(--sp-4)}
@@ -154,7 +154,7 @@
 .pagedash .fv-counts b{color:var(--fg)}
 .pagedash .fv-toggle{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;cursor:pointer}
 .pagedash .fv-floors{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 11px}
-.pagedash .fv-floors button{font-size:11.5px;font-weight:700;color:#5a6b85;background:#f1f4f8;
+.pagedash .fv-floors button{font-size:11.5px;font-weight:700;color:var(--text-secondary);background:var(--surface-sunken);
   border:1px solid transparent;border-radius:7px;padding:var(--sp-1) 9px;cursor:pointer}
 .pagedash .fv-floors button.on{color:var(--surface);background:var(--blue);border-color:var(--blue)}
 .pagedash .fv-floors button em{font-style:normal;opacity:.7;margin-left:3px;font-size:10.5px}
@@ -167,11 +167,11 @@
 .pagedash .fv-name{font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pagedash .fv-badge{font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;flex-shrink:0}
 .pagedash .fv-badge.ok{color:var(--source-real);background:var(--source-real-soft);border:1px solid var(--source-real-line)}
-.pagedash .fv-badge.maybe{color:#8a6d3b;background:#fdf8ec;border:1px solid #f3e6c4}
+.pagedash .fv-badge.maybe{color:var(--note-ink);background:var(--note-soft);border:1px solid var(--note-line)}
 .pagedash .fv-meta{font-size:12px;margin:6px 0 3px}
 .pagedash .fv-meta .dim{color:var(--sub);font-size:11px;margin-left:3px}
 .pagedash .fv-sub{font-size:11px;color:var(--sub);line-height:1.5}
-.pagedash .fv-warn{color:#8a6d3b}
+.pagedash .fv-warn{color:var(--note-ink)}
 .pagedash .fv-empty{font-size:12px;color:var(--sub);background:#f8fafc;border:1px dashed var(--line);
   border-radius:10px;padding:var(--sp-3) 14px}
 .pagedash .fv-note{font-size:11px;color:var(--sub);line-height:1.6;margin:9px 0 var(--sp-1)}
@@ -187,7 +187,7 @@
 .pagedash .fv-fit{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:6px 0 var(--sp-1);
   padding:6px var(--sp-2);background:#f4f8fb;border-radius:8px;font-size:11px}
 .pagedash .fv-fit.weak{background:#f7f8fa;opacity:.85}
-.pagedash .fv-fit-k{font-weight:700;color:#5a6b85}
+.pagedash .fv-fit-k{font-weight:700;color:var(--text-secondary)}
 .pagedash .fv-fit-v{background:var(--surface);border:1px solid #dde5ef;border-radius:6px;padding:1px 6px;font-weight:700}
 .pagedash .fv-fit-v em{font-style:normal;color:var(--blue);margin-left:2px}
 .pagedash .fv-fit-n{color:#8494a8;margin-left:auto;font-size:10px}

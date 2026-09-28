@@ -71,7 +71,7 @@
 
 .biz-actions { display: flex; gap: var(--sp-2); justify-content: flex-end; flex-wrap: wrap; }
 .biz-actions button { height: 40px; padding: 0 16px; border-radius: 10px; font: inherit; font-size: 14px; font-weight: var(--fw-semibold, 600); cursor: pointer; }
-.biz-start { border: 0; background: var(--track-page); color: var(--surface); }
+.biz-start { border: 0; background: var(--track-page); color: var(--on-accent); }
 .biz-start:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
 .biz-browse { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 
