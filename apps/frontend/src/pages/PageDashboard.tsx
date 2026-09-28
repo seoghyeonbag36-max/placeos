@@ -3,13 +3,14 @@ import { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import {
   BASIS_LABEL,
   listDistricts, getDistrict, getPostings, getMarketing, getVacancyHeatmap, getBuildingVacancy,
-  getFloorVacancies,
+  getFloorVacancies, getForecastSkill,
 } from "@/lib/api";
 import type {
   DistrictSummary, DistrictDetail, Posting, Marketing, TierScenario, VacancyHeatmap, GeoJSONFC,
-  VacancySource, FloorVacancyList, FloorVacancyUnit,
+  VacancySource, FloorVacancyList, FloorVacancyUnit, ForecastSkill,
 } from "@/lib/api";
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
+import { directionLine, errorLine, foldReason, lstmPromoted, pendingLine } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
 import "./PageDashboard.css";
 
@@ -192,7 +193,7 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
               {s.risk_zones !== null && s.risk_zones !== undefined &&
                 <span className={s.risk_zones > 0 ? "risk" : ""}>위험구역 {s.risk_zones}</span>}
               <Anchor pct={s.anchor_pct} gap={s.anchor_gap_pp} />
-              <Pred rate={s.predicted_rate} delta={s.predicted_delta} direction={s.predicted_direction} />
+              <Pred current={s.vacancy_rate} rate={s.predicted_rate} delta={s.predicted_delta} direction={s.predicted_direction} />
             </div>
             <div className="dtiers">
               {(["premium", "value", "factory"] as const).map((t) => (
@@ -210,14 +211,53 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
   );
 }
 
-/** LSTM 다음 분기 공실 예측 배지 — forecast 미배포(null) 시 렌더하지 않음 */
-function Pred({ rate, delta, direction }: { rate: number | null; delta: number | null; direction: "up" | "down" | null }) {
+/** 판정은 화면 전체에서 한 번만 받는다 — 거점 카드마다 부르지 않는다 */
+let skillReq: Promise<ForecastSkill | null> | null = null;
+function useForecastSkill(): ForecastSkill | null | undefined {
+  const [skill, setSkill] = useState<ForecastSkill | null | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    skillReq ??= getForecastSkill().catch(() => null);
+    skillReq.then((s) => { if (live) setSkill(s); });
+    return () => { live = false; };
+  }, []);
+  return skill;
+}
+
+/** 다음 분기 공실 배지.
+ *
+ *  2026-09-28 B안: LSTM 이 오차 축에서 지속성(직전 분기값 그대로)보다 못해(참고 판정),
+ *  **기본 표시는 지속성**이다 — 다음 분기 = 현재 공실률. LSTM 값은 Platform 「모델 근거」
+ *  의 실험 모델 칸으로 내렸고, 여기 title 에 왜 내렸는지를 판정(응답 `skill`)으로 적는다.
+ *  두 축 게이트가 모두 `실력` 이 되면(`lstmPromoted`) LSTM 배지로 돌아간다.
+ *  성능 숫자는 박지 않는다 — 판정을 못 읽으면 숫자 없는 문구만 남는다.
+ *  forecast 미배포(rate null) 거점에는 배지를 그리지 않는다(종전과 같은 자리 규칙). */
+function Pred({ current, rate, delta, direction }: {
+  current: number | null | undefined;
+  rate: number | null; delta: number | null; direction: "up" | "down" | null;
+}) {
+  const skill = useForecastSkill();
   if (rate == null || delta == null) return null;
-  const up = direction === "up";
+  const detail = skill
+    ? [errorLine(skill), directionLine(skill), pendingLine(skill)].filter(Boolean).join("\n")
+    : null;
+  if (lstmPromoted(skill)) {
+    const up = direction === "up";
+    return (
+      <span className="pred" style={{ color: up ? "#c2410c" : "#1d6feb" }}
+        title={`Platform·LSTM 다음 분기 공실 예측\n${detail}`}>
+        예측 {rate.toFixed(1)}% {up ? "▲" : "▼"}{Math.abs(delta).toFixed(1)}
+      </span>
+    );
+  }
+  if (current == null) return null;
   return (
-    <span className="pred" style={{ color: up ? "#c2410c" : "#1d6feb" }}
-      title="Platform·LSTM 다음 분기 공실 예측 (홀드아웃 MAE 1.109 / RMSE 1.494)">
-      예측 {rate.toFixed(1)}% {up ? "▲" : "▼"}{Math.abs(delta).toFixed(1)}
+    <span className="pred pred-persist"
+      title={"다음 분기 기본값은 지속성(현재 공실률 그대로)이다.\n"
+        + foldReason(skill)
+        + (detail ? `\n${detail}` : "")
+        + "\nLSTM 예측은 Platform 「모델 근거」의 실험 모델 칸에 있다."}>
+      다음 분기 {current.toFixed(1)}%<small> 지속성</small>
     </span>
   );
 }
@@ -489,7 +529,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
                 평균 {hm.avg_vacancy === null || hm.avg_vacancy === undefined
                   ? <b className="value-absent" title="쟀지만 거점을 대표하지 못해 내렸다">대표값 미제공</b>
                   : <b style={{ color: vacHex(hm.avg_vacancy) }}>{hm.avg_vacancy.toFixed(1)}%</b>}
-                {" "}<Pred rate={hm.predicted_rate} delta={hm.predicted_delta} direction={hm.predicted_direction} />
+                {" "}<Pred current={hm.avg_vacancy} rate={hm.predicted_rate} delta={hm.predicted_delta} direction={hm.predicted_direction} />
                 {" "}· 셀 {hm.cells.length} · 영업 {hm.sum_stores.toLocaleString()} · 공실 {hm.sum_vac}
                 {" "}<SourceBadge source={hm.vacancy_source} />
                 {hm.vacancy_source === "gold" && hm.buildings != null && (
@@ -715,7 +755,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
             {detail?.sub ?? summary.note} · 공실률{" "}
             <MeasuredValue value={summary.vacancy_rate} unit="%"
               absent={summary.vacancy_withheld ? "대표값 미제공" : "실측 없음"} />
-            {" "}<Pred rate={summary.predicted_rate} delta={summary.predicted_delta} direction={summary.predicted_direction} />
+            {" "}<Pred current={summary.vacancy_rate} rate={summary.predicted_rate} delta={summary.predicted_delta} direction={summary.predicted_direction} />
             {" "}· 감성 <MeasuredValue value={summary.sentiment} unit="pt" />
             {summary.rec_top ? ` · 추천 상위 Tier ${summary.rec_top}` : ""}
           </div>

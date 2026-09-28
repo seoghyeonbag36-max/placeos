@@ -582,9 +582,11 @@ export interface VacancyForecast {
   horizons: ForecastHorizon[];
   horizon_quarters: number;
   trained_at: string | null;
-  /** 전체 홀드아웃 지표. `holdout_direction_acc` 는 54거점 표본에서 노이즈가 커
-   *  게이트에서 내렸다 — 성능 근거로 인용하지 않는다(MAE 가 주지표). */
+  /** 산출물의 홀드아웃 지표 원본. ⚠ 이 값만으로 "잘 맞는다"를 말하지 않는다 —
+   *  베이스라인 대비 판정은 `skill` 을 읽는다(KPI 규칙 1·2). */
   metrics: Record<string, number> | null;
+  /** 베이스라인 대비 판정 — 산출물이 없으면 null(화면은 문구를 숨긴다) */
+  skill: ForecastSkill | null;
   /** 이 거점의 홀드아웃 1점 — 전체 MAE 뒤에 거점 오차를 숨기지 않기 위해 붙는다 */
   district_holdout?: { pred: number; actual: number; prev: number; direction_hit: boolean };
   /** 지상검증 실측 앵커 (보유 거점에만 — 현재 garosugil) */
@@ -594,6 +596,35 @@ export interface VacancyForecast {
     as_of: string; source: string;
   };
 }
+
+/** 판정 어휘 — scripts/kpi_baseline 의 세 갈래(+확정 전·표본 없음). 통과는 `실력` 하나뿐 */
+export type SkillVerdict = "실력" | "구분불가" | "열위" | "확인대기" | "검정불가";
+
+/** LSTM 이 무정보 베이스라인을 이기는가 — 백엔드 services/forecast_skill 이 kpi_baseline 과
+ *  같은 코드로 낸다. 화면은 성능 숫자를 **박지 않고** 이것만 읽는다.
+ *  `verdict` = 전체 holdout 의 참고 판정 · `gate_verdict` = confirm_after 이후 분기로만 낸 판정.
+ *  구간(`*_ci95*`) 없이 판정을 적지 않는다(KPI 규칙 2). */
+export interface ForecastSkill {
+  n: number; n_hubs: number; n_forecast_hubs: number;
+  confirm_after: string | null; n_fresh: number | null;
+  /** 오차 축 — 베이스라인: 지속성(다음 분기 = 직전 분기값) */
+  error: {
+    model_mae: number; persistence_mae: number;
+    /** 1 − 모델/지속성. 음수면 지속성보다 못하다 */
+    mae_skill: number; mae_skill_ci95: [number, number];
+    verdict: SkillVerdict; gate_verdict: SkillVerdict;
+  };
+  /** 방향 축 — 베이스라인: 무정보 상수(항상 하락/상승 중 holdout 에서 더 잘 맞는 쪽) */
+  direction: {
+    model_acc: number; baseline_acc: number; baseline_label: string;
+    skill_pp: number; skill_ci95_pp: [number, number]; mcnemar_p: number;
+    verdict: SkillVerdict; gate_verdict: SkillVerdict;
+  };
+}
+
+/** 판정만 — 예측 본문 없이 판정 문구가 필요한 화면(거점 보드)용 */
+export const getForecastSkill = () =>
+  getJSON<{ skill: ForecastSkill | null }>("/ai/forecast-skill").then((r) => r.skill);
 
 /** LSTM 공실 예측 — horizon_months 는 백엔드에서 분기로 환산된다(올림, 1~4 클램프).
  *  ⚠ 미지원 거점은 404 — 호출부에서 잡아 빈 상태로 둔다. */

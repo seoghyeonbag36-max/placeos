@@ -49,6 +49,9 @@
 .pagedash .dmeta>*{white-space:nowrap}
 .pagedash .dmeta .risk{color:#c2410c;font-weight:700}
 .pagedash .pred{font-weight:700;white-space:nowrap}
+/* 지속성 기본(09-28 B안) — 모델 예측이 아니라 현재값 그대로라 색으로 방향을 말하지 않는다 */
+.pagedash .pred-persist{font-weight:600;color:var(--sub);cursor:help}
+.pagedash .pred-persist small{font-size:10px;margin-left:2px}
 .pagedash .dtiers{display:flex;gap:5px;margin-top:var(--sp-2);border-top:1px solid var(--line);padding-top:var(--sp-2)}
 .pagedash .tchip{font-size:10px;font-weight:700;border:1px solid;border-radius:6px;padding:1px 7px;background:var(--surface)}
 .pagedash .foot{text-align:center;font-size:11px;color:#9aa3af;margin-top:18px;line-height:1.6}
