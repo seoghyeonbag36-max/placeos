@@ -55,6 +55,11 @@ n = 160(80거점 × 2). 지속성의 방향 0% 는 정의상이다(예측 = 직�
 | ② | 방향 축 기준 | (가) 다수방향 상수 유지 · (나) **상수와 '평균 쪽' 규칙 중 강한 쪽** | (나) |
 | ③ | 선택 규칙 후보 필터 | ①을 따라간다 — val MAE < 강한 쪽 기준 | ①과 같이 |
 
+> ✅ **2026-09-30 결정 — ①(나) ②(나) · ③ ①을 따른다.** 사전등록 개정 절이 코드보다 먼저 커밋됐다
+> → [prereg §개정](finding-lstm-regularization-prereg-2026-09-28.md#개정-2026-09-30--16시행-전).
+> 구현: `ml/training/lstm_baselines.py`(거점 평균 · train 행만) · `selection.select_trial(baseline="strongest")`
+> · `forecast_skill.lstm_skill`(holdout `clim` 이 있으면 강한 쪽 · 없으면 종전 기준으로 물러나고 밝힌다).
+
 (나)는 기준을 **올리는** 쪽이라 결과를 보고 쉽게 만드는 metric shopping 과 방향이 반대다.
 그래도 이 개정은 스모크를 보고 나왔으므로 그 사실을 §5 에 적는다.
 

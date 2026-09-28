@@ -50,6 +50,7 @@ except (AttributeError, ValueError):  # 재설정 불가 스트림이면 그대�
     pass
 
 from ml.models.lstm.vacancy_lstm import VacancyLSTM  # noqa: E402
+from ml.training.lstm_baselines import climatology_block, hub_climatology  # noqa: E402
 from ml.training.lstm_grids import GRIDS, build_trials, serves  # noqa: E402
 from ml.training.selection import select_trial  # noqa: E402
 from ml.training.datasets import (  # noqa: E402
@@ -127,6 +128,13 @@ def _train_once(hidden: int, layers: int, look_back: int | None, epochs: int = 4
 
     model.eval()
 
+    # 2026-09-30 개정 — 거점 평균(train 행 타깃 평균, 수준 단위). Δ 면 직전값을 더해 수준으로.
+    # train 행만 쓴다(val·test 타깃을 보지 않는다) → ml/training/lstm_baselines.py
+    level = ds.y.astype(np.float64) * ds.y_sd + ds.y_mu
+    if ds.target_mode == "delta":
+        level = level + ds.y_prev
+    clim_all = hub_climatology(ds.sample_district, level, train)
+
     def _score(X: torch.Tensor, ytrue: torch.Tensor, mask: np.ndarray) -> dict:
         """한 분할의 지표. 방향 기준값 prev = 그 윈도우 마지막 분기의 vac_proxy."""
         with torch.no_grad():
@@ -144,8 +152,13 @@ def _train_once(hidden: int, layers: int, look_back: int | None, epochs: int = 4
         d_actual = np.sign(actual - prev)
         n = max(len(d_actual), 1)
         base_dir = max((d_actual > 0).sum(), (d_actual < 0).sum()) / n
+        # 거점 평균 규칙(오차) · '평균 쪽' 규칙(방향) — 2026-09-30 개정의 두 번째 기준
+        clim = clim_all[mask]
+        cb = climatology_block(clim, actual, prev)
         return {
-            "pred": pred, "actual": actual, "prev": prev,
+            "pred": pred, "actual": actual, "prev": prev, "clim": clim,
+            "climatology_mae": cb["climatology_mae"],
+            "meanward_dir_acc": cb["meanward_dir_acc"],
             "mae": float(np.mean(np.abs(pred - actual))),
             "rmse": float(np.sqrt(np.mean((pred - actual) ** 2))),
             "dir_acc": float(np.mean(np.sign(pred - prev) == d_actual)),
@@ -307,19 +320,27 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
         v, p = res["val"], res["params"]
         stop = (f" · epoch {p['stopped_epoch']}(최선 {p['best_epoch']})"
                 if p["patience"] is not None else "")
-        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} (지속성 {v['persistence_mae']:.3f}) "
-              f"방향 {v['dir_acc']:.1%} (상수 {v['baseline_dir_acc']:.1%}){stop}", flush=True)
+        clim = ("" if v["climatology_mae"] is None else
+                f" · 거점 평균 {v['climatology_mae']:.3f}")
+        mw = ("" if v["meanward_dir_acc"] is None else
+              f" · 평균 쪽 {v['meanward_dir_acc']:.1%}")
+        print(f"[trial {i}] {hp} → val MAE {v['mae']:.3f} (지속성 {v['persistence_mae']:.3f}"
+              f"{clim}) 방향 {v['dir_acc']:.1%} (상수 {v['baseline_dir_acc']:.1%}{mw}){stop}",
+              flush=True)
         _log_mlflow(res, run_name=f"trial{i}")
         results.append(res)
 
-    chosen, selection = select_trial([r["val"] for r in results])
+    chosen, selection = select_trial([r["val"] for r in results],
+                                     baseline=GRIDS[grid]["selection_baseline"])
     best = results[chosen]
     bt, bv = best["test"], best["val"]
     print(f"[best] trial {chosen} {best['params']} — 후보 {selection['eligible']}/"
-          f"{selection['trials']} (val MAE {bv['mae']:.3f} vs 지속성 "
-          f"{bv['persistence_mae']:.3f} · val 방향 {bv['dir_acc']:.1%})")
+          f"{selection['trials']} (val MAE {bv['mae']:.3f} vs 기준 "
+          f"{selection['baseline_label']} {selection['baseline_mae']:.3f} · val 방향 "
+          f"{bv['dir_acc']:.1%}) · 필터 {selection['rule']}")
     if selection["fallback"]:
-        print("  ⚠ val 단계에서 이미 지속성 미달 — 지속성을 이긴 시행이 없어 val MAE 최소로 골랐다")
+        print(f"  ⚠ val 단계에서 이미 기준 미달 — 필터 기준({selection['baseline']})을 이긴 "
+              "시행이 없어 val MAE 최소로 골랐다")
     print(f"  test MAE {bt['mae']:.3f} (지속성 {bt['persistence_mae']:.3f}) · "
           f"RMSE {bt['rmse']:.3f} · 방향 {bt['dir_acc']:.1%} "
           f"(무정보 상수 {bt['baseline_dir_acc']:.1%})")
@@ -328,6 +349,8 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
               "임계값(70%)을 넘더라도 '달성'으로 적지 말 것.")
     if bt["mae"] >= bt["persistence_mae"]:
         print("  ⚠ 오차 축도 지속성 베이스라인 이하다.")
+    if bt["climatology_mae"] is not None and bt["mae"] >= bt["climatology_mae"]:
+        print(f"  ⚠ 오차 축이 거점 평균(모델 없음 · MAE {bt['climatology_mae']:.3f}) 이하다.")
 
     # 홀드아웃 상세 — 키는 **거점@분기** 다. 롤링 오리진이면 한 거점이 여러 건을
     # 내므로 거점명만 키로 쓰면 dict 가 덮어써져 표본이 조용히 1/K 로 준다.
@@ -336,13 +359,16 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
     ds = best["ds"]
     hold_dids = [ds.district_ids[d] for d in ds.sample_district[ds.sample_is_last]]
     hold_qs = list(ds.sample_quarter[ds.sample_is_last])
+    # `clim` = 그 거점 train 기간 타깃 평균(2026-09-30 개정). forecast_skill.lstm_skill 이
+    # 이 값이 **모든 행에** 있을 때만 두 기준 중 강한 쪽으로 판정한다 — 없으면 종전 기준.
     per_district = {
         f"{did}@{q}": {"hub": did, "quarter": str(q),
                        "pred": round(float(p), 3), "actual": round(float(a), 3),
                        "prev": round(float(v), 3),
+                       **({"clim": round(float(c), 3)} if np.isfinite(c) else {}),
                        "direction_hit": bool(np.sign(p - v) == np.sign(a - v))}
-        for did, q, p, a, v in zip(hold_dids, hold_qs, best["pred"], best["actual"],
-                                   best["prev"])
+        for did, q, p, a, v, c in zip(hold_dids, hold_qs, best["pred"], best["actual"],
+                                      best["prev"], bt["clim"])
     }
     for key, m in per_district.items():
         print(f"  {key}: pred {m['pred']} vs actual {m['actual']} "
@@ -364,9 +390,20 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
                     "mae_skill": round(1 - bt["mae"] / bt["persistence_mae"], 3)
                     if bt["persistence_mae"] else None,
                     "holdout_n": bt["n"],
+                    # 2026-09-30 개정의 두 번째 기준 — 판정은 kpi_baseline 이 holdout 표로 다시 낸다
+                    "climatology_mae": (None if bt["climatology_mae"] is None
+                                        else round(bt["climatology_mae"], 3)),
+                    "meanward_direction_acc": (None if bt["meanward_dir_acc"] is None
+                                               else round(bt["meanward_dir_acc"], 3)),
                     "val_direction_acc": round(bv["dir_acc"], 3),
                     "val_mae": round(bv["mae"], 3)},
         "protocol": {**_PROTOCOL, "test_quarters": test_quarters,
+                     # 그리드마다 후보 필터 기준이 다르다(default = 지속성 · reg-0928 = 강한 쪽)
+                     "selection_rule": selection["rule"],
+                     "selection_baseline": selection["baseline"],
+                     # holdout 행에 `clim` 이 실린다 → 판정은 두 기준 중 강한 쪽(2026-09-30 개정)
+                     "baselines": ["majority_direction", "persistence",
+                                   "climatology_hub_train_mean", "meanward_direction"],
                      "val_quarters": val_quarters,
                      "target_modes_searched": list(dict.fromkeys(t["target_mode"] for t in trials)),
                      "grid": grid,
@@ -385,7 +422,8 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
     report = {**payload, "served": served,
               "trials": [{"trial": i, "params": r["params"],
                           "val": {k: r["val"][k] for k in
-                                  ("mae", "persistence_mae", "dir_acc", "baseline_dir_acc", "n")}}
+                                  ("mae", "persistence_mae", "climatology_mae", "dir_acc",
+                                   "baseline_dir_acc", "meanward_dir_acc", "n")}}
                          for i, r in enumerate(results)]}
     REPORTS.mkdir(parents=True, exist_ok=True)
     report_path = REPORTS / f"lstm_trials_{grid}_{now[:10]}.json"
@@ -412,7 +450,7 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
         # 서빙(ml/inference/predictor.py)이 이 값으로 복원 방식을 고른다 — 빠지면 Δ 모델
         # 출력을 수준으로 읽어 **조용히** 틀린 값을 낸다(09-24 holdout 키 결함과 같은 모양).
         "target_mode": ds.target_mode,
-        "protocol": _PROTOCOL,
+        "protocol": payload["protocol"],
     }, ARTIFACT)
     print(f"[artifact] {ARTIFACT}")
 

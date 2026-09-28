@@ -309,7 +309,9 @@ def test_selection_never_sees_test_metrics() -> None:
                      if not ln.lstrip().startswith("#") and '"""' not in ln)
     assert '"test"' not in code and "['test']" not in code
     body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
-    assert 'select_trial([r["val"] for r in results])' in body
+    # 2026-09-30: 기준 인자(`baseline=`)가 붙었다 — 넘기는 지표는 여전히 val 블록뿐이다
+    assert 'select_trial([r["val"] for r in results],' in body
+    assert "baseline=GRIDS[grid][\"selection_baseline\"]" in body
 
 
 def test_protocol_pins_the_last_seen_test_quarter() -> None:
@@ -442,3 +444,83 @@ def test_early_stopping_restores_the_best_val_checkpoint(monkeypatch) -> None:
     with torch.no_grad():
         got = float(torch.nn.functional.mse_loss(model(X).squeeze(-1), y))
     assert got == pytest.approx(p["best_val_loss"], rel=1e-4, abs=1e-6)
+
+
+# ─────────────── 두 기준 중 강한 쪽 — 후보 필터 (2026-09-30 개정) ───────────────
+# → docs/finding-lstm-regularization-prereg-2026-09-28.md §개정
+
+def _vc(mae: float, pers: float, clim: float | None, dir_acc: float) -> dict:
+    return {"mae": mae, "persistence_mae": pers, "climatology_mae": clim, "dir_acc": dir_acc}
+
+
+def test_strongest_filter_rejects_trials_that_only_beat_persistence() -> None:
+    """**핵심 잠금.** 지속성만 넘고 거점 평균을 못 넘는 시행은 후보가 아니다.
+
+    스모크의 모양 그대로(합성값): 거점 평균 0.905 · 지속성 1.338 · 평균 근처 모델 1.0.
+    """
+    sel = _select()
+    vals = [_vc(1.00, 1.338, 0.905, 0.76),    # 지속성만 이긴다 — 평균회귀
+            _vc(0.88, 1.338, 0.905, 0.70)]    # 둘 다 이긴다 → 이것
+    idx, rec = sel.select_trial(vals, baseline="strongest")
+    assert idx == 1 and rec["eligible"] == 1 and rec["fallback"] is False
+    assert rec["rule"] == sel.RULE_STRONGEST
+    assert rec["baseline_label"] == "climatology"
+    # 같은 val 을 종전 필터로 보면 첫 시행(방향 최대)이 골라졌다 — 개정이 바꾸는 자리
+    assert sel.select_trial(vals)[0] == 0
+
+
+def test_strongest_filter_uses_persistence_when_it_is_the_stronger_one() -> None:
+    sel = _select()
+    idx, rec = sel.select_trial([_vc(1.0, 1.2, 1.5, 0.6)], baseline="strongest")
+    assert rec["eligible"] == 1 and rec["baseline_label"] == "persistence"
+
+
+def test_strongest_filter_refuses_a_val_block_without_climatology() -> None:
+    """조용히 지속성으로 물러나면 개정 기준이 한 시행에서 빠져도 모른다 — 멈춘다."""
+    sel = _select()
+    with pytest.raises(ValueError):
+        sel.select_trial([_v(1.0, 1.2, 0.6)], baseline="strongest")
+
+
+def test_default_selection_is_unchanged_by_the_revision() -> None:
+    """기본(`persistence`)은 09-26 사전등록 그대로 — 거점 평균이 있어도 읽지 않는다."""
+    sel = _select()
+    idx, rec = sel.select_trial([_vc(1.0, 1.338, 0.905, 0.76)])
+    assert rec["eligible"] == 1 and rec["rule"] == sel.RULE
+    assert rec["baseline"] == "persistence"
+
+
+def test_grids_pin_their_selection_baseline() -> None:
+    """reg-0928 은 강한 쪽(개정) · default 는 지속성(09-26 사전등록 그대로)."""
+    g = _grids()
+    assert g.GRIDS["reg-0928"]["selection_baseline"] == "strongest"
+    assert g.GRIDS["default"]["selection_baseline"] == "persistence"
+
+
+def test_holdout_rows_carry_the_hub_mean() -> None:
+    """판정(forecast_skill)은 holdout 행의 `clim` 으로 강한 쪽을 잰다 — 산출물에 실려야 한다."""
+    body = TRAIN.read_text(encoding="utf-8").split('def main(')[-1]
+    assert '"clim": round(float(c), 3)' in body
+    src = TRAIN.read_text(encoding="utf-8")
+    assert "hub_climatology(ds.sample_district, level, train)" in src, (
+        "거점 평균을 train 행에서만 내지 않는다")
+
+
+def test_hub_climatology_reads_train_rows_only() -> None:
+    """거점 평균은 train 행 타깃의 평균이다 — val·test 타깃이 섞이면 누수다."""
+    np = pytest.importorskip("numpy")
+    sys.path.insert(0, str(ROOT))
+    from ml.training.lstm_baselines import climatology_block, hub_climatology
+
+    did = np.array([0, 0, 0, 1, 1, 2])
+    y = np.array([1.0, 3.0, 100.0, 4.0, -50.0, 7.0])
+    train = np.array([True, True, False, True, False, False])
+    clim = hub_climatology(did, y, train)
+    assert clim[:3].tolist() == [2.0, 2.0, 2.0]      # 100(홀드아웃)은 안 섞인다
+    assert clim[3:5].tolist() == [4.0, 4.0]
+    assert np.isnan(clim[5])                          # train 행 없는 거점 — 채우지 않는다
+
+    blk = climatology_block(np.array([0.0, 0.0]), np.array([0.5, -0.5]), np.array([2.0, -2.0]))
+    assert blk["climatology_mae"] == pytest.approx(0.5)
+    assert blk["meanward_dir_acc"] == pytest.approx(1.0)
+    assert climatology_block(clim, y, y)["climatology_mae"] is None   # NaN 이 있으면 재지 않는다

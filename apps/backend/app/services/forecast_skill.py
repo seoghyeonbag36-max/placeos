@@ -153,6 +153,15 @@ def _sgn(x: float) -> int:
 
 # ─────────────────────────── LSTM ───────────────────────────
 
+# 기준 이름 — 응답·출력에 그대로 실린다(화면이 이 문자열을 읽는다)
+PERSISTENCE = "지속성"          # 예측 = 직전 분기값
+CLIMATOLOGY = "거점 평균"       # 예측 = 그 거점 train 기간 타깃 평균(`clim`)
+MEANWARD = "평균 쪽"            # 방향 = sign(거점 평균 − 직전값)
+# 어느 기준 체계로 쟀는가 — 읽는 쪽이 종전 기준으로 물러났는지 알 수 있어야 한다
+BASIS_STRONGEST = "strongest_of_two"     # 2026-09-30 개정: 두 기준 중 강한 쪽
+BASIS_LEGACY = "legacy_no_clim"          # `clim` 없는 산출물 — 종전 기준(지속성 · 다수방향 상수)
+
+
 def lstm_skill(forecast: dict) -> dict:
     """공실 예측 — 방향정확도·오차 두 축을 각각 베이스라인에 댄다.
 
@@ -160,36 +169,76 @@ def lstm_skill(forecast: dict) -> dict:
     둘 다 돌려준다. 실제로 갈렸고, 09-24 누수 차단 재학습에서는 **서로 자리를 바꿨다**
     (방향 −7.7%p → +4.6%p · 오차 +20.5% → −86.9%). 그래서 여기엔 어느 축이 이긴다고
     적지 않는다 — 그런 문장이 낡는 것이 이 저장소의 주된 실패 양식이다.
+
+    ## 기준 — 두 무정보 규칙 중 강한 쪽 (2026-09-30 사전등록 개정)
+
+    holdout 행마다 `clim`(그 거점 train 기간 타깃 평균)이 있으면 축마다 기준이 둘이다:
+    - 오차 — 지속성 · 거점 평균 중 **MAE 가 낮은 쪽**
+    - 방향 — 다수방향 상수 · '평균 쪽'(sign(clim − prev)) 중 **정확도가 높은 쪽**
+    강한 쪽은 **이 표본에서** 정한다(확정 부분표본이면 그 부분표본에서). 동률이면 종전
+    기준을 쓴다. `vac_proxy` 는 평균회귀가 강해 거점 평균만 내밀어도 지속성을 크게 이긴다
+    — 종전 기준만 대면 그 평균회귀가 `실력`으로 통과한다
+    (docs/finding-lstm-climatology-baseline-2026-09-28.md §3).
+
+    `clim` 이 **한 행이라도 없으면** 종전 기준(지속성 · 다수방향 상수)으로 물러나고
+    `baseline_basis = "legacy_no_clim"` 으로 밝힌다 — 09-27 서빙본이 그렇다. 소급하지 않는다.
     """
     hold = forecast.get("holdout") or {}
     # 키는 `거점@분기`(롤링 오리진) 또는 `거점`(단일 원점). 군집 단위는 **거점**이라
     # `hub` 필드를 우선 쓰고, 없으면 키에서 `@` 앞을 떼어 옛 산출물도 읽는다.
-    rows = [(v.get("hub") or str(k).split("@")[0],
-             v.get("pred"), v.get("actual"), v.get("prev")) for k, v in hold.items()]
-    rows = [r for r in rows if None not in r[1:]]
-    n = len(rows)
+    raw = [(v.get("hub") or str(k).split("@")[0],
+            v.get("pred"), v.get("actual"), v.get("prev"), v.get("clim")) for k, v in hold.items()]
+    raw = [r for r in raw if None not in r[1:4]]
+    n = len(raw)
     if n == 0:
         return {"available": False, "reason": "holdout 표가 비어 있다"}
+    has_clim = all(r[4] is not None for r in raw)
+    basis = BASIS_STRONGEST if has_clim else BASIS_LEGACY
+    rows = [r[:4] for r in raw]
+    clim = [r[4] for r in raw] if has_clim else None
 
     hits = sum(1 for _, p, a, pr in rows if _sgn(p - pr) == _sgn(a - pr))
     up = sum(1 for _, _, a, pr in rows if a - pr > 0)
     down = sum(1 for _, _, a, pr in rows if a - pr < 0)
     # 사후적 다수 방향 — 모델에 불리한(즉 방어에 적합한) 베이스라인
-    base_hits, base_label = (down, "항상 하락") if down >= up else (up, "항상 상승")
+    base_down = down >= up
+    const_hits, const_label = (down, "항상 하락") if base_down else (up, "항상 상승")
+
+    def _const_hit(i: int) -> bool:
+        _, _, a, pr = rows[i]
+        return (a - pr < 0) if base_down else (a - pr > 0)
+
+    # 방향 기준 — 상수와 '평균 쪽' 중 적중이 많은 쪽. 동률이면 상수(종전 기준)
+    dir_base_hit = [_const_hit(i) for i in range(n)]
+    base_hits, base_label = const_hits, const_label
+    meanward_hits = None
+    if clim is not None:
+        mw = [_sgn(clim[i] - rows[i][3]) == _sgn(rows[i][2] - rows[i][3]) for i in range(n)]
+        meanward_hits = sum(mw)
+        if meanward_hits > const_hits:
+            dir_base_hit, base_hits, base_label = mw, meanward_hits, MEANWARD
 
     # 쌍대 비교: 모델만 맞은 칸 b · 베이스라인만 맞은 칸 c
     b = c = 0
-    base_down = base_hits == down
-    for _, p, a, pr in rows:
+    for i, (_, p, a, pr) in enumerate(rows):
         m_hit = _sgn(p - pr) == _sgn(a - pr)
-        base_hit = (a - pr < 0) if base_down else (a - pr > 0)
-        b += int(m_hit and not base_hit)
-        c += int(base_hit and not m_hit)
+        b += int(m_hit and not dir_base_hit[i])
+        c += int(dir_base_hit[i] and not m_hit)
 
     mae_m = sum(abs(p - a) for _, p, a, _ in rows) / n
     rmse_m = math.sqrt(sum((p - a) ** 2 for _, p, a, _ in rows) / n)
     mae_p = sum(abs(pr - a) for _, _, a, pr in rows) / n        # 지속성
     rmse_p = math.sqrt(sum((pr - a) ** 2 for _, _, a, pr in rows) / n)
+
+    # 오차 기준 — 지속성과 거점 평균 중 MAE 가 낮은 쪽. 동률이면 지속성(종전 기준)
+    err_base = [pr for _, _, _, pr in rows]
+    err_label, mae_b, rmse_b = PERSISTENCE, mae_p, rmse_p
+    mae_c = rmse_c = None
+    if clim is not None:
+        mae_c = sum(abs(clim[i] - rows[i][2]) for i in range(n)) / n
+        rmse_c = math.sqrt(sum((clim[i] - rows[i][2]) ** 2 for i in range(n)) / n)
+        if mae_c < mae_p:
+            err_base, err_label, mae_b, rmse_b = list(clim), CLIMATOLOGY, mae_c, rmse_c
 
     # 혼동행렬(상승=양성) — 소수 클래스에 신호가 있는지 본다
     tp = sum(1 for _, p, a, pr in rows if p - pr > 0 and a - pr > 0)
@@ -202,13 +251,12 @@ def lstm_skill(forecast: dict) -> dict:
     by_hub: dict[str, list[bool]] = {}
     dir_diff: dict[str, list[int]] = {}
     err_diff: dict[str, list[float]] = {}
-    for hub, p, a, pr in rows:
+    for i, (hub, p, a, pr) in enumerate(rows):
         m_hit = _sgn(p - pr) == _sgn(a - pr)
-        base_hit = (a - pr < 0) if base_down else (a - pr > 0)
         by_hub.setdefault(hub, []).append(m_hit)
-        dir_diff.setdefault(hub, []).append(int(m_hit) - int(base_hit))
-        # 양수 = 모델이 지속성보다 가깝다
-        err_diff.setdefault(hub, []).append(abs(pr - a) - abs(p - a))
+        dir_diff.setdefault(hub, []).append(int(m_hit) - int(dir_base_hit[i]))
+        # 양수 = 모델이 기준(강한 쪽)보다 가깝다
+        err_diff.setdefault(hub, []).append(abs(err_base[i] - a) - abs(p - a))
     n_hubs = len(by_hub)
     per_hub = n / n_hubs if n_hubs else 0.0
     # 거점당 1건이면 Wilson 과 사실상 같으므로 굳이 부트스트랩을 돌리지 않는다.
@@ -226,10 +274,16 @@ def lstm_skill(forecast: dict) -> dict:
         "n": n,
         "n_hubs": n_hubs,
         "samples_per_hub": per_hub,
+        # 두 축 공통 — 강한 쪽 기준으로 쟀는가, 종전 기준으로 물러났는가
+        "baseline_basis": basis,
         "direction": {
             "model_hits": hits, "model_acc": acc, "model_ci95": ci, "ci_kind": ci_kind,
+            # 판정에 쓴 기준(강한 쪽). legacy 면 종전과 같이 다수방향 상수다
             "baseline_label": base_label, "baseline_hits": base_hits,
             "baseline_acc": base_acc, "baseline_ci95": list(wilson(base_hits, n)),
+            # 두 후보를 다 싣는다 — 어느 쪽이 왜 강했는지 읽는 쪽이 대 볼 수 있게
+            "constant_label": const_label, "constant_acc": const_hits / n,
+            "meanward_acc": None if meanward_hits is None else meanward_hits / n,
             "skill_pp": (acc - base_acc) * 100.0,
             "skill_ci95_pp": [skill_ci[0] * 100.0, skill_ci[1] * 100.0],
             "mcnemar": {"b_model_only": b, "c_baseline_only": c,
@@ -244,14 +298,18 @@ def lstm_skill(forecast: dict) -> dict:
         "error": {
             "model_mae": mae_m, "model_rmse": rmse_m,
             "persistence_mae": mae_p, "persistence_rmse": rmse_p,
-            # 기술점수(skill score) — 1 − 모델/베이스라인. 양수면 베이스라인보다 낫다.
-            "mae_skill": (1.0 - mae_m / mae_p) if mae_p else 0.0,
-            "rmse_skill": (1.0 - rmse_m / rmse_p) if rmse_p else 0.0,
-            # MAE 기술점수의 구간 = (지속성 − 모델) 절대오차 차이의 구간 ÷ 지속성 MAE
-            "mae_skill_ci95": ([mae_diff_ci[0] / mae_p, mae_diff_ci[1] / mae_p]
-                               if mae_p else [0.0, 0.0]),
+            "climatology_mae": mae_c, "climatology_rmse": rmse_c,
+            # 판정에 쓴 기준(강한 쪽). legacy 면 지속성이다
+            "baseline_label": err_label, "baseline_mae": mae_b, "baseline_rmse": rmse_b,
+            # 기술점수(skill score) — 1 − 모델/기준. 양수면 기준보다 낫다.
+            "mae_skill": (1.0 - mae_m / mae_b) if mae_b else 0.0,
+            "rmse_skill": (1.0 - rmse_m / rmse_b) if rmse_b else 0.0,
+            # MAE 기술점수의 구간 = (기준 − 모델) 절대오차 차이의 구간 ÷ 기준 MAE
+            "mae_skill_ci95": ([mae_diff_ci[0] / mae_b, mae_diff_ci[1] / mae_b]
+                               if mae_b else [0.0, 0.0]),
             # 점추정의 **부호**다 — 판정이 아니다. 판정은 아래 verdict.
             "beats_persistence": mae_m < mae_p,
+            "beats_baseline": mae_m < mae_b,
             "verdict": verdict(mae_diff_ci),
         },
     }
@@ -266,7 +324,10 @@ def apply_confirmation(lstm: dict, forecast: dict) -> None:
     (`verdict`)은 **참고**로 남기고, 게이트 판정(`gate_verdict`)은 본 적 없는 분기의
     부분표본에서 낸다. 그런 표본이 0건이면 `확인대기` 다.
 
-    `confirm_after` 가 없는 산출물(09-26 이전 학습본)은 종전대로 전체 판정이 곧 게이트
+    강한 쪽 기준은 **부분표본에서 다시** 고른다(`lstm_skill` 이 그 표본으로 잰다) — 전체에서
+강했던 기준이 확정 표본에서도 강하다는 보장이 없다.
+
+`confirm_after` 가 없는 산출물(09-26 이전 학습본)은 종전대로 전체 판정이 곧 게이트
     판정이다 — 그 규칙이 생기기 전에 만든 산출물에 소급하지 않는다.
     분기 문자열은 `YYYYQ` 5자리라 사전식 비교가 곧 시간순이다.
     """
@@ -286,6 +347,7 @@ def apply_confirmation(lstm: dict, forecast: dict) -> None:
     lstm["confirmation"] = {
         "after": str(after),
         "n_fresh": conf.get("n", 0) if conf.get("available") else 0,
+        "baseline_basis": conf.get("baseline_basis") if conf.get("available") else None,
         "direction": conf.get("direction") if conf.get("available") else None,
         "error": conf.get("error") if conf.get("available") else None,
     }

@@ -10,6 +10,7 @@ torch·numpy 없이 import 되도록 `train_lstm` 에서 떼어 냈다(`selectio
   **바꾸지 않는다.** 조기종료·가중치감쇠 없이 400 epoch 고정이라 09-24 · 09-27 을 재현한다.
 - `reg-0928` — 기존 8 조합 × `weight_decay ∈ {0, 1e-3}` = 16 시행, `level` 고정 ·
   val 손실 조기종료(patience 20 · 상한 400) 공통(2026-09-28 사전등록 §2).
+  후보 필터는 지속성·거점 평균 중 강한 쪽(2026-09-30 개정 · 16 시행 전).
   → docs/finding-lstm-regularization-prereg-2026-09-28.md
 
 ⚠ 결과를 본 뒤 여기 값을 바꾸는 것은 그 사전등록의 연장이 아니다 — 새 그리드 이름과
@@ -42,6 +43,8 @@ GRIDS: dict[str, dict] = {
         "patience": None,              # None = 조기종료 없음(400 epoch 고정)
         # 09-27 은 후보 0 이어도 fallback 시행으로 서빙을 교체했다 — 그 동작을 유지한다
         "serve_on_fallback": True,
+        # 후보 필터 기준 — 09-26 사전등록 그대로 지속성(selection.filter_mae)
+        "selection_baseline": "persistence",
         "prereg": "docs/finding-lstm-delta-target-2026-09-26.md",
     },
     "reg-0928": {
@@ -50,6 +53,8 @@ GRIDS: dict[str, dict] = {
         "patience": 20,
         # §4: 후보 0/16 이면 레버 기각 — 기각된 레버의 산출물을 서빙에 올리지 않는다
         "serve_on_fallback": False,
+        # 2026-09-30 개정(16 시행 전): 지속성·거점 평균 중 강한 쪽 — §개정
+        "selection_baseline": "strongest",
         "prereg": "docs/finding-lstm-regularization-prereg-2026-09-28.md",
     },
 }

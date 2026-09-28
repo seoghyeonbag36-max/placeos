@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.data.measured_pages import MEASURED_BY_ID
@@ -184,6 +185,28 @@ def test_forecast_skill_matches_kpi_baseline():
     assert {s["error"]["gate_verdict"], s["direction"]["gate_verdict"]} <= allowed
     # 관측 전용 지표(균형정확도·MCC)는 화면 요약에 싣지 않는다 — 판정에 쓰지 않는다
     assert "observed" not in s["direction"]
+
+
+def test_forecast_skill_on_the_0927_artifact_keeps_the_legacy_baselines():
+    """2026-09-30 개정(두 기준 중 강한 쪽) 뒤에도 09-27 서빙본의 판정·화면 문구가 그대로다.
+
+    09-27 산출물의 holdout 에는 거점 평균(`clim`)이 없다 → 종전 기준(지속성 · 다수방향
+    상수)으로 물러나고, 응답이 그렇다고 밝힌다(`baseline_basis = legacy_no_clim`).
+    화면(`lib/forecastSkill.ts`)이 읽는 값 — 판정 네 칸 · 기준 이름 · 기준 MAE — 을 잠근다.
+    ⚠ 서빙 산출물이 재학습돼 `clim` 을 실으면 이 테스트는 **깨지는 것이 맞다**.
+    """
+    fc = json.loads((_GOLD / "platform_vacancy_forecast.json").read_text(encoding="utf-8"))
+    if any("clim" in v for v in (fc.get("holdout") or {}).values()):
+        pytest.skip("서빙 산출물이 개정 뒤 학습본이다 — 이 잠금은 09-27 서빙본 전용")
+    s = client.get(f"{V1}/ai/forecast-skill").json()["skill"]
+    assert s["baseline_basis"] == "legacy_no_clim"
+    assert s["error"]["baseline_label"] == "지속성"
+    assert s["error"]["baseline_mae"] == s["error"]["persistence_mae"]
+    assert s["direction"]["baseline_label"] == "항상 하락"
+    # 09-27 서빙본의 판정(개정 전 값 — 2026-09-30 이 브랜치에서 개정 전 코드로 확인)
+    assert (s["error"]["verdict"], s["error"]["gate_verdict"]) == ("열위", "확인대기")
+    assert (s["direction"]["verdict"], s["direction"]["gate_verdict"]) == ("구분불가", "확인대기")
+    assert s["n"] == 240 and s["n_fresh"] == 0
 
 
 def test_predict_vacancy_carries_skill():
