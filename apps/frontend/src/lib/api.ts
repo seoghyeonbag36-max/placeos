@@ -436,7 +436,7 @@ export const getPostings = (id: string) => getJSON<Posting[]>(`/commercial-distr
  *     ROI 계산에 쓰면 프리미엄 트립와이어가 부호를 넘는다 → feature-posting.md §0-Q·§0-T */
 /** 같은 조건(대장 용도·층)의 자리에서 **실제 영업 중인** 업종 분포.
  *  ⚠ 추천이 아니라 관측이다 — 그 자리에서 잘 된다는 뜻이 아니고(매출·생존 미고려),
- *     GNN 업종 추천(`recommendIndustry`)과도 다른 축이다(저쪽은 좌표 기준 7종 라벨). */
+ *     GNN 업종 추천(`recommendIndustry`)과도 다른 축이다(저쪽은 좌표 기준 · 서빙 어휘 라벨 — 어휘는 산출물이 정한다). */
 export interface IndustryFit {
   /** "purps_floor" 용도+층 관측 · "floor" 용도 표본이 얇아 층만 본 폴백 */
   basis: "purps_floor" | "floor" | string;

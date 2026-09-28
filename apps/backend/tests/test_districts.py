@@ -49,7 +49,7 @@ def test_list_districts():
     for d in data:
         # 감성은 **어느 거점에서도 재지 않았다**(2026-09-05). 종전에는 시드 54거점만
         # 손으로 적은 값을 갖고 실측 12거점은 None 이라 갈라져 있었는데, 구역을 행정동
-        # 실측으로 갈면서 그 입력이 사라졌다 — 이제 66거점이 똑같이 None 이다.
+        # 실측으로 갈면서 그 입력이 사라졌다 — 이제 서빙 거점 전부가 똑같이 None 이다.
         # 0 으로 채우면 "쟀더니 0" 으로 읽힌다(docs/feature-platform.md §0-K·§0-M).
         assert d["sentiment"] is None, d["id"]
         assert d["reviews"] is None, d["id"]

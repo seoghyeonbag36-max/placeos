@@ -5,7 +5,7 @@
  *   - 처음 방문에 카드가 안 뜨거나, 필수 칸이 비었는데 「시작」이 눌리는 것(C-08)
  *   - 시작한 뒤 Platform 으로 넘어가지 않거나 칩·저장이 목적을 말하지 않는 것(C-09 · C-10)
  *   - 업종 바꾸기 표의 「이 업종으로 입점 계산 →」이 Posting 업종칸을 채우지 않는 것(PL-10 · PS-08)
- *   - 모델 7종 밖 업종에 순위를 지어 보여주는 것(PL-11)
+ *   - 서빙 어휘(산출물 기준) 밖 업종에 순위를 지어 보여주는 것(PL-11)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
@@ -121,7 +121,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(screen.getByText(/Platform 에서 고른 업종으로 채웠습니다/)).toBeTruthy();
   });
 
-  it("PL-11 모델 7종 밖 업종이면 순위를 지어 보여주지 않는다", async () => {
+  it("PL-11 서빙 어휘 밖 업종이면 순위를 지어 보여주지 않는다", async () => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
       status: "set", profile: { goal: "start", industryKey: "bar", homeDistrictId: null },
     }));

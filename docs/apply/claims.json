@@ -290,7 +290,7 @@
       "id": "F_VERCEL",
       "pattern": "Vercel|vercel",
       "why": "2026-08-28 프로덕션에서 내려왔다(무료 플랜 상업적 사용 금지). 현재 프로덕션은 Cloud Run + Firebase Hosting 이다",
-      "instead": "spaceos-twin.web.app (Cloud Run + Firebase Hosting)"
+      "instead": "placeos.web.app (Cloud Run + Firebase Hosting)"
     },
     {
       "id": "F_PILOT_CLAIM",

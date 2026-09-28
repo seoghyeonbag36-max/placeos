@@ -24,7 +24,7 @@ services/marketing.py 의 Gold 슬러그 매핑과 동일 id).
 ⚠ **감성구역(`zones`)은 2026-09-05 에 이 파일에서 걷어냈다.** 거점별 6구역 ×
 54거점 = 324개가 전부 손으로 적은 값이었다(감성 76.8 · 리뷰 2,140건 · "+41%" 에
 근거가 없었다). 지금은 `gold/{거점}/district_zones.json` 의 **행정동 실측 구역**이
-그 자리를 채우고, 66거점이 같은 규칙 위에 선다 — `data/pipelines/build_district_zones.py`.
+그 자리를 채우고, 서빙 거점 전부가 같은 규칙 위에 선다 — `data/pipelines/build_district_zones.py`.
 `zones: []` 는 그래서 남겨 둔 빈 자리다(서비스가 Gold 로 덮는다: services/districts._attach_zones).
 감성 자체는 여전히 못 잰다 — 그 사유는 docs/feature-platform.md §0-K.
 
