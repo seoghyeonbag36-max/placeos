@@ -183,6 +183,89 @@ def gnn_skill(recommend: dict) -> dict:
     return out
 
 
+# ─────────────────────────── GNN 어휘 점검 (2026-09-28) ───────────────────────────
+#
+# 쌍대 판정은 "같은 test 에서 사전분포보다 나은가"만 묻고 **추천 어휘를 제품으로 쓸 수
+# 있는가**는 묻지 않는다. 09-27 재학습의 어휘 (a) `group` 은 추천 1순위의 74% 가
+# "미분류"였는데도 `실력`이 나왔고, 사람이 JSON 을 열어서 잡았다.
+# → docs/finding-gnn-81hub-retrain-2026-09-27.md §판정기의 사각
+#
+# 결정 어휘: (b) `group_mapped` — 7종에 사상된 점포만, 미분류는 클래스가 아니다(창업자 2026-09-27).
+# → docs/finding-gnn-81hub-retrain-2026-09-27.md §결정. 기준 ①②③ 은 창업자 승인(2026-09-28).
+SERVING_LABEL_LEVEL = "group_mapped"
+SERVING_VOCAB = ("음식점", "카페", "편의점", "병원", "약국", "숙박", "문화시설")
+UNMAPPED_LABEL = "미분류"
+VOCAB_PASS = "합격"
+VOCAB_FAIL = "어휘 불합격"
+
+
+def gnn_vocab_check(recommend: dict) -> dict:
+    """서빙 추천 산출물 하나로 어휘 기준 ①②③ 을 잰다. 입력은 이 산출물뿐이다.
+
+    ① 서빙 어휘 일치 — `metrics.label_level == SERVING_LABEL_LEVEL`. 기록이 없으면 `검정불가`.
+    ② 미분류 0 — 서빙 추천 Top-3 어디에도 "미분류"가 없다.
+    ③ 어휘 폭 — 추천에 나타나는 라벨 수 ≥ 결정 어휘 라벨 수 − 1. 빠진 라벨은 경고로 싣는다.
+
+    하나라도 어기면 `어휘 불합격`, ① 기록이 없으면 `검정불가` — 어느 쪽이든 게이트를
+    `실력`으로 닫지 않는다. 1순위 쏠림은 **관측**으로만 싣는다(판정에 쓰지 않는다).
+    """
+    rec = recommend or {}
+    level = (rec.get("metrics") or {}).get("label_level")
+    top1: dict[str, int] = {}
+    seen: set[str] = set()
+    unmapped = n = 0
+    for nodes in (rec.get("districts") or {}).values():
+        for v in nodes.values():
+            tops = [r.get("industry") for r in v.get("top") or []]
+            if not tops:
+                continue
+            n += 1
+            top1[tops[0]] = top1.get(tops[0], 0) + 1
+            seen.update(tops)
+            unmapped += tops.count(UNMAPPED_LABEL)
+    missing = [lab for lab in SERVING_VOCAB if lab not in seen]
+    width_min = len(SERVING_VOCAB) - 1
+    checks = {
+        "label_level": {"ok": level == SERVING_LABEL_LEVEL, "value": level,
+                        "want": SERVING_LABEL_LEVEL},
+        "no_unmapped": {"ok": n > 0 and unmapped == 0, "value": unmapped},
+        "width": {"ok": len(seen) >= width_min, "value": len(seen), "want": width_min,
+                  "of": len(SERVING_VOCAB)},
+    }
+    if level is None:
+        v = UNTESTABLE
+    elif all(c["ok"] for c in checks.values()):
+        v = VOCAB_PASS
+    else:
+        v = VOCAB_FAIL
+    lead = max(top1.items(), key=lambda kv: kv[1]) if top1 else (None, 0)
+    return {
+        "verdict": v,
+        "checks": checks,
+        "labels": sorted(seen),
+        "missing": missing,
+        "outside_vocab": sorted(seen - set(SERVING_VOCAB)),
+        "slots": n,
+        # [관측] 1순위 쏠림 — 판정에 쓰지 않는다(기준 밖이라 결과를 보고 끼우면 안 된다)
+        "top1_lead": {"label": lead[0], "share": (lead[1] / n) if n else None},
+    }
+
+
+def _vocab_why(vc: dict) -> str:
+    """어휘 점검이 게이트를 막은 이유 — 어긴 기준만."""
+    c = vc["checks"]
+    if vc["verdict"] == UNTESTABLE:
+        return "산출물에 label_level 기록이 없어 어휘를 확인할 수 없다"
+    out = []
+    if not c["label_level"]["ok"]:
+        out.append(f"① label_level={c['label_level']['value']} ≠ {SERVING_LABEL_LEVEL}")
+    if not c["no_unmapped"]["ok"]:
+        out.append(f"② Top-3 에 {UNMAPPED_LABEL} {c['no_unmapped']['value']:,}건")
+    if not c["width"]["ok"]:
+        out.append(f"③ 라벨 {c['width']['value']}/{c['width']['of']}종 < {c['width']['want']}")
+    return " · ".join(out)
+
+
 # ─────────────────────────── 종합 ───────────────────────────
 
 def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> dict:
@@ -199,6 +282,10 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
         _apply_confirmation(lstm, fc)
     if gnn.get("available"):
         gnn["gate_verdict"] = gnn["verdict"]
+        # 2026-09-28: 통계로 `실력`이어도 어휘 기준을 어기면 닫지 않는다(§GNN 어휘 점검).
+        vc = gnn["vocab"] = gnn_vocab_check(rec)
+        if gnn["verdict"] == SKILL and vc["verdict"] != VOCAB_PASS:
+            gnn["gate_verdict"] = vc["verdict"]
 
     # 실패는 **게이트 판정(gate_verdict)이 실력이 아닌 모든 축**이다. 부호가 양수여도
     # 구분불가면 적는다 — 그게 규칙 2 다. 문구는 무엇에 졌는지(베이스라인 이름)와
@@ -224,7 +311,10 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
                 f"— 기술점수 {e['mae_skill']:+.1%} [{lo:+.1%}, {hi:+.1%}] → {e['gate_verdict']}"
                 + (f"(참고 {e['verdict']})" if pend else "") + pend)
     if gnn.get("available") and gnn["gate_verdict"] != SKILL:
-        if gnn["verdict_basis"] == "paired":
+        if gnn["verdict"] == SKILL:
+            # 통계는 넘었는데 어휘가 막았다 — 무엇을 어겼는지를 말한다
+            why = f"통계는 실력이지만 {_vocab_why(gnn['vocab'])}"
+        elif gnn["verdict_basis"] == "paired":
             lo, hi = gnn["skill_ci95_pp"]
             why = f"[{lo:+.2f}, {hi:+.2f}] · McNemar p={gnn['mcnemar']['p_two_sided']:.3f}"
         elif gnn["verdict"] == UNTESTABLE:
@@ -233,12 +323,13 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
             why = f"분해능 ±{gnn['detectability']['min_detectable_pp']}%p"
         failures.append(
             f"GNN Top-3 {gnn['top3']:.1%} vs 거점 사전분포 {gnn['baseline_top3']:.1%} "
-            f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['verdict']}")
+            f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['gate_verdict']}")
 
     return {"lstm": lstm, "gnn": gnn, "failures": failures, "ok": not failures}
 
 
-_MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠", PENDING: "⏳"}
+_MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠", PENDING: "⏳",
+         VOCAB_PASS: "✅", VOCAB_FAIL: "❌"}
 
 
 def _fmt(res: dict) -> str:
@@ -310,6 +401,28 @@ def _fmt(res: dict) -> str:
             line += (f" [{glo:+.2f}, {ghi:+.2f}] · McNemar b={gm['b_model_only']} "
                      f"c={gm['c_prior_only']} p={gm['p_two_sided']:.3f} (쌍대 · 거점 군집)")
         out.append(line)
+        vc = gnn.get("vocab")
+        if vc:
+            c = vc["checks"]
+            mk = {True: "✓", False: "✗"}
+            out.append(f"   [어휘] {_MARK[vc['verdict']]} {vc['verdict']} — "
+                       f"① label_level {c['label_level']['value']} {mk[c['label_level']['ok']]} · "
+                       f"② {UNMAPPED_LABEL} {c['no_unmapped']['value']:,}건 "
+                       f"{mk[c['no_unmapped']['ok']]} · "
+                       f"③ 라벨 {c['width']['value']}/{c['width']['of']}종 "
+                       f"(≥{c['width']['want']}) {mk[c['width']['ok']]}")
+            if vc["missing"]:
+                out.append(f"          ⚠ 결정 어휘 중 추천에 안 나오는 라벨: "
+                           f"{', '.join(vc['missing'])}")
+            if vc["outside_vocab"]:
+                out.append(f"          ⚠ 결정 어휘 밖 라벨: {', '.join(vc['outside_vocab'])}")
+            lead = vc["top1_lead"]
+            if lead["share"] is not None:
+                out.append(f"          [관측] 1순위 쏠림 — {lead['label']} {lead['share']:.1%} "
+                           f"({vc['slots']:,}자리) · 판정에 쓰지 않는다")
+            if gnn["gate_verdict"] != gnn["verdict"]:
+                out.append(f"   [게이트] {_MARK[gnn['gate_verdict']]} {gnn['gate_verdict']} — "
+                           f"통계 판정({gnn['verdict']})을 어휘 점검이 막았다")
         det = gnn.get("detectability") or {}
         if det.get("min_detectable_pp") is not None:
             verdict = ("가를 수 있다" if gnn.get("skill_is_detectable")
