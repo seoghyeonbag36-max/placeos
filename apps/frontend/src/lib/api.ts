@@ -1101,6 +1101,43 @@ export interface AdminPmf extends KpiExclusion {
   note: string;
 }
 
+/**
+ * GET /admin/pilot-w4 — 4주 무료가 끝난 조직의 W4 판정(2026-09-28 사전등록).
+ * 규칙 원문: docs/pilot-outreach-founders-2026-10.md §W4 판정 규칙. n 이 모자라면 수치 필드가 null 이거나 빠진다
+ */
+export interface AdminPilotW4 extends KpiExclusion {
+  verdict: "표본부족" | "판정보류" | "충족" | "미달";
+  rules: {
+    pilot_days: number;
+    min_active_weeks: number;
+    min_response_rate_pct: number;
+    min_responses: number;
+    nps_target: number;
+    pay_target_pct: number;
+    source: string;
+  };
+  orgs_in_progress: number;
+  orgs_ended_inactive: number;
+  orgs_ended_active: number;
+  responded: number;
+  response_rate_pct: number | null;
+  nps: number | null;
+  would_pay_pct?: number;
+  would_pay_maybe_pct?: number;
+  one_response_swing_nps?: number;
+  orgs: {
+    id_prefix: string;
+    name: string;
+    signup_at: string;
+    w4_end: string;
+    status: "진행중" | "활성" | "비활성";
+    /** 접근이 있었던 주차(1~4) */
+    active_weeks: number[];
+    responded: boolean;
+  }[];
+  note: string;
+}
+
 /** KPI③ 사용량 — GET /admin/usage + `X-Admin-Token`. */
 export function getAdminUsage(adminToken: string, days = 30): Promise<AdminUsage> {
   return adminGet<AdminUsage>(`/admin/usage?days=${days}`, adminToken);
@@ -1109,4 +1146,9 @@ export function getAdminUsage(adminToken: string, days = 30): Promise<AdminUsage
 /** KPI③ PMF — GET /admin/pmf + `X-Admin-Token`. */
 export function getAdminPmf(adminToken: string): Promise<AdminPmf> {
   return adminGet<AdminPmf>("/admin/pmf", adminToken);
+}
+
+/** KPI③ W4 판정 — GET /admin/pilot-w4 + `X-Admin-Token`. */
+export function getAdminPilotW4(adminToken: string): Promise<AdminPilotW4> {
+  return adminGet<AdminPilotW4>("/admin/pilot-w4", adminToken);
 }

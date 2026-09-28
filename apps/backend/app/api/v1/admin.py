@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.services.districts import PAGES_BY_ID, get_summary
 from app.services import latency as latency_service
+from app.services import pilot_w4 as pilot_w4_service
 from app.services import pmf as pmf_service
 from app.services import usage as usage_service
 
@@ -126,6 +127,17 @@ def pmf(db: Session = Depends(get_db)) -> dict:
     "NPS 40 달성" 이 얼마나 약한 말인지 숫자로 보라는 뜻이다.
     """
     return pmf_service.pmf_summary(db)
+
+
+@router.get("/pilot-w4", dependencies=[Depends(require_admin)])
+def pilot_w4(db: Session = Depends(get_db)) -> dict:
+    """W4 판정 — 4주 무료가 끝난 조직을 사전등록 규칙대로 센다(2026-09-28).
+
+    `/usage` · `/pmf` 는 "지금" 창이다. 여기는 조직마다 가입일부터 28일을 세고,
+    서로 다른 2주 이상 쓴 조직만 분모에 넣고, 응답률 60% 미만이면 판정을 보류한다.
+    규칙 원문은 docs/pilot-outreach-founders-2026-10.md §W4 판정 규칙.
+    """
+    return pilot_w4_service.w4_summary(db)
 
 
 @router.get("/usage", dependencies=[Depends(require_admin)])
