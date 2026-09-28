@@ -185,6 +185,11 @@ export default function ApiKeys({ go }: AccountScreenProps) {
         <Button variant="ghost" onClick={logout}>로그아웃</Button>
       </div>
 
+      <p className="acct-muted acct-feedback-entry">
+        파일럿을 쓰고 계신가요?{" "}
+        <button type="button" className="acct-link" onClick={() => go("feedback")}>피드백 남기기</button>
+      </p>
+
       {issued && (
         <Card className="acct-reveal">
           <p className="acct-reveal-title" role="status">「{issued.name}」 키를 발급했습니다</p>
