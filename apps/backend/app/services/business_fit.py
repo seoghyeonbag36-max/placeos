@@ -14,11 +14,19 @@
 
 ## 업종 이름표가 두 벌이다
 
-- 모델(GNN) 추천은 **7종**(음식점·카페·병원·편의점·숙박·문화시설·약국)만 안다.
+- 모델(GNN) 추천 어휘는 **서빙 산출물이 정한다** — `gold/platform_industry_recommend.json` 에
+  실제로 나타나는 라벨 집합(`served_labels()`). 코드에 박아 두지 않는다: 2026-09-27 81거점 재학습
+  (어휘 (b) group_mapped)으로 어휘가 7종 → 6종(음식점·카페·병원·편의점·숙박·약국)이 되며
+  문화시설이 빠졌는데, 코드의 7종 가정 때문에 「전시·공연」이 81상권 전부 적합도 0.0 으로
+  1~81위를 받았다(순위는 목록 순서일 뿐이었다).
 - 상권 업종 구성은 카카오 플레이스 **말단 라벨**이다(`platform_profile._categories`).
 
-사업자가 고르는 12종(`INDUSTRIES`)이 둘을 잇는다. 7종 밖 업종은 `model_label=None` 이고
-**입지 적합도를 내지 않는다** — 가까운 업종 점수로 대신 채우면 그 업종의 답인 것처럼 읽힌다.
+사업자가 고르는 12종(`INDUSTRIES`)이 둘을 잇는다. **입지 적합도를 내지 않는** 업종은 두 갈래다.
+  ① `model_label=None` — 애초에 모델 라벨로 잇지 않은 업종
+  ② `model_label` 은 있으나 지금 서빙 어휘에 없는 업종(재학습으로 빠짐)
+둘 다 적합도·순위 없음 · `model_covered=False` 로 똑같이 다루고, 사유만 `fit_unavailable_reason`
+으로 가른다. 0.0 으로 채우거나 가까운 업종 점수로 대신 채우면 그 업종의 답인 것처럼 읽힌다.
+②에서도 `model_label` 은 지우지 않는다 — 다음 재학습에서 어휘에 돌아오면 코드 수정 없이 순위가 난다.
 
 ## 값의 정의와 한계
 
@@ -46,7 +54,7 @@ _TTL_SECONDS = 300.0
 #   key          안정 식별자(URL·저장값). 바꾸면 브라우저에 저장된 「내 사업」이 깨진다.
 #   label        화면 이름
 #   input        Posting 업종칸·Program 카테고리칸에 채우는 말
-#   model_label  GNN 7종 라벨. 없으면 None(적합도 없음)
+#   model_label  GNN 라벨. 없으면 None(적합도 없음). 있어도 서빙 어휘에 없으면 적합도 없음
 #   needles      같은 업종으로 세는 카카오 라벨 부분문자열
 INDUSTRIES: list[dict] = [
     {"key": "cafe", "label": "카페·디저트", "input": "카페", "model_label": "카페",
@@ -89,13 +97,19 @@ NOTE = ("입지 적합도는 비슷한 입지에 그 업종이 이미 모여 있
 _cache: dict[str, tuple[float, object]] = {}
 
 
+# 적합도를 내지 않는 사유 — ①②를 화면·사람이 가를 수 있게 문구를 다르게 둔다.
+REASON_NO_MODEL_LABEL = "추천 모델이 다루지 않는 업종이라 입지 적합도를 내지 않음"
+REASON_NOT_IN_VOCAB = "현재 추천 모델 어휘에 없음('{label}') — 입지 적합도·순위를 내지 않음"
+REASON_NO_ARTIFACT = "추천 모델 산출물이 없어 입지 적합도를 내지 않음"
+
+
 def public(item: dict) -> dict:
     """화면에 내는 업종 필드 — needles 는 규칙이라 싣지 않는다(설계서 대응표가 사람용 정본)."""
     return {k: item[k] for k in ("key", "label", "input", "model_label")}
 
 
 def industries() -> list[dict]:
-    return [public(i) for i in INDUSTRIES]
+    return [{**public(i), "fit_unavailable_reason": unavailable_reason(i)} for i in INDUSTRIES]
 
 
 def get(key: str) -> dict | None:
@@ -110,6 +124,42 @@ def _cached(name: str, build):
     value = build()
     _cache[name] = (now, value)
     return value
+
+
+def served_labels() -> frozenset[str] | None:
+    """서빙 산출물에 실제로 나타나는 GNN 라벨 집합. 산출물이 없으면 None.
+
+    어휘는 재학습마다 바뀔 수 있으므로 코드가 아니라 산출물에서 읽는다.
+    """
+    def build() -> frozenset[str] | None:
+        data = industry_recommend._load()
+        if data is None:
+            return None
+        return frozenset(
+            t["industry"]
+            for nodes in (data.get("districts") or {}).values() if nodes
+            for item in nodes.values()
+            for t in item.get("top", [])
+        )
+    return _cached("labels", build)
+
+
+def unavailable_reason(item: dict) -> str | None:
+    """이 업종에 입지 적합도를 내지 않는 사유. 낼 수 있으면 None."""
+    label = item["model_label"]
+    if not label:
+        return REASON_NO_MODEL_LABEL
+    labels = served_labels()
+    if labels is None:
+        return REASON_NO_ARTIFACT
+    if label not in labels:
+        return REASON_NOT_IN_VOCAB.format(label=label)
+    return None
+
+
+def _model_label(item: dict) -> str | None:
+    """적합도 계산에 쓸 라벨 — 서빙 어휘에 없으면 None(= model_label 없는 업종과 똑같이 다룬다)."""
+    return None if unavailable_reason(item) else item["model_label"]
 
 
 def _all_means() -> dict[str, dict[str, float]]:
@@ -171,7 +221,7 @@ def fit_by_district(key: str) -> dict | None:
 
 def _fit_by_district(item: dict) -> dict:
     key = item["key"]
-    label = item["model_label"]
+    label = _model_label(item)
     means = _all_means() if label else {}
     rows: list[dict] = []
     for s in _served():
@@ -206,6 +256,8 @@ def _fit_by_district(item: dict) -> dict:
     return {
         "industry": public(item),
         "model_covered": covered,
+        "fit_unavailable_reason": None if covered else (unavailable_reason(item)
+                                                         or REASON_NO_ARTIFACT),
         "seoul_fit": seoul_fit,
         "ranked_n": sum(1 for r in rows if r["fit_rank"] is not None),
         "districts": rows,
@@ -222,17 +274,20 @@ def industries_in_district(district_id: str) -> dict | None:
         return None
     rows = []
     for item in INDUSTRIES:
-        label = item["model_label"]
+        label = _model_label(item)
         fit = round(means.get(label, 0.0), 4) if (label and means is not None) else None
+        reason = unavailable_reason(item)
+        if reason is None and fit is None:
+            reason = "이 상권은 추천 모델 산출물이 없어 입지 적합도를 내지 않음"
         rows.append({
-            **public(item), "fit": fit, "fit_rank": None,
+            **public(item), "fit": fit, "fit_rank": None, "fit_unavailable_reason": reason,
             "same_n": same[0][item["key"]] if same else None,
             "same_share": (round(same[0][item["key"]] / same[1], 4) if same and same[1] else None),
         })
     ranked = sorted((r for r in rows if r["fit"] is not None), key=lambda r: -r["fit"])
     for n, r in enumerate(ranked, start=1):
         r["fit_rank"] = n
-    # 7종 밖 업종은 순위 없이 원래 칩 순서대로 뒤에 둔다.
+    # 적합도 없는 업종(모델 라벨 없음·서빙 어휘 밖)은 순위 없이 원래 칩 순서대로 뒤에 둔다.
     rows = ranked + [r for r in rows if r["fit"] is None]
     return {
         "district_id": district_id,

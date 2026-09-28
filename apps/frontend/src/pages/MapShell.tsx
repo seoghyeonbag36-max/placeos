@@ -180,7 +180,7 @@ interface MapShellProps {
   workspace?: PageWorkspace;
   onWorkspaceChange?: Dispatch<SetStateAction<PageWorkspace>>;
   onReview?: (selection: BuildingSelection) => void;
-  /** 「내 사업」 업종(화면설계서 3판 PG-10). 모델 7종 안이면 건물 상세 업종 추천에서 표시한다. */
+  /** 「내 사업」 업종(화면설계서 3판 PG-10). 서빙 모델 어휘 안이면 건물 상세 업종 추천에서 표시한다. */
   myIndustry?: IndustryOption | null;
 }
 
@@ -899,7 +899,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                     </div>
                   );
                 })}
-                {myIndustry?.model_label && !rec.recommendations.some((r) => r.industry === myIndustry.model_label) && (
+                {myIndustry?.model_label && !myIndustry.fit_unavailable_reason && !rec.recommendations.some((r) => r.industry === myIndustry.model_label) && (
                   <div className="b-rec-note">{topic(myIndustry.input)} 이 자리 추천 3위 밖</div>
                 )}
                 <div className="b-rec-note">

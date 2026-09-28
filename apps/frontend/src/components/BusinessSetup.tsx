@@ -110,7 +110,7 @@ export default function BusinessSetup({
                     <input type="radio" name={`${cardId}-ind`} value={i.key} checked={industryKey === i.key}
                       onChange={() => setIndustryKey(i.key)} />
                     <b>{i.label}</b>
-                    {!i.model_label && <small>상권 비교만</small>}
+                    {(!i.model_label || i.fit_unavailable_reason) && <small>상권 비교만</small>}
                   </label>
                 ))}
               </div>
