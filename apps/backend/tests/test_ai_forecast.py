@@ -152,3 +152,44 @@ def test_heatmap_carries_predicted_rate():
     hm = r.json()
     assert hm["predicted_rate"] is not None
     assert hm["predicted_direction"] in ("up", "down")
+
+
+def test_forecast_skill_matches_kpi_baseline():
+    """화면이 읽는 판정(`skill`)은 `scripts/kpi_baseline.py` 와 **같은 값**이어야 한다.
+
+    2026-09-28: 화면에 07-25 MAE 1.109 가 박혀 있었다(실제 2.065, 지속성 1.190).
+    판정을 백엔드가 kpi_baseline 과 같은 코드로 내고, 화면은 그 값만 읽는다.
+    두 출처가 갈리면 그 자체가 이 테스트가 막으려는 실패다.
+    """
+    import importlib.util
+
+    root = Path(__file__).resolve().parents[3]
+    spec = importlib.util.spec_from_file_location("kpi_baseline_t", root / "scripts" / "kpi_baseline.py")
+    kb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(kb)
+    ref = kb.check()["lstm"]
+
+    r = client.get(f"{V1}/ai/forecast-skill")
+    assert r.status_code == 200
+    s = r.json()["skill"]
+    assert s is not None
+    assert s["n"] == ref["n"]
+    for axis in ("error", "direction"):
+        assert s[axis]["verdict"] == ref[axis]["verdict"], axis
+        assert s[axis]["gate_verdict"] == ref[axis]["gate_verdict"], axis
+    assert s["error"]["mae_skill_ci95"] == ref["error"]["mae_skill_ci95"]
+    assert s["direction"]["skill_ci95_pp"] == ref["direction"]["skill_ci95_pp"]
+    # 판정 어휘는 네 가지뿐이다 — 임계값 문구("정확도 70%")가 끼어들 자리가 없다
+    allowed = {"실력", "구분불가", "열위", "확인대기", "검정불가"}
+    assert {s["error"]["gate_verdict"], s["direction"]["gate_verdict"]} <= allowed
+    # 관측 전용 지표(균형정확도·MCC)는 화면 요약에 싣지 않는다 — 판정에 쓰지 않는다
+    assert "observed" not in s["direction"]
+
+
+def test_predict_vacancy_carries_skill():
+    r = client.post(f"{V1}/ai/predict-vacancy", json={"district_id": "garosugil"})
+    assert r.status_code == 200
+    s = r.json()["skill"]
+    assert s["n_forecast_hubs"] == len(json.loads(
+        (_GOLD / "platform_vacancy_forecast.json").read_text(encoding="utf-8"))["forecasts"])
+    assert s["error"]["persistence_mae"] > 0

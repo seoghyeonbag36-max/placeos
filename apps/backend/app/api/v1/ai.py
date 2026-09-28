@@ -33,8 +33,9 @@ class IndustryRequest(BaseModel):
 async def predict_vacancy(req: VacancyRequest) -> dict[str, object]:
     """LSTM 공실 예측 — gold/platform_vacancy_forecast.json 서빙.
 
-    홀드아웃 성능은 MAE 1.109 / RMSE 1.494 가 주지표다(2026-07-25 학습분). 방향정확도
-    (현재 72.2%)는 54거점 표본에서 노이즈가 커 게이트 지표에서 뺐다 — 인용하지 말 것.
+    성능 숫자를 여기 적지 않는다 — 적어 둔 값은 재학습마다 낡는다(09-28 에 07-25 값이
+    남아 있었다). 응답의 `metrics`(산출물 그대로)와 `skill`(베이스라인 대비 판정:
+    오차=지속성 · 방향=무정보 상수, `scripts/kpi_baseline.py` 와 같은 코드)을 읽을 것.
 
     horizon_months(1~12)는 분기로 환산(올림, 최대 4분기)해 재귀 예측 horizon 을 고른다.
     forecast json 부재 시(신규 클론 등) 스텁 응답으로 폴백, 미지원 거점은 404.
@@ -46,6 +47,13 @@ async def predict_vacancy(req: VacancyRequest) -> dict[str, object]:
     if out is None:
         raise HTTPException(status_code=404, detail=f"no forecast for district: {req.district_id}")
     return out
+
+
+@router.get("/forecast-skill")
+async def get_forecast_skill() -> dict[str, object]:
+    """LSTM 공실 예측의 베이스라인 대비 판정만 — 거점 보드처럼 예측 본문 없이
+    판정 문구만 필요한 화면용. 산출물이 없으면 `skill: null`(화면은 문구를 숨긴다)."""
+    return {"skill": vacancy_svc.skill_summary()}
 
 
 @router.post("/recommend-industry")

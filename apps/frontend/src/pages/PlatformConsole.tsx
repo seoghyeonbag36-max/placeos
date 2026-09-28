@@ -13,6 +13,9 @@ import { Card } from "@/design/components/Card";
 import { mapLabelHTML } from "@/design/components/MapMarkerPin";
 import IndustryFitCard from "@/components/IndustryFitCard";
 import { findIndustry, type BusinessProfile } from "@/lib/businessProfile";
+import {
+  directionLine, errorLine, foldReason, lstmPromoted, pendingLine, verdictLabel,
+} from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
 import { useMapHost } from "@/components/MapHost";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
@@ -528,7 +531,9 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
 function modelFoldSummary(fc: VacancyForecast | null, rec: IndustryRecommend | null): ReactNode {
   const parts: ReactNode[] = [];
   if (fc && fc.model !== "lstm-stub") {
-    parts.push(<>공실 <b>{fc.forecast_vac_proxy.toFixed(3)}</b> vac_proxy ({signed(fc.delta)})</>);
+    parts.push(lstmPromoted(fc.skill)
+      ? <>공실 <b>{fc.forecast_vac_proxy.toFixed(3)}</b> vac_proxy ({signed(fc.delta)})</>
+      : <>공실 <b>지속성</b>{fc.skill ? ` · LSTM ${verdictLabel(fc.skill.error)}` : ""}</>);
   }
   if (rec && rec.model !== "gnn-stub" && rec.recommendations.length) {
     parts.push(<>추천 1위 <b>{rec.recommendations[0].industry}</b> {pct(rec.recommendations[0].score)}</>);
@@ -930,17 +935,16 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
     : 1;
   const holdout = fc?.district_holdout;
   const mae = fc?.metrics?.holdout_mae;
+  const rmse = fc?.metrics?.holdout_rmse;
   const absErr = holdout ? Math.abs(holdout.pred - holdout.actual) : null;
+  // 이 거점에서 지속성(예측 = 직전 분기값)이 낸 오차 — 모델 오차 옆에 같은 1점으로 댄다
+  const persistErr = holdout ? Math.abs(holdout.prev - holdout.actual) : null;
+  // 2026-09-28 B안: 기본 표시는 지속성. 두 축 게이트가 모두 `실력` 일 때만 LSTM 을 올린다.
+  const skill = fc?.skill ?? null;
+  const promoted = lstmPromoted(skill);
 
-  return (
-    <section className="card">
-      <div className="chead">
-        <h2>공실 예측 <span className="badge is-model">LSTM</span></h2>
-        {fc && !stub && (
-          <div className="cmeta">{fc.model} · {fc.trained_at?.slice(0, 10) ?? "학습일 미상"}</div>
-        )}
-      </div>
-
+  const lstmBody = fc && !stub && (
+    <>
       <div className="seg" role="tablist">
         {QUARTERS.map((q) => (
           <button key={q} className={quarters === q ? "on" : ""} onClick={() => onQuarters(q)}>
@@ -949,99 +953,148 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
         ))}
       </div>
 
+      <div className="big">
+        <div className="bigval">
+          {fc.forecast_vac_proxy.toFixed(3)}
+          <small>vac_proxy · {quarterLabel(fc.forecast_quarter ?? fc.horizons[fc.horizon_quarters - 1]?.quarter)}</small>
+        </div>
+        <div className={`bigdelta ${fc.direction}`}>
+          {fc.direction === "up" ? "▲" : "▼"} {signed(fc.delta)}
+          <small>마지막 관측 {quarterLabel(fc.last_quarter)} 대비</small>
+        </div>
+      </div>
+
+      {/* 단위를 숨기지 않는다 — %는 예측의 단위가 아니라 파생 근사다 */}
+      {approxPct != null && baseVac != null && (
+        <div className="approx">
+          <div className="approxv">
+            공실률 환산 <b>{baseVac.toFixed(1)}%</b> → <b>{approxPct.toFixed(1)}%</b>
+          </div>
+          <div className="note">
+            예측의 단위는 vac_proxy 다. %는 delta 를 현재 공실률에 가산한 <b>근사</b>다.
+          </div>
+        </div>
+      )}
+
+      <div className="hz">
+        {fc.horizons.map((h, i) => {
+          const w = (Math.abs(h.forecast_vac_proxy) / maxAbs) * 50;
+          const neg = h.forecast_vac_proxy < 0;
+          const on = i + 1 === fc.horizon_quarters;
+          return (
+            <div key={h.quarter} className={`hzrow${on ? " on" : ""}${i > 0 ? " recur" : ""}`}>
+              <span className="hzq">{quarterLabel(h.quarter)}</span>
+              <span className="hzbar">
+                <i className="zero" />
+                <i
+                  className="fill"
+                  style={neg ? { right: "50%", width: `${w}%` } : { left: "50%", width: `${w}%` }}
+                />
+              </span>
+              <span className="hzv">{h.forecast_vac_proxy.toFixed(3)}</span>
+            </div>
+          );
+        })}
+        <div className="hznote">
+          +1분기만 관측 피처로 민 것이다. <b>+2분기부터는 외생 피처를 마지막 관측값으로
+          고정한 재귀 예측</b>이라 뒤로 갈수록 불확실하다(연한 행).
+        </div>
+      </div>
+
+      {/* 성능 숫자는 박지 않는다 — 산출물 metrics 에서 읽고, 없으면 행을 숨긴다 */}
+      {(mae != null || (holdout && absErr != null)) && (
+        <div className="evid">
+          <div className="evidh">검증 근거</div>
+          {mae != null && rmse != null && (
+            <div className="row">
+              <span>홀드아웃 MAE / RMSE (전 거점)</span>
+              <span>{mae.toFixed(3)} / {rmse.toFixed(3)}</span>
+            </div>
+          )}
+          {holdout && absErr != null && persistErr != null && (
+            <>
+              <div className="row">
+                <span>이 거점 홀드아웃 · 예측 → 실측</span>
+                <span>{holdout.pred.toFixed(3)} → {holdout.actual.toFixed(3)}</span>
+              </div>
+              <div className="row">
+                <span>이 거점 오차 · LSTM / 지속성</span>
+                <span className={absErr > persistErr ? "worse" : "better"}>
+                  {absErr.toFixed(3)} / {persistErr.toFixed(3)}
+                  {absErr > persistErr ? " · 지속성보다 나쁨" : " · 지속성보다 좋음"}
+                </span>
+              </div>
+            </>
+          )}
+          <div className="evidnote">
+            한 거점 1점은 판정 근거가 아니다 — 판정은 위 두 축(전 거점 홀드아웃 · 구간 포함)이다.
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <section className="card">
+      <div className="chead">
+        <h2>공실 예측 <span className="badge is-model">{promoted ? "LSTM" : "지속성"}</span></h2>
+        {fc && !stub && (
+          <div className="cmeta">{fc.model} · {fc.trained_at?.slice(0, 10) ?? "학습일 미상"}</div>
+        )}
+      </div>
+
       {err && <div className="empty">이 거점의 예측 산출물이 없다{/404/.test(err)
-        ? " — LSTM 은 서울 54거점 pooled 로 학습돼 경기 거점 예측이 없다."
+        ? " — LSTM 학습 표본 밖의 거점이라 예측이 없다."
         : <> — <code>{err}</code></>}</div>}
       {!err && !fc && <div className="empty">예측 불러오는 중…</div>}
       {stub && <div className="empty">Gold 미적재 폴백(<code>lstm-stub</code>) — 실측 예측이 아니다.</div>}
 
       {fc && !stub && (
         <>
-          <div className="big">
-            <div className="bigval">
-              {fc.forecast_vac_proxy.toFixed(3)}
-              <small>vac_proxy · {quarterLabel(fc.forecast_quarter ?? fc.horizons[fc.horizon_quarters - 1]?.quarter)}</small>
+          {!promoted && (
+            <div className="big">
+              <div className="bigval">
+                {fc.last_vac_proxy.toFixed(3)}
+                <small>vac_proxy · 다음 분기 = 마지막 관측 {quarterLabel(fc.last_quarter)} 그대로(지속성)</small>
+              </div>
+              {baseVac != null && (
+                <div className="bigdelta">
+                  {baseVac.toFixed(1)}%
+                  <small>현재 공실률 그대로</small>
+                </div>
+              )}
             </div>
-            <div className={`bigdelta ${fc.direction}`}>
-              {fc.direction === "up" ? "▲" : "▼"} {signed(fc.delta)}
-              <small>마지막 관측 {quarterLabel(fc.last_quarter)} 대비</small>
-            </div>
-          </div>
+          )}
 
           {/* 환산이 빠진 이유를 밝힌다. 조용히 사라지면 예측 자체가 없는 것으로 읽힌다. */}
           {approxPct == null && hub?.vacancy_withheld && (
             <div className="approx">
               <div className="note">
                 이 거점은 <b>거점 대표 공실률을 내렸다</b>(계획상가 밀집) — 기준선이 없어
-                %  환산을 내지 않는다. 예측 자체는 위 vac_proxy 로 유효하다.
-              </div>
-            </div>
-          )}
-          {/* 단위를 숨기지 않는다 — %는 예측의 단위가 아니라 파생 근사다 */}
-          {approxPct != null && baseVac != null && (
-            <div className="approx">
-              <div className="approxv">
-                공실률 환산 <b>{baseVac.toFixed(1)}%</b> → <b>{approxPct.toFixed(1)}%</b>
-              </div>
-              <div className="note">
-                예측의 단위는 vac_proxy 다. %는 delta 를 현재 공실률에 가산한 <b>근사</b>이고,
-                거점 대시보드의 예측 배지와 같은 식으로 계산한다.
+                %  환산을 내지 않는다. 값은 위 vac_proxy 로 읽는다.
               </div>
             </div>
           )}
 
-          <div className="hz">
-            {fc.horizons.map((h, i) => {
-              const w = (Math.abs(h.forecast_vac_proxy) / maxAbs) * 50;
-              const neg = h.forecast_vac_proxy < 0;
-              const on = i + 1 === fc.horizon_quarters;
-              return (
-                <div key={h.quarter} className={`hzrow${on ? " on" : ""}${i > 0 ? " recur" : ""}`}>
-                  <span className="hzq">{quarterLabel(h.quarter)}</span>
-                  <span className="hzbar">
-                    <i className="zero" />
-                    <i
-                      className="fill"
-                      style={neg ? { right: "50%", width: `${w}%` } : { left: "50%", width: `${w}%` }}
-                    />
-                  </span>
-                  <span className="hzv">{h.forecast_vac_proxy.toFixed(3)}</span>
-                </div>
-              );
-            })}
-            <div className="hznote">
-              +1분기만 관측 피처로 민 것이다. <b>+2분기부터는 외생 피처를 마지막 관측값으로
-              고정한 재귀 예측</b>이라 뒤로 갈수록 불확실하다(연한 행).
+          {/* 베이스라인 대비 판정 — 응답 skill(= kpi_baseline 과 같은 코드). 없으면 숨긴다 */}
+          {skill && (
+            <div className="evid">
+              <div className="evidh">LSTM vs 베이스라인 <span className="badge is-model">{verdictLabel(skill.error)}</span></div>
+              <div className="evidnote">{errorLine(skill)}</div>
+              <div className="evidnote">{directionLine(skill)}</div>
+              {pendingLine(skill) && <div className="evidnote">{pendingLine(skill)}</div>}
             </div>
-          </div>
+          )}
 
-          {/* 전체 MAE 옆에 이 거점의 홀드아웃 1점을 붙인다 — 평균 뒤에 거점 오차를 숨기지 않는다 */}
-          <div className="evid">
-            <div className="evidh">검증 근거</div>
-            <div className="row">
-              <span>홀드아웃 MAE / RMSE (전 거점)</span>
-              <span>{mae?.toFixed(3) ?? "—"} / {fc.metrics?.holdout_rmse?.toFixed(3) ?? "—"}</span>
-            </div>
-            {holdout && absErr != null && (
-              <>
-                <div className="row">
-                  <span>이 거점 홀드아웃 · 예측 → 실측</span>
-                  <span>{holdout.pred.toFixed(3)} → {holdout.actual.toFixed(3)}</span>
-                </div>
-                <div className="row">
-                  <span>이 거점 오차</span>
-                  <span className={mae != null && absErr > mae ? "worse" : "better"}>
-                    {absErr.toFixed(3)}
-                    {mae != null && (absErr > mae ? " · 전체 평균보다 나쁨" : " · 전체 평균보다 좋음")}
-                  </span>
-                </div>
-              </>
-            )}
-            <div className="evidnote">
-              방향정확도는 <b>싣지 않는다</b> — 홀드아웃이 거점당 1분기뿐이라 한 거점만 뒤집혀도
-              크게 흔들려 게이트 지표에서 내렸다. 주지표는 MAE다.
-            </div>
-          </div>
+          {promoted ? lstmBody : (
+            <>
+              <div className="evidnote">{foldReason(skill)}</div>
+              <Fold title="실험 모델 — LSTM 예측" badge="접음"
+                summary={<>{fc.forecast_vac_proxy.toFixed(3)} vac_proxy ({signed(fc.delta)})</>}>
+                {lstmBody}
+              </Fold>
+            </>
+          )}
 
           {fc.ground_anchor && (
             <div className="anchor">

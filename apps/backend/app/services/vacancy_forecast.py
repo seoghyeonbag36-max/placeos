@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from app.services import forecast_skill
+
 # repo/data/gold/platform_vacancy_forecast.json (services → app → backend → apps → repo)
 _GOLD = Path(__file__).resolve().parents[4] / "data" / "gold"
 _FORECAST_JSON = _GOLD / "platform_vacancy_forecast.json"
@@ -95,6 +97,8 @@ def get_forecast(district_id: str, quarters: int = 1) -> dict | None:
             "direction": "up" if sel["forecast_vac_proxy"] > item.get("last_vac_proxy", 0.0) else "down",
         })
     out["horizon_quarters"] = q
+    # 베이스라인 대비 실력 판정 — 화면이 예측 옆에 성능 숫자를 **박지 않고** 여기서 읽는다.
+    out["skill"] = skill_summary()
     # 이 거점의 홀드아웃 — 전체 MAE 옆에 붙여 "이 거점에서 실제로 얼마나 틀렸나"를
     # 같이 보여준다. 평균만 내놓으면 거점별 오차가 평균 뒤에 숨는다.
     #
@@ -118,6 +122,58 @@ def get_forecast(district_id: str, quarters: int = 1) -> dict | None:
     if anchor:
         out["ground_anchor"] = anchor
     return out
+
+
+def skill_summary() -> dict | None:
+    """LSTM 이 베이스라인을 이기는가 — `scripts/kpi_baseline.py` 와 같은 판정(같은 코드).
+
+    화면용으로 줄인 요약이다. 두 축(오차: 지속성 · 방향: 무정보 상수)을 **둘 다** 준다 —
+    하나만 인용하면 어느 쪽이든 거짓이 된다(`forecast_skill.lstm_skill` 독스트링).
+    `verdict` 는 전체 holdout 의 **참고** 판정, `gate_verdict` 는 `protocol.confirm_after`
+    이후(본 적 없는) 분기로만 낸 판정이다 — 그런 표본이 0건이면 `확인대기`.
+    균형정확도·MCC 는 관측 전용이라 싣지 않는다(판정에 쓰지 않는다).
+
+    산출물이 없거나 holdout 이 비면 None — 화면은 그때 문구를 **숨긴다**(옛 값 폴백 없음).
+    부트스트랩(2000회)이 있어 산출물을 다시 읽을 때만 새로 계산한다.
+    """
+    fc = _load()
+    if fc is None:
+        return None
+    if _cache.get("skill_for") is fc:
+        return _cache.get("skill")
+    res = forecast_skill.lstm_skill(fc)
+    summary: dict | None = None
+    if res.get("available"):
+        forecast_skill.apply_confirmation(res, fc)
+        e, d = res["error"], res["direction"]
+        cf = res.get("confirmation") or {}
+        summary = {
+            "n": res["n"],
+            "n_hubs": res["n_hubs"],
+            "n_forecast_hubs": len(fc.get("forecasts") or {}),
+            "confirm_after": cf.get("after"),
+            "n_fresh": cf.get("n_fresh"),
+            "error": {
+                "model_mae": e["model_mae"],
+                "persistence_mae": e["persistence_mae"],
+                "mae_skill": e["mae_skill"],
+                "mae_skill_ci95": e["mae_skill_ci95"],
+                "verdict": e["verdict"],
+                "gate_verdict": e["gate_verdict"],
+            },
+            "direction": {
+                "model_acc": d["model_acc"],
+                "baseline_acc": d["baseline_acc"],
+                "baseline_label": d["baseline_label"],
+                "skill_pp": d["skill_pp"],
+                "skill_ci95_pp": d["skill_ci95_pp"],
+                "mcnemar_p": d["mcnemar"]["p_two_sided"],
+                "verdict": d["verdict"],
+                "gate_verdict": d["gate_verdict"],
+            },
+        }
+    _cache["skill_for"], _cache["skill"] = fc, summary
+    return summary
 
 
 def all_forecasts() -> dict[str, dict]:
