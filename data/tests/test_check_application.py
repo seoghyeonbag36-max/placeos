@@ -222,7 +222,9 @@ def test_shipped_drafts_pass():
     미완은 위반이 아니고, 제출 직전에만 `--require-complete` 로 본다.
     """
     claims = json.loads(ca.CLAIMS.read_text(encoding="utf-8"))
-    docs = sorted(p for p in ca.APPLY_DIR.rglob("*.md") if p.name not in ca.SKIP_NAMES)
+    arch = ca.archived_paths(claims)
+    docs = sorted(p for p in ca.APPLY_DIR.rglob("*.md")
+                  if p.name not in ca.SKIP_NAMES and p.resolve() not in arch)
     assert docs, "docs/apply/ 에 원고가 없다 — 검사 대상이 사라졌는지 확인할 것"
     bad = {}
     for d in docs:
@@ -230,6 +232,34 @@ def test_shipped_drafts_pass():
         if not res["ok"]:
             bad[res["doc"]] = res["violations"]
     assert not bad, json.dumps(bad, ensure_ascii=False, indent=2)
+
+
+def test_archived_entries_are_real_submissions():
+    """과거본 목록은 가드를 끄는 스위치다 — 항목마다 실제 파일 · 제출일 · 당시 대장 커밋이 있어야 한다.
+
+    이 셋이 없으면 '과거본'은 검사를 피하는 이름표가 된다.
+    """
+    claims = json.loads(ca.CLAIMS.read_text(encoding="utf-8"))
+    for p, a in ca.archived_paths(claims).items():
+        assert p.exists(), a
+        assert p.is_relative_to(ca.APPLY_DIR.resolve()), a
+        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", a["submitted"]), a
+        assert re.fullmatch(r"[0-9a-f]{7,40}", a["claims_ref"]), a
+        assert a.get("why"), a
+
+
+def test_main_skips_archived_and_says_so(tmp_path, monkeypatch, capsys):
+    """과거본은 위반이 있어도 종료코드를 바꾸지 않되, 건너뛴 사실은 출력에 남는다."""
+    old = _doc(tmp_path, "## 절\n\n서울 실측 공실률 을 쓴 과거본\n")
+    claims = {**CLAIMS, "archived": [{"path": str(old), "submitted": "2026-09-18",
+                                      "claims_ref": "9926d7a", "why": "테스트"}]}
+    monkeypatch.setattr(ca, "_load_claims", lambda: claims)
+    monkeypatch.setattr(ca, "OUT", tmp_path / "out.json")
+    monkeypatch.setattr("sys.argv", ["x", "--doc", str(old)])
+    assert ca.main() == 0
+    out = capsys.readouterr().out
+    assert "[과거본]" in out and "검사 제외" in out
+    assert ca.check_doc(old, claims, False)["ok"] is False   # 검사하면 잡힌다 — 빼는 것은 main 의 선택
 
 
 @pytest.mark.parametrize("name", ["AGENTS.md", "README.md", "claims.json"])
