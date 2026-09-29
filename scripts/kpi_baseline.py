@@ -274,15 +274,23 @@ def _vocab_why(vc: dict) -> str:
 # ─────────────────────────── 종합 ───────────────────────────
 
 def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> dict:
+    # 2026-09-29: 파일이 **있는데** 못 읽은 것을 "없음"으로 적지 않는다 — 판정 실패다.
+    errors: dict[Path, str] = {}
+
     def _load(p: Path) -> dict | None:
         try:
             return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
+        except Exception as exc:
+            if p.exists():
+                errors[p] = f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}"
             return None
 
+    def _missing(p: Path) -> str:
+        return f"{p.name} 읽기 실패 — {errors[p]}" if p in errors else f"{p.name} 없음"
+
     fc, rec = _load(forecast_path), _load(recommend_path)
-    lstm = lstm_skill(fc) if fc else {"available": False, "reason": f"{forecast_path.name} 없음"}
-    gnn = gnn_skill(rec) if rec else {"available": False, "reason": f"{recommend_path.name} 없음"}
+    lstm = lstm_skill(fc) if fc else {"available": False, "reason": _missing(forecast_path)}
+    gnn = gnn_skill(rec) if rec else {"available": False, "reason": _missing(recommend_path)}
     if lstm.get("available"):
         _apply_confirmation(lstm, fc)
     if gnn.get("available"):
@@ -330,6 +338,9 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
         failures.append(
             f"GNN Top-3 {gnn['top3']:.1%} vs 거점 사전분포 {gnn['baseline_top3']:.1%} "
             f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['gate_verdict']}")
+
+    # 있는 산출물을 못 읽은 것은 "판정 없음"이 아니라 판정 실패다 — 종료코드 0 으로 넘기지 않는다.
+    failures += [f"{p.name} 읽기 실패 — {why} → 판정 못 냄" for p, why in errors.items()]
 
     return {"lstm": lstm, "gnn": gnn, "failures": failures, "ok": not failures}
 

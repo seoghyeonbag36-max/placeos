@@ -60,6 +60,9 @@ class Track:
     name: str
     phase: str
     gates: list[Gate] = field(default_factory=list)
+    # 판정을 못 내서 게이트가 0 으로 떨어졌을 때의 사유(예외 종류: 첫 줄). 비어 있으면 정상.
+    # 채워져 있으면 pct 는 **판정 실패로 떨어진 값**이라 인용하면 안 된다(2026-09-29).
+    judgement_error: str = ""
 
     @property
     def pct(self) -> float:
@@ -75,11 +78,35 @@ class Track:
 
 # ─────────────────────────── 공통 로더 ───────────────────────────
 
+def _exc_line(exc: BaseException) -> str:
+    """예외를 보고용 한 줄로 — `종류: 메시지 첫 줄`."""
+    # KeyError 의 str() 은 repr 이라 줄바꿈이 이스케이프된다 — 인자가 하나면 그 인자를 쓴다.
+    msg = str(exc.args[0]) if len(exc.args) == 1 else str(exc)
+    first = next((ln.strip() for ln in msg.splitlines() if ln.strip()), "")
+    return f"{type(exc).__name__}: {first}" if first else type(exc).__name__
+
+
+# 산출물이 **있는데** 못 읽은 경우를 삼키지 않기 위한 자리(2026-09-29). 없는 파일은 각 게이트가
+# "없음"으로 적으므로 여기 남기지 않는다. 09-28 밤의 Platform 40.0 은 recommend.json, 50.0 은
+# forecast.json 을 이 함수가 못 읽은 경우와 값이 정확히 맞는다(옛 코드로 재현) — 그때는 흔적이 없었다.
+_LOAD_ERRORS: dict[str, str] = {}
+
+
 def _load(path: Path) -> dict | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        if path.exists() and path.name not in _LOAD_ERRORS:
+            _LOAD_ERRORS[path.name] = _exc_line(exc)
+            print(f"⚠ 산출물 읽기 실패 — {path.name} {_LOAD_ERRORS[path.name]}", file=sys.stderr)
         return None
+
+
+# kpi_baseline 판정 실패를 **삼키지 않기 위한** 자리(2026-09-29). `_HUB_LOAD_ERROR` 와 같은 계열.
+# 09-28 밤 같은 명령이 연달아 Platform 40.0 · 50.0 을 냈다가 이후 네 번은 66.7 이었다. 종전
+# `except Exception: return None` 은 실패를 흔적 없이 None 으로 바꿔, GNN 게이트가 "판정 없음"
+# 으로 0 이 되고 LSTM 두 게이트는 아예 사라졌다 — 값은 여전히 그럴듯하게 찍혔다.
+_KPI_ERROR: str = ""
 
 
 def _kpi_baseline() -> dict | None:
@@ -89,13 +116,20 @@ def _kpi_baseline() -> dict | None:
     `_count_measured_foot_hubs` 가 백엔드 함수를 직접 부르는 것과 같은 이유다.
     한쪽만 고쳐졌을 때 조용히 어긋나는 것을 막는다. 읽기 전용·표준 라이브러리라
     네트워크도 파일 쓰기도 없다.
+
+    ⚠ None 으로 물러나는 경로는 조용하면 안 된다 — 예외 종류와 첫 줄을 `_KPI_ERROR` 에
+    남기고 stderr 에 한 줄 찍는다. 판정 규칙은 그대로다(`실력`만 닫힌다).
     """
+    global _KPI_ERROR
+    _KPI_ERROR = ""
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from kpi_baseline import check
 
         return check()
-    except Exception:
+    except Exception as exc:
+        _KPI_ERROR = _exc_line(exc)
+        print(f"⚠ kpi_baseline 판정 실패 — {_KPI_ERROR}", file=sys.stderr)
         return None
 
 
@@ -438,6 +472,16 @@ def platform_track() -> Track:
     ))
 
     kb = _kpi_baseline()
+    if _KPI_ERROR:
+        if fc:
+            # 종전에는 이 두 게이트가 **사라져** 분모가 조용히 줄었다. 판정을 못 낸 것은
+            # `실력`이 아니므로 0 으로 두고(규칙 그대로) 사유를 적는다.
+            for axis in ("**방향** 실력 (vs 무정보 상수)", "**오차** 실력 (vs 지속성)"):
+                t.gates.append(Gate(
+                    f"KPI 공실예측 {axis}", 0.0,
+                    f"**판정 실패** — kpi_baseline {_KPI_ERROR}. 모델이 진 것이 아니라 판정을 "
+                    f"못 낸 것이다. `python scripts/kpi_baseline.py` 로 직접 확인할 것",
+                ))
     if kb and kb.get("lstm", {}).get("available"):
         d = kb["lstm"]["direction"]
         e = kb["lstm"]["error"]
@@ -497,6 +541,14 @@ def platform_track() -> Track:
         ))
 
     rec = _load(GOLD / "platform_industry_recommend.json")
+    # 판정 실패 사유를 한 줄로 모은다 — 하나라도 있으면 이 트랙의 pct 는 "판정 실패로 떨어진 값".
+    _why = [f"{n} 읽기 실패 {_LOAD_ERRORS[n]}"
+            for n in ("platform_vacancy_forecast.json", "platform_industry_recommend.json")
+            if n in _LOAD_ERRORS]
+    _why += [f"kpi_baseline {_KPI_ERROR}"] if _KPI_ERROR else []
+    _why += [f"kpi_baseline {v['reason']}" for v in ((kb or {}).get("lstm"), (kb or {}).get("gnn"))
+             if v and "읽기 실패" in str(v.get("reason", ""))]
+    t.judgement_error = " · ".join(_why)
     m = (rec or {}).get("metrics", {})
     t.gates.append(Gate(
         "GNN 업종추천 학습·서빙",
@@ -567,7 +619,7 @@ def platform_track() -> Track:
                 "KPI 업종추천 Top-3 실력 (vs 거점 사전분포)",
                 1.0 if gv == "실력" else 0.0,
                 f"모델 {top3:.1%} vs 사전분포 {b3:.1%} → 실력 **{(top3 - b3) * 100:+.2f}%p** "
-                f"→ **{gv or '판정 없음'}** — {gnote} · {vnote}. "
+                f"→ **{gv or (f'판정 실패({_KPI_ERROR})' if _KPI_ERROR else '판정 없음')}** — {gnote} · {vnote}. "
                 f"옛 게이트(≥70%)는 사전분포가 이미 {b3 - 0.70:+.1%}p 로 넘겨 놓아 "
                 f"모델을 보증하지 못했다"
                 + (f" · Top-1 {top1:.1%} vs {m.get('baseline_district_prior_top1', 0):.1%} "
@@ -1308,6 +1360,7 @@ def main() -> int:
             "hubs": total,
             "tracks": [{
                 "name": t.name, "phase": t.phase, "pct": round(t.pct, 1),
+                "judgement_error": t.judgement_error or None,
                 "gates": [{"name": g.name, "value": round(g.value, 3), "auto": g.auto,
                            "observe": g.observe,
                            "detail": g.detail, "evidence": g.evidence} for g in t.gates],
@@ -1323,6 +1376,9 @@ def main() -> int:
         return 0
 
     print("PPPP 진행률 — 산출물에서 계산 (거점 %d)" % total)
+    if _LOAD_ERRORS:
+        print("⚠ 있는 산출물을 못 읽었다 — 그 파일에 기대는 게이트는 **판정 실패로 떨어진 값**이다: "
+              + " · ".join(f"{n} {e}" for n, e in _LOAD_ERRORS.items()))
     if _HUB_LOAD_ERROR:
         # 게이트 값이 전부 다른 모집단에서 나온 상태다. 배너 없이 숫자만 보면
         # 오독하게 되므로 맨 위에서 막는다.
@@ -1335,6 +1391,8 @@ def main() -> int:
     print("=" * 78)
     for t in tracks:
         print(f"\n{t.name}  {t.pct:5.1f}%  {_bar(t.pct)}   {t.phase}")
+        if t.judgement_error:
+            print(f"   ⚠ 판정 실패로 떨어진 값 — {t.judgement_error}. 이 진행률을 인용하지 말 것")
         for g in t.gates:
             tag = "관측" if g.observe else ("자동" if g.auto else "선언")
             print(f"   [{tag}] {g.value:5.1%}  {g.name}")
@@ -1347,7 +1405,8 @@ def main() -> int:
     # (2026-08-17 실제로 그렇게 읽혔다). 진행률이 높은 트랙을 먼저 하라는 뜻이 아니다 —
     # 오히려 뒤처진 트랙이 다음 차례인 경우가 많다. 그래서 이름을 사실대로 바꾸고,
     # 작업 순서는 의존 방향으로 결정된 값을 따로 적는다.
-    rank = " > ".join(f"{t.name} {t.pct:.0f}%" for t in sorted(tracks, key=lambda x: -x.pct))
+    rank = " > ".join(f"{t.name} {t.pct:.0f}%" + ("(판정 실패로 떨어진 값)" if t.judgement_error else "")
+                      for t in sorted(tracks, key=lambda x: -x.pct))
     print(f"진행률 순위: {rank}")
     # 네 트랙이 다 100% 가 되면 이 줄은 순위로서 아무 말도 하지 않는다. 그리고 그때가
     # **이 숫자가 가장 위험한 순간**이다 — "PPPP 완료"로 인용되기 때문이다. 그래서
