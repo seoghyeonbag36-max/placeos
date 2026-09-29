@@ -686,3 +686,41 @@ def test_serving_artifact_reads_on_the_strongest_baselines() -> None:
     assert d["baseline_acc"] == max(d["constant_acc"], d["meanward_acc"])
     # reg-0928 서빙본에서는 두 축 모두 거점 평균 쪽 규칙이 강하다
     assert (e["baseline_label"], d["baseline_label"]) == ("거점 평균", "평균 쪽")
+
+
+# ─────────────── 이름표가 실제 기준을 말한다 (2026-09-30) ───────────────
+# #56 개정 뒤에도 "상수 규칙이 강하다" · "vs 무정보 상수" · "vs 지속성" 이 고정 문장이라
+# 기준이 '평균 쪽'·'거점 평균'일 때도 그렇게 찍혔다. 판정은 맞았고 이름표만 틀렸다.
+
+def test_direction_phrase_names_the_rule_that_actually_won() -> None:
+    from kpi_baseline import _direction_basis_phrase
+
+    mw = lstm_skill(_mean_reverting())["direction"]          # '평균 쪽' 이 강하다
+    assert "'평균 쪽' 규칙이" in _direction_basis_phrase(mw)
+    assert "상수 규칙이 강하다" not in _direction_basis_phrase(mw)
+
+    fc = _mean_reverting()
+    for row in fc["holdout"].values():                       # 전부 하락 · 평균은 위쪽
+        row["actual"] = row["prev"] - 1.0
+        row["clim"] = row["prev"] + 1.0
+    const = lstm_skill(fc)["direction"]
+    assert const["baseline_label"] == const["constant_label"] == "항상 하락"
+    assert "다수방향 상수('항상 하락')가 '평균 쪽'보다 강하다" in _direction_basis_phrase(const)
+
+    legacy = lstm_skill(_mean_reverting(with_clim=False))["direction"]
+    assert "후보가 없어" in _direction_basis_phrase(legacy)
+
+
+def test_status_gate_names_are_basis_neutral_and_detail_names_the_basis() -> None:
+    """게이트 이름은 기준 체계와 무관하게 고정 — 어느 규칙이었는지는 └ 줄이 말한다."""
+    from pppp_status import _LSTM_DIR_GATE, _LSTM_ERR_GATE, platform_track
+
+    for name in (_LSTM_DIR_GATE, _LSTM_ERR_GATE):
+        assert "무정보 상수" not in name and "지속성" not in name
+    res = check()
+    if not res["lstm"].get("available"):
+        pytest.skip("서빙 산출물 없음")
+    gates = {g.name: g for g in platform_track().gates}
+    d, e = res["lstm"]["direction"], res["lstm"]["error"]
+    assert f"'{d['baseline_label']}'" in gates[_LSTM_DIR_GATE].detail
+    assert f"vs {e['baseline_label']} {e['baseline_mae']:.3f}" in gates[_LSTM_ERR_GATE].detail

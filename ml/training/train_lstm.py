@@ -386,9 +386,19 @@ def main(test_quarters: int = TEST_QUARTERS, val_quarters: int = VAL_QUARTERS,
                     # 떨어져 나가고, 떨어지는 순간 그 지표는 다시 판정 근거가 못 된다.
                     "baseline_direction_acc": round(bt["baseline_dir_acc"], 3),
                     "persistence_mae": round(bt["persistence_mae"], 3),
-                    "direction_skill_pp": round((bt["dir_acc"] - bt["baseline_dir_acc"]) * 100, 1),
-                    "mae_skill": round(1 - bt["mae"] / bt["persistence_mae"], 3)
+                    # ⚠ 아래 두 실력 값은 **종전 기준**(다수방향 상수 · 지속성)에 댄 것이다.
+                    # 2026-09-30 개정 뒤 판정 기준은 "두 무정보 규칙 중 강한 쪽"이라, 거점
+                    # 평균·'평균 쪽'이 더 강하면 이 값은 실력을 **부풀린다**(reg-0928 서빙본:
+                    # 방향 +25.0%p vs 판정 +11.3%p · 오차 +30.9% vs 판정 +17.6%). 종전에는
+                    # 키가 `direction_skill_pp`·`mae_skill` 이라 판정 값으로 인용될 수 있었다 →
+                    # 키 이름에 기준을 넣고 basis 를 같이 싣는다. 판정 값은 여기 없다 —
+                    # `forecast_skill.lstm_skill`(API `skill` · kpi_baseline)이 holdout 표로 낸다.
+                    "direction_skill_pp_vs_constant": round(
+                        (bt["dir_acc"] - bt["baseline_dir_acc"]) * 100, 1),
+                    "mae_skill_vs_persistence": round(1 - bt["mae"] / bt["persistence_mae"], 3)
                     if bt["persistence_mae"] else None,
+                    "legacy_skill_basis": "majority_direction · persistence — 판정 기준 아님"
+                                          "(판정은 강한 쪽 · forecast_skill.lstm_skill)",
                     "holdout_n": bt["n"],
                     # 2026-09-30 개정의 두 번째 기준 — 판정은 kpi_baseline 이 holdout 표로 다시 낸다
                     "climatology_mae": (None if bt["climatology_mae"] is None

@@ -349,6 +349,23 @@ _MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠", PENDI
          VOCAB_PASS: "✅", VOCAB_FAIL: "❌"}
 
 
+def _direction_basis_phrase(d: dict) -> str:
+    """방향 축에서 **실제로 기준이 된 규칙**이 무엇이고 왜 그쪽이 강했는지 한 구절.
+
+    기준 라벨(`baseline_label`)이 상수 라벨(`constant_label`)과 같으면 다수방향 상수가
+    이긴 것이다(쏠림 덕). 다르면 '평균 쪽' 규칙이 이긴 것이다(평균회귀 덕).
+    '평균 쪽' 후보가 없으면(legacy_no_clim) 상수 하나뿐이라 고른 것이 아니다.
+    """
+    if d.get("meanward_acc") is None:
+        return (f"비교할 '평균 쪽' 후보가 없어 다수방향 상수('{d['baseline_label']}')가 "
+                f"기준이다(종전 기준)")
+    if d["baseline_label"] == d["constant_label"]:
+        return (f"한쪽으로 쏠려 있어 다수방향 상수('{d['baseline_label']}')가 "
+                f"'평균 쪽'보다 강하다 — 그것을 기준으로 쓴다")
+    return (f"쏠림보다 평균회귀가 커서 '{d['baseline_label']}' 규칙이 "
+            f"다수방향 상수('{d['constant_label']}')보다 강하다 — 그것을 기준으로 쓴다")
+
+
 def _fmt(res: dict) -> str:
     out: list[str] = []
     out.append("KPI 실력 검정 — 모델 vs 무정보 베이스라인")
@@ -379,8 +396,10 @@ def _fmt(res: dict) -> str:
                    f"[{slo:+.1f}, {shi:+.1f}] · McNemar "
                    f"b={d['mcnemar']['b_model_only']} c={d['mcnemar']['c_baseline_only']} "
                    f"p={d['mcnemar']['p_two_sided']:.3f}")
+        # 2026-09-30: 종전에는 고정 문장("한쪽으로 쏠려 있어 상수 규칙이 강하다")이라
+        # 기준이 '평균 쪽'이어도 그렇게 찍혔다. 실제로 기준이 된 규칙을 말한다.
         out.append(f"      실제 방향 상승 {d['actual_up']} · 하락 {d['actual_down']} "
-                   f"— 한쪽으로 쏠려 있어 상수 규칙이 강하다")
+                   f"— {_direction_basis_phrase(d)}")
         ob = d.get("observed") or {}
         if ob:
             c = ob["confusion"]
