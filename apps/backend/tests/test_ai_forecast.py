@@ -219,3 +219,22 @@ def test_predict_vacancy_carries_skill():
     assert s["n_forecast_hubs"] == len(json.loads(
         (_GOLD / "platform_vacancy_forecast.json").read_text(encoding="utf-8"))["forecasts"])
     assert s["error"]["persistence_mae"] > 0
+
+
+def test_predict_vacancy_metrics_drop_legacy_skill_values():
+    """응답 `metrics` 에 종전 기준(상수·지속성) 실력 값이 새지 않는다 — 판정은 `skill` 이다.
+
+    2026-09-30: reg-0928 산출물의 `direction_skill_pp` 는 +25.0%p(vs 상수)인데 판정 값은
+    +11.3%p(vs '평균 쪽')다. 같은 응답에 두 값이 있으면 앞의 것이 판정으로 인용된다.
+    """
+    from app.services import vacancy_forecast as vf
+
+    r = client.post(f"{V1}/ai/predict-vacancy", json={"district_id": "garosugil"})
+    assert r.status_code == 200
+    m = r.json()["metrics"]
+    assert m and "holdout_mae" in m                       # 나머지 지표는 그대로 나간다
+    assert not (vf._LEGACY_SKILL_KEYS & set(m)), sorted(vf._LEGACY_SKILL_KEYS & set(m))
+    # 원본(캐시)은 건드리지 않는다 — 산출물 수정 금지
+    raw = json.loads((_GOLD / "platform_vacancy_forecast.json").read_text(encoding="utf-8"))
+    assert vf._LEGACY_SKILL_KEYS & set(raw["metrics"])      # 옛 키든 개명본이든 원본엔 있다
+    assert vf._LEGACY_SKILL_KEYS & set(vf._load()["metrics"])

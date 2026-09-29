@@ -416,6 +416,38 @@ def page_track(total: int) -> Track:
 
 # ─────────────────────────── Platform ───────────────────────────
 
+# LSTM 실력 게이트 이름 — **기준 체계에 중립**이다(2026-09-30). 09-28 #56 이 대조군을
+# "두 무정보 규칙 중 강한 쪽"으로 올린 뒤에도 이름이 "vs 무정보 상수"·"vs 지속성"이라,
+# 실제 기준이 '평균 쪽'·'거점 평균'일 때 이름과 근거 줄이 서로 다른 말을 했다.
+# 어느 규칙이 강했는지는 kpi_baseline 결과의 `baseline_label` 에서 읽어 └ 줄에 싣는다.
+# 이 문자열은 게이트 키다 — 바꾸면 data/tests/test_kpi_baseline.py 의 접두사 대조도 본다.
+_LSTM_DIR_GATE = "KPI 공실예측 **방향** 실력 (vs 무정보 기준 · 강한 쪽)"
+_LSTM_ERR_GATE = "KPI 공실예측 **오차** 실력 (vs 무정보 기준 · 강한 쪽)"
+
+# 오차 축 기준을 사람 말로 — forecast_skill 의 PERSISTENCE · CLIMATOLOGY 라벨과 같은 값
+_ERR_RULE_PHRASE = {
+    "지속성": "직전 분기값 그대로(지속성)",
+    "거점 평균": "그 거점의 과거 평균(거점 평균)",
+}
+
+
+def _lstm_basis_note(lstm: dict, axis: str) -> str:
+    """└ 줄 머리 — 이 축의 판정이 어느 규칙을 기준으로 쟀는지(axis: "direction"|"error").
+
+    `baseline_basis` 가 legacy_no_clim 이면 산출물에 거점 평균(clim)이 없어 강한 쪽을
+    못 고른 것이다 — 게이트 이름의 '강한 쪽'이 이때는 성립하지 않으므로 그렇게 적는다.
+    """
+    x = lstm[axis]
+    if lstm.get("baseline_basis") == "legacy_no_clim":
+        return (f"[기준] 종전 기준으로 물러남 — 산출물에 거점 평균(clim)이 없어 강한 쪽을 "
+                f"못 골랐다 → '{x['baseline_label']}'. ")
+    if axis == "direction":
+        return (f"[기준] 강한 쪽 '{x['baseline_label']}' (후보 '{x['constant_label']}' "
+                f"{x['constant_acc']:.1%} · '평균 쪽' {x['meanward_acc']:.1%}). ")
+    return (f"[기준] 강한 쪽 '{x['baseline_label']}' (후보 지속성 MAE "
+            f"{x['persistence_mae']:.3f} · 거점 평균 {x['climatology_mae']:.3f}). ")
+
+
 def platform_track() -> Track:
     t = Track("Platform", "Phase 5 (ML)")
     fc = _load(GOLD / "platform_vacancy_forecast.json")
@@ -476,9 +508,9 @@ def platform_track() -> Track:
         if fc:
             # 종전에는 이 두 게이트가 **사라져** 분모가 조용히 줄었다. 판정을 못 낸 것은
             # `실력`이 아니므로 0 으로 두고(규칙 그대로) 사유를 적는다.
-            for axis in ("**방향** 실력 (vs 무정보 상수)", "**오차** 실력 (vs 지속성)"):
+            for axis in (_LSTM_DIR_GATE, _LSTM_ERR_GATE):
                 t.gates.append(Gate(
-                    f"KPI 공실예측 {axis}", 0.0,
+                    axis, 0.0,
                     f"**판정 실패** — kpi_baseline {_KPI_ERROR}. 모델이 진 것이 아니라 판정을 "
                     f"못 낸 것이다. `python scripts/kpi_baseline.py` 로 직접 확인할 것",
                 ))
@@ -498,44 +530,51 @@ def platform_track() -> Track:
             f"§0-B ③)에 따라 게이트는 {cf['after']} **이후** 분기 holdout {cf['n_fresh']}건으로 "
             f"판정한다 → 방향 **{d['gate_verdict']}** · 오차 **{e['gate_verdict']}**"
             if cf else "")
-        head = (f"모델 {d['model_acc']:.1%}({d['model_hits']}/{kb['lstm']['n']}) vs "
+        # 2026-09-30: 어느 규칙이 기준이었는지는 게이트 이름이 아니라 이 설명 줄이 말한다.
+        # 이름은 기준 체계와 무관하게 고정한다(#56 개정 뒤 "vs 무정보 상수"가 '평균 쪽'
+        # 기준일 때도 찍혀 있었다).
+        head = (_lstm_basis_note(kb["lstm"], "direction") + f"모델 {d['model_acc']:.1%}({d['model_hits']}/{kb['lstm']['n']}) vs "
                 f"베이스라인 '{d['baseline_label']}' {d['baseline_acc']:.1%} → "
                 f"실력 **{d['skill_pp']:+.1f}%p** · 실력 95%CI [{slo:+.1f}, {shi:+.1f}]%p "
                 f"· McNemar b={mc['b_model_only']} c={mc['c_baseline_only']} "
                 f"p={mc['p_two_sided']:.3f} → **{dv}**. ")
         if dv == "실력":
-            body = "구간이 0 위에 있고 쌍대 검정도 유의하다 — 상수 규칙보다 낫다고 말할 수 있다"
+            body = (f"구간이 0 위에 있고 쌍대 검정도 유의하다 — '{d['baseline_label']}' 규칙보다 "
+                    f"낫다고 말할 수 있다")
         elif dv == "열위":
-            body = ("구간이 0 아래에 있고 쌍대 검정도 유의하다 — **상수 규칙이 모델보다 "
-                    "낫다**는 것이 증명됐다")
+            body = (f"구간이 0 아래에 있고 쌍대 검정도 유의하다 — **'{d['baseline_label']}' "
+                    f"규칙이 모델보다 낫다**는 것이 증명됐다")
         else:
-            body = ("부호와 무관하게 구간이 0 을 품는다 — 이 표본으로는 모델과 상수 규칙을 "
-                    "**못 가른다**. 점추정의 부호로 닫지 않는다(KPI 규칙 2)")
+            body = (f"부호와 무관하게 구간이 0 을 품는다 — 이 표본으로는 모델과 "
+                    f"'{d['baseline_label']}' 규칙을 **못 가른다**. 점추정의 부호로 닫지 않는다"
+                    f"(KPI 규칙 2)")
         tail = (f". 실제 방향 하락 {d['actual_down']}·상승 {d['actual_up']} · "
                 f"모델 정확도 95%CI [{lo:.1%}, {hi:.1%}] (n={kb['lstm']['n']})")
         if ob:
             tail += (f" · [관측] 균형정확도 {ob['balanced_acc']:.1%}(상수 50%) · "
                      f"MCC {ob['mcc']:+.3f}(상수 0) — 판정 지표가 아니다")
         t.gates.append(Gate(
-            "KPI 공실예측 **방향** 실력 (vs 무정보 상수)",
+            _LSTM_DIR_GATE,
             1.0 if d.get("gate_verdict", dv) == "실력" else 0.0,
             head + body + tail + conf_note,
         ))
         elo, ehi = e["mae_skill_ci95"]
         ev = e["verdict"]
-        head = (f"MAE {e['model_mae']:.3f} vs 지속성 {e['persistence_mae']:.3f} → "
+        head = (_lstm_basis_note(kb["lstm"], "error") + f"MAE {e['model_mae']:.3f} vs {e['baseline_label']} "
+                f"{e['baseline_mae']:.3f} → "
                 f"기술점수 **{e['mae_skill']:+.1%}** [{elo:+.1%}, {ehi:+.1%}] "
                 f"(RMSE {e['rmse_skill']:+.1%}) → **{ev}**. ")
+        rule = _ERR_RULE_PHRASE.get(e["baseline_label"], f"'{e['baseline_label']}'")
         if ev == "실력":
-            body = "직전 분기값을 그대로 내미는 것보다 구간 전체가 낫다"
+            body = f"{rule}을 내미는 것보다 구간 전체가 낫다"
         elif ev == "열위":
-            body = ("**직전 분기값을 그대로 내미는 쪽이 유의하게 낫다** — 제품이 파는 "
+            body = (f"**{rule}을 내미는 쪽이 유의하게 낫다** — 제품이 파는 "
                     "공실 압력의 크기에서 모델이 아직 기여하지 못한다. 후보는 "
                     "docs/finding-lstm-leakfree-retrain-2026-09-24.md §남은 것")
         else:
-            body = "구간이 0 을 품는다 — 지속성과 못 가른다"
+            body = f"구간이 0 을 품는다 — {rule}과 못 가른다"
         t.gates.append(Gate(
-            "KPI 공실예측 **오차** 실력 (vs 지속성)",
+            _LSTM_ERR_GATE,
             1.0 if e.get("gate_verdict", ev) == "실력" else 0.0,
             head + body + conf_note,
         ))

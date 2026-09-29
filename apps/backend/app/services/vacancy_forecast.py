@@ -25,6 +25,24 @@ _ANCHOR_DISTRICTS = {"garosugil"}
 
 _cache: dict[str, Any] = {}
 
+# 응답 `metrics` 에서 빼는 키 — **종전 기준**(다수방향 상수 · 지속성)에 댄 실력 값이다.
+# 2026-09-30 개정 뒤 판정 기준은 "두 무정보 규칙 중 강한 쪽"이라, 거점 평균·'평균 쪽'이
+# 더 강하면 이 값은 실력을 부풀린다(reg-0928: 방향 +25.0%p vs 판정 +11.3%p · 오차
+# +30.9% vs 판정 +17.6%). 판정 값은 같은 응답의 `skill` 에 있다. 산출물(JSON)은 그대로
+# 두고 응답에서만 뺀다 — 옛 키(09-29 서빙본)와 train_lstm 이 다음 학습부터 쓰는 키 둘 다.
+_LEGACY_SKILL_KEYS = frozenset({
+    "direction_skill_pp", "mae_skill",                                  # 09-29 서빙본까지
+    "direction_skill_pp_vs_constant", "mae_skill_vs_persistence",       # 다음 학습부터
+    "legacy_skill_basis",
+})
+
+
+def _public_metrics(metrics: dict | None) -> dict | None:
+    """산출물 metrics 에서 종전 기준 실력 값을 뺀 사본 — 원본(캐시)은 건드리지 않는다."""
+    if metrics is None:
+        return None
+    return {k: v for k, v in metrics.items() if k not in _LEGACY_SKILL_KEYS}
+
 
 def _anchor(district_id: str) -> dict | None:
     """building_vacancy PoC 실측 보정값을 참조 앵커로 부착 (단일 시점 스냅샷)."""
@@ -81,7 +99,7 @@ def get_forecast(district_id: str, quarters: int = 1) -> dict | None:
     out = {
         "district_id": district_id,
         **item,
-        "metrics": fc.get("metrics"),
+        "metrics": _public_metrics(fc.get("metrics")),
         "model": fc.get("model", "vacancy-lstm-pooled-v2"),
         "trained_at": fc.get("trained_at"),
         "source": "forecast_json",

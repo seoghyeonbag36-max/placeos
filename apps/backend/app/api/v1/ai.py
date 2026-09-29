@@ -35,7 +35,10 @@ async def predict_vacancy(req: VacancyRequest) -> dict[str, object]:
 
     성능 숫자를 여기 적지 않는다 — 적어 둔 값은 재학습마다 낡는다(09-28 에 07-25 값이
     남아 있었다). 응답의 `metrics`(산출물 그대로)와 `skill`(베이스라인 대비 판정:
-    오차=지속성 · 방향=무정보 상수, `scripts/kpi_baseline.py` 와 같은 코드)을 읽을 것.
+    축마다 두 무정보 규칙 중 강한 쪽 — 어느 쪽이었는지는 `baseline_label`,
+    `scripts/kpi_baseline.py` 와 같은 코드)을 읽을 것. `metrics` 에서는 종전 기준(상수·
+    지속성)에 댄 실력 값(`direction_skill_pp`·`mae_skill` 과 그 개명본)을 **뺀다** —
+    판정 값으로 오인되기 때문이다(`vacancy_forecast._LEGACY_SKILL_KEYS`).
 
     horizon_months(1~12)는 분기로 환산(올림, 최대 4분기)해 재귀 예측 horizon 을 고른다.
     forecast json 부재 시(신규 클론 등) 스텁 응답으로 폴백, 미지원 거점은 404.
