@@ -35,7 +35,12 @@
 
 ## Abstract
 
-<!-- TODO(영문초록): 국문 초록을 번역한다. 새 주장·새 수치를 더하지 않는다. -->
+<!-- 2026-09-29 초안: ../paper-page.md 「초록」 8문장을 문장 단위로 옮겼다. 새 주장·새 수치 없음.
+     수치 근거: 66 hubs · 52,642 → PAGE-D01 / 66/66 반복 → PAGE-D04 / 셀 재합산·보존 서빙 → PAGE-D08 /
+     Gold→서빙 → PAGE-D09 / 198 · 65 hubs → PAGE-D05. 국문 초록을 고치면 이 번역도 같이 고친다.
+     분량(단어 수) 제한은 투고규정 원문 확인 후 맞춘다 — 현재 211 단어. -->
+
+Commercial vacancy information built by linking public administrative data provides detailed spatial outputs, yet computational consistency and real-world vacancy accuracy require different forms of validation. This study evaluates frozen processed data from PlaceOS for structural consistency, computational reproducibility under fixed inputs, and sensitivity to the row order of building polygons. The scope of inspection covers 52,642 master polygons across 66 analysis hubs, and the denominators to which each rule applies are distinguished from items that could not be evaluated. In earlier repeated runs, comparisons of the master, coverage, and serving outputs matched in 66 of 66 hubs, and agreement was also confirmed in an independent cell re-aggregation and in a comparison from the processed (Gold) layer to the served responses. However, in 198 earlier order-permutation trials, although hub-level aggregates did not change, grid-cell membership or cell numerators and denominators were affected in 65 hubs. This shows that reproducing results from fixed inputs must be distinguished from the order invariance of spatial outputs. Because independent ground truth and temporal alignment of the source observations were not available, real-world vacancy accuracy and the effect of error correction were not evaluated. The study proposes a validation and reporting procedure that does not extend successful computational reproduction to claims of spatial stability or real-world accuracy.
 
 **Keywords:** public administrative data, vacancy information, data quality, computational reproducibility, order sensitivity
 
