@@ -53,6 +53,15 @@ python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md --
 06·08 은 학술 원고라 [docs/papers](../papers/) 의 규칙과 근거 인덱스를 따른다. 이 디렉터리는
 신청서 전용이다.
 
+### 과거본 — 제출한 원고는 검사에서 빼고 드러낸다 (2026-09-29)
+
+대장이 바뀌면(09-29: LSTM 누수 차단 재학습 · GNN 81거점 재학습 반영) 이미 제출한 원고의
+당시 수치가 새 forbid 에 걸린다. 제출본은 고칠 수 없고 대장을 되돌리면 새 원고의 가드가
+풀리므로, `claims.json` 의 `archived` 에 **경로 · 제출일 · 당시 대장 커밋(`claims_ref`)** 을
+적어 검사에서 뺀다. 검사기는 그 원고를 `[과거본] … 검사 제외` 로 출력한다 — 조용히 건너뛰지
+않는다. 지금 01 · 02 가 과거본이다. **과거본의 숫자를 새 원고로 옮겨 오지 말 것** — 당시 대장은
+`git show <claims_ref>:docs/apply/claims.json` 으로만 본다.
+
 ## 공통 코어
 
 | | 산출물 | 상태 |

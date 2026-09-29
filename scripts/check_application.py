@@ -15,6 +15,12 @@
   4. 빈 절 — `<!-- FILL -->` 만 지우고 내용을 안 채운 자리
   5. FILL 잔여 — 제출 직전에는 0 이어야 한다 (`--require-complete`)
 
+과거본(claims.json 의 `archived`): 이미 제출한 원고는 **제출 당시의 대장**으로 쓰였다.
+지금 대장으로 검사하면 당시에 사실이던 값이 금지로 잡혀, 원고를 고치든(제출본과 달라진다)
+대장을 되돌리든(새 원고의 가드가 풀린다) 둘 다 잘못이다. 그래서 과거본은 검사에서 빼고
+'과거본'이라고 **드러내어** 표시한다 — 조용히 건너뛰면 가드가 사라진 것과 구분되지 않는다.
+당시 대장은 `claims_ref` 커밋에 있다(`git show <ref>:docs/apply/claims.json`).
+
 HTML 주석과 코드펜스는 근거 검사(1~3)에서 제외한다. FILL 마커 자체가 금지어와 수치를
 지시문으로 담고 있어서, 주석까지 세면 지시문이 위반으로 잡힌다. 다만 '빈 절'(4) 은
 코드·표를 **내용으로 센다** — 근거에서 빼는 것과 절이 비었는지 세는 것은 다른 판정이다.
@@ -103,6 +109,11 @@ def _load_claims() -> dict:
     if not CLAIMS.exists():
         raise SystemExit(f"[apply] 대장이 없다: {_rel(CLAIMS)}")
     return json.loads(CLAIMS.read_text(encoding="utf-8"))
+
+
+def archived_paths(claims: dict) -> dict[Path, dict]:
+    """claims.json 의 `archived` → {절대경로: 항목}. 과거본은 지금 대장으로 검사하지 않는다."""
+    return {(ROOT / a["path"]).resolve(): a for a in claims.get("archived", [])}
 
 
 def check_doc(path: Path, claims: dict, require_complete: bool) -> dict:
@@ -235,8 +246,23 @@ def main() -> int:
     else:
         docs = sorted(p for p in APPLY_DIR.rglob("*.md") if p.name not in SKIP_NAMES)
 
+    # 과거본은 검사에서 빼되 드러낸다. 목록이 가리키는 파일이 없으면 실패 — 낡은 목록이
+    # 새 원고를 과거본으로 잘못 덮는 일을 막는다.
+    arch = archived_paths(claims)
+    gone = [a["path"] for p, a in arch.items() if not p.exists()]
+    if gone:
+        for g in gone:
+            print(f"[apply] 과거본 목록의 파일이 없다: {g}", flush=True)
+        return 1
+    skipped = [d for d in docs if d.resolve() in arch]
+    docs = [d for d in docs if d.resolve() not in arch]
+    for d in skipped:
+        a = arch[d.resolve()]
+        print(f"[과거본] {_rel(d)}  (제출 {a['submitted']} · 당시 근거 claims@{a['claims_ref']} · 검사 제외)",
+              flush=True)
+
     if not docs:
-        print("[apply] 검사할 원고가 없다 — docs/apply/ 가 비어 있다", flush=True)
+        print("[apply] 검사할 원고가 없다 — docs/apply/ 가 비었거나 과거본만 지정했다", flush=True)
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps({"started": datetime.now().isoformat(timespec="seconds"),
                                    "docs": [], "ok": True}, ensure_ascii=False, indent=2),
@@ -251,6 +277,7 @@ def main() -> int:
         "claims": _rel(CLAIMS),
         "require_complete": args.require_complete,
         "docs": results,
+        "archived": [arch[d.resolve()] for d in skipped],
         "ok": all(r["ok"] for r in results),
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
