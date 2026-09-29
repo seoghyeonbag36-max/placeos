@@ -8,6 +8,7 @@
 **2026-09-05 실측: 서빙 66거점이 전부 `gold` 다**(전 거점 `GET /heatmap/vacancy` 호출로 확인).
 즉 `synthetic` 폴백은 코드에 남아 있지만 지금 그 길을 타는 서빙 거점은 없다. 이 문장은
 거점이 늘면 낡는다 — **세어서 고칠 것**(개수를 여기 박아 두지 않는 이유이기도 하다).
+2026-09-28 재확인: 서빙 81거점 전부 `gold`(`list_summaries()` 의 `vacancy_source` 전수).
 
 갈림길은 **파일 존재가 아니다.** `page_building_master.geojson` 은 서빙 거점 전부에 있다
 (대장 없는 거점도 폴리곤 근사로 만든다 — Tier2). `gold_vacancy.build_cells()` 가 셀을 만들려면

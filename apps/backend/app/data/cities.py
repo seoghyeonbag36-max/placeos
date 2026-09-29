@@ -59,7 +59,7 @@ CITIES: dict[str, City] = {
         id="seoul", name="서울특별시", short="서울", sido="서울특별시",
         sgg_codes=_SEOUL_SGG, gus=_SEOUL_GUS,
         has_trdar=True, has_living_pop=True, has_city_events=True,
-        note="원년 도시 — 54거점. 서울 전용 소스 3종이 전부 선다",
+        note="원년 도시. 서울 전용 소스 3종이 전부 선다 — 거점 수는 page_hubs.ACTIVE_HUBS 가 정한다",
     ),
     "goyang": City(
         id="goyang", name="고양특례시", short="고양", sido="경기도",

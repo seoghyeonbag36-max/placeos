@@ -195,7 +195,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 창업·옮기기이고 내 업종이 서빙 모델 어휘 안이면 자리를 **내 업종 점수 순**으로 세우고 칩도 그 점수를 말한다
   // (화면설계서 3판 「자리 칩 · 자리 카드 — 내 업종이 있을 때」). 바꾸기·어휘 밖이면 2판 규칙 그대로.
   const myIndustry = findIndustry(industries, business?.industryKey);
-  // 서빙 어휘 밖(fit_unavailable_reason)이면 모델 라벨이 있어도 점수가 없다 — 7종 밖과 똑같이 둔다.
+  // 서빙 어휘 밖(fit_unavailable_reason)이면 모델 라벨이 있어도 점수가 없다 — 모델 라벨이 없는 업종과 똑같이 둔다.
   const mySite = business?.goal !== "pivot" && myIndustry?.model_label && !myIndustry.fit_unavailable_reason
     ? { label: myIndustry.model_label, input: myIndustry.input } : null;
   const openingsHere = useMemo(() => {
@@ -740,7 +740,7 @@ function Spark({ points, direction }: { points: number[]; direction: string }) {
 
 function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggleSite, onClear, onOpenInPage, mySite }: {
   openings: PlatformProfile["openings"]; districtName: string;
-  /** 3판 — 창업·옮기기 · 모델 7종 업종이면 자리가 이 업종 점수 순으로 온다 */
+  /** 3판 — 창업·옮기기 · 서빙 어휘(산출물 기준) 안 업종이면 자리가 이 업종 점수 순으로 온다 */
   mySite?: { label: string; input: string } | null;
   onOpenInPage?: (site: OpeningSite) => void;
   /** 비교 후보 — 지도 칩과 공유하므로 상위(PlatformConsole)가 든다 */

@@ -471,7 +471,7 @@ L1~L6 중 **통과 조건을 채운 브랜치만** main 에 머지한다. 채우
   python scripts/watch_deploy_verify.py
 ⚠ main 푸시는 GitHub Actions → Cloud Run 프로덕션 배포를 태운다(문서 한 줄이라도 마찬가지다).
 2단계에서 실패가 났으면 푸시 전에 docs/deploy-cloud-run.md 를 읽고 판단한다.
-프로덕션은 https://spaceos-twin.web.app 다. 배포 후 거점 하나를 실제로 열어 확인하라.
+프로덕션은 https://placeos.web.app 다. 배포 후 거점 하나를 실제로 열어 확인하라.
 
 [통과 조건]
 L7_STATIC: npm run test · npm run build · pytest 결과가 적혀 있다(미실행을 통과로 적지 않는다).
