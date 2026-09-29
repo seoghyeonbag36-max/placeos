@@ -52,6 +52,37 @@
         지도 위에서는 겹치지 않는다 — 한 표식 안에 둘을 섞지 말 것. */
   --source-real: #0F7A55; --source-real-soft: #E3F5EE; --source-real-line: #B7E3D2;
 
+  /* ── UI 보조 색 (2026-09-28 · 2차 hex 이관) ──────────────────────────────────
+     pages/*.css 가 파일마다 hex 로 적던 값을 **그대로** 이름만 붙였다 — 값은 하나도
+     반올림·통합하지 않았다(비슷한 회색끼리 합치면 픽셀이 움직인다. 그건 별도 결정).
+     ⚠ --danger-* 는 맨 이름 --danger(#E03E36 · 공실 축 상단 · colors.ts semantic.danger)와
+        다른 계열이다 — 오류 박스·오류 문구용. 둘을 섞지 말 것.
+     ⚠ 경고는 세 벌이다(값이 달라 합치지 않았다):
+        --warn-*    호박색 안내 박스(지도 공지·HA 블록)
+        --caution-* 결측·미확인 배지(Posting 출처 · Platform is-warn)
+        --note-*    합성·HA·보류 배지(Page · Program)
+     ⚠ --on-accent 는 --surface 와 값이 같지만 역할이 다르다 — 트랙·brand 색 위의 글자. */
+  --brand-soft: #E6F7F9;
+  --text-secondary: #5A6B85; --text-subtle: #9AA3AF;
+  --surface-sunken: #F1F4F8; --surface-subtle: #FAFBFC;
+  --ui-navy: #3A5A98;
+  --on-accent: #FFFFFF;
+  --danger-soft: #FEF2F2; --danger-line: #FECACA; --danger-text: #B91C1C; --danger-ink: #7F1D1D;
+  --warn-soft: #FFFBEB;    --warn-line: #FDE68A;    --warn-ink: #78350F;
+  --caution-soft: #FDF5E3; --caution-line: #F0DCAE; --caution-ink: #8A5A00;
+  --note-soft: #FDF8EC;    --note-line: #F3E6C4;    --note-ink: #8A6D3B;
+
+  /* ── 3차 이관 (2026-09-28) ── 역시 기존 값 그대로다.
+     --ink-alt · --line-alt 는 대시보드 계열(PageDashboard · PlatformConsole · PostingConsole
+     · Verdict)이 지역 --ink/--line 으로 덮어쓰던 값이다. 전역 --ink(#1C2533)·--line(#E3E9F2)
+     과 **값이 다르다** — 합치면 그 화면들의 글자·선 색이 바뀐다(별도 결정).
+     --success · --danger 는 colors.ts semantic.success/danger 와 같은 값 — 공실 축 양 끝이자
+     증감(상승·하락) 색이다. */
+  --ink-alt: #1F2937; --line-alt: #E5E7EB;
+  --text-tertiary: #8A93A0; --surface-muted: #F6F7F9;
+  --ui-blue: #2E6FB7; --ui-navy-deep: #1E3A5F;
+  --success: #22B07D; --danger: #E03E36;
+
   --ink: #1C2533; --muted: #6B7280; --line: #E3E9F2; --surface: #FFFFFF; --bg: #F4F7FB;
   --radius-md: 12px; --radius-lg: 16px;
   /* 간격(spacing) 4px 그리드 — padding·margin·gap 의 단일 출처.

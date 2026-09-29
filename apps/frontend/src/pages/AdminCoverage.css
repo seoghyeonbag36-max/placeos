@@ -46,14 +46,14 @@
   gap: var(--sp-2); margin-bottom: var(--sp-3);
 }
 .admin-kpi3-tile { padding: 10px var(--sp-3); border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-.admin-kpi3-tile.is-warn { border-color: #fecaca; background: #fef2f2; }
+.admin-kpi3-tile.is-warn { border-color: var(--danger-line); background: var(--danger-soft); }
 .admin-kpi3-tile-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
 .admin-kpi3-tile-value { font-size: 17px; font-weight: var(--fw-bold); color: var(--ink); overflow-wrap: anywhere; }
-.admin-kpi3-tile.is-warn .admin-kpi3-tile-value { color: #b91c1c; }
+.admin-kpi3-tile.is-warn .admin-kpi3-tile-value { color: var(--danger-text); }
 .admin-kpi3-tile-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .admin-kpi3-error {
   padding: 10px var(--sp-3); border-radius: 8px; margin-bottom: var(--sp-3);
-  background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+  background: var(--danger-soft); color: var(--danger-text); border: 1px solid var(--danger-line);
 }
 .admin-kpi3-list h3 { font-size: 13px; margin: var(--sp-3) 0 var(--sp-1); }
 .admin-kpi3-list ul { margin: 0; padding-left: 18px; }
