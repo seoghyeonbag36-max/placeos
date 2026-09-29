@@ -669,16 +669,20 @@ def test_legacy_numbers_are_unchanged_by_the_revision() -> None:
     assert e["mae_skill"] == 1.0 - mae_m / mae_p
 
 
-def test_serving_artifact_reads_on_the_legacy_baselines() -> None:
-    """09-27 서빙본에는 `clim` 이 없다 → 종전 기준. 판정 문구가 개정 전과 같아야 한다.
+def test_serving_artifact_reads_on_the_strongest_baselines() -> None:
+    """서빙본은 `clim` 을 싣는다(2026-09-29 reg-0928 trial 10) → 두 기준 중 강한 쪽으로 판정한다.
 
-    서빙 산출물이 새로 학습돼 `clim` 을 실으면 이 테스트는 **깨지는 것이 맞다** —
-    그때 판정은 강한 쪽 기준이고, 이 잠금을 새 산출물에 맞춰 옮긴다.
+    09-27 서빙본(`clim` 없음 · 종전 기준)의 잠금을 여기로 옮겼다. 종전 기준으로 물러나는
+    경로는 위 합성 테스트(`test_holdout_without_clim_falls_back_…`)가 계속 잠근다.
+    서빙 산출물이 `clim` 없는 학습본으로 되돌아가면 이 테스트는 **깨지는 것이 맞다**.
     """
     res = check()["lstm"]
     if not res.get("available"):
         pytest.skip("서빙 산출물 없음")
-    assert res["baseline_basis"] == "legacy_no_clim"
-    assert res["error"]["baseline_label"] == "지속성"
-    assert res["error"]["baseline_mae"] == res["error"]["persistence_mae"]
-    assert res["direction"]["baseline_label"] in ("항상 하락", "항상 상승")
+    assert res["baseline_basis"] == "strongest_of_two"
+    e, d = res["error"], res["direction"]
+    # 강한 쪽 = 같은 표본에서 MAE 가 낮은 쪽 · 정확도가 높은 쪽
+    assert e["baseline_mae"] == min(e["persistence_mae"], e["climatology_mae"])
+    assert d["baseline_acc"] == max(d["constant_acc"], d["meanward_acc"])
+    # reg-0928 서빙본에서는 두 축 모두 거점 평균 쪽 규칙이 강하다
+    assert (e["baseline_label"], d["baseline_label"]) == ("거점 평균", "평균 쪽")
