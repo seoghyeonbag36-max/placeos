@@ -13,6 +13,7 @@
 | **A. 서빙본** | 66거점 47,442노드 | category_group 7종 | 117열 | 2026-09-05 |
 | **B. 실험군(group)** | 54거점 | category_group 7종 | 105/115열 | 2026-08-19~26 |
 | **C. 실험군(category2)** | 54거점 | category 2단계 32클래스 | 105/115열 | 2026-08-27 |
+| **E. 서빙본(81거점 재학습)** | 81거점 88,238노드 | category_group 7종 중 사상분(`group_mapped` · 실제 6클래스) | 132열 | 2026-09-27 |
 
 Page의 **조건 D(2026-09-06 동결 구조 감사)**는 아래 별도 절에 등재한다. 위 그래프 조건 A/B/C와 모집단·태스크가 다르며 합산하지 않는다.
 
@@ -187,6 +188,37 @@ a_only 148 · b_only 149 · discordant 297 · 델타 **+0.03pp** · chi2 = 0.0 �
 거점의 R-ONE 열이 전 분기 NaN 이 되고, **pooled LSTM 이 전 거점 NaN 으로 붕괴한다**
 (`feature-platform.md` §0). 성능 수치를 재현할 때 이 매핑을 먼저 확인한다.
 
+<a id="platform-condition-e"></a>
+
+### GNN 81거점 재학습 — 조건 E (2026-09-27 학습 · 서빙본)
+
+등재일: 2026-09-30. ⚠ **조건 A/B/C 와 모집단·원천·어휘가 모두 다르다.** 노드 원천은 2026-09-15 교체 뒤 그래프이고,
+어휘 (b) `group_mapped` 는 7종에 사상되지 않는 점포를 **모집단에서 뺀다.** 위 표들과 한 표에 두거나 차이를 개선·저하로 읽지 않는다.
+KIIT 원고(`kiit/paper-platform-kiit.md` · PR #74)의 `{{K1}}`~`{{K11}}` · `{{M1}}` 자리가 이 행들이다.
+
+**재검증 명령:** 저장소 루트에서 `python scripts/kpi_baseline.py --json` (읽기 전용 · 네트워크 없음).
+입력 `data/gold/platform_industry_recommend.json` 의 `metrics` · `test_top3_paired`. 2026-09-30 새 체크아웃에서 실행해 아래 값을 확인했다.
+K3·K4·K6·K1 은 노드별 덤프 `reports/gnn_test_preds_group-mapped_2026-09-27.json` 의 `test_rows`(`hit_top3` · `prior_hit_top3` · `district`)로 **따로 다시 세어** 같은 값을 얻었다.
+학습 재실행이 아니다 — 학습 명령과 경위는 `docs/finding-gnn-81hub-retrain-2026-09-27.md` 「재학습 (b)」.
+
+| ID | 값 | 출처 필드 | 허용되는 해석 |
+|---|---|---|---|
+| K1 | **81거점** | `test_top3_paired.by_district` 81개 · 덤프 `district` 81종 | 서울 서빙 거점 전체. 경기 보류 거점 제외 |
+| K2 | 노드 88,238 · 엣지 270,212 · 피처 132열 · 미사상 제외 91,052 · 클래스 6 · val 선택 `top1` | `metrics.nodes` · `edges_used` · `features` · `unmapped_nodes_dropped` · `classes` · `val_select_by` | 1점포 1행(겹침 제거) 뒤 규모. 클래스 6 은 7종 중 문화시설이 모집단에 없다는 뜻 |
+| K3 | test **17,650**자리 | `metrics.test_nodes` · 덤프 `test_rows` 길이 | 모델 선택에 쓰지 않은 시험 집합. 같은 그래프의 전이적 평가 |
+| K4 | Top-3 모델 **92.03%** · 거점 사전분포 **88.67%** · 차이 **+3.36%p** | `test_top3` 0.9203 · `baseline_district_prior_top3` 0.8867 | 같은 test 자리 위 쌍대 비교. 절대 정확도가 아니라 차이가 판정 대상 |
+| K5 | 차이의 거점 군집 부트스트랩 95% 구간 **[+2.78, +3.95]%p** | kpi_baseline `skill_ci95_pp` | 거점을 재표본 단위로 둔 구간. 새 거점으로의 일반화 구간 아님 |
+| K6 | McNemar b=**851** · c=**258** · 양측 정확 p=2.13×10⁻⁷⁴ · 판정 `실력` | `test_top3_paired.b_model_only/c_prior_only` · kpi_baseline `mcnemar` | 자리 독립 가정. 판정은 K5 구간과 둘 다 요구 |
+| K7 | Top-1 모델 **66.96%** · 사전분포 **64.06%** · 차이 **+2.90%p** | `test_top1` 0.6696 · `baseline_district_prior_top1` 0.6406 | **관측.** Top-1 은 쌍대 표가 없어 구간·판정 미산출 |
+| K8 | off-prior Top-3 **42.55%** · **2,000**자리 · 분해능 ≈**2.21**%p | `test_offprior_top3` · `offprior_nodes` · kpi_baseline `offprior_detectability` | 관측 전용(게이트 2026-08-26 폐기). 조건 A 의 33.8%(n=1,011)와 모집단이 달라 비교하지 않는다 |
+| K9 | test SE **0.2**%p · 분해능(SE 의 2배) ≈**0.41**%p | kpi_baseline `detectability` | 검정이 아니라 눈금 |
+| K10 | 어휘 점검 `합격` — 라벨 수준 `group_mapped` · 미분류 0 · 라벨 폭 6/7(기준 ≥6) · 빠진 라벨 문화시설 · [관측] 1순위 음식점 93.3%(88,238자리) | kpi_baseline `vocab` | 기준 ①②③ 은 창업자 승인(2026-09-28) 제품 기준이며 통계적 도출이 아님. 1순위 쏠림은 판정에 쓰지 않음 |
+| K11 | **어휘 (a) 대조 — 서빙 불가 판본.** Top-3 91.44% vs 사전분포 89.56%(+1.88%p) · 구간 [+1.57, +2.20]%p · b=1,160 · c=486 · p=1.38×10⁻⁶³ · 판정 `실력` · test 35,861자리 중 미분류 18,211(50.8%) · 서빙 1순위 미분류 133,453/179,290(74.4%) | `reports/gnn_label_a_2026-09-27.json`(`metrics` · `test_top3_paired` · `serving_check`)에 `kpi_baseline.gnn_skill` 적용 · 덤프 `reports/gnn_test_preds_label-a_2026-09-27.json`(y=0 이 미분류) | **실험 근거일 뿐 서빙본 아님.** 통계 판정이 어휘의 쓸모를 보증하지 않는다는 사례로만 쓴다. K1~K10 과 모집단(노드 179,290)이 다르다 |
+| M1 | 방법 상수: 구간 95% · 군집 부트스트랩 2,000회 · seed 42 · 유의수준 0.05 · 판정 = 구간 하한 > 0 **그리고** McNemar p < 0.05 일 때만 `실력` | `apps/backend/app/services/forecast_skill.py` `cluster_bootstrap_ratio_ci`(reps=2000, seed=42) · `ALPHA` · `verdict` | 코드 상수. 결과 수치가 아님 |
+
+<!-- 확인필요: finding-gnn-81hub-retrain-2026-09-27 의 비교 열은 09-04 서빙본 사전분포 Top-3 를 89.3%(+2.32%p)로 적는다.
+     이 인덱스 조건 A 는 89.4%. 어느 쪽도 이 절에서 고치지 않는다. 조건 E 와 조건 A 를 나란히 쓰지 않으므로 이 절의 값에는 영향이 없다. -->
+
 ---
 
 ## P2 · Page — 건물 단위 공실률 데이터셋
@@ -293,6 +325,7 @@ a_only 148 · b_only 149 · discordant 297 · 델타 **+0.03pp** · chi2 = 0.0 �
 ## 등재 대기 (본문에 쓰기 전 확인 필요)
 
 - [x] LSTM 공실 예측 성능 — 2026-09-09 등재 완료. [서빙본 절](#lstm-공실-예측--서빙본-2026-09-04-학습--66거점) 참조. GNN 조건 A/B/C 와 모집단·태스크가 다르므로 합산하지 않는다
+- [x] GNN 81거점 09-27 재학습(조건 E) — 2026-09-30 등재. [조건 E 절](#platform-condition-e). 조건 A/B/C 와 합산·비교하지 않는다
 - [ ] Page 공실률의 R-ONE 앵커 대비 **격차 수치** — "앵커 대조 보유 66/66"은 보유일 뿐 격차가 아니다
 - [ ] Posting 감도 실험 32조합의 **결과 수치** — 조합 수만 인덱스에 있다
 - [x] Page 핵심 문헌 Alsudais의 저자 공개본 v2: 8페이지 텍스트·시각 대조 완료. [읽기 장부](page-study/reading-ledger.md). 출판본·별도 부록·보조문헌 전체 본문은 미확인이고, 다른 P의 상태를 완료로 바꾸지 않는다.
