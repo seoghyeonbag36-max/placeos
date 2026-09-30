@@ -30,6 +30,23 @@ def sha(path: Path) -> str:
     return h.hexdigest()
 
 
+def eol_match(path: Path, expected: str) -> str | None:
+    """매니페스트 해시와 어떻게 맞았는지 돌려준다. 안 맞으면 None.
+
+    매니페스트는 Windows 체크아웃(autocrlf)에서 만들어졌고, 저장소 안의 텍스트 Gold 는 LF 다
+    (`.gitattributes` 의 `* text=auto`). 그래서 같은 데이터도 체크아웃 플랫폼에 따라 바이트가
+    다르다. 원본 바이트를 먼저 비교하고, 안 맞을 때만 줄바꿈을 CRLF·LF 로 정규화한 바이트를
+    비교한다. 해시 비교는 건너뛰지 않는다 — 줄바꿈 말고 한 바이트라도 다르면 None 이다.
+    """
+    if sha(path) == expected:
+        return "raw"
+    lf = path.read_bytes().replace(b"\r\n", b"\n")
+    for mode, data in (("crlf_normalized", lf.replace(b"\n", b"\r\n")), ("lf_normalized", lf)):
+        if hashlib.sha256(data).hexdigest() == expected:
+            return mode
+    return None
+
+
 def read(path: Path) -> Any:
     READ_HASHES[path.relative_to(ROOT).as_posix()] = sha(path)
     return json.loads(path.read_text(encoding="utf-8"))
@@ -71,9 +88,12 @@ def main() -> None:
     data_availability = []
     for item in manifest["files"]:
         path = ROOT / item["path"]
+        mode = eol_match(path, item["sha256"]) if path.is_file() else None
         data_availability.append({"path": item["path"], "layer": item["layer"], "present": path.is_file(),
-                                  "hash_matches": sha(path) == item["sha256"] if path.is_file() else None})
-    assert not [r for r in data_availability if r["hash_matches"] is False]
+                                  "hash_matches": mode is not None if path.is_file() else None,
+                                  "hash_match_mode": mode})
+    mismatched = [r["path"] for r in data_availability if r["hash_matches"] is False]
+    assert not mismatched, mismatched
     audit = read(AUDIT / "structural-audit.json")
     rows = audit["hubs"]
     names = sorted(r["hub"] for r in rows)
@@ -147,6 +167,8 @@ def main() -> None:
             "unavailable_archived_files": sum(not r["present"] for r in availability),
             "inventory_files": len(data_availability), "inventory_present": sum(r["present"] for r in data_availability),
             "inventory_missing": sum(not r["present"] for r in data_availability),
+            "inventory_hash_match_modes": dict(sorted(Counter(r["hash_match_mode"] for r in data_availability
+                                                              if r["present"]).items())),
             "hubs": len(names), "polygons": polygons,
             "floor_checked_polygons": rules["floor_semantics"]["pass"],
             "temporal_not_evaluable_hubs": rules["temporal_observation_alignment"]["not_evaluable"],
