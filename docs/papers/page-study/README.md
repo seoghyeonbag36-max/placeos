@@ -23,7 +23,7 @@
 
 기존 순서 시험 198회에서 거점 집계 변화는 없었으나 65거점의 격자 소속 또는 분자·분모에 영향이 있었다. 이는 기존 사후 탐색 결과를 재집계한 수치이며 이번에 새로운 독립 표본을 확보한 결과가 아니다. 새 체크아웃에는 원본 인벤토리 946개 중 265개가 있고 681개는 없다. 전체 Bronze→Gold 재현·클라우드 실행을 완료했다고 주장하지 않는다.
 
-검증 실행: 저장소 루트에서 `python docs/papers/page-study/verify_evidence.py`. 기존 연구 폴더·원천에 쓰거나 네트워크에 연결하는 동작을 차단한다. 실행 결과에는 체크아웃 커밋·실행기·입력·로드한 저장소 코드 해시와 Python 버전이 포함된다.
+검증 실행: 저장소 루트에서 `python docs/papers/page-study/verify_evidence.py`. 기존 연구 폴더·원천에 쓰거나 네트워크에 연결하는 동작을 차단한다. 실행 결과에는 체크아웃 커밋·실행기·입력·로드한 저장소 코드 해시와 Python 버전이 포함된다. Gold→서빙 재계산은 보존 서빙을 재현한 동결 커밋(`SERVING_CODE_COMMIT`)의 코드를 `git archive` 로 풀어 쓰고, Gold 는 현재 체크아웃 것을 쓴다(결과의 `serving_code_commit`·`imported_repository_code[].origin`). 원본 매니페스트는 Windows 체크아웃에서 만들어져 텍스트 Gold 가 CRLF 기준으로 해시돼 있으므로, 원본 바이트가 안 맞을 때만 줄바꿈을 정규화한 해시로 한 번 더 비교하고 어느 쪽으로 맞았는지 `hash_match_mode` 에 남긴다. 줄바꿈 밖의 바이트가 다르면 여전히 실패한다. 실행하면 `evidence-verification.json` 을 새로 쓰므로(수기로 더한 `pc_session_recheck` 포함), 보존 기록을 갱신할 의도가 아니면 실행 후 되돌린다.
 
 문헌의 원본·추출문·페이지 이미지는 `private/`에 보존하고 `.gitignore`로 제외한다. 공개 연구 패키지는 파일 출처·해시·읽기 범위를 제공한다. 이전 방법론 작업은 `chore/papers-method-review`의 별도 worktree에서 수행했다. 이번 PC 작업은 사용자 승인에 따라 `chore/papers-page-condition-d-results`에서 진행하며, 기존 `reports/full_verify.json` 변경은 보존한다.
 

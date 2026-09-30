@@ -7,8 +7,11 @@ import json
 import math
 import os
 import statistics
+import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +23,11 @@ OUT = Path(__file__).resolve().parent
 AUDIT = ROOT / "docs/papers/audits/page-analysis-20260906"
 INPUT = ROOT / "docs/papers/audits/page-inventory-20260906/manifest.json"
 READ_HASHES: dict[str, str] = {}
+# baseline-serving 을 마지막으로 재현한 체크아웃(evidence-verification.json 의 09-07 실행).
+# Gold→서빙 재계산은 이 커밋의 코드로 한다. 그 뒤 코드는 거점을 늘리고(66→81, 09-24)
+# 서빙 결과에 키를 더했다(aligned_*, 09-28) — 동결 근거와 등식으로 비교할 대상이 아니다.
+SERVING_CODE_COMMIT = "4a0dea0eeb55c69335ec6bdfea41f19bf481db42"
+SERVING_CODE_PATHS = ["apps/backend/app", "data/__init__.py", "data/config"]
 
 
 def sha(path: Path) -> str:
@@ -45,6 +53,21 @@ def eol_match(path: Path, expected: str) -> str | None:
         if hashlib.sha256(data).hexdigest() == expected:
             return mode
     return None
+
+
+def extract_serving_code(dest: Path) -> None:
+    """동결 커밋의 서빙 코드를 dest 에 푼다. 작업 트리·.git 은 건드리지 않는다(git archive)."""
+    try:
+        blob = subprocess.run(["git", "archive", "--format=tar", SERVING_CODE_COMMIT, *SERVING_CODE_PATHS],
+                              cwd=ROOT, check=True, capture_output=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise SystemExit(f"동결 커밋 {SERVING_CODE_COMMIT[:8]} 을 읽을 수 없다(얕은 클론이면 "
+                         f"`git fetch --unshallow`): {e.stderr.decode(errors='replace').strip()}") from e
+    with tempfile.TemporaryFile() as f:
+        f.write(blob)
+        f.seek(0)
+        with tarfile.open(fileobj=f) as tar:
+            tar.extractall(dest, filter="data")
 
 
 def read(path: Path) -> Any:
@@ -73,7 +96,17 @@ def main() -> None:
     started = datetime.now(timezone.utc).isoformat()
     tracked = set(subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True, encoding="utf-8").splitlines())
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, encoding="utf-8").strip()
-    sys.addaudithook(guard)
+    # 가드를 걸기 전에 푼다 — 연구 출력 경계 밖(임시 디렉터리) 쓰기는 이것 하나뿐이다.
+    frozen = Path(tempfile.mkdtemp(prefix="verify-evidence-"))
+    try:
+        extract_serving_code(frozen)
+        sys.addaudithook(guard)
+        run(started, tracked, commit, frozen)
+    finally:
+        shutil.rmtree(frozen, ignore_errors=True)
+
+
+def run(started: str, tracked: set[str], commit: str, frozen: Path) -> None:
     hashes = read(AUDIT / "output-hashes.json")
     availability: list[dict[str, Any]] = []
     for item in hashes:
@@ -136,8 +169,10 @@ def main() -> None:
     assert all(r["review_label"] == "unresolved" for r in labels)
 
     # 새 체크아웃에 있는 배포 Gold만 사용한다. Bronze→Gold 전체 재빌드는 아니다.
-    sys.path[:0] = [str(ROOT), str(ROOT / "apps/backend")]
-    from app.services import gold_vacancy
+    # 코드는 동결 커밋 것(SERVING_CODE_COMMIT), Gold 는 이 체크아웃 것 — 위 매니페스트 해시로 확인한 그 파일이다.
+    sys.path[:0] = [str(frozen), str(frozen / "apps/backend")]
+    from app.services import building_vacancy, gold_vacancy
+    building_vacancy._GOLD_DIR = gold_vacancy._GOLD_DIR = ROOT / "data/gold"
     from app.data.seoul_pages import DISTRICTS_BY_ID
     from app.data.measured_pages import _grid
     from data.config.page_hubs import ACTIVE_HUBS
@@ -146,6 +181,9 @@ def main() -> None:
     for hub in names:
         master = ROOT / f"data/gold/{hub}/page_building_master.geojson"
         READ_HASHES[master.relative_to(ROOT).as_posix()] = sha(master)
+        calibration = ROOT / f"data/gold/{hub}/calibration.json"
+        if calibration.is_file():
+            READ_HASHES[calibration.relative_to(ROOT).as_posix()] = sha(calibration)
         grid = DISTRICTS_BY_ID[hub]["grid"] if hub in DISTRICTS_BY_ID else _grid(ACTIVE_HUBS[hub])
         result = gold_vacancy.build_cells(hub, grid)
         old = read(AUDIT / "baseline-serving" / f"{hub}.json")
@@ -154,14 +192,18 @@ def main() -> None:
     imported_code = []
     for module in list(sys.modules.values()):
         file = getattr(module, "__file__", None)
-        if file and Path(file).is_file() and Path(file).resolve().is_relative_to(ROOT.resolve()):
-            p = Path(file).resolve()
-            imported_code.append({"path": p.relative_to(ROOT).as_posix(), "sha256": sha(p)})
+        if not (file and Path(file).is_file()):
+            continue
+        p = Path(file).resolve()
+        for base, origin in ((frozen.resolve(), SERVING_CODE_COMMIT), (ROOT.resolve(), "checkout")):
+            if p.is_relative_to(base):
+                imported_code.append({"path": p.relative_to(base).as_posix(), "origin": origin, "sha256": sha(p)})
+                break
     assert all(sha(ROOT / p) == expected for p, expected in READ_HASHES.items())
     result = {
         "scope": "archived_evidence_reaggregation_and_fresh_checkout_gold_to_serving",
         "started_at_utc": started, "completed_at_utc": datetime.now(timezone.utc).isoformat(),
-        "checkout_commit": commit, "verifier_sha256": sha(Path(__file__)), "python": sys.version,
+        "checkout_commit": commit, "serving_code_commit": SERVING_CODE_COMMIT, "verifier_sha256": sha(Path(__file__)), "python": sys.version,
         "summary": {
             "available_archived_hashes_match": sum(r["present"] for r in availability),
             "unavailable_archived_files": sum(not r["present"] for r in availability),
