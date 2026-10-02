@@ -266,23 +266,16 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           근거: design/references/INDEX.md §2-1(Placer.ai — 결론 → 차트 → 원자료). */}
       <Verdict
         eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
-        question="어느 가격대의 page 를 이 자리에 올릴까"
-        verdict={head.verdict} grounds={head.grounds} sources={head.sources}
-        note={
-          <>
-            "얼마에 팔까"가 아니라 <b>어느 가격대를 이 자리에 posting 할까</b>를 답한다.
-            실측 공실 자리를 골라 <b>업종·권리금</b>을 넣으면 세 전략(고급화·가성비·기능중심)의
-            월 순익과 회수기간을 낸다. 임대료는 R-ONE 실측, 면적은 건축물대장이며,
-            <b> 권리금은 공개 통계가 없어 기업이 넣는 입력</b>이다 — 비워 두면 0 을 전제로 계산하고
-            결과가 그 사실을 밝힌다.
-          </>
-        }
+        question="어떤 비용과 전략으로 입점할까요?"
+        verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
       />
 
       {err && (
         <div className="err">
           <strong>계산에 실패했습니다.</strong>
-          <div className="errdetail">{err}</div>
+          <div className="errdetail">{err.includes("선택한 자리와 계산 응답이 일치하지 않습니다.")
+            ? "선택한 자리와 계산 응답이 일치하지 않습니다. 자리를 다시 선택해 주세요."
+            : "입력 조건을 확인하고 잠시 후 다시 시도해 주세요."}</div>
         </div>
       )}
 
@@ -332,7 +325,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
                     {r.industry} {Math.round(r.score * 100)}%
                   </button>
                 ))}
-                <i className="chipnote">GNN 추천 — 이 자리 좌표 기준</i>
+                <i className="chipnote">이 자리의 추천 점수 · 성공 확률 아님</i>
               </span>
             )}
             {baseIndustry && industry === baseIndustry && (
@@ -342,14 +335,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
           <div className="ptitle posting-input-step">2. 비용 조건 입력</div>
           <label className="field">
-            <span className="flabel">권리금 <em>입력 계약</em></span>
+            <span className="flabel">권리금 <em>직접 입력</em></span>
             <input value={prem} inputMode="numeric"
               onChange={(e) => setPrem(e.target.value.replace(/[^\d]/g, ""))}
               placeholder="만원 — 비우면 0 전제" />
             <span className="fhint">
-              공개 통계가 없다(bronze 전수 확인). 임대인·기존 임차인과의 <b>협상값</b>이라
-              그 자리에 들어갈 기업만 안다. 비워 두면 0 을 전제로 계산하고
-              결과에 <code>absent</code> 로 표시된다.
+              협의한 금액을 입력하세요. 비워 두면 <b>0원으로 가정</b>해 계산합니다.
             </span>
           </label>
 
@@ -393,7 +384,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
                 <div className="rbadges">
                   {/* 코파일럿이 돌았는지 폴백인지 — 안 붙였다와 붙였는데 실패했다를 섞지 않는다 */}
                   <span className={"badge " + (result.source === "copilot" ? "is-copilot" : "is-fallback")}>
-                    {result.source === "copilot" ? "코파일럿" : "내부 3-Tier 폴백"}
+                    {result.source === "copilot" ? "AI 분석" : "기본 계산"}
                   </span>
                   {result.inputs_quarter && <span className="badge is-q">{result.inputs_quarter} 기준</span>}
                 </div>
@@ -401,8 +392,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
               {result.source_note && (
                 <div className="note is-warn">
-                  <b>코파일럿이 설정돼 있는데 실패했다</b> — 아래는 폴백 계산이다.
-                  <div className="notedetail">{result.source_note}</div>
+                  AI 분석을 완료하지 못해 기본 계산 결과를 표시합니다.
                 </div>
               )}
 
@@ -432,13 +422,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               {previous && calculation && <p className="posting-comparison-note">직전 계산 대비 · 동일 자리·업종·전략·기준분기 · 권리금 {previous.input.prem === undefined ? "미입력(0 전제)" : won(previous.input.prem)} → {calculation.input.prem === undefined ? "미입력(0 전제)" : won(calculation.input.prem)}. 차이는 두 서버 계산 결과를 비교한 값입니다.</p>}
 
               <div className="rsrc">
-                비용 기준: {BASIS_LABEL[tiers[0]?.[1]?.basis] ?? tiers[0]?.[1]?.basis ?? "미상"}
-                {" · "}자리 = 건축물대장 실측 공실 인벤토리 · 임대료 = R-ONE ·
-                매출 앵커 = KOSIS 서비스업조사 + 공정위 가맹사업 면적
-                <br />
-                권리금을 넣으면 회수기간이 바뀐다 — 실측 감도(270유닛 전수)로
-                <b> 추천 5.2% 뒤집힘 · 회수 가부 판정은 0건 변화</b>였다. 즉 "회수 불가" 결론은
-                권리금과 무관하게 성립한다.
+                매출·순익·회수기간은 입력 조건에 따른 추정입니다. 실제 계약 금액과 운영 조건에 따라 달라질 수 있습니다.
               </div>
             </>
           )}
@@ -559,7 +543,7 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
   return {
     verdict: (
       <>
-        <b>{where}</b>는 <b>{bestName}</b> 전략으로 <b>{bestTier.roi_months}개월</b>에 회수된다
+        <b>{where}</b>는 <b>{bestName}</b> 전략으로 <b>{bestTier.roi_months}개월</b>에 회수가 예상됩니다
         {premAbsent && <> — 단 <b>권리금 0 을 전제</b>로 한 값이다</>}.
       </>
     ),
@@ -592,10 +576,10 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
 
 function srcLabel(v: string | undefined): string {
   return ({
-    rone: "R-ONE 실측", flpop: "유동 실측", "flpop+seed": "유동+서열",
-    "flpop+jipgyegu": "유동 실측(집계구)",
-    seed: "시드 프록시", absent: "전제(0)", contract: "기업 입력",
-    bldg: "대장 실측", "gold-ledger": "대장 실측", "bldg+split": "대장·균등분할",
+    rone: "실측", flpop: "실측", "flpop+seed": "실측+예시",
+    "flpop+jipgyegu": "실측",
+    seed: "예시", absent: "전제(0)", contract: "직접 입력",
+    bldg: "실측", "gold-ledger": "실측", "bldg+split": "실측 면적·분할 추정",
   } as Record<string, string>)[v ?? ""] ?? (v ?? "미상");
 }
 /** 실측(초록) / 프록시(회색 점선) / 전제(노랑 점선). 모르는 값은 프록시로 눕힌다 —

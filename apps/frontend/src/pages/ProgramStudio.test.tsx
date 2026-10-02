@@ -191,7 +191,7 @@ describe("ProgramStudio — 채널별 초안", () => {
     const changed = "수정한 초안\n두 번째 줄 <img src=x onerror=alert(1)>";
     fireEvent.change(await editor(), { target: { value: changed } });
     expect(screen.getByRole("button", { name: "인스타그램 편집됨" })).toBeTruthy();
-    expect(screen.getByText(/수정한 본문은 서버 HA 검증을 거치지 않았습니다/)).toBeTruthy();
+    expect(screen.getByText(/수정한 본문은 내용 검증을 거치지 않았습니다/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "미리보기" }));
     const preview = screen.getByRole("region", { name: "인스타그램 본문 미리보기" });
     expect(preview.textContent).toContain(changed);
@@ -236,11 +236,11 @@ describe("ProgramStudio — 채널별 초안", () => {
   it("편집 후에도 생성 출처·원본 근거·HA 경고와 검증 범위를 보존한다", async () => {
     mount(); generate();
     fireEvent.change(await editor(), { target: { value: "근거를 다시 확인할 수정 본문" } });
-    expect(screen.getByText("LLM 생성", { selector: ".srcbadge" })).toBeTruthy();
+    expect(screen.getByText("AI 생성", { selector: ".srcbadge" })).toBeTruthy();
     expect(screen.getByText(PLAN.online[0].rationale, { exact: false })).toBeTruthy();
-    expect(screen.getByText(/생성 후 편집한 초안은 이 검증에 포함되지 않는다/)).toBeTruthy();
-    const fold = screen.getByText("생성 원본의 Humanistic Authority 검증").closest("details")!;
-    fireEvent.click(within(fold).getByText("생성 원본의 Humanistic Authority 검증"));
+    expect(screen.getByText(/수정한 본문은 내용 검증을 거치지 않았습니다/)).toBeTruthy();
+    const fold = screen.getByText("생성 내용 확인").closest("details")!;
+    fireEvent.click(within(fold).getByText("생성 내용 확인"));
     expect(within(fold).getByText("최상급 표현을 확인하세요.", { exact: false })).toBeTruthy();
     expect(within(fold).getByText("최고")).toBeTruthy();
     expect(within(fold).getByText(PLAN.ha_check)).toBeTruthy();
@@ -252,8 +252,8 @@ describe("ProgramStudio — 채널별 초안", () => {
     ] } });
     generate();
     fireEvent.change(await editor(), { target: { value: "사용자가 수정한 스텁" } });
-    expect(screen.getByText("규칙 기반 폴백", { selector: ".srcbadge" })).toBeTruthy();
-    expect(screen.getByText(/LLM 생성물이 HA 검증에 걸려 폐기됐고/)).toBeTruthy();
+    expect(screen.getByText("기본 예시", { selector: ".srcbadge" })).toBeTruthy();
+    expect(screen.getByText(/생성 내용이 검증을 통과하지 못해/)).toBeTruthy();
     expect(screen.getByText("있지도 않은 경험을 근거로 삼습니다.")).toBeTruthy();
     expect(screen.getByText("단골 고객")).toBeTruthy();
   });
@@ -272,7 +272,7 @@ describe("ProgramStudio — 채널별 초안", () => {
     fireEvent.change(await editor(), { target: { value: "폐기할 편집 본문" } });
     fireEvent.click(screen.getByRole("button", { name: "비우기" }));
     expect(screen.queryByRole("textbox", { name: "초안 본문" })).toBeNull();
-    expect(screen.queryByText("생성 원본의 Humanistic Authority 검증")).toBeNull();
+    expect(screen.queryByText("생성 내용 확인")).toBeNull();
   });
 
   it.each(["아이템", "가설", "검증 방식", "비우기", "예시 채우기"])("생성 대기 중 %s 변경 뒤 이전 입력의 응답을 표시하지 않는다", async (field) => {
@@ -289,19 +289,21 @@ describe("ProgramStudio — 채널별 초안", () => {
     } else fireEvent.click(screen.getByRole("button", { name: field }));
     await act(async () => { pending.resolve(PLAN); await pending.promise; });
     expect(screen.queryByRole("textbox", { name: "초안 본문" })).toBeNull();
-    expect(screen.queryByText("생성 원본의 Humanistic Authority 검증")).toBeNull();
+    expect(screen.queryByText("생성 내용 확인")).toBeNull();
   });
 
   it("생성 실패에 가짜 초안을 만들지 않는다", async () => {
     mount({ status: 503 }); generate();
     expect(await screen.findByText("생성에 실패했습니다.")).toBeTruthy();
     expect(screen.queryByRole("textbox", { name: "초안 본문" })).toBeNull();
+    expect(screen.queryByText(/uvicorn|apps\/backend|POST \/api/)).toBeNull();
+    expect(screen.getByRole("banner").querySelector(".vsrc")).toBeNull();
   });
 
   it("온라인·오프라인이 모두 없으면 원본 출처와 빈 상태를 표시한다", async () => {
     mount({ result: { ...PLAN, online: [], offline: [] } }); generate();
     expect(await screen.findByText("생성된 채널안이 없습니다. 입력 근거를 확인해 다시 생성하세요.")).toBeTruthy();
-    expect(screen.getByText("LLM 생성", { selector: ".srcbadge" })).toBeTruthy();
+    expect(screen.getByText("AI 생성", { selector: ".srcbadge" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "본문 복사" })).toBeNull();
   });
 });

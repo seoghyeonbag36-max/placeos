@@ -404,3 +404,15 @@
   background: var(--track-page-soft); color: var(--ink); font-size: var(--fs-caption); line-height: var(--lh-caption);
 }
 .mapshell .handoff-miss button { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--track-page); font: inherit; padding: var(--sp-1) var(--sp-2); min-height: 32px; cursor: pointer; }
+
+/* Page 고객 화면 — 기술 대조 대신 공간 목록과 선택한 건물을 강조한다. */
+.mapshell .sp-track { display: none; }
+.mapshell .sp-head { padding: var(--sp-5) var(--sp-4) var(--sp-4); }
+.mapshell .sp-title { font-size: var(--fs-heading); line-height: var(--lh-heading); padding-right: var(--sp-6); }
+.mapshell .sp-sub { font-size: var(--fs-caption); line-height: var(--lh-caption); margin-top: var(--sp-2); }
+.mapshell .b-item { padding: var(--sp-4); gap: var(--sp-3); }
+.mapshell .b-name { font-size: var(--fs-body); line-height: var(--lh-body); }
+.mapshell .b-meta, .mapshell .b-rec-note, .mapshell .rent-summary-foot { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.mapshell .b-detail { padding: var(--sp-4); }
+.mapshell .b-detail .row { font-size: var(--fs-caption); margin-top: var(--sp-2); }
+.mapshell .legend { gap: var(--sp-2); }

@@ -177,3 +177,23 @@
 .progstudio .signals tbody th{font-weight:var(--fw-semibold)}
 .progstudio .signals .sig-target{color:var(--track-program);font-weight:var(--fw-semibold);white-space:nowrap}
 .progstudio .draft-meta{margin:var(--sp-2) 0 0;font-size:var(--fs-caption);color:var(--muted);overflow-wrap:anywhere}
+
+/* 고객 화면 — 핵심 요약과 상세의 서열을 정리하고 내부 전환 표식은 생략한다. */
+.progstudio .verdict { padding: var(--sp-5); margin-bottom: var(--sp-4); border-radius: var(--radius-md); }
+.progstudio .verdict .vconv { display: none; }
+.progstudio .verdict .vq { font-size: var(--fs-title); line-height: var(--lh-title); margin-top: var(--sp-2); }
+.progstudio .verdict .vone { font-size: var(--fs-body); line-height: var(--lh-body); margin-top: var(--sp-3); }
+.progstudio .verdict .vgrounds { margin-top: var(--sp-4); }
+.progstudio .verdict .vgrounds li { padding: var(--sp-2) 0; gap: var(--sp-2); }
+.progstudio .verdict .gl, .progstudio .verdict .gv { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.progstudio .vfold { border-radius: var(--radius-md); margin-bottom: var(--sp-3); }
+.progstudio .vfold > summary { padding: var(--sp-4); gap: var(--sp-2); align-items: center; }
+.progstudio .vfold .fs { flex-basis: 100%; font-size: var(--fs-caption); font-weight: 400; }
+.progstudio .vfold .fx { position: absolute; right: var(--sp-4); top: var(--sp-5); }
+.progstudio .vfold > summary { position: relative; padding-right: var(--sp-8); }
+.progstudio .vfold .vfoldbody { padding: var(--sp-4); }
+
+/* 생성 전에는 입력에 집중하고, 부가 안내도 읽을 수 있는 크기를 유지한다. */
+.progstudio .flabel, .progstudio .fhint, .progstudio .fhint > summary { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.progstudio .field input, .progstudio .field select { min-height: 44px; }
+.progstudio .arrival { font-size: var(--fs-caption); line-height: var(--lh-caption); }

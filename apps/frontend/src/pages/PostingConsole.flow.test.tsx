@@ -36,7 +36,7 @@ describe("Posting — 입력과 결과의 대응", () => {
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "200" } });
     expect(screen.getByText(/입력이 변경되었습니다/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
-    await screen.findByText("기업 입력");
+    await screen.findByText("직접 입력");
     expect(screen.getAllByText("초기 투자 +200만원")).toHaveLength(3);
     expect(screen.getAllByText("회수기간 +2개월")).toHaveLength(3);
     expect(api.matching(/simulate-revenue$/)[1].body).toMatchObject({ prem: 200, unit_id: "garosugil-u1" });
@@ -51,7 +51,7 @@ describe("Posting — 입력과 결과의 대응", () => {
     await screen.findByText("전제(0)");
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "200" } });
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
-    await screen.findByText("기업 입력");
+    await screen.findByText("직접 입력");
     fireEvent.change(screen.getAllByRole("combobox")[1], { target: { value: "garosugil-u2" } });
     await screen.findByText("전제(0)");
     expect(screen.queryByText("초기 투자 +200만원")).toBeNull();
@@ -69,8 +69,8 @@ describe("Posting — 입력과 결과의 대응", () => {
     const outdated = response({ district_id: "garosugil", unit_id: "garosugil-u1" });
     outdated.source = "copilot";
     await act(async () => { resolveFirst(outdated); await pending; });
-    expect(screen.queryByText("코파일럿", { selector: ".badge" })).toBeNull();
-    expect(screen.getByText("내부 3-Tier 폴백", { selector: ".badge" })).toBeTruthy();
+    expect(screen.queryByText("AI 분석", { selector: ".badge" })).toBeNull();
+    expect(screen.getByText("기본 계산", { selector: ".badge" })).toBeTruthy();
   });
 
   it("선택한 자리와 다른 서버 폴백 응답은 결과로 표시하지 않는다", async () => {

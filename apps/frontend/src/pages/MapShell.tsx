@@ -25,7 +25,6 @@ import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatm
 import { colors } from "@/design/tokens/colors";
 import { topic } from "@/lib/businessProfile";
 import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/MapMarkerPin";
-import AlignedAnchor from "@/components/AlignedAnchor";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "@/styles/tokens.css";
 import "./MapShell.css";
@@ -713,15 +712,13 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               ? ` · ${VACANCY_LABEL.primary} ${hub.vacancy_rate.toFixed(1)}%`
               : hub.vacancy_withheld ? " · 거점 대표값 미제공" : "")}
           </div>
-          {/* 정렬 대조 — 격차는 대조 지표(R-ONE 정렬) − 앵커다. 주 지표에서 빼지 않는다. */}
-          {hub && <div><AlignedAnchor src={hub} className="sp-anchor" /></div>}
         </div>
         {/* 임대시세 레이어의 첫 답 — "이 상권, 층마다 평당 월 얼마인가". 격자 색이 아니라 숫자다. */}
         {layer === "rent" && currentRent && (
           <div className="rent-summary" aria-label="층별 평당 월 임대료">
             <div className="rent-summary-head">
               <strong>층별 평당 월 임대료</strong>
-              <span>{currentRent.rent_source === "rone-shared" ? "R-ONE(인접 상권 표본)" : "R-ONE"} · {quarterText(currentRent.quarter)}</span>
+              <span>{currentRent.rent_source === "rone-shared" ? "인접 상권 기준 · " : ""}추정 · {quarterText(currentRent.quarter)}</span>
             </div>
             <div className="rent-floors">
               {currentRent.floors.map((f) => (
@@ -857,7 +854,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                 층이 없으면(빈 층 없음 · R-ONE 미제공) 그 사실을 적는다 — 0 원처럼 비워 두지 않는다. */}
             {currentRent && (
               <div className="b-rentbox">
-                <div className="b-rec-h">빈 층 임대료(추정)<span className="b-rent-badge">R-ONE</span></div>
+                <div className="b-rec-h">빈 층 임대료<span className="b-rent-badge">추정</span></div>
                 {(rentByBuilding.get(selected.id) ?? []).length === 0
                   ? <div className="b-rec-note">이 건물에는 금액을 붙일 빈 층 매물이 없다.</div>
                   : (
@@ -876,8 +873,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                     </table>
                   )}
                 <div className="b-rec-note">
-                  R-ONE 소규모상가 {quarterText(currentRent.quarter)} × 층 계수 × 대장 층 면적 · {currentRent.excludes.join("·")} 제외 ·
-                  한 층에 호실이 여럿이면 층 전체 금액
+                  실제 호가와 다를 수 있습니다. {currentRent.excludes.join("·")} 제외 · 한 층에 호실이 여럿이면 층 전체 금액입니다.
                 </div>
               </div>
             )}
@@ -887,7 +883,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {rec && rec.model !== "gnn-stub" && rec.recommendations.length > 0 && (
               <div className="b-rec">
                 <div className="b-rec-h">
-                  이 자리 업종 추천<span className="b-rec-badge">GNN</span>
+                  이 자리 업종 추천<span className="b-rec-badge">AI 추천</span>
                 </div>
                 {rec.recommendations.map((r) => {
                   const mine = !!myIndustry?.model_label && r.industry === myIndustry.model_label;
@@ -904,10 +900,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                 <div className="b-rec-note">
                   {rec.scope === "node"
                     ? `가장 가까운 점포 자리 기준 · ${Math.round(rec.matched_distance_m ?? 0)}m`
-                    : "거점 평균 — 이 건물 근처에 그래프 노드가 없다"}
-                  {typeof rec.metrics?.lift_vs_district_prior_pct === "number" && (
-                    <> · 거점 평균 대비 <b>+{rec.metrics.lift_vs_district_prior_pct}%</b></>
-                  )}
+                    : "이 자리의 정보가 부족해 상권 전체 기준으로 추천합니다"}
+                  {" · "}추천 점수는 성공 확률이 아닙니다.
                 </div>
               </div>
             )}
@@ -968,14 +962,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                     : `상권 ${footHm.trdar_count}곳`}{" "}
                   {/* 공간 눈금 — 어느 구획의 집계인지 밝힌다. 둘 다 격자 실측은 아니다. */}
                   <span style={TRDAR_BADGE}>
-                    {footHm.resolution === "jipgyegu" ? "집계구 단위" : "TRDAR 상권단위"}
+                    {footHm.resolution === "jipgyegu" ? "집계구 단위" : "상권 단위"}
                   </span>{" "}
-                  {/* 시간 눈금 — 세 축의 값 스케일이 서로 다르다 */}
-                  <span style={TRDAR_BADGE}>
-                    {footHm.time_source === "jipgyegu_hourly" ? "생활인구 24h(집계구)"
-                      : footHm.time_source === "adong_hourly" ? "생활인구 24h(행정동)"
-                      : "TRDAR 6구간"}
-                  </span>
                 </>
               : "유동인구 · 불러오는 중"}
           </span>
@@ -987,10 +975,10 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                   칩 = 빈 층 월 임대료(추정) · 1층 평당 <b className="num">{currentRent.base_rent_per_pyeong.toLocaleString("ko-KR")}만원</b>
                   {" · "}{pinMode ? "묶음 — 누르면 건물별" : "건물별 가장 싼 빈 층"} · 점선 = 추정 공실{" "}
                   <span className="src-badge-real">
-                    {currentRent.rent_source === "rone-shared" ? "R-ONE 인접상권" : "R-ONE"} {quarterText(currentRent.quarter)}
+                    {currentRent.rent_source === "rone-shared" ? "인접 상권 기준 · " : ""}추정 {quarterText(currentRent.quarter)}
                   </span>
                 </>
-              : rentMissingFor === districtId ? "임대시세 · 이 거점에는 R-ONE 임대료가 없다(이웃 거점 값으로 채우지 않는다)" : "임대시세 · 불러오는 중"}
+              : rentMissingFor === districtId ? "임대시세 · 이 상권의 임대료 정보가 없습니다" : "임대시세 · 불러오는 중"}
           </span>
         )}
         {layer === "density" && (
@@ -1001,7 +989,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                     ? `집계구 ${densHm.oa_count ?? 0}곳`
                     : `상권 ${densHm.trdar_count}곳`}{" "}
                   <span style={TRDAR_BADGE}>
-                    {densHm.resolution === "jipgyegu" ? "집계구 단위" : "TRDAR 상권단위"}
+                    {densHm.resolution === "jipgyegu" ? "집계구 단위" : "상권 단위"}
                   </span>
                 </>
               : "밀도 · 불러오는 중"}
