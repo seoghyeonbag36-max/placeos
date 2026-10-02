@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import App from "./App";
+import { WorkspaceApp } from "@/App";
+const App = () => <WorkspaceApp token="jwt.test.token" initialBusiness={{ status: "browsing" }} />;
 import { installNaverStub, removeNaverStub, type NaverStub } from "@/test/naverStub";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { buildings, district, postings, rentHeatmap, simulateResult } from "@/test/fixtures";

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.db import get_db
-from app.models.auth import Membership, Org, User
+from app.models.auth import Membership, Org, User, RevokedToken
 
 _bearer = HTTPBearer(auto_error=False)
 
@@ -59,6 +59,7 @@ def hash_api_key(raw: str) -> str:
 def create_access_token(user_id: str, org_id: str) -> str:
     now = datetime.now(timezone.utc)
     payload = {
+        "jti": secrets.token_hex(16),
         "sub": user_id,
         "org_id": org_id,
         "iat": now,
@@ -131,6 +132,8 @@ def get_optional_principal(
                               algorithms=[settings.jwt_algorithm])
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰이 유효하지 않습니다")
+    if db.get(RevokedToken, hash_api_key(creds.credentials)) is not None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그아웃한 토큰입니다")
     user = db.get(User, payload.get("sub"))
     org = db.get(Org, payload.get("org_id"))
     if user is None or org is None:
@@ -163,6 +166,8 @@ def get_current_user(
                               algorithms=[settings.jwt_algorithm])
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰이 유효하지 않습니다")
+    if db.get(RevokedToken, hash_api_key(creds.credentials)) is not None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그아웃한 토큰입니다")
 
     user = db.get(User, payload.get("sub"))
     org = db.get(Org, payload.get("org_id"))

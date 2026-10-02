@@ -9,16 +9,17 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import App from "@/App";
+import { WorkspaceApp } from "@/App";
 import { installNaverStub, removeNaverStub } from "@/test/naverStub";
-import { installFetchStub, type Route } from "@/test/fetchStub";
+import { installFetchStub, type ApiCall, type Route } from "@/test/fetchStub";
 import { buildings, district } from "@/test/fixtures";
 import type { IndustryOption } from "@/lib/api";
-import { STORAGE_KEY } from "@/lib/businessProfile";
+import type { BusinessState } from "@/lib/businessProfile";
+let savedBusiness: BusinessState = { status: "unset" };
 
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => Promise.resolve(), describeNaverMapError: String }));
 
-beforeEach(() => { installNaverStub(); });
+beforeEach(() => { installNaverStub(); savedBusiness = { status: "unset" }; });
 afterEach(() => { cleanup(); removeNaverStub(); });
 
 const TAB_LOAD = { timeout: 20000 };
@@ -40,12 +41,13 @@ const fitRow = (id: string, name: string, fit: number | null, rank: number | nul
 function mount(extra: Route[] = []) {
   installFetchStub([
     ...extra,
+    { match: /auth\/workspace$/, body: (_m: RegExpExecArray, call: ApiCall) => { savedBusiness = call.body as BusinessState; return savedBusiness; } },
     { match: /ai\/industries$/, body: { industries: INDUSTRIES } },
     { match: /commercial-districts$/, body: [district("garosugil", { name: "가로수길" }), district("yeonnam", { name: "연남동" })] },
     { match: /heatmap\/buildings\?/, body: buildings([{ id: "g1", name: "검토 건물", status: "empty" }]) },
     { match: /postings$/, body: [] },
   ]);
-  render(<App />);
+  render(<WorkspaceApp token="test-user" initialBusiness={savedBusiness} />);
 }
 
 describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => {
@@ -73,18 +75,18 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(within(table).getByRole("button", { name: "연남동 상권 보기" })).toBeTruthy();
     expect(screen.getByText(/매출·생존율이 아닙니다/)).toBeTruthy();
 
-    // 칩이 목적과 업종을 말하고, 카드가 접혔고, 브라우저에 남았다
+    // 칩이 목적과 업종을 말하고, 카드가 접혔고, 서버 저장 요청에 남았다
     expect(screen.getByRole("button", { name: /카페·디저트 창업/ })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull();
-    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null"))
-      .toEqual({ status: "set", profile: { goal: "start", industryKey: "cafe", homeDistrictId: null } });
+    expect(savedBusiness)
+      .toEqual({ status: "set", profile: { goal: "start", industryKey: "cafe", homeDistrictId: null, businessName: null, description: null } });
   });
 
   it("「그냥 둘러보기」는 언제나 눌리고, 다시 열어도 카드가 펴지지 않는다", async () => {
     mount();
     const card = await screen.findByRole("region", { name: "무엇을 하려고 하세요?" });
     fireEvent.click(within(card).getByRole("button", { name: "그냥 둘러보기" }));
-    expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull());
     // 첫 화면이 Platform 이 된 뒤(2026-09-26)로 「내 사업 설정」은 **둘**이다 — 셸의 칩과
     // Platform 빈 카드(IndustryFitCard)의 버튼. 여기서 보려는 건 칩이라 aria-expanded 로 가른다.
     expect(screen.getByRole("button", { name: /내 사업 설정/, expanded: false })).toBeTruthy();
@@ -95,9 +97,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
   });
 
   it("PL-10 · PS-08 업종 바꾸기면 이 상권 업종 순위에 지금 업종이 표시되고, 다른 업종으로 입점 계산하면 Posting 업종칸이 채워진다", async () => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    savedBusiness = {
       status: "set", profile: { goal: "pivot", industryKey: "restaurant", homeDistrictId: "garosugil" },
-    }));
+    };
     mount([{
       match: /ai\/district-industries\/garosugil$/,
       body: { district_id: "garosugil", sample_n: 100, source: "src", note: "note", rows: [
@@ -122,9 +124,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
   });
 
   it("PL-11 서빙 어휘 밖 업종이면 순위를 지어 보여주지 않는다", async () => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    savedBusiness = {
       status: "set", profile: { goal: "start", industryKey: "bar", homeDistrictId: null },
-    }));
+    };
     mount([{
       match: /ai\/industry-fit\?industry=bar/,
       body: { industry: INDUSTRIES[2], model_covered: false, seoul_fit: null, ranked_n: 0, source: "src", note: "note",
@@ -139,9 +141,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
   });
 
   it("PL-11b 모델 라벨이 있어도 서빙 어휘 밖이면 순위 없이 사유를 보인다", async () => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    savedBusiness = {
       status: "set", profile: { goal: "start", industryKey: "culture", homeDistrictId: null },
-    }));
+    };
     mount([{
       match: /ai\/industry-fit\?industry=culture/,
       body: { industry: INDUSTRIES[3], model_covered: false, seoul_fit: null, ranked_n: 0, source: "src", note: "note",

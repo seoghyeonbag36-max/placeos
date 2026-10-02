@@ -12,6 +12,7 @@
  * ⚠ **조직 API 키 원문은 여기 두지 않는다.** 원문은 발급 직후 화면의 React 상태에만 있고
  *   화면을 닫으면 사라진다(ProgramStudio 도 키를 입력칸 상태로만 쓴다).
  */
+export const SESSION_CHANGED_EVENT = "placeos:session-changed";
 const TOKEN_KEY = "placeos.session.v1";
 /** 저장소가 막힌 환경(사생활 보호 모드 등)에서만 쓰는 대체 자리 — 새로고침하면 사라진다 */
 let memoryToken: string | null = null;
@@ -30,6 +31,7 @@ export function saveToken(token: string): void {
   } catch {
     memoryToken = token;
   }
+  window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
 }
 
 export function clearToken(): void {
@@ -37,4 +39,5 @@ export function clearToken(): void {
   try {
     window.sessionStorage.removeItem(TOKEN_KEY);
   } catch { /* 지울 것이 없다 */ }
+  window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
 }

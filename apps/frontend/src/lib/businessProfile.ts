@@ -9,7 +9,7 @@
  *
  * ## 저장
  *
- * 이 브라우저에만 남긴다(localStorage). 서버로 보내지 않는다 — 계정 화면이 서면 옮긴다.
+ * 로그인한 사용자의 정보는 /auth/workspace에 저장한다. 아래 localStorage 함수는 이전 형식 검증용이며 App에서는 사용하지 않는다.
  * 읽기·쓰기가 막히면(사생활 보호 창 등) 처음 방문으로 보고 화면은 그대로 돈다.
  */
 import type { DistrictSummary, IndustryOption } from "@/lib/api";
@@ -17,6 +17,8 @@ import type { DistrictSummary, IndustryOption } from "@/lib/api";
 export type BusinessGoal = "start" | "pivot" | "move";
 
 export interface BusinessProfile {
+  businessName?: string | null;
+  description?: string | null;
   goal: BusinessGoal;
   /** `GET /ai/industries` 의 key. 바꾸기면 **지금** 업종, 창업·옮기기면 할 업종 */
   industryKey: string;

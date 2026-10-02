@@ -158,3 +158,13 @@
   .acct-keylist li { flex-direction: column; }
   .acct-confirm { flex-basis: auto; width: 100%; }
 }
+
+
+/* 홈페이지는 계정 화면의 디자인 토큰을 공유한다. */
+.home { max-width: 960px; margin: auto; min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: var(--sp-8); padding: var(--sp-6); }
+.home h1 { font-size: var(--fs-display); line-height: var(--lh-display); }
+@media (max-width: 700px) { .home { grid-template-columns: 1fr; align-content: start; } }
+
+.home { box-sizing: border-box; width: 100%; color: var(--ink); }
+.home section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--sp-5); }
+.acct-field textarea { box-sizing: border-box; width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--sp-2); resize: vertical; }

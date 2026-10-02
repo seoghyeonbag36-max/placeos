@@ -1,3 +1,5 @@
+import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
+import Home from "@/pages/Home";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import type { TrackKey } from "@/design/tokens/colors";
 import PageDashboard from "@/pages/PageDashboard";
@@ -7,8 +9,8 @@ import TrackMapFrame from "@/components/TrackMapFrame";
 import BusinessSetup from "@/components/BusinessSetup";
 import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { Button } from "@/design/components/Button";
-import { listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
-import { businessChipText, findIndustry, loadBusiness, saveBusiness, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
+import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
+import { businessChipText, findIndustry, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import "./App.css";
 
@@ -100,7 +102,7 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
   { key: "program", label: "Program", icon: <IconMegaphone />, track: "program" },
 ];
 
-export default function App() {
+export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string }) {
   // 첫 화면은 **Platform** 이다(2026-09-26 — 그전 Page 지도, 2026-09-12). 되돌리려면 이 한 줄만 바꾼다.
   // 「내 사업」 카드는 이 위에 펴진다. 「시작」이 가는 곳도 Platform 이라(startBusiness) 이제
   // 같은 화면이고, 「그냥 둘러보기」는 카드만 걷고 Platform 에 남는다(그전에는 Page 지도).
@@ -139,7 +141,7 @@ export default function App() {
   }, []);
 
   // ── 「내 사업」(화면설계서 3판 공통 프레임) ───────────────────────────────────
-  const [business, setBusiness] = useState<BusinessState>(loadBusiness);
+  const [business, setBusiness] = useState<BusinessState>(initialBusiness);
   const [bizOpen, setBizOpen] = useState(() => business.status === "unset");
   const [industries, setIndustries] = useState<IndustryOption[] | null | "error">(null);
   // 상권 목록은 카드(지금 가게 상권)와 칩 문구(지금 상권 이름)에만 쓴다 — 필요할 때 한 번만 받는다.
@@ -161,21 +163,31 @@ export default function App() {
     return () => { alive = false; };
   }, [needDistricts, bizDistricts.length]);
   const [bizAnnounce, setBizAnnounce] = useState("");
-  const startBusiness = useCallback((next: BusinessProfile) => {
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const startBusiness = useCallback(async (next: BusinessProfile) => {
     const state: BusinessState = { status: "set", profile: next };
+    setSaving(true);
+    setSaveError("");
+    try { await saveBusinessWorkspace(token, state); }
+    catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
+    finally { setSaving(false); }
     setBusiness(state);
-    saveBusiness(state);
     setBizOpen(false);
     if (next.homeDistrictId) setDistrictId(next.homeDistrictId);
     setBizAnnounce(`${businessChipText(state, Array.isArray(industries) ? industries : null, bizDistricts)}로 설정됨`);
     setView("platform");
-  }, [industries, bizDistricts, setDistrictId]);
-  const browse = useCallback(() => {
+  }, [industries, bizDistricts, setDistrictId, token]);
+  const browse = useCallback(async () => {
     const state: BusinessState = { status: "browsing" };
+    setSaving(true);
+    setSaveError("");
+    try { await saveBusinessWorkspace(token, state); }
+    catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
+    finally { setSaving(false); }
     setBusiness(state);
-    saveBusiness(state);
     setBizOpen(false);
-  }, []);
+  }, [token]);
   const myIndustry = findIndustry(Array.isArray(industries) ? industries : null, profile?.industryKey);
   // Platform 업종 바꾸기 표 → Posting 업종칸(인계 표 「Platform → Posting」).
   const [postingIndustry, setPostingIndustry] = useState<{ input: string; requestId: number }>();
@@ -290,8 +302,10 @@ export default function App() {
           )}
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
-          open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} />
+          open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
       </MapHost>
+      {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}
+      {saveError && <p className="session-note" role="alert">{saveError}</p>}
       <span className="sr-only" aria-live="polite">{bizAnnounce}</span>
       {sessionExpired && !accountScreen && (
         <p className="caveat-note caveat-withheld session-note" role="status">
@@ -372,4 +386,33 @@ function IconMegaphone() {
       <path d="M18.5 9.5a3.5 3.5 0 0 1 0 5" />
     </svg>
   );
+}
+
+
+/** 계정이 바뀌면 작업 화면을 다시 마운트한다. */
+export default function App() {
+  const [token, setToken] = useState(loadToken);
+  const [workspace, setWorkspace] = useState<BusinessState | null>(null);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    const changed = () => { setWorkspace(null); setError(""); setToken(loadToken()); };
+    window.addEventListener(SESSION_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(SESSION_CHANGED_EVENT, changed);
+  }, []);
+  useEffect(() => {
+    if (!token) return;
+    let alive = true;
+    getBusinessWorkspace(token).then((data) => { if (alive) setWorkspace(data); }, (err: unknown) => {
+      if (!alive) return;
+      if (err instanceof Error && "status" in err && err.status === 401) clearToken();
+      else setError("내 사업 정보를 불러오지 못했습니다.");
+    });
+    return () => { alive = false; };
+  }, [token, retry]);
+  if (!token) return <Home />;
+  if (!workspace) return <main className="acct"><h1>PlaceOS</h1><p role="status">{error || "내 사업 정보 불러오는 중…"}</p>
+    {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>다시 시도</Button>}
+    <Button variant="ghost" onClick={clearToken}>로그인 화면으로</Button></main>;
+  return <WorkspaceApp key={token} token={token} initialBusiness={workspace} />;
 }

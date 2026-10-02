@@ -23,10 +23,11 @@ export interface BusinessSetupProps {
   onOpenChange: (open: boolean) => void;
   onStart: (profile: BusinessProfile) => void;
   onBrowse: () => void;
+  saving?: boolean;
 }
 
 export default function BusinessSetup({
-  state, industries, districts, districtId, open, onOpenChange, onStart, onBrowse,
+  state, industries, districts, districtId, open, onOpenChange, onStart, onBrowse, saving = false,
 }: BusinessSetupProps) {
   const id = useId();
   const cardId = `biz-card-${id}`;
@@ -34,6 +35,8 @@ export default function BusinessSetup({
   const [goal, setGoal] = useState<BusinessGoal | null>(saved?.goal ?? null);
   const [industryKey, setIndustryKey] = useState<string | null>(saved?.industryKey ?? null);
   const [home, setHome] = useState<string>(saved?.homeDistrictId ?? districtId);
+  const [businessName, setBusinessName] = useState(saved?.businessName ?? "");
+  const [description, setDescription] = useState(saved?.description ?? "");
   const list = Array.isArray(industries) ? industries : null;
 
   // 카드를 다시 펼 때는 저장된 값에서 시작한다(칩으로 연 편집이 이전 편집의 잔여를 들고 오지 않게).
@@ -43,6 +46,8 @@ export default function BusinessSetup({
       setGoal(saved?.goal ?? null);
       setIndustryKey(saved?.industryKey ?? null);
       setHome(saved?.homeDistrictId ?? districtId);
+      setBusinessName(saved?.businessName ?? "");
+      setDescription(saved?.description ?? "");
     }
     wasOpen.current = open;
   }, [open, saved, districtId]);
@@ -83,7 +88,13 @@ export default function BusinessSetup({
       {open && (
         <section id={cardId} className="biz-card" aria-labelledby={`${cardId}-h`}>
           <h2 id={`${cardId}-h`} ref={headRef} tabIndex={-1}>무엇을 하려고 하세요?</h2>
-          <p className="biz-sub">업종과 지금 가게를 알려주면 네 화면이 그 기준으로 답합니다. 이 브라우저에만 저장됩니다.</p>
+          <p className="biz-sub">업종과 지금 가게를 알려주면 네 화면이 그 기준으로 답합니다. 직접 입력한 정보는 본인 계정에 저장됩니다.</p>
+          <label className="acct-field"><span>사업 이름 (선택)</span>
+            <input value={businessName} maxLength={200} onChange={(e) => setBusinessName(e.target.value)} />
+          </label>
+          <label className="acct-field"><span>창업하려는 사업 소개 (선택)</span>
+            <textarea value={description} maxLength={3000} rows={3} onChange={(e) => setDescription(e.target.value)} />
+          </label>
 
           <fieldset className="biz-goals">
             <legend className="sr-only">목적</legend>
@@ -127,11 +138,12 @@ export default function BusinessSetup({
           )}
 
           <div className="biz-actions">
-            <button type="button" className="biz-start" disabled={!ready}
-              onClick={() => ready && onStart({ goal: goal!, industryKey: industryKey!, homeDistrictId: needsHome ? home : null })}>
+            <button type="button" className="biz-start" disabled={!ready || saving}
+              onClick={() => ready && onStart({ goal: goal!, industryKey: industryKey!, homeDistrictId: needsHome ? home : null,
+                businessName: businessName.trim() || null, description: description.trim() || null })}>
               시작
             </button>
-            <button type="button" className="biz-browse" onClick={onBrowse}>그냥 둘러보기</button>
+            <button type="button" className="biz-browse" disabled={saving} onClick={onBrowse}>그냥 둘러보기</button>
           </div>
         </section>
       )}
