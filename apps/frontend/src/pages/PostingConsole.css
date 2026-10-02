@@ -117,3 +117,29 @@
 /* Posting → Program 인계(2026-09-13, 화면설계서 2판) — 결과 위, 자리가 있으면 켜진다 */
 .postconsole .posting-to-program{width:100%;min-height:44px;margin-bottom:var(--sp-3);border:1px solid var(--track-program);color:var(--track-program);background:var(--surface);font-weight:700}
 .postconsole button.posting-to-program:hover:not(:disabled){background:var(--track-program-soft)}
+
+/* 고객 화면 — 핵심 요약과 상세의 서열을 정리하고 내부 전환 표식은 생략한다. */
+.postconsole .verdict { padding: var(--sp-5); margin-bottom: var(--sp-4); border-radius: var(--radius-md); }
+.postconsole .verdict .vconv { display: none; }
+.postconsole .verdict .vq { font-size: var(--fs-title); line-height: var(--lh-title); margin-top: var(--sp-2); }
+.postconsole .verdict .vone { font-size: var(--fs-body); line-height: var(--lh-body); margin-top: var(--sp-3); }
+.postconsole .verdict .vgrounds { margin-top: var(--sp-4); }
+.postconsole .verdict .vgrounds li { padding: var(--sp-2) 0; gap: var(--sp-2); }
+.postconsole .verdict .gl, .postconsole .verdict .gv { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.postconsole .vfold { border-radius: var(--radius-md); margin-bottom: var(--sp-3); }
+.postconsole .vfold > summary { padding: var(--sp-4); gap: var(--sp-2); align-items: center; }
+.postconsole .vfold .fs { flex-basis: 100%; font-size: var(--fs-caption); font-weight: 400; }
+.postconsole .vfold .fx { position: absolute; right: var(--sp-4); top: var(--sp-5); }
+.postconsole .vfold > summary { position: relative; padding-right: var(--sp-8); }
+.postconsole .vfold .vfoldbody { padding: var(--sp-4); }
+
+/* 세 전략의 수치와 입력 가정을 고객이 읽을 수 있는 크기로 표시한다. */
+.postconsole .posting-result-heading { margin: var(--sp-4) 0; }
+.postconsole .posting-result-heading h2 { font-size: var(--fs-heading); }
+.postconsole .inputs { gap: var(--sp-2); margin: var(--sp-3) 0 var(--sp-4); }
+.postconsole .isrc, .postconsole .isrc i, .postconsole .rsrc, .postconsole .tsub { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.postconsole .trow { flex-wrap: wrap; font-size: var(--fs-caption); margin-top: var(--sp-2); }
+.postconsole .trow span:last-child { margin-left: auto; overflow-wrap: anywhere; }
+.postconsole .trow.big span:last-child { font-size: var(--fs-heading); }
+.postconsole .fhint, .postconsole .posting-input-summary { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.postconsole .rhead { gap: var(--sp-3); flex-wrap: wrap; }

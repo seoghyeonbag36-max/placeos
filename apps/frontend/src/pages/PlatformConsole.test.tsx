@@ -66,6 +66,40 @@ function rowValue(region: HTMLElement, name: string) {
 }
 
 describe("PlatformConsole — 동일 상권 후보 비교", () => {
+  it("고객 요약에서 내부 출처와 모델 지표를 생략하고 실측·합성 구분을 유지한다", async () => {
+    mount();
+    await screen.findByText("상권 특성 자세히 보기");
+    const header = screen.getByRole("banner");
+    expect(header.querySelector(".vsrc")).toBeNull();
+    expect(header.querySelector(".gs")).toBeNull();
+    expect(header.querySelector(".vnote")).toBeNull();
+    expect(header.textContent).not.toMatch(/Gold|LSTM|GNN|\/api|vac_proxy/);
+    expect(screen.getByText("실측", { selector: ".src" })).toBeTruthy();
+    expect(screen.queryByText("모델 근거")).toBeNull();
+  });
+
+  it("신뢰성 게이트를 통과하지 않은 예측을 고객 전망으로 올리지 않는다", async () => {
+    // 테스트 전용 응답이다. TODO: 실제 연동은 predictVacancy의 skill 판정을 따른다.
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { vacancy_rate: 12.3 })] },
+      { match: /\/garosugil\/platform$/, body: profile("garosugil", []) },
+      { match: /\/garosugil\/sentiment$/, body: [] },
+      { match: /\/ai\/predict-vacancy/, body: {
+        model: "lstm-test", last_vac_proxy: 1.234, forecast_vac_proxy: 9.876, delta: 8.642,
+        last_quarter: "20262", forecast_quarter: "20263", horizon_quarters: 1,
+        horizons: [{ quarter: "20263", forecast_vac_proxy: 9.876 }], skill: null,
+      } },
+    ]);
+    render(<PlatformConsole />);
+    const title = await screen.findByText("공실 전망과 추천 업종");
+    fireEvent.click(title.closest("summary")!);
+    await screen.findByText("현재값 기준");
+    const forecast = screen.getByText("공실 전망").closest("section")!;
+    expect(forecast.textContent).toContain("12.3");
+    expect(forecast.textContent).toContain("미래 변화가 없다는 뜻은 아닙니다");
+    expect(document.body.textContent).not.toContain("9.876");
+  });
+
   it("2곳부터 비교할 수 있고 최대 3곳을 고르며 해제하면 다른 후보를 선택할 수 있다", async () => {
     mount();
     const group = await openCandidates();

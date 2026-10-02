@@ -244,7 +244,7 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     fireEvent.click(screen.getByRole("button", { name: "임대시세" }));
     fireEvent.click(screen.getByRole("button", { name: /^가로수 C 카페/ }));
 
-    expect(await screen.findByText("빈 층 임대료(추정)")).toBeTruthy();
+    expect(await screen.findByText("빈 층 임대료", { exact: false, selector: ".b-rec-h" })).toBeTruthy();
     // 목록 줄에도 "333만원"이 있으므로 상세 표 안에서만 찾는다.
     const row = within(screen.getByRole("table")).getByText("333만원").closest("tr")!;
     expect(row.className).toContain("is-probable");
@@ -258,7 +258,7 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     renderOnMap(<MapShell />);
     await screen.findByText("가로수 A");
     fireEvent.click(screen.getByRole("button", { name: "임대시세" }));
-    expect(await screen.findByText(/이 거점에는 R-ONE 임대료가 없다/)).toBeTruthy();
+    expect(await screen.findByText(/이 상권의 임대료 정보가 없습니다/)).toBeTruthy();
     expect(screen.queryByLabelText("층별 평당 월 임대료")).toBeNull();
     expect(chips()).toHaveLength(0);
   });
@@ -407,8 +407,8 @@ describe("MapShell — 사이드패널", () => {
     // 거점 대표값도 같이 밝힌다.
     // 주 지표는 §4-2 라벨로 적는다(2026-09-28) — 대조 지표와 같은 "공실률" 이름을 쓰지 않는다.
     expect(screen.getByText(/거점 전체 공실률 \(실측·호실 기준\) 12\.3%/)).toBeTruthy();
-    // 격차는 정렬 격차(대조 지표 − 앵커)만 싣는다 — 옛 `앵커 9.9% +2.4%p` 는 사라졌다.
-    expect(screen.getByText(/정렬 격차 \+4\.2%p/)).toBeTruthy();
+    // 내부 대조 지표는 고객 화면에서 생략하며 주 공실률과 실측 표시는 유지한다.
+    expect(screen.queryByText(/정렬 격차/)).toBeNull();
     expect(screen.queryByText(/\+2\.4%p/)).toBeNull();
   });
 

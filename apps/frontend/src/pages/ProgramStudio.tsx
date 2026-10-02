@@ -89,14 +89,6 @@ const SAMPLE: FormState = {
   differentiatorsText: ["주간 단위 원두 교체", "로스팅 당일 추출"].join("\n"),
 };
 
-/** 이 화면을 읽는 법 — 접히지만 지우지 않는다 */
-const HOW_TO_READ = "아이템과 검증 방식(팝업스토어·가오픈·MVP)을 넣으면, 그 아이템이 이 상권에서 통하는지 "
-  + "정해진 기간 안에 판정할 수 있는 program 을 낸다 — 사람을 모으는 온라인안, 자리를 빌리고 상권과 잇는 "
-  + "오프라인안, 그리고 무엇을 세면 통했다고 할지 정한 검증 지표. 거점을 고르면 Platform 이 모은 상권 "
-  + "수치(업종 분포·검색 트렌드·시간대별 유동/매출·행사)가, Posting 에서 넘어오면 그 공실의 대장 사실이 "
-  + "근거로 합류한다. 아직 이 자리에서 장사한 적이 없으므로 단골·기존 고객·쌓인 후기를 전제한 제안은 "
-  + "서버가 폐기한다. 이 화면에서 접힌 자리는 한 번 눌러 그대로 편다 — 아무것도 지우지 않았다.";
-
 const linesOf = (t: string) => t.split("\n").map((s) => s.trim()).filter(Boolean);
 const toInt = (t: string): number | undefined => {
   const n = Number(t.replace(/[,\s]/g, ""));
@@ -232,9 +224,8 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
     <div className="progstudio"><div className="wrap">
       <Verdict
         eyebrow="PlaceOS · Program" conversion="PROMOTION ▶ PROGRAM"
-        question="이 아이템이 이 platform 에서 통하는지, 어떤 검증 program 으로 확인할 것인가"
-        verdict={head.verdict} grounds={head.grounds} sources={head.sources}
-        note={HOW_TO_READ}
+        question="이 아이템의 수요를 어떻게 확인할까요?"
+        verdict={head.verdict} grounds={result ? head.grounds.map(({ label, value }) => ({ label, value })) : []}
       />
 
       {/* Posting → Program 인계 안내. 금액은 안내에만 쓰고 생성 요청에는 싣지 않는다 —
@@ -305,10 +296,10 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
             </Field>
           </div>
 
-          <Field label="거점(상권 컨텍스트)"
+          <Field label="상권"
             hint={districtErr
-              ? "거점 목록을 불러오지 못했다 — 백엔드 확인 필요. 지금은 컨텍스트 결합 없이만 생성된다."
-              : "선택 시 그 거점의 상권 수치(업종 분포·검색 트렌드·시간대별 유동/매출·행사)가 근거로 합류한다. 검증 지표의 목표선도 여기서 나온다."}
+              ? "상권 목록을 불러오지 못했습니다. 상권 정보 없이 생성할 수 있습니다."
+              : "선택한 상권의 특성을 검증 계획에 반영합니다."}
             count={districts?.length ? `${districts.length}곳` : undefined}>
             <select value={form.districtId} onChange={(e) => changeField("districtId", e.target.value)} disabled={districts === null}>
               <option value="">{districts === null ? "거점 불러오는 중…" : "— 결합 안 함 —"}</option>
@@ -371,14 +362,13 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
           {error && (
             <div className="err">
               <strong>생성에 실패했습니다.</strong>
-              <div>백엔드가 떠 있는지 확인하세요 — <code>cd apps/backend && uvicorn app.main:app --reload</code></div>
-              <div className="errdetail">{error}</div>
+              <div>입력 내용을 확인하고 잠시 후 다시 시도해 주세요.</div>
             </div>
           )}
 
           {!error && !result && !busy && (
             <div className="empty">
-              {"왼쪽에 아이템과 검증 방식을 넣고 «검증 program 생성»을 누르면 여기에 결과가 나온다. "
+              {"아이템과 검증 방식을 넣고 «검증 program 생성»을 누르면 여기에 결과가 나옵니다. "
                 + "처음이라면 «예시 채우기»로 한 번 돌려보면 된다."}
             </div>
           )}
@@ -582,16 +572,15 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled 
   } else if (busy) {
     verdict = `생성 중이다 — ${elapsed}초 경과.`;
   } else if (!result) {
-    verdict = `아직 돌릴 검증 program 이 없다 — 아이템과 검증 방식을 넣으면 모객·자리·판정 세 벌을 근거와 함께 낸다`
-      + ` (현재 ${STAGE_LABEL[form.stage]} · ${modeLabel}).`;
+    verdict = "아이템과 검증 방식을 입력하면 고객 모집 방법과 수요 확인 지표를 제안합니다.";
   } else {
     const lead = `${result.item}(${result.category}) — ${modeLabel}로 확인한다: `
       + `온라인 ${result.online.length}건 · 오프라인 ${result.offline.length}건 · 검증 지표 ${result.signals.length}건`
       + `${result.signals[0] ? `, 첫 판정선은 「${result.signals[0].name}」` : ""}.`;
     verdict = stub
       ? <>{lead} <span className="value-absent">{blocked.length > 0
-        ? `단 LLM 생성물이 HA 검증에 걸려 폐기됐고(${blocked.length}건), 아래는 규칙 기반 스텁이다.`
-        : "단 LLM 을 타지 못해 아래는 규칙 기반 스텁이다."}</span></>
+        ? `생성 내용이 검증을 통과하지 못해(${blocked.length}건) 기본 예시를 표시합니다.`
+        : "AI 생성을 완료하지 못해 기본 예시를 표시합니다."}</span></>
       : lead;
   }
 
@@ -606,10 +595,10 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled 
   ];
 
   const haVerdict = blocked.length > 0
-    ? <span className="tr-up">HA 폐기 {blocked.length}건</span>
+    ? <span className="tr-up">검증 실패 {blocked.length}건</span>
     : warnings.length > 0
-      ? <span className="tr-flat">HA 경고 {warnings.length}건 (사전 매칭이라 오탐 가능)</span>
-      : "HA 서버 검증 통과";
+      ? <span className="tr-flat">확인 필요 {warnings.length}건</span>
+      : "생성 내용 검증 통과";
 
   const grounds: Ground[] = [
     {
@@ -631,7 +620,7 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled 
       label: "무엇으로 판정하나",
       value: result
         ? <>{result.signals.map((s) => `${s.name}(${s.target})`).join(" · ") || <span className="value-absent">지표 없음</span>}
-          {" · "}생성 원본: {stub ? "규칙 기반 폴백" : "LLM 생성"} · {haVerdict}</>
+          {" · "}생성 원본: {stub ? "기본 예시" : "AI 생성"} · {haVerdict}</>
         : <span className="value-absent">아직 생성하지 않았다</span>,
       source: "서버 후처리 ha_guard — 금액·트렌드 방향·미검증 경험·지표 형식을 따로 검증한다"
         + " (LLM 자체점검 문장과 섞지 않는다). 생성 후 편집한 초안은 이 검증에 포함되지 않는다.",
@@ -664,9 +653,9 @@ function Result({ r }: { r: ProgramPlan }) {
         </div>
         <span className={`srcbadge ${stub ? "is-syn" : "is-gold"}`}
           title={stub
-            ? "LLM_API_KEY 미설정이거나 호출이 실패해 규칙 기반 스텁으로 응답했다"
-            : "Claude 실호출로 생성된 결과다"}>
-          {stub ? "규칙 기반 폴백" : "LLM 생성"}
+            ? "AI 생성 대신 기본 예시를 표시합니다"
+            : "입력한 내용을 바탕으로 AI가 생성한 결과입니다"}>
+          {stub ? "기본 예시" : "AI 생성"}
         </span>
       </div>
 
@@ -677,16 +666,15 @@ function Result({ r }: { r: ProgramPlan }) {
       <DraftWorkspace online={r.online} offline={r.offline} />
 
       {/* 검증의 **결과**는 위 결론 줄이 이미 말했다. 여기 접힌 것은 그 사유와 원문이다. */}
-      <Fold title="생성 원본의 Humanistic Authority 검증"
+      <Fold title="생성 내용 확인"
         badge={blocked.length ? `폐기 ${blocked.length}` : warnings.length ? `경고 ${warnings.length}` : "통과"}
-        summary={<>편집 초안은 검증 대상 아님 · LLM 자체점검 문장</>}>
+        summary={<>수정한 초안은 다시 확인해 주세요</>}>
 
         {/* 스텁이 나온 이유가 둘이다. 크레딧·키 문제와 "생성은 됐는데 검증에 걸렸다"를
             같은 문구로 보여주면 엉뚱한 데를 고치게 된다. */}
         {stub && blocked.length > 0 && (
           <div className="warn">
-            LLM 이 생성한 결과가 <b>Humanistic Authority 검증에 걸려 폐기</b>됐다 — 위 카드는 그
-            대신 나온 규칙 기반 스텁이다. 키·크레딧 문제가 아니다.
+            생성 내용이 <b>검증을 통과하지 못했습니다.</b> 아래 사유를 확인해 주세요. 위 카드는 기본 예시입니다.
             <ul className="halist">
               {blocked.map((f, i) => (
                 <li key={i}>
@@ -700,16 +688,14 @@ function Result({ r }: { r: ProgramPlan }) {
 
         {stub && blocked.length === 0 && (
           <div className="warn">
-            LLM 을 타지 못해 <b>규칙 기반 스텁</b>이 나왔다 — 브리프·상권 수치를 읽고 쓴 결과가 아니다.
-            <code>LLM_API_KEY</code>(로컬은 <code>apps/backend/.env</code>, 배포는 Cloud Run 환경변수),
-            Anthropic 크레딧 잔액, 백엔드 로그를 확인하라.
+            AI 생성을 완료하지 못해 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를 반영한 결과가 아니므로 다시 생성해 주세요.
           </div>
         )}
 
         {/* 경고는 사전 매칭이라 오탐이 섞인다. 지우지 않고 근거를 함께 보여 사람이 판단하게 한다. */}
         {!stub && warnings.length > 0 && (
           <div className="hawarn">
-            <b>HA 검증 경고 {warnings.length}건</b> — 위 생성물은 살아 있다. 사전 매칭이라
+            <b>확인이 필요한 내용 {warnings.length}건</b> — 위 생성물은 살아 있다. 사전 매칭이라
             오탐일 수 있으니 근거를 보고 판단하라.
             <ul className="halist">
               {warnings.map((f, i) => (
@@ -724,10 +710,10 @@ function Result({ r }: { r: ProgramPlan }) {
 
         {/* 자기신고와 서버 검증을 나란히 두되 섞지 않는다 — 아래 문장은 LLM 이 스스로
             적은 것이고, 그게 사실인지는 서버(ha_guard)가 따로 판정한다. */}
-        <div className="rlabel">Humanistic Authority 자체점검 <em>LLM 이 적은 문장이다</em></div>
+        <div className="rlabel">AI 자체점검 <em>생성 내용에 대한 설명입니다</em></div>
         <div className="ha">{r.ha_check}</div>
         {!stub && warnings.length === 0 && (
-          <div className="note">서버 후처리 검증(금액·트렌드 방향·미검증 경험·지표 형식·채널 균형) 통과.</div>
+          <div className="note">생성 원본의 내용 검증을 통과했습니다. 수정한 초안은 검증에 포함되지 않습니다.</div>
         )}
       </Fold>
     </div>
@@ -851,8 +837,8 @@ function DraftWorkspace({ online, offline }: { online: ChannelPlan[]; offline: C
           {meta && <p className="draft-meta">{meta}</p>}
           <p className="draft-validation" id="draft-validation" role="status">
             {edited
-              ? "편집됨 · 생성 후 사용자가 수정한 초안입니다. 수정한 본문은 서버 HA 검증을 거치지 않았습니다."
-              : "초안 · 생성 원본입니다. 출처와 HA 검증 결과는 아래에서 확인하세요."}
+              ? "편집됨 · 생성 후 사용자가 수정한 초안입니다. 수정한 본문은 내용 검증을 거치지 않았습니다."
+              : "생성된 초안입니다. 내용을 확인한 뒤 사용하세요."}
           </p>
           {preview ? (
             <div className="draft-preview" role="region" aria-label={`${plan.channel} 본문 미리보기`}>
@@ -877,7 +863,7 @@ function DraftWorkspace({ online, offline }: { online: ChannelPlan[]; offline: C
             <p className="draft-feedback" role="alert">복사하지 못했습니다. 편집 화면에서 본문을 선택해 직접 복사하세요.</p>
           )}
           <div className="prationale"><b>생성 원본의 근거</b> {plan.rationale}</div>
-          {edited && <p className="draft-scope">위 근거와 아래 HA 결과는 생성 원본에 관한 내용입니다. 수정한 본문을 뒷받침하는지 직접 확인하세요.</p>}
+          {edited && <p className="draft-scope">위 근거와 아래 검증 결과는 생성 원본에 관한 내용입니다. 수정한 본문을 뒷받침하는지 직접 확인하세요.</p>}
         </div>
       </div>
     </section>

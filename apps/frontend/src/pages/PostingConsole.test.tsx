@@ -103,10 +103,10 @@ describe("PostingConsole — 결과 패널", () => {
     expect(tiers.getAllByText("14개월").length).toBe(3);
     // 권리금을 안 넣었으면 0 은 관측이 아니라 **전제**다 — 화면이 그 사실을 밝힌다.
     expect(screen.getByText("전제(0)")).toBeTruthy();
-    expect(screen.getByText("R-ONE 실측")).toBeTruthy();
+    expect(document.querySelector(".inputs")?.textContent).toContain("임대료실측");
     // ⚠ .badge 로 좁힌다 — 2026-09-13 부터 화면 머리(Verdict)의 "계산 경로" 근거도
     //   같은 문구를 쓴다. 여기서 보려는 것은 **결과 패널의 배지**다.
-    expect(screen.getByText("내부 3-Tier 폴백", { selector: ".badge" })).toBeTruthy();
+    expect(screen.getByText("기본 계산", { selector: ".badge" })).toBeTruthy();
   });
 
   /* 2026-09-13: 화면 머리를 공용 `Verdict` 로 바꿨다 — 그전에는 질문(h1)만 있고
@@ -125,8 +125,10 @@ describe("PostingConsole — 결과 패널", () => {
     // ⚠ 권리금 미입력은 **결론에 실린다.** 0 전제로 낸 회수기간을 실측처럼 읽으면
     //   그 숫자가 곧 거짓말이 된다.
     expect(one).toContain("권리금 0 을 전제");
-    // 출처 줄은 상세를 다 접어도 남는다.
-    expect(within(head).getByText("임대료 R-ONE 실측")).toBeTruthy();
+    // 고객 요약에는 내부 출처 목록이 없고 결과 옆 실측·가정 배지는 유지한다.
+    expect(head.querySelector(".vsrc")).toBeNull();
+    expect(head.querySelector(".gs")).toBeNull();
+    expect(document.querySelector(".inputs")?.textContent).toContain("임대료실측");
   });
 
   it("실측 자리가 0곳인 거점은 계산하지 않고 안내만 남긴다", async () => {

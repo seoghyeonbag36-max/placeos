@@ -13,9 +13,7 @@ import { Card } from "@/design/components/Card";
 import { mapLabelHTML } from "@/design/components/MapMarkerPin";
 import IndustryFitCard from "@/components/IndustryFitCard";
 import { findIndustry, type BusinessProfile } from "@/lib/businessProfile";
-import {
-  directionLine, errorLine, foldReason, lstmPromoted, pendingLine, verdictLabel,
-} from "@/lib/forecastSkill";
+import { lstmPromoted } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
 import { useMapHost } from "@/components/MapHost";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
@@ -25,34 +23,9 @@ import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./PlatformConsole.css";
 
 /**
- * Platform 콘솔 — "이 입지·상권은 어떤 플랫폼인가" 를 답하는 화면.
- *
- * Platform 트랙의 본질은 모델 지표가 아니라 두 답이다(2026-08-29 방향 확정):
- *   ① **이 상권은 어떤 플랫폼인가** — 무엇이 모여 있고, 누가·언제 오고,
- *      밖에서 뭐라고 불리며, 어디로 가고 있나 (`/commercial-districts/{id}/platform`)
- *   ② **그 안 어느 자리에 어떤 업소가 들어오면 좋은가** — 실측 공실 자리마다
- *      GNN 최근접 노드 추천
- *
- * ## 화면이 한 번에 펴는 양 (2026-09-07)
- *
- * 종전에는 이 화면이 결론·근거·원자료를 **동시에** 폈다. 정체성 3패널·자리 카드
- * 9장·모델 카드 2장·구역 카드가 전부 열린 채라, 답을 찾으려면 읽어야 할 것이
- * 먼저 왔다. 그래서 규칙을 하나로 고정한다 — **결론 1줄 + 근거 3줄**:
- *
- *   · 맨 위 `Verdict` 가 질문(헤드라인) → 결론 한 문장 → 근거 세 줄 → 출처 줄을 낸다.
- *     여기까지가 스크롤 없이 보이는 자리다.
- *   · 정체성 원자료 · 자리 제안 · 모델 근거 · 구역은 전부 `Fold` 로 **접는다**.
- *     지운 것이 아니다 — 접힌 요약줄이 안에 무엇이 몇 개 있는지 말하고, 한 번 누르면
- *     종전 화면이 그대로 펴진다.
- *   · **출처는 접지 않는다.** 아래가 전부 접혀 있어도 `Verdict` 의 출처 줄에
- *     카카오 플레이스 · TRDAR · 네이버 데이터랩 · LSTM · GNN · R-ONE 앵커가 남는다.
- *   · 값은 계산한 정밀도 그대로 싣는다. 자리를 아끼자고 반올림하지 않는다.
- *
- * 접힌 자리 안의 규칙은 종전과 같다 — 값 옆에 그 값의 한계를 같이 싣는다:
- *   · 유형 라벨은 규칙과 함께 — 묶음이 근거를 가리지 않게 군을 펼쳐 볼 수 있다.
- *   · 예측 단위는 vac_proxy 다. %는 delta 가산 **근사**로만 쓴다.
- *   · GNN 은 Top-3 만 보면 과대평가되므로 거점 사전확률 대비로 같이 읽힌다.
- *   · 감성은 전부 시드라 정체성 근거에 섞지 않고 맨 아래 별도 영역에 둔다.
+ * 고객용 상권 분석 — 상권 요약, 공간 후보, 공실 전망과 추천 업종을 보여준다.
+ * 내부 파일 경로·모델 검증 지표는 표시하지 않는다. 실측·합성 구분과 추천의 한계는 유지한다.
+ * 전망은 기존 신뢰성 게이트를 그대로 사용하며, 통과 전에는 현재 공실률을 참고값으로 표시한다.
  */
 
 const DEFAULT_DISTRICT = "garosugil";
@@ -218,23 +191,14 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         onDistrictChange={setDistrictId} onOpenBusiness={onOpenBusiness} onTryIndustry={onTryIndustry} />
       <Verdict
         eyebrow="PlaceOS · Platform" conversion="PLACE ▶ PLATFORM"
-        question="이 입지·상권은 어떤 플랫폼인가"
-        verdict={head.verdict} grounds={head.grounds} sources={head.sources}
-        note={
-          <>
-            상권을 하나의 플랫폼으로 본다. 무엇이 모여 있고, 누가·언제 오고, 밖에서 뭐라고
-            불리는지로 <b>정체성</b>을 세우고, 그 안 <b>어느 빈 자리에 어떤 업소</b>가 들어오면
-            좋은지까지 잇는다. LSTM·GNN 은 그 답을 뒷받침하는 근거라 아래 접힌 자리에 둔다 —
-            지표가 위에 오면 &ldquo;이 상권이 어떤 곳인가&rdquo;라는 질문에 MAE 로 답하는 화면이 된다.
-            접힌 자리는 한 번 눌러 그대로 편다. 아무것도 지우지 않았다.
-          </>
-        }
+        question="이 상권은 어떤 곳인가요?"
+        verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
       />
 
       {listErr && (
         <div className="err">
           <strong>거점 목록을 불러오지 못했습니다.</strong>
-          <div className="errdetail">{listErr}</div>
+          <div className="errdetail">잠시 후 다시 시도해 주세요.</div>
         </div>
       )}
 
@@ -268,14 +232,14 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
       {profErr && (
         <div className="err">
-          <strong>이 상권의 Platform 산출물이 없습니다.</strong>
+          <strong>상권 분석 정보를 제공할 수 없습니다.</strong>
           {/* 404 는 고장이 아니라 **아직 수집하지 않았다**는 뜻이다(경기 거점은 Platform
               트랙이 미착수다). 원시 에러 문자열을 사용자에게 보이면 고장처럼 읽히므로
               404 만 사람 말로 바꾸고, 그 외(5xx·네트워크)는 원문을 남겨 진단을 돕는다. */}
           <div className="errdetail">
             {/404/.test(profErr)
-              ? "이 도시에는 아직 Platform 소스(업종 구성·감성·트렌드)를 수집하지 않았다."
-              : profErr}
+              ? "이 상권의 분석 정보가 아직 준비되지 않았습니다."
+              : "잠시 후 다시 시도해 주세요."}
           </div>
         </div>
       )}
@@ -289,7 +253,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
       )}
 
       {/* 근거 — 위 두 답을 만든 모델의 성능과 한계. 지표가 아니라 **답**이 먼저 오도록 접어 둔다 */}
-      <Fold title="모델 근거" badge="LSTM · GNN"
+      <Fold title="공실 전망과 추천 업종"
         summary={modelFoldSummary(fc, rec)}>
         <div className="cols">
           <ForecastCard fc={fc} err={fcErr} quarters={quarters} onQuarters={setQuarters} hub={hub} />
@@ -421,8 +385,7 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
   } else {
     verdict = (
       <>
-        {name} — <b>「{ident.archetype}」</b> 플랫폼이다
-        ({groups[0].group} {pct(groups[0].share)} 최대 군 · 점포 {total.toLocaleString()}곳).
+        {name}은 <b>「{ident.archetype}」</b> 상권입니다.
       </>
     );
   }
@@ -531,18 +494,11 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
 /** 「모델 근거」가 접힌 채로도 무엇이 들어 있는지 — 두 모델의 대표 수치 한 줄. */
 function modelFoldSummary(fc: VacancyForecast | null, rec: IndustryRecommend | null): ReactNode {
   const parts: ReactNode[] = [];
-  if (fc && fc.model !== "lstm-stub") {
-    parts.push(lstmPromoted(fc.skill)
-      ? <>공실 <b>{fc.forecast_vac_proxy.toFixed(3)}</b> vac_proxy ({signed(fc.delta)})</>
-      : <>공실 <b>지속성</b>{fc.skill ? ` · LSTM ${verdictLabel(fc.skill.error)}` : ""}</>);
-  }
+  if (fc && fc.model !== "lstm-stub") parts.push(lstmPromoted(fc.skill) ? "공실률 추정 전망" : "현재 공실률 기준");
   if (rec && rec.model !== "gnn-stub" && rec.recommendations.length) {
     parts.push(<>추천 1위 <b>{rec.recommendations[0].industry}</b> {pct(rec.recommendations[0].score)}</>);
-    if (rec.metrics?.test_top3 != null) {
-      parts.push(<>Top-3 {pct(rec.metrics.test_top3)} / 사전확률 {rec.metrics.baseline_district_prior_top3 != null ? pct(rec.metrics.baseline_district_prior_top3) : "—"}</>);
-    }
   }
-  return parts.length ? joinDot(parts) : "검증 근거 · 홀드아웃 · 지상검증 앵커";
+  return parts.length ? joinDot(parts) : "전망과 추천 정보 확인";
 }
 
 /* ───────────────── ① 이 상권은 어떤 플랫폼인가 (원자료) ───────────────── */
@@ -557,14 +513,13 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
   const maxAge = Math.max(...(demand.ages ?? []).map((a) => a.share), 1);
 
   return (
-    <Fold title="정체성 원자료" badge="Gold 컨텍스트"
+    <Fold title="상권 특성 자세히 보기"
       summary={<>업종 {cats.total.toLocaleString()}곳 / {cats.groups.length}군 · 시간대 {bands.length}구간
         · 키워드 {keywords.words.length}개 · 트렌드 {trends.length}계열</>}>
       <div className="herotop">
         <div>
           <div className="herolabel">이 상권의 유형</div>
           <div className="heroarch">{ident.archetype ?? "판정할 업종 근거가 없다"}</div>
-          <div className="herorule">{ident.archetype_rule}</div>
         </div>
         {hub && (
           <div className="herokpis">
@@ -622,7 +577,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
                   {cats.ungrouped.map((m) => <span key={m.label} className="kw">{m.label} {m.n}</span>)}
                 </div>
                 <div className="pnote">
-                  카카오 라벨에 상호·브랜드가 섞여 오는 자리다. 억지로 분류하지 않고 남긴다.
+                  업종을 확인할 수 없는 점포입니다.
                 </div>
               </details>
             )}
@@ -631,7 +586,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
 
         {/* 누가·언제 오나 */}
         <div className="panel">
-          <h3>누가 · 언제 오나<small>서울 상권분석(TRDAR)</small></h3>
+          <h3>누가 · 언제 오나<small>방문 고객과 시간대</small></h3>
           {demand.ages && demand.ages.length > 0 && (
             <div className="ages">
               {demand.ages.map((a) => (
@@ -687,8 +642,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
             ))}
           </div>
           <div className="pnote">
-            블로그 원문 토큰 상위 {keywords.scanned}개 중 일반어 {keywords.dropped}개를 표시에서
-            뺐다. 감성 점수가 아니라 <b>언급 빈도</b>다 — 좋다/나쁘다는 여기서 알 수 없다.
+            자주 언급되는 단어입니다. 긍정·부정 평가를 뜻하지 않습니다.
           </div>
 
           {trends.length > 0 && (
@@ -704,7 +658,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
                   </div>
                   <Spark points={t.points.map((p) => p.value)} direction={t.direction} />
                   <div className="trmeta">
-                    직전 3개월 {t.prior} → 최근 3개월 {t.recent} · 네이버 데이터랩
+                    직전 3개월 {t.prior} → 최근 3개월 {t.recent}
                   </div>
                 </div>
               ))}
@@ -713,7 +667,6 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
         </div>
       </div>
 
-      <div className="herosrc">근거: {ident.source}</div>
     </Fold>
   );
 }
@@ -769,7 +722,7 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
     // 칩을 눌러도 아무 일이 안 일어난 것처럼 읽힌다.
     <Fold title="어느 자리에 어떤 업소가 들어오면 좋나" badge="실측 공실" open={pinnedOpen || undefined}
       summary={<>공실 <b>{openings.unit_count}곳</b> · 추천이 붙은 자리 <b>{openings.matched_count}곳</b>
-        {" "}(반경 {openings.match_radius_m}m 안 그래프 노드) · {mySite ? <><b>{mySite.input}</b> 점수 높은 자리부터</> : "상권 평균과 가장 다른 자리부터"}</>}>
+        {" · "}{mySite ? <><b>{mySite.input}</b> 점수 높은 자리부터</> : "상권 평균과 가장 다른 자리부터"}</>}>
 
       {sites.length === 0 && <div className="loading">이 상권에는 실측 공실 자리가 없다.</div>}
 
@@ -843,11 +796,7 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
       )}
 
       <div className="sitesrc">
-        {openings.source}
-        {openings.distinct_note && <><br />{openings.distinct_note}</>}
-        <br />
-        ⚠ <b>직전 업종과 추천 업종은 눈금이 다르다</b> — 직전 업종은 상가정보 분류,
-        추천은 GNN 7군이다. 둘이 다르다고 그 자체로 &ldquo;업종 전환&rdquo;을 뜻하지 않는다.
+        추천 점수는 입점 성공 확률이 아닙니다. 직전 업종과 추천 업종은 분류 기준이 다릅니다.
       </div>
     </Fold>
   );
@@ -901,7 +850,7 @@ function SiteCard({ site, seq, selected, disabled, onToggle, onOpenInPage }: {
         </div>
       ) : (
         <div className="snorec">
-          반경 안에 그래프 노드가 없다 — 거점 평균으로 채우지 않는다.
+          이 자리의 추천 정보가 없습니다.
         </div>
       )}
 
@@ -929,287 +878,50 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
   quarters: number; onQuarters: (q: number) => void; hub?: DistrictSummary;
 }) {
   const stub = fc?.model === "lstm-stub";
+  const promoted = lstmPromoted(fc?.skill ?? null);
   const baseVac = hub?.vacancy_rate ?? null;
   const approxPct = approxVacancyPct(fc, hub);
-  const maxAbs = fc
-    ? Math.max(...fc.horizons.map((h) => Math.abs(h.forecast_vac_proxy)), 0.001)
-    : 1;
-  const holdout = fc?.district_holdout;
-  const mae = fc?.metrics?.holdout_mae;
-  const rmse = fc?.metrics?.holdout_rmse;
-  const absErr = holdout ? Math.abs(holdout.pred - holdout.actual) : null;
-  // 이 거점에서 지속성(예측 = 직전 분기값)이 낸 오차 — 모델 오차 옆에 같은 1점으로 댄다
-  const persistErr = holdout ? Math.abs(holdout.prev - holdout.actual) : null;
-  // 2026-09-28 B안: 기본 표시는 지속성. 두 축 게이트가 모두 `실력` 일 때만 LSTM 을 올린다.
-  const skill = fc?.skill ?? null;
-  const promoted = lstmPromoted(skill);
-
-  const lstmBody = fc && !stub && (
-    <>
-      <div className="seg" role="tablist">
-        {QUARTERS.map((q) => (
-          <button key={q} className={quarters === q ? "on" : ""} onClick={() => onQuarters(q)}>
-            +{q}분기
-          </button>
-        ))}
-      </div>
-
-      <div className="big">
-        <div className="bigval">
-          {fc.forecast_vac_proxy.toFixed(3)}
-          <small>vac_proxy · {quarterLabel(fc.forecast_quarter ?? fc.horizons[fc.horizon_quarters - 1]?.quarter)}</small>
-        </div>
-        <div className={`bigdelta ${fc.direction}`}>
-          {fc.direction === "up" ? "▲" : "▼"} {signed(fc.delta)}
-          <small>마지막 관측 {quarterLabel(fc.last_quarter)} 대비</small>
-        </div>
-      </div>
-
-      {/* 단위를 숨기지 않는다 — %는 예측의 단위가 아니라 파생 근사다 */}
-      {approxPct != null && baseVac != null && (
-        <div className="approx">
-          <div className="approxv">
-            공실률 환산 <b>{baseVac.toFixed(1)}%</b> → <b>{approxPct.toFixed(1)}%</b>
-          </div>
-          <div className="note">
-            예측의 단위는 vac_proxy 다. %는 delta 를 현재 공실률에 가산한 <b>근사</b>다.
-          </div>
-        </div>
-      )}
-
-      <div className="hz">
-        {fc.horizons.map((h, i) => {
-          const w = (Math.abs(h.forecast_vac_proxy) / maxAbs) * 50;
-          const neg = h.forecast_vac_proxy < 0;
-          const on = i + 1 === fc.horizon_quarters;
-          return (
-            <div key={h.quarter} className={`hzrow${on ? " on" : ""}${i > 0 ? " recur" : ""}`}>
-              <span className="hzq">{quarterLabel(h.quarter)}</span>
-              <span className="hzbar">
-                <i className="zero" />
-                <i
-                  className="fill"
-                  style={neg ? { right: "50%", width: `${w}%` } : { left: "50%", width: `${w}%` }}
-                />
-              </span>
-              <span className="hzv">{h.forecast_vac_proxy.toFixed(3)}</span>
-            </div>
-          );
-        })}
-        <div className="hznote">
-          +1분기만 관측 피처로 민 것이다. <b>+2분기부터는 외생 피처를 마지막 관측값으로
-          고정한 재귀 예측</b>이라 뒤로 갈수록 불확실하다(연한 행).
-        </div>
-      </div>
-
-      {/* 성능 숫자는 박지 않는다 — 산출물 metrics 에서 읽고, 없으면 행을 숨긴다 */}
-      {(mae != null || (holdout && absErr != null)) && (
-        <div className="evid">
-          <div className="evidh">검증 근거</div>
-          {mae != null && rmse != null && (
-            <div className="row">
-              <span>홀드아웃 MAE / RMSE (전 거점)</span>
-              <span>{mae.toFixed(3)} / {rmse.toFixed(3)}</span>
-            </div>
-          )}
-          {holdout && absErr != null && persistErr != null && (
-            <>
-              <div className="row">
-                <span>이 거점 홀드아웃 · 예측 → 실측</span>
-                <span>{holdout.pred.toFixed(3)} → {holdout.actual.toFixed(3)}</span>
-              </div>
-              <div className="row">
-                <span>이 거점 오차 · LSTM / 지속성</span>
-                <span className={absErr > persistErr ? "worse" : "better"}>
-                  {absErr.toFixed(3)} / {persistErr.toFixed(3)}
-                  {absErr > persistErr ? " · 지속성보다 나쁨" : " · 지속성보다 좋음"}
-                </span>
-              </div>
-            </>
-          )}
-          <div className="evidnote">
-            한 거점 1점은 판정 근거가 아니다 — 판정은 위 두 축(전 거점 홀드아웃 · 구간 포함)이다.
-          </div>
-        </div>
-      )}
-    </>
-  );
-
   return (
     <section className="card">
-      <div className="chead">
-        <h2>공실 예측 <span className="badge is-model">{promoted ? "LSTM" : "지속성"}</span></h2>
-        {fc && !stub && (
-          <div className="cmeta">{fc.model} · {fc.trained_at?.slice(0, 10) ?? "학습일 미상"}</div>
-        )}
-      </div>
-
-      {err && <div className="empty">이 거점의 예측 산출물이 없다{/404/.test(err)
-        ? " — LSTM 학습 표본 밖의 거점이라 예측이 없다."
-        : <> — <code>{err}</code></>}</div>}
-      {!err && !fc && <div className="empty">예측 불러오는 중…</div>}
-      {stub && <div className="empty">Gold 미적재 폴백(<code>lstm-stub</code>) — 실측 예측이 아니다.</div>}
-
-      {fc && !stub && (
-        <>
-          {!promoted && (
-            <div className="big">
-              <div className="bigval">
-                {fc.last_vac_proxy.toFixed(3)}
-                <small>vac_proxy · 다음 분기 = 마지막 관측 {quarterLabel(fc.last_quarter)} 그대로(지속성)</small>
-              </div>
-              {baseVac != null && (
-                <div className="bigdelta">
-                  {baseVac.toFixed(1)}%
-                  <small>현재 공실률 그대로</small>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 환산이 빠진 이유를 밝힌다. 조용히 사라지면 예측 자체가 없는 것으로 읽힌다. */}
-          {approxPct == null && hub?.vacancy_withheld && (
-            <div className="approx">
-              <div className="note">
-                이 거점은 <b>거점 대표 공실률을 내렸다</b>(계획상가 밀집) — 기준선이 없어
-                %  환산을 내지 않는다. 값은 위 vac_proxy 로 읽는다.
-              </div>
-            </div>
-          )}
-
-          {/* 베이스라인 대비 판정 — 응답 skill(= kpi_baseline 과 같은 코드). 없으면 숨긴다 */}
-          {skill && (
-            <div className="evid">
-              <div className="evidh">LSTM vs 베이스라인 <span className="badge is-model">{verdictLabel(skill.error)}</span></div>
-              <div className="evidnote">{errorLine(skill)}</div>
-              <div className="evidnote">{directionLine(skill)}</div>
-              {pendingLine(skill) && <div className="evidnote">{pendingLine(skill)}</div>}
-            </div>
-          )}
-
-          {promoted ? lstmBody : (
-            <>
-              <div className="evidnote">{foldReason(skill)}</div>
-              {/* 접힌 요약에 예측값을 올리지 않는다 — 올리면 접은 값이 기본 표시로 새어 나온다(09-28 화면 실측) */}
-              <Fold title="실험 모델 — LSTM 예측" badge="접음"
-                summary={`+1~${fc.horizons.length}분기 vac_proxy · 펼쳐서 보기`}>
-                {lstmBody}
-              </Fold>
-            </>
-          )}
-
-          {fc.ground_anchor && (
-            <div className="anchor">
-              <div className="evidh">지상검증 앵커 <span className="badge is-ground">실측</span></div>
-              <div className="row">
-                {/* 이 값은 rone_aligned.mid(중대형·면적)다 — 거점 전체 공실률과 다른 수라
-                    같은 "공실률" 이름을 붙이지 않는다(2026-09-28). */}
-                <span>{VACANCY_LABEL.contrast}</span>
-                <span>
-                  {fc.ground_anchor.estimated_vacancy_pct?.toFixed(1)}%
-                  {fc.ground_anchor.buildings_used
-                    ? ` · ${fc.ground_anchor.buildings_used.toLocaleString()}동`
-                    : ""}
-                </span>
-              </div>
-              {fc.ground_anchor.anchor_street_pct != null && (
-                <div className="row">
-                  <span>{VACANCY_LABEL.anchor}</span>
-                  <span>{fc.ground_anchor.anchor_street_pct.toFixed(1)}%</span>
-                </div>
-              )}
-              <div className="evidnote">{fc.ground_anchor.source} · {fc.ground_anchor.as_of}</div>
-            </div>
-          )}
-        </>
-      )}
+      <div className="chead"><h2>공실 전망 <span className="badge is-warn">{promoted ? "추정" : "현재값 기준"}</span></h2></div>
+      {err && <div className="empty">이 상권의 전망 정보를 제공할 수 없습니다.</div>}
+      {!err && !fc && <div className="empty">전망 불러오는 중…</div>}
+      {stub && <div className="empty">예시 데이터입니다. 실제 상권 전망으로 사용할 수 없습니다.</div>}
+      {fc && !stub && <>
+        {promoted && <div className="seg" role="group" aria-label="전망 기간">
+          {QUARTERS.map((q) => <button key={q} aria-pressed={quarters === q} className={quarters === q ? "on" : ""} onClick={() => onQuarters(q)}>+{q}분기</button>)}
+        </div>}
+        <div className="big"><div className="bigval">
+          <MeasuredValue value={promoted ? approxPct : baseVac} unit="%" absent={hub?.vacancy_withheld ? "대표값 미제공" : "정보 없음"} />
+          <small>{promoted ? quarterLabel(fc.forecast_quarter ?? fc.horizons[fc.horizon_quarters - 1]?.quarter) : "다음 분기 참고값"}</small>
+        </div></div>
+        <p className="recnote">{promoted
+          ? "현재 공실률에 예상 변화를 반영한 근사값입니다."
+          : "예측의 신뢰성을 확인 중이므로 현재 공실률을 참고값으로 표시합니다. 미래 변화가 없다는 뜻은 아닙니다."}</p>
+      </>}
     </section>
   );
 }
 
-/* ───────────────── 근거 ②: GNN 업종 추천 ───────────────── */
-
 function RecommendCard({ rec, err }: { rec: IndustryRecommend | null; err: string | null }) {
   const stub = rec?.model === "gnn-stub";
-  const m = rec?.metrics ?? null;
-  const top1 = m?.test_top1, prior1 = m?.baseline_district_prior_top1;
-  const top3 = m?.test_top3, prior3 = m?.baseline_district_prior_top3;
-  const lift3 = top3 != null && prior3 ? ((top3 - prior3) / prior3) * 100 : null;
   const max = rec?.recommendations.length ? rec.recommendations[0].score : 1;
-
   return (
     <section className="card">
-      <div className="chead">
-        <h2>업종 추천 <span className="badge is-model">GNN</span></h2>
-        {rec && !stub && (
-          <div className="cmeta">
-            {rec.scope === "district" ? "상권 전체 노드 평균" : "최근접 자리"}
-            {m?.nodes ? ` · 노드 ${m.nodes.toLocaleString()}개` : ""}
-          </div>
-        )}
-      </div>
-
-      {err && <div className="empty">이 거점의 추천 산출물이 없다{/404/.test(err)
-        ? " — GNN 노드·엣지가 이 거점에는 아직 없다."
-        : <> — <code>{err}</code></>}</div>}
+      <div className="chead"><h2>추천 업종 <span className="badge is-model">AI 추천</span></h2></div>
+      {err && <div className="empty">이 상권의 추천 정보를 제공할 수 없습니다.</div>}
       {!err && !rec && <div className="empty">추천 불러오는 중…</div>}
-      {stub && <div className="empty">Gold 미적재 폴백(<code>gnn-stub</code>) — 실측 추천이 아니다.</div>}
-      {rec && !stub && rec.recommendations.length === 0 && (
-        <div className="empty">이 거점에는 추천할 그래프 노드가 없다.</div>
-      )}
-
-      {rec && !stub && rec.recommendations.length > 0 && (
-        <>
-          <div className="recs">
-            {rec.recommendations.map((r, i) => (
-              <div key={r.industry} className={`recrow${i === 0 ? " top" : ""}`}>
-                <span className="rank">{i + 1}</span>
-                <span className="rind">{r.industry}</span>
-                <span className="rbar"><i style={{ width: `${(r.score / max) * 100}%` }} /></span>
-                <span className="rsc">{pct(r.score)}</span>
-              </div>
-            ))}
+      {stub && <div className="empty">예시 데이터입니다. 실제 입점 판단에 사용할 수 없습니다.</div>}
+      {rec && !stub && rec.recommendations.length === 0 && <div className="empty">이 상권의 추천 정보가 없습니다.</div>}
+      {rec && !stub && rec.recommendations.length > 0 && <>
+        <div className="recs">{rec.recommendations.map((r, i) => (
+          <div key={r.industry} className={`recrow${i === 0 ? " top" : ""}`}>
+            <span className="rank">{i + 1}</span><span className="rind">{r.industry}</span>
+            <span className="rbar"><i style={{ width: `${(r.score / max) * 100}%` }} /></span><span className="rsc">{pct(r.score)}</span>
           </div>
-          <div className="recnote">
-            상권 전체 노드의 평균이라 <b>이 플랫폼의 성향</b>을 뜻한다. 자리마다의 답은
-            위 「어느 자리에 어떤 업소가」가 좌표로 물어 온 것이다.
-          </div>
-
-          <div className="evid">
-            <div className="evidh">검증 근거 <span className="badge is-warn">prior 대비로 읽을 것</span></div>
-            <div className="row">
-              <span>Top-1 정확도 / 상권 사전확률</span>
-              <span>
-                {top1 != null ? pct(top1) : "—"} / {prior1 != null ? pct(prior1) : "—"}
-                {m?.lift_vs_district_prior_pct != null && <b> (+{m.lift_vs_district_prior_pct}%)</b>}
-              </span>
-            </div>
-            <div className="row">
-              <span>Top-3 정확도 / 상권 사전확률</span>
-              <span>
-                {top3 != null ? pct(top3) : "—"} / {prior3 != null ? pct(prior3) : "—"}
-                {lift3 != null && <b> (+{lift3.toFixed(1)}%)</b>}
-              </span>
-            </div>
-            {m?.test_offprior_top3 != null && (
-              <div className="row">
-                <span>사전확률과 답이 갈리는 자리의 Top-3</span>
-                <span className="worse">
-                  {pct(m.test_offprior_top3)}
-                  {m.offprior_nodes ? ` · ${m.offprior_nodes.toLocaleString()}노드` : ""}
-                </span>
-              </div>
-            )}
-            <div className="evidnote">
-              Top-3 만 보면 과대평가된다 — 상권에서 가장 흔한 업종 셋을 그냥 찍어도
-              {prior3 != null ? ` ${pct(prior3)}` : " 약 89%"} 다. 모델의 기여는 그 위의 lift 이고,
-              사전확률과 답이 갈리는 자리에서는
-              {m?.test_offprior_top3 != null ? ` ${pct(m.test_offprior_top3)}` : ""} 로 떨어진다.
-              그게 이 모델의 현재 한계다.
-            </div>
-          </div>
-        </>
-      )}
+        ))}</div>
+        <p className="recnote">상권 전체의 추천 점수이며 입점 성공 확률이 아닙니다. 개별 공간의 추천은 자리 목록에서 확인하세요.</p>
+      </>}
     </section>
   );
 }
@@ -1224,37 +936,14 @@ function zoneVacHex(v: number): string {
 }
 
 function SentimentSection({ zones, hub }: { zones: Zone[] | null; hub?: DistrictSummary }) {
-  // 감성을 실제로 가진 구역이 하나라도 있나. 지금은 어느 거점에도 없지만, 채널이
-  // 생기면 이 자리가 그대로 살아난다 — 값이 들어오면 화면이 저절로 그린다.
-  const scored = (zones ?? []).filter((z) => z.s !== null);
   return (
-    <Fold title="구역" badge="행정동 실측"
-      summary={zones === null
-        ? "구역 불러오는 중…"
-        : <>구역 {zones.length}개 · 거점 감성 <MeasuredValue value={hub?.sentiment ?? null} unit="pt" />
-          {scored.length === 0 && " (감성 채널 없음)"}</>}>
-      <div className="zonenote">
-        거점을 <b>행정동</b>으로 갈라 각 구역의 점포·건물·공실을 실측으로 센다. 구역 수가
-        거점마다 다른 것은(1~11개) <b>거점이 실제로 몇 개 행정동에 걸쳐 있느냐</b>가 정하기
-        때문이다 — 예전에 전 거점이 똑같이 6구역이던 것은 실측이 아니라 서식이었다.
-        공실률은 거점 대표값과 <b>같은 규칙</b>으로 세므로 구역 합계가 거점 값과 맞는다.
-        <br />
-        <b>감성 점수는 싣지 않는다.</b> 블로그 원문에 좌표가 없어 구역까지 내려오지 못하고,
-        점포명 귀속은 3.18%이며 부정어는 0.53%다(2026-08-25 실측). 좌표를 가진 점포 리뷰
-        채널이 생기기 전에는 못 재는 값이라, <b>공실률을 감성 자리에 옮겨 놓지 않았다.</b>
-      </div>
+    <Fold title="동네별 공실 현황" badge="행정동 실측"
+      summary={zones === null ? "구역 불러오는 중…" : `행정동 ${zones.length}개`}>
+      <div className="zonenote">행정동별 점포·건물 수와 공실률을 비교하세요.</div>
       {hub && <CaveatNote district={hub} />}
-      {hub && (
-        <div className="zonesum">
-          거점 감성 <MeasuredValue value={hub.sentiment} unit="pt" /> ·
-          리뷰 표본 {hub.reviews === null || hub.reviews === undefined
-            ? <span className="value-absent">없음</span> : `${hub.reviews.toLocaleString()}건`}
-          {scored.length === 0 && " — 감성 채널이 아직 없다"}
-        </div>
-      )}
       {!zones && <div className="empty">구역 불러오는 중…</div>}
       {zones && zones.length === 0 && (
-        <div className="empty">이 거점의 구역 산출물이 아직 없다 (build_district_zones 미실행).</div>
+        <div className="empty">이 상권의 동네별 정보가 아직 없습니다.</div>
       )}
       {zones && zones.length === 1 && (
         <div className="zonesum">이 거점은 <b>행정동 하나</b> 안에 있다 — 구역이 거점 전체와 같다.</div>
