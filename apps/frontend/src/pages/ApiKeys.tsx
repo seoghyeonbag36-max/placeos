@@ -12,7 +12,7 @@ import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
 import {
-  createApiKey, getMe, listApiKeys, revokeApiKey,
+  logoutSession, createApiKey, getMe, listApiKeys, revokeApiKey,
   type ApiKeyCreated, type ApiKeyInfo, type AuthMe,
 } from "@/lib/api";
 import { apiKeyErrorText, isSessionExpired, SESSION_EXPIRED_TEXT } from "@/lib/authText";
@@ -74,9 +74,10 @@ export default function ApiKeys({ go }: AccountScreenProps) {
     return () => { alive = false; };
   }, [token, onLoaded, onLoadError]);
 
-  function logout() {
-    clearToken();
-    go("login");
+  async function logout() {
+    if (!token) return;
+    try { await logoutSession(token); clearToken(); go("login"); }
+    catch { setActionError("로그아웃하지 못했습니다. 다시 시도해 주세요."); }
   }
 
   async function issue(e: FormEvent) {
@@ -141,7 +142,7 @@ export default function ApiKeys({ go }: AccountScreenProps) {
         <p className="acct-lede">조직 API 키를 보려면 로그인해 주세요. 키는 외부 시스템이 분석 API 를 부를 때(X-API-Key 헤더) 조직을 밝히는 데 씁니다.</p>
         <div className="acct-actions">
           <Button onClick={() => go("login")}>로그인</Button>
-          <Button variant="ghost" onClick={() => go("signup")}>조직 가입</Button>
+          <Button variant="ghost" onClick={() => go("signup")}>회원가입</Button>
         </div>
       </div>
     );

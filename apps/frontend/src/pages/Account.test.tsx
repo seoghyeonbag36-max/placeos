@@ -12,7 +12,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import App from "@/App";
+import { WorkspaceApp } from "@/App";
+const App = () => <WorkspaceApp token="jwt.test.token" initialBusiness={{ status: "browsing" }} />;
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import ApiKeys from "@/pages/ApiKeys";
@@ -33,6 +34,32 @@ afterEach(() => { try { window.sessionStorage.clear(); } catch { /* 막힌 환�
 
 const type = (label: string | RegExp, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
+
+it("로그아웃은 서버 토큰을 폐기한 뒤 로컬 세션을 지운다", async () => {
+  saveToken(TOKEN);
+  const api = installFetchStub([
+    { match: /auth\/me$/, body: ME },
+    { match: /auth\/api-keys$/, body: [] },
+    { match: /auth\/logout$/, body: { ok: true } },
+  ]);
+  render(<ApiKeys go={vi.fn()} />);
+  fireEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
+  await waitFor(() => expect(loadToken()).toBeNull());
+  expect(api.matching(/auth\/logout$/)[0].headers.Authorization).toBe(`Bearer ${TOKEN}`);
+});
+
+it("서버 로그아웃이 실패하면 완료한 것으로 표시하지 않는다", async () => {
+  saveToken(TOKEN);
+  installFetchStub([
+    { match: /auth\/me$/, body: ME },
+    { match: /auth\/api-keys$/, body: [] },
+    { match: /auth\/logout$/, status: 503 },
+  ]);
+  render(<ApiKeys go={vi.fn()} />);
+  fireEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
+  expect(await screen.findByText("로그아웃하지 못했습니다. 다시 시도해 주세요.")).toBeTruthy();
+  expect(loadToken()).toBe(TOKEN);
+});
 
 describe("Login — #login", () => {
   it("성공하면 토큰을 세션에 두고 키 화면으로 간다 · 비밀번호는 POST 본문에만 실린다", async () => {
@@ -80,16 +107,16 @@ describe("Signup — #signup", () => {
   it("8자 미만 비밀번호와 확인 불일치는 서버를 부르지 않고 화면에서 막는다", () => {
     const api = installFetchStub([]);
     render(<Signup go={vi.fn()} />);
-    type("조직 이름", "테스트자산운용");
+    type("사업 이름 또는 작업 공간 이름", "테스트자산운용");
     type("이메일", "ops@example.com");
     type("비밀번호", "short");
     type("비밀번호 확인", "short");
-    fireEvent.click(screen.getByRole("button", { name: "조직 만들고 가입" }));
+    fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
     expect(screen.getByRole("alert").textContent).toBe("비밀번호는 8자 이상이어야 합니다.");
 
     type("비밀번호", "pw-12345678");
     type("비밀번호 확인", "pw-87654321");
-    fireEvent.click(screen.getByRole("button", { name: "조직 만들고 가입" }));
+    fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
     expect(screen.getByRole("alert").textContent).toBe("비밀번호 확인이 일치하지 않습니다.");
     expect(api.calls).toHaveLength(0);
   });
@@ -98,11 +125,11 @@ describe("Signup — #signup", () => {
     const api = installFetchStub([{ match: /\/auth\/signup$/, status: 201, body: { access_token: TOKEN, token_type: "bearer" } }]);
     const go = vi.fn();
     render(<Signup go={go} />);
-    type("조직 이름", "  테스트자산운용 ");
+    type("사업 이름 또는 작업 공간 이름", "  테스트자산운용 ");
     type("이메일", "ops@example.com");
     type("비밀번호", "pw-12345678");
     type("비밀번호 확인", "pw-12345678");
-    fireEvent.click(screen.getByRole("button", { name: "조직 만들고 가입" }));
+    fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
 
     await waitFor(() => expect(go).toHaveBeenCalledWith("account"));
     expect(api.calls[0].url).toBe("/api/v1/auth/signup");
@@ -114,11 +141,11 @@ describe("Signup — #signup", () => {
     installFetchStub([{ match: /\/auth\/signup$/, status: 409, body: { detail: "이미 가입된 이메일입니다" } }]);
     const go = vi.fn();
     render(<Signup go={go} />);
-    type("조직 이름", "테스트자산운용");
+    type("사업 이름 또는 작업 공간 이름", "테스트자산운용");
     type("이메일", "ops@example.com");
     type("비밀번호", "pw-12345678");
     type("비밀번호 확인", "pw-12345678");
-    fireEvent.click(screen.getByRole("button", { name: "조직 만들고 가입" }));
+    fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("이미 가입된 이메일입니다. 이 이메일로 로그인해 주세요.");
@@ -246,8 +273,8 @@ describe("App — 레일 「계정」과 #account", { timeout: 60000 }, () => {
     expect(window.location.hash).toBe("#account");
 
     const dialog = await screen.findByRole("dialog", { name: "API 키" }, ACCOUNT_LOAD);
-    fireEvent.click(within(dialog).getByRole("button", { name: "조직 가입" }));
-    expect(await screen.findByRole("dialog", { name: "조직 가입" }, ACCOUNT_LOAD)).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole("button", { name: "회원가입" }));
+    expect(await screen.findByRole("dialog", { name: "회원가입" }, ACCOUNT_LOAD)).toBeTruthy();
     expect(window.location.hash).toBe("#signup");
 
     fireEvent.click(screen.getByRole("button", { name: "계정 창 닫기" }));

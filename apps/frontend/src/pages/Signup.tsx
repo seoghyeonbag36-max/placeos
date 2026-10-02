@@ -27,7 +27,7 @@ export default function Signup({ go }: AccountScreenProps) {
   const [registered, setRegistered] = useState(false);
 
   function check(): string {
-    if (!orgName.trim()) return "조직 이름을 적어 주세요.";
+    if (!orgName.trim()) return "사업 이름 또는 작업 공간 이름을 적어 주세요.";
     if (!email.trim()) return "이메일을 적어 주세요.";
     if (password.length < PASSWORD_MIN) return `비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`;
     if (password !== confirm) return "비밀번호 확인이 일치하지 않습니다.";
@@ -59,16 +59,14 @@ export default function Signup({ go }: AccountScreenProps) {
   return (
     <div className="acct">
       <p className="acct-eyebrow">PlaceOS 계정</p>
-      <h2 id={ACCOUNT_TITLE_ID}>조직 가입</h2>
+      <h2 id={ACCOUNT_TITLE_ID}>회원가입</h2>
       <p className="acct-lede">
-        가입하면 조직이 하나 만들어지고, 가입한 분이 그 조직의 <strong>관리자</strong>가 됩니다.
-        관리자는 연동에 쓸 API 키를 발급·폐기할 수 있습니다. 혼자 창업을 준비하신다면 상호나
-        「이름 + 창업 준비」를 조직 이름으로 적으면 됩니다.
+        창업을 준비하는 사업 이름을 적어 주세요. 아직 상호가 없다면 직접 정한 작업 공간 이름을 사용할 수 있습니다. 사업 정보는 로그인 후 입력합니다.
       </p>
 
       <form className="acct-form" method="post" noValidate onSubmit={submit}>
         <label className="acct-field">
-          <span>조직 이름</span>
+          <span>사업 이름 또는 작업 공간 이름</span>
           <input name="organization" autoComplete="organization" required maxLength={ORG_NAME_MAX}
             placeholder="예: ○○커피 · ○○ 창업 준비" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
         </label>
@@ -98,7 +96,7 @@ export default function Signup({ go }: AccountScreenProps) {
             )}
           </div>
         )}
-        <Button type="submit" disabled={pending} aria-busy={pending}>{pending ? "가입 중…" : "조직 만들고 가입"}</Button>
+        <Button type="submit" disabled={pending} aria-busy={pending}>{pending ? "가입 중…" : "회원가입"}</Button>
       </form>
 
       <p className="acct-switch">

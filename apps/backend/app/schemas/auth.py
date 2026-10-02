@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from typing import Literal
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class SignupRequest(BaseModel):
@@ -51,3 +52,31 @@ class ApiKeyOut(BaseModel):
 
 class ApiKeyCreatedResponse(ApiKeyOut):
     key: str = Field(description="원문 키. 이 응답에서만 볼 수 있고 서버에 저장되지 않는다")
+
+
+class BusinessProfile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    goal: Literal["start", "pivot", "move"]
+    industryKey: str = Field(min_length=1, max_length=200)
+    homeDistrictId: str | None = Field(default=None, max_length=200)
+    businessName: str | None = Field(default=None, max_length=200)
+    description: str | None = Field(default=None, max_length=3000)
+
+    @model_validator(mode="after")
+    def require_district(self) -> "BusinessProfile":
+        if self.goal != "start" and not self.homeDistrictId:
+            raise ValueError("현재 상권이 필요합니다")
+        return self
+
+
+class BusinessWorkspaceData(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    status: Literal["unset", "browsing", "set"]
+    profile: BusinessProfile | None = None
+    source: Literal["user_input"] = "user_input"
+
+    @model_validator(mode="after")
+    def require_profile(self) -> "BusinessWorkspaceData":
+        if (self.status == "set") != (self.profile is not None):
+            raise ValueError("설정 상태와 사업 정보가 일치해야 합니다")
+        return self

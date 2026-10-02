@@ -1158,3 +1158,11 @@ export function getAdminPmf(adminToken: string): Promise<AdminPmf> {
 export function getAdminPilotW4(adminToken: string): Promise<AdminPilotW4> {
   return adminGet<AdminPilotW4>("/admin/pilot-w4", adminToken);
 }
+
+
+/** 개인 사업 정보는 인증된 요청만 보낸다. */
+export const getBusinessWorkspace = (token: string) =>
+  authRequest<import("./businessProfile").BusinessState>("GET", "/workspace", { token });
+export const saveBusinessWorkspace = (token: string, body: import("./businessProfile").BusinessState) =>
+  authRequest<import("./businessProfile").BusinessState>("POST", "/workspace", { token, body });
+export const logoutSession = (token: string) => authRequest<{ ok: boolean }>("POST", "/logout", { token });

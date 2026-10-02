@@ -204,3 +204,51 @@ def test_api_key_resolves_to_org_and_stops_after_revoke():
             "폐기된 키가 계속 통과하면 폐기가 의미 없다"
     finally:
         db.close()
+
+
+def test_signup():
+    assert _signup().status_code == 201
+
+
+def test_login():
+    _signup()
+    assert client.post("/api/v1/auth/login", json={"email": "owner@acme.com", "password": "hunter2hunter"}).status_code == 200
+
+
+def test_logout():
+    headers = _auth()
+    assert client.post("/api/v1/auth/logout", headers=headers).status_code == 200
+    assert client.get("/api/v1/auth/me", headers=headers).status_code == 401
+    assert client.get("/api/v1/auth/workspace", headers=headers).status_code == 401
+
+
+def test_user_workspace_isolation():
+    a, b = _auth("a@acme.com"), _auth("b@acme.com")
+    data = {"status": "set", "profile": {"goal": "start", "industryKey": "coffee", "homeDistrictId": None, "businessName": "내 카페", "description": "동네 주민을 위한 카페"}}
+    assert client.post("/api/v1/auth/workspace", headers=a, json=data).status_code == 200
+    assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == data["profile"]
+    assert client.get("/api/v1/auth/workspace", headers=b).json()["status"] == "unset"
+    assert client.get("/api/v1/auth/workspace").status_code == 401
+    assert client.post("/api/v1/auth/workspace", headers=b, json={**data, "user_id": "someone-else"}).status_code == 422
+    assert client.get("/api/v1/auth/workspace", headers=a).json()["source"] == "user_input"
+    # 같은 조직에 속해도 개인 사업 정보는 공유되지 않는다.
+    from app.models.auth import Membership
+    from app.core.security import create_access_token
+    me_a = client.get("/api/v1/auth/me", headers=a).json()
+    me_b = client.get("/api/v1/auth/me", headers=b).json()
+    with _TestSession() as db:
+        db.add(Membership(user_id=me_b["user_id"], org_id=me_a["org"]["id"], role="member"))
+        db.commit()
+    shared_org_token = create_access_token(me_b["user_id"], me_a["org"]["id"])
+    assert client.get("/api/v1/auth/workspace", headers={"Authorization": f"Bearer {shared_org_token}"}).json()["status"] == "unset"
+
+
+def test_workspace_missing_profile_rejected():
+    assert client.post("/api/v1/auth/workspace", headers=_auth(), json={"status": "set"}).status_code == 422
+
+
+def test_login_after_logout_issues_fresh_token():
+    headers = _auth()
+    client.post("/api/v1/auth/logout", headers=headers)
+    token = client.post("/api/v1/auth/login", json={"email": "key@acme.com", "password": "hunter2hunter"}).json()["access_token"]
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200

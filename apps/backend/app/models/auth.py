@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
@@ -89,3 +89,16 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String(50))
     detail: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class BusinessWorkspace(Base):
+    """사용자가 직접 입력한 개인 사업 정보. 조직 멤버 사이에도 공유하지 않는다."""
+    __tablename__ = "business_workspaces"
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    data: Mapped[dict[str, object]] = mapped_column(JSON)
+
+
+class RevokedToken(Base):
+    """로그아웃한 JWT의 해시만 저장한다."""
+    __tablename__ = "revoked_tokens"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)

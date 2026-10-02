@@ -7,15 +7,16 @@ districts·ai·...)는 이 라우터와 무관하게 그대로 공개로 남는�
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.core.security import CurrentUser, create_access_token, get_current_user
+from app.core.security import CurrentUser, create_access_token, get_current_user, _bearer
 from app.schemas.auth import (
     ApiKeyCreatedResponse, ApiKeyCreateRequest, ApiKeyOut, LoginRequest, MeResponse,
-    OrgOut, SignupRequest, TokenResponse,
+    OrgOut, SignupRequest, TokenResponse, BusinessWorkspaceData,
 )
-from app.services import auth_service
+from app.services import auth_service, business_workspace
 
 router = APIRouter()
 
@@ -90,3 +91,24 @@ def revoke_api_key(key_id: str,
     except auth_service.ApiKeyNotFound:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "키를 찾을 수 없습니다")
     return ApiKeyOut.model_validate(rec)
+
+
+@router.get("/workspace", response_model=BusinessWorkspaceData)
+def get_workspace(current: CurrentUser = Depends(get_current_user),
+                  db: Session = Depends(get_db)) -> BusinessWorkspaceData:
+    return business_workspace.load(db, current.user.id)
+
+
+@router.post("/workspace", response_model=BusinessWorkspaceData)
+def save_workspace(req: BusinessWorkspaceData,
+                   current: CurrentUser = Depends(get_current_user),
+                   db: Session = Depends(get_db)) -> BusinessWorkspaceData:
+    return business_workspace.save(db, current.user.id, req)
+
+
+@router.post("/logout")
+def logout(current: CurrentUser = Depends(get_current_user),
+           creds: HTTPAuthorizationCredentials = Depends(_bearer),
+           db: Session = Depends(get_db)) -> dict[str, bool]:
+    business_workspace.logout(db, creds.credentials)
+    return {"ok": True}
