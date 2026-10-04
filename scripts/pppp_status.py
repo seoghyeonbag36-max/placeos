@@ -1194,11 +1194,19 @@ def posting_track(total: int) -> Track:
         "**남은 자리**: KOSIS 축에서 프리미엄을 밀어 올릴 레버는 없다고 본다. 인벤토리 수준 "
         "비교는 층·모집단이 양변에서 상쇄되는 **R-ONE 축 `location_premium()`** 으로 할 것. "
         "폴백은 garak 1곳 5유닛뿐이고 "
-        "`area_basis`·`revenue_basis` 로 어느 모델이 돌았는지 드러난다",
+        "`area_basis`·`revenue_basis` 로 어느 모델이 돌았는지 드러난다. "
+        "⚠ **2026-10-04 정정 — 위 '트립와이어 `>0` 그대로'와 '폴백 garak 1곳 5유닛뿐'은 54거점 "
+        "시절 서술이다.** 매출 산출물이 54거점에 머문 채 서빙이 81이 되어 시드 밖 27거점이 폴백을 "
+        "탔다(313/840유닛·37% — 마진 중앙 76.6%·회수 1.1개월, 근거 없는 계수가 만든 값). 81거점으로 "
+        "재빌드해 지금은 실측 79거점·827/840유닛이고 폴백은 garak·bulgwang 13유닛이다. 부호 검사는 "
+        "'거점 임대료 서열' 검사로 대체했다 — 임계값을 낮춘 것이 아니다(§0-X). ⚠ 이 게이트의 100% 는 "
+        "'비용 모델이 보정됐다'이지 '전 거점이 실측 모델을 탄다'가 아니다 — 후자는 "
+        "`test_revenue_artifact_covers_served_hubs` 가 지킨다(자동 게이트는 아직 없다)",
         auto=False,
-        evidence=("docs/feature-posting.md §0-I · services/posting_revenue.py · "
+        evidence=("docs/feature-posting.md §0-I · §0-X · services/posting_revenue.py · "
                   "data/pipelines/build_posting_store_area.py · "
-                  "apps/backend/tests/test_posting_revenue.py (20건) · "
+                  "data/pipelines/build_posting_revenue.py · "
+                  "apps/backend/tests/test_posting_revenue.py (22건) · "
                   "data/config/rone_districts.benchmark_scope · "
                   "scripts/posting_cost_sensitivity.py::_shipped"),
     ))
