@@ -1,8 +1,14 @@
 {
-  "started": "2026-09-29T00:03:46",
+  "started": "2026-10-04T09:57:11",
   "claims": "docs/apply/claims.json",
   "require_complete": false,
   "docs": [
+    {
+      "doc": "docs/apply/04-fintech/draft.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
     {
       "doc": "docs/apply/09-digitalsolveup/draft.md",
       "fill_remaining": 0,
