@@ -142,6 +142,10 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 ① 조직 이름이 `[내부]` 로 시작(앞으로의 시험 가입) ② Cloud Run 환경변수 `KPI_EXCLUDE_ORG_IDS`
 (이미 있는 조직, 쉼표 구분 org id). 뺀 수는 두 응답의 `excluded_orgs` 로 드러나고, #admin 의
 「KPI③」 칸이 폰에서 그대로 보여 준다. 판정 기준(`min_responses` 등)은 바뀌지 않았다.
+⚠ **프로덕션 `pilot_feedback` 표는 2026-10-04 에야 생겼다.** 09-16 PMF 리비전(`a1b2c3d4e5f6`)이
+그날까지 Neon 에 적용된 적이 없었다(alembic 은 배포에 안 묶여 있다). 그래서 **09-16~10-04 의 응답 0 은
+무응답이 아니라 저장할 곳이 없던 배선 결손**이다 — 이 구간을 "파일럿 반응 없음"으로 읽지 말 것.
+KPI③ 의 관측 기간은 10-04 부터다 → docs/deploy-cloud-run.md §2026-10-04
 
 ## Preferences
 - 결과물: **Word(.docx)** 선호 (표·그래프 포함, 핵심 요약 + 상세 분석)
