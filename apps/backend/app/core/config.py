@@ -18,10 +18,7 @@ DEV_JWT_SECRET = "dev-only-change-me"
 
 # 플랫폼이 **스스로** 심는 프로덕션 표식. 사람이 넣는 APP_ENV 가 없어도 이걸로 알아본다.
 #   K_SERVICE  Cloud Run 이 컨테이너에 자동 주입하는 서비스명 (현행 프로덕션, 2026-08-28~)
-#   VERCEL     Vercel 이 자동 주입하던 표식 (2026-08-28 프로덕션에서 내려옴 · 이력)
-# ⚠ Vercel 을 지우지 않는 이유: 표식이 남아 있어도 해가 없고, 지우면 옛 배포가 되살아났을 때
-#   가드가 조용히 통과한다. 표식은 **더하는 쪽**이 안전하다.
-_PROD_PLATFORM_MARKERS = ("K_SERVICE", "VERCEL")
+_PROD_PLATFORM_MARKERS = ("K_SERVICE",)
 
 
 def _detect_env() -> str:
@@ -31,8 +28,8 @@ def _detect_env() -> str:
     가드가 조용히 통과한다. 이 저장소가 반복해 잡아 온 실패 양식(설정은 있는데 안 읽는다ㆍ
     폴백이 고장을 가린다)과 같은 모양이라, 플랫폼이 스스로 심는 표식을 먼저 본다.
 
-    ⚠ **2026-09-15 정정 — 표식이 `VERCEL` 하나뿐이었다.** 프로덕션은 2026-08-28 에
-    Cloud Run 으로 옮겼는데 Cloud Run 은 `VERCEL` 을 넣지 않는다. 지금은 `Dockerfile` 이
+    ⚠ **2026-09-15 정정 — 표식이 옛 호스팅 것 하나뿐이었다.** 프로덕션은 2026-08-28 에
+    Cloud Run 으로 옮겼는데 Cloud Run 은 그 표식을 넣지 않는다. 지금은 `Dockerfile` 이
     `ENV APP_ENV=prod` 를 박아 두어 가드가 살아 있지만, 그 한 줄이 이 함수의 **유일한**
     방어선이 되어 있었다 — 이미지를 그대로 쓰면서 APP_ENV 를 덮거나(`docker run -e`),
     같은 이미지로 서비스를 새로 만들면서 환경변수를 안 옮기면 자동 판정이 `dev` 로 떨어져
@@ -59,7 +56,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://spaceos:spaceos@localhost:5432/spaceos"
     # Redis (캐싱 / Celery 브로커)
     redis_url: str = "redis://localhost:6379/0"
-    # dev | prod. 미지정 시 _detect_env() 가 플랫폼 표식(K_SERVICE·VERCEL)으로 판정한다.
+    # dev | prod. 미지정 시 _detect_env() 가 플랫폼 표식(K_SERVICE)으로 판정한다.
     app_env: str = ""
     # 계정층 JWT — 기본값은 로컬 개발용이다. 배포 환경은 .env 로 반드시 덮어쓸 것
     # (기본값 그대로 배포하면 누구나 토큰을 위조할 수 있다). prod 에서는 기동이 실패한다.
