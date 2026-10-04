@@ -1,5 +1,9 @@
 """LSTM 확정 감시(scripts/lstm_confirm_watch.py)와 그 받침 — 네트워크·작업 스케줄러 없이.
 
+⚠ CI 의 데이터 잡은 data/requirements.txt(requests·pyproj·pyshp)만 깐다 — pandas 를 모듈 맨 위에서
+임포트하면 수집 단계에서 잡 전체가 멈춘다(2026-10-04 #83 첫 CI). pandas 가 필요한 Gold 관문 테스트만
+importorskip 으로 빠지고, 나머지는 거기서도 돈다.
+
 무인으로 도는 코드라 틀리면 아무도 모른다. 그래서 세 가지를 테스트로 묶는다:
 '언제 돌고 언제 안 도는가'(decide · gold_check), '무엇을 돌리는가'(사전등록 그리드만),
 '공표 판정을 어떻게 읽는가'(2026-10-04 실측 응답 모양).
@@ -12,7 +16,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -116,6 +119,7 @@ FEATS = ("vac_proxy", "vac_small")
 
 
 def _frame(rows):
+    pd = pytest.importorskip("pandas")
     return pd.DataFrame(rows, columns=["district_id", "quarter", *FEATS])
 
 
