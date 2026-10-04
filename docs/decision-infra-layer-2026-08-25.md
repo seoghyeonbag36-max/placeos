@@ -192,7 +192,7 @@ Platform off-prior 축이 완전히 닫히면서(`feature-platform.md` §0-N·§
 
 | # | 작업 | 무엇을 푸는가 |
 |---|---|---|
-| 1 | **prod 비밀값 가드** (`core/config.py`) | `JWT_SECRET` 이 개발 기본값이면 prod 기동 실패(fail closed). `APP_ENV` 미지정 시 `VERCEL` 표식으로 자동 판정 |
+| 1 | **prod 비밀값 가드** (`core/config.py`) | `JWT_SECRET` 이 개발 기본값이면 prod 기동 실패(fail closed). `APP_ENV` 미지정 시 플랫폼 표식(`K_SERVICE`)으로 자동 판정 |
 | 2 | **API 키 발급·목록·폐기** (`/api/v1/auth/api-keys`) | B2B 연동의 표준 접근 수단. 조직 단위라 담당자가 바뀌어도 안 끊긴다 |
 | 3 | **선택적 인증 + 사용량 계측** (`api/deps.track_access`) | 파일럿이 무엇을 얼마나 썼나 = KPI② 의 원천 데이터 |
 | 4 | **관측 창구** (`GET /api/v1/admin/usage`) + `pppp_status` KPI② 블록 | 재는 자리를 만들고, 진행률이 KPI 절반만 말한다는 사실을 출력에 드러냈다 |
