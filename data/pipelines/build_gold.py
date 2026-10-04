@@ -652,7 +652,11 @@ def run_platform13() -> None:
 if __name__ == "__main__":
     import sys
 
-    if "--platform13" in sys.argv:
+    if "--platform13-timeseries" in sys.argv:
+        # LSTM 입력 하나만 다시 만든다(2026-10-04 · scripts/lstm_confirm_watch.py). `--platform13`
+        # 은 Program 컨텍스트 CSV 까지 다시 써서 trend·demand 빌더를 그 뒤에 다시 돌려야 한다.
+        build_platform13_timeseries()
+    elif "--platform13" in sys.argv:
         run_platform13()
     else:
         run()

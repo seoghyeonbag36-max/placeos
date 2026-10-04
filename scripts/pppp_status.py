@@ -421,6 +421,24 @@ def page_track(total: int) -> Track:
 # 실제 기준이 '평균 쪽'·'거점 평균'일 때 이름과 근거 줄이 서로 다른 말을 했다.
 # 어느 규칙이 강했는지는 kpi_baseline 결과의 `baseline_label` 에서 읽어 └ 줄에 싣는다.
 # 이 문자열은 게이트 키다 — 바꾸면 data/tests/test_kpi_baseline.py 의 접두사 대조도 본다.
+# LSTM 확정 감시(scripts/lstm_confirm_watch.py, 2026-10-04)의 마지막 상태. 게이트 값은 바꾸지
+# 않고 `확인대기` 설명에 한 줄만 붙인다 — "기다리고 있다"와 "아무도 안 기다린다"를 가른다.
+_CONFIRM_WATCH_STATE = ROOT / "data" / "logs" / "lstm-confirm-watch.state.json"
+_WATCH_LABEL = {"waiting": "미공표", "launched": "공표 확인 · 파이프라인 기동",
+                "running": "파이프라인 실행 중", "done": "확정 실행 완료", "failed": "파이프라인 실패"}
+
+
+def _confirm_watch_note(path: Path = _CONFIRM_WATCH_STATE) -> str:
+    try:
+        st = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return " · 감시 없음 — `python scripts/lstm_confirm_watch.py --install` 로 건다"
+    s = str(st.get("status", "?"))
+    when = str(st.get("last_check") or st.get("finished") or "")[:16].replace("T", " ")
+    tail = f" → {st['report']}" if st.get("report") and s in ("done", "failed") else ""
+    return f" · 감시: {st.get('target', '?')} {_WATCH_LABEL.get(s, s)}({when}){tail}"
+
+
 _LSTM_DIR_GATE = "KPI 공실예측 **방향** 실력 (vs 무정보 기준 · 강한 쪽)"
 _LSTM_ERR_GATE = "KPI 공실예측 **오차** 실력 (vs 무정보 기준 · 강한 쪽)"
 
@@ -530,6 +548,8 @@ def platform_track() -> Track:
             f"§0-B ③)에 따라 게이트는 {cf['after']} **이후** 분기 holdout {cf['n_fresh']}건으로 "
             f"판정한다 → 방향 **{d['gate_verdict']}** · 오차 **{e['gate_verdict']}**"
             if cf else "")
+        if cf and not cf.get("n_fresh"):
+            conf_note += _confirm_watch_note()
         # 2026-09-30: 어느 규칙이 기준이었는지는 게이트 이름이 아니라 이 설명 줄이 말한다.
         # 이름은 기준 체계와 무관하게 고정한다(#56 개정 뒤 "vs 무정보 상수"가 '평균 쪽'
         # 기준일 때도 찍혀 있었다).

@@ -95,6 +95,15 @@ test_quarters, val_quarters, target_mode)`. CLI 는 `--test-quarters` · `--val-
 `protocol.confirm_after = "20262"` **이후 분기** holdout 으로만 판정하고, 그런 표본이 없으면
 `확인대기`다. 이번 시행이 어떻게 나와도 Platform 진행률은 2026Q3 데이터 전에는 바뀌지 않는다.
 
+> **무인 배선(2026-10-04)** — 확정 재학습은 `scripts/lstm_confirm_watch.py` 가 건다. 기다릴 분기 =
+> 서빙 forecast holdout 의 마지막 분기 다음(지금 20263). TRDAR 점포·추정매출 + R-ONE 현행 통계표 셋이
+> **모두** 공표돼야 진행하고, 이 문서 §7 의 명령(`train_lstm --grid reg-0928` → `kpi_baseline`)을 그대로
+> 돈다 — 그리드·선택 규칙·판정 코드는 바꾸지 않는다. 수집 뒤 Gold 가 줄었거나(부분 수집본) 그 분기 행이
+> 거점의 90% 미만이면 학습하지 않고 멈춘다. 결과는 `reports/lstm_confirm_<분기>_<날짜>.json` 에 남고
+> **커밋·배포·⑥은 사람 몫**이다. 같은 날 발견해 함께 고친 것: `QUARTERS` 가 2026Q2 에 손으로 박혀 있어
+> 20263 이 공표돼도 수집기가 묻지 않았다(→ 끝난 분기까지 자동) · R-ONE 수집기가 이 노트북에서
+> `CERTIFICATE_VERIFY_FAILED` 로 막혔다(→ certifi 신뢰 저장소).
+
 ## 6. 레버 2 와의 분기점
 
 **§4 에서 레버 기각(후보 0/16)이면 레버 2 로 간다** — 목표 `vac_proxy`(폐업률−개업률−점포증감)

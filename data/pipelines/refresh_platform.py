@@ -9,7 +9,11 @@
 소요 실측(2026-07-24 · 33거점): 수집 35분(stor 119코드×21분기가 대부분) + 빌드·학습 7분
 (gold 25s · 엣지 29s · LSTM 170s · GNN 130s).
 
-주의: data/config/platform_districts.py 의 QUARTERS 에 새 분기를 추가한 뒤 실행할 것.
+분기: data/config/platform_districts.QUARTERS 가 **끝난 분기까지 자동으로** 늘어난다(2026-10-04 —
+      종전에는 손으로 추가해야 했고, 2026Q2 에 박혀 있었다).
+⚠ LSTM 확정(사전등록 confirm_after 이후 분기)은 이 스크립트가 아니라
+  scripts/lstm_confirm_watch.py 로 돈다 — 여기 LSTM 단계는 기본 그리드라 사전등록 그리드
+  (reg-0928)와 다르고, GNN 재학습·블로그 수집까지 끼어 있다.
 """
 from __future__ import annotations
 
