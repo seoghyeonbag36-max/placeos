@@ -14,9 +14,6 @@ description: 프로덕션 배포 — main 푸시로 도는 Cloud Run 자동 배�
 프론트(Vite 정적)와 백엔드(FastAPI)가 **컨테이너 하나**다. `api.ts` 가 `/api/v1` 을
 상대경로로 박고 있어 호스트를 쪼개면 프론트가 통째로 깨진다.
 
-⚠ **Vercel 을 쓰지 않는다** — 2026-08-28 내려왔다(무료 플랜 상업적 사용 금지).
-`vercel --prod` 금지. `docs/deploy-vercel.md` 는 이력으로만 남겼다.
-
 ## 절차
 
 ```bash

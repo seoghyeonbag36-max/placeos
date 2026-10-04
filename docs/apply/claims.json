@@ -340,12 +340,6 @@
       "instead": "2D 층 스택 + 네이버 거리뷰"
     },
     {
-      "id": "F_VERCEL",
-      "pattern": "Vercel|vercel",
-      "why": "2026-08-28 프로덕션에서 내려왔다(무료 플랜 상업적 사용 금지). 현재 프로덕션은 Cloud Run + Firebase Hosting 이다",
-      "instead": "placeos.web.app (Cloud Run + Firebase Hosting)"
-    },
-    {
       "id": "F_PILOT_CLAIM",
       "pattern": "(파일럿|고객사|도입사|레퍼런스)\\s*\\d+\\s*(건|개|곳|사)\\s*(확보|달성|운영|진행|보유)",
       "why": "계측 배선은 4/4로 서 있으나 실적은 미확인이다. 배선 100%는 파일럿 0건과 양립한다",

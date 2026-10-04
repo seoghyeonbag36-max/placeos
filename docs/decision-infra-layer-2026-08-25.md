@@ -15,7 +15,7 @@
 >
 > | 행 | 08-25 스냅샷 | 지금 |
 > |---|---|---|
-> | **서빙 API** | Vercel 서버리스 1함수(`api/index.py`) | **Cloud Run 단일 컨테이너**(`Dockerfile` → `app.main:app`). Vercel 은 2026-08-28 프로덕션에서 내려왔다(무료 플랜 상업적 사용 금지). `api/index.py` 는 CI 의 최소 의존성 계약용으로만 남았다 → `deploy-cloud-run.md` |
+> | **서빙 API** | 서버리스 1함수(`api/index.py`) | **Cloud Run 단일 컨테이너**(`Dockerfile` → `app.main:app`). 2026-08-28 에 옮겼다. `api/index.py` 는 CI 의 최소 의존성 계약용으로만 남았다 → `deploy-cloud-run.md` |
 > | **프론트** | 화면 4개(MapShell·PageDashboard·ProgramStudio·SeoulDashboard) | 화면 6개(**MapShell · PlatformConsole · PostingConsole · ProgramStudio** + PageDashboard(`#board`) · AdminCoverage(`#admin`)). `SeoulDashboard` 는 서울·거점 탭과 함께 삭제됐다(2026-09-13) |
 > | **DB** | ⛔ 없다 (ORM 모델 0개) | ◐ **계정·조직·사용량 층만 선다**(`app/models/auth.py` · Alembic, 2026-08-26 도입). 분석 산출물은 여전히 Gold 파일 직독이라 DB 를 안 탄다 |
 > | **CI/CD** | ◐ CI 만 섰다 · CD 는 없다 | ✅ **CD 도 섰다**(2026-08-28 `.github/workflows/deploy.yml` — main 푸시 → 테스트 → 빌드 → Cloud Run → 검증, WIF 로 장기 키 없음) |
@@ -27,7 +27,7 @@
 
 | 층 | 실태 | 근거 |
 |---|---|---|
-| **서빙 API** | ✅ 선다 | FastAPI + Gold 파일 직독. Vercel 서버리스 1함수(`api/index.py`) |
+| **서빙 API** | ✅ 선다 | FastAPI + Gold 파일 직독. 서버리스 1함수(`api/index.py`) |
 | **프론트** | ◐ 선다 | 화면 4개(MapShell·PageDashboard·ProgramStudio·SeoulDashboard). **라우터 없음** — `App.tsx` 가 상태로 화면을 가른다 |
 | **DB** | ⛔ **없다** | `app/models/` 에 `__init__.py` 뿐. ORM 모델 0개 · 마이그레이션 0건 |
 | **PostgreSQL/PostGIS·Redis·Celery** | ⛔ **코드에 없다** | `requirements.txt` 에만 있다. `app/` 전체에서 import 0건 |
@@ -115,7 +115,7 @@ DB 를 **분석 데이터용이 아니라 사용자 데이터용**으로만 도�
    ⚠ **CI 를 세우려다 실제 결함을 하나 찾았다.**
    `data/gold/platform_posting_store_area.json`(914B · 공정위 기반 평균 점포 면적 A)이
    `.gitignore` 에 걸려 **추적되지 않고 있었다** — 형제 세 파일에는 전부 `!` 예외가
-   있는데 이것만 빠져 있었다. 새로 클론한 환경(CI·Vercel)에는 파일이 없어
+   있는데 이것만 빠져 있었다. 새로 클론한 환경(CI)에는 파일이 없어
    `posting_revenue` 가 임차료 **역산 폴백**으로 내려간다(§0-I 가 "한식집 7.1평은
    실물이 아니었다"며 기각한 모델이다). 로컬에는 파일이 있어 **개발 기계에서는
    영원히 안 드러난다.** 예외를 추가해 추적으로 돌렸고,
@@ -178,7 +178,7 @@ DB 를 **분석 데이터용이 아니라 사용자 데이터용**으로만 도�
 - ~~기존 서빙 라우터에 인증을 걸지 않았다~~ → **§8 에서 처리**(전부 잠그는 대신 선택적 인증)
 - ~~`ApiKey` 모델은 만들었지만 발급·검증 엔드포인트는 없다~~ → **§8 에서 처리**
 - ~~`jwt_secret` 기본값을 배포 전에 덮어써야 한다~~ → **§8 에서 가드로 강제**
-- Vercel 서버리스는 연결마다 새 프로세스라 커넥션 풀링 문제가 흔하다 — 실제 Postgres 에
+- 서버리스는 연결마다 새 프로세스라 커넥션 풀링 문제가 흔하다 — 실제 Postgres 에
   붙일 때 `NullPool` 또는 pgbouncer 필요 여부를 확인할 것(로컬은 지금 방식으로 충분).
   **남아 있다** — 실제 배포 시점 과제
 
@@ -249,7 +249,7 @@ bcrypt 를 쓰면 p95 <200ms 목표를 API 키 경로에서 혼자 깎는다. �
 ### 계정층 배선이 프로덕션을 18시간 죽였다 (2026-08-27 발견·복구)
 
 같은 커밋(`1979bb4`, 08-26 23:04)이 **프로덕션 API 를 통째로 내렸다.** 08-27 오후에
-`https://spaceos-sandy.vercel.app` 을 눌러 보고 처음 알았다 — 프론트 정적 파일은 200 이고
+옛 프로덕션 주소를 눌러 보고 처음 알았다 — 프론트 정적 파일은 200 이고
 `/api/*` 와 `/health` 만 전부 500(`FUNCTION_INVOCATION_FAILED`)이었다. **화면은 멀쩡해
 보인다.** 지도가 비어 있는 것이 데이터 문제인지 API 문제인지 화면만 봐서는 구별되지 않는다.
 
@@ -259,7 +259,7 @@ bcrypt 를 쓰면 p95 <200ms 목표를 API 키 경로에서 혼자 깎는다. �
 |---|---|---|
 | 1 | 루트 `requirements.txt` 에 `sqlalchemy`·`bcrypt`·`pyjwt`·`email-validator` 없음 | 백엔드 CI 는 `apps/backend/requirements.txt`(전부 포함)로 돈다. **배포 최소 셋으로 import 해 보는 자리가 없었다** |
 | 2 | `core/db.py` 가 모듈 최상위에서 `create_engine()` 호출 | 파일 주석은 "지연 연결이라 괜찮다"고 적혀 있었고 **절반만 맞았다** — 커넥션은 안 열지만 DBAPI 드라이버(`psycopg2`)를 그 자리에서 import 한다. 로컬·CI 에는 psycopg2 가 깔려 있어 구멍이 안 보였다 |
-| 3 | Vercel 에 `JWT_SECRET` 미등록 | `_guard_prod_secrets` 가 설계대로 fail-closed. 가드는 제 일을 했는데 **아무도 값을 넣지 않았다** |
+| 3 | 서버리스 호스팅에 `JWT_SECRET` 미등록 | `_guard_prod_secrets` 가 설계대로 fail-closed. 가드는 제 일을 했는데 **아무도 값을 넣지 않았다** |
 
 ②는 `get_optional_principal` 이 주장하던 "익명 요청은 DB 를 건드리지 않는다"와도 어긋나
 있었다. 엔진 생성을 늦추기만 하면 실패 지점이 import 에서 **요청마다로** 옮겨갈 뿐이라
@@ -273,7 +273,7 @@ bcrypt 를 쓰면 p95 <200ms 목표를 API 키 경로에서 혼자 깎는다. �
 드라이버를 넣으면 ②의 검사가 조용히 무의미해지기 때문이다.
 
 ⚠ **2026-09-15 정정 두 가지.** ① 파이썬 버전은 3.14 가 아니라 **3.12** 다(당시에도 3.12 였다 —
-3.14 는 Vercel 의 *의존성 해결* 단계 버전이고 함수 런타임은 3.12 였다). ② Cloud Run 전환 뒤
+3.14 는 옛 서버리스 호스팅의 *의존성 해결* 단계 버전이고 함수 런타임은 3.12 였다). ② Cloud Run 전환 뒤
 이 잡은 **배포 재현이 아니다** — 프로덕션 이미지에는 psycopg2 가 들어 있다(계정층이 쓴다).
 지금 이 잡이 지키는 것은 "익명 분석 경로가 pandas·torch·DB 드라이버 없이 돈다" 는 성질 하나다.
 
@@ -296,5 +296,5 @@ bcrypt 를 쓰면 p95 <200ms 목표를 API 키 경로에서 혼자 깎는다. �
 
 다음 후보(전부 파일럿이 생긴 뒤에 값이 생기는 일):
 - 분석 API 를 실제로 잠글지(엔드포인트별 판단) · 조직별 데이터 스코핑
-- Vercel + 실 Postgres 커넥션 풀링(§7 잔여)
+- 실 Postgres 커넥션 풀링(§7 잔여)
 - 과금(§4 3순위 — 무상 파일럿 결정이라 계약 직전까지 미룸)

@@ -65,9 +65,6 @@ git push origin main   # 상세: docs/deploy-cloud-run.md
 #    → https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
 ```
 
-⚠ **`vercel --prod` 를 쓰지 말 것.** Vercel 은 2026-08-28 프로덕션에서 내려왔다(무료 플랜이
-상업적 사용 금지). `docs/deploy-vercel.md` 는 **이력으로만** 남겼다.
-
 ### 지금 어디까지 와 있나
 
 숫자를 이 파일에서 읽지 말 것 — 문서는 적은 날의 값이라 낡는다. 산출물을 세는 스크립트가

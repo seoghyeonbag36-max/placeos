@@ -316,15 +316,14 @@ cityhall 33.5%, garosugil 31.8% ← 창원 가로수길, nonhyeon 23.1% ← 인�
 
 ## 0-5. 상권 컨텍스트가 프로덕션에서 한 번도 돈 적이 없었다 (2026-08-06)
 
-`_district_context()` 가 `import pandas` 로 시작해 파케이를 읽었다. **배포(Vercel
-서버리스)에는 pandas 도 pyarrow 도 없다.** import 실패가 함수의 `except` 에 삼켜져
+`_district_context()` 가 `import pandas` 로 시작해 파케이를 읽었다. **배포(서버리스)에는 pandas 도 pyarrow 도 없다.** import 실패가 함수의 `except` 에 삼켜져
 컨텍스트가 **항상 `None`** 이었고, `get_district_marketing` 은 `ctx` 가 없으면 LLM 을
 아예 부르지 않으므로 — **상권 단위 LLM 경로는 프로덕션에서 단 한 번도 실행된 적이 없다.**
 화면은 시드 카피를 보여주고 있었으므로 눈으로는 알 수 없었다. §0-4 에서 붙인 행사
 컨텍스트도 같은 이유로 배포판에선 죽어 있었다.
 
 **저장소는 이미 이 규칙을 알고 있었다** — `services/posting_inputs.py` 가
-*"Vercel 서버리스에 pandas 를 싣지 않는다"* 라고 적어 두고 정적 JSON 만 읽는다.
+*"서버리스에 pandas 를 싣지 않는다"* 라고 적어 두고 정적 JSON 만 읽는다.
 런타임에 읽히는 다른 Gold 산출물(행사·입점입력·건물마스터·커버리지)도 전부
 JSON/GeoJSON 이다. **이 산출물 하나만 예외였다.**
 

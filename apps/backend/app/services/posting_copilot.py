@@ -49,7 +49,7 @@ PlaceOS 가 계약을 발행하고 공급자가 여기에 맞춘다.** 어댑터
 읽는 사람이 그걸 비교로 오독한다.
 
 의존성은 표준 라이브러리만 쓴다.
-⚠ **근거가 2026-08-28 에 바뀌었다.** 종전 이유는 "Vercel 서버리스 의존성이 fastapi/pydantic
+⚠ **근거가 2026-08-28 에 바뀌었다.** 종전 이유는 "서버리스 배포 의존성이 fastapi/pydantic
 뿐이라 httpx 를 쓰면 프로덕션에서만 죽는다"였는데, Cloud Run 이미지
 (apps/backend/requirements.txt)에는 httpx 가 들어 있어 그 문장은 더 이상 참이 아니다.
 그래도 규칙은 유지한다 — 루트 `requirements.txt` 의 최소 의존성 계약을 CI 가 지키고 있고

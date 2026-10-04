@@ -54,7 +54,7 @@ grep -rho "^def test_\|^    def test_" tests/ test/ **/tests/ 2>/dev/null | wc -
   답하는 자리다. 숫자가 작아도 정확한 편이 낫다.
 
 ### 1-3. 서비스 실체
-- 배포 주소가 있는가. README / vercel.json / Dockerfile / cloudbuild / fly.toml 등 확인
+- 배포 주소가 있는가. README / Dockerfile / cloudbuild / fly.toml 등 확인
 - 지금 살아 있는가. 있으면 URL 을 적고, 없으면 "로컬 실행 단계" 라고 쓴다
 - 사용 기술 스택을 의존성 파일(requirements.txt / package.json / pyproject.toml)에서
   실제로 읽어 나열한다. 쓰지 않는 라이브러리를 적지 않는다
