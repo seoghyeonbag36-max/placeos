@@ -376,7 +376,7 @@ def test_clean_output_has_no_findings():
 
 # ── 배선 (검증 프로그램) ─────────────────────────────────────────────────────
 
-def test_violation_falls_back_to_stub(monkeypatch):
+def test_violation_falls_back_to_stub(monkeypatch, signed_in):
     """허위가 확정되면 LLM 응답을 버리고 스텁으로 내려간다 — 정책의 핵심."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -386,7 +386,7 @@ def test_violation_falls_back_to_stub(monkeypatch):
         channel="전단", content="런치 세트 12,000원", rationale="점심 수요")])
     monkeypatch.setattr(mkt, "_call_llm", lambda brief, ctx, site=None, brief_ctx=None: bad)
 
-    body = client.post(f"{V1}/marketing/generate", json=_BRIEF).json()
+    body = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in).json()
     assert body["source"] == "rule-stub", "위반인데 생성물이 그대로 나갔다"
     codes = {f["code"] for f in body["ha_findings"]}
     assert "fabricated_price" in codes, "폐기 사유가 응답에 없다 — 왜 스텁인지 알 수 없다"
@@ -394,7 +394,7 @@ def test_violation_falls_back_to_stub(monkeypatch):
     assert "12,000원" not in str(body["online"]) + str(body["offline"]) + str(body["signals"])
 
 
-def test_warning_keeps_llm_output(monkeypatch):
+def test_warning_keeps_llm_output(monkeypatch, signed_in):
     """경고 등급은 응답을 살리고 밝히기만 한다."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -406,7 +406,7 @@ def test_warning_keeps_llm_output(monkeypatch):
 
     # 컨텍스트 결합을 끊어 이 테스트가 Gold 적재 상태에 좌우되지 않게 한다.
     monkeypatch.setattr(mkt, "_district_context", lambda d: None)
-    body = client.post(f"{V1}/marketing/generate", json=_BRIEF).json()
+    body = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in).json()
     assert body["source"] == "llm", "경고인데 응답을 버렸다"
     codes = {f["code"] for f in body["ha_findings"]}
     assert "unsupported_superlative" in codes
@@ -427,7 +427,7 @@ def test_stub_without_llm_has_empty_findings(monkeypatch):
 
 # ── 배선 (상권 단위) ─────────────────────────────────────────────────────────
 
-def test_district_violation_falls_back_to_seed(monkeypatch):
+def test_district_violation_falls_back_to_seed(monkeypatch, signed_in):
     """상권 카피가 확정 트렌드를 뒤집으면 시드로 내려간다 (08-01 사고의 회귀 방지)."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -439,13 +439,13 @@ def test_district_violation_falls_back_to_seed(monkeypatch):
         ha_check="점검 통과")
     monkeypatch.setattr(mkt, "_call_district_llm", lambda name, sub, ctx: bad)
 
-    body = client.get(f"{V1}/marketing/garosugil").json()
+    body = client.get(f"{V1}/marketing/garosugil", headers=signed_in).json()
     assert body["source"] == "seed", "위반인데 생성 카피가 그대로 나갔다"
     assert "trend_contradiction" in {f["code"] for f in body["ha_findings"]}
     assert not any("늘고 있는" in c for c in body["online_contents"])
 
 
-def test_district_violation_is_cached(monkeypatch):
+def test_district_violation_is_cached(monkeypatch, signed_in):
     """폐기된 결과도 캐시한다 — 안 그러면 호출마다 같은 위반을 다시 생성하며 크레딧을 태운다."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -461,14 +461,14 @@ def test_district_violation_is_cached(monkeypatch):
 
     monkeypatch.setattr(mkt, "_call_district_llm", spy)
 
-    first = client.get(f"{V1}/marketing/garosugil").json()
-    second = client.get(f"{V1}/marketing/garosugil").json()
+    first = client.get(f"{V1}/marketing/garosugil", headers=signed_in).json()
+    second = client.get(f"{V1}/marketing/garosugil", headers=signed_in).json()
     assert len(calls) == 1, "폐기된 결과가 캐시되지 않아 LLM 을 다시 쳤다"
     assert first["source"] == second["source"] == "seed"
     assert second["ha_findings"], "캐시 경로가 폐기 사유를 잃었다"
 
 
-def test_district_clean_output_is_served(monkeypatch):
+def test_district_clean_output_is_served(monkeypatch, signed_in):
     """정상 카피는 그대로 나가고 findings 는 비어 있다 (음성 대조)."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -479,6 +479,6 @@ def test_district_clean_output_is_served(monkeypatch):
         online_contents=["골목마다 다른 커피 취향 #가로수길 #카페투어"], ha_check="ok")
     monkeypatch.setattr(mkt, "_call_district_llm", lambda name, sub, ctx: good)
 
-    body = client.get(f"{V1}/marketing/garosugil").json()
+    body = client.get(f"{V1}/marketing/garosugil", headers=signed_in).json()
     assert body["source"] == "llm"
     assert body["ha_findings"] == []

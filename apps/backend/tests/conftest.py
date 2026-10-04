@@ -36,6 +36,54 @@ def _no_network_llm(monkeypatch):
     monkeypatch.setattr(settings, "llm_api_key", "", raising=False)
 
 
+@pytest.fixture
+def signed_in():
+    """로그인한 요청의 헤더 — `POST /marketing/generate` 의 LLM 경로는 로그인 호출에만 열린다.
+
+    LLM 경로를 보는 테스트는 이 픽스처를 받아 `headers=signed_in` 으로 부른다. 익명은
+    LLM 키가 있어도 스텁이다(test_program_llm_gate.py).
+
+    SQLite 인메모리에 실제로 가입시켜 토큰을 받는다 — 신원 해석(`get_optional_principal`)을
+    목으로 바꾸면 "로그인하면 열린다"는 계약 자체를 재지 못한다. `get_db` 오버라이드는
+    **이전 값을 복원**한다: test_auth.py 가 모듈 최상단에서 전역으로 걸어 두므로, 여기서
+    지워 버리면 뒤에 도는 계정층 테스트가 진짜 DB 를 찾는다.
+    """
+    from fastapi.testclient import TestClient
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    from app.core.db import Base, get_db
+    from app.main import app
+
+    engine = create_engine("sqlite:///:memory:",
+                           connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    session_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+    def _db():
+        db = session_factory()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    Base.metadata.create_all(bind=engine)
+    previous = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = _db
+    try:
+        resp = TestClient(app).post("/api/v1/auth/signup", json={
+            "org_name": "Gate Test Org", "email": "gate@example.com",
+            "password": "hunter2hunter"})
+        assert resp.status_code == 201, resp.text
+        yield {"Authorization": f"Bearer {resp.json()['access_token']}"}
+    finally:
+        if previous is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous
+        Base.metadata.drop_all(bind=engine)
+
+
 # ── 출력 계약 헬퍼 (2026-08-23 · 2026-09-17 signals 추가) ────────────────────
 # 온라인(모객)과 오프라인(자리·연계)은 대칭이 아니라 필요한 속성이 다르고, 검증
 # 지표(signals)는 또 다른 모양이다(schemas/marketing.py). 테스트들이 검증하는 것은

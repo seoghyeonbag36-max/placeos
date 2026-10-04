@@ -4,8 +4,8 @@
 
 1) **검증 프로그램**: 예비창업자·검증하려는 기창업자가 낸 브리프(`ProgramBrief`)로
    팝업스토어·가오픈·MVP 를 돌릴 온라인(모객)·오프라인(자리·연계)·**검증 지표(판정)**
-   한 벌을 만든다. LLM 키(settings.llm_api_key) 설정 시 Claude 실호출, 실패·미설정 시
-   규칙 기반 스텁 폴백 (source 필드로 구분).
+   한 벌을 만든다. **로그인한 호출**이고 LLM 키(settings.llm_api_key)가 있으면 Claude
+   실호출, 익명·실패·미설정 시 규칙 기반 스텁 폴백 (source 필드로 구분).
 
    종전에는 **영업 중인 가게의 리뷰·사진·메뉴**가 입력이었다. 대상이 아직 그 자리에서
    장사한 적 없는 사람으로 바뀌면서 그 입력은 성립하지 않는다 — 근거는 리뷰가 아니라
@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import csv
 import re
+import time
 from pathlib import Path
 
 from app.core.config import settings
@@ -492,10 +493,17 @@ def _call_llm(brief: dict, district_ctx: str | None,
     return parsed
 
 
-def generate_program(brief: dict) -> dict:
+def generate_program(brief: dict, *, allow_llm: bool = False) -> dict:
     """검증 프로그램(모객 · 자리·연계 · 검증 지표) 생성.
 
-    LLM 키(settings.llm_api_key) 설정 시 LLM 생성, 미설정·실패 시 규칙 기반 스텁.
+    `allow_llm` 이 참이고 LLM 키(settings.llm_api_key)가 있으면 LLM 생성, 그 밖(익명 호출·
+    키 미설정·실패)에는 규칙 기반 스텁.
+
+    **`allow_llm` 의 기본값이 False 인 이유(2026-10-03).** 이 엔드포인트는 호출 1회가 곧
+    Sonnet 1회(max_tokens 8192 + thinking)인데 캐시가 없고, 분석 API 는 공개 데모라
+    익명을 통과시킨다 — 누구든 반복 호출로 크레딧을 태울 수 있었다. 그래서 신원이 확인된
+    호출(JWT·조직 API 키)에만 LLM 을 열고, 호출부가 이 인자를 빠뜨려도 **막히는 쪽**으로
+    떨어지게 했다. 열리는 자리는 `api/v1/marketing.py` 한 곳이다.
 
     생성 직후 **HA 후처리 검증**(services/ha_guard.py)을 통과해야 응답이 된다.
     `ha_check` 는 LLM 이 스스로 통과했다고 적은 문장이라 근거가 아니다 — 입력과 대조해
@@ -504,7 +512,7 @@ def generate_program(brief: dict) -> dict:
 
     반환: ProgramPlan 스키마 dict.
     """
-    if settings.llm_api_key:
+    if allow_llm and settings.llm_api_key:
         try:
             ctx = _district_context(brief.get("district_id"))
             site_ctx = _site_context(brief)
@@ -671,6 +679,30 @@ def _call_district_llm(name: str, sub: str, ctx: str) -> LLMDistrictContents:
 # 프로세스가 재시작되면(프롬프트·검증기 수정이 반영되는 시점) 어차피 다시 친다.
 _district_llm_cache: dict[str, tuple[float, list[str], list[dict]]] = {}
 
+# 상권 콘텐츠 LLM **실패** 캐시: district_id → (컨텍스트 mtime, 이 시각(monotonic)까지 재시도 금지)
+#
+# 위 캐시는 "생성이 끝난 결과"만 담는다. 응답이 비었거나(online_contents 0건) 호출이 예외로 끝난
+# 경우(파싱·스키마 실패 포함)는 아무것도 못 담아서, **같은 요청이 올 때마다 LLM 을 다시 쳤다.**
+# 파싱 실패는 토큰을 이미 쓴 뒤에 터지므로 실패한 호출도 비용이다(2026-10-03 발견).
+#
+# 성공 캐시처럼 mtime 만으로 무효화하지 않고 **시간 제한**을 둔다 — 실패 원인이 일시적인
+# 장애(rate limit·네트워크)일 수 있어서, 재시작 전까지 시드에 붙잡아 두면 장애가 끝나도 AI 콘텐츠가
+# 돌아오지 않는다. 그 사이 비용 상한은 "거점당 인스턴스당 5분에 1회"다. 5분은 도출한 값이 아니라
+# 고른 값이다: 일시 장애가 풀릴 만큼은 짧고, 반복 호출이 비용이 되지 않을 만큼은 길다.
+# 컨텍스트가 바뀌면(mtime) 입력이 달라졌으니 시간이 안 지나도 다시 친다.
+_DISTRICT_FAILURE_TTL_S = 300.0
+_district_llm_failures: dict[str, tuple[float, float]] = {}
+
+
+def _remember_district_failure(district_id: str, mtime: float) -> None:
+    _district_llm_failures[district_id] = (mtime, time.monotonic() + _DISTRICT_FAILURE_TTL_S)
+
+
+def _district_failure_pending(district_id: str, mtime: float) -> bool:
+    """이 입력으로 최근에 실패했고 아직 재시도 금지 시간 안이면 True."""
+    hit = _district_llm_failures.get(district_id)
+    return bool(hit and hit[0] == mtime and time.monotonic() < hit[1])
+
 
 def clear_district_cache() -> None:
     """상권 콘텐츠 LLM 캐시 비우기.
@@ -679,6 +711,7 @@ def clear_district_cache() -> None:
     같은 프로세스 안에서 캐시를 강제로 버려야 할 때 쓴다(테스트 격리, 프롬프트 수정 후 재생성).
     """
     _district_llm_cache.clear()
+    _district_llm_failures.clear()
 
 
 def _context_mtime(district_id: str) -> float:
@@ -713,12 +746,16 @@ def get_district_events(district_id: str) -> dict | None:
     return {"district_id": district_id, "events": real_events, "events_source": "seoul-open-data"}
 
 
-def get_district_marketing(district_id: str) -> dict | None:
+def get_district_marketing(district_id: str, *, allow_llm: bool = False) -> dict | None:
     """상권 단위 마케팅(행사 + 온라인 콘텐츠) — Program 2단계.
 
     online_contents: Gold(program_content_context)의 블로그 키워드·업종 분포를 근거로
-      LLM 생성. 키 미설정·Gold 미적재·호출 실패 시 시드 카피로 폴백(source 로 구분).
-      생성 결과는 컨텍스트 파일 mtime 기준으로 캐시한다(위 주석 참조).
+      LLM 생성. **`allow_llm`(로그인한 호출)이 아니면 LLM 을 부르지 않고 시드를 준다** —
+      캐시에 이미 있는 결과도 보여주지 않는다(같은 거점이 호출자에 따라 달라지지 않게, 그리고
+      "로그인하면 AI 생성" 안내가 거짓이 되지 않게). 기본값이 False 인 이유는
+      `generate_program` 과 같다. 키 미설정·Gold 미적재·호출 실패 시에도 시드 카피로
+      폴백(source 로 구분). 생성 결과는 컨텍스트 파일 mtime 기준으로 캐시하고, 실패는 시간
+      제한을 두고 따로 캐시한다(위 주석 참조).
     events: 서울열린데이터광장 문화행사 실데이터(services/events.py). LLM 은 절대
       관여하지 않는다 — 좌표·일정이 붙은 실물이라 지어내면 없는 행사를 지도에 찍게 된다.
       Gold 미적재면 시드로 폴백하되 events_source 로 출처를 밝힌다.
@@ -737,7 +774,7 @@ def get_district_marketing(district_id: str) -> dict | None:
         base = {**base, "events": real_events, "events_source": "seoul-open-data"}
 
     ctx = _district_context(district_id)
-    if settings.llm_api_key and ctx:
+    if allow_llm and settings.llm_api_key and ctx:
         mtime = _context_mtime(district_id)
         hit = _district_llm_cache.get(district_id)
         if hit and hit[0] == mtime:
@@ -748,10 +785,17 @@ def get_district_marketing(district_id: str) -> dict | None:
                         "ha_findings": hit[2]}
             return {**base, "source": "seed", "ha_findings": hit[2]}
 
+        # 최근에 같은 입력으로 실패했으면 다시 치지 않는다 — 실패한 호출도 토큰을 쓴다.
+        if _district_failure_pending(district_id, mtime):
+            return {**base, "source": "seed"}
+
         d = DISTRICTS_BY_ID.get(district_id, {})
         try:
             parsed = _call_district_llm(d.get("name", district_id), d.get("sub", ""), ctx)
-            if parsed.online_contents:
+            if not parsed.online_contents:
+                # 응답이 비었다 — 캐시할 결과가 없으므로 실패로 적어 반복 호출을 막는다.
+                _remember_district_failure(district_id, mtime)
+            else:
                 findings = ha_guard.check_district(parsed, ctx)
                 dumped = [f.model_dump() for f in findings]
                 if ha_guard.has_violation(findings):
@@ -763,5 +807,6 @@ def get_district_marketing(district_id: str) -> dict | None:
                 return {**base, "online_contents": parsed.online_contents,
                         "source": "llm", "ha_findings": dumped}
         except Exception as exc:
+            _remember_district_failure(district_id, mtime)
             print(f"[marketing] 상권 콘텐츠 LLM 생성 실패 → 시드 폴백: {exc}")
     return {**base, "source": "seed"}

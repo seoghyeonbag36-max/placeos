@@ -1,0 +1,6 @@
+/* 익명 "로그인하면 AI 생성" 안내 — 폐기(.warn, 호박색)도 경고(.hawarn, 회색)도 아닌 **안내**라
+   기존 둘과 겹치지 않게 노트 톤(--note-*)을 쓴다. 두 화면(ProgramStudio·PageDashboard)이 같은 모양을 쓴다. */
+.login-hint{font-size:11.5px;color:var(--note-ink);background:var(--note-soft);border:1px solid var(--note-line);border-radius:9px;padding:var(--sp-2) 10px;line-height:1.55;margin:8px 0}
+.login-hint .login-hint-now{font-weight:700}
+.login-hint a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.login-hint a:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:2px}

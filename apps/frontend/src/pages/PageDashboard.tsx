@@ -12,6 +12,8 @@ import type {
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
 import { directionLine, errorLine, foldReason, lstmPromoted, pendingLine } from "@/lib/forecastSkill";
 import AlignedAnchor from "@/components/AlignedAnchor";
+import LoginHint from "@/components/LoginHint";
+import { useSignedIn } from "@/hooks/useSignedIn";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import { colors } from "@/design/tokens/colors";
 import "./PageDashboard.css";
@@ -710,11 +712,15 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
   const [marketing, setMarketing] = useState<Marketing | null>(null);
   const [floorVac, setFloorVac] = useState<FloorVacancyList | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // 서버는 LLM 을 로그인한 호출에만 연다 — 익명의 시드는 "키가 없어서"가 아니라 로그인 전 상태다.
+  const signedIn = useSignedIn();
   const marketingContentGold = marketing?.source === "llm";
   const marketingContentSourceLabel = marketingContentGold ? "Gold 생성" : "시드";
   const marketingContentSourceTitle = marketingContentGold
     ? "Gold(program_content_context)의 블로그 키워드·업종 분포·검색 트렌드를 근거로 생성"
-    : "LLM 키 미설정·Gold 미적재·호출 실패 시 폴백 — 손으로 적은 예시 카피다";
+    : signedIn
+      ? "LLM 키 미설정·Gold 미적재·호출 실패 시 폴백 — 손으로 적은 예시 카피다"
+      : "로그인하지 않으면 AI 생성 없이 손으로 적은 예시 카피를 표시한다";
   const haFindings = marketing?.ha_findings ?? [];
   const haBlocked = haFindings.filter((f) => f.severity === "violation");
   const haWarnings = haFindings.filter((f) => f.severity !== "violation");
@@ -732,7 +738,8 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
       .then((v) => { if (live) setFloorVac(v); })
       .catch(() => { if (live) setFloorVac(null); });
     return () => { live = false; };
-  }, [summary.id]);
+    // signedIn: 로그인하면 같은 거점이 AI 콘텐츠로 바뀌므로 다시 받는다(로그아웃·세션 만료도 같다).
+  }, [summary.id, signedIn]);
 
   return (
     <div className="pagedash"><div className="wrap">
@@ -918,6 +925,13 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                 <span className={`srcbadge ${marketingContentGold ? "is-gold" : "is-syn"}`}
                   title={marketingContentSourceTitle}>{marketingContentSourceLabel}</span>
               </div>
+              {/* 이 화면(#board)은 App 이 해시가 바뀌면 떠나 버려 링크를 달지 않는다 — 지도 화면의 「계정」에서 로그인한다. */}
+              {!signedIn && !marketingContentGold && (
+                <LoginHint now="지금은 시드 카피를 표시합니다." link={false}>
+                  이 상권의 수집 데이터를 근거로 AI가 생성한 콘텐츠를 볼 수 있습니다(데이터가 적재된
+                  상권). 지도 화면의 「계정」 메뉴에서 로그인합니다.
+                </LoginHint>
+              )}
               {/* 폐기와 경고를 섞지 않는다 — 전자는 이 카피가 시드인 **이유**이고
                   후자는 살아 있는 카피에 붙은 주석이다. ProgramStudio 의 가게 단위 표기와
                   같은 구조로 맞춘다. */}
