@@ -108,6 +108,7 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 
 ⚠ 이 표의 숫자도 낡는다(09-16 표는 09-24 에 두 축이 통째로 뒤집혔다). 인용 전에 단일 출처를 돌릴 것.
 ⏳ **LSTM 두 축은 2026Q3 데이터 전에는 닫히지 않는다** — 이미 본 test 분기(~20262)로는 `실력`을 확정하지 않는다(사전등록 ③ · docs/finding-lstm-delta-target-2026-09-26.md §0-B). Δ 타깃 가설은 기각(§2).
+⏳ **2026Q3 공표는 무인 감시가 기다린다**(2026-10-04) — `scripts/lstm_confirm_watch.py`(예약 작업 `SpaceOS-LSTM-ConfirmWatch` · 매일 09:17 + 로그온)가 TRDAR·R-ONE 공표를 5콜로 묻고, 공표되면 수집 → Gold 시계열 → **사전등록 그리드(reg-0928)** 재학습 → `kpi_baseline` 까지 돌린 뒤 `reports/lstm_confirm_<분기>_<날짜>.json` 을 남기고 스스로 꺼진다. **커밋·배포·결과 해석(사전등록 ⑥)은 사람 몫**이다. 상태는 `pppp_status` 의 LSTM 게이트 줄에 붙는다.
 ⏳ **기준 개정 적용(09-29 reg-0928 서빙본부터)** — LSTM 두 축의 대조군을 두 무정보 규칙 중 **강한 쪽**으로 올렸다(docs/finding-lstm-regularization-prereg-2026-09-28.md §개정). 위 두 행은 그 기준 값이다. 09-27 서빙본(종전 기준 · 참고 열위 −73.5% · 구분불가 +0.8%p)과는 **대조군이 달라** 차이를 나란히 비교하지 말 것. 참고 판정의 test 분기는 개정 전 스모크에서 한 번 노출됐다(docs/finding-lstm-climatology-baseline-2026-09-28.md §5) — 그래서 게이트는 20262 이후 분기로만 닫는다. 근거 reports/lstm_trials_reg-0928_2026-09-29.json
 
 단일 출처는 `python scripts/kpi_baseline.py` (`실력` 아닌 축이 하나라도 있으면 종료코드 1) · `python scripts/pppp_status.py`.

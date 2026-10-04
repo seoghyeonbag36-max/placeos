@@ -45,6 +45,8 @@
 """
 from __future__ import annotations
 
+from datetime import date as _date
+
 SLUG = "platform13"  # bronze/gold 하위 폴더명 (garosugil PoC 산출물과 분리 보존)
 
 # 거점 id → 채택 상권코드 목록 (코드: TbgisTrdarRelm.TRDAR_CD)
@@ -236,8 +238,21 @@ TRDAR_TO_DISTRICT: dict[str, str] = {
 
 ALL_TRDAR_CODES: tuple[str, ...] = tuple(TRDAR_TO_DISTRICT)
 
-# 수집 분기 후보 — 상권분석서비스 현행 개편분(2021~). 빈 분기는 수집기에서 자동 스킵.
-QUARTERS: tuple[str, ...] = tuple(
-    f"{y}{q}" for y in range(2021, 2027) for q in range(1, 5)
-    if not (y == 2026 and q > 2)
-)
+def ended_quarters(today: _date | None = None) -> tuple[str, ...]:
+    """2021Q1 부터 **이미 끝난** 분기까지(STDR_YYQU_CD 형식).
+
+    종전에는 `if not (y == 2026 and q > 2)` 로 2026Q2 에 손으로 박혀 있었다. 그러면
+    2026Q3 이 공표돼도 수집기가 **묻지를 않는다** — LSTM 확정(사전등록 confirm_after=20262)
+    이 기다리는 바로 그 분기다(2026-10-04 발견). 끝난 분기까지 자동으로 늘린다.
+    아직 공표 전인 분기는 API 가 INFO-200(데이터 없음)을 주고, 수집기가 빈 분기로 건너뛴다.
+    """
+    t = today or _date.today()
+    y, q = t.year, (t.month - 1) // 3          # 지금 분기의 직전 분기
+    if q == 0:
+        y, q = y - 1, 4
+    return tuple(f"{yy}{qq}" for yy in range(2021, y + 1) for qq in range(1, 5)
+                 if (yy, qq) <= (y, q))
+
+
+# 수집 분기 후보 — 상권분석서비스 현행 개편분(2021~)부터 끝난 분기까지. 빈 분기는 수집기에서 자동 스킵.
+QUARTERS: tuple[str, ...] = ended_quarters()

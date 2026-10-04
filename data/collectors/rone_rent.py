@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import ssl
 import time
 import urllib.request
 
@@ -31,14 +32,29 @@ def _key() -> str:
     return k
 
 
+def ssl_context() -> ssl.SSLContext:
+    """reb.or.kr 검증용 TLS 컨텍스트 — certifi 번들이 있으면 그것을 쓴다.
+
+    2026-10-04 실측: 기본 컨텍스트(Windows 인증서 저장소)로는 `CERTIFICATE_VERIFY_FAILED
+    unable to get local issuer certificate` 로 막혔고, certifi 번들로는 같은 URL 이 200 이었다.
+    검증을 끄는 것이 아니라 **신뢰 저장소를 바꾸는 것**이다.
+    """
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:  # pragma: no cover — requests 의존성이라 보통 있다
+        return ssl.create_default_context()
+
+
 def _fetch_all(key: str, statbl_id: str) -> list[dict]:
     """통계표 전체 행 수집 (페이지네이션)."""
     rows: list[dict] = []
     pindex = 1
+    ctx = ssl_context()
     while True:
         url = (f"{_BASE}?KEY={key}&Type=json&pIndex={pindex}&pSize={_PAGE}"
                f"&STATBL_ID={statbl_id}&DTACYCLE_CD=QY")
-        with urllib.request.urlopen(url, timeout=30) as r:
+        with urllib.request.urlopen(url, timeout=30, context=ctx) as r:
             j = json.loads(r.read().decode("utf-8"))
         if "SttsApiTblData" not in j:
             print(f"  [경고] {statbl_id}: {str(j)[:120]}")

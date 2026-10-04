@@ -98,7 +98,12 @@ def _fetch_page(key: str, service: str, start: int, end: int, extra: str = "") -
     resp.raise_for_status()
     body = resp.json()
     if service not in body:
-        msg = body.get("RESULT", {}).get("MESSAGE", str(body)[:200])
+        result = body.get("RESULT", {})
+        # INFO-200 "해당하는 데이터가 없습니다" 는 오류가 아니라 **빈 결과**다. 공표 전 분기가
+        # 이렇게 온다 — QUARTERS 가 끝난 분기까지 자동으로 늘어나므로(2026-10-04) 정상 경로다.
+        if result.get("CODE") == "INFO-200":
+            return [], 0
+        msg = result.get("MESSAGE", str(body)[:200])
         raise RuntimeError(f"{service}: {msg}")
     payload = body[service]
     return payload.get("row", []), int(payload.get("list_total_count", 0))
@@ -143,6 +148,15 @@ def collect_platform13() -> dict[str, int]:
     # 2) stor — (코드×분기) 직접 쿼리
     stor_rows: list[dict] = []
     for q in QUARTERS:
+        # 공표 전 분기면 코드별로 다 묻지 않는다 — 분기만으로도 경로 필터가 된다(2026-10-04
+        # 실측: 20262 75,912행 · 20263 INFO-200). 판정을 못 하면 종전대로 코드별로 묻는다.
+        try:
+            _, q_total = _fetch_page(key, "VwsmTrdarStorQq", 1, 1, f"/{q}")
+        except Exception:  # noqa: BLE001
+            q_total = -1
+        if q_total == 0:
+            print(f"  stor {q}: 데이터 없음(공표 전) — 건너뜀")
+            continue
         q_hits = 0
         for code in ALL_TRDAR_CODES:
             try:
