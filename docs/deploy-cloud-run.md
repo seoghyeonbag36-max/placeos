@@ -230,6 +230,51 @@ URL 의 `&`(`...sslmode=require&channel_binding=require`)를 cmd 래퍼가 명�
 `There was an error parsing the body`(400)로 거절한다. UTF-8 파일로 만들어
 `--data-binary @파일` 로 보낼 것.
 
+### 2026-10-04 — 마이그레이션 두 건이 프로덕션에 닿은 적이 없었다
+
+**main 머지는 코드만 배포한다.** GitHub Actions 워크플로·Dockerfile·앱 기동 어디에도
+`alembic` 이나 `create_all` 이 없다 — 위의 `alembic upgrade head` 는 **사람이 손으로 돌려야** 한다.
+`tests/test_migration.py` 는 "리비전을 실행해 보고 모델과 대조"까지만 지킨다. 프로덕션 DB 가
+어느 리비전인지는 보지 못한다.
+
+그 틈으로 10-04 에 두 건이 새어 있던 것이 드러났다. Neon 의 `alembic_version` 은 최초
+계정층 `f62faed65f49` 에 멈춰 있었다.
+
+| 리비전 | 들어간 날 | 만드는 것 | 안 닿아 있던 동안의 증상 |
+|---|---|---|---|
+| `a1b2c3d4e5f6` | 09-16 (PMF 계측기) | `pilot_feedback` | NPS·유료 전환 의향 응답이 저장될 표가 없었다 |
+| `b2c3d4e5f6a7` | 10-02 (#81) | `business_workspaces` · `revoked_tokens` | 로그인한 요청이 전부 500. #81 의 로그인 전용 첫 화면과 겹쳐 앱이 사실상 닫혀 있었다 |
+
+⚠ **KPI③ 해석**: 09-16~10-04 의 PMF 응답 0 은 무응답이 아니라 **배선 결손**이다. 이 기간은
+"파일럿 반응 없음"의 근거가 아니다. 프로덕션 기준 KPI③ 관측은 10-04 부터다.
+
+**복구 (노트북 없이 폰으로 — 10-04 에 실제로 쓴 경로)**. 접속 문자열을 쓸 수 없거나 노트북이
+의심 상태일 때 통한다. 오프라인 모드는 DB 에 접속하지 않고 SQL 만 낸다:
+
+```bash
+cd apps/backend
+# 1) SQL 만 뽑는다 — <현재>:<목표> 는 아래 2) 에서 확인한 값으로. INFO 로그는 stderr 라 stdout 만 저장한다.
+DATABASE_URL=postgresql://offline:offline@localhost/offline \
+  python -m alembic upgrade f62faed65f49:b2c3d4e5f6a7 --sql > migrate.sql
+```
+
+2. Neon SQL Editor(프로덕션 브랜치)에서 **먼저** 현재 버전을 확인한다. 이 값이 1) 의 `<현재>` 와
+   다르면 SQL 을 실행하지 말고 `<현재>:<목표>` 를 맞춰 다시 뽑는다(이미 적용된 리비전을 다시
+   만들려 들거나, 버전 갱신이 조용히 안 먹는 SQL 이 된다).
+   ```sql
+   SELECT version_num FROM alembic_version;
+   ```
+3. `migrate.sql` 을 그대로 붙여 실행한다. 출력이 `BEGIN;` ~ `COMMIT;` 한 트랜잭션이라 중간에
+   실패하면 아무것도 남지 않는다. 끝나고 같은 SELECT 로 `b2c3d4e5f6a7`(head) 를 확인한다.
+4. **표면에서 검증한다.** 가입 화면에서 조직 이름을 `[내부] …` 로 시험 가입해(위 §KPI③ 의 이름
+   규칙으로 표본에서 빠진다) `/auth/me` · `/auth/workspace` · 분석 API 가 200 인지, 로그아웃한
+   토큰이 401 인지 본다. 10-04 에는 이 가입으로 전부 확인했다. 시험 조직 2개는 지우지 않고
+   두었다 — `[내부]` 규칙으로 KPI② · ③ 표본에서 빠진다.
+
+**앞으로**: `apps/backend/migrations/versions/` 를 건드린 PR 이 머지되면 **그날** 위 SELECT 로
+프로덕션 버전을 확인하고, 뒤처져 있으면 같은 날 적용한다. 코드가 먼저 배포되고 DB 가 뒤따르는
+틈이 길수록 그 틈 동안의 요청이 500 으로 떨어진다.
+
 ## KPI③ 표본에서 내부·테스트 조직 빼기 (2026-09-28)
 
 `/admin/usage` · `/admin/pmf` 는 아래 두 규칙의 **합집합**에 걸린 조직을 표본에서 빼고,
