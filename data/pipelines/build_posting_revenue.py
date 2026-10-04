@@ -42,10 +42,21 @@
 2. **점포 평균이라 신규 진입 가정이 아니다.** 자리 잡은 점포와 갓 연 점포가 섞여 있다.
 3. **상권 경계 ≠ 거점 경계.** 한 거점에 여러 TRDAR 이 걸리므로 점포수 가중으로 합친다.
 
-실행: python -m data.pipelines.build_posting_revenue
+## 서빙 거점을 다 덮는가 — `coverage`
+
+이 산출물은 `trdar_demand.parquet`(TRDAR→거점 매핑)과 bronze 의 최신 수집분에서 나온다.
+**거점이 늘어도 이 빌더를 다시 돌리지 않으면 새 거점은 조용히 빠진다** — 2026-08-22 에 54거점으로
+빌드된 채 81거점이 되도록 방치돼, 27거점이 실측 모델 대신 손으로 적은 계수 폴백을 탔다
+(`districts.tier_scenarios` 의 `rent+fitout` 분기). 그래서 서빙 목록(`ACTIVE_HUBS`)과 대조한
+`coverage` 를 산출물에 싣고 출력한다. 세 tier 를 다 가져야 실측 모델이 선다(`posting_revenue.available`).
+
+실행: python -m data.pipelines.build_posting_revenue [--quarter 20262]
+  (--quarter 를 생략하면 bronze 의 최신 분기. 임대료 산출물(`platform_posting_inputs.json`)과
+   분기를 맞춰 쓸 것 — 어긋나면 입지 배율의 분자·분모가 다른 분기가 된다.)
 """
 from __future__ import annotations
 
+import argparse
 import glob
 import json
 import statistics as st
@@ -56,6 +67,7 @@ from pathlib import Path
 import pandas as pd
 
 from data.collectors.common import GOLD
+from data.config.page_hubs import ACTIVE_HUBS
 
 _BRONZE = Path("data/bronze/platform13")
 _OUT = GOLD / "platform_posting_revenue.json"
@@ -79,11 +91,16 @@ def _latest(name: str) -> list[dict]:
     return json.loads(Path(paths[-1]).read_text(encoding="utf-8"))
 
 
-def _per_store_rows() -> tuple[str, list[tuple[str, str, float, float]]]:
-    """(분기, [(trdar_cd, induty_cd, 점포당월매출_만원, 점포수)]) — 최신 분기만."""
+def _per_store_rows(quarter: str | None = None
+                    ) -> tuple[str, list[tuple[str, str, float, float]]]:
+    """(분기, [(trdar_cd, induty_cd, 점포당월매출_만원, 점포수)]) — 한 분기만(기본 최신)."""
     sel = _latest("selng")
     sto = _latest("stor")
-    quarter = max(r["STDR_YYQU_CD"] for r in sel)
+    available = sorted({r["STDR_YYQU_CD"] for r in sel})
+    if quarter is None:
+        quarter = available[-1]
+    elif quarter not in available:
+        raise SystemExit(f"분기 {quarter} 없음 — bronze 에 있는 분기: {available[0]}~{available[-1]}")
 
     stores = {(r["TRDAR_CD"], r["SVC_INDUTY_CD"]): r["STOR_CO"]
               for r in sto if r["STDR_YYQU_CD"] == quarter}
@@ -119,8 +136,24 @@ def _stats(vals: list[float], weights: list[float]) -> dict:
     }
 
 
-def run() -> dict:
-    quarter, rows = _per_store_rows()
+def _coverage(districts: dict) -> dict:
+    """서빙 거점(ACTIVE_HUBS) 중 세 tier 를 다 가진 거점 — 실측 모델이 서는 거점이다.
+
+    `posting_revenue.available` 이 세 tier 전부를 요구하므로 하나라도 빠지면 그 거점은
+    손으로 적은 계수 폴백으로 내려간다. 빠진 tier 를 거점별로 적어 둔다.
+    """
+    need = set(TIER_INDUTY)
+    served = list(ACTIVE_HUBS)
+    full = [h for h in served if need <= set(districts.get(h, {}))]
+    partial = {h: sorted(need - set(districts[h])) for h in served
+               if h in districts and not need <= set(districts[h])}
+    absent = [h for h in served if h not in districts]
+    return {"served": len(served), "full": len(full),
+            "missing_tiers": partial, "absent": absent}
+
+
+def run(quarter: str | None = None) -> dict:
+    quarter, rows = _per_store_rows(quarter)
     cd2tier = {cd: t for t, m in TIER_INDUTY.items() for cd in m}
 
     demand = pd.read_parquet(_DEMAND, columns=["trdar_cd", "district_id"])
@@ -161,6 +194,7 @@ def run() -> dict:
         "seoul": {t: _stats(v, seoul_w[t]) for t, v in seoul.items()},
         "by_induty": {induty_names[cd]: _stats(v, [1.0] * len(v))
                       for cd, v in sorted(by_induty.items())},
+        "coverage": _coverage(districts),
         "districts": districts,
     }
     _OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -168,8 +202,16 @@ def run() -> dict:
 
 
 def main() -> None:
-    out = run()
-    print(f"[posting-revenue] 분기 {out['quarter']} · 거점 {len(out['districts'])}")
+    ap = argparse.ArgumentParser(description="Posting 3-Tier 매출 실측 산출물 빌드")
+    ap.add_argument("--quarter", help="STDR_YYQU_CD (예: 20262). 생략하면 bronze 최신 분기")
+    out = run(ap.parse_args().quarter)
+    cov = out["coverage"]
+    print(f"[posting-revenue] 분기 {out['quarter']} · 거점 {len(out['districts'])}"
+          f" · 서빙 {cov['served']}거점 중 세 tier 완비 {cov['full']}")
+    if cov["missing_tiers"]:
+        print(f"  ⚠ tier 가 빠진 서빙 거점(→ 폴백): {cov['missing_tiers']}")
+    if cov["absent"]:
+        print(f"  ⚠ 산출 자체가 없는 서빙 거점(→ 폴백): {cov['absent']}")
     print("\n서울 전체 — tier별 점포당 월매출(만원)")
     for t in ("premium", "value", "factory"):
         s = out["seoul"].get(t)

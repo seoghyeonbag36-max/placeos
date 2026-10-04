@@ -179,14 +179,21 @@ def test_missing_artifact_falls_back_and_says_so(monkeypatch, tmp_path):
 
 # ── 순환하지 않는 대조: KOSIS 와의 격차가 산술로 닫히는가 ───────────────────
 
-def _margin_and_rent_share():
-    """tier별 (마진 중앙 %, rent/rev 중앙) — 전 거점 전 유닛."""
+def _margin_and_rent_share(hubs=None):
+    """tier별 (마진 중앙 %, rent/rev 중앙) — 서빙 거점의 **실측 모델 유닛**.
+
+    ⚠ 2026-10-04 모집단을 시드 `D.DISTRICTS`(54) 에서 **서빙 목록 `D.PAGES`(81)** 로 바꿨다.
+      시드로 재면 제품이 내는 거점의 절반 가까이가 이 검사 밖이라, 매출 산출물이 54거점에
+      머문 채 27거점이 폴백을 타도 초록이었다(이 저장소가 반복하는 시드-vs-서빙 양식).
+    ⚠ 분해 항등식은 실측 모델(`COST_BASIS`)에서만 성립한다 — 폴백(`rent+fitout`)은 비용을
+      `rev × 비임차비용률` 로 계산하지 않으므로 섞으면 항등식이 깨진다.
+    """
     mg = {t: [] for t in P.TIERS}
     rr = {t: [] for t in P.TIERS}
-    for d in D.DISTRICTS:
+    for d in (hubs if hubs is not None else getattr(D, "PAGES", None) or D.DISTRICTS):
         for u in (D.resolved_units(d["id"]) or []):
             for t, v in D.tier_scenarios(u, d["id"]).items():
-                if v["month_rev"]:
+                if v["month_rev"] and v.get("basis") == D.COST_BASIS:
                     mg[t].append(v["month_net"] / v["month_rev"] * 100)
                     rr[t].append(u["rent"] / v["month_rev"])
     return ({t: st.median(v) for t, v in mg.items()},
@@ -201,9 +208,9 @@ def test_margin_gap_is_exactly_the_prime_rent_premium():
              = KOSIS 이익률 − (rent/rev − KOSIS 임차료율)
                               └────── 프라임 프리미엄 ──────┘
 
-    우리 유닛은 전부 프라임 54거점이라 매출 대비 임대료가 서울 평균보다 3.5~6.6%p
-    높다. 그만큼 마진이 깎이는 것이고, 이건 버그가 아니라 자리가 비싼 데서 오는
-    실제 신호다. 대역 안으로 밀어 넣으려고 A 나 매출을 건드리면 검증이 순환한다.
+    프리미엄이 양이면 마진이 그만큼 깎이고, 음이면 그만큼 올라간다 — 어느 쪽이든 버그가
+    아니라 인벤토리의 임대료 수준에서 오는 신호다(아래 `test_premium_tracks_hub_rent_level`).
+    대역 안으로 밀어 넣으려고 A 나 매출을 건드리면 검증이 순환한다.
     """
     rates = P._rates()
     for t in P.TIERS:
@@ -215,20 +222,87 @@ def test_margin_gap_is_exactly_the_prime_rent_premium():
     med, rent_share = _margin_and_rent_share()
     for t in P.TIERS:
         premium_pp = (rent_share[t] - rates[t]["rent_rate"]) * 100
-        # ⚠ 2026-08-25 이 단언의 **근거가 바뀌었다**(§0-O). 종전 실패 문구는 "프라임인데
-        #   임대료 비중이 서울 평균 이하 — 의심" 이었는데, 그 '의심'이 기대던 *"우리
-        #   유닛은 전부 프라임"* 전제가 측정으로 반증됐다 — 54거점 중 22곳(유닛
-        #   182/528)이 R-ONE 서울 표본상권 집계보다 싸다. 즉 premium 이 0 근처인 것은
-        #   이상현상이 아니라 인벤토리가 41백분위에 걸쳐 있다는 사실의 결과다.
-        #   임계값은 **내리지 않았다** — 부호가 뒤집히면 여전히 무언가 잘못된 것이다.
-        #   → test_prime_inventory_premise_is_measurably_false 가 그 분포를 고정한다.
-        assert premium_pp > 0, (
-            f"{t}: 임대료 비중이 서울 기준 이하 — 분해가 성립하지 않는다 "
-            f"(프리미엄 {premium_pp:+.3f}%p)")
+        # ⚠ 2026-10-04 **여기 있던 `premium_pp > 0` 부호 검사를 뺐다.** 두 번 근거가 바뀐 끝이다.
+        #   ① 2026-08-25(§0-O): 그 검사가 기대던 *"우리 유닛은 전부 프라임"* 전제가 측정으로
+        #     반증됐다(54거점 중 22곳이 서울 기준선 아래). 그래도 부호를 지킨 것은 premium 이
+        #     +0.02%p 로 **경계 위를 간신히 통과**하고 있었기 때문이다.
+        #   ② 2026-10-04 매출 산출물을 54 → 81거점으로 재빌드하자(27거점이 폴백에서 실측으로)
+        #     인벤토리가 기준선 **정확히 한가운데**(유닛 50.4% 가 미만)로 모였고 premium 은
+        #     −0.3~−0.7%p 가 됐다. 중앙값이 50백분위에 걸린 모집단에서 0 의 부호는 정보가 없다.
+        #   임계값을 낮춰 통과시킨 것이 아니다 — 그 검사가 지키려던 **의도("비싼 자리일수록
+        #   임대료 부담이 크다")를 측정된 분할로 다시 세웠다**: test_premium_tracks_hub_rent_level.
+        #   분해가 성립하는지는 아래 항등식 단언(2.0%p)이 직접 잰다 — 81거점에서 차이 0.00%p.
         # 마진 중앙이 "KOSIS 이익률 − 프라임 프리미엄" 근처에 선다(중앙값이라 정확히는
         # 안 맞지만, 두 %p 넘게 벌어지면 위 분해로 설명되지 않는 무언가가 있는 것이다).
         expect = rates[t]["profit_rate"] * 100 - premium_pp
         assert abs(med[t] - expect) < 2.0, f"{t}: 마진 {med[t]:.1f} vs 분해 {expect:.1f}"
+
+
+def test_premium_tracks_hub_rent_level():
+    """프라임 프리미엄은 거점 임대료가 서울 기준선 **위인가 아래인가**를 따라간다.
+
+    종전 `premium_pp > 0` 부호 검사가 지키려던 의도는 "비싼 자리일수록 매출 대비 임대료
+    부담이 크다"였다. 그 검사는 인벤토리 **전체**에 부호를 요구했는데, 인벤토리의 절반이
+    기준선 아래라(`test_prime_inventory_premise_is_measurably_false`) 전체 부호는 정보가
+    없다. 같은 의도를 **측정된 분할**로 세운다: R-ONE 임대료가 서울 기준점 이상인 거점
+    ("프라임")의 프리미엄이 미만 거점보다 모든 tier 에서 커야 한다. 임대료 입력과 매출
+    산출물이 어긋나면(분기·단위·거점 매핑) 이 서열이 먼저 뒤집힌다.
+
+    실측 2026-10-04(81거점·분기 20262): 프라임 38거점 +0.08 / +2.38 / +1.14%p,
+    그 외 43거점 −1.40 / +0.45 / −0.29%p (premium / value / factory).
+    ⚠ 임계값은 **서열(>)** 뿐이다 — 격차 크기를 숫자로 박지 않았다(발명하지 않는다).
+    """
+    inp = P._read(P._INPUTS)
+    seoul_pm2 = (inp.get("seoul") or {}).get("rent_per_m2_krw_thousand")
+    assert seoul_pm2, "서울 기준점 없음"
+    dist = inp["districts"]
+    served = getattr(D, "PAGES", None) or D.DISTRICTS
+    rates = P._rates()
+
+    def premium_pp(keep):
+        hubs = [d for d in served
+                if keep(dist.get(d["id"], {}).get("rent_per_m2_krw_thousand", 0))]
+        assert hubs, "분할이 비었다"
+        _, share = _margin_and_rent_share(hubs)
+        return {t: (share[t] - rates[t]["rent_rate"]) * 100 for t in P.TIERS}
+
+    prime = premium_pp(lambda r: r >= seoul_pm2)
+    rest = premium_pp(lambda r: r < seoul_pm2)
+    for t in P.TIERS:
+        assert prime[t] > rest[t], (
+            f"{t}: 기준선 이상 거점 프리미엄 {prime[t]:+.3f}%p 가 미만 거점 "
+            f"{rest[t]:+.3f}%p 보다 크지 않다 — 임대료 입력과 매출 산출물이 같은 축인지 볼 것")
+
+
+def test_revenue_artifact_covers_served_hubs():
+    """매출 산출물이 **서빙 거점을 따라왔는가** — 뒤처지면 조용히 폴백을 탄다.
+
+    2026-08-22 에 54거점으로 빌드된 `platform_posting_revenue.json` 이 81거점이 되도록
+    방치돼, 시드 밖 27거점이 손으로 적은 계수(`rent+fitout`)로 3-Tier 를 계산했다. 폴백
+    거점은 회수가능(viable)이 939/939 = 100% 였다(실측 모델 87%) — 화면은 멀쩡했고 `basis`
+    만 달랐다. 시드 54 로 재는 다른 테스트는 이걸 못 봤다.
+
+    ⚠ **비율로 잰다**(거점 수를 박지 않는다 — 거점이 늘 때마다 깨진다). 얇은 표본 때문에
+      tier 가 빠지는 거점이 소수 있을 수 있어(`_MIN_STORES`) 0 을 요구하지 않는다.
+    """
+    rev = P._read(P._REV)
+    served = [d["id"] for d in (getattr(D, "PAGES", None) or D.DISTRICTS)]
+    cov = rev.get("coverage") or {}
+    assert cov.get("served") == len(served), (
+        f"산출물이 본 서빙 거점 {cov.get('served')} ≠ 지금 {len(served)} — "
+        "`python -m data.pipelines.build_posting_revenue` 를 다시 돌릴 것")
+
+    measured_hubs = [h for h in served if P.available(h)]
+    assert len(measured_hubs) / len(served) >= 0.9, (
+        f"실측 모델 거점 {len(measured_hubs)}/{len(served)} — 나머지는 근거 없는 계수 폴백이다")
+
+    n_all = n_legacy = 0
+    for h in served:
+        n = len(D.resolved_units(h) or [])
+        n_all += n
+        if not P.available(h):
+            n_legacy += n
+    assert n_all and n_legacy / n_all <= 0.1, f"폴백 유닛 {n_legacy}/{n_all}"
 
 
 def test_margins_stay_in_sane_bounds():
