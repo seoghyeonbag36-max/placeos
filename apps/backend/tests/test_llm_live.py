@@ -111,14 +111,14 @@ def test_call_llm_live():
         assert s.target.strip(), f"signals[{i}]: 목표선이 비어 있음"
 
 
-def test_generate_program_live_no_fallback(capsys):
+def test_generate_program_live_no_fallback(capsys, signed_in):
     """엔드포인트 실호출 — 폴백으로 새면 실패한다.
 
     `source != "llm"` 이면 LLM 경로가 죽고 규칙 기반 스텁이 응답한 것이다.
     서비스가 실패 사유를 stdout 에 print 하므로 그것을 단언 메시지에 실어
     "왜 폴백됐는지"까지 한 번에 보이게 한다.
     """
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF)
+    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
     assert r.status_code == 200
     body = r.json()
 
@@ -154,14 +154,14 @@ def test_call_district_llm_live():
         assert line.count("#") >= 2, f"해시태그 2개 규칙 위반 — {line!r}"
 
 
-def test_district_marketing_live_no_fallback(capsys):
+def test_district_marketing_live_no_fallback(capsys, signed_in):
     """상권 엔드포인트 실호출 — 시드 폴백으로 새면 실패한다.
 
     행사(events)는 LLM 이 만들지 않는다. 2026-08-01 부터 서울열린데이터광장 문화행사
     실데이터라 건수는 거점·시점에 따라 변한다 — 개수를 고정하는 대신 **출처**가
     실데이터인지를 단언한다(예전 `== 3` 은 시드 시절의 값이라 실데이터 전환 후 낡았다).
     """
-    r = client.get(f"{V1}/marketing/garosugil")
+    r = client.get(f"{V1}/marketing/garosugil", headers=signed_in)
     assert r.status_code == 200
     body = r.json()
 

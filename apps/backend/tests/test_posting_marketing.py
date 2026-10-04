@@ -238,8 +238,8 @@ _BRIEF = {
 }
 
 
-def test_generate_program_llm(monkeypatch):
-    """LLM 키 설정 시 _call_llm 결과가 ProgramPlan(source=llm)으로 매핑된다."""
+def test_generate_program_llm(monkeypatch, signed_in):
+    """로그인 + LLM 키 설정 시 _call_llm 결과가 ProgramPlan(source=llm)으로 매핑된다."""
     from app.core.config import settings
     from app.schemas.marketing import LLMProgramPlan
     from app.services import marketing as mkt
@@ -254,7 +254,7 @@ def test_generate_program_llm(monkeypatch):
     monkeypatch.setattr(mkt, "_call_llm",
                         lambda brief, ctx, site=None, brief_ctx=None: fake)
 
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF)
+    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
     assert r.status_code == 200
     body = r.json()
     assert body["source"] == "llm"
@@ -263,7 +263,7 @@ def test_generate_program_llm(monkeypatch):
     assert body["signals"][0]["decision"], "판정선이 응답에서 사라졌다"
 
 
-def test_generate_program_llm_error_falls_back(monkeypatch):
+def test_generate_program_llm_error_falls_back(monkeypatch, signed_in):
     """LLM 호출 실패 시 규칙 기반 스텁으로 폴백한다 (요청은 200 유지)."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -275,7 +275,8 @@ def test_generate_program_llm_error_falls_back(monkeypatch):
 
     monkeypatch.setattr(mkt, "_call_llm", boom)
 
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF)
+    # 로그인해서 LLM 경로에 실제로 들어가게 한다 — 익명이면 호출 전에 스텁이라 폴백을 재지 못한다.
+    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
     assert r.status_code == 200
     assert r.json()["source"] == "rule-stub"
 
@@ -337,7 +338,7 @@ def test_events_carry_real_fields_not_fabricated_metrics():
         assert e["roles"] is None and e["ha"] is None
 
 
-def test_district_marketing_llm_contents(monkeypatch):
+def test_district_marketing_llm_contents(monkeypatch, signed_in):
     """Gold 컨텍스트가 있으면 온라인 콘텐츠는 LLM 생성분으로 교체된다(행사는 시드 유지)."""
     from app.core.config import settings
     from app.schemas.marketing import LLMDistrictContents
@@ -349,7 +350,7 @@ def test_district_marketing_llm_contents(monkeypatch):
         online_contents=["가로수길 팝업 지도 #가로수길 #팝업"], ha_check="점검 통과")
     monkeypatch.setattr(mkt, "_call_district_llm", lambda name, sub, ctx: fake)
 
-    body = client.get(f"{V1}/marketing/garosugil").json()
+    body = client.get(f"{V1}/marketing/garosugil", headers=signed_in).json()
     assert body["source"] == "llm"
     assert body["online_contents"] == ["가로수길 팝업 지도 #가로수길 #팝업"]
     # 행사는 LLM 이 만들지 않는다 — 좌표·일정이 붙은 실물이라 별도 소스에서만 온다
@@ -357,7 +358,7 @@ def test_district_marketing_llm_contents(monkeypatch):
     assert all(e.get("lat") and e.get("lng") for e in body["events"])
 
 
-def test_district_marketing_llm_error_falls_back(monkeypatch):
+def test_district_marketing_llm_error_falls_back(monkeypatch, signed_in):
     """상권 콘텐츠 LLM 실패 시 시드 콘텐츠로 폴백한다 (요청은 200 유지)."""
     from app.core.config import settings
     from app.services import marketing as mkt
@@ -370,7 +371,8 @@ def test_district_marketing_llm_error_falls_back(monkeypatch):
 
     monkeypatch.setattr(mkt, "_call_district_llm", boom)
 
-    r = client.get(f"{V1}/marketing/garosugil")
+    # 로그인해서 LLM 경로에 실제로 들어가게 한다 — 익명이면 호출 전에 시드라 폴백을 재지 못한다.
+    r = client.get(f"{V1}/marketing/garosugil", headers=signed_in)
     assert r.status_code == 200
     assert r.json()["source"] == "seed"
 
@@ -420,7 +422,7 @@ def test_trend_summary_direction_rule():
 # 없어졌다. 그 자리를 대신하는 것이 아래 세 검사다 — 브리프가 실제로 쓰이는가.
 
 
-def test_brief_reaches_llm_prompt(monkeypatch):
+def test_brief_reaches_llm_prompt(monkeypatch, signed_in):
     """브리프가 LLM 컨텍스트에 실린다 — 스키마에만 있고 안 쓰이면 죽은 필드다."""
     from app.core.config import settings
     from app.schemas.marketing import LLMProgramPlan
@@ -438,7 +440,7 @@ def test_brief_reaches_llm_prompt(monkeypatch):
             signals=[_signal()], ha_check="ok")
 
     monkeypatch.setattr(mkt, "_call_llm", spy)
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF)
+    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
     assert r.status_code == 200
     assert "제철 해산물 오마카세 가오픈" in seen["brief_ctx"]
     assert "가오픈" in seen["brief_ctx"], "검증 방식이 컨텍스트에 없다"

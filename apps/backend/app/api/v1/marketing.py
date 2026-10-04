@@ -8,8 +8,9 @@
 그 자리에서 장사한 적 없는 창업자로 바뀌면서 그 입력 자체가 사라졌다
 → docs/feature-program.md §0-V.
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.core.security import Principal, get_optional_principal
 from app.schemas.district import DistrictEvents, Marketing
 from app.schemas.marketing import ProgramBrief, ProgramPlan, VacantSiteList
 from app.services import marketing as mkt
@@ -19,13 +20,21 @@ router = APIRouter()
 
 
 @router.post("/generate", response_model=ProgramPlan)
-async def generate_program(brief: ProgramBrief) -> dict:
+async def generate_program(
+    brief: ProgramBrief,
+    principal: Principal | None = Depends(get_optional_principal),
+) -> dict:
     """검증 프로그램 생성 — 모객(online) · 자리·연계(offline) · **검증 지표(signals)**.
 
     입력(ProgramBrief)은 팝업스토어·가오픈·MVP 로 아이템을 확인하려는 창업자의 브리프다.
-    LLM 키 미설정 시 규칙 기반 스텁으로 응답한다 (source 필드로 구분).
+
+    **LLM 은 로그인한 호출(JWT·조직 API 키)에만 열린다.** 익명은 규칙 기반 스텁으로
+    응답한다 — 같은 200 이고 `source` 만 `"rule-stub"` 이다. 이 호출은 1회가 곧 LLM 1회이고
+    캐시가 없는데 공개 데모는 익명을 통과시키므로, 막지 않으면 반복 호출이 그대로 크레딧이
+    된다. 잘못된 자격증명은 라우터 공통 의존성에서 이미 401 이다(조용히 익명으로 강등하지 않는다).
+    LLM 키 미설정·호출 실패·HA 검증 위반 폐기도 같은 스텁이다 (source 필드로 구분).
     """
-    return mkt.generate_program(brief.model_dump())
+    return mkt.generate_program(brief.model_dump(), allow_llm=principal is not None)
 
 
 @router.get("/sites", response_model=VacantSiteList)
@@ -63,14 +72,19 @@ async def list_district_events(
 
 
 @router.get("/{district_id}", response_model=Marketing)
-async def get_marketing(district_id: str) -> dict:
+async def get_marketing(
+    district_id: str,
+    principal: Principal | None = Depends(get_optional_principal),
+) -> dict:
     """상권 단위 마케팅(행사 + 온라인 콘텐츠).
 
     온라인 콘텐츠는 Platform 수집 정보(gold/program_content_context) 기반 생성이며
-    LLM 키 미설정·Gold 미적재 시 시드로 폴백한다(source 필드로 구분).
+    **LLM 은 로그인한 호출에만 열린다** — 익명은 시드로 응답한다(`/generate` 와 같은 문, 같은
+    이유). LLM 키 미설정·Gold 미적재·호출 실패도 시드로 폴백한다(source 필드로 구분).
     행사(events)는 서울열린데이터광장 문화행사 실데이터 — events_source 로 출처를 밝힌다.
+    행사는 LLM 과 무관해서 익명에게도 그대로 나간다.
     """
-    m = mkt.get_district_marketing(district_id)
+    m = mkt.get_district_marketing(district_id, allow_llm=principal is not None)
     if m is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {district_id}")
     return m

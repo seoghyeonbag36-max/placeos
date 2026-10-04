@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { caveatKind, CaveatNote } from "@/components/DistrictPicker";
+import LoginHint from "@/components/LoginHint";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import { generateProgram, getDistrictEvents, listDistricts, MODE_LABEL, STAGE_LABEL, VALIDATION_MODES } from "@/lib/api";
 import type {
@@ -12,6 +13,7 @@ import { mapLabelHTML } from "@/design/components/MapMarkerPin";
 import { colors } from "@/design/tokens/colors";
 import { useMapHost } from "@/components/MapHost";
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
+import { useSignedIn } from "@/hooks/useSignedIn";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import type { BusinessGoal } from "@/lib/businessProfile";
 import "./ProgramStudio.css";
@@ -211,8 +213,9 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
     }
   }
 
+  const signedIn = useSignedIn();
   const head = headline({
-    result, busy, elapsed, error, hub, form, siteUnitId,
+    result, busy, elapsed, error, hub, form, siteUnitId, signedIn,
     filled: {
       hypothesis: form.hypothesis.trim() !== "", target: form.targetCustomer.trim() !== "",
       period: runDays !== undefined || form.startDate !== "", budget: budgetMin !== undefined && budgetMax !== undefined,
@@ -553,9 +556,11 @@ function OfflinePlaces({ data, selectedId, onSelect }: {
  * 결과가 없을 때도 세 줄을 그대로 내고, 값이 "아직 무엇이 들어와 있나"로 바뀐다.
  * HA 폐기·경고와 스텁 여부는 상세를 접어도 이 결론 줄에 남긴다.
  */
-function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled }: {
+function headline({ result, busy, elapsed, error, hub, form, siteUnitId, signedIn, filled }: {
   result: ProgramPlan | null; busy: boolean; elapsed: number; error: string | null;
   hub?: DistrictSummary; form: FormState; siteUnitId?: string;
+  /** 로그인해 있는가 — 익명의 기본 예시는 실패가 아니라 **로그인 전 상태**다(서버가 LLM 을 닫아 둔다) */
+  signedIn: boolean;
   filled: { hypothesis: boolean; target: boolean; period: boolean; budget: boolean; differentiators: number };
 }): { verdict: ReactNode; grounds: Ground[]; sources: ReactNode[] } {
   const stub = result ? result.source !== "llm" : false;
@@ -580,7 +585,9 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled 
     verdict = stub
       ? <>{lead} <span className="value-absent">{blocked.length > 0
         ? `생성 내용이 검증을 통과하지 못해(${blocked.length}건) 기본 예시를 표시합니다.`
-        : "AI 생성을 완료하지 못해 기본 예시를 표시합니다."}</span></>
+        : signedIn
+          ? "AI 생성을 완료하지 못해 기본 예시를 표시합니다."
+          : "로그인하지 않아 AI 생성 없이 기본 예시를 표시합니다."}</span></>
       : lead;
   }
 
@@ -639,6 +646,7 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, filled 
 
 function Result({ r }: { r: ProgramPlan }) {
   const stub = r.source !== "llm";
+  const signedIn = useSignedIn();
   const findings = r.ha_findings ?? [];
   // 폐기(violation)와 경고(warning)는 성격이 다르다 — 전자는 이 응답이 스텁인 **이유**이고,
   // 후자는 살아 있는 생성물에 붙은 주석이다. 섞어 보여주면 둘 다 안 읽힌다.
@@ -658,6 +666,14 @@ function Result({ r }: { r: ProgramPlan }) {
           {stub ? "기본 예시" : "AI 생성"}
         </span>
       </div>
+
+      {/* 익명이 받은 기본 예시는 **실패가 아니다** — 서버가 LLM 을 로그인한 호출에만 연다. 이유를 말하지
+          않으면 다시 눌러 보지만 로그인 전에는 몇 번을 눌러도 같다. 로그인 후에는 사라진다. */}
+      {stub && !signedIn && (
+        <LoginHint now="지금은 기본 예시를 표시합니다.">
+          입력한 브리프와 상권 정보를 바탕으로 AI가 생성한 검증 program 을 받을 수 있습니다.
+        </LoginHint>
+      )}
 
       {/* 판정표를 초안보다 **먼저** 둔다 — 무엇으로 판정할지가 이 결과의 결론이고,
           채널 초안은 그 판정에 쓸 표본을 모으는 수단이다. */}
@@ -687,9 +703,16 @@ function Result({ r }: { r: ProgramPlan }) {
         )}
 
         {stub && blocked.length === 0 && (
-          <div className="warn">
-            AI 생성을 완료하지 못해 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를 반영한 결과가 아니므로 다시 생성해 주세요.
-          </div>
+          signedIn ? (
+            <div className="warn">
+              AI 생성을 완료하지 못해 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를 반영한 결과가 아니므로 다시 생성해 주세요.
+            </div>
+          ) : (
+            <div className="warn">
+              로그인하지 않아 AI 생성을 쓰지 않았고 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를 반영한 결과가
+              아니며, 로그인 전에는 다시 생성해도 같은 예시가 나옵니다.
+            </div>
+          )
         )}
 
         {/* 경고는 사전 매칭이라 오탐이 섞인다. 지우지 않고 근거를 함께 보여 사람이 판단하게 한다. */}

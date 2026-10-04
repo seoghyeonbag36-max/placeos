@@ -2,10 +2,11 @@
  *
  * 2026-09-17 대상 재정의로 사라진 스위트: 상용 온보딩(점주 동의 4개·영수증)과 가게 조회
  * 응답 차단(상호 검색·블로그 스니펫). 특정할 영업 중인 가게도, 받을 점주 원문도 없다. */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ProgramStudio from "@/pages/ProgramStudio";
 import type { ProgramPlan } from "@/lib/api";
+import { clearToken, saveToken } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import { installFetchStub, type Route } from "@/test/fetchStub";
 
@@ -305,5 +306,60 @@ describe("ProgramStudio — 채널별 초안", () => {
     expect(await screen.findByText("생성된 채널안이 없습니다. 입력 근거를 확인해 다시 생성하세요.")).toBeTruthy();
     expect(screen.getByText("AI 생성", { selector: ".srcbadge" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "본문 복사" })).toBeNull();
+  });
+});
+
+describe("ProgramStudio — 익명 안내 (로그인하면 AI 생성)", () => {
+  // 세션 토큰은 sessionStorage 에 있어 setup.ts 의 정리(localStorage)가 닿지 않는다 — 직접 치운다.
+  afterEach(() => clearToken());
+
+  const STUB: ProgramPlan = { ...structuredClone(PLAN), source: "rule-stub", ha_findings: [] };
+  const hint = () => screen.queryByRole("note");
+
+  it("익명이 받은 기본 예시는 로그인하면 달라진다고 말하고 로그인 링크를 준다", async () => {
+    mount({ result: structuredClone(STUB) });
+    await generateAndFlush();
+    const note = await screen.findByRole("note");
+    expect(note.textContent).toContain("지금은 기본 예시를 표시합니다.");
+    expect(note.textContent).toContain("로그인하면");
+    expect(note.textContent).toContain("AI가 생성한 검증 program");
+    expect(within(note).getByRole("link", { name: "로그인" }).getAttribute("href")).toBe("#login");
+    // 결론 줄도 실패가 아니라 로그인 전 상태라고 말한다
+    expect(screen.getByText("로그인하지 않아 AI 생성 없이 기본 예시를 표시합니다.")).toBeTruthy();
+  });
+
+  it("익명에게 '다시 생성해 주세요'라고 하지 않는다 — 로그인 전에는 몇 번을 눌러도 같다", async () => {
+    mount({ result: structuredClone(STUB) });
+    await generateAndFlush();
+    await screen.findByRole("note");
+    expect(screen.queryByText(/다시 생성해 주세요/)).toBeNull();
+    expect(screen.getByText(/로그인 전에는 다시 생성해도 같은 예시가 나옵니다/)).toBeTruthy();
+  });
+
+  it("로그인한 사용자의 기본 예시는 실패로 말한다 — 안내는 없다", async () => {
+    saveToken("test-token");
+    mount({ result: structuredClone(STUB) });
+    await generateAndFlush();
+    await screen.findByText("기본 예시", { selector: ".srcbadge" });
+    expect(hint()).toBeNull();
+    expect(screen.getByText("AI 생성을 완료하지 못해 기본 예시를 표시합니다.")).toBeTruthy();
+    expect(screen.getByText(/다시 생성해 주세요/)).toBeTruthy();
+  });
+
+  it("AI 생성 결과에는 안내를 달지 않는다", async () => {
+    mount();   // source: "llm"
+    await generateAndFlush();
+    await screen.findByRole("textbox", { name: "초안 본문" });
+    expect(hint()).toBeNull();
+  });
+
+  it("보는 중에 로그인하면 안내가 사라지고 다시 생성하라는 말로 바뀐다", async () => {
+    mount({ result: structuredClone(STUB) });
+    await generateAndFlush();
+    await screen.findByRole("note");
+
+    act(() => saveToken("test-token"));
+    await waitFor(() => expect(hint()).toBeNull());
+    expect(screen.getByText(/다시 생성해 주세요/)).toBeTruthy();
   });
 });
