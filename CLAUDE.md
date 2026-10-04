@@ -213,8 +213,6 @@ docker compose -f infra/docker/docker-compose.yml up
 # 수동 배포·좌표·무료 한도의 경계는 docs/deploy-cloud-run.md 참조.
 #   프로덕션: https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
 #   옛 주소 https://spaceos-twin.web.app 은 페이지만 301 로 정식 주소에 보내고 /api 는 계속 서빙한다(firebase.json)
-# ⚠ Vercel 은 2026-08-28 프로덕션에서 내려왔다(무료 플랜이 상업적 사용 금지).
-#   `vercel --prod` 를 쓰지 말 것 — docs/deploy-vercel.md 는 이력으로만 남겼다.
 git push origin main
 
 # ML 골격 확인

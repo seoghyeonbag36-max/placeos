@@ -14,7 +14,6 @@ Claude Code(CLI) 기반 PlaceOS 개발 가이드. PPPP 프레임워크 4기능�
 | [feature-program.md](feature-program.md) | **Program** — 예비창업자·검증하려는 기창업자의 팝업/가오픈/MVP 검증 program 생성 (2026-09-17 대상 재정의 §0-V) |
 | [placeos-vibe-build-sequence.md](placeos-vibe-build-sequence.md) | **빌드 순서 + 현재 위치** — Phase 0~6 의존 순서, 막힌 것의 종류 구분 |
 | [deploy-cloud-run.md](deploy-cloud-run.md) | **배포(현행)** — main 푸시 → GitHub Actions → Cloud Run. 빌드 시점 가드·수동 배포·무료 한도 |
-| [deploy-vercel.md](deploy-vercel.md) | ~~배포~~ **이력 전용** — Vercel 은 2026-08-28 프로덕션에서 내려왔다(무료 플랜 상업적 사용 금지). `vercel --prod` 를 쓰지 말 것 |
 | [api-keys-and-specs.md](api-keys-and-specs.md) · [api-key-checklist.md](api-key-checklist.md) | 인증키 5종과 응답 필드 스펙 |
 | [poc-building-vacancy.md](poc-building-vacancy.md) | 건물 단위 공실 PoC 설계 (D1 스키마) |
 | [decision-infra-layer-2026-08-25.md](decision-infra-layer-2026-08-25.md) | **결정·구현 기록** — PPPP 게이트가 세지 않는 층(DB·인증·과금·오케스트레이션) |

@@ -52,14 +52,12 @@
 - 추가 피처 실험: 상권변화지표(ix_opr_mt/ix_cls_mt)는 방향정확도 84.6→76.9% 악화로 기각(gold 컬럼은 유지). 소득소비-상권(OA-21278)은 **서비스 종료**(2026-06)로 수집 불가
 - 분기 갱신 운영: `python -m data.pipelines.refresh_platform` — 수집→Gold(platform13 한정)→엣지→재학습 원커맨드 (배포는 git push). 새 분기 추가 시 `platform_districts.QUARTERS` 갱신 필요
 - 산출: `ml/artifacts/vacancy_lstm.pt` + `data/gold/platform_vacancy_forecast.json`(2026Q2 예측) + `ml/mlruns`
-- 서빙: Vercel 서버리스에 torch 를 싣지 않으므로 **forecast json 정적 서빙이 기본 경로** — `apps/backend/app/services/vacancy_forecast.py` (인메모리 TTL 5분, json은 .gitignore/.vercelignore 예외로 배포 포함)
+- 서빙: 서버리스에 torch 를 싣지 않으므로 **forecast json 정적 서빙이 기본 경로** — `apps/backend/app/services/vacancy_forecast.py` (인메모리 TTL 5분, json은 .gitignore 예외로 배포 포함)
   ⚠ **2026-09-08 정정 — 이 줄의 '왜'는 낡았고 '무엇'은 그대로다.** 프로덕션은 2026-08-28 에
   **Cloud Run** 으로 옮겼다(`docs/deploy-cloud-run.md` · Firebase Hosting → Cloud Run).
-  Vercel 은 무료 플랜의 상업적 사용 금지로 내려왔고 `docs/deploy-vercel.md` 는 이력으로만
-  남았다. 그래도 **결론(forecast json 정적 서빙)은 유효하다** — `apps/backend/requirements.txt`
+  그래도 **결론(forecast json 정적 서빙)은 유효하다** — `apps/backend/requirements.txt`
   에 `torch` 가 없어서 런타임에 모델을 싣지 않는 것은 같다. 근거가 '서버리스 용량'에서
-  '컨테이너 의존성 선택'으로 바뀌었을 뿐이다. `.vercelignore` 파일 자체는 아직 저장소에
-  남아 있으므로 배포 포함 여부의 실제 기준은 `.gitignore` 예외 + Dockerfile 이다.
+  '컨테이너 의존성 선택'으로 바뀌었을 뿐이다. 배포 포함 여부의 실제 기준은 `.gitignore` 예외 + Dockerfile 이다.
 - 노출: `/api/v1/ai/predict-vacancy`(스텁 교체 완료) + 대시보드·히트맵 응답의 `predicted_rate/delta/direction` + 프론트 **66거점** 카드·심층·범례 ▲▼ 배지
 
 > ⚠ **2026-09-15 — 노드 소스가 카카오 로컬 → 소상공인 상가(상권)정보로 바뀌었다.**
@@ -100,13 +98,12 @@
 - **성능(홀드아웃 층화 60/20/20): Top-1 64.9% / Top-3 91.7% · macro-F1 0.235.** ⚠ 2026-09-16 게이트 교체 — "KPI Top-3 70% 달성" 표기를 걷었다. **거점 사전분포만으로 Top-3 89.4%** 가 나오므로 70% 임계값은 그래프를 통째로 들어내도 통과한다. 판정은 사전분포 대비 실력(**+2.32%p**)으로 한다. 단, 거점 사전분포 기준선이 Top-1 61.7%/Top-3 89.4% 라 **lift 는 +5.3%에 그친다** — 대분류 업종은 대부분 '어느 거점이냐'로 결정되고 그래프가 얹는 정보가 작다. 그래도 GNN 은 거점 평균이 못 주는 **자리별 점수**(공실 유닛 단위)를 주므로 제품 가치는 사전분포와 별개. 엣지 ablation: spatial_knn 단독 90.8% → +건물 90.9% → +체인(all) 91.1%, 다양화의 한계 기여는 대분류에선 작다.
 - 라벨을 category 2단계(30클래스)로 내리면 lift +22%로 커지나 Top-3 57%로 KPI 미달 — 세분 업종일수록 그래프 정보가 더 필요하지만 절대 정확도는 낮다.
 - **리뷰 유사도 엣지는 데이터 부재로 불가.** 네이버 블로그 검색 API 가 본문이 아닌 ~150자 스니펫만 주어 27거점 8,554건 중 점포명 2개 이상 동시 언급이 15건(0.2%)뿐. 점포 단위 리뷰 원문(플레이스 리뷰)은 공식 API 부재 — 소스가 바뀌기 전엔 재시도 무의미.
-- 산출: `ml/artifacts/industry_gnn.pt` + `data/gold/platform_industry_recommend.json`(40,388노드 Top-3, ~8.4MB — **2026-08-19 105열본**) + `ml/mlruns`. 서빙: `apps/backend/app/services/industry_recommend.py`(좌표→최근접 노드 400m, 없으면 거점 평균) → `/api/v1/ai/recommend-industry`(스텁 교체 완료). json 은 .gitignore/.vercelignore 예외로 배포 포함.
+- 산출: `ml/artifacts/industry_gnn.pt` + `data/gold/platform_industry_recommend.json`(40,388노드 Top-3, ~8.4MB — **2026-08-19 105열본**) + `ml/mlruns`. 서빙: `apps/backend/app/services/industry_recommend.py`(좌표→최근접 노드 400m, 없으면 거점 평균) → `/api/v1/ai/recommend-industry`(스텁 교체 완료). json 은 .gitignore 예외로 배포 포함.
   ⚠ **2026-09-08 정정 — 이 줄의 괄호가 같은 절 머리말과 다른 말을 하고 있었다.** 오늘
   산출물을 읽으면 `platform_industry_recommend.json` 은 **47,442노드 · 9.9MB ·
   `metrics.features` 117** 이고, 이는 위 머리말("66거점 47,442노드 · 엣지 188,673 ·
   피처 117열")과 같은 값이다. "40,388노드 · ~8.4MB · 105열본" 은 2026-08-19 판이고
   2026-09-05 재산출로 교체됐다 — 괄호만 안 따라온 자리다. 서빙 경로는 안 바뀌었다.
-  `.vercelignore` 는 위 LSTM 서빙 줄의 정정과 같다(프로덕션은 Cloud Run).
 
 **공공 수요신호 주입 — 완료·재학습 반영 (2026-08-16). lift +3.1% → +4.4%.**
 `build_gold.py:124` 의 §9 TODO(생활인구·매출·SGIS 조인)를 GNN 쪽으로 구현한 것.
@@ -299,7 +296,7 @@ ep425 에서 죽어 있던 학습을 체크포인트 재개로 이어받아 600 
 **Platform 트랙 88.2% → 93.8%.**
 
 산출물: `ml/artifacts/industry_gnn.pt`(105열 서빙 체크포인트) ·
-`data/gold/platform_industry_recommend.json`(토치 없는 Vercel 경로용 배치 추천, 40,388노드).
+`data/gold/platform_industry_recommend.json`(토치 없는 서버리스 경로용 배치 추천, 40,388노드).
 
 ⚠ **로그를 파일로 남길 때 인코딩 주의.** `train_gnn` 재개가 항상 죽던 원인이 Windows 기본
 cp949 에 `—`(em dash) 가 없어서였다. 파일 리다이렉트 시 `PYTHONIOENCODING=utf-8` 을 준다.

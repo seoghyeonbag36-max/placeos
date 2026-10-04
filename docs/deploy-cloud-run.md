@@ -1,7 +1,6 @@
 # Cloud Run 배포 가이드 (프로덕션, 2026-08-28~)
 
 프론트(Vite 정적 빌드) + 백엔드(FastAPI)를 **컨테이너 하나**에 담아 Cloud Run 으로 낸다.
-Vercel 에서 옮겨 온 경위는 [deploy-vercel.md](deploy-vercel.md) 머리말 참조.
 
 ## 좌표
 
@@ -52,11 +51,11 @@ $g = "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"
 
 ## 이 구조가 없애는 위험 둘
 
-1. **이중 requirements 소멸.** Vercel 은 루트 `requirements.txt`(배포 전용 최소 셋)를 썼고
+1. **이중 requirements 소멸.** 예전 서버리스 배포는 루트 `requirements.txt`(배포 전용 최소 셋)를 썼고
    그게 백엔드용과 갈라져 2026-08-26~27 프로덕션을 18시간 죽였다. Cloud Run 은 CI 가
    테스트하는 `apps/backend/requirements.txt` 하나만 쓴다 — 갈라질 목록이 없다.
 2. **런타임 버전 고정.** Dockerfile 이 `python:3.11-slim` 을 박는다. 플랫폼이 파이썬을
-   몰래 올릴 수 없다(Vercel 은 빌드 3.14 / 런타임 3.12 로 두 버전을 썼고, 3.14 로 올라가면
+   몰래 올릴 수 없다(예전 서버리스 배포는 빌드 3.14 / 런타임 3.12 로 두 버전을 썼고, 3.14 로 올라가면
    SQLAlchemy 2.0.35 가 깨지는 지뢰가 있었다).
 
 ## 빌드 시점 가드
@@ -71,7 +70,7 @@ $g = "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"
 - `VITE_NAVER_MAPS_KEY_ID` 가 비어 있지 않은가
 
 ⚠ 이 저장소가 두 번 당한 양식이 **데이터가 빠졌는데 화면은 멀쩡해 보인다**는 것이다
-(2026-08-15 `.vercelignore` 가 `data/` 를 빼먹어 프로덕션이 gold 를 한 파일도 못 읽었는데
+(2026-08-15 옛 서버리스 배포의 업로드 제외 목록이 `data/` 를 빼먹어 프로덕션이 gold 를 한 파일도 못 읽었는데
 07-19 부터 아무도 몰랐다). 조용한 폴백보다 시끄러운 빌드 실패가 낫다.
 
 ⚠ Dockerfile 에 heredoc(`RUN python - <<'PY'`)을 쓰지 말 것 — Cloud Build 의 기본

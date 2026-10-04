@@ -17,7 +17,7 @@
 
 - **질문 금지.** 모든 선택은 합리적 기본값으로 스스로 결정하고, 결정 근거를 커밋 메시지·로그에 남긴다. 모든 확인성 질문의 답은 'yes'로 간주한다.
 - **막히면 우회.** 어떤 하위 작업이 15분 이상 막히면(외부 API 장애, 의존성 실패 등) `TODO` 주석 + docs 메모로 문서화하고 다음 작업으로 넘어간다. 전체가 멈추는 것이 최악이다.
-- **단계마다 커밋·푸시.** 각 단계 완료 시 검증(빌드·pytest) 통과 확인 후 커밋하고 push 한다(main 푸시 = Vercel 자동 배포 — 기존 워크플로우와 동일).
+- **단계마다 커밋·푸시.** 각 단계 완료 시 검증(빌드·pytest) 통과 확인 후 커밋하고 push 한다(main 푸시 = 자동 배포 — 기존 워크플로우와 동일).
 - **시간 예산 ~2시간**: A(15분) → B(50분) → C(20분) → D(30분) → 잔여 시간에 E. 예산 초과 시 해당 단계를 최소 동작 상태로 마무리하고 다음으로.
 - **파괴 금지**: 기존 gold 데이터(garosugil PoC 산출물, PoC exit 통과분)를 덮어쓰지 말 것. 신규 산출물은 새 파일/새 키로 추가.
 
@@ -37,14 +37,14 @@
 ## C. 서빙 연동
 
 1. `ml/inference/predictor.py`: 학습 산출물(모델 or forecast json)을 로드해 `predict_vacancy(district_id)` 제공. 모델 로드 실패 시 forecast json 폴백.
-2. `apps/backend/app/api/v1/ai.py` 의 `predict-vacancy` 스텁을 predictor 호출로 교체. Redis 없으면 인메모리 TTL 캐시 폴백(서버리스 환경 고려 — Vercel 에서는 forecast json 정적 서빙이 기본 경로가 되도록).
+2. `apps/backend/app/api/v1/ai.py` 의 `predict-vacancy` 스텁을 predictor 호출로 교체. Redis 없으면 인메모리 TTL 캐시 폴백(서버리스 환경 고려 — forecast json 정적 서빙이 기본 경로가 되도록).
 3. 검증: `cd apps/backend && pytest` + 로컬 uvicorn 기동 후 `/api/v1/ai/predict-vacancy` 13거점 응답 확인 (spaceos:verify 스킬 절차 준수).
 
 ## D. 다음 단계 — Page 예측 연동 (로드맵 순서)
 
 1. `/api/v1/heatmap` 및 상권 대시보드 응답에 **predicted_rate(다음 분기 예측)** 속성 추가 — 소스는 B-4 의 forecast.
 2. 프론트(`apps/frontend`): 13거점 대시보드/심층 화면에 예측값 표시(현재값 대비 ▲▼). `npm run build` 통과 확인.
-3. 커밋·푸시 → 배포 확인(`curl https://spaceos-sandy.vercel.app/api/v1/commercial-districts` 에 예측 필드 포함 여부).
+3. 커밋·푸시 → 배포 확인(운영 `/api/v1/commercial-districts` 응답에 예측 필드 포함 여부).
 
 ## E. 잔여 시간 시 (선택)
 
