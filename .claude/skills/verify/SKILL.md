@@ -11,8 +11,13 @@ description: PlaceOS 변경분을 실제 표면에서 확인하는 절차 — �
 cd apps/backend && pytest -q                 # 백엔드 테스트/임포트
 python -m pytest data/tests -q               # 데이터 파이프라인 (CI 의 별도 잡)
 cd apps/frontend && npm run build            # 프론트 타입체크 + 빌드
+cd apps/frontend && npm run lint             # eslint — CI 가 에러(0건이어야 한다)로 막는다. 경고는 기존 86건
 cd ml && python -c "import torch; print('torch', torch.__version__)"
 ```
+
+⚠ **`npm run lint` 를 빠뜨리지 말 것.** 2026-10-05 에 로컬은 build·vitest 가 전부 초록이었는데 머지 직후
+main CI 의 「프론트 타입체크 + 빌드」가 **린트 단계**에서 실패했다(`react-hooks/refs` — 렌더 도중 ref 갱신).
+build 는 타입만 보고 eslint 규칙(React 훅 규칙 포함)은 안 본다. CI 와 같은 순서(린트 → 타입체크 → 빌드)로 돌린다.
 
 ⚠ **`data/tests` 를 빠뜨리지 말 것.** CI 는 이것을 **별도 잡**("데이터 파이프라인
 pytest")으로 돌리는데 로컬 레시피와 `run_full_verify.py` 에는 둘 다 없었다 —
