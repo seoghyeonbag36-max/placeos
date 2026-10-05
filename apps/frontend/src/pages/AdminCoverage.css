@@ -60,3 +60,32 @@
 .admin-kpi3-list li { margin: 2px 0; overflow-wrap: anywhere; }
 .admin-kpi3-name { font-weight: var(--fw-semibold); }
 .admin-kpi3-meta { color: var(--muted); }
+
+/* ── 섹션 점프 내비 + KPI② 칸 (2026-10-05 · AdminLatency.tsx) ───────────────────
+ * 내비는 스크롤해도 위에 붙는다 — 폰에서 세 칸을 오가며 읽는 것이 목적이다.
+ * 경로 목록도 표가 아니라 줄 목록이다(KPI③ 과 같은 이유 — 가로 스크롤 없음). */
+.admin-nav {
+  position: sticky; top: 0; z-index: 1; display: flex; gap: var(--sp-2); flex-wrap: wrap;
+  margin: 0 0 var(--sp-4); padding: var(--sp-2) 0; background: var(--bg);
+}
+.admin-nav button {
+  padding: 6px var(--sp-3); font-size: var(--fs-caption); border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.admin-nav button:hover { border-color: var(--ui-navy); color: var(--ui-navy); }
+
+/* `.admin-kpi3-list ul` 의 들여쓰기(18px)보다 특이도가 높아야 제목과 줄이 맞는다 */
+.admin-kpi3-list .admin-lat-list { list-style: none; padding: 0; margin: 0; }
+.admin-lat-row { padding: var(--sp-2) 0; border-top: 1px solid var(--line); }
+.admin-lat-row:first-child { border-top: 0; }
+.admin-lat-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.admin-lat-verdict {
+  flex: none; padding: 1px var(--sp-2); border-radius: 999px; font-size: var(--fs-caption);
+  border: 1px solid var(--line); color: var(--muted);
+}
+.admin-lat-verdict.is-ok { border-color: var(--source-real-line); background: var(--source-real-soft); color: var(--source-real); }
+.admin-lat-verdict.is-warn { border-color: var(--danger-line); background: var(--danger-soft); color: var(--danger-text); }
+.admin-lat-more {
+  margin-top: var(--sp-2); padding: 6px var(--sp-3); font-size: var(--fs-caption); cursor: pointer;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink);
+}

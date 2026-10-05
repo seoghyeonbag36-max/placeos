@@ -49,6 +49,28 @@ it("계정 전환 후 도착한 이전 계정의 응답은 화면에 남지 않�
   expect(screen.queryByLabelText("사업 이름 (선택)")).toBeNull();
 });
 
+it("#admin 은 로그인 전에도 관리자 화면을 연다 — 관리자 API 는 계정이 아니라 X-Admin-Token 만 본다", async () => {
+  window.location.hash = "#admin";
+  try {
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "PlaceOS 관리자" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: /내 사업의 시작/ })).toBeNull();
+    expect(getBusinessWorkspace).not.toHaveBeenCalled();           // 계정 API 는 부르지 않는다
+    // 이미 열린 홈에서 해시만 바뀌어도(새로고침 없이) 따라간다
+    act(() => { window.location.hash = ""; window.dispatchEvent(new HashChangeEvent("hashchange")); });
+    expect(await screen.findByRole("heading", { name: /내 사업의 시작/ })).toBeTruthy();
+    act(() => { window.location.hash = "#admin"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
+    expect(await screen.findByRole("heading", { name: "PlaceOS 관리자" })).toBeTruthy();
+  } finally { window.location.hash = ""; }
+});
+
+it("#admin 이 아니면 로그인 전 첫 화면은 그대로 홈이다", () => {
+  window.location.hash = "";
+  render(<App />);
+  expect(screen.getByRole("heading", { name: /내 사업의 시작/ })).toBeTruthy();
+  expect(screen.queryByRole("heading", { name: "PlaceOS 관리자" })).toBeNull();
+});
+
 it("개인 정보 로드가 실패하면 빈 작업 공간으로 진행하지 않는다", async () => {
   vi.mocked(getBusinessWorkspace).mockRejectedValue(new Error("offline"));
   saveToken("user-a");

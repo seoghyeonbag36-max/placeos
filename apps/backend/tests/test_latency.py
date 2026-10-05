@@ -173,3 +173,41 @@ def test_frontend_metric_names_match_the_server_allowlist() -> None:
            / "clientTiming.ts").read_text(encoding="utf-8")
     for name in metrics.ALLOWED:
         assert f'"{name}"' in src, f"프론트에 {name} 이 없다"
+
+
+# ── 서버 목표(200ms)와 화면 목표(3초)를 섞지 않는다 (2026-10-05 관리자 화면에서 발견) ──
+
+def test_client_timings_are_judged_against_the_client_target() -> None:
+    """**핵심 잠금.** 1.2초 걸린 지도가 서버 목표 200ms 로 '미달' 판정되면 안 된다."""
+    for _ in range(latency.MIN_SAMPLES):
+        latency.record("client:map_ready", 1200.0)
+    row = next(r for r in latency.summary()["routes"] if r["route"] == "client:map_ready")
+    assert row["source"] == "client"
+    assert row["target_ms"] == latency.CLIENT_TARGET_MS
+    assert row["verdict"] == "충족"
+
+    latency.reset()
+    for _ in range(latency.MIN_SAMPLES):
+        latency.record("client:map_ready", latency.CLIENT_TARGET_MS + 500.0)
+    row = next(r for r in latency.summary()["routes"] if r["route"] == "client:map_ready")
+    assert row["verdict"] == "미달", "3초를 넘긴 지도가 충족으로 읽힌다"
+
+
+def test_server_routes_keep_the_server_target_and_are_tagged() -> None:
+    latency.record("/api/v1/x", 5.0)
+    row = latency.summary()["routes"][0]
+    assert row["source"] == "server"
+    assert row["target_ms"] == latency.TARGET_MS
+
+
+def test_overall_counts_server_routes_only() -> None:
+    """클라이언트 표본(초 단위 자가보고)이 서버 p95 를 부풀리면 KPI② 가 다른 값을 잰다."""
+    for _ in range(latency.MIN_SAMPLES):
+        latency.record("/api/v1/fast", 5.0)
+    for _ in range(latency.MIN_SAMPLES * 3):
+        latency.record("client:map_ready", 2500.0)
+    body = latency.summary()
+    assert body["overall"]["n"] == latency.MIN_SAMPLES
+    assert body["overall"]["p95_ms"] == 5.0
+    assert body["overall"]["verdict"] == "충족"
+    assert body["client_target_ms"] == latency.CLIENT_TARGET_MS

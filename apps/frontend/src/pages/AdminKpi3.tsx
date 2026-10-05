@@ -55,7 +55,7 @@ export default function AdminKpi3({ request }: { request: Kpi3Request | null }) 
 
   const loading = !!request?.token && result?.seq !== request.seq;
   return (
-    <section className="admin-kpi3" aria-label="KPI③ 고객 검증">
+    <section className="admin-kpi3" id="admin-kpi3" aria-label="KPI③ 고객 검증">
       <h2 className="admin-kpi3-title">KPI③ 고객 검증 (파일럿 · PMF)</h2>
 
       {!request?.token && (
@@ -170,7 +170,8 @@ function OrgList({ title, empty, rows }: {
   );
 }
 
-function Tile({ label, value, sub, warn }: {
+/** 관리자 패널 공용 타일 — KPI② 칸(AdminLatency)도 같은 모양을 쓴다. */
+export function Tile({ label, value, sub, warn }: {
   label: string; value: string; sub?: string; warn?: boolean;
 }) {
   return (

@@ -44,6 +44,10 @@ MIN_SAMPLES = 100
 MAX_ROUTES = 200
 # KPI② 목표. 바꾸려면 CLAUDE.md §KPI Priorities 와 함께 바꾼다.
 TARGET_MS = 200.0
+# 화면 쪽 목표(지도 로딩 <3초). `client:` 키는 브라우저가 스스로 보고한 값이라 단위가 초다 —
+# 서버 목표(200ms)로 판정하면 1.2초 걸린 지도가 표본 100건에서 "미달"로 찍힌다(2026-10-05).
+CLIENT_TARGET_MS = 3000.0
+CLIENT_PREFIX = "client:"
 
 _lock = threading.Lock()
 _samples: dict[str, deque[float]] = {}
@@ -79,35 +83,46 @@ def _percentile(values: list[float], q: float) -> float:
     return ordered[rank - 1]
 
 
-def _verdict(n: int, p95: float) -> str:
+def _verdict(n: int, p95: float, target: float = TARGET_MS) -> str:
     if n < MIN_SAMPLES:
         return "표본부족"
-    return "충족" if p95 < TARGET_MS else "미달"
+    return "충족" if p95 < target else "미달"
 
 
 def summary() -> dict:
-    """경로별 + 전체 지연 요약. 읽기만 한다."""
+    """경로별 + 전체 지연 요약. 읽기만 한다.
+
+    `overall` 은 **서버 경로만** 센다 — `client:` 표본(초 단위 자가보고)이 섞이면 서버 p95 가
+    통째로 부풀어 KPI② 의 `API p95 <200ms` 가 다른 값을 재게 된다. 경로마다 `source` 와
+    그 경로가 비교한 `target_ms` 를 싣는다.
+    """
     with _lock:
         snapshot = {route: list(buf) for route, buf in _samples.items()}
 
     routes = []
     for route, vals in snapshot.items():
         p95 = _percentile(vals, 0.95)
+        is_client = route.startswith(CLIENT_PREFIX)
+        target = CLIENT_TARGET_MS if is_client else TARGET_MS
         routes.append({
             "route": route,
+            "source": "client" if is_client else "server",
             "n": len(vals),
             "p50_ms": round(median(vals), 1),
             "p95_ms": round(p95, 1),
             "p99_ms": round(_percentile(vals, 0.99), 1),
             "max_ms": round(max(vals), 1),
-            "verdict": _verdict(len(vals), p95),
+            "target_ms": target,
+            "verdict": _verdict(len(vals), p95, target),
         })
     routes.sort(key=lambda r: -r["p95_ms"])
 
-    allv = [v for vals in snapshot.values() for v in vals]
+    allv = [v for route, vals in snapshot.items() if not route.startswith(CLIENT_PREFIX)
+            for v in vals]
     overall_p95 = _percentile(allv, 0.95)
     return {
         "target_ms": TARGET_MS,
+        "client_target_ms": CLIENT_TARGET_MS,
         "min_samples": MIN_SAMPLES,
         "window_per_route": WINDOW,
         # 이 값이 전역이 아니라는 사실을 응답에 박아 둔다 — 떼면 오독된다.
