@@ -6,6 +6,15 @@
     <!-- 선언이 없으면 브라우저가 /favicon.ico 를 스스로 찾아가 404 를 낸다 —
          페이지를 열 때마다 콘솔 에러 1건이 그래서 생겼다(2026-09-08 렌더 검증). -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- 앱스토어 출시 대신 웹앱(PWA)으로 먼저 간다(2026-10-05) — 홈 화면에 추가하면 앱처럼 뜬다.
+         심사·개발자 계정·인앱결제 정책을 지금 질 이유가 없다(docs/decision-lightweight-first-2026-10-05.md §4).
+         ⚠ 서비스 워커는 일부러 두지 않는다. 캐시가 옛 빌드를 붙잡으면 09-13 의 "배포했는데 옛 화면"
+           사고가 되풀이된다(apps/backend/app/main.py FrontendFiles 의 no-cache 정책). 아이콘은
+           scripts/build_pwa_icons.py 가 만든다. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#3A5A98" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="PlaceOS" />
     <title>PlaceOS — 상권 디지털 트윈</title>
   </head>
   <body>

@@ -100,7 +100,7 @@ claude mcp list
 ```
 PlaceOS/
 ├── apps/
-│   ├── backend/   app/api/v1/(ai·buildings·districts·heatmap·marketing·payments) · services · schemas · models
+│   ├── backend/   app/api/v1/(ai·auth·buildings·districts·heatmap·marketing·admin·feedback·metrics) · services · schemas · models
 │   └── frontend/  src/(components · pages · design/{tokens,components} · lib/{api.ts,naverMap.ts})
 ├── ml/            models/{lstm,gnn} · training · inference · notebooks      (PyTorch + MLflow)
 ├── data/          bronze/ silver/ gold/ · crawlers/ · pipelines/ · collectors/   (Bronze→Silver→Gold)

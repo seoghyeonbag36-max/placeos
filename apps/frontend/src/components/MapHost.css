@@ -65,6 +65,9 @@
   z-index: 1;
 }
 .maphost .map-note strong { color: var(--ink); font-size: 15px; }
+.maphost .map-note-cause { max-width: 520px; font-size: 12px; }
+.maphost .map-note-cause summary { cursor: pointer; }
+.maphost .map-note-cause[open] { display: flex; flex-direction: column; gap: var(--sp-1); }
 .maphost .map-note code {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 6px; padding: 2px 6px; font-size: 12px;

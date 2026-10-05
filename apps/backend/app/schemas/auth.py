@@ -18,6 +18,17 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleLoginRequest(BaseModel):
+    """구글 버튼이 넘겨준 ID 토큰(credential). 처음이면 가입까지 한다 — 사업 이름은 선택이다."""
+    credential: str = Field(min_length=1, max_length=4096)
+    org_name: str | None = Field(default=None, max_length=200)
+
+
+class AuthProviders(BaseModel):
+    """화면이 그릴 로그인 수단. 구글 클라이언트 ID 는 공개값이다(구글 버튼이 그대로 싣는다)."""
+    google_client_id: str | None = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

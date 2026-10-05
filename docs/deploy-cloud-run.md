@@ -299,3 +299,18 @@ curl.exe -s -H "X-Admin-Token: <토큰>" "https://placeos.web.app/api/v1/admin/u
 처럼 구분자를 바꾸거나, 공백으로 구분해 넣는다(코드는 쉼표·공백 둘 다 받는다).
 ⚠ 적었는데 DB 에 없는 id 는 `exclusion_rules.env_ids_unmatched` 와 #admin 경고로 드러난다 —
 오타면 아무것도 빠지지 않는다.
+
+## 구글 로그인 켜기 (2026-10-05)
+
+코드는 배포돼 있어도 **`GOOGLE_CLIENT_ID` 가 비면 꺼져 있다**(첫 화면에 버튼 없음 · `/auth/google` 404).
+클라이언트 ID 만드는 법(OAuth 동의 화면 · 승인된 JavaScript 원본)은
+[decision-lightweight-first-2026-10-05.md](decision-lightweight-first-2026-10-05.md) §1 「켜는 법」. 넣는 법은 위와 같다:
+
+```powershell
+& "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.ps1" run services update spaceos `
+    --region=us-central1 --project=spaceos-digital-twin `
+    --update-env-vars=GOOGLE_CLIENT_ID=<클라이언트 ID>
+curl.exe -s https://placeos.web.app/api/v1/auth/providers    # → {"google_client_id":"…"}
+```
+
+마이그레이션은 **없다** — 비밀번호 없는 계정은 기존 `users.hashed_password` 칸에 `!` 를 넣는다.

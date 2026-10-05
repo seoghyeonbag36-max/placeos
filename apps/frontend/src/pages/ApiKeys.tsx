@@ -6,16 +6,21 @@
  * ⚠ **원문 키는 발급 직후 한 번만** 보인다. 서버도 원문을 저장하지 않으므로(해시만 남긴다) 목록
  *   응답에는 원문이 아예 없다. 원문은 이 화면의 React 상태에만 있고, 「보관했습니다」를 누르거나
  *   창을 닫으면 사라진다. 브라우저 저장소에 넣지 않는다(lib/session.ts 머리말).
+ *
+ * 2026-10-05: 맨 아래 **회원 탈퇴**(DELETE /auth/me). 받은 개인정보를 지울 길이 없으면 파기 의무를
+ *   지킬 수 없다 — 확인 단계를 한 번 거쳐 바로 지운다(docs/decision-lightweight-first-2026-10-05.md §2).
  */
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
 import {
-  logoutSession, createApiKey, getMe, listApiKeys, revokeApiKey,
+  logoutSession, createApiKey, deleteAccount, getMe, listApiKeys, revokeApiKey,
   type ApiKeyCreated, type ApiKeyInfo, type AuthMe,
 } from "@/lib/api";
-import { apiKeyErrorText, isSessionExpired, SESSION_EXPIRED_TEXT } from "@/lib/authText";
+import {
+  apiKeyErrorText, deleteAccountErrorText, isSessionExpired, SESSION_EXPIRED_TEXT,
+} from "@/lib/authText";
 import { clearToken, loadToken } from "@/lib/session";
 import "./Account.css";
 
@@ -47,6 +52,8 @@ export default function ApiKeys({ go }: AccountScreenProps) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [revoking, setRevoking] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [leaving, setLeaving] = useState<"idle" | "confirm" | "pending">("idle");
+  const [leaveError, setLeaveError] = useState("");
 
   /** 401 은 어느 호출에서 오든 같은 뜻이다 — 토큰을 버리고 로그인 안내로 돌아간다. */
   const expire = useCallback(() => {
@@ -78,6 +85,22 @@ export default function ApiKeys({ go }: AccountScreenProps) {
     if (!token) return;
     try { await logoutSession(token); clearToken(); go("login"); }
     catch { setActionError("로그아웃하지 못했습니다. 다시 시도해 주세요."); }
+  }
+
+  /** 탈퇴 — 서버가 지운 뒤에만 세션을 비운다(실패했는데 로그아웃처럼 보이면 지워진 줄 안다). */
+  async function leave() {
+    if (!token || leaving === "pending") return;
+    setLeaving("pending");
+    setLeaveError("");
+    try {
+      await deleteAccount(token);
+      clearToken();
+      go("login");
+    } catch (err) {
+      if (isSessionExpired(err)) { expire(); return; }
+      setLeaveError(deleteAccountErrorText(err));
+      setLeaving("confirm");
+    }
   }
 
   async function issue(e: FormEvent) {
@@ -268,6 +291,32 @@ export default function ApiKeys({ go }: AccountScreenProps) {
           </ul>
         )}
       </Card>
+
+      <section className="acct-leave" aria-labelledby="acct-leave-title">
+        <h3 id="acct-leave-title">회원 탈퇴</h3>
+        <p className="acct-muted">
+          계정(이메일)과 내 사업 정보·피드백을 바로 지웁니다. 혼자 쓰는 조직이면 조직과 API 키도 함께 지워져,
+          그 키로 부르던 연동은 즉시 거절됩니다.
+        </p>
+        {leaving === "idle" ? (
+          <Button type="button" variant="ghost" onClick={() => { setLeaving("confirm"); setLeaveError(""); }}>
+            회원 탈퇴
+          </Button>
+        ) : (
+          <div className="caveat-note caveat-withheld acct-confirm" role="group" aria-label="회원 탈퇴 확인">
+            <p>되돌릴 수 없습니다. 정말 탈퇴할까요?</p>
+            <div className="acct-actions">
+              <Button type="button" disabled={leaving === "pending"} onClick={() => void leave()}>
+                {leaving === "pending" ? "지우는 중…" : "탈퇴하고 지우기"}
+              </Button>
+              <Button type="button" variant="ghost" disabled={leaving === "pending"} onClick={() => setLeaving("idle")}>
+                취소
+              </Button>
+            </div>
+          </div>
+        )}
+        {leaveError && <p className="caveat-note caveat-withheld acct-error" role="alert">{leaveError}</p>}
+      </section>
     </div>
   );
 }

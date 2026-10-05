@@ -54,6 +54,19 @@ export function apiKeyErrorText(err: unknown, action: "불러오지" | "발급�
   return common(err, `키를 ${action}`);
 }
 
+/** 구글 로그인 실패(2026-10-05). 401 은 구글이 준 토큰을 서버가 확인하지 못한 경우다(만료·다른 앱용). */
+export function googleErrorText(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401) return "구글 로그인을 확인하지 못했습니다. 다시 시도해 주세요.";
+    if (err.status === 404) return "지금은 구글 로그인을 쓸 수 없습니다. 이메일로 로그인해 주세요.";
+    if (err.status === 503) return "구글 인증 서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.";
+  }
+  return common(err, "구글로 로그인하지");
+}
+
+/** 탈퇴 실패. 401 은 isSessionExpired 로 따로 처리한다(토큰을 버리고 로그인 안내). */
+export const deleteAccountErrorText = (err: unknown) => common(err, "탈퇴하지");
+
 /** 피드백 제출 실패. 401 은 isSessionExpired 로 따로 처리한다(토큰을 버리고 로그인 안내). */
 export function feedbackErrorText(err: unknown): string {
   if (err instanceof ApiError && err.status === 422) {

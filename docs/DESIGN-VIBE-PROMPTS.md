@@ -33,9 +33,10 @@ Card·BottomSheet 컴포넌트를 재사용하고, 한글 가독성(Pretendard 1
 ```
 고급화/가성비/기능중심 3개를 나란히 비교하는 카드 UI 를 Card 로 만들어줘.
 tier 헤더는 각기 다른 톤(고급화=ink, 가성비=brand, 기능중심=muted)으로 구분하고,
-ROI·손익분기를 큰 숫자(display)로 강조. 결제로 이어지는 단건 리포트 버튼 옆에는
-NaverPayButton(공식 슬롯)을 배치하되 버튼 자체는 변형하지 말 것.
+ROI·손익분기를 큰 숫자(display)로 강조.
 ```
+> ⚠ 2026-10-05: 종전 프롬프트의 "단건 리포트 버튼 옆 NaverPayButton(공식 슬롯)" 은 뺐다 — 결제 버튼을
+> 두지 않는다(PG 미연동 · `NaverPayButton` 삭제). → docs/decision-lightweight-first-2026-10-05.md §3
 
 ## 4. Program 화면 — 마케팅/행사 자동화
 ```
@@ -45,12 +46,13 @@ LLM 이 생성한 마케팅안/행사안을 검수·편집하는 에디터 화�
 마이크로카피에 반영해줘.
 ```
 
-## 5. 네이버 연동 컴포넌트 — 지도/페이
+## 5. 네이버 연동 컴포넌트 — 지도
 ```
-design/assets/naverpay 의 공식 버튼 에셋으로 NaverPayButton 을 실제 공식 버튼으로 교체해줘
-(임의 색·문구 변경 금지). 네이버 지도는 src/lib/naverMap.ts 와 연결해 마커/바텀시트가
-지도 위에 자연스럽게 떠 있도록 z-index·여백을 맞춰줘. 결제 플로우는 backend payments.py 와 연동.
+네이버 지도는 src/lib/naverMap.ts 와 연결해 마커/바텀시트가
+지도 위에 자연스럽게 떠 있도록 z-index·여백을 맞춰줘.
 ```
+> ⚠ 2026-10-05: 종전 프롬프트의 "NaverPayButton 을 공식 버튼으로 교체 · 결제 플로우는 payments.py 와 연동"은
+> 뺐다 — 둘 다 지웠다(PG 미연동). → docs/decision-lightweight-first-2026-10-05.md §3
 
 ## 6. 품질 — 접근성·일관성 검수
 ```

@@ -63,6 +63,11 @@ class Settings(BaseSettings):
     jwt_secret: str = DEV_JWT_SECRET
     jwt_algorithm: str = "HS256"
     jwt_expires_minutes: int = 60 * 24 * 7   # 7일
+    # 구글 로그인(2026-10-05) — 웹 OAuth 클라이언트 ID. **비어 있으면 구글 로그인이 꺼진다**
+    # (화면에 버튼이 안 뜨고 /auth/google 은 404). 공개값이다 — 브라우저가 구글 버튼을 그릴 때
+    # 그대로 싣는다. 클라이언트 비밀(secret)은 쓰지 않는다: ID 토큰 흐름은 서버가 구글 공개키로
+    # 서명만 확인한다(services/google_auth.py · docs/decision-lightweight-first-2026-10-05.md §1).
+    google_client_id: str = ""
     # CORS 허용 오리진
     cors_origins: list[str] = ["http://localhost:5173"]
     # LLM API (PPPP 마케팅 콘텐츠 생성)

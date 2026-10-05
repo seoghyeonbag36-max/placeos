@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "PlaceOS — 상권 디지털 트윈",
+  "short_name": "PlaceOS",
+  "description": "창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 검증 준비까지 이어가는 작업 공간",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F7FB",
+  "theme_color": "#3A5A98",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
