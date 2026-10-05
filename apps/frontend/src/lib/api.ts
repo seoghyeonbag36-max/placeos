@@ -1173,6 +1173,38 @@ export function getAdminPilotW4(adminToken: string): Promise<AdminPilotW4> {
   return adminGet<AdminPilotW4>("/admin/pilot-w4", adminToken);
 }
 
+/** GET /admin/latency 의 경로 한 줄. `source: "client"` 는 브라우저 **자가보고**(초 단위 · 목표 3초) —
+ *  서버 실측(목표 200ms)과 등급이 달라 `target_ms` 가 경로마다 따로 온다. */
+export interface AdminLatencyRoute {
+  route: string;
+  source: "server" | "client";
+  n: number;
+  p50_ms: number;
+  p95_ms: number;
+  p99_ms: number;
+  max_ms: number;
+  target_ms: number;
+  verdict: "표본부족" | "충족" | "미달";
+}
+
+/** GET /admin/latency — KPI② 의 유일한 관측 지점. 값은 **프로세스 로컬 표본**(`scope`)이다.
+ *  `overall` 은 서버 경로만 센다(client 표본은 섞이지 않는다). */
+export interface AdminLatency {
+  target_ms: number;
+  client_target_ms: number;
+  min_samples: number;
+  window_per_route: number;
+  scope: "process";
+  note: string;
+  overall: { n: number; p50_ms: number; p95_ms: number; verdict: "표본부족" | "충족" | "미달" };
+  routes: AdminLatencyRoute[];
+}
+
+/** KPI② 응답시간 — GET /admin/latency + `X-Admin-Token`. */
+export function getAdminLatency(adminToken: string): Promise<AdminLatency> {
+  return adminGet<AdminLatency>("/admin/latency", adminToken);
+}
+
 
 /** 개인 사업 정보는 인증된 요청만 보낸다. */
 export const getBusinessWorkspace = (token: string) =>

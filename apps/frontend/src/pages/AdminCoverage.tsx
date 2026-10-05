@@ -3,10 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import AdminKpi3, { type Kpi3Request } from "@/pages/AdminKpi3";
+import AdminLatency from "@/pages/AdminLatency";
 import "./AdminCoverage.css";
 
 /**
- * 관리자 전용 커버리지 패널 — 지도에 표시되지 않는 '제외 건물' 을 여기서만 본다.
+ * 관리자 콘솔(#admin) — 운영 지표를 한 화면에 모은다. 위에서부터 KPI② 성능 · KPI③ 고객 검증 · 지도 커버리지.
+ * 2026-10-05: KPI② 칸(AdminLatency)을 더했고 섹션 점프 내비를 달았다. 이 파일 이름이 AdminCoverage 인 것은
+ * 커버리지 패널로 시작해서다 — 토큰 입력과 조회 순번(아래)이 여기서 세 칸을 함께 부른다.
+ *
+ * 지도 커버리지 패널 — 지도에 표시되지 않는 '제외 건물' 을 여기서만 본다.
  *
  * 공개 지도(MapShell)는 건축물대장으로 capacity 를 확인한 건물만 그린다. 대장 미확인
  * 건물은 빠지는데(연남동 433동), 그 사실을 사용자 화면에 섞으면 근거가 다른 데이터가
@@ -17,14 +22,25 @@ import "./AdminCoverage.css";
  */
 const TOKEN_KEY = "spaceos.adminToken";
 
+/** 섹션 점프 — 해시(#admin)가 화면 라우팅에 쓰이므로 `href="#…"` 앵커를 쓰지 않는다. */
+const SECTIONS = [
+  { id: "admin-kpi2", label: "KPI② 성능" },
+  { id: "admin-kpi3", label: "KPI③ 고객 검증" },
+  { id: "admin-coverage", label: "지도 커버리지" },
+] as const;
+
+function jumpTo(id: string) {
+  document.getElementById(id)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+}
+
 export default function AdminCoverage() {
   // 토큰은 세션 스토리지에만 둔다 — 새 탭·재시작이면 다시 입력한다.
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) ?? "");
   const [data, setData] = useState<Payload | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  // KPI③ 칸은 같은 토큰으로 따로 부른다 — 커버리지가 실패해도 KPI③ 은 제 오류를 따로 낸다.
-  const [kpi3, setKpi3] = useState<Kpi3Request | null>(null);
+  // KPI② · KPI③ 칸은 같은 토큰으로 따로 부른다 — 커버리지가 실패해도 두 칸은 제 오류를 따로 낸다.
+  const [panels, setPanels] = useState<Kpi3Request | null>(null);
 
   // 조회 순번 — 조회가 겹치면(조회 중 Enter · 개발 모드의 자동 조회 2회) 늦게 도착한 옛 응답이
   // 최신 결과를 덮어 오류 문구와 표가 함께 보이고 실패한 토큰이 저장됐다(2026-09-28 브라우저 실측).
@@ -34,7 +50,7 @@ export default function AdminCoverage() {
   async function load(t: string) {
     if (!t) return;
     const seq = ++latest.current;
-    setKpi3({ token: t, seq });
+    setPanels({ token: t, seq });
     setLoading(true);
     setError("");
     try {
@@ -59,10 +75,9 @@ export default function AdminCoverage() {
   const t = data?.totals;
   return (
     <div className="admin-cov">
-      <h1 style={{ fontSize: 18, margin: "0 0 4px" }}>지도 커버리지 (관리자)</h1>
+      <h1 style={{ fontSize: 18, margin: "0 0 4px" }}>PlaceOS 관리자</h1>
       <p style={{ color: "#6b7280", margin: "0 0 18px" }}>
-        공개 지도에는 <strong>건축물대장으로 capacity 를 확인한 건물만</strong> 표시됩니다.
-        아래 제외 동수는 이 화면에서만 확인할 수 있습니다.
+        공개 화면에 내지 않는 운영 지표만 모았습니다. 값은 X-Admin-Token 이 있어야 옵니다.
       </p>
 
       <div className="admin-cov-form">
@@ -88,7 +103,20 @@ export default function AdminCoverage() {
         </div>
       )}
 
-      <AdminKpi3 request={kpi3} />
+      <nav className="admin-nav" aria-label="관리자 섹션">
+        {SECTIONS.map((s) => (
+          <button key={s.id} type="button" onClick={() => jumpTo(s.id)}>{s.label}</button>
+        ))}
+      </nav>
+
+      <AdminLatency request={panels} />
+      <AdminKpi3 request={panels} />
+
+      <h2 className="admin-kpi3-title" id="admin-coverage">지도 커버리지</h2>
+      <p className="admin-cov-note">
+        공개 지도에는 <strong>건축물대장으로 capacity 를 확인한 건물만</strong> 표시됩니다.
+        아래 제외 동수는 이 화면에서만 확인할 수 있습니다.
+      </p>
 
       {t && (
         <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
