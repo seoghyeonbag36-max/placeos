@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- 레일 로고(App.css .rail-logo)와 같은 남색·같은 글자. 파비콘만 따로 놀지 않게. -->
+  <!-- 레일 로고(App.css .rail-logo)와 같은 남색·같은 글자. 파비콘만 따로 놀지 않게.
+       2026-10-05: "S"(SpaceOS 시절 머리글자)를 "P" 로 — 레일은 09-13 에 바꿨는데 여기만 남아 있었다. -->
   <rect width="32" height="32" rx="8" fill="#3a5a98"/>
   <text x="16" y="22" text-anchor="middle" fill="#fff"
         font-family="Pretendard, 'Malgun Gothic', sans-serif"
-        font-size="18" font-weight="700" letter-spacing="-.5">S</text>
+        font-size="18" font-weight="700" letter-spacing="-.5">P</text>
 </svg>

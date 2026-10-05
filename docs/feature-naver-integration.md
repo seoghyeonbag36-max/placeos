@@ -44,7 +44,10 @@ X-NCP-APIGW-API-KEY:    {Client Secret}
 | 승인 | `/payments/v2.2/apply/payment` | `paymentId`로 실제 승인 |
 | 조회 | `/payments/v2.2/list/...` | 정산·거래완료 내역 → 성공보수 정산 |
 
-- 백엔드 코드: `apps/backend/app/api/v1/payments.py` (스텁 제공).
+- ~~백엔드 코드: `apps/backend/app/api/v1/payments.py` (스텁 제공).~~
+  **2026-10-05 보류 — 스텁을 지웠다.** 라우터에 붙은 적 없는 죽은 코드였고, 위 흐름은 PG 심사(사업자등록증)·
+  정기결제 별도 심사·환불·웹훅을 전제로 한다. 지금은 결제 의향(KPI③) → 수동 계좌이체 + 세금계산서로 간다.
+  이 절은 정기결제가 실제로 필요해질 때 다시 읽을 참고로 남긴다 → [decision-lightweight-first-2026-10-05.md](decision-lightweight-first-2026-10-05.md) §3
 - 결제 모델: ⑴ DaaS 월 구독, ⑵ 리포트 단건, ⑶ 공실 매칭 성공보수.
 
 ## 3. 환경변수(.env) 키

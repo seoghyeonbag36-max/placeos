@@ -46,7 +46,7 @@
 .ds-btn-brand:hover:not(:disabled) { background: var(--brand-pressed, #0b8294); }
 .ds-btn-brand:disabled { opacity: .5; }
 
-/* naver variant 는 '네이버 연동 액션'(길찾기 등)에만. 결제는 NaverPayButton. */
+/* naver variant 는 '네이버 연동 액션'(길찾기 등)에만. (결제 버튼은 없다 — PG 미연동, 2026-10-05) */
 .ds-btn-naver { background: var(--naver-green, #03c75a); color: #fff; }
 .ds-btn-naver:hover:not(:disabled) { background: var(--naver-green-pressed, #02b350); }
 .ds-btn-naver:disabled { opacity: .5; }

@@ -10,7 +10,11 @@
 // 거리뷰가 채우는 자리는 다른 것이다: "가보지 않고 그 자리의 성격을 본다".
 // ⚠ 촬영 시점이 몇 년 전일 수 있어 **공실 판정의 근거가 아니다.** 그래서 촬영일을
 //   반드시 같이 그린다 — 안 밝히면 사용자가 눈으로 본 셔터를 현재 상태로 읽는다.
+//
+// 2026-10-05: 아래에 **카카오맵 링크**(위치·로드뷰)를 단다. 거리뷰는 네이버 지도 SDK 에 묶여 있어
+//   한도·도메인 등록 문제로 안 뜰 수 있는데, 링크는 키가 필요 없다(lib/externalMap.ts).
 import { useEffect, useRef, useState } from "react";
+import { kakaoMapUrl, kakaoRoadviewUrl } from "@/lib/externalMap";
 import { describeNaverMapError, renderStreetView, type PanoramaInfo } from "@/lib/naverMap";
 import "./BuildingViewer.css";
 
@@ -151,9 +155,15 @@ export function StreetView({ center, name }: { center?: { lat: number; lng: numb
       {state === "none" && (
         <div className="sview-msg over">
           이 자리에는 거리뷰가 없다 — 도로에서 떨어진 골목·부지에서 정상적으로 일어난다.
+          {center && " 아래 카카오맵 로드뷰로도 확인해 볼 수 있다."}
         </div>
       )}
-      {state === "error" && <div className="sview-msg over err">{err}</div>}
+      {state === "error" && (
+        <div className="sview-msg over err">
+          {err}
+          {center && <><br />아래 카카오맵 링크로 그 자리를 볼 수 있다.</>}
+        </div>
+      )}
       {state === "ok" && (
         <div className="sview-meta">
           {/* 촬영일을 안 밝히면 사용자가 본 셔터를 현재 상태로 읽는다. 이 목록의
@@ -186,6 +196,17 @@ export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
           <StreetView center={b.center} name={b.name} />
         </div>
       </div>
+      {b.center && (
+        <p className="bviewer-links">
+          <a href={kakaoMapUrl(b.center, b.name)} target="_blank" rel="noopener noreferrer">
+            카카오맵에서 위치 보기<span className="sr-only">(새 창)</span>
+          </a>
+          {" · "}
+          <a href={kakaoRoadviewUrl(b.center)} target="_blank" rel="noopener noreferrer">
+            카카오맵 로드뷰<span className="sr-only">(새 창)</span>
+          </a>
+        </p>
+      )}
       <div className="bviewer-legend">
         {measured ? (
           <>

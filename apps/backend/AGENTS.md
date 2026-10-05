@@ -5,7 +5,8 @@
 ## 구조
 
 ```
-app/api/v1/    라우터 — 도메인당 한 파일 (buildings · districts · heatmap · ai · marketing · auth · payments · admin)
+app/api/v1/    라우터 — 도메인당 한 파일 (buildings · districts · heatmap · ai · marketing · auth · admin · feedback · metrics)
+               ⚠ payments 는 2026-10-05 에 지웠다 — PG 연동 금지(docs/decision-lightweight-first-2026-10-05.md §3)
 app/services/  비즈니스 로직 — 라우터에 로직을 넣지 않는다
 app/schemas/   Pydantic 스키마 (응답 계약)
 app/models/    DB 모델 (계정층)

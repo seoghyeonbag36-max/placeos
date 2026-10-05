@@ -110,14 +110,24 @@ export default function MapHost({ active, children }: { active: boolean; childre
         {/* 지도 캔버스는 탭 순서에서 뺀다 — 키보드 사용자가 지도에 갇히지 않게 */}
         <div ref={elRef} className="map-canvas" tabIndex={-1} />
 
+        {/* 2026-10-05: 첫 줄은 **사용자에게** 말한다. 종전에는 "NCP 콘솔에 origin 을 등록하라"가
+            전부라 창업자는 할 수 있는 게 없었다. 지도 SDK 는 한도·과금·도메인 등록에 묶여 있어
+            언제든 안 뜰 수 있다 — 패널의 목록·수치와 건물별 카카오맵 링크(BuildingViewer)는 그래도
+            돈다는 것을 먼저 알리고, 원인은 운영자용으로 접어 둔다. */}
         {error && (
-          <div className="map-note">
-            <strong>네이버 지도를 불러오지 못했습니다</strong>
-            <div>{error}</div>
+          <div className="map-note" role="status">
+            <strong>지도를 불러오지 못했습니다</strong>
             <div>
-              NCP 콘솔 &gt; Maps &gt; Application 의 Web 서비스 URL 에{" "}
-              <code>{window.location.origin}</code> 을 등록해야 합니다.
+              왼쪽 패널의 목록과 수치는 그대로 볼 수 있습니다. 건물을 고르면 그 자리를 카카오맵에서 열 수 있습니다.
             </div>
+            <details className="map-note-cause">
+              <summary>원인(운영자용)</summary>
+              <div>{error}</div>
+              <div>
+                NCP 콘솔 &gt; Maps &gt; Application 의 Web 서비스 URL 에{" "}
+                <code>{window.location.origin}</code> 을 등록해야 합니다.
+              </div>
+            </details>
           </div>
         )}
 

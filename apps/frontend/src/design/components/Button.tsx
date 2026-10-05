@@ -1,5 +1,6 @@
 // PlaceOS 기본 버튼 — 토큰 기반. variant 로 네이버/브랜드 맥락 구분.
-// naver variant 는 '네이버 연동 액션'(길찾기 등)에만 사용. 네이버페이 결제는 NaverPayButton 사용.
+// naver variant 는 '네이버 연동 액션'(길찾기 등)에만 사용. (NaverPayButton 은 2026-10-05 에 지웠다 —
+// PG 결제를 붙이지 않고 계좌이체·사전 예약으로 간다: docs/decision-lightweight-first-2026-10-05.md §3)
 //
 // 2026-09-06: Tailwind 유틸리티 클래스로만 짜여 있었는데 이 저장소에는 tailwindcss 가
 // 없어 스타일이 하나도 걸리지 않았다 → design.css 로 옮겼다. 공개 props 는 그대로다.

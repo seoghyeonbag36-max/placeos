@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -31,7 +32,19 @@ def hash_password(raw: str) -> str:
     return bcrypt.hashpw(_bytes72(raw), bcrypt.gensalt()).decode("utf-8")
 
 
+# 비밀번호가 없는 계정(구글 로그인)의 해시 자리. bcrypt 해시는 `$` 로 시작하므로 겹치지 않고,
+# 어떤 입력과도 일치하지 않는다. 컬럼을 nullable 로 바꾸지 않은 이유: 스키마가 바뀌면 Neon 에
+# 마이그레이션을 손으로 적용해야 하고, 적용이 배포보다 늦으면 로그인 전체가 깨진다(10-04 실제 사고).
+UNUSABLE_PASSWORD = "!"
+
+
+def has_usable_password(hashed: str) -> bool:
+    return bool(hashed) and not hashed.startswith(UNUSABLE_PASSWORD)
+
+
 def verify_password(raw: str, hashed: str) -> bool:
+    if not has_usable_password(hashed):
+        return False
     try:
         return bcrypt.checkpw(_bytes72(raw), hashed.encode("utf-8"))
     except ValueError:
@@ -56,7 +69,22 @@ def hash_api_key(raw: str) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def create_access_token(user_id: str, org_id: str) -> str:
+def credential_version(hashed_password: str) -> str:
+    """로그인 수단의 지문 — 토큰의 `cv` 클레임. 수단이 바뀌면 그 전에 발급된 토큰이 전부 무효가 된다.
+
+    쓰는 자리는 지금 하나다: 비밀번호 계정이 구글 로그인으로 넘어가며 비밀번호를 끊을 때
+    (auth_service.login_with_google). 비밀번호 가입은 이메일 소유를 확인하지 않았으므로, 남이
+    먼저 그 주소로 가입해 두었다면 비밀번호를 끊는 것만으로는 부족하다 — 그가 이미 들고 있는
+    토큰(최대 7일)도 함께 죽여야 한다. 토큰 목록을 저장하지 않고 그렇게 하는 방법이 이것이다.
+
+    JWT 본문은 누구나 읽으므로 해시 원문이 아니라 서버 비밀로 HMAC 한 앞 16자만 싣는다.
+    """
+    digest = hmac.new(settings.jwt_secret.encode("utf-8"), hashed_password.encode("utf-8"),
+                      hashlib.sha256).hexdigest()
+    return digest[:16]
+
+
+def create_access_token(user_id: str, org_id: str, cv: str | None = None) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "jti": secrets.token_hex(16),
@@ -65,7 +93,14 @@ def create_access_token(user_id: str, org_id: str) -> str:
         "iat": now,
         "exp": now + timedelta(minutes=settings.jwt_expires_minutes),
     }
+    if cv is not None:
+        payload["cv"] = cv
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def issue_access_token(user: User, org: Org) -> str:
+    """가입·로그인 응답용 토큰 — 로그인 수단 지문(cv)을 싣는다."""
+    return create_access_token(user.id, org.id, cv=credential_version(user.hashed_password))
 
 
 class CurrentUser:
@@ -91,6 +126,30 @@ class Principal:
         self.user = user
         self.via = via                  # "jwt" | "api_key"
         self.api_key_id = api_key_id
+
+
+def _resolve_token(db: Session, raw: str) -> tuple[User, Org]:
+    """JWT 원문 → (사용자, 조직). 아래 두 의존성이 **같은 판정**을 쓰게 한 곳에 둔다.
+
+    한쪽에만 검사를 더하면 "계정 화면은 막혔는데 분석 API 는 통과" 같은 모순이 조용히 생긴다
+    (resolve_api_key 를 한 곳에 둔 것과 같은 이유다).
+    """
+    try:
+        payload = jwt.decode(raw, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    except jwt.PyJWTError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰이 유효하지 않습니다")
+    if db.get(RevokedToken, hash_api_key(raw)) is not None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그아웃한 토큰입니다")
+    user = db.get(User, payload.get("sub"))
+    org = db.get(Org, payload.get("org_id"))
+    if user is None or org is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰의 계정이 존재하지 않습니다")
+    # `cv` 가 없는 토큰은 이 검사 이전(2026-10-05 전)에 발급된 것이다 — 통과시킨다. 막으면
+    # 배포 순간 모든 사용자가 로그아웃되고, 그 토큰들도 7일 안에 저절로 만료된다.
+    cv = payload.get("cv")
+    if cv is not None and cv != credential_version(user.hashed_password):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그인 수단이 바뀌었습니다. 다시 로그인해 주세요")
+    return user, org
 
 
 def get_optional_principal(
@@ -127,17 +186,7 @@ def get_optional_principal(
     if creds is None:
         return None                     # 익명 — 여기서 끝난다(DB 접근 없음)
 
-    try:
-        payload = jwt.decode(creds.credentials, settings.jwt_secret,
-                              algorithms=[settings.jwt_algorithm])
-    except jwt.PyJWTError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰이 유효하지 않습니다")
-    if db.get(RevokedToken, hash_api_key(creds.credentials)) is not None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그아웃한 토큰입니다")
-    user = db.get(User, payload.get("sub"))
-    org = db.get(Org, payload.get("org_id"))
-    if user is None or org is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰의 계정이 존재하지 않습니다")
+    user, org = _resolve_token(db, creds.credentials)
     return Principal(org=org, user=user, via="jwt")
 
 
@@ -161,19 +210,8 @@ def get_current_user(
 ) -> CurrentUser:
     if creds is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "인증 토큰이 필요합니다")
-    try:
-        payload = jwt.decode(creds.credentials, settings.jwt_secret,
-                              algorithms=[settings.jwt_algorithm])
-    except jwt.PyJWTError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰이 유효하지 않습니다")
-    if db.get(RevokedToken, hash_api_key(creds.credentials)) is not None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그아웃한 토큰입니다")
-
-    user = db.get(User, payload.get("sub"))
-    org = db.get(Org, payload.get("org_id"))
-    if user is None or org is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "토큰의 계정이 존재하지 않습니다")
-    membership = db.query(Membership).filter_by(user_id=user.id, org_id=org.id).first()
+    user, org = _resolve_token(db, creds.credentials)
+    membership =db.query(Membership).filter_by(user_id=user.id, org_id=org.id).first()
     if membership is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "이 조직에 대한 멤버십이 없습니다")
     return CurrentUser(user=user, org=org, role=membership.role)

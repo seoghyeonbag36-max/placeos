@@ -52,5 +52,7 @@ Humanistic Authority(균형·공생·공감) 가이드를 시스템 프롬프트
 feature-naver-integration.md 를 읽어줘.
 1) 백엔드 naver_geo.py 의 geocode 로 data/bronze 상가 주소를 좌표로 정규화해
    data/silver 에 parquet 으로 저장하는 스크립트를 data/pipelines 에 만들어줘.
-2) payments.py 의 reserve/apply 스텁을 실제 네이버페이 결제형 플로우로 채워줘(.env 키 사용).
 ```
+> ⚠ 2026-10-05: 종전의 2) "payments.py 의 reserve/apply 스텁을 실제 네이버페이 결제형 플로우로 채워줘"는
+> **쓰지 말 것.** 스텁을 지웠고 PG 연동은 하지 않기로 했다(심사·정기결제·환불·웹훅 부담).
+> 과금은 결제 의향 → 수동 계좌이체로 간다 → docs/decision-lightweight-first-2026-10-05.md §3
