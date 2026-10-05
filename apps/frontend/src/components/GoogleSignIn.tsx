@@ -25,8 +25,10 @@ export default function GoogleSignIn({ clientId, orgName, onSignedIn }: {
   const [state, setState] = useState<"loading" | "ready" | "pending" | "unavailable">("loading");
   const [error, setError] = useState("");
   // 버튼 콜백은 한 번 걸리고 오래 산다 — 그 사이 바뀐 사업 이름·이동 함수를 읽도록 ref 로 넘긴다.
+  // ⚠ ref 는 **렌더 도중이 아니라 이펙트에서** 갱신한다(react-hooks/refs — CI 린트가 에러로 막는다).
+  //   콜백은 사용자가 구글 버튼을 누른 뒤에 불리므로 그 시점엔 이펙트가 이미 돌아 최신값이 들어 있다.
   const latest = useRef({ orgName, onSignedIn });
-  latest.current = { orgName, onSignedIn };
+  useEffect(() => { latest.current = { orgName, onSignedIn }; });
 
   useEffect(() => {
     const el = slot.current;
