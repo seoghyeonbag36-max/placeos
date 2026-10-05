@@ -144,6 +144,31 @@
 
 .acct-feedback-entry { margin: 0 0 var(--sp-4); }
 
+/* ── 구글 로그인 · 수집 안내 · 탈퇴 (2026-10-05) ──
+   구글 버튼 자체는 구글이 그린다(색·문구를 바꾸지 않는다). 우리는 자리와 간격만 맞춘다. */
+.acct-google { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0 0 var(--sp-3); }
+/* 가입 화면은 사업 이름 칸 바로 아래에 버튼이 온다 — 칸의 도움말과 붙지 않게 띄운다 */
+.acct-field + .acct-google { margin-top: var(--sp-3); }
+/* 버튼이 그려지기 전에도 높이를 잡아 둔다 — 늦게 뜨는 버튼이 아래 폼을 밀어내지 않게 */
+.acct-google-slot { min-height: 44px; }
+.acct-google p { margin: 0; }
+.acct-divider {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin: var(--sp-2) 0 var(--sp-3); color: var(--muted); font-size: var(--fs-caption);
+}
+.acct-divider::before, .acct-divider::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.acct-alt { margin: var(--sp-3) 0 0; }
+.acct-alt > summary {
+  display: flex; align-items: center; min-height: 44px; cursor: pointer;
+  color: var(--brand-pressed); font-weight: var(--fw-semibold);
+}
+.acct-alt[open] > summary { margin-bottom: var(--sp-2); }
+.acct-hint { margin: var(--sp-3) 0 0; }
+.acct-privacy { margin: var(--sp-4) 0 0; }
+.acct-leave { margin-top: var(--sp-5); padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+.acct-leave > p { margin: 0 0 var(--sp-3); }
+.acct-leave .acct-error { margin-top: var(--sp-2); }
+
 /* 세션 만료 알림 — 지도 위 한 줄. 분석은 익명으로 계속 돈다(lib/api.ts analysisFetch) */
 .session-note {
   position: fixed; left: 50%; bottom: var(--sp-4); transform: translateX(-50%); z-index: 50;

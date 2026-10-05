@@ -243,6 +243,12 @@ python scripts/check_application.py --doc <원고> --require-complete   # 제출
 - **Data**: 모든 파이프라인은 Bronze→Silver→Gold 3계층 흐름을 지킨다. 크롤러는 `data/crawlers/`.
 - **API 설계**: 엔드포인트는 `/api/v1/...` 규약 (buildings, commercial-districts, ai, heatmap, marketing).
 - 데이터 기반·추측 최소화 원칙은 코드에도 적용 — 더미 데이터에는 반드시 `TODO` 주석으로 실제 연동 지점을 명시.
+- **가벼운 대안 먼저**(2026-10-05) — 심사·보안 부담이 큰 기능은 만들기 전에
+  [docs/decision-lightweight-first-2026-10-05.md](docs/decision-lightweight-first-2026-10-05.md) 를 본다.
+  로그인은 **구글**(`GOOGLE_CLIENT_ID` 로 켜짐 · 비밀번호 재설정 흐름은 만들지 않는다) · 결제는 **PG 금지**
+  (결제 의향 → 수동 계좌이체) · 앱은 **PWA**(서비스 워커 없음) · 알림은 이메일 먼저(알림톡·문자 금지) ·
+  본인인증은 법이 요구할 때만 · 지도 SDK 가 실패해도 **카카오맵 링크**로 길을 남긴다. 받는 개인정보를
+  늘리면 `PrivacyNote` 문구와 탈퇴(`auth_service.delete_account`)를 같이 고친다.
 
 ### 성능 목표 (참고)
 - **AI** — "정확도 70%+" 는 2026-09-16 에 폐기했다. 무정보 베이스라인이 그 선을 넘어

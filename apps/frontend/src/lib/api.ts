@@ -973,6 +973,20 @@ export const createApiKey = (token: string, name: string) =>
 export const revokeApiKey = (token: string, keyId: string) =>
   authRequest<ApiKeyInfo>("DELETE", `/api-keys/${encodeURIComponent(keyId)}`, { token });
 
+/* ===== 구글 로그인 · 탈퇴 (2026-10-05) =====
+ * 정본: app/api/v1/auth.py · docs/decision-lightweight-first-2026-10-05.md §1·§2.
+ * 비밀번호를 우리가 받지 않는 로그인과, 받은 정보를 바로 지우는 탈퇴다.
+ */
+
+/** 화면이 그릴 로그인 수단(AuthProviders). `google_client_id` 가 null 이면 구글 버튼을 그리지 않는다 */
+export interface AuthProviders { google_client_id: string | null }
+export const getAuthProviders = () => authRequest<AuthProviders>("GET", "/providers");
+/** 구글 ID 토큰으로 로그인 — 201(처음이라 가입) · 200 · 401(확인 실패) · 404(구글 로그인 꺼짐) · 503(구글 공개키 못 받음) */
+export const loginWithGoogle = (req: { credential: string; org_name?: string }) =>
+  authRequest<AuthToken>("POST", "/google", { body: req });
+/** 회원 탈퇴 — 내 정보와 혼자 쓰던 조직(키·피드백 포함)을 바로 지운다 · 401(세션 만료) */
+export const deleteAccount = (token: string) => authRequest<{ ok: boolean }>("DELETE", "/me", { token });
+
 /* ===== 파일럿 피드백 — KPI③ NPS · 유료 전환 의향 (2026-09-28 P2) =====
  * 계약의 정본: app/schemas/feedback.py · app/api/v1/feedback.py. **인증 필수**(익명 401) —
  * 공개 데모 만족도가 B2B PMF 로 둔갑하지 않게 백엔드가 막는다. 같은 조직이 다시 내면 덮어쓰지

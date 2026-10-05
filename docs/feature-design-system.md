@@ -9,13 +9,14 @@ design/                              디자인 원천 데이터(브랜드·에�
 design/tokens/tokens.json            토큰 export 본 (색·타이포·간격)
 apps/frontend/src/design/tokens/     colors·typography·layout (TS 단일 출처)
 apps/frontend/src/styles/tokens.css  CSS 변수(화면 전역 · 지도 오버레이) + Pretendard @font-face
-apps/frontend/src/design/components/ Button·Card·BottomSheet·MapMarkerPin·VacancyLegend·NaverPayButton
+apps/frontend/src/design/components/ Button·Card·BottomSheet·MapMarkerPin·VacancyLegend
 ```
+(`NaverPayButton` 은 2026-10-05 에 지웠다 — PG 결제를 붙이지 않는다 → decision-lightweight-first-2026-10-05.md §3)
 
 ## 2. 네이버 연동 디자인 모델 (핵심 규칙)
 1. **네이버 그린(#03C75A)은 네이버 연동 맥락에만** — 지도 길찾기, 네이버페이 영역 강조. 남발 금지.
 2. **PlaceOS 고유 기능(AI 추천·공실 히트맵)은 brand teal(#0EA5B7)** — 그린과 보색으로 역할 분리.
-3. **네이버페이 버튼은 공식 디자인 고정** — 색·모양·문구 변경 시 패널티. `NaverPayButton`은 공식 에셋 슬롯, 주변 여백/정렬만 우리 토큰으로 맞춘다.
+3. **네이버페이 버튼은 공식 디자인 고정** — 색·모양·문구 변경 시 패널티. (2026-10-05 보류: 결제 버튼 자체를 두지 않는다. 정기결제가 필요해져 다시 붙일 때 이 규칙을 따른다.)
 4. **지도 위 UI는 한국형 패턴** — 바텀시트(BottomSheet)로 상권/상가 정보 노출, 커스텀 마커(MapMarkerPin)는 공실 위험도 색계열.
 5. **한글 가독성 최우선** — Pretendard, 본문 15px/줄간격 1.5, 대비 WCAG AA.
 
