@@ -20,7 +20,7 @@ vi.mock("@/lib/api", async (original) => ({
   getBusinessWorkspace: vi.fn(),
 }));
 
-const ADMIN_HEADING = "지도 커버리지 (관리자)";
+const ADMIN_HEADING = "PlaceOS 관리자";   // 관리자 콘솔 제목(AdminCoverage.tsx) — 바꾸면 이 줄과 AppAuth.test.tsx 를 같이 고친다
 const HOME_HEADING = /내 사업의 시작/;
 const goTo = (hash: string) => act(() => {
   window.location.hash = hash;
