@@ -395,6 +395,15 @@ export default function App() {
   const [workspace, setWorkspace] = useState<BusinessState | null>(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  // #admin 은 로그인 전에도 열린다(2026-10-05). 관리자 API 는 계정과 무관하게 X-Admin-Token 만 보는데,
+  // 이 해시 분기가 로그인 뒤에만 서는 WorkspaceApp 안에 있어 계정 없는 운영자는 화면에 못 들어왔다.
+  // 로그인 상태의 경로(WorkspaceApp 의 isAdmin)는 그대로 둔다 — 작업 화면 상태를 지키려고 언마운트하지 않는다.
+  const [adminHash, setAdminHash] = useState(() => window.location.hash === "#admin");
+  useEffect(() => {
+    const onHash = () => setAdminHash(window.location.hash === "#admin");
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   useEffect(() => {
     const changed = () => { setWorkspace(null); setError(""); setToken(loadToken()); };
     window.addEventListener(SESSION_CHANGED_EVENT, changed);
@@ -410,7 +419,7 @@ export default function App() {
     });
     return () => { alive = false; };
   }, [token, retry]);
-  if (!token) return <Home />;
+  if (!token) return adminHash ? <AdminCoverage /> : <Home />;
   if (!workspace) return <main className="acct"><h1>PlaceOS</h1><p role="status">{error || "내 사업 정보 불러오는 중…"}</p>
     {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>다시 시도</Button>}
     <Button variant="ghost" onClick={clearToken}>로그인 화면으로</Button></main>;
