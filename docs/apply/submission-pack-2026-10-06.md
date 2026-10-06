@@ -20,7 +20,7 @@
 | 10-22 | 16 | 데이터안심구역 | 없음 — **불참 권고** | 시설 방문 전제 |
 | 10-23 | 17 | KIIT 추계 | **초록·결론·한계 절 채움** [paper-platform-kiit.md](../papers/kiit/paper-platform-kiit.md) | 서식·저자·문헌 남음 |
 | 11-03 | 28 | 사회문제 해결 챌린지 상세기획서 | **상세기획서 원고** [09-digitalsolveup/detailed-plan.md](09-digitalsolveup/detailed-plan.md) | 서식은 교류회 뒤 |
-| 11-25 | 50 | KISTI DATA·AI 분석 | 이중 출품 개요(아래) | 규정 확인 선행 |
+| 11-25 | 50 | KISTI DATA·AI 분석 | 문제발굴·문제해결 원고(13-kisti) | 규정 확인 전 제출 금지 |
 | 11-15 이후 | — | PACIS 2027 | 없음 | 투고 오픈 전 |
 
 한 번에 두 개 이상 쓰지 않는다는 캘린더의 원칙대로, **오늘~10-08 은 핀테크 하나**, 그다음 LX·DIC 를 잡는다.
