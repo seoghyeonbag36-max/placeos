@@ -70,6 +70,15 @@ describe("AdminCoverage — #admin 화면 문구", () => {
     expect(window.sessionStorage.getItem(TOKEN_KEY)).toBeNull();
   });
 
+  it("429 → 잠시 막혔다는 안내 · 토큰 오답(403) 문구와 섞지 않는다 (2026-10-06)", async () => {
+    installFetchStub([{ match: /\/admin\/coverage$/, status: 429, body: { detail: "too many" } }]);
+    render(<AdminCoverage />);
+    query("tok");
+    expect(await screen.findByText("토큰 시도가 너무 많아 잠시 막혔습니다. 15분 뒤 다시 시도해 주세요.")).toBeTruthy();
+    expect(screen.queryByText(FORBIDDEN_TEXT)).toBeNull();
+    expect(window.sessionStorage.getItem(TOKEN_KEY)).toBeNull();
+  });
+
   it("그 밖 상태(500) → 상태 코드를 단 요청 실패", async () => {
     installFetchStub([{ match: /\/admin\/coverage$/, status: 500, body: { detail: "boom" } }]);
     render(<AdminCoverage />);

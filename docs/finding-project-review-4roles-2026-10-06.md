@@ -207,10 +207,19 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
 
 ## 6. 먼저 할 일 — 계획 · 변경 예상 파일 · 검증
 
-### ① 보안 1순위 (비공개 사본 §1)
+### ① 보안 1순위 (비공개 사본 §1) — ✅ 2026-10-06 `feat/rate-limit-20261006`
 
-계획·변경 파일·검증은 비공개 사본 §6 에 있다. 새 의존성 없이 프로세스 로컬로 시작한다
+요청량 제어를 넣었다 — `apps/backend/app/services/rate_limit.py`. 새 의존성 없이 프로세스 로컬
 (`services/latency` 와 같은 방식 — [decision-lightweight-first](decision-lightweight-first-2026-10-05.md)).
+
+- 로그인 실패(이메일 단위 15분) · 새 계정 생성(전역 1시간, 비밀번호·구글 합산) · LLM 생성(조직·전역 24시간,
+  넘으면 같은 200 에 스텁 + `stub_reason: "llm_quota"`) · 관리자 토큰 실패(전역 15분, `hmac.compare_digest`).
+- **키에 클라이언트 IP 를 쓰지 않는다** — `X-Forwarded-For` 의 어느 홉을 믿을지 실측하지 않았고 맨 앞 값은
+  위조된다. 그래서 계획에 있던 "XFF 1콜 실측"이 필요 없어졌다.
+- 한도는 `Settings` 필드(인스턴스마다 따로 센다 · 최대 3대 = 실효 상한 ×3, `gcloud run services describe` 확인).
+- 검증: 백엔드 462 통과(신규 `test_rate_limit.py`·`test_admin_guard.py` 21건 — 관리자 라우트 순회 포함),
+  data 549, 프론트 build·lint(오류 0, 경고 기존 86)·vitest 211. 로컬 백엔드(임시 SQLite, 낮은 한도)에 curl 로
+  가입 201·201·429(`Retry-After`)·로그인 401·401·429·관리자 403×3·429, Vite 프록시 화면에서 두 429 문구 확인.
 
 ### ② 공개 저장소 위생
 

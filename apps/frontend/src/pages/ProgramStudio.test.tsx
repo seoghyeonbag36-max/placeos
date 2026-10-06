@@ -346,6 +346,18 @@ describe("ProgramStudio — 익명 안내 (로그인하면 AI 생성)", () => {
     expect(screen.getByText(/다시 생성해 주세요/)).toBeTruthy();
   });
 
+  it("한도로 난 기본 예시(stub_reason=llm_quota)는 한도라고 말하고 다시 생성하라고 하지 않는다 (2026-10-06)", async () => {
+    saveToken("test-token");
+    mount({ result: { ...structuredClone(STUB), stub_reason: "llm_quota" } });
+    await generateAndFlush();
+    await screen.findByText("기본 예시", { selector: ".srcbadge" });
+    expect(hint()).toBeNull();
+    expect(screen.getByText("하루 AI 생성 한도를 다 써서 기본 예시를 표시합니다.")).toBeTruthy();
+    expect(screen.getByText(/한도가 풀리기 전\(최대 24시간\)에는 다시 생성해도 같은 예시가 나옵니다/)).toBeTruthy();
+    expect(screen.queryByText(/다시 생성해 주세요/)).toBeNull();
+    expect(screen.queryByText("AI 생성을 완료하지 못해 기본 예시를 표시합니다.")).toBeNull();
+  });
+
   it("AI 생성 결과에는 안내를 달지 않는다", async () => {
     mount();   // source: "llm"
     await generateAndFlush();

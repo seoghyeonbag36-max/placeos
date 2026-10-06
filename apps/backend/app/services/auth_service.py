@@ -17,6 +17,7 @@ from app.core.security import (
 )
 from app.models.auth import ApiKey, AuditLog, BusinessWorkspace, Membership, Org, User
 from app.models.feedback import PilotFeedback
+from app.services import rate_limit
 
 # 구글로 처음 들어온 사람의 조직 이름. 구글 화면은 사업 이름을 묻지 않으므로, 가입 화면에서
 # 적지 않았으면 이 이름으로 시작한다(「내 사업」 카드에서 사업 이름을 따로 적는다).
@@ -35,10 +36,30 @@ class ApiKeyNotFound(Exception):
     pass
 
 
+class SignupRateLimited(Exception):
+    """새 계정 생성 한도(services/rate_limit.try_signup)에 닿았다. 기존 계정 로그인은 막지 않는다."""
+
+    def __init__(self, retry_after: int):
+        super().__init__(retry_after)
+        self.retry_after = retry_after
+
+
+def _claim_signup_slot() -> None:
+    """새 계정을 만들기 **직전에** 한 번 센다 — 비밀번호 가입과 구글 첫 로그인이 같은 한도를 쓴다.
+
+    가입이 무료·무제한이면 로그인한 호출에만 연 LLM(api/v1/marketing.py)이 계정을 찍어 내는 것만으로
+    다시 열린다(2026-10-06 점검). 이미 있는 이메일(409)이나 기존 계정의 구글 로그인은 세지 않는다.
+    """
+    retry = rate_limit.try_signup()
+    if retry:
+        raise SignupRateLimited(retry)
+
+
 def signup(db: Session, org_name: str, email: str, password: str) -> tuple[User, Org]:
     email = email.lower()
     if db.execute(select(User).filter_by(email=email)).scalar_one_or_none():
         raise EmailAlreadyRegistered(email)
+    _claim_signup_slot()
 
     org = Org(name=org_name)
     user = User(email=email, hashed_password=hash_password(password))
@@ -89,6 +110,7 @@ def login_with_google(db: Session, email: str, org_name: str | None = None) -> t
     email = email.lower()
     user = db.execute(select(User).filter_by(email=email)).scalar_one_or_none()
     if user is None:
+        _claim_signup_slot()
         org = Org(name=(org_name or "").strip() or DEFAULT_ORG_NAME)
         user = User(email=email, hashed_password=UNUSABLE_PASSWORD)
         db.add_all([org, user])

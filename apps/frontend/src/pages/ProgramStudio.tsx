@@ -585,7 +585,9 @@ function headline({ result, busy, elapsed, error, hub, form, siteUnitId, signedI
     verdict = stub
       ? <>{lead} <span className="value-absent">{blocked.length > 0
         ? `생성 내용이 검증을 통과하지 못해(${blocked.length}건) 기본 예시를 표시합니다.`
-        : signedIn
+        : result.stub_reason === "llm_quota"
+          ? "하루 AI 생성 한도를 다 써서 기본 예시를 표시합니다."
+          : signedIn
           ? "AI 생성을 완료하지 못해 기본 예시를 표시합니다."
           : "로그인하지 않아 AI 생성 없이 기본 예시를 표시합니다."}</span></>
       : lead;
@@ -703,7 +705,13 @@ function Result({ r }: { r: ProgramPlan }) {
         )}
 
         {stub && blocked.length === 0 && (
-          signedIn ? (
+          r.stub_reason === "llm_quota" ? (
+            /* 한도는 실패가 아니다 — "다시 생성해 주세요"라고 하면 눌러도 같은 예시만 나온다(2026-10-06). */
+            <div className="warn">
+              이 조직의 <b>하루 AI 생성 한도</b>를 다 써서 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를
+              반영한 결과가 아니며, 한도가 풀리기 전(최대 24시간)에는 다시 생성해도 같은 예시가 나옵니다.
+            </div>
+          ) : signedIn ? (
             <div className="warn">
               AI 생성을 완료하지 못해 <b>기본 예시</b>를 표시합니다. 입력한 브리프와 상권 정보를 반영한 결과가 아니므로 다시 생성해 주세요.
             </div>

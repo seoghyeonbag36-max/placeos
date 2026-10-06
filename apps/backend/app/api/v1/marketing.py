@@ -10,11 +10,12 @@
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.core.config import settings
 from app.core.security import Principal, get_optional_principal
 from app.schemas.district import DistrictEvents, Marketing
 from app.schemas.marketing import ProgramBrief, ProgramPlan, VacantSiteList
 from app.services import marketing as mkt
-from app.services import program_site
+from app.services import program_site, rate_limit
 
 router = APIRouter()
 
@@ -33,8 +34,18 @@ async def generate_program(
     캐시가 없는데 공개 데모는 익명을 통과시키므로, 막지 않으면 반복 호출이 그대로 크레딧이
     된다. 잘못된 자격증명은 라우터 공통 의존성에서 이미 401 이다(조용히 익명으로 강등하지 않는다).
     LLM 키 미설정·호출 실패·HA 검증 위반 폐기도 같은 스텁이다 (source 필드로 구분).
+
+    **로그인해도 한도가 있다(2026-10-06).** 가입이 무료라 "로그인한 호출에만"만으로는 계정을
+    찍어 내면 다시 열린다. 조직당·인스턴스당 24시간 횟수(services/rate_limit.try_llm)를 넘으면
+    같은 200 에 스텁을 주고 `stub_reason: "llm_quota"` 로 이유를 밝힌다 — 화면이 "실패"가
+    아니라 "한도"라고 말할 수 있게. 키가 없으면 어차피 LLM 을 안 부르므로 세지 않는다.
     """
-    return mkt.generate_program(brief.model_dump(), allow_llm=principal is not None)
+    allow_llm = principal is not None
+    stub_reason: str | None = None
+    if allow_llm and settings.llm_api_key and not rate_limit.try_llm(principal.org.id):
+        allow_llm, stub_reason = False, "llm_quota"
+    plan = mkt.generate_program(brief.model_dump(), allow_llm=allow_llm)
+    return {**plan, "stub_reason": stub_reason} if stub_reason else plan
 
 
 @router.get("/sites", response_model=VacantSiteList)

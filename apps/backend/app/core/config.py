@@ -79,6 +79,15 @@ class Settings(BaseSettings):
     # 외부 AI 창업 코파일럿 (Posting) — 미설정 시 내부 3-Tier 폴백
     posting_copilot_url: str = ""
     posting_copilot_key: str = ""
+    # 요청량 제어(2026-10-06 · services/rate_limit.py). **인스턴스마다 따로 센다** — 실효 상한은
+    # 값 × 인스턴스 수(최대 3대). 값은 도출이 아니라 고른 것이다: 파일럿 5~10조직이 하루에 쓰는
+    # 양보다 넉넉하고, 남이 반복 호출해도 하루 비용이 정해진 선을 넘지 않을 만큼 작다.
+    llm_daily_quota_per_org: int = 20          # 조직당 24시간 LLM 생성 횟수
+    llm_daily_cap_per_instance: int = 100      # 인스턴스 전체 24시간 LLM 생성 횟수
+    signup_hourly_cap_per_instance: int = 20   # 1시간에 새로 만드는 계정 수(비밀번호·구글 합산)
+    login_failures_per_email: int = 10         # 15분 안에 이 횟수를 틀리면 그 이메일의 비밀번호 로그인 429
+    # 관리자 화면은 한 번 열 때 관리자 API 를 여러 개 부른다 — 토큰을 잘못 넣은 한 번이 실패 여러 건이다.
+    admin_failures_per_instance: int = 50      # 15분 안의 관리자 토큰 실패(전역)
     # (2026-09-17) 카카오 로컬·네이버 검색 키는 서버 설정에서 뺐다. Program 의 가게 반자동 조회
     # (/marketing/places·/reviews)만 쓰던 값인데, 대상이 영업 중인 가게에서 검증하려는 창업자로
     # 바뀌면서 그 조회가 삭제됐다. 데이터 수집기는 data/.env 를 직접 읽으므로 영향이 없고,
