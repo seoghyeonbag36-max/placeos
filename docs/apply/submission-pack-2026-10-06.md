@@ -150,10 +150,11 @@
 | 11-25 | KISTI 문제발굴 | `_submit/13-kisti-problem-discovery-2026-10-06.docx` | `13-kisti/problem-discovery.md` | 규정 확인 전 제출 금지 |
 | 11-25 | KISTI 문제해결 | `_submit/13-kisti-problem-solving-2026-10-06.docx` | `13-kisti/problem-solving.md` | 규정·KIIT 중복 확인 전 제출 금지 |
 | 공고 대기 | 부동산원 논문 공모 제안서 | `11-reb-paper/proposal-2026-10-06.docx` | `11-reb-paper/proposal.md` | 제2회 일정 기준 가설 |
+| 10-23 | KIIT 추계 논문(초안) | `_submit/KIIT-platform-draft-2026-10-06.docx` | `docs/papers/kiit/paper-platform-kiit.md` | 저자·선행연구 4자리 자리 표시 · 서식 미대조 |
 | 참고 | 공고 대기·다음 시즌 준비 키트 | `12-upcoming/upcoming-kit-2026-10-06.docx` | `12-upcoming/upcoming-kit.md` | |
 | 참고 | 이 문서 | `submission-pack-2026-10-06.docx` | `submission-pack-2026-10-06.md` | |
 
-Word 본이 없는 것: KIIT 원고(`docs/papers/kiit/paper-platform-kiit.md` · 서식·저자·문헌이 남아 있어 변환 보류) · LX 원고 · 학회 논문 전반.
+Word 본이 없는 것: LX 원고 · 그 밖의 학회 논문. KIIT Word 본은 투고 본문만 담은 초안이라(내부 메모 제거) 재변환 시 원본의 서식 대조·문헌 TODO 가 보이지 않는다 — 원본을 같이 본다.
 
 ## 이번 세션에서 바뀐 파일
 
