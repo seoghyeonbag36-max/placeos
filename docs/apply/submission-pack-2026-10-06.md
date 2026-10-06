@@ -150,7 +150,7 @@
 | 11-25 | KISTI 문제발굴 | `_submit/13-kisti-problem-discovery-2026-10-06.docx` | `13-kisti/problem-discovery.md` | 규정 확인 전 제출 금지 |
 | 11-25 | KISTI 문제해결 | `_submit/13-kisti-problem-solving-2026-10-06.docx` | `13-kisti/problem-solving.md` | 규정·KIIT 중복 확인 전 제출 금지 |
 | 공고 대기 | 부동산원 논문 공모 제안서 | `11-reb-paper/proposal-2026-10-06.docx` | `11-reb-paper/proposal.md` | 제2회 일정 기준 가설 |
-| 10-11 | LX 「지적과 국토정보」 논문(초안) | `_submit/LX-page-draft-2026-10-06.docx` | `docs/papers/lx/paper-page-lx.md` (변환 입력: 같은 폴더 `paper-page-lx-submit-draft.md`) | 국문 초록·서론·정책 함의·국내 선행연구 3자리 비어 있음 · 투고규정 미대조 |
+| 10-11 | LX 「지적과 국토정보」 논문(초안) | `_submit/LX-page-draft-2026-10-06.docx` | `docs/papers/lx/paper-page-lx.md` (변환 입력: 같은 폴더 `paper-page-lx-submit-draft.md`) | 정책 함의·국내 선행연구 3자리 비어 있음(국문 초록·서론은 채움) · 투고규정 미대조 |
 | 10-23 | KIIT 추계 논문(초안) | `_submit/KIIT-platform-draft-2026-10-06.docx` | `docs/papers/kiit/paper-platform-kiit.md` (변환 입력: 같은 폴더 `paper-platform-kiit-submit-draft.md`) | 저자·선행연구 4자리 자리 표시 · 서식 미대조 |
 | 참고 | 공고 대기·다음 시즌 준비 키트 | `12-upcoming/upcoming-kit-2026-10-06.docx` | `12-upcoming/upcoming-kit.md` | |
 | 참고 | 이 문서 | `submission-pack-2026-10-06.docx` | `submission-pack-2026-10-06.md` | |
