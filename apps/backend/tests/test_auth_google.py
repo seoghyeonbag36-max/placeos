@@ -5,6 +5,7 @@
 2. **꺼져 있으면 흔적이 없다** — GOOGLE_CLIENT_ID 가 비면 버튼도 엔드포인트도 없다.
 3. **선점 차단** — 같은 이메일의 비밀번호 계정은 구글 로그인 순간 비밀번호가 끊기고,
    그 전에 발급된 토큰도 함께 무효가 된다(이메일을 확인하지 않은 가입이었으므로).
+   조직 API 키도 그 순간 폐기된다(2026-10-06) — 연결 뒤 새로 만든 키는 다음 로그인에서 살아남는다.
 4. **감사로그에 이메일 사본이 없다**(수집 최소화).
 
 구글 공개키 대신 로컬 RSA 키로 서명한다 — 네트워크를 타지 않는다.
@@ -207,6 +208,45 @@ def test_google_login_takes_over_unverified_password_account(google_on):
     with _TestSession() as db:
         actions = set(db.execute(select(AuditLog.action)).scalars())
     assert "auth.google_link" in actions
+
+
+def test_google_link_revokes_api_keys_issued_before_link(google_on):
+    """(2026-10-06) 선점자가 비밀번호·토큰과 별개로 **조직 API 키**를 미리 발급해 두었다. 진짜 주인이
+    구글로 들어오는 순간 그 키도 죽어야 한다 — 살아 있으면 주인 조직 명의로 피드백·사용 기록이 계속 쌓인다."""
+    squat = client.post(f"{V1}/auth/signup", json={
+        "org_name": "선점", "email": "founder@gmail.com", "password": "squatter-pass"})
+    issued = client.post(f"{V1}/auth/api-keys", json={"name": "선점자 연동"},
+                         headers=_bearer(squat.json()["access_token"]))
+    assert issued.status_code == 201, issued.text
+    key = {"X-API-Key": issued.json()["key"]}
+    assert client.get(f"{V1}/commercial-districts", headers=key).status_code == 200
+
+    owner = client.post(f"{V1}/auth/google", json={"credential": _id_token()})
+    assert owner.status_code == 200, owner.text
+
+    assert client.get(f"{V1}/commercial-districts", headers=key).status_code == 401, \
+        "선점자의 API 키가 구글 연결 뒤에도 살아 있다"
+    keys = client.get(f"{V1}/auth/api-keys", headers=_bearer(owner.json()["access_token"])).json()
+    assert keys and all(k["revoked_at"] for k in keys), "폐기 기록(revoked_at)이 남아야 한다 — 삭제가 아니다"
+    with _TestSession() as db:
+        details = list(db.execute(select(AuditLog.detail)
+                                  .where(AuditLog.action == "api_key.revoke")).scalars())
+    assert details == ["선점자 연동 (google_link)"]
+
+
+def test_keys_issued_after_link_survive_later_google_logins(google_on):
+    """폐기는 **비밀번호를 끊는 그 한 번**뿐이다. 연결 뒤 주인이 새로 만든 키는 다음 구글 로그인에서 살아남는다."""
+    client.post(f"{V1}/auth/signup", json={
+        "org_name": "선점", "email": "founder@gmail.com", "password": "squatter-pass"})
+    owner = client.post(f"{V1}/auth/google", json={"credential": _id_token()})
+    fresh = client.post(f"{V1}/auth/api-keys", json={"name": "주인 연동"},
+                        headers=_bearer(owner.json()["access_token"]))
+    assert fresh.status_code == 201, fresh.text
+
+    again = client.post(f"{V1}/auth/google", json={"credential": _id_token()})
+    assert again.status_code == 200
+    assert client.get(f"{V1}/commercial-districts",
+                      headers={"X-API-Key": fresh.json()["key"]}).status_code == 200
 
 
 def test_token_without_cv_stays_valid():

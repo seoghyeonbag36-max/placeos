@@ -106,6 +106,11 @@ def login_with_google(db: Session, email: str, org_name: str | None = None) -> t
     로그인이 막히고, 해시가 바뀌므로 그가 이미 들고 있던 토큰도 `cv` 검사로 함께 무효가 된다
     (core/security.credential_version). 진짜 주인이 비밀번호로 가입했던 경우라면 이후로는
     구글로만 들어오면 된다.
+
+    ⚠ **조직 API 키도 같은 순간 폐기한다(2026-10-06).** 비밀번호·토큰만 끊으면 선점자가 미리 발급해 둔
+    키(`X-API-Key`)는 살아남아, 진짜 주인의 조직 명의로 피드백(KPI③)·사용 기록을 계속 남길 수 있었다.
+    진짜 주인이 비밀번호로 가입해 키를 쓰던 경우라면 다시 발급하면 된다 — 남의 키가 살아 있는 것보다 싸다.
+    사업 정보(business_workspaces)는 **지우지 않는다**: 누가 적었는지 가를 수 없고, 진짜 주인의 데이터일 수 있다.
     """
     email = email.lower()
     user = db.execute(select(User).filter_by(email=email)).scalar_one_or_none()
@@ -130,10 +135,29 @@ def login_with_google(db: Session, email: str, org_name: str | None = None) -> t
         user.hashed_password = UNUSABLE_PASSWORD
         db.add(AuditLog(org_id=org.id, user_id=user.id, action="auth.google_link",
                         detail="password_disabled"))
+        _revoke_keys_on_google_link(db, user)
     db.add(AuditLog(org_id=org.id, user_id=user.id, action="login", detail="google"))
     db.commit()
     db.refresh(user)
     return issue_access_token(user, org), False
+
+
+def _revoke_keys_on_google_link(db: Session, user: User) -> None:
+    """구글 연결로 비밀번호를 끊는 순간, 그 사람이 속한 조직의 살아 있는 API 키를 모두 폐기한다.
+
+    폐기는 `revoke_api_key` 와 같이 삭제가 아니라 `revoked_at` 기록이고, 키마다 감사 행을 남긴다
+    (detail 의 `google_link` 가 사람이 누른 폐기와 가른다). 커밋은 호출부(login_with_google)가 한다.
+    """
+    now = datetime.now(timezone.utc)
+    org_ids = list(db.execute(select(Membership.org_id).filter_by(user_id=user.id)).scalars())
+    if not org_ids:
+        return
+    live = db.execute(select(ApiKey).where(ApiKey.org_id.in_(org_ids),
+                                           ApiKey.revoked_at.is_(None))).scalars()
+    for key in live:
+        key.revoked_at = now
+        db.add(AuditLog(org_id=key.org_id, user_id=user.id,
+                        action="api_key.revoke", detail=f"{key.name} (google_link)"))
 
 
 def delete_account(db: Session, user: User) -> None:
