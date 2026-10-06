@@ -97,3 +97,33 @@ class BusinessWorkspaceData(BaseModel):
         if (self.status == "set") != (self.profile is not None):
             raise ValueError("설정 상태와 사업 정보가 일치해야 합니다")
         return self
+
+
+# ── 저장한 결과 (2026-10-06) ───────────────────────────────────────────────────
+# Posting 계산·Program 생성 결과를 사용자가 「결과 저장」으로 남긴다. 종전에는 화면 상태에만 있어
+# 새로고침·탭 종료에 사라졌다(docs/finding-project-review-4roles-2026-10-06.md §2-4 · 소유자 결정).
+# 서버는 payload 를 **해석하지 않는다** — 화면이 다시 그릴 입력·결과를 그대로 보관만 한다.
+
+SAVED_RESULT_MAX_BYTES = 64 * 1024     # 한 건 상한. Program 결과 한 벌이 실측 수 KB~20KB 라 넉넉하다.
+
+
+class SavedResultIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    kind: Literal["posting", "program"]
+    title: str = Field(min_length=1, max_length=200)
+    districtId: str | None = Field(default=None, max_length=200)
+    payload: dict[str, object]
+
+    @model_validator(mode="after")
+    def payload_fits(self) -> "SavedResultIn":
+        import json  # noqa: PLC0415 — 검증에서만 쓴다
+
+        size = len(json.dumps(self.payload, ensure_ascii=False, default=str).encode("utf-8"))
+        if size > SAVED_RESULT_MAX_BYTES:
+            raise ValueError(f"저장할 결과가 너무 큽니다({size // 1024}KB > {SAVED_RESULT_MAX_BYTES // 1024}KB)")
+        return self
+
+
+class SavedResultOut(SavedResultIn):
+    id: str
+    createdAt: datetime

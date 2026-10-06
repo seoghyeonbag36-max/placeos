@@ -20,6 +20,7 @@ from app.core.security import CurrentUser, get_current_user, issue_access_token,
 from app.schemas.auth import (
     ApiKeyCreatedResponse, ApiKeyCreateRequest, ApiKeyOut, AuthProviders, GoogleLoginRequest,
     LoginRequest, MeResponse, OrgOut, SignupRequest, TokenResponse, BusinessWorkspaceData,
+    SavedResultIn, SavedResultOut,
 )
 from app.services import auth_service, business_workspace, google_auth, rate_limit
 
@@ -168,6 +169,35 @@ def save_workspace(req: BusinessWorkspaceData,
                    current: CurrentUser = Depends(get_current_user),
                    db: Session = Depends(get_db)) -> BusinessWorkspaceData:
     return business_workspace.save(db, current.user.id, req)
+
+
+# ── 저장한 결과 (2026-10-06) ───────────────────────────────────────────────────
+# Posting 계산·Program 생성 결과를 사용자가 고른 것만 남긴다. **본인 것**이라 JWT 사용자만 쓴다 —
+# 조직 API 키(사람이 없는 연동)로는 읽지도 쓰지도 못한다. 보관 상한·저장 위치는 services/business_workspace.
+
+
+@router.get("/results", response_model=list[SavedResultOut])
+def list_results(current: CurrentUser = Depends(get_current_user),
+                 db: Session = Depends(get_db)) -> list[SavedResultOut]:
+    return business_workspace.list_results(db, current.user.id)
+
+
+@router.post("/results", response_model=SavedResultOut, status_code=status.HTTP_201_CREATED)
+def save_result(req: SavedResultIn,
+                current: CurrentUser = Depends(get_current_user),
+                db: Session = Depends(get_db)) -> SavedResultOut:
+    return business_workspace.add_result(db, current.user.id, req)
+
+
+@router.delete("/results/{result_id}")
+def delete_result(result_id: str,
+                  current: CurrentUser = Depends(get_current_user),
+                  db: Session = Depends(get_db)) -> dict[str, bool]:
+    try:
+        business_workspace.delete_result(db, current.user.id, result_id)
+    except business_workspace.SavedResultNotFound:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "저장한 결과를 찾을 수 없습니다")
+    return {"ok": True}
 
 
 @router.post("/logout")
