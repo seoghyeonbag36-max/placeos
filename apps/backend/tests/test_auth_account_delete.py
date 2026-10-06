@@ -114,7 +114,8 @@ def test_delete_leaves_other_users_alone():
     assert client.delete(f"{V1}/auth/me", headers=me).status_code == 200
 
     assert client.get(f"{V1}/auth/me", headers=other).status_code == 200
-    assert client.get(f"{V1}/auth/workspace", headers=other).json()["profile"] == _PROFILE["profile"]
+    assert client.get(f"{V1}/auth/workspace", headers=other).json()["profile"] == {
+        **_PROFILE["profile"], "targetIndustryKey": None}
     assert {m: _count(m) for m in before} == before
     assert _count(User) == 1 and _count(Org) == 1
 

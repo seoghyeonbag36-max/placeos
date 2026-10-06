@@ -121,6 +121,54 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     const input = await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement;
     expect(input.value).toBe("카페");
     expect(screen.getByText(/Platform 에서 고른 업종으로 채웠습니다/)).toBeTruthy();
+    // (2026-10-06) 순위표에서 고른 업종은 「바꿀 업종」으로 저장된다 — 다음에 바로 들어와도 그 업종으로 시작한다.
+    await waitFor(() => expect(savedBusiness).toMatchObject(
+      { status: "set", profile: { goal: "pivot", industryKey: "restaurant", targetIndustryKey: "cafe" } }));
+  });
+
+  it("(2026-10-06) 업종 바꾸기인데 바꿀 업종을 아직 안 정했으면 Posting·Program 업종칸에 지금 업종을 넣지 않는다", async () => {
+    savedBusiness = { status: "set", profile: { goal: "pivot", industryKey: "restaurant", homeDistrictId: "garosugil" } };
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
+    const posting = await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement;
+    expect(posting.value, "버릴 업종(음식점)이 기본값으로 채워졌다").toBe("");
+    expect(screen.queryByText(/내 사업 기준으로 채웠습니다/)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Program" }));
+    const category = await screen.findByPlaceholderText("예: 카페", undefined, TAB_LOAD) as HTMLInputElement;
+    expect(category.value).toBe("");
+  });
+
+  it("(2026-10-06) 바꿀 업종을 정했으면 Posting·Program 이 그 업종으로 시작하고, 칩이 바꿀 업종을 말한다", async () => {
+    savedBusiness = { status: "set",
+      profile: { goal: "pivot", industryKey: "cafe", homeDistrictId: "garosugil", targetIndustryKey: "restaurant" } };
+    mount();
+    expect(await screen.findByRole("button", { name: /가로수길 · 카페·디저트에서 음식점으로 바꾸기/ }, TAB_LOAD)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
+    expect((await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement).value).toBe("음식점");
+    expect(screen.getByText(/내 사업 기준으로 채웠습니다/)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Program" }));
+    expect((await screen.findByPlaceholderText("예: 카페", undefined, TAB_LOAD) as HTMLInputElement).value).toBe("음식점");
+  });
+
+  it("(2026-10-06) 카드에서 업종 바꾸기를 고르면 「바꿀 업종(선택)」 칸이 뜨고, 고른 값이 저장된다", async () => {
+    mount();
+    const card = await screen.findByRole("region", { name: "무엇을 하려고 하세요?" });
+    expect(within(card).queryByText(/무엇으로 바꿀지 정했나요/)).toBeNull();   // 목적을 고르기 전·창업·옮기기에는 없다
+    fireEvent.click(within(card).getByRole("radio", { name: /지금 상권에서 업종 바꾸기/ }));
+    expect(within(card).getByText(/무엇으로 바꿀지 정했나요/)).toBeTruthy();
+    fireEvent.click(await within(card).findByRole("radio", { name: "음식점" }));          // 지금 업종
+    // 지금 업종은 바꿀 업종 후보에서 빠진다
+    expect(within(card).queryByRole("radio", { name: "음식점으로 바꾸기" })).toBeNull();
+    fireEvent.click(within(card).getByRole("radio", { name: "카페·디저트로 바꾸기" }));
+    const start = within(card).getByRole("button", { name: "시작" }) as HTMLButtonElement;
+    await waitFor(() => expect(start.disabled).toBe(false));
+    fireEvent.click(start);
+    await waitFor(() => expect(savedBusiness).toMatchObject(
+      { status: "set", profile: { goal: "pivot", industryKey: "restaurant", targetIndustryKey: "cafe" } }));
   });
 
   it("PL-11 서빙 어휘 밖 업종이면 순위를 지어 보여주지 않는다", async () => {

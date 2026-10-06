@@ -68,15 +68,21 @@ class ApiKeyCreatedResponse(ApiKeyOut):
 class BusinessProfile(BaseModel):
     model_config = ConfigDict(extra="forbid")
     goal: Literal["start", "pivot", "move"]
+    # 창업·옮기기면 **할** 업종, 바꾸기면 **지금** 업종(Platform 이 지금 상권의 업종 순위를 매기는 기준).
     industryKey: str = Field(min_length=1, max_length=200)
     homeDistrictId: str | None = Field(default=None, max_length=200)
     businessName: str | None = Field(default=None, max_length=200)
     description: str | None = Field(default=None, max_length=3000)
+    # 바꾸기만: **바꿀** 업종(2026-10-06). 아직 모르면 비운다. Posting·Program 의 업종 기본값이 이것이다 —
+    # 종전에는 바꾸기 사용자에게도 industryKey(버릴 업종)가 기본값으로 채워졌다(finding-project-review §2-1).
+    targetIndustryKey: str | None = Field(default=None, max_length=200)
 
     @model_validator(mode="after")
     def require_district(self) -> "BusinessProfile":
         if self.goal != "start" and not self.homeDistrictId:
             raise ValueError("현재 상권이 필요합니다")
+        if self.goal != "pivot" and self.targetIndustryKey:
+            raise ValueError("바꿀 업종은 업종 바꾸기에서만 정합니다")
         return self
 
 

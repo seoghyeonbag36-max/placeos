@@ -8,7 +8,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import DistrictPicker from "@/components/DistrictPicker";
 import type { DistrictSummary, IndustryOption } from "@/lib/api";
-import { GOALS, businessChipText, type BusinessGoal, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
+import { GOALS, businessChipText, toward, type BusinessGoal, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { isEditableTarget } from "@/lib/keyboard";
 import "./BusinessSetup.css";
 
@@ -34,6 +34,8 @@ export default function BusinessSetup({
   const saved = state.status === "set" ? state.profile : null;
   const [goal, setGoal] = useState<BusinessGoal | null>(saved?.goal ?? null);
   const [industryKey, setIndustryKey] = useState<string | null>(saved?.industryKey ?? null);
+  // 바꾸기만 — 바꿀 업종(선택). Posting·Program 의 업종 기본값이 된다(lib/businessProfile.workIndustryKey).
+  const [targetKey, setTargetKey] = useState<string | null>(saved?.targetIndustryKey ?? null);
   const [home, setHome] = useState<string>(saved?.homeDistrictId ?? districtId);
   const [businessName, setBusinessName] = useState(saved?.businessName ?? "");
   const [description, setDescription] = useState(saved?.description ?? "");
@@ -45,6 +47,7 @@ export default function BusinessSetup({
     if (open && !wasOpen.current) {
       setGoal(saved?.goal ?? null);
       setIndustryKey(saved?.industryKey ?? null);
+      setTargetKey(saved?.targetIndustryKey ?? null);
       setHome(saved?.homeDistrictId ?? districtId);
       setBusinessName(saved?.businessName ?? "");
       setDescription(saved?.description ?? "");
@@ -74,6 +77,8 @@ export default function BusinessSetup({
   }, [open, state.status, onBrowse, onOpenChange]);
 
   const needsHome = goal === "pivot" || goal === "move";
+  // 지금 업종과 같은 업종으로 "바꾸기"는 뜻이 없다 — 지금 업종을 바꾸면 바꿀 업종이 그것과 겹칠 때 비운다.
+  const target = goal === "pivot" && targetKey && targetKey !== industryKey ? targetKey : null;
   const homeOk = !needsHome || districts.some((d) => d.id === home);
   const ready = !!goal && !!industryKey && !!list?.some((i) => i.key === industryKey) && homeOk;
   const chipText = businessChipText(state, list, districts);
@@ -128,6 +133,27 @@ export default function BusinessSetup({
             )}
           </fieldset>
 
+          {goal === "pivot" && list && (
+            <fieldset className="biz-inds">
+              <legend>무엇으로 바꿀지 정했나요? (선택)</legend>
+              <p className="biz-hint">고르면 입점 계산·검증 program 이 이 업종으로 시작합니다. 아직 모르면 비워 두고 Platform 의 업종 순위에서 고르세요.</p>
+              <div className="biz-ind-grid">
+                <label className={"biz-ind" + (target === null ? " on" : "")}>
+                  <input type="radio" name={`${cardId}-target`} value="" checked={target === null}
+                    onChange={() => setTargetKey(null)} />
+                  <b>아직 모름</b>
+                </label>
+                {list.filter((i) => i.key !== industryKey).map((i) => (
+                  <label key={i.key} className={"biz-ind" + (target === i.key ? " on" : "")}>
+                    <input type="radio" name={`${cardId}-target`} value={i.key} checked={target === i.key}
+                      onChange={() => setTargetKey(i.key)} aria-label={`${toward(i.label)} 바꾸기`} />
+                    <b>{i.label}</b>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
           {needsHome && (
             <div className="biz-home">
               {/* DistrictPicker 는 id 를 받지 않는다 — 이름은 aria-label 로 잇고, 보이는 글자는 같은 말을 쓴다 */}
@@ -140,7 +166,8 @@ export default function BusinessSetup({
           <div className="biz-actions">
             <button type="button" className="biz-start" disabled={!ready || saving}
               onClick={() => ready && onStart({ goal: goal!, industryKey: industryKey!, homeDistrictId: needsHome ? home : null,
-                businessName: businessName.trim() || null, description: description.trim() || null })}>
+                businessName: businessName.trim() || null, description: description.trim() || null,
+                ...(goal === "pivot" ? { targetIndustryKey: target } : {}) })}>
               시작
             </button>
             <button type="button" className="biz-browse" disabled={saving} onClick={onBrowse}>그냥 둘러보기</button>
