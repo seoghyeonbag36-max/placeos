@@ -221,7 +221,18 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
   data 549, 프론트 build·lint(오류 0, 경고 기존 86)·vitest 211. 로컬 백엔드(임시 SQLite, 낮은 한도)에 curl 로
   가입 201·201·429(`Retry-After`)·로그인 401·401·429·관리자 403×3·429, Vite 프록시 화면에서 두 429 문구 확인.
 
-### ② 공개 저장소 위생
+### ② 공개 저장소 위생 — ✅ 2026-10-06 `chore/repo-hygiene-ruflo-20261006` (개인 문서는 미결)
+
+- **한 것**: `.gitignore` 에 `.swarm/`·`.claude-flow/` 전체와 Ruflo 가 `.claude/` 에 깐 이름(에이전트 6·스킬 30·
+  `commands/`·`helpers/`·`proven-config*`·`settings.json.bak-*`)을 넣었다 — **무시**를 골랐다(이 프로젝트 코드가 아니고,
+  `helpers/` 는 자동 허용과 묶이면 공급망 통로가 된다). Ruflo init 의 `.env.local`·`.env.*.local` 은 기존 `*.local` 이 덮는다.
+  `.claude/settings.json` 의 미커밋 Ruflo 변경(허용 4·env·플러그인·마켓플레이스)은 **커밋하지 않고** 그 기기의
+  `settings.local.json`(무시됨)으로 옮겼다 — 그 기기의 동작은 같고 공유 파일만 깨끗해졌다.
+- **검증**: 미추적 Ruflo 파일이 있는 작업 트리에 새 규칙을 대 보니 `.swarm`·`.claude-flow`·`.claude` 아래 미추적
+  271 → 0, 추적 중인 파일이 새 패턴에 걸리는 수 0(`git ls-files -ci --exclude-from`).
+- **남은 것(소유자 결정)**: 개인 문서의 공개 범위와 이력 정리. 작업 트리 삭제만으로는 이력에서 내려가지 않는다.
+
+<details><summary>처음 세운 계획</summary>
 
 - **계획**: `.gitignore` 에 `.swarm/`·`.claude-flow/` 전체를 넣는다(10-05 미커밋 변경과 합친다). `.claude/settings.json` 의
   Ruflo 자동 허용·플러그인 활성화는 되돌리거나 `settings.local.json` 으로 옮긴다. Ruflo 가 깐 `.claude/agents/*`·`.claude/skills/*`
@@ -230,6 +241,8 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
 - **검증**: `git check-ignore -v .swarm/memory.db .claude-flow/daemon-state.json` 이 둘 다 매칭,
   `git status --porcelain -- .swarm .claude-flow` 0줄, `git ls-files .swarm .claude-flow` 0줄.
   `settings.json` 은 `git diff` 로 허용 목록이 HEAD 와 같은지.
+
+</details>
 
 ### ③ 배포를 CI 전체에 묶기 + 로컬 검증 정합
 

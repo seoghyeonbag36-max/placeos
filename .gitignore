@@ -222,3 +222,40 @@ docs/papers/audits/**/repeat-a/gold/
 
 # 논문 원문(외부 PDF) 로컬 서고 — 저장소가 public 이라 제3자 저작물을 재배포하지 않는다.
 docs/papers/library/private/
+
+# ── Ruflo(claude-flow) 로컬 상태와 설치물 — 2026-10-06 ─────────────────────────────
+# 저장소가 public 이다(docs/finding-project-review-4roles-2026-10-06.md §5-2). 무시하지 않으면
+# `git add -A` 한 번에 아래가 올라간다:
+#   · .swarm/memory.db · .claude-flow/graph/agents.db — 에이전트 메모리 DB
+#   · .claude-flow/ 의 daemon pid·상태·metrics — 머신 로컬 실행 상태
+#   · Ruflo 가 .claude/ 에 깐 범용 에이전트·스킬·명령·헬퍼 — 이 프로젝트 코드가 아니다. 특히
+#     .claude/helpers/ 는 `Bash(node .claude/*)` 자동 허용과 묶이면 PR 하나로 개발자 PC 에서
+#     프롬프트 없이 도는 스크립트가 된다.
+# 프로젝트 자체 에이전트·스킬(.claude/agents/*.md · .claude/skills/<이름>/)은 계속 추적한다 —
+# 아래는 Ruflo 가 만든 이름만 고른 것이라 겹치지 않는다(2026-10-06 git ls-files 대조).
+# Ruflo init 이 넣으려던 `.env.local`·`.env.*.local` 은 위 `*.local` 이 이미 덮는다.
+.swarm/
+.claude-flow/
+.claude/.proven-config-version
+.claude/proven-config.json
+.claude/settings.json.bak-*
+.claude/commands/
+.claude/helpers/
+.claude/agents/browser/
+.claude/agents/consensus/
+.claude/agents/core/
+.claude/agents/sparc/
+.claude/agents/swarm/
+.claude/agents/testing/
+.claude/skills/agentdb-*/
+.claude/skills/browser/
+.claude/skills/github-*/
+.claude/skills/hooks-automation/
+.claude/skills/pair-programming/
+.claude/skills/reasoningbank-*/
+.claude/skills/skill-builder/
+.claude/skills/sparc-methodology/
+.claude/skills/stream-chain/
+.claude/skills/swarm-*/
+.claude/skills/v3-*/
+.claude/skills/verification-quality/
