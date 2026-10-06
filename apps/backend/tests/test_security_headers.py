@@ -63,8 +63,9 @@ def test_csp_keeps_core_guards():
 def test_csp_allows_measured_third_parties():
     """2026-10-06 실측 — 빠지면 강제 전환 때 지도·구글 로그인이 막힌다."""
     d = _directives()
-    for src in ("https://oapi.map.naver.com", "https://nrbe.map.naver.net", "https://apis.naver.com",
-                "https://accounts.google.com/gsi/client"):
+    # nrbe.pstatic.net 은 운영(https)에서만 나온다 — 로컬(http) 실측으로는 못 잡고 운영 보고로 잡았다.
+    for src in ("https://oapi.map.naver.com", "https://nrbe.pstatic.net", "https://nrbe.map.naver.net",
+                "https://apis.naver.com", "https://accounts.google.com/gsi/client"):
         assert src in d["script-src"], src
     assert "https://accounts.google.com/gsi/style" in d["style-src"]
     assert "https://accounts.google.com/gsi/" in d["frame-src"]

@@ -191,6 +191,8 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
   `feat/security-headers-20261006`). 출처는 로그인 상태로 네 트랙·건물 상세 거리뷰·로그인 화면을 열어 실측했다
   — 네이버 SDK 는 `oapi` 외에 `nrbe.map.naver.net`·`apis.naver.com` 을 JSONP 로 부른다. **CSP 강제 전환은 남았다**:
   운영 콘솔에서 `[Report Only]` 위반 0 을 확인한 뒤 `Content-Security-Policy` 로 바꾼다.
+  운영 1차 실측(배포 직후, `[내부]` 점검 계정으로 네 트랙·거리뷰 → 바로 탈퇴): 위반 3건 = 스타일 JSONP 가 https 에서는
+  `nrbe.pstatic.net` 으로 간다(로컬 http 에서는 `nrbe.map.naver.net`) → 추가(`fix/csp-nrbe-pstatic-20261006`). 그 밖의 위반·콘솔 오류 0.
 
 ### 5-2. 공개 저장소 위생 (지금 막을 것)
 
