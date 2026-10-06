@@ -226,7 +226,7 @@ def test_user_workspace_isolation():
     a, b = _auth("a@acme.com"), _auth("b@acme.com")
     data = {"status": "set", "profile": {"goal": "start", "industryKey": "coffee", "homeDistrictId": None, "businessName": "내 카페", "description": "동네 주민을 위한 카페"}}
     assert client.post("/api/v1/auth/workspace", headers=a, json=data).status_code == 200
-    assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == data["profile"]
+    assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == {**data["profile"], "targetIndustryKey": None}
     assert client.get("/api/v1/auth/workspace", headers=b).json()["status"] == "unset"
     assert client.get("/api/v1/auth/workspace").status_code == 401
     assert client.post("/api/v1/auth/workspace", headers=b, json={**data, "user_id": "someone-else"}).status_code == 422
@@ -245,6 +245,24 @@ def test_user_workspace_isolation():
 
 def test_workspace_missing_profile_rejected():
     assert client.post("/api/v1/auth/workspace", headers=_auth(), json={"status": "set"}).status_code == 422
+
+
+def test_pivot_target_industry_round_trips_and_is_pivot_only():
+    """(2026-10-06) 바꾸기는 바꿀 업종(targetIndustryKey)을 따로 둔다 — Posting·Program 기본값이 그것이다.
+    창업·옮기기에는 그 칸이 없다(industryKey 가 이미 할 업종이다)."""
+    h = _auth()
+    pivot = {"status": "set", "profile": {"goal": "pivot", "industryKey": "cafe", "homeDistrictId": "yeonnam",
+                                          "targetIndustryKey": "restaurant"}}
+    assert client.post("/api/v1/auth/workspace", headers=h, json=pivot).status_code == 200
+    got = client.get("/api/v1/auth/workspace", headers=h).json()["profile"]
+    assert got["industryKey"] == "cafe" and got["targetIndustryKey"] == "restaurant"
+
+    unknown_yet = {"status": "set", "profile": {**pivot["profile"], "targetIndustryKey": None}}
+    assert client.post("/api/v1/auth/workspace", headers=h, json=unknown_yet).status_code == 200
+
+    start_with_target = {"status": "set", "profile": {"goal": "start", "industryKey": "cafe",
+                                                      "targetIndustryKey": "restaurant"}}
+    assert client.post("/api/v1/auth/workspace", headers=h, json=start_with_target).status_code == 422
 
 
 def test_login_after_logout_issues_fresh_token():

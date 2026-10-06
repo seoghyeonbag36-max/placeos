@@ -24,6 +24,8 @@ export interface BusinessProfile {
   industryKey: string;
   /** 지금 가게 상권 — 바꾸기·옮기기만. 창업이면 null */
   homeDistrictId: string | null;
+  /** 바꾸기만: **바꿀** 업종(2026-10-06). 아직 모르면 null. Posting·Program 의 업종 기본값이 이것이다 */
+  targetIndustryKey?: string | null;
 }
 
 /** unset = 처음 방문(카드를 편다) · browsing = 「그냥 둘러보기」 · set = 설정됨 */
@@ -73,6 +75,13 @@ export function saveBusiness(state: BusinessState): void {
 export const findIndustry = (industries: IndustryOption[] | null | undefined, key: string | null | undefined) =>
   (key && industries?.find((i) => i.key === key)) || null;
 
+/** Posting·Program 의 업종 기본값 key — **해 볼** 업종이다(2026-10-06).
+ *  창업·옮기기는 industryKey 가 곧 할 업종이다. 바꾸기는 industryKey 가 **지금(버릴)** 업종이라 기본값으로 쓰면
+ *  안 되고, 바꿀 업종(targetIndustryKey)을 쓴다 — 아직 모르면 null(빈칸에서 시작). Page·Platform 의 「내 업종」은
+ *  계속 industryKey 다(지금 가게의 업종을 기준으로 상권을 읽는다). */
+export const workIndustryKey = (profile: BusinessProfile | null | undefined): string | null =>
+  !profile ? null : profile.goal === "pivot" ? profile.targetIndustryKey ?? null : profile.industryKey;
+
 /** 칩 문구 — 목적과 업종(·지금 상권)을 한 줄로. 업종 목록이 아직 없으면 key 를 그대로 쓰지 않고 「내 사업」. */
 export function businessChipText(state: BusinessState, industries: IndustryOption[] | null | undefined,
   districts: DistrictSummary[] | null | undefined): string {
@@ -82,7 +91,10 @@ export function businessChipText(state: BusinessState, industries: IndustryOptio
   if (!ind) return "내 사업";
   const home = districts?.find((d) => d.id === homeDistrictId)?.name ?? "지금 상권";
   if (goal === "start") return `${ind.label} 창업`;
-  if (goal === "pivot") return `${home} · ${ind.label}에서 업종 바꾸기`;
+  if (goal === "pivot") {
+    const target = findIndustry(industries, state.profile.targetIndustryKey);
+    return target ? `${home} · ${ind.label}에서 ${toward(target.label)} 바꾸기` : `${home} · ${ind.label}에서 업종 바꾸기`;
+  }
   return `${ind.label} · ${home}에서 옮기기`;
 }
 

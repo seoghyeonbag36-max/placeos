@@ -10,7 +10,7 @@ import BusinessSetup from "@/components/BusinessSetup";
 import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { Button } from "@/design/components/Button";
 import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
-import { businessChipText, findIndustry, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
+import { businessChipText, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import "./App.css";
 
@@ -188,13 +188,27 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     setBusiness(state);
     setBizOpen(false);
   }, [token]);
-  const myIndustry = findIndustry(Array.isArray(industries) ? industries : null, profile?.industryKey);
+  const industryList = Array.isArray(industries) ? industries : null;
+  // 「내 업종」 — 지금 가게의 업종(바꾸기) 또는 할 업종(창업·옮기기). Page 강조·Platform 순위의 기준이다.
+  const myIndustry = findIndustry(industryList, profile?.industryKey);
+  // Posting·Program 의 업종 **기본값** — 해 볼 업종이다. 바꾸기면 바꿀 업종(없으면 빈칸)이고, 지금(버릴) 업종이
+  // 아니다(2026-10-06 · docs/finding-project-review-4roles-2026-10-06.md §2-1).
+  const workIndustry = findIndustry(industryList, workIndustryKey(profile));
   // Platform 업종 바꾸기 표 → Posting 업종칸(인계 표 「Platform → Posting」).
   const [postingIndustry, setPostingIndustry] = useState<{ input: string; requestId: number }>();
   const tryIndustry = useCallback((input: string) => {
     setPostingIndustry((prev) => ({ input, requestId: (prev?.requestId ?? 0) + 1 }));
     setView("posting");
-  }, []);
+    // 바꾸기: 순위표에서 고른 업종을 「바꿀 업종」으로 남긴다 — 다음에 Posting·Program 에 바로 들어와도 그 업종으로
+    // 시작한다. 저장이 실패해도 이번 방문 동안은 메모리 값으로 돈다(인계 자체는 이미 끝났다).
+    const picked = industryList?.find((i) => i.input === input);
+    if (profile?.goal === "pivot" && picked && picked.key !== profile.industryKey
+        && picked.key !== profile.targetIndustryKey) {
+      const next: BusinessState = { status: "set", profile: { ...profile, targetIndustryKey: picked.key } };
+      setBusiness(next);
+      saveBusinessWorkspace(token, next).catch(() => { /* 위 주석 */ });
+    }
+  }, [industryList, profile, token]);
   useEffect(() => {
     const t = window.setTimeout(() => {
       // 실패해도 조용히 넘어간다 — 그 탭을 누를 때 lazy 가 다시 받는다.
@@ -290,14 +304,14 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           {view === "posting" && (
             <TrackMapFrame track="posting" label="입점 계산">
               <PostingConsole selection={postingSelection} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} defaultIndustry={myIndustry?.input} industryRequest={postingIndustry} />
+                onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input} industryRequest={postingIndustry} />
             </TrackMapFrame>
           )}
           {view === "program" && (
             <TrackMapFrame track="program" label="검증 program">
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={myIndustry?.input} businessGoal={profile?.goal} />
+                defaultCategory={workIndustry?.input} businessGoal={profile?.goal} />
             </TrackMapFrame>
           )}
         </Suspense>
