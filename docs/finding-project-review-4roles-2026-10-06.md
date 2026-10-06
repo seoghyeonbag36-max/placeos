@@ -244,7 +244,19 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
 
 </details>
 
-### ③ 배포를 CI 전체에 묶기 + 로컬 검증 정합
+### ③ 배포를 CI 전체에 묶기 + 로컬 검증 정합 — ✅ 2026-10-06 `feat/deploy-after-ci-20261006`
+
+- **한 것**: `deploy.yml` 이 `push` 대신 CI 의 `workflow_run`(completed · main)으로 돈다. 게이트는 CI 결론 success ·
+  CI 를 일으킨 이벤트가 push · **이 저장소**의 커밋 — 계획에 없던 뒤의 두 조건을 더했다(빠지면 포크 PR 이 `main` 이라는
+  이름의 브랜치로 돌린 CI 가 배포를 일으킬 수 있다). 체크아웃·이미지 태그는 CI 가 검사한 `head_sha`(`DEPLOY_SHA`).
+  배포 쪽 백엔드 pytest(`test` 잡)는 **지우지 않았다** — 수동 실행에는 앞선 CI 가 없다. 헤더 주석의 WIF 조건 저장소 이름을
+  실제 값(`placeos`, `gcloud` 확인)으로 고쳤다. `run_full_verify.py` 에 frontend-lint·frontend-test 를 CI 순서대로 넣었다
+  (minimal-deps 는 별도 venv 가 있어야 같은 조건이라 넣지 않았다). verify SKILL 명령 목록에 `npm run test`, 순서를
+  build → lint → test 로 정정.
+- **검증**: `test_ci_deploy_contract.py` 5건 — 예전 `deploy.yml`·`run_full_verify.py` 에 대면 4건이 실패함을 확인.
+  `workflow_run` 은 머지 뒤에만 효력이 나므로, 이 PR 의 머지 커밋이 CI 성공 뒤 `workflow_run` 으로 배포되는지로 확인한다.
+
+<details><summary>처음 세운 계획</summary>
 
 - **계획**: `deploy.yml` 을 `on: workflow_run: { workflows: [CI], types: [completed], branches: [main] }` 로 바꾸고
   `if: github.event.workflow_run.conclusion == 'success'`, 체크아웃은 `github.event.workflow_run.head_sha` 로 고정한다.
@@ -255,6 +267,8 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
 - **검증**: `workflow_run` 은 기본 브랜치의 워크플로 파일로만 트리거되므로 머지 뒤에 확인한다 —
   다음 main 푸시에서 `gh run list --workflow Deploy` 의 트리거가 `workflow_run` 이고 CI 성공 뒤에만 시작하는지,
   CI 실패 커밋에서는 Deploy 가 `skipped` 인지. 계약 테스트는 pytest 로.
+
+</details>
 
 ### 그다음 (제품 결정이 먼저 필요)
 

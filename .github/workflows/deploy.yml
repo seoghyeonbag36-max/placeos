@@ -1,4 +1,4 @@
-# PlaceOS 배포 — main 푸시 시 Cloud Run 으로 나간다
+# PlaceOS 배포 — main 의 CI 가 **전부 통과한 뒤** Cloud Run 으로 나간다
 #
 # ## 왜 이 파일이 필요한가
 # 2026-08-28 Cloud Run 전환 전까지는 `git push` 가 예전 서버리스 호스팅으로 **자동 배포**됐다.
@@ -9,19 +9,31 @@
 # ## 장기 키를 쓰지 않는다
 # Workload Identity 연합(WIF)으로 GitHub OIDC 토큰을 GCP 서비스계정으로 교환한다.
 # 저장소에 서비스계정 키(JSON)를 두지 않는다 — 유출되면 취소 전까지 계속 유효한 물건이다.
-# 공급자에 `assertion.repository=='seoghyeonbag36-max/spaceos'` 조건이 걸려 있어
+# 공급자에 `assertion.repository=='seoghyeonbag36-max/placeos'` 조건이 걸려 있어
 # **다른 저장소의 토큰으로는 이 서비스계정을 못 빌린다.**
+# (2026-10-06 `gcloud iam workload-identity-pools providers list` 로 확인 — 이 주석은 저장소
+#  개명 전 이름 `spaceos` 를 적고 있었다.)
 #
-# ## CI 가 통과해야만 배포한다
-# `needs: [ci-gate]` 가 아니라 별도 워크플로라 순서를 강제할 수 없으므로, 여기서
-# 백엔드 테스트를 한 번 더 돌린다. 빨간 코드가 프로덕션에 나가는 것보다 2분이 싸다.
+# ## CI 가 통과해야만 배포한다 (2026-10-06 — `push` 에서 `workflow_run` 으로)
+# 종전에는 `on: push` 로 CI 와 **나란히** 돌았고, 순서를 강제할 수 없어 여기서 백엔드 pytest 만
+# 한 번 더 돌렸다. 그래서 프론트 lint·vitest, data pytest, 최소 의존성 임포트가 빨개도 배포는 나갔다
+# (docs/finding-project-review-4roles-2026-10-06.md §4-2). 이제 CI 워크플로가 끝나면 그 결과를 보고 돈다:
+#   · CI 결론이 success 이고, main 에 대한 **push** 로 돈 CI 이고, **이 저장소**의 커밋일 때만 배포한다.
+#     뒤의 두 조건이 빠지면 포크 PR 이 `main` 이라는 이름의 브랜치로 돌린 CI 가 배포를 일으킬 수 있다.
+#   · 배포하는 커밋은 CI 가 검사한 `workflow_run.head_sha` 로 고정한다. `github.sha` 는 이 이벤트에서
+#     "지금 main 의 꼭대기"라 CI 가 본 커밋과 다를 수 있다.
+#   · `workflow_run` 은 **기본 브랜치에 있는** 이 파일로만 트리거된다 — 이 파일을 고친 PR 은 머지된 뒤에야 효력이 난다.
+# 아래 `test` 잡(백엔드 pytest)은 일부러 남긴다: 수동 실행(workflow_dispatch)에는 앞선 CI 가 없고,
+# 배포 직전 같은 커밋으로 한 번 더 도는 2분이 빨간 코드가 나가는 것보다 싸다.
 
 name: Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-  workflow_dispatch:        # 수동 재배포(롤백 후 재시도 등)
+  workflow_dispatch:        # 수동 재배포(롤백 후 재시도 등) — 앞선 CI 없이 `test` 잡만 거친다
 
 concurrency:
   group: deploy-cloud-run
@@ -35,14 +47,26 @@ env:
   REGION: us-central1
   SERVICE: spaceos
   IMAGE: us-central1-docker.pkg.dev/spaceos-digital-twin/spaceos/web
+  # 배포할 커밋 — CI 가 검사한 커밋(workflow_run) 또는 수동 실행이 고른 커밋(workflow_dispatch).
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 jobs:
   test:
     name: 배포 전 테스트
+    # 게이트는 첫 잡에 둔다 — 여기서 건너뛰면 `needs: test` 인 배포도 함께 건너뛴다.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -65,6 +89,8 @@ jobs:
       id-token: write        # WIF 토큰 발급에 필요하다
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
 
       - name: GCP 인증 (WIF)
         uses: google-github-actions/auth@v2
@@ -80,7 +106,7 @@ jobs:
         run: |
           gcloud builds submit \
             --config cloudbuild.yaml \
-            --substitutions=_NAVER_KEY='${{ secrets.VITE_NAVER_MAPS_KEY_ID }}',_IMAGE=${{ env.IMAGE }}:${{ github.sha }} \
+            --substitutions=_NAVER_KEY='${{ secrets.VITE_NAVER_MAPS_KEY_ID }}',_IMAGE=${{ env.IMAGE }}:${{ env.DEPLOY_SHA }} \
             --project=${{ env.PROJECT_ID }}
 
       # 런타임 비밀값(JWT_SECRET·ADMIN_TOKEN·LLM_API_KEY)은 **건드리지 않는다.**
@@ -89,7 +115,7 @@ jobs:
       - name: Cloud Run 배포
         run: |
           gcloud run deploy ${{ env.SERVICE }} \
-            --image=${{ env.IMAGE }}:${{ github.sha }} \
+            --image=${{ env.IMAGE }}:${{ env.DEPLOY_SHA }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --project=${{ env.PROJECT_ID }}
