@@ -36,6 +36,19 @@ def _no_network_llm(monkeypatch):
     monkeypatch.setattr(settings, "llm_api_key", "", raising=False)
 
 
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits():
+    """요청량 카운터(services/rate_limit)를 테스트마다 비운다.
+
+    카운터는 프로세스 전역이다. 비우지 않으면 앞 테스트들의 가입이 쌓여 뒤 테스트가 가입 한도(429)에
+    걸리고, 그 실패는 순서를 바꾸면 사라지는 종류라 원인을 찾기 어렵다(2026-10-06).
+    """
+    from app.services import rate_limit
+    rate_limit.reset()
+    yield
+    rate_limit.reset()
+
+
 @pytest.fixture
 def signed_in():
     """로그인한 요청의 헤더 — `POST /marketing/generate` 의 LLM 경로는 로그인 호출에만 열린다.

@@ -886,6 +886,9 @@ export interface ProgramPlan {
   /** 서버 후처리 검증 결과. rule-stub 인데 violation 이 있으면 **키가 없어서가 아니라
    *  생성물이 검증에 걸려 폐기된 것**이다 — 화면이 두 경우를 구분해야 한다. */
   ha_findings?: HAFinding[];
+  /** 스텁인 이유가 **한도**일 때만 온다(2026-10-06): "llm_quota" = 로그인했지만 조직의 24시간 AI 생성 한도를
+   *  넘었다. 실패가 아니므로 "다시 생성해 주세요"라고 하지 않는다. 그 밖의 스텁은 null/없음. */
+  stub_reason?: "llm_quota" | string | null;
 }
 
 /** 검증 프로그램 생성 — 모객 · 자리·연계 · 검증 지표 한 벌 */

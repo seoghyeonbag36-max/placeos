@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 from pathlib import Path
@@ -20,6 +21,7 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.services.districts import PAGES_BY_ID, get_summary
 from app.services import latency as latency_service
+from app.services import rate_limit
 from app.services import pilot_w4 as pilot_w4_service
 from app.services import pmf as pmf_service
 from app.services import usage as usage_service
@@ -31,12 +33,24 @@ _GOLD_DIR = Path(__file__).resolve().parents[5] / "data" / "gold"
 
 
 def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    """관리자 토큰 검증. 토큰 미설정 시에도 통과시키지 않는다."""
+    """관리자 토큰 검증. 토큰 미설정 시에도 통과시키지 않는다.
+
+    2026-10-06: 비교를 `hmac.compare_digest` 로 바꾸고(응답 시간으로 토큰을 한 글자씩 맞혀 가지
+    못하게), 틀린 토큰이 15분에 `admin_failures_per_instance` 건을 넘으면 429 로 막는다
+    (services/rate_limit — 키가 전역이라 그동안은 맞는 토큰도 막힌다). 헤더가 아예 없는 요청은
+    대입 시도가 아니므로 세지 않는다.
+    """
     expected = os.getenv("ADMIN_TOKEN")
     if not expected:
         raise HTTPException(status_code=403,
                             detail="ADMIN_TOKEN 미설정 — 관리자 API 가 비활성화되어 있습니다")
-    if x_admin_token != expected:
+    retry = rate_limit.admin_retry_after()
+    if retry:
+        raise HTTPException(status_code=429, headers={"Retry-After": str(retry)},
+                            detail="관리자 토큰 시도가 너무 많습니다. 잠시 뒤 다시 시도해 주세요")
+    if not x_admin_token or not hmac.compare_digest(x_admin_token.encode(), expected.encode()):
+        if x_admin_token:
+            rate_limit.record_admin_failure()
         raise HTTPException(status_code=403, detail="관리자 토큰이 올바르지 않습니다")
 
 

@@ -64,7 +64,10 @@ export default function AdminCoverage() {
       const status = err instanceof ApiError ? err.status : 0;
       setError(status === 403
         ? "토큰이 올바르지 않거나 서버에 ADMIN_TOKEN 이 설정되지 않았습니다."
-        : status === 0 ? "서버에 연결하지 못했습니다." : `요청 실패 (${status})`);
+        : status === 429
+          // 틀린 토큰이 쌓이면 서버가 15분 동안 맞는 토큰도 막는다(services/rate_limit · 2026-10-06).
+          ? "토큰 시도가 너무 많아 잠시 막혔습니다. 15분 뒤 다시 시도해 주세요."
+          : status === 0 ? "서버에 연결하지 못했습니다." : `요청 실패 (${status})`);
     } finally {
       if (seq === latest.current) setLoading(false);
     }

@@ -93,6 +93,19 @@ describe("Login — #login", () => {
     expect(loadToken()).toBeNull();
   });
 
+  it("429 면 비밀번호가 틀렸다고 하지 않고 잠시 막혔다고 말한다 (서버 요청량 제어 · 2026-10-06)", async () => {
+    installFetchStub([{ match: /\/auth\/login$/, status: 429, body: { detail: "로그인 시도가 너무 많습니다" } }]);
+    const go = vi.fn();
+    render(<Login go={go} />);
+    type("이메일", "ops@example.com");
+    type("비밀번호", "hunter2hunter");
+    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe("시도가 너무 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도해 주세요.");
+    expect(go).not.toHaveBeenCalled();
+    expect(loadToken()).toBeNull();
+  });
+
   it("서버에 닿지 못하면 네트워크 문구를 띄운다", async () => {
     vi.stubGlobal("fetch", () => Promise.reject(new TypeError("Failed to fetch")));
     render(<Login go={vi.fn()} />);

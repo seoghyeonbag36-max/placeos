@@ -9,10 +9,15 @@
 import { ApiError } from "@/lib/api";
 
 export const NETWORK_TEXT = "서버에 연결하지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.";
+/** 429 — 서버 요청량 제어(2026-10-06 · services/rate_limit). 로그인 실패 누적·가입 몰림 어느 쪽이든
+ *  "곧바로 다시 누르면 같다"는 것만 알리면 된다. 구글 로그인을 권하지 않는 이유: 구글 동의 화면이
+ *  테스트 단계라 등록된 테스트 사용자만 들어올 수 있고, 가입 몰림이면 구글 첫 로그인도 같은 한도에 걸린다. */
+export const TOO_MANY_TEXT = "시도가 너무 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도해 주세요.";
 
 function common(err: unknown, action: string): string {
   if (!(err instanceof ApiError)) return `${action} 못했습니다. 다시 시도해 주세요.`;
   if (err.status === 0) return NETWORK_TEXT;
+  if (err.status === 429) return TOO_MANY_TEXT;
   if (err.status >= 500) return `서버 오류로 ${action} 못했습니다(HTTP ${err.status}). 잠시 뒤 다시 시도해 주세요.`;
   return `${action} 못했습니다(HTTP ${err.status}).`;
 }

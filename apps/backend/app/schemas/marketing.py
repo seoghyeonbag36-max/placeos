@@ -258,3 +258,6 @@ class ProgramPlan(BaseModel):
     ha_check: str                     # LLM 자기신고 — 이것만으로는 검증이 아니다
     source: str                       # "llm" | "rule-stub"
     ha_findings: list[HAFinding] = []  # 서버 후처리 검증 결과 (ha_check 와 다르다)
+    # 스텁인 이유가 **한도**일 때만 채운다(2026-10-06): "llm_quota" = 로그인했지만 24시간 LLM 한도를 넘었다.
+    # 그 밖의 스텁(익명·키 미설정·호출 실패·HA 폐기)은 None 이다 — 기존 구분(source·ha_findings)을 그대로 쓴다.
+    stub_reason: str | None = None

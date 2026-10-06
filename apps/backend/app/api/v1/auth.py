@@ -21,7 +21,7 @@ from app.schemas.auth import (
     ApiKeyCreatedResponse, ApiKeyCreateRequest, ApiKeyOut, AuthProviders, GoogleLoginRequest,
     LoginRequest, MeResponse, OrgOut, SignupRequest, TokenResponse, BusinessWorkspaceData,
 )
-from app.services import auth_service, business_workspace, google_auth
+from app.services import auth_service, business_workspace, google_auth, rate_limit
 
 router = APIRouter()
 
@@ -32,21 +32,42 @@ def _require_admin(current: CurrentUser) -> None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "이 작업은 조직 관리자만 할 수 있습니다")
 
 
+def _too_many(retry_after: int, detail: str) -> HTTPException:
+    """429 — `Retry-After` 를 함께 싣는다(services/rate_limit)."""
+    return HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, detail,
+                         headers={"Retry-After": str(retry_after)})
+
+
+_SIGNUP_LIMITED = "지금은 새 가입이 몰려 잠시 막혀 있습니다. 잠시 뒤 다시 시도해 주세요"
+
+
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def signup(req: SignupRequest, db: Session = Depends(get_db)) -> TokenResponse:
     try:
         user, org = auth_service.signup(db, req.org_name, req.email, req.password)
     except auth_service.EmailAlreadyRegistered:
         raise HTTPException(status.HTTP_409_CONFLICT, "이미 가입된 이메일입니다")
+    except auth_service.SignupRateLimited as e:
+        raise _too_many(e.retry_after, _SIGNUP_LIMITED)
     return TokenResponse(access_token=issue_access_token(user, org))
 
 
 @router.post("/login", response_model=TokenResponse)
 def login(req: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+    """비밀번호 로그인. 같은 이메일로 15분에 `login_failures_per_email` 번 틀리면 429 (2026-10-06).
+
+    키가 IP 가 아니라 이메일인 이유는 services/rate_limit 머리말. 막히는 것은 그 이메일의
+    **비밀번호** 로그인뿐이다 — 진짜 주인은 구글로 들어올 수 있다.
+    """
+    retry = rate_limit.login_retry_after(req.email)
+    if retry:
+        raise _too_many(retry, "로그인 시도가 너무 많습니다. 잠시 뒤 다시 시도해 주세요")
     try:
         token, _user, _org, _role = auth_service.login(db, req.email, req.password)
     except auth_service.InvalidCredentials:
+        rate_limit.record_login_failure(req.email)
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다")
+    rate_limit.clear_login_failures(req.email)
     return TokenResponse(access_token=token)
 
 
@@ -73,6 +94,8 @@ def google_login(req: GoogleLoginRequest, response: Response,
         token, created = auth_service.login_with_google(db, email, req.org_name)
     except auth_service.InvalidCredentials:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "구글 로그인을 확인하지 못했습니다")
+    except auth_service.SignupRateLimited as e:
+        raise _too_many(e.retry_after, _SIGNUP_LIMITED)
     if created:
         response.status_code = status.HTTP_201_CREATED
     return TokenResponse(access_token=token)
