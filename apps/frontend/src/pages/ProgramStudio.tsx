@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { caveatKind, CaveatNote } from "@/components/DistrictPicker";
 import LoginHint from "@/components/LoginHint";
+import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import { generateProgram, getDistrictEvents, listDistricts, MODE_LABEL, STAGE_LABEL, VALIDATION_MODES } from "@/lib/api";
 import type {
@@ -124,6 +125,8 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const [districtErr, setDistrictErr] = useState(false);
   const [result, setResult] = useState<ProgramPlan | null>(null);
   const [resultVersion, setResultVersion] = useState(0);
+  // 저장한 결과 목록을 다시 받게 하는 신호(「결과 저장」 성공 때 올린다)
+  const [savedTick, setSavedTick] = useState(0);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -379,6 +382,21 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
           {busy && <div className="empty">생성 중… {elapsed}초</div>}
 
           {result && !busy && <Result key={resultVersion} r={result} />}
+          {/* 결과 저장(2026-10-06) — 기각 조건이 든 판정표를 4주 뒤에도 볼 수 있게 본인 계정에 남긴다. 고른 것만 남긴다. */}
+          {result && !busy && (
+            <SaveResultButton onSaved={() => setSavedTick((n) => n + 1)}
+              build={() => ({
+                kind: "program",
+                title: `${result.item} · ${MODE_LABEL[result.mode] ?? result.mode}${hub ? ` · ${hub.name}` : ""}`,
+                districtId: form.districtId || null,
+                payload: { plan: result },
+              })} />
+          )}
+          <SavedResults kind="program" refreshKey={savedTick}
+            render={(it) => {
+              const plan = (it.payload as { plan?: ProgramPlan }).plan;
+              return plan?.signals ? <Result r={plan} /> : <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
+            }} />
         </Card>
       </div>
     </div></div>

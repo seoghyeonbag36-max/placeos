@@ -5,12 +5,13 @@ import {
   BASIS_LABEL, getPostings, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
 import type {
-  DistrictSummary, IndustryRec, Posting, SimulateResult, TierScenario,
+  DistrictSummary, IndustryRec, Posting, SavedResult, SimulateResult, TierScenario,
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { mapLabelHTML, shortManwon } from "@/design/components/MapMarkerPin";
 import { colors } from "@/design/tokens/colors";
+import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { type Ground } from "@/components/Verdict";
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
@@ -95,6 +96,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const lastCalculation = useRef<Calculation | null>(null);
   const requestSerial = useRef(0);
   const [handoffNote, setHandoffNote] = useState("");
+  // 저장한 결과 목록을 다시 받게 하는 신호(「결과 저장」 성공 때 올린다)
+  const [savedTick, setSavedTick] = useState(0);
   const result = calculation?.result ?? null;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -424,11 +427,39 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               <div className="rsrc">
                 매출·순익·회수기간은 입력 조건에 따른 추정입니다. 실제 계약 금액과 운영 조건에 따라 달라질 수 있습니다.
               </div>
+              {/* 결과 저장(2026-10-06) — 새로고침하면 사라지던 계산을 본인 계정에 남긴다. 고른 것만 남긴다. */}
+              <SaveResultButton disabled={busy || !calculation} onSaved={() => setSavedTick((n) => n + 1)}
+                build={() => calculation && {
+                  kind: "posting",
+                  title: `${districts.find((d) => d.id === calculation.input.district_id)?.name ?? calculation.input.district_id}`
+                    + ` · ${unit?.n ?? calculation.result.unit_id} · ${calculation.result.industry_type || calculation.input.industry_type || "자리 기본 업종"}`,
+                  districtId: calculation.input.district_id,
+                  payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null },
+                }} />
             </>
           )}
+          <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
         </div>
       </div>
     </div></div>
+  );
+}
+
+/** 저장한 Posting 결과 — 읽기 전용(components/SavedResults 머리말). 저장 당시의 입력과 세 가격대를 그대로 그린다. */
+function SavedPostingView({ item }: { item: SavedResult }) {
+  const saved = item.payload as Partial<Calculation> & { unitName?: string | null };
+  const r = saved.result;
+  if (!r?.scenarios) return <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
+  return (
+    <div className="saved-posting">
+      <div className="posting-input-summary">
+        계산에 사용한 입력: {saved.input?.industry_type || "자리 기본 업종"} · 권리금 {saved.input?.prem === undefined ? "미입력 · 0 전제" : won(saved.input.prem)}
+        {" · "}{TIER_LABEL[saved.input?.strategy ?? ""]?.name ?? "세 전략 비교"}{r.inputs_quarter ? ` · ${r.inputs_quarter} 기준` : ""}
+      </div>
+      <div className="tiers">
+        {Object.entries(r.scenarios).map(([key, s]) => <TierCard key={key} tierKey={key} s={s} />)}
+      </div>
+    </div>
   );
 }
 

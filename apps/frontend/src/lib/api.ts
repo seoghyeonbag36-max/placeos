@@ -1215,3 +1215,22 @@ export const getBusinessWorkspace = (token: string) =>
 export const saveBusinessWorkspace = (token: string, body: import("./businessProfile").BusinessState) =>
   authRequest<import("./businessProfile").BusinessState>("POST", "/workspace", { token, body });
 export const logoutSession = (token: string) => authRequest<{ ok: boolean }>("POST", "/logout", { token });
+
+/* ===== 저장한 결과 (2026-10-06) =====
+ * Posting 계산·Program 생성 결과를 사용자가 「결과 저장」으로 남긴다. 정본은 백엔드
+ * app/api/v1/auth.py(/auth/results) · app/schemas/auth.py(SavedResultIn/Out). 서버는 payload 를 해석하지
+ * 않는다 — 화면이 다시 그릴 입력·결과를 그대로 보관만 한다(사용자당 최대 30건 · 한 건 64KB). */
+export type SavedResultKind = "posting" | "program";
+export interface SavedResultInput {
+  kind: SavedResultKind;
+  title: string;
+  districtId?: string | null;
+  payload: Record<string, unknown>;
+}
+export interface SavedResult extends SavedResultInput { id: string; createdAt: string; }
+
+export const listSavedResults = (token: string) => authRequest<SavedResult[]>("GET", "/results", { token });
+export const saveResult = (token: string, body: SavedResultInput) =>
+  authRequest<SavedResult>("POST", "/results", { token, body });
+export const deleteSavedResult = (token: string, id: string) =>
+  authRequest<{ ok: boolean }>("DELETE", `/results/${encodeURIComponent(id)}`, { token });

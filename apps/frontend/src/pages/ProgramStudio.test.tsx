@@ -8,7 +8,7 @@ import ProgramStudio from "@/pages/ProgramStudio";
 import type { ProgramPlan } from "@/lib/api";
 import { clearToken, saveToken } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
-import { installFetchStub, type Route } from "@/test/fetchStub";
+import { installFetchStub, type ApiCall, type Route } from "@/test/fetchStub";
 
 const PLAN: ProgramPlan = {
   item: "테스트 원두 팝업", category: "카페", mode: "popup", stage: "pre_founder",
@@ -373,5 +373,62 @@ describe("ProgramStudio — 익명 안내 (로그인하면 AI 생성)", () => {
     act(() => saveToken("test-token"));
     await waitFor(() => expect(hint()).toBeNull());
     expect(screen.getByText(/다시 생성해 주세요/)).toBeTruthy();
+  });
+});
+
+describe("ProgramStudio — 결과 저장 (2026-10-06)", () => {
+  afterEach(() => clearToken());
+
+  /** 저장한 결과를 기억하는 가짜 /auth/results — 저장하면 목록에 앞에 쌓이고, 지우면 빠진다. */
+  function savedResultsRoutes() {
+    const store: Array<Record<string, unknown>> = [];
+    const routes: Route[] = [
+      { match: /\/auth\/results\/(\w+)$/, body: (m: RegExpExecArray) => {
+        const i = store.findIndex((r) => r.id === m[1]);
+        if (i >= 0) store.splice(i, 1);
+        return { ok: true };
+      } },
+      { match: /\/auth\/results$/, status: (call: ApiCall) => (call.method === "POST" ? 201 : 200), body: (_m: RegExpExecArray, call: ApiCall) => {
+        if (call.method !== "POST") return store;
+        const item = { ...(call.body as object), id: `r${store.length + 1}`, createdAt: "2026-10-06T12:00:00Z" };
+        store.unshift(item);
+        return item;
+      } },
+    ];
+    return routes;
+  }
+
+  it("익명에게는 「결과 저장」도 저장한 결과 목록도 없다(서버도 로그인한 사용자만 받는다)", async () => {
+    clearToken();
+    mount();
+    await generateAndFlush();
+    await editor();
+    expect(screen.queryByRole("button", { name: "결과 저장" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "저장한 결과" })).toBeNull();
+  });
+
+  it("로그인하면 결과를 저장하고, 목록에서 다시 보고(읽기 전용), 지울 수 있다", async () => {
+    saveToken("test-token");
+    const api = mount({ routes: savedResultsRoutes() });
+    const list = await screen.findByRole("region", { name: "저장한 결과" });
+    expect(await within(list).findByText(/아직 저장한 결과가 없습니다/)).toBeTruthy();
+
+    await generateAndFlush();
+    await editor();
+    fireEvent.click(screen.getByRole("button", { name: "결과 저장" }));
+    expect(await screen.findByText(/저장했습니다/)).toBeTruthy();
+    const post = api.matching(/\/auth\/results$/).find((c) => c.method === "POST")!;
+    expect(post.body).toMatchObject({ kind: "program", payload: { plan: { item: PLAN.item, signals: PLAN.signals } } });
+    expect((post.body as { title: string }).title).toContain(PLAN.item);
+
+    // 목록에 나타나고, 「보기」를 누르면 저장 당시의 판정표를 그린다
+    expect(await within(list).findByText(new RegExp(`${PLAN.item} · `))).toBeTruthy();
+    fireEvent.click(within(list).getByRole("button", { name: "보기" }));
+    expect(within(list).getByText(/에 저장한 결과입니다 — 그 뒤 데이터가 바뀌었을 수 있습니다/)).toBeTruthy();
+    expect(within(list).getAllByText("일 방문객 수").length).toBeGreaterThan(0);
+
+    fireEvent.click(within(list).getByRole("button", { name: /삭제$/ }));
+    expect(await within(list).findByText(/아직 저장한 결과가 없습니다/)).toBeTruthy();
+    expect(api.matching(/\/auth\/results\/r1$/).map((c) => c.method)).toEqual(["DELETE"]);
   });
 });
