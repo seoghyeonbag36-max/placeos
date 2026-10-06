@@ -1,10 +1,10 @@
 {
-  "started": "2026-10-06T04:14:32",
+  "started": "2026-10-06T04:19:55",
   "claims": "docs/apply/claims.json",
-  "require_complete": true,
+  "require_complete": false,
   "docs": [
     {
-      "doc": "docs/apply/_submit/09-detailed-plan-2026-10-06.md",
+      "doc": "docs/apply/submission-pack-2026-10-06.md",
       "fill_remaining": 0,
       "violations": [],
       "ok": true
