@@ -137,8 +137,27 @@
 | 10월 말~11-03 | 상세기획서 서식 이식·제출 |
 | 11월 | KISTI 규정 확인 · 이중 출품 · 11-15 이후 PACIS 초안 |
 
+## Word 파일 위치 (docs/apply 기준 · 모두 같은 변환기로 만든 것)
+
+변환기: `scripts/build_apply_docx.py <입력.md> [출력.docx]`. 한글 폰트는 `Malgun Gothic` 이름만 지정하고 임베딩하지 않았다.
+수정은 Markdown 원본에서 하고 다시 변환한다(Word 본을 직접 고치면 원본과 갈라진다).
+
+| 마감 | 자리 | Word 파일 | Markdown 원본 | 비고 |
+|---|---|---|---|---|
+| 10-08 16:00 | 핀테크 아이디어 공모전 | `_submit/04-fintech-submit-2026-10-06.docx` | `04-fintech/draft.md` | 내부 주석 제거본 |
+| 10-11 23:59 | DIC2026 예비창업자 | `_submit/10-dic2026-plan-2026-10-06.docx` | `10-dic2026/draft.md` | 대표자 이력·캡처 자리 표시 |
+| 11-03 | 사회문제 해결 챌린지 상세기획서 | `_submit/09-detailed-plan-2026-10-06.docx` | `09-digitalsolveup/detailed-plan.md` | 캡처 자리 표시 |
+| 11-25 | KISTI 문제발굴 | `_submit/13-kisti-problem-discovery-2026-10-06.docx` | `13-kisti/problem-discovery.md` | 규정 확인 전 제출 금지 |
+| 11-25 | KISTI 문제해결 | `_submit/13-kisti-problem-solving-2026-10-06.docx` | `13-kisti/problem-solving.md` | 규정·KIIT 중복 확인 전 제출 금지 |
+| 공고 대기 | 부동산원 논문 공모 제안서 | `11-reb-paper/proposal-2026-10-06.docx` | `11-reb-paper/proposal.md` | 제2회 일정 기준 가설 |
+| 참고 | 공고 대기·다음 시즌 준비 키트 | `12-upcoming/upcoming-kit-2026-10-06.docx` | `12-upcoming/upcoming-kit.md` | |
+| 참고 | 이 문서 | `submission-pack-2026-10-06.docx` | `submission-pack-2026-10-06.md` | |
+
+Word 본이 없는 것: KIIT 원고(`docs/papers/kiit/paper-platform-kiit.md` · 서식·저자·문헌이 남아 있어 변환 보류) · LX 원고 · 학회 논문 전반.
+
 ## 이번 세션에서 바뀐 파일
 
-- 신규: `_submit/04-fintech-submit-2026-10-06.md` · `10-dic2026/draft.md` · `09-digitalsolveup/detailed-plan.md` · 이 문서
-- 수정: `docs/papers/kiit/paper-platform-kiit.md` (초록·결론·한계·부록)
+- 신규 원고: `_submit/` 의 제출본 3건 · `10-dic2026/draft.md` · `09-digitalsolveup/detailed-plan.md` · `11-reb-paper/proposal.md` · `12-upcoming/upcoming-kit.md` · `13-kisti/` 2건 · 이 문서
+- 신규 도구: `scripts/build_apply_docx.py`
+- 수정: `docs/papers/kiit/paper-platform-kiit.md` (초록·결론·한계·부록) · `README.md`
 - 검사: `python scripts/check_application.py` — 위반 0
