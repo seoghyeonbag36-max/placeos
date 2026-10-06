@@ -25,7 +25,9 @@ from __future__ import annotations
 _CSP_DIRECTIVES: dict[str, list[str]] = {
     "default-src": ["'self'"],
     # 네이버 SDK 는 oapi 의 maps.js 뒤에 지도 스타일·인증을 JSONP(<script>)로 다시 부른다(실측).
-    "script-src": ["'self'", "https://oapi.map.naver.com", "https://nrbe.map.naver.net",
+    # 스타일 JSONP 호스트가 **페이지 스킴마다 다르다**: http 에서는 nrbe.map.naver.net, https(운영)에서는
+    # nrbe.pstatic.net — 로컬 실측에서는 안 보였고 운영 Report-Only 보고 3건으로 잡았다(2026-10-06).
+    "script-src": ["'self'", "https://oapi.map.naver.com", "https://nrbe.pstatic.net", "https://nrbe.map.naver.net",
                    "https://apis.naver.com", "https://accounts.google.com/gsi/client"],
     # 네이버 SDK 와 구글 버튼이 <style> 을 넣는다.
     "style-src": ["'self'", "'unsafe-inline'", "https://accounts.google.com/gsi/style"],
