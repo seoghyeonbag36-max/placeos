@@ -1,10 +1,16 @@
 {
-  "started": "2026-10-04T09:57:11",
+  "started": "2026-10-06T00:26:50",
   "claims": "docs/apply/claims.json",
   "require_complete": false,
   "docs": [
     {
       "doc": "docs/apply/04-fintech/draft.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
+      "doc": "docs/apply/09-digitalsolveup/detailed-plan.md",
       "fill_remaining": 0,
       "violations": [],
       "ok": true
@@ -16,7 +22,25 @@
       "ok": true
     },
     {
+      "doc": "docs/apply/10-dic2026/draft.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
+      "doc": "docs/apply/_submit/04-fintech-submit-2026-10-06.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
       "doc": "docs/apply/data-sources.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
+      "doc": "docs/apply/submission-pack-2026-10-06.md",
       "fill_remaining": 0,
       "violations": [],
       "ok": true
