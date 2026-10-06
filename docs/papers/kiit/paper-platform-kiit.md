@@ -47,19 +47,24 @@
 
 # 무정보 베이스라인 대비 실력 게이트: 상권 그래프 신경망 업종 추천의 사례
 
-<!-- TODO(서식): 영문 제목 — 국문 제목을 번역한다. 새 주장을 더하지 않는다. -->
+**English title:** A Baseline-Relative Skill Gate: A Case Study of Graph Neural Network Business-Type Recommendation for Commercial Districts
+
+<!-- 영문 제목은 국문 제목의 번역이다. 새 주장을 더하지 않았다. 학회 서식이 영문 제목 위치를 달리 정하면 옮긴다. -->
 
 <!-- TODO(저자): 저자명 · 소속 · 교신저자 이메일. 공저자 여부는 창업자 결정. -->
 
 ## 요약
 
-<!-- TODO(요약): §1·§3·§4 가 확정된 뒤 쓴다. 요약에 들어갈 수치는 §4 표 1 의 등재값뿐이다.
-     빼지 말 것: ① 임계값이 아니라 차이로 판정한다 ② 구간이 0 을 품으면 통과가 아니다
-     ③ 통계적 실력과 추천 어휘의 쓸모는 다른 질문이다 ④ 외부 거점·미래 시점 검증은 아니다. -->
+상권 업종 추천은 거점의 업종 분포가 크게 편중되어, 입력을 보지 않고 거점의 학습 라벨 빈도만 내미는 사전분포 규칙이 이미 높은 Top-3 적중률을 보인다. 이 경우 사전에 정한 목표선을 넘었다는 판정은 모델에 대해 정보가 없다. 본 연구는 업종 추천 게이트를 같은 표본의 무정보 베이스라인과의 쌍대 차이로 다시 세우고, 차이의 거점 군집 부트스트랩 95% 구간과 McNemar 정확검정이 모두 동의할 때만 `실력` 으로 판정하는 세 갈래(`실력` · `구분불가` · `열위`) 게이트를 제안한다. 서울 81거점 재학습본의 시험 17,650자리에서 모델의 Top-3 는 92.03% 로 거점 사전분포 88.67% 보다 +3.36%p(구간 [+2.78, +3.95]%p) 높았고 판정은 `실력` 이었다. 한편 라벨 어휘를 정하지 않은 판본에서도 같은 판정기가 `실력` 을 냈으므로, 통계적 실력은 추천의 쓸모를 보증하지 않으며 어휘 점검을 통계 판정 앞에 따로 두어야 한다. 이 평가는 기존 점포 업종의 복원이며, 신규 입점 성과나 새 거점·미래 시점으로의 일반화를 평가한 것이 아니다.
+
+**Abstract.** In business-type recommendation for commercial districts, a prior-distribution rule that ignores all inputs and returns only each district's training-label frequencies already achieves a high Top-3 hit rate, so passing a preset threshold says little about the model. We re-establish the gate as a paired difference against this uninformed baseline on the same test sites, and label a result `skill` only when a district-clustered bootstrap 95% interval and an exact McNemar test both agree (otherwise `indistinguishable` or `inferior`). On a retrained graph neural network covering 81 Seoul districts, the Top-3 hit rate on 17,650 test sites was 92.03% against 88.67% for the district prior, a difference of +3.36 percentage points (interval [+2.78, +3.95]), judged `skill`. Because the same judge also returned `skill` for an earlier version whose label vocabulary had not been fixed, statistical skill does not guarantee the usefulness of the recommendations, and a vocabulary check must precede the statistical verdict. The evaluation concerns recovering existing stores' business types; it does not assess new-entry outcomes or generalization to new districts or future periods.
+<!-- 요약의 수치는 §4 표 1 의 등재값(K4·K5·K6)과 §3.1 의 K1·K3 뿐이다. 영문 초록은 국문 요약의 번역이다. 분량은 학회 서식 확인 뒤 맞춘다. -->
 
 **주제어:** 그래프 신경망, 업종 추천, 무정보 베이스라인, 쌍대 비교, 군집 부트스트랩, 성능 게이트
 
-<!-- TODO(서식): 주제어 수 · 영문 Keywords -->
+**Keywords:** graph neural network, business-type recommendation, uninformed baseline, paired comparison, cluster bootstrap, performance gate
+
+<!-- 주제어·Keywords 개수는 학회 서식 확인 뒤 맞춘다. -->
 
 ## 1. 서론
 
@@ -217,19 +222,24 @@ Top-3 적중률은 42.55% 였다. 다만 이 자리는 2,000개로 분해능이 
 
 ## 5. 논의와 한계
 
-<!-- 쓸 것 (한계 절은 줄이지 않는다):
-     - 전이적 평가 · 단일 분할 · 같은 그래프 — 새 거점·미래 시점 외부 검증 아님 (PLATFORM-E01 해석 범위)
-     - 업종 복원 ≠ 입점 성과. 상위 원고 H3(미검증)과 같은 자리
-     - McNemar 는 자리 독립을 가정 — 군집 구간과 둘 다 요구한 이유이자, 공간 의존성이 완전히 반영됐다는 뜻은 아님
-     - 게이트가 확정을 미룬 축이 있다: 같은 판정기가 시계열 축에서는 선택에 노출된 시험 분기로는 확정하지 않고
-       이후 분기를 기다린다. 이 원고는 그 축을 다루지 않는다(수치 없이 한 문장. LSTM 은 넣지 않기로 함 · 2026-09-30).
-     - 어휘 점검 기준 ①②③ 은 창업자가 정한 제품 기준이며 통계적 도출이 아니다
-     - 1순위 쏠림(음식점)은 관측만 — 추천 다양성 문제는 이 게이트가 재지 않는다 -->
+본 연구의 평가에는 다음 한계가 있다. 한계는 줄이지 않고 적는다.
+
+첫째, 평가는 전이적이다. 한 그래프 안에서 층화 분할한 시험 집합을 쓰므로 구조를 공유하는 같은 거점의 점포가 학습과 시험에 함께 들어 있으며, 새 거점이나 미래 시점으로의 일반화는 평가하지 않았다. 표 1 의 `실력` 은 이 표본 안에서 사전분포보다 낫다는 판정이다.
+
+둘째, 업종 복원은 입점 성과가 아니다. 기존 점포의 업종을 가렸다가 맞히는 것은 그 자리에 새로 들어올 업종이 성공할지에 대한 증거가 아니다. 이 연결은 검증하지 않았다.
+
+셋째, McNemar 검정은 자리 사이의 독립을 가정한다. 같은 거점의 자리는 독립이 아니므로 군집 부트스트랩 구간과 둘 다 요구했지만, 이것이 공간 의존성을 완전히 반영했다는 뜻은 아니다.
+
+넷째, 게이트가 확정을 미룬 축이 있다. 같은 판정기가 시계열 축에서는 모델 선택 과정에 노출된 시험 분기로는 확정하지 않고 이후 분기를 기다린다. 본 원고는 그 축을 다루지 않는다.
+
+다섯째, 어휘 점검의 기준 ①②③ 은 통계적으로 도출한 것이 아니라 제품 기준으로 정한 것이다. 기준을 결과를 본 뒤 끼우지 않으려고 판정 전에 고정했을 뿐, 다른 기준이 더 옳다는 근거는 없다.
+
+여섯째, 추천 1순위가 음식점에 크게 쏠렸고 문화시설은 학습 모집단에 없어 추천하지 못한다(§4). 추천의 다양성은 이 게이트가 재지 않는 질문으로 남는다.
+<!-- 한계 절 근거: §3.1·§3.3·§3.4·§4 본문과 상위 원고 PLATFORM-E01 의 해석 범위. 새 수치를 더하지 않았다. -->
 
 ## 6. 결론
 
-<!-- 쓸 것: 두세 문장. "임계값을 넘었다"에는 정보가 없고 차이와 구간에 있다 · 통계 실력과 어휘의 쓸모는 따로 막아야 한다.
-     과장 금지: "모델이 우수하다"가 아니라 "이 표본·이 어휘에서 사전분포보다 나음이 판정됐다". -->
+사전분포가 강한 업종 추천에서 목표선을 넘었다는 판정은 모델에 대해 정보가 없으며, 정보는 같은 표본의 무정보 베이스라인과의 차이와 그 구간에 있다. 서울 81거점 재학습본에서 모델은 이 표본과 이 어휘에서 거점 사전분포보다 나음이 판정되었다. 그러나 같은 판정기가 어휘를 정하지 않은 판본에도 같은 판정을 냈으므로, 통계적 실력과 추천 어휘의 쓸모는 서로 다른 관문으로 따로 막아야 한다.
 
 ## 참고문헌
 
@@ -241,6 +251,7 @@ Top-3 적중률은 42.55% 였다. 다만 이 자리는 2,000개로 분해능이 
 
 ## 부록 — 재현 명령과 산출물
 
-<!-- 쓸 것: 재학습 명령(docs/finding-gnn-81hub-retrain-2026-09-27.md 「재학습 (b)」) · 판정 명령(kpi_baseline) ·
-     산출물(data/gold/platform_industry_recommend.json · reports/gnn_test_preds_group-mapped_2026-09-27.json ·
-     reports/gnn_label_a_2026-09-27.json). 단편 분량이 허락하지 않으면 저장소 경로 한 줄로 줄인다. -->
+- 판정: 저장소 루트에서 `python scripts/kpi_baseline.py` (기계 판독 `--json`). 읽기만 하며 네트워크를 쓰지 않는다.
+- 재학습: `docs/finding-gnn-81hub-retrain-2026-09-27.md` 의 「재학습 (b)」에 명령과 설정이 있다.
+- 산출물: `data/gold/platform_industry_recommend.json` · `reports/gnn_test_preds_group-mapped_2026-09-27.json` · `reports/gnn_label_a_2026-09-27.json`.
+<!-- 경로는 원래 이 자리의 지시문에 적혀 있던 것을 옮겼다. 단편 분량이 허락하지 않으면 경로 한 줄로 줄인다. -->

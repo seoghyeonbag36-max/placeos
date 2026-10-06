@@ -48,6 +48,8 @@ python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md --
 | 05 | 제3회 부동산정보 활용성 논문 공모전 | 공고 대기 | 미착수 — 1단계는 논문제안서뿐 |
 | 06 | 한국정보기술학회 2026 추계 | 2026-10-23 | 미착수 — `docs/papers/` 소관. LSTM 근거 등재 완료 — 집필 가능 |
 | 07 | 2026 DATA·AI 분석 경진대회 | 2026-11-25 | 미착수 — 부문 규정 확인 먼저 |
+| 09 | AI·디지털 사회문제 해결 챌린지 | 참가 09-30 · 상세 11-03 | [draft.md](09-digitalsolveup/draft.md)(참가신청서) · [detailed-plan.md](09-digitalsolveup/detailed-plan.md)(상세기획서 · 서식 가설) |
+| 10 | DIC2026 예비창업자 트랙 | 2026-10-11 23:59 | [draft.md](10-dic2026/draft.md) — 사업계획서 재료 · 자격·서식 미확인 |
 | 08 | PACIS 2027 | 2027-03-01 | 미착수 — `docs/papers/` 소관. AIS 템플릿 필수 |
 
 06·08 은 학술 원고라 [docs/papers](../papers/) 의 규칙과 근거 인덱스를 따른다. 이 디렉터리는
@@ -61,6 +63,8 @@ python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md --
 적어 검사에서 뺀다. 검사기는 그 원고를 `[과거본] … 검사 제외` 로 출력한다 — 조용히 건너뛰지
 않는다. 지금 01 · 02 가 과거본이다. **과거본의 숫자를 새 원고로 옮겨 오지 말 것** — 당시 대장은
 `git show <claims_ref>:docs/apply/claims.json` 으로만 본다.
+
+마감순 진행표와 사람이 남은 일은 [submission-pack-2026-10-06.md](submission-pack-2026-10-06.md). 핀테크 제출본은 [_submit/](_submit/).
 
 ## 공통 코어
 
