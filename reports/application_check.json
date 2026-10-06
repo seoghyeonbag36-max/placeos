@@ -1,118 +1,15 @@
 {
-  "started": "2026-10-06T03:40:51",
+  "started": "2026-10-06T03:51:00",
   "claims": "docs/apply/claims.json",
-  "require_complete": false,
+  "require_complete": true,
   "docs": [
-    {
-      "doc": "docs/apply/04-fintech/draft.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/09-digitalsolveup/detailed-plan.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/09-digitalsolveup/draft.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/10-dic2026/draft.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/11-reb-paper/proposal.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/12-upcoming/upcoming-kit.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/13-kisti/problem-discovery.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/13-kisti/problem-solving.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/14-data-recipe/draft.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
     {
       "doc": "docs/apply/_submit/04-fintech-submit-2026-10-06.md",
       "fill_remaining": 0,
       "violations": [],
       "ok": true
-    },
-    {
-      "doc": "docs/apply/_submit/09-detailed-plan-2026-10-06.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/_submit/10-dic2026-plan-2026-10-06.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/_submit/14-data-recipe-2026-10-06.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/data-sources.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/submission-pack-2026-10-06.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
-    },
-    {
-      "doc": "docs/apply/submission-plan-2026-09-21.md",
-      "fill_remaining": 0,
-      "violations": [],
-      "ok": true
     }
   ],
-  "archived": [
-    {
-      "path": "docs/apply/01-spatial-info/draft.md",
-      "submitted": "2026-09-18",
-      "claims_ref": "9926d7a",
-      "why": "이미 제출한 원고다. 제출 당시의 대장(claims_ref)으로 쓰였고 그때는 통과했다. 지금 대장의 forbid(66거점 · LSTM 09-16 값 등)로 검사하면 당시 사실이 위반으로 잡힌다 — 제출본을 바꿀 수 없으므로 검사에서 빼고 과거본으로 표시한다. 여기서 숫자를 다시 인용하지 않는다"
-    },
-    {
-      "path": "docs/apply/02-govtech/draft.md",
-      "submitted": "2026-09-21",
-      "claims_ref": "9926d7a",
-      "why": "이미 제출한 원고다. 제출 당시의 대장(claims_ref)으로 쓰였고 그때는 통과했다. 지금 대장의 forbid(66거점 · LSTM 09-16 값 등)로 검사하면 당시 사실이 위반으로 잡힌다 — 제출본을 바꿀 수 없으므로 검사에서 빼고 과거본으로 표시한다. 여기서 숫자를 다시 인용하지 않는다"
-    }
-  ],
+  "archived": [],
   "ok": true
 }
