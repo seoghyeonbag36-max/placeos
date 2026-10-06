@@ -38,32 +38,61 @@ R = WD_ALIGN_PARAGRAPH.RIGHT
 BLANK = "[                              ]"
 FILL = "[ 채울 것 ]"
 
-# 저장소 실측값 (2026-09-16 기준 · pppp_status.py / kpi_baseline.py)
+# 저장소 실측값 (2026-10-04 기준). 숫자마다 산출 근거를 붙인다 — 근거 없는 값은 쓰지 않는다.
+#   S1 = python scripts/pppp_status.py      S2 = python scripts/kpi_baseline.py
 M = {
-    "hubs": "66",
+    # S1 — 서빙 거점(page_hubs.ACTIVE_HUBS) · 트랙 진행률
+    "hubs": "81",
     "page": "100.0",
-    "platform": "66.7",
+    "platform": "66.7",          # 남은 두 게이트가 LSTM 확인대기라 100 이 아니다
     "posting": "100.0",
     "program": "100.0",
-    "units": "664",
-    "floor_units": "12,497",
-    "floor_conf": "9,437",
-    "floor_prob": "3,060",
-    "loc": "58,921",
-    "lstm_mae": "1.061",
-    "lstm_base": "1.333",
-    "lstm_skill": "+20.5",
-    "lstm_dir": "70.8",
-    "lstm_dir_base": "78.5",
-    "lstm_dir_skill": "-7.7",
-    "gnn_top3": "91.7",
-    "gnn_prior": "89.3",
-    "gnn_skill": "+2.32",
-    "gnn_nodes": "47,442",
-    "gnn_feat": "117",
-    "roi_units": "528",
-    "roi_fail": "0.8",
-    "roi_win": "432",
+    "gates": "27",               # 진행률 게이트 수 · 그중 선언형(사람이 판정) 8개
+    "gates_declared": "8",
+    # S1 — 공실 인벤토리: 81/81거점 840유닛 / data/gold/*/vacant_floor_units.json 합계(certainty 로 분리)
+    "units": "840",
+    "floor_units": "15,366",
+    "floor_conf": "11,770",
+    "floor_prob": "3,596",
+    # git ls-files 의 py/ts/tsx/js/jsx 줄 수
+    "loc": "69,686",
+    # S2 — LSTM 공실 예측 (reg-0928 서빙본 · 홀드아웃 240 · 거점 80곳). 두 축 모두 '참고' 판정이고
+    #      게이트는 20262 이후 분기 표본 전에는 닫히지 않는다(확인대기).
+    "lstm_n": "240",
+    "lstm_mae": "0.822",
+    "lstm_persist": "1.190",     # 지속성(직전 분기값) MAE
+    "lstm_base": "0.998",        # 거점 평균 MAE — 두 무정보 규칙 중 강한 쪽 = 대조군
+    "lstm_skill": "+17.6",
+    "lstm_skill_ci": "+11.6, +24.5",
+    "lstm_dir": "80.0",
+    "lstm_dir_base": "68.8",     # '평균 쪽' 규칙 — 상수 '항상 하락' 55.0% 보다 강해 이쪽이 대조군
+    "lstm_dir_const": "55.0",
+    "lstm_dir_skill": "+11.3",
+    "lstm_dir_ci": "+5.4, +17.1",
+    # S2 — GNN 업종 추천 (81거점 · 09-27 · 어휘 group_mapped)
+    "gnn_top3": "92.0",
+    "gnn_prior": "88.7",
+    "gnn_skill": "+3.36",
+    "gnn_ci": "+2.78, +3.95",
+    "gnn_test": "17,650",
+    "gnn_nodes": "88,238",
+    "gnn_feat": "132",
+    # 서빙 81거점 840유닛에 districts.tier_scenarios 를 직접 호출해 센 값
+    #   (scripts/posting_cost_sensitivity.py 의 528유닛은 시드 54거점 표본이라 서빙 전체가 아니다)
+    "roi_units": "840",
+    "roi_fail": "0.5",           # 4/840
+    "roi_fail_n": "4",
+    "roi_win": "620",            # 기능중심(factory)이 회수 최단인 유닛
+    "roi_real": "827",           # 실측 매출 모델이 도는 유닛 (폴백 13 · garak · bulgwang)
+    "roi_hubs_real": "79",
+    # 테스트: pytest --collect-only (apps/backend) · 프론트는 *.test.* 파일 수
+    "tests_be": "420",
+    "tests_be_files": "34",
+    "tests_fe_files": "17",
+    # 09-16 에 지표 결함을 발견한 시점의 값(역사) — 현재 값과 섞어 쓰지 않는다
+    "leak_dir_model": "70.8",
+    "leak_dir_const": "78.5",
+    "leak_gnn_prior": "89.4",
     "bundle_before": "832",
     "bundle_after": "4",
 }
@@ -133,11 +162,11 @@ def build_resume(out: Path) -> Path:
          "시계열 공실 예측(LSTM)과 업종 추천(GNN)을 학습·서빙까지 연결했습니다. "
          "성능은 임계값이 아니라 무정보 베이스라인 대비 개선폭으로 관리합니다."),
         ("제품화 · ",
-         "FastAPI + React + PostGIS 스택을 GitHub Actions - Cloud Run 파이프라인에 올려 "
+         "FastAPI + React 스택을 GitHub Actions - Cloud Run 파이프라인에 올려 "
          "테스트 통과 시에만 배포되도록 구성했습니다."),
         ("검증 설계 · ",
          "자기 지표의 결함을 스스로 찾아내 지표 체계 전체를 재정의한 경험이 있습니다. "
-         "상세는 경력기술서 4장."),
+         "아직 확정되지 않은 값은 달성이 아니라 '확인대기'로 둡니다. 상세는 경력기술서 4장."),
     ])
 
     bp.h2(doc, "04", "주요 프로젝트")
@@ -146,7 +175,7 @@ def build_resume(out: Path) -> Path:
         ["PlaceOS",
          "2026.05 ~\n현재",
          "기획 · 개발\n(단독)",
-         "오프라인 상권 디지털 트윈 플랫폼.\n건물 단위 공실 인벤토리 + 공실 예측 + 업종 추천"],
+         "오프라인 상권 디지털 트윈 플랫폼.\n건물 단위 공실 인벤토리 + 공실 예측 · 업종 추천 + 입점 ROI · 창업 검증 program 생성"],
         ["Co.I",
          FILL,
          "기획 · 개발\n(단독)",
@@ -158,10 +187,10 @@ def build_resume(out: Path) -> Path:
     bp.h2(doc, "05", "보유 기술")
     bp.make_table(doc, [
         ["구분", "내용"],
-        ["Backend", "Python 3.11, FastAPI, PostgreSQL / PostGIS, Redis, Celery, Alembic"],
-        ["ML", "PyTorch, PyTorch Geometric (GNN), LSTM, MLflow, LangChain"],
+        ["Backend", "Python 3.11, FastAPI, PostgreSQL (계정 · 조직 · 사용량), SQLAlchemy, Alembic"],
+        ["ML · LLM", "PyTorch, PyTorch Geometric (GNN), LSTM, MLflow / Anthropic SDK (생성 엔진 직접 호출)"],
         ["Frontend", "React, TypeScript, Vite, 네이버 지도 API (지도 · 거리뷰)"],
-        ["Data", "Airflow, Selenium / Playwright, Bronze / Silver / Gold 3계층 설계"],
+        ["Data", "Selenium / Playwright 수집기, Bronze / Silver / Gold 3계층 설계, 일일 쿼터 런북"],
         ["Infra", "Docker, GitHub Actions, Google Cloud Run, Firebase Hosting"],
         ["공공데이터", "건축HUB 건축물대장, 서울시 상권분석, R-ONE 부동산통계, KOSIS, 공정위 정보공개서"],
     ], [3.0, 12.8], sizes=[9.0, 9.0], aligns=[L, L], bold_first_col=True)
@@ -226,7 +255,7 @@ def build_experience(out: Path) -> Path:
             "오프라인 상권을 데이터로 재구성하는 SaaS 두 종을 기획부터 배포까지 단독으로 수행했습니다. "
             "수집 파이프라인, 예측 모델, API, 화면, 배포까지 전 구간을 담당했으며, 두 서비스 모두 "
             "운영 중입니다. 아래 정량 성과는 모두 저장소의 산출물 계측 스크립트에서 산출한 값이며, "
-            "미달 항목도 그대로 기재했습니다.")
+            "아직 확정되지 않은 항목(공실 예측 두 축)도 확인대기로 그대로 기재했습니다.")
     bp.make_table(doc, [
         ["항목", "값", "산출 근거"],
         ["대상 상권", f"서울 {M['hubs']}개 거점", "건축물대장 실측 (Tier1)"],
@@ -244,8 +273,9 @@ def build_experience(out: Path) -> Path:
         ["기간", "2026.05 ~ 현재 (진행 중)"],
         ["역할", "기획 · 아키텍처 설계 · 전 구간 개발 · 배포 (단독)"],
         ["사용 기술",
-         "Python 3.11, FastAPI, PostgreSQL / PostGIS, Redis, Celery / "
-         "PyTorch, PyTorch Geometric, MLflow / React, TypeScript, Vite, 네이버 지도 API / "
+         "Python 3.11, FastAPI, PostgreSQL (계정 · 조직 · 사용량), SQLAlchemy, Alembic / "
+         "PyTorch, PyTorch Geometric, MLflow, Anthropic SDK / "
+         "React, TypeScript, Vite, 네이버 지도 API / "
          "Docker, GitHub Actions, Google Cloud Run, Firebase Hosting"],
         ["운영 주소", "https://placeos.web.app"],
         ["문제 정의",
@@ -253,24 +283,28 @@ def build_experience(out: Path) -> Path:
          "'어느 건물 몇 층이 비었고 거기에 무엇이 들어가야 하는가'를 답하지 못한다."],
         ["해결 접근",
          "건축물대장을 실측 원천으로 삼아 건물 - 층 - 유닛 단위 공실 인벤토리를 세우고, "
-         "그 위에 공실 예측 · 업종 추천 · 입점 ROI · 마케팅 생성 네 트랙을 얹었다."],
+         "그 위에 공실 예측 · 업종 추천(Platform), 층별 공실(Page), 입점 ROI(Posting), "
+         "창업 검증 program 생성(Program) 네 트랙을 얹었다."],
     ])
 
     bp.h2(doc, "2.2", "Platform — 상권 AI 추천 엔진")
     bp.bullets(doc, [
         ("담당 · ", "LSTM 공실 예측 모델과 GNN 업종 추천 모델의 데이터셋 구성, 학습, 서빙 연동."),
-        ("규모 · ", f"GNN 그래프 노드 {M['gnn_nodes']}개 · 피처 {M['gnn_feat']}열."),
-        ("성과 (공실 예측) · ",
-         f"MAE {M['lstm_mae']} — 직전 분기값을 그대로 내미는 지속성 베이스라인 "
-         f"{M['lstm_base']} 대비 {M['lstm_skill']}% 개선."),
-        ("성과 (업종 추천) · ",
+        ("규모 · ",
+         f"GNN 그래프 노드 {M['gnn_nodes']}개 · 피처 {M['gnn_feat']}열 · {M['hubs']}거점."),
+        ("성과 (업종 추천 · 확정) · ",
          f"Top-3 정확도 {M['gnn_top3']}% — 거점 사전분포 베이스라인 {M['gnn_prior']}% 대비 "
-         f"{M['gnn_skill']}%p 개선."),
-        ("미달 항목 (그대로 기재) · ",
-         f"공실 예측의 방향 정확도는 {M['lstm_dir']}% 로, 무정보 상수 베이스라인 "
-         f"{M['lstm_dir_base']}% 에 {M['lstm_dir_skill']}%p 미달합니다. n=65 의 신뢰구간이 "
-         "넓어 우열을 가를 수 없는 표본이며, 제품이 파는 값은 방향 이분법이 아니라 "
-         "공실 압력의 크기이므로 오차 축을 주 지표로 둡니다."),
+         f"{M['gnn_skill']}%p ({M['gnn_ci']} · 95% 구간 · test {M['gnn_test']}자리)."),
+        ("성과 (공실 예측 · 참고) · ",
+         f"MAE {M['lstm_mae']} — 무정보 규칙 둘(지속성 {M['lstm_persist']} · 거점 평균 "
+         f"{M['lstm_base']}) 중 강한 쪽인 거점 평균 대비 {M['lstm_skill']}% "
+         f"({M['lstm_skill_ci']} · 홀드아웃 {M['lstm_n']}건). 방향 정확도 {M['lstm_dir']}% — "
+         f"강한 쪽 대조군('평균 쪽' 규칙) {M['lstm_dir_base']}% 대비 {M['lstm_dir_skill']}%p "
+         f"({M['lstm_dir_ci']})."),
+        ("아직 확정하지 않은 것 (그대로 기재) · ",
+         "위 공실 예측 두 값은 '참고 판정'입니다. 이미 본 분기로는 확정하지 않는다는 규칙을 "
+         "사전에 못박아 두었고, 2026년 3분기 데이터가 공표된 뒤에만 닫습니다. "
+         "그 전까지 이 두 축은 달성이 아니라 확인대기입니다."),
     ])
 
     bp.h2(doc, "2.3", "Page — 공실 히트맵 · 층별 매물 · 거리뷰")
@@ -288,25 +322,41 @@ def build_experience(out: Path) -> Path:
     bp.bullets(doc, [
         ("담당 · ", "3-Tier 비용-효용 모델, 매출 추정 앵커링, 외부 코파일럿 연동 어댑터 설계."),
         ("성과 · ",
-         f"실 인벤토리 {M['roi_units']}유닛 기준 회수불가 {M['roi_fail']}%, "
-         f"기능중심 티어 {M['roi_win']}승. 공정위 가맹사업 정보공개서와 KOSIS를 교차 검증해 "
-         "평당매출을 업계 통상 대역 안으로 맞췄습니다."),
-        ("발견한 결함 · ",
+         f"서빙 {M['hubs']}거점 {M['roi_units']}유닛 기준 회수불가 {M['roi_fail_n']}유닛"
+         f"({M['roi_fail']}%), 기능중심 티어가 회수 최단인 유닛 {M['roi_win']}개. "
+         "공정위 가맹사업 정보공개서와 KOSIS를 교차 검증해 평당매출을 업계 통상 대역 안으로 "
+         "맞췄습니다."),
+        ("발견한 결함 (1) · ",
          "임대료를 1층 기준으로 계산하던 초기 모델이 실제 상업층 분포와 맞지 않아 "
          "임대료를 중앙값 기준 45% 과대계상하고 있었습니다. 층별 면적 비중으로 가중 평균해 "
          "바로잡았고, 두 모델이 참값을 사이에 두는 상한 - 하한 관계임을 테스트로 고정했습니다."),
+        ("발견한 결함 (2) · ",
+         "매출 산출물이 시드 54거점으로만 빌드된 채 서빙이 81거점으로 늘어, 28거점이 근거 없는 "
+         "폴백 계수로 계산되고 있었습니다(840유닛 중 313유닛 · 마진 중앙 76.6% · 회수 1.1개월 — "
+         "비현실적인 값). 81거점으로 재빌드해 실측 모델 거점 "
+         f"{M['roi_hubs_real']}개 · {M['roi_real']}/{M['roi_units']}유닛으로 올렸고, 같은 "
+         "사고를 막는 테스트(산출물이 서빙 거점 수와 다르면 실패)를 더했습니다. 폴백 13유닛"
+         "(2거점)은 표본 부족으로 그대로 남아 있으며, 응답이 어느 모델이 돌았는지 밝힙니다."),
     ])
 
-    bp.h2(doc, "2.5", "Program — 마케팅 자동화")
+    bp.h2(doc, "2.5", "Program — 창업 아이템 검증 program 자동 생성")
     bp.bullets(doc, [
-        ("담당 · ", "LLM 생성 엔진, 생성물 사실성 검증 가드(ha_guard), 상용 입력 온보딩 계약."),
+        ("대상 · ",
+         "예비창업자, 그리고 자기 아이템이 통하는 상권을 찾아 팝업스토어 · 가오픈 · MVP 로 "
+         "검증하려는 기창업자. 영업 중인 가게의 마케팅은 이 트랙이 아닙니다(2026-09-17 대상 재정의)."),
+        ("담당 · ",
+         "검증 브리프 입력 계약(아이템 · 검증 방식 · 단계 · 가설 · 기간 · 예산 구간), "
+         "모객 · 자리 · 상권 연계 세 벌의 출력, LLM 생성 엔진(Anthropic SDK 직접 호출), "
+         "생성물 사실성 검증 가드(ha_guard)."),
+        ("설계 원칙 · ",
+         "무엇을 세면 통했다고 할지 시작 전에 정하지 않은 검증은 판정이 아니라 지출이라고 보고, "
+         "출력에 검증 지표(지표 · 측정 방법 · 목표선 · 기각 조건)를 반드시 포함시켰습니다."),
         ("성과 · ",
-         "아직 개업하지 않은 가게에 '방문 후기형 포스팅'을 제안하는 등의 사실 오류를 "
-         "타입과 서버 검증으로 차단했습니다. 예산 항목을 정수 퍼센트 타입으로 강제해 "
-         "허구의 절대 금액이 구조적으로 들어갈 수 없게 했습니다."),
-        ("개인정보 처리 · ",
-         "조직 인증, 처리 · 권리 · 외부 모델 처리 동의를 요청 스키마가 강제하며, "
-         "원문은 저장하지 않고 감사 메타데이터만 남깁니다."),
+         "아직 해 보지 않은 아이템에 '단골'이나 '쌓인 후기'를 근거로 삼는 문장을 서버 검증으로 "
+         "차단합니다(측정 문장은 면제 — 재방문율 같은 검증 지표를 막지 않기 위해). 예산 항목을 "
+         "정수 퍼센트 타입으로 강제해 허구의 절대 금액이 구조적으로 들어갈 수 없게 했습니다."),
+        ("접근 통제 · ",
+         "조직 · API 키 인증 계정층과 접근 감사 로그를 두었습니다."),
     ])
 
     # ── Co.I ────────────────────────────────────────────────────────────
@@ -339,15 +389,24 @@ def build_experience(out: Path) -> Path:
         ["과제",
          "같은 홀드아웃에서 입력을 전혀 보지 않는 규칙이 이미 그 선을 넘는지 확인했다."],
         ["행동",
-         f"무정보 베이스라인을 계산했다. 공실 예측 방향은 '항상 하락' 상수가 {M['lstm_dir_base']}% "
-         f"(모델 {M['lstm_dir']}%), 업종 추천 Top-3 은 거점 사전분포가 {M['gnn_prior']}% 였다. "
-         "즉 임계값을 넘겼다는 사실에 정보가 없었고, 그 달성 표기가 진행률 문서와 외부 원고까지 "
-         "퍼져 있었다."],
+         f"무정보 베이스라인을 계산했다. 2026-09-16 시점에 공실 예측 방향은 '항상 하락' 상수가 "
+         f"{M['leak_dir_const']}% (모델 {M['leak_dir_model']}%), 업종 추천 Top-3 은 거점 사전분포가 "
+         f"{M['leak_gnn_prior']}% 였다. 즉 임계값을 넘겼다는 사실에 정보가 없었고, 그 달성 표기가 "
+         "진행률 문서와 외부 원고까지 퍼져 있었다."],
         ["결과",
          "!임계값 단독 판정을 폐기하고 베이스라인 대비 실력으로 전 지표를 재정의했다. "
          "네 규칙(임계값 단독 금지 / 불확실성 동반 / 선택과 보고 분리 / 계측기 없는 목표는 "
-         "지표가 아님)을 세우고, 미달이면 종료코드 1을 내는 검사 스크립트로 못박았다."],
+         "지표가 아님)을 세우고, 실력이 확인되지 않은 축이 하나라도 있으면 종료코드 1을 내는 "
+         "검사 스크립트로 못박았다."],
     ], [2.4, 13.4], sizes=[9.0, 9.0], aligns=[C, L], bold_first_col=True)
+    bp.body(doc,
+            "그 뒤에도 이 체계 자체를 두 번 고쳤습니다. 누수를 막은 재학습(81거점 · 홀드아웃 "
+            f"{M['lstm_n']}건)에서 방향 축이 +4.6%p 였는데 신뢰구간이 0 을 품는데도 점추정 부호만으로 "
+            "게이트가 닫혀 있었습니다. 그래서 판정을 '실력 · 구분불가 · 열위 · 검정불가' 세 갈래 "
+            "(표본이 없으면 검정불가)로 바꾸고 '실력'일 때만 닫히게 했습니다. 이어서 대조군을 두 무정보 "
+            "규칙 중 강한 쪽으로 올리고 학습 조건을 사전에 등록했습니다. 그 과정에서 참고 판정용 분기가 "
+            "한 번 노출됐던 사실도 문서에 남겼고, 그래서 확정은 이후 분기 데이터로만 하기로 했습니다. "
+            "현재 공실 예측 두 축은 참고 판정이 '실력'이지만 확정은 확인대기입니다.", before=4)
 
     bp.h2(doc, "4.2", "계측기 없는 목표를 먼저 계측 가능하게 만들기")
     bp.make_table(doc, [
@@ -371,6 +430,24 @@ def build_experience(out: Path) -> Path:
             "이후로는 문서의 서술을 믿지 않고 1회 실측으로 확인한 뒤 그 결과를 별도 문서로 "
             "남기는 절차를 두었습니다.", before=4)
 
+    bp.h2(doc, "4.4", "통계상 '실력'이 나왔지만 서빙하지 않은 사례")
+    bp.make_table(doc, [
+        ["구분", "내용"],
+        ["상황", f"업종 추천(GNN)을 {M['hubs']}거점으로 재학습했다. 판정 도구는 거점 사전분포 대비 "
+                 "+1.88%p 로 통계적 '실력'을 냈다."],
+        ["과제", "판정이 닫히는 것과 그 추천을 제품으로 내보내도 되는 것은 별개인지 서빙 산출물을 "
+                 "직접 열어 확인했다."],
+        ["행동",
+         "1순위 추천의 74%, 3순위 안의 100%가 '미분류'였다. 판정 도구는 추천 어휘가 쓸 수 있는지는 "
+         "묻지 않기 때문에 제품으로는 틀린 '실력'이었다. 서빙 파일을 이전 본으로 되돌리고, 라벨 "
+         "어휘를 먼저 정한 뒤 재학습했다."],
+        ["결과",
+         "!판정 도구에 어휘 점검 세 항목(라벨 수준 일치 · 미분류 0건 · 라벨 6종 이상)을 붙였다. "
+         "재학습 결과는 Top-3 " + f"{M['gnn_top3']}% (사전분포 {M['gnn_prior']}%, "
+         f"{M['gnn_skill']}%p [{M['gnn_ci']}]). 다만 추천 어휘 7종 중 문화시설은 이 모집단에 "
+         "나타나지 않아 6종으로 서빙한다."],
+    ], [2.4, 13.4], sizes=[9.0, 9.0], aligns=[C, L], bold_first_col=True)
+
     bp.h1(doc, "5", "일하는 방식")
     bp.bullets(doc, [
         ("측정 우선 · ", "재지 않은 값은 달성으로 적지 않습니다. 미달 항목은 미달로 남깁니다."),
@@ -380,8 +457,12 @@ def build_experience(out: Path) -> Path:
         ("테스트로 고정 · ",
          "합의한 전제는 문장이 아니라 테스트와 타입으로 고정합니다. "
          "예: 예산 항목을 정수 퍼센트 타입으로 두어 절대 금액이 구조적으로 들어갈 수 "
-         "없게 했습니다. 현재 백엔드 테스트 351개(34개 파일)가 GitHub Actions 에서 돌고, "
+         f"없게 했습니다. 현재 백엔드 테스트 {M['tests_be']}개({M['tests_be_files']}개 파일)와 "
+         f"프론트 테스트 {M['tests_fe_files']}개 파일이 GitHub Actions 에서 돌고, "
          "통과해야만 배포됩니다."),
+        ("서빙 거점 기준 검사 · ",
+         "Posting 매출 산출물이 시드 거점 수가 아니라 서빙 거점 수를 따라가는지 재는 테스트를 "
+         "두었습니다. 거점이 늘었는데 빌더를 다시 돌리지 않으면 CI 가 실패합니다."),
         ("검증 절차 · ",
          "변경 직후 정적 3종(백엔드 테스트 · 프론트 빌드 타입체크 · 모델 임포트)을 항상 "
          "돌립니다. 다만 이 저장소에서 실제로 밟은 함정은 전부 '테스트는 통과하는데 화면과 "
@@ -419,7 +500,7 @@ def build_portfolio(out: Path) -> Path:
     p = bp.para(doc, before=0, after=0, line=1.45)
     bp.run(p, "seoghyeonbag36@gmail.com  ·  https://placeos.web.app", size=9.5, color=bp.MUTED)
     p = bp.para(doc, before=0, after=0, line=1.45)
-    bp.run(p, "2026. 09.", size=9.5, color=bp.MUTED)
+    bp.run(p, "2026. 10.", size=9.5, color=bp.MUTED)
 
     p = bp.para(doc, before=0, after=0)
     from docx.enum.text import WD_BREAK
@@ -431,20 +512,27 @@ def build_portfolio(out: Path) -> Path:
             "물리적 상권을 SNS · 디지털 관점의 플랫폼으로 읽는 가설에서 출발했습니다. "
             "기존 상권 정보가 행정동 단위 통계에 머물러 '어느 건물 몇 층이 비었는가'를 답하지 "
             "못한다는 점이 문제였습니다. PlaceOS 는 건축물대장을 실측 원천으로 삼아 건물 - 층 - 유닛 "
-            "단위 공실 인벤토리를 세우고, 그 위에 네 가지 질문을 차례로 답하는 구조입니다.")
+            "단위 공실 인벤토리를 세우고, 그 위에 Platform · Page · Posting · Program 네 가지 "
+            "질문을 차례로 답하는 구조입니다. 마지막 Program 의 대상은 예비창업자, 그리고 자기 "
+            "아이템이 통하는 상권을 찾아 팝업스토어 · 가오픈 · MVP 로 검증하려는 기창업자입니다.")
     bp.make_table(doc, [
         ["트랙", "답하는 질문", "구현", "진행률"],
-        ["Platform", "이 입지는 어떤 플랫폼인가",
+        ["Platform", "이 입지 · 상권은 어떤 플랫폼인가",
          "공실 예측(LSTM) · 업종 추천(GNN)", f"{M['platform']}%"],
-        ["Page", "어디에 자리가 비어 있는가",
+        ["Page", "이 platform 안에 어떤 page 가 만들어져야 하는가 (어디가 비었는가)",
          "공실 히트맵 · 층별 매물 · 거리뷰", f"{M['page']}%"],
-        ["Posting", "어느 가격대로 들어가야 하는가",
-         "3-Tier 비용-효용 · ROI 시뮬레이션", f"{M['posting']}%"],
-        ["Program", "어떻게 알릴 것인가",
-         "마케팅 생성 · 사실성 검증 가드", f"{M['program']}%"],
-    ], [2.6, 5.0, 5.8, 2.4], sizes=[9.0, 9.0, 9.0, 9.0],
+        ["Posting", "어떤 가격대의 page 가 posting 되어야 하는가",
+         "3-Tier 비용-효용 · 입점 ROI · 외부 코파일럿 연동 계약", f"{M['posting']}%"],
+        ["Program", "이 아이템이 이 platform 에서 통하는지, 어떤 검증 program 으로 확인할 것인가",
+         "검증 program 자동 생성(모객 · 자리 · 연계 + 검증 지표) · 사실성 검증 가드",
+         f"{M['program']}%"],
+    ], [2.4, 5.4, 5.8, 2.2], sizes=[9.0, 9.0, 9.0, 9.0],
         aligns=[L, L, L, C], bold_first_col=True)
-    bp.caption(doc, "진행률은 문서가 아니라 산출물을 세어 계산한다 (scripts/pppp_status.py).")
+    bp.caption(doc,
+               "진행률은 문서가 아니라 산출물을 세어 계산한다 (scripts/pppp_status.py). "
+               f"다만 진행률 게이트 {M['gates']}개 중 {M['gates_declared']}개는 사람이 판정하는 "
+               "선언형이고, Platform 이 100%가 아닌 것은 남은 두 게이트가 공실 예측의 확정 판정 "
+               "(확인대기)이기 때문입니다.")
 
     # 02
     bp.h1(doc, "02", "실측 산출물")
@@ -458,10 +546,13 @@ def build_portfolio(out: Path) -> Path:
         ["층 단위 공실", f"{M['floor_units']}개",
          f"확정 {M['floor_conf']} / 추정 {M['floor_prob']}"],
         ["히트맵 레이어", "4종", "공실 · 임대료 · 유동 · 밀도 (동일 100m 격자)"],
-        ["시간 축", "24시간", "생활인구 행정동 · 평일 20일 / 주말 8일 표본"],
+        ["시간 축", "24시간",
+         f"집계구 단위 생활인구 · {M['hubs']}/{M['hubs']}거점 · 표본 7일(평일 5 / 주말 2) — 격자 실측은 아님"],
         ["GNN 그래프", f"노드 {M['gnn_nodes']} · 피처 {M['gnn_feat']}", "업종 간 시너지 · 잠식"],
-        ["ROI 표본", f"{M['roi_units']}유닛", f"회수불가 {M['roi_fail']}%"],
+        ["ROI 표본", f"{M['roi_units']}유닛 ({M['hubs']}거점)",
+         f"회수불가 {M['roi_fail_n']}유닛({M['roi_fail']}%) · 실측 매출 모델 {M['roi_real']}유닛"],
         ["코드 규모", f"{M['loc']} 라인", "Python · TypeScript"],
+        ["테스트", f"백엔드 {M['tests_be']}개 · 프론트 {M['tests_fe_files']}개 파일", "GitHub Actions 통과 시에만 배포"],
     ], [3.2, 4.4, 8.2], sizes=[9.0, 9.0, 8.5], aligns=[L, L, L], bold_first_col=True)
 
     # 03
@@ -469,11 +560,13 @@ def build_portfolio(out: Path) -> Path:
     bp.make_table(doc, [
         ["계층", "구성"],
         ["수집", "건축HUB 건축물대장 · 서울시 상권분석 · R-ONE 부동산통계 · KOSIS · 공정위 정보공개서\n"
-                 "Airflow DAG + Selenium / Playwright 크롤러, 일일 쿼터 관리 런북"],
+                 "Selenium / Playwright 수집기 · 수동 실행 스크립트 · 일일 쿼터 관리 런북"],
         ["저장", "Bronze (원본) → Silver (정제 · 주소 정규화) → Gold (분석용 집계)\n"
-                 "PostgreSQL / PostGIS + Redis"],
-        ["모델", "LSTM 공실 예측 · GNN(PyTorch Geometric) 업종 추천 · MLflow 실험 추적"],
-        ["서빙", "FastAPI (/api/v1/ 규약) · Celery 비동기 · 지연 계측 미들웨어"],
+                 "분석 산출물은 Gold JSON · Parquet 을 직접 읽고, DB(PostgreSQL · Alembic)는 "
+                 "계정 · 조직 · 사용량 층만 담당"],
+        ["모델", "LSTM 공실 예측 · GNN(PyTorch Geometric) 업종 추천 · MLflow 실험 추적 · "
+                 "생성 엔진은 Anthropic SDK 직접 호출"],
+        ["서빙", "FastAPI (/api/v1/ 규약) · 지연 계측 미들웨어 · 클라이언트 타이밍 수집"],
         ["화면", "React + TypeScript + Vite · 네이버 지도(지도 · 거리뷰) · CSS 변수 토큰 단일 체계"],
         ["배포", "GitHub Actions (테스트 → 빌드 → 배포 → 검증) → Cloud Run + Firebase Hosting"],
     ], [2.4, 13.4], sizes=[9.0, 8.5], aligns=[L, L], bold_first_col=True)
@@ -483,19 +576,26 @@ def build_portfolio(out: Path) -> Path:
     bp.body(doc,
             "이 프로젝트에서 가장 설명하고 싶은 부분입니다. 2026년 9월, 자사 지표가 "
             "모델 성능을 전혀 보증하지 못한다는 사실을 스스로 확인하고 지표 체계를 전면 "
-            "재정의했습니다. 그 전까지의 기준은 'AI 정확도 70% 이상' 한 줄이었습니다.")
+            "재정의했습니다. 그 전까지의 기준은 'AI 정확도 70% 이상' 한 줄이었습니다. "
+            "당시 공실 예측 방향은 '항상 하락'이라고만 답하는 상수가 "
+            f"{M['leak_dir_const']}% 로 모델({M['leak_dir_model']}%)보다 높았습니다. "
+            "그 뒤 재학습과 판정 정정을 거친 현재 상태는 아래와 같습니다 "
+            "(2026-10-04 · scripts/kpi_baseline.py).")
     bp.make_table(doc, [
-        ["축", "무정보 베이스라인", "모델", "실력"],
-        ["공실 예측 · 오차 (MAE)", f"지속성 {M['lstm_base']}", M['lstm_mae'], f"{M['lstm_skill']}%"],
-        ["공실 예측 · 방향", f"'항상 하락' {M['lstm_dir_base']}%", f"{M['lstm_dir']}%",
-         f"!{M['lstm_dir_skill']}%p"],
+        ["축", "대조군 (무정보 규칙 중 강한 쪽)", "모델", "차이 [95% 구간]", "판정"],
+        ["공실 예측 · 오차 (MAE)", f"거점 평균 {M['lstm_base']} (지속성 {M['lstm_persist']})",
+         M['lstm_mae'], f"{M['lstm_skill']}% [{M['lstm_skill_ci']}]", "!참고 실력 · 확인대기"],
+        ["공실 예측 · 방향", f"'평균 쪽' {M['lstm_dir_base']}% (상수 {M['lstm_dir_const']}%)",
+         f"{M['lstm_dir']}%", f"{M['lstm_dir_skill']}%p [{M['lstm_dir_ci']}]", "!참고 실력 · 확인대기"],
         ["업종 추천 · Top-3", f"거점 사전분포 {M['gnn_prior']}%", f"{M['gnn_top3']}%",
-         f"{M['gnn_skill']}%p"],
-    ], [4.6, 4.6, 3.2, 3.4], sizes=[9.0, 9.0, 9.0, 9.0], aligns=[L, L, C, C],
-        bold_first_col=True)
+         f"{M['gnn_skill']}%p [{M['gnn_ci']}]", "실력 (확정)"],
+    ], [3.8, 4.4, 1.8, 3.4, 2.4], sizes=[8.5, 8.5, 8.5, 8.5, 8.5],
+        aligns=[L, L, C, C, C], bold_first_col=True)
     bp.caption(doc,
-               "방향 축은 미달입니다. 감추지 않고 그대로 싣습니다. "
-               "제품이 파는 값은 방향 이분법이 아니라 공실 압력의 크기이므로 오차 축을 주 지표로 둡니다.")
+               f"공실 예측은 홀드아웃 {M['lstm_n']}건(거점 80곳), 업종 추천은 test {M['gnn_test']}자리 기준입니다. "
+               "공실 예측 두 축은 확정이 아니라 참고 판정입니다. 이미 본 분기 데이터로는 확정하지 않는다는 "
+               "규칙을 사전에 정했고, 2026년 3분기 데이터가 공표되면 자동 감시 작업이 재학습까지 "
+               "돌린 뒤 사람이 판정합니다. 그때까지 이 두 값을 달성이라고 적지 않습니다.")
 
     bp.h2(doc, "4.1", "적용한 네 규칙")
     bp.bullets(doc, [
@@ -523,7 +623,7 @@ def build_portfolio(out: Path) -> Path:
     ], [3.2, 12.6], sizes=[9.0, 9.0], aligns=[L, L], bold_first_col=True)
     guide(doc, [
         ("이 장을 반드시 채울 것", True),
-        ("Co.I 는 박사 과정의 주제이자 면접에서 가장 많이 질문받을 항목입니다. "
+        ("Co.I 는 면접에서 가장 많이 질문받을 항목입니다. "
          "위 다섯 칸을 비운 채 제출하면 '만들다 만 두 번째 프로젝트'로 읽힙니다.", False),
         ("정량 지표가 아직 없다면, 제출 전에 응답 시간과 처리 질의 수만이라도 측정해 두십시오. "
          "측정하지 않은 값을 적는 것보다는 '현재 측정 중'이 낫습니다.", False),
@@ -593,7 +693,9 @@ def build_talent_profile(out: Path) -> Path:
          "센터가 매년 받는 성과평가에서 쓰일 수 있는 경험입니다."],
         ["프로그램 운영\n· 멘토링",
          "창업 당사자로서 보육을 받는 쪽의 입장을 압니다. 입주기업에게 무엇이 실제로 도움이 "
-         "되고 무엇이 형식에 그치는지를 구분할 수 있습니다. 데모데이 · IR 자료의 시장 분석 "
+         "되고 무엇이 형식에 그치는지를 구분할 수 있습니다. 예비창업자가 자기 아이템을 팝업스토어 · "
+         "가오픈 · MVP 로 검증하는 program 을 설계해 본 경험이 있고, 무엇을 세면 통했다고 할지(검증 "
+         "지표 · 기각 조건)를 시작 전에 정하는 방식을 씁니다. 데모데이 · IR 자료의 시장 분석 "
          "파트를 데이터로 뒷받침하는 일도 가능합니다."],
     ], [3.2, 12.6], sizes=[9.0, 9.0], aligns=[L, L], bold_first_col=True)
 
@@ -604,23 +706,25 @@ def build_talent_profile(out: Path) -> Path:
         ["PlaceOS\n(운영 중)",
          f"서울 {M['hubs']}개 상권을 건축물대장으로 실측해 건물 단위 공실 인벤토리 구축 "
          f"({M['units']}유닛 · 층 단위 {M['floor_units']}개)\n"
-         f"공실 예측 MAE {M['lstm_mae']} — 지속성 베이스라인 대비 {M['lstm_skill']}% 개선\n"
-         f"업종 추천 Top-3 {M['gnn_top3']}% — 거점 사전분포 대비 {M['gnn_skill']}%p 개선\n"
-         f"코드 {M['loc']} 라인 · GitHub Actions - Cloud Run 자동 배포"],
+         f"업종 추천 Top-3 {M['gnn_top3']}% — 거점 사전분포 대비 {M['gnn_skill']}%p "
+         f"[{M['gnn_ci']}] (확정)\n"
+         f"공실 예측 MAE {M['lstm_mae']} — 거점 평균 대비 {M['lstm_skill']}% "
+         f"[{M['lstm_skill_ci']}] (참고 · 확정은 2026년 3분기 데이터 이후)\n"
+         f"코드 {M['loc']} 라인 · 백엔드 테스트 {M['tests_be']}개 · GitHub Actions - Cloud Run 자동 배포"],
         ["Co.I", FILL],
     ], [3.0, 12.8], sizes=[9.0, 8.5], aligns=[C, L], bold_first_col=True)
     bp.caption(doc,
-               f"미달 항목도 함께 밝힙니다. 공실 예측의 방향 정확도는 {M['lstm_dir']}% 로 "
-               f"무정보 상수 베이스라인 {M['lstm_dir_base']}% 에 {M['lstm_dir_skill']}%p 미달입니다. "
-               "재지 않은 값을 달성으로 적지 않는 것이 이 프로젝트의 기본 규칙입니다.")
+               "아직 확정하지 못한 항목도 함께 밝힙니다. 공실 예측 두 축은 참고 판정이며 확인대기입니다. "
+               "재지 않은 값, 확정되지 않은 값을 달성으로 적지 않는 것이 이 프로젝트의 기본 규칙입니다.")
 
     # 5. 기술
     bp.h2(doc, "05", "보유 기술")
     bp.make_table(doc, [
         ["구분", "내용"],
         ["Backend · Data",
-         "Python, FastAPI, PostgreSQL / PostGIS, Redis, Celery, Airflow, Selenium / Playwright"],
-        ["ML", "PyTorch, PyTorch Geometric (GNN), LSTM, MLflow"],
+         "Python, FastAPI, PostgreSQL (계정층), SQLAlchemy / Alembic, Selenium / Playwright, "
+         "Bronze · Silver · Gold 3계층"],
+        ["ML · LLM", "PyTorch, PyTorch Geometric (GNN), LSTM, MLflow, Anthropic SDK"],
         ["Frontend · Infra",
          "React, TypeScript, Vite, 네이버 지도 API / Docker, GitHub Actions, Cloud Run"],
         ["공공데이터",
@@ -705,7 +809,7 @@ def mail_body(doc, text):
             bp.para_border(p, ("bottom",), color=bp.RULE, sz=8, space=7)
 
 
-MAIL_UNIV_BI = """
+MAIL_UNIV_BI = f"""
 ○○대학교 창업보육센터 담당자님께
 
 안녕하십니까.
@@ -715,8 +819,9 @@ MAIL_UNIV_BI = """
 저는 창업 도메인에서 두 개의 서비스를 직접 만들어 운영 중입니다.
 
 - PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.web.app)
-  서울 66개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
-  업종 추천과 입점 ROI 시뮬레이션을 결합했습니다.
+  서울 {M['hubs']}개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
+  업종 추천과 입점 ROI 시뮬레이션, 예비창업자의 팝업·가오픈·MVP 검증
+  program 설계를 결합했습니다.
 
 - Co.I — 창업 코파일럿 AI
   창업 의사결정(입지·업종·가격대·홍보)을 단계별로 보조합니다.
@@ -754,7 +859,7 @@ MAIL_UNIV_BI = """
 seoghyeonbag36@gmail.com
 """
 
-MAIL_PUBLIC_BI = """
+MAIL_PUBLIC_BI = f"""
 ○○ 창업보육센터 담당자님께
 
 안녕하십니까.
@@ -764,9 +869,10 @@ MAIL_PUBLIC_BI = """
 저는 창업 도메인에서 두 개의 서비스를 직접 만들어 운영 중입니다.
 
 - PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.web.app)
-  서울 66개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
-  업종 추천과 입점 ROI 시뮬레이션을 결합했습니다. 오프라인 점포 기반
-  창업팀의 입지 판단에 바로 쓰이는 형태입니다.
+  서울 {M['hubs']}개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
+  업종 추천과 입점 ROI 시뮬레이션, 예비창업자의 팝업·가오픈·MVP 검증
+  program 설계를 결합했습니다. 오프라인 점포 기반 창업팀의 입지 판단에
+  바로 쓰이는 형태입니다.
 
 - Co.I — 창업 코파일럿 AI
   창업 의사결정(입지·업종·가격대·홍보)을 단계별로 보조합니다.
