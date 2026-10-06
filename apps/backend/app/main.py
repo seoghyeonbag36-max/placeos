@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
+from app.core import security_headers
 from app.core.config import settings
 from app.services import latency as latency_service
 
@@ -60,6 +61,16 @@ async def _measure_latency(request: Request, call_next):
             latency_service.record(route, elapsed_ms)
         except Exception:      # 계측 실패가 응답을 깨뜨리지 않는다
             pass
+    return response
+
+
+# ── 보안 헤더 (2026-10-06) ─────────────────────────────────────────────────────
+# 위 계측보다 **뒤에** 등록한다 — 나중에 추가한 미들웨어가 바깥이라, 여기 둬야 API 뿐 아니라
+# 프론트 정적 파일(`/` 마운트)·`/maps`·`/health` 까지 전부 덮는다. 정책과 이유는 core/security_headers.
+@app.middleware("http")
+async def _security_headers(request: Request, call_next):
+    response = await call_next(request)
+    security_headers.apply(response.headers)
     return response
 
 # HTML 대시보드 정적 파일 서빙

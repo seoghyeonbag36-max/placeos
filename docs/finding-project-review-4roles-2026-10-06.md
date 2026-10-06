@@ -186,6 +186,11 @@ gold 50개·서빙 거점 가드) → Cloud Run → `/health` 스모크. 앞단 
 - ✅ (중간) 비밀번호 가입은 이메일 소유를 확인하지 않는데, 구글 연결로 비밀번호를 끊어도 선점자가 미리 발급한
   조직 API 키는 살아남았다 → 구글 연결 순간 그 조직의 살아 있는 키를 모두 폐기(`auth_service._revoke_keys_on_google_link`,
   `feat/google-link-revokes-keys-20261006`). 사업 정보는 누가 적었는지 가를 수 없어 지우지 않는다.
+- ✅ (중간~낮음) 응답 보안 헤더가 HSTS 하나뿐이었다 → 모든 응답에 nosniff · `X-Frame-Options: DENY` ·
+  Referrer-Policy · Permissions-Policy 를 강제하고, CSP 는 **Report-Only** 로 시작(`app/core/security_headers.py`,
+  `feat/security-headers-20261006`). 출처는 로그인 상태로 네 트랙·건물 상세 거리뷰·로그인 화면을 열어 실측했다
+  — 네이버 SDK 는 `oapi` 외에 `nrbe.map.naver.net`·`apis.naver.com` 을 JSONP 로 부른다. **CSP 강제 전환은 남았다**:
+  운영 콘솔에서 `[Report Only]` 위반 0 을 확인한 뒤 `Content-Security-Policy` 로 바꾼다.
 
 ### 5-2. 공개 저장소 위생 (지금 막을 것)
 
