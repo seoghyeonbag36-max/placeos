@@ -16,7 +16,7 @@
 | 10-08 | 2 | 빅콘테스트 참가신청 | 없음 — **불참 권고** (아래) | 결정 필요 |
 | 10-11 | 5 | LX 「지적과 국토정보」 | 기존 [paper-page-lx.md](../papers/lx/paper-page-lx.md) 점검만 | 문헌·정책 함의 남음(사람) |
 | 10-11 23:59 | 5 | DIC2026 예비창업자 | **사업계획서 원고** [10-dic2026/draft.md](10-dic2026/draft.md) | 자격 확인 → hwpx 이식 |
-| 10-22 | 16 | 데이터 문제해결 부문 | 재료 매핑(아래) | 원문 확인 선행 |
+| 10-22 | 16 | 데이터 문제해결 부문 | 신청서 원고(14-data-recipe) | 원문 확인 후 제출 |
 | 10-22 | 16 | 데이터안심구역 | 없음 — **불참 권고** | 시설 방문 전제 |
 | 10-23 | 17 | KIIT 추계 | **초록·결론·한계 절 채움** [paper-platform-kiit.md](../papers/kiit/paper-platform-kiit.md) | 서식·저자·문헌 남음 |
 | 11-03 | 28 | 사회문제 해결 챌린지 상세기획서 | **상세기획서 원고** [09-digitalsolveup/detailed-plan.md](09-digitalsolveup/detailed-plan.md) | 서식은 교류회 뒤 |
@@ -84,8 +84,7 @@
 
 - **데이터안심구역 — 불참 권고.** 지정기관 미개방 데이터를 **시설 안에서** 분석하는 형식이라 PlaceOS 산출물을 내는
   자리가 아니다. 예선(10-28~29)·본선(11-18~19)이 시설 방문을 전제한다.
-- **데이터 문제해결(1,040만원) — 원문 확인 후 결정.** 과제 형식·제출물·시설 방문 여부를 모른다. 확인해서 낼 수 있다면
-  아래 재료가 이미 있다.
+- **데이터 문제해결(1,040만원) — 원고 작성됨, 원문 확인 후 제출 결정.** [14-data-recipe/draft.md](14-data-recipe/draft.md)('AI·데이터 레시피' 형식 가설). 과제 형식·제출물·시설 방문 여부를 확인하기 전에는 제출하지 않는다. 쓴 재료는 아래와 같다.
 
 | 문제해결 신청서에 들어갈 것 | 가져올 곳 (이번에 만든 원고) |
 |---|---|
@@ -147,6 +146,7 @@
 | 10-08 16:00 | 핀테크 아이디어 공모전 | `_submit/04-fintech-submit-2026-10-06.docx` | `04-fintech/draft.md` | 내부 주석 제거본 |
 | 10-11 23:59 | DIC2026 예비창업자 | `_submit/10-dic2026-plan-2026-10-06.docx` | `10-dic2026/draft.md` | 대표자 이력·캡처 자리 표시 |
 | 11-03 | 사회문제 해결 챌린지 상세기획서 | `_submit/09-detailed-plan-2026-10-06.docx` | `09-digitalsolveup/detailed-plan.md` | 캡처 자리 표시 |
+| 10-22 | 데이터+AI 혁신 챌린지 · 데이터 문제해결 | `_submit/14-data-recipe-2026-10-06.docx` | `14-data-recipe/draft.md` | 신청서 서식·시설 방문 여부 미확인 · 다른 원고와 중복 규정 확인 |
 | 11-25 | KISTI 문제발굴 | `_submit/13-kisti-problem-discovery-2026-10-06.docx` | `13-kisti/problem-discovery.md` | 규정 확인 전 제출 금지 |
 | 11-25 | KISTI 문제해결 | `_submit/13-kisti-problem-solving-2026-10-06.docx` | `13-kisti/problem-solving.md` | 규정·KIIT 중복 확인 전 제출 금지 |
 | 공고 대기 | 부동산원 논문 공모 제안서 | `11-reb-paper/proposal-2026-10-06.docx` | `11-reb-paper/proposal.md` | 제2회 일정 기준 가설 |
