@@ -1,5 +1,5 @@
 {
-  "started": "2026-10-06T00:26:50",
+  "started": "2026-10-06T00:33:59",
   "claims": "docs/apply/claims.json",
   "require_complete": false,
   "docs": [
@@ -23,6 +23,18 @@
     },
     {
       "doc": "docs/apply/10-dic2026/draft.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
+      "doc": "docs/apply/11-reb-paper/proposal.md",
+      "fill_remaining": 0,
+      "violations": [],
+      "ok": true
+    },
+    {
+      "doc": "docs/apply/12-upcoming/upcoming-kit.md",
       "fill_remaining": 0,
       "violations": [],
       "ok": true
