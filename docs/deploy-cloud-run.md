@@ -15,13 +15,15 @@
 
 ## 배포는 자동이다
 
-`main` 에 푸시하면 `.github/workflows/deploy.yml` 이 **테스트 → 빌드 → 배포 → 검증** 을
-순서대로 돈다. 검증 단계가 `/health` 200 과 분석 API 의 `"vacancy_source":"gold"` 를
+`main` 에 푸시하면 CI(`ci.yml`)가 돌고, **CI 가 전부 통과하면** `.github/workflows/deploy.yml` 이
+`workflow_run` 으로 시작해 **테스트 → 빌드 → 배포 → 검증** 을 순서대로 돈다(2026-10-06 — 그 전에는 `push` 로
+CI 와 나란히 돌아 프론트 lint·vitest·data pytest 가 빨개도 배포가 나갔다). 배포 커밋은 CI 가 검사한
+`head_sha` 로 고정한다. 검증 단계가 `/health` 200 과 분석 API 의 `"vacancy_source":"gold"` 를
 확인하므로, **배포는 성공했는데 데이터가 비어 있는 상태**로는 초록이 안 뜬다.
 
 인증은 Workload Identity 연합이다 — 저장소에 서비스계정 키를 두지 않는다. 공급자에
-`assertion.repository=='seoghyeonbag36-max/spaceos'` 조건이 걸려 있어 다른 저장소의
-토큰으로는 이 서비스계정을 못 빌린다.
+`assertion.repository=='seoghyeonbag36-max/placeos'` 조건이 걸려 있어 다른 저장소의
+토큰으로는 이 서비스계정을 못 빌린다(2026-10-06 `gcloud` 로 확인 — 저장소 개명 전 이름 `spaceos` 로 적혀 있었다).
 
 ### 수동 배포 (긴급 시)
 

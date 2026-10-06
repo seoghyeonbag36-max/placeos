@@ -12,12 +12,19 @@ cd apps/backend && pytest -q                 # 백엔드 테스트/임포트
 python -m pytest data/tests -q               # 데이터 파이프라인 (CI 의 별도 잡)
 cd apps/frontend && npm run build            # 프론트 타입체크 + 빌드
 cd apps/frontend && npm run lint             # eslint — CI 가 에러(0건이어야 한다)로 막는다. 경고는 기존 86건
+cd apps/frontend && npm run test             # vitest — CI 가 같은 잡의 마지막 단계로 돈다
 cd ml && python -c "import torch; print('torch', torch.__version__)"
 ```
 
 ⚠ **`npm run lint` 를 빠뜨리지 말 것.** 2026-10-05 에 로컬은 build·vitest 가 전부 초록이었는데 머지 직후
 main CI 의 「프론트 타입체크 + 빌드」가 **린트 단계**에서 실패했다(`react-hooks/refs` — 렌더 도중 ref 갱신).
-build 는 타입만 보고 eslint 규칙(React 훅 규칙 포함)은 안 본다. CI 와 같은 순서(린트 → 타입체크 → 빌드)로 돌린다.
+build 는 타입만 보고 eslint 규칙(React 훅 규칙 포함)은 안 본다. CI 와 같은 순서(**build → lint → test**,
+`.github/workflows/ci.yml` frontend 잡)로 돌린다. (이 줄은 2026-10-06 까지 "린트 → 타입체크 → 빌드"라고 적고
+있었고, 위 목록에 `npm run test` 가 없었다.)
+
+⚠ **배포는 CI 가 전부 통과한 뒤에만 나간다(2026-10-06).** `deploy.yml` 이 `push` 가 아니라 CI 의
+`workflow_run`(success · main push · 이 저장소)으로 돈다 — 그래서 위 단계 중 하나라도 CI 에서 빨개지면 그 커밋은
+프로덕션에 안 나간다. 로컬에서 같은 순서로 미리 돌려 두는 이유다.
 
 ⚠ **`data/tests` 를 빠뜨리지 말 것.** CI 는 이것을 **별도 잡**("데이터 파이프라인
 pytest")으로 돌리는데 로컬 레시피와 `run_full_verify.py` 에는 둘 다 없었다 —

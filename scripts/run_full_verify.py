@@ -1,4 +1,4 @@
-"""무인 전체 검증 — 백엔드 테스트 + 프론트 타입체크·빌드를 순서대로 돌리고 결과를 남긴다.
+"""무인 전체 검증 — 백엔드·데이터 테스트 + 프론트 빌드·린트·테스트를 순서대로 돌리고 결과를 남긴다.
 
 왜 필요한가: 오늘 `ml/training/train_gnn.py` 의 조기 종료 기준을 바꿨다. 그 변경이
 서빙·API 표면을 건드리지 않았다는 것은 **테스트가 통과해야** 말할 수 있는데,
@@ -47,7 +47,15 @@ STEPS = [
     # 신청서 원고의 근거 검사 — docs/apply/ 가 비어 있으면 통과한다.
     ("application-check", [sys.executable, "scripts/check_application.py"], ROOT, False),
     # 프론트는 npm 이라 Windows 에서 셸이 필요하다(npm.cmd).
+    # ⚠ **2026-10-06 lint·test 추가 — CI 「프론트 타입체크 + 빌드」 잡과 같은 순서(build → lint → test).**
+    #   10-05 에 로컬 build·vitest 는 초록인데 main CI 가 **린트**에서 깨졌다(react-hooks/refs).
+    #   build 는 타입만 보고 eslint 규칙은 안 본다. 이 목록과 ci.yml 의 대응은
+    #   apps/backend/tests/test_ci_deploy_contract.py 가 지킨다.
     ("frontend-build", "npm run build", ROOT / "apps" / "frontend", True),
+    ("frontend-lint", "npm run lint", ROOT / "apps" / "frontend", True),
+    ("frontend-test", "npm run test", ROOT / "apps" / "frontend", True),
+    # CI 의 「최소 의존성 임포트」 잡은 여기 없다 — 별도 venv(루트 requirements.txt · Python 3.12)가
+    # 있어야 같은 조건이 되고, 이 머신의 전체 환경에서 import 하면 그 잡이 잡으려는 결함을 못 본다.
 ]
 
 TIMEOUT = 1800  # 스텝당 30분 — 무인이라 매달리지 않게 상한을 둔다

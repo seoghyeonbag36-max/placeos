@@ -9,7 +9,11 @@ description: 프로덕션 배포 — main 푸시로 도는 Cloud Run 자동 배�
 |---|---|
 | 프로덕션 | **https://placeos.web.app** (Firebase Hosting → Cloud Run) · 옛 주소 `spaceos-twin.web.app` 은 페이지만 301, `/api` 는 계속 서빙 |
 | Cloud Run | `spaceos` / `us-central1` (무료 한도 리전) · 프로젝트 `spaceos-digital-twin` |
-| 파이프라인 | `.github/workflows/deploy.yml` — 테스트 → 빌드 → 배포 → **검증** |
+| 파이프라인 | `ci.yml` **전부 통과** → `.github/workflows/deploy.yml`(`workflow_run`) — 테스트 → 빌드 → 배포 → **검증** |
+
+⚠ **2026-10-06 부터 배포는 CI 성공 뒤에만 돈다.** 푸시하면 바로 Deploy 가 뜨지 않는다 — CI(백엔드·data pytest,
+최소 의존성, 프론트 build·lint·vitest)가 끝나고 success 일 때 `workflow_run` 으로 시작한다. CI 가 하나라도 빨가면
+그 커밋은 안 나간다. `gh run list --workflow Deploy` 에서 이벤트가 `workflow_run` 으로 보인다.
 
 프론트(Vite 정적)와 백엔드(FastAPI)가 **컨테이너 하나**다. `api.ts` 가 `/api/v1` 을
 상대경로로 박고 있어 호스트를 쪼개면 프론트가 통째로 깨진다.

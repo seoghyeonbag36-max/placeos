@@ -209,7 +209,8 @@ cd apps/frontend && npm run build         # 타입체크 + 빌드
 # 전체 로컬 스택 (DB + Redis + Backend)
 docker compose -f infra/docker/docker-compose.yml up
 
-# 배포 — main 에 푸시하면 GitHub Actions 가 Cloud Run 으로 낸다(테스트→빌드→배포→검증).
+# 배포 — main 에 푸시하면 CI 가 돌고, CI 가 **전부** 통과한 뒤에만 Deploy 가 Cloud Run 으로 낸다
+# (2026-10-06 부터 `workflow_run` — 프론트 lint·vitest·data pytest 가 빨개도 배포되던 틈을 막았다).
 # 수동 배포·좌표·무료 한도의 경계는 docs/deploy-cloud-run.md 참조.
 #   프로덕션: https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
 #   옛 주소 https://spaceos-twin.web.app 은 페이지만 301 로 정식 주소에 보내고 /api 는 계속 서빙한다(firebase.json)
