@@ -38,8 +38,11 @@ R = WD_ALIGN_PARAGRAPH.RIGHT
 BLANK = "[                              ]"
 FILL = "[ 채울 것 ]"
 
-# 저장소 실측값 (2026-10-04 기준). 숫자마다 산출 근거를 붙인다 — 근거 없는 값은 쓰지 않는다.
+# 저장소 실측값 (2026-10-04 기준 · 줄 수와 테스트 수는 2026-10-07 `bd2517c` 기준으로 다시 쟀다).
+# 숫자마다 산출 근거를 붙인다 — 근거 없는 값은 쓰지 않는다.
 #   S1 = python scripts/pppp_status.py      S2 = python scripts/kpi_baseline.py
+# 세는 방법은 10-04 말 커밋 `34d1678` 에 대 보고 옛 값이 그대로 나오는지로 검증했다(줄 수 69,686 · 백엔드 파일 34 ·
+# 백엔드 collect 420 이 재현됨). 프론트 파일 수만 17 이 재현되지 않았다 — 그 방법(`*.test.*`)으로는 그때도 19 였다.
 M = {
     # S1 — 서빙 거점(page_hubs.ACTIVE_HUBS) · 트랙 진행률
     "hubs": "81",
@@ -54,8 +57,8 @@ M = {
     "floor_units": "15,366",
     "floor_conf": "11,770",
     "floor_prob": "3,596",
-    # git ls-files 의 py/ts/tsx/js/jsx 줄 수
-    "loc": "69,686",
+    # git ls-files 의 py/ts/tsx/js/jsx 줄 수 (2026-10-07 bd2517c · 10-04 34d1678 에서는 69,686)
+    "loc": "73,432",
     # S2 — LSTM 공실 예측 (reg-0928 서빙본 · 홀드아웃 240 · 거점 80곳). 두 축 모두 '참고' 판정이고
     #      게이트는 20262 이후 분기 표본 전에는 닫히지 않는다(확인대기).
     "lstm_n": "240",
@@ -85,10 +88,11 @@ M = {
     "roi_win": "620",            # 기능중심(factory)이 회수 최단인 유닛
     "roi_real": "827",           # 실측 매출 모델이 도는 유닛 (폴백 13 · garak · bulgwang)
     "roi_hubs_real": "79",
-    # 테스트: pytest --collect-only (apps/backend) · 프론트는 *.test.* 파일 수
-    "tests_be": "420",
-    "tests_be_files": "34",
-    "tests_fe_files": "17",
+    # 테스트: pytest --collect-only (apps/backend) · 프론트는 *.test.* 파일 수 (2026-10-07 bd2517c)
+    #   · 백엔드 collect: 10-04 420 → 493 · 백엔드 파일(tests/test_*.py): 34 → 41 · 프론트 파일: 10-04 19(스크립트엔 17) → 24
+    "tests_be": "493",
+    "tests_be_files": "41",
+    "tests_fe_files": "24",
     # 09-16 에 지표 결함을 발견한 시점의 값(역사) — 현재 값과 섞어 쓰지 않는다
     "leak_dir_model": "70.8",
     "leak_dir_const": "78.5",
