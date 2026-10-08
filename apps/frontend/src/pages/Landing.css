@@ -1,0 +1,105 @@
+/* 랜딩 — 로그인 전 첫 화면 (2026-10-08). pages/Landing.tsx.
+   색·간격·글자는 토큰만 쓴다(하드코딩 금지 — design skill). 휴대폰이 기본이고(인스타·광고 유입), 880px 부터 2단.
+   작은 보조 글자는 --muted(#6B7280)가 --bg 위에서 4.5:1 에 못 미쳐 --text-secondary 를 쓴다.
+   버튼 바탕은 --brand(#0EA5B7) 대신 --brand-pressed 다 — 흰 글자 대비가 --brand 는 AA 미달, --brand-pressed 는 4.5:1 이상이다. */
+
+.lp { min-height: 100dvh; background: var(--bg); color: var(--ink); }
+.lp a { color: inherit; text-underline-offset: 2px; }
+.lp a:focus-visible, .lp summary:focus-visible { outline: 2px solid var(--brand-pressed); outline-offset: 2px; border-radius: var(--radius-md); }
+.lp h1, .lp h2, .lp h3, .lp p, .lp ul, .lp ol, .lp figure { margin: 0; }
+.lp ul, .lp ol { padding: 0; list-style: none; }
+
+.lp-wrap { width: min(1040px, calc(100% - 2 * var(--sp-4))); margin-inline: auto; }
+.lp-narrow { max-width: 720px; }
+
+/* ── 상단 바 ── */
+.lp-bar { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
+.lp-bar-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 56px; }
+.lp-logo { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; font-weight: var(--fw-bold); text-decoration: none; }
+.lp-logo-mark {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-md);
+  background: var(--brand-pressed); color: var(--surface); font-weight: var(--fw-bold);
+}
+.lp-bar-actions { display: flex; align-items: center; gap: var(--sp-3); }
+.lp-textlink { display: inline-flex; align-items: center; min-height: 44px; padding-inline: var(--sp-2); font-weight: var(--fw-semibold); }
+
+/* ── 버튼 (링크) ── */
+.lp-btn {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: var(--sp-3) var(--sp-5);
+  border: 1px solid transparent; border-radius: var(--radius-md);
+  font-size: var(--fs-body); font-weight: var(--fw-bold); text-decoration: none; cursor: pointer;
+}
+.lp-btn-sm { min-height: 44px; padding: var(--sp-2) var(--sp-4); }
+.lp-btn-primary { background: var(--brand-pressed); color: var(--surface); }
+.lp-btn-primary:hover { filter: brightness(.92); }
+.lp a.lp-btn-primary { color: var(--surface); }
+.lp-btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.lp-btn-ghost:hover { background: var(--bg); }
+
+/* ── 히어로 ── */
+.lp-hero { padding-block: var(--sp-6) var(--sp-7); }
+.lp-hero-grid { display: grid; gap: var(--sp-6); align-items: center; }
+.lp-eyebrow { margin-bottom: var(--sp-3) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-bold); }
+.lp-hero h1 { font-size: clamp(var(--fs-display), 7vw, 44px); line-height: var(--lh-display); font-weight: var(--fw-bold); }
+.lp-lede { margin-top: var(--sp-4) !important; max-width: 34em; font-size: var(--fs-body); line-height: 1.7; color: var(--ink); }
+.lp-cta-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-5); }
+.lp-cta-center { justify-content: center; }
+.lp-fine { margin-top: var(--sp-3) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.lp-hero-art { display: grid; justify-items: center; gap: var(--sp-2); }
+.lp-hero-art img { width: min(100%, 420px); height: auto; }
+.lp-hero-art figcaption { color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+
+/* ── 구역 공통 ── */
+.lp-section { padding-block: var(--sp-7); }
+.lp-section-alt { background: var(--surface); border-block: 1px solid var(--line); }
+.lp h2 { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--fw-bold); }
+.lp-sub { margin-top: var(--sp-2) !important; color: var(--text-secondary); }
+.lp-cards { display: grid; gap: var(--sp-3); margin-top: var(--sp-5) !important; }
+.lp-card { padding: var(--sp-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+.lp-section-alt .lp-card { background: var(--bg); box-shadow: none; }
+.lp h3 { font-size: var(--fs-heading); line-height: var(--lh-heading); font-weight: var(--fw-bold); }
+.lp-card h3 { margin-bottom: var(--sp-2); }
+.lp-card p { line-height: 1.7; }
+
+/* ── 네 질문 ── */
+.lp-steps { display: grid; gap: var(--sp-3); margin-top: var(--sp-5) !important; counter-reset: lp-step; }
+.lp-step { display: grid; grid-template-columns: 44px 1fr; gap: var(--sp-3); padding: var(--sp-4); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.lp-step[data-track="platform"] { --lp-accent: var(--track-platform); --lp-soft: var(--track-platform-soft); }
+.lp-step[data-track="page"]     { --lp-accent: var(--track-page);     --lp-soft: var(--track-page-soft); }
+.lp-step[data-track="posting"]  { --lp-accent: var(--track-posting);  --lp-soft: var(--track-posting-soft); }
+.lp-step[data-track="program"]  { --lp-accent: var(--track-program);  --lp-soft: var(--track-program-soft); }
+.lp-step-badge { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--lp-accent); color: var(--surface); }
+.lp-step-badge svg { width: 22px; height: 22px; }
+.lp-step-name { color: var(--lp-accent); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-bold); }
+.lp-step h3 { margin: var(--sp-1) 0 var(--sp-2); }
+.lp-step p:last-child { line-height: 1.7; }
+
+/* ── 못 하는 것 ── */
+.lp-limits { display: grid; gap: var(--sp-2); margin-top: var(--sp-5) !important; }
+.lp-limits li { position: relative; padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-6); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md); line-height: 1.7; }
+.lp-limits li::before { content: ""; position: absolute; left: var(--sp-4); top: calc(var(--sp-3) + 0.7em); width: 6px; height: 6px; border-radius: 50%; background: var(--text-secondary); }
+
+/* ── 자주 묻는 것 ── */
+.lp-faq { display: grid; gap: var(--sp-2); margin-top: var(--sp-5); }
+.lp-faq details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.lp-faq summary { display: flex; align-items: center; min-height: 48px; padding: var(--sp-3) var(--sp-4); font-weight: var(--fw-semibold); cursor: pointer; }
+.lp-faq details[open] summary { border-bottom: 1px solid var(--line); }
+.lp-faq details p { padding: var(--sp-3) var(--sp-4) var(--sp-4); line-height: 1.7; }
+.lp-faq a { color: var(--brand-pressed); }
+
+/* ── 마지막 CTA · 푸터 ── */
+.lp-final { padding-block: var(--sp-7); text-align: center; background: var(--surface); border-top: 1px solid var(--line); }
+.lp-final h2 { font-size: var(--fs-title); }
+.lp-foot { padding-block: var(--sp-5); background: var(--bg); border-top: 1px solid var(--line); color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.lp-foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-2); }
+.lp-foot a { display: inline-block; padding-block: var(--sp-2); }
+
+/* ── 넓은 화면 ── */
+@media (min-width: 880px) {
+  .lp-hero { padding-block: var(--sp-8) var(--sp-8); }
+  .lp-hero-grid { grid-template-columns: 1.1fr 0.9fr; gap: var(--sp-7); }
+  .lp-cards-3 { grid-template-columns: repeat(3, 1fr); }
+  .lp-steps { grid-template-columns: 1fr 1fr; }
+  .lp-section, .lp-final { padding-block: var(--sp-8); }
+}

@@ -18,6 +18,17 @@ export default function Home() {
       .catch(() => { /* 이메일 폼만 — 위 주석 */ });
     return () => { alive = false; };
   }, []);
+  // 해시가 화면을 고른다(2026-10-08 — 랜딩의 CTA 가 `#signup` · `#login`). 이미 열려 있는 동안 주소창에서 해시만
+  // 바뀌어도(새로고침 없이) 따라간다. 화면 안의 전환(go)은 replaceState 라 이 이벤트를 내지 않는다.
+  useEffect(() => {
+    const onHash = () => {
+      const h = window.location.hash;
+      if (h === "#signup") setScreen("signup");
+      else if (h === "#login") setScreen("login");
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   const go = (next: AccountScreen) => {
     if (next === "login" || next === "signup") {
       setScreen(next);
@@ -32,7 +43,10 @@ export default function Home() {
       <p className="acct-lede">창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 홍보 준비까지 이어가세요.</p>
       <p>직접 입력한 사업 정보는 본인 계정에서만 확인할 수 있습니다.</p>
       {/* 구글 OAuth 앱 게시는 홈페이지에서 처리방침으로 가는 링크를 요구한다(docs/runbook-custom-domain-placeos-kr-2026-10-08.md §5). */}
-      <p className="acct-muted home-policy"><a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침 (새 창)</a></p>
+      <p className="acct-muted home-policy">
+        <a href="#">← PlaceOS 소개</a>{" · "}
+        <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침 (새 창)</a>
+      </p>
     </header>
     <section aria-label="계정 시작">{screen === "signup"
       ? <Signup go={go} googleClientId={google} />

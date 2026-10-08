@@ -1,5 +1,10 @@
 # PRD — PlaceOS 랜딩 페이지 (Lovable 입력본)
 
+> **⚠ 2026-10-08 — 이 문서는 독자가 투자자다(09-07).** 로그인 전 첫 화면으로 실제로 나간 랜딩은 **창업자**를 독자로 한
+> 별개의 것이다 → [spec-landing-founders-2026-10-08.md](spec-landing-founders-2026-10-08.md) · `apps/frontend/src/pages/Landing.tsx`.
+> 투자자용 랜딩이 필요해지면 이 문서를 쓰되, 아래 §3 의 숫자(66거점·664유닛·연남동 1,133동 등)는 **09-07 값이라 낡았다**
+> (거점은 지금 81) — 인용 전에 `python scripts/pppp_status.py` 로 다시 잴 것.
+
 > **위치**: D2 산출물. [plan-design-upgrade-2026-09.md](plan-design-upgrade-2026-09.md) §5-1 이 지정한 두 PRD 중 **랜딩** 쪽.
 > 앱 PRD(`docs/prd-app.md`)는 별도이고 양식이 다르다([prompt-ux-screen-spec.md](prompt-ux-screen-spec.md) §3).
 > **용법**: 이 문서를 Lovable 에 통째로 붙여넣는다. 붙여넣기용 축약 프롬프트는 §10.

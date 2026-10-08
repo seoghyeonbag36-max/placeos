@@ -1,5 +1,7 @@
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
+import Landing from "@/pages/Landing";
+import { IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import type { TrackKey } from "@/design/tokens/colors";
 import PageDashboard from "@/pages/PageDashboard";
@@ -342,66 +344,12 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   );
 }
 
-/* 레일 아이콘 — 라이브러리를 더 붙이지 않는다(지도 SDK 만으로도 이미 무겁다).
-   currentColor 라 활성/비활성 색이 버튼 상태 하나로 따라온다. */
-const SVG = {
-  fill: "none", stroke: "currentColor", strokeWidth: 1.7,
-  strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
-  viewBox: "0 0 24 24", "aria-hidden": true,
-};
+/* 레일 아이콘은 components/TrackIcons.tsx 로 옮겼다(2026-10-08 — 랜딩이 같은 그림을 쓴다). */
 
-/* Platform — 모델(LSTM·GNN) 축을 뜻하는 노드+스파크 */
-function IconSpark() {
-  return (
-    <svg {...SVG}>
-      <circle cx="6" cy="17" r="2.2" />
-      <circle cx="12.5" cy="9" r="2.2" />
-      <circle cx="19" cy="15" r="2.2" />
-      <path d="m7.6 15.3 3.5-4.4m3 .3 3.3 3" />
-    </svg>
-  );
-}
-
-function IconPin() {
-  return (
-    <svg {...SVG}>
-      <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
-      <circle cx="12" cy="10" r="2.6" />
-    </svg>
-  );
-}
-
-/* Posting — 빈 자리에 들어간다는 뜻의 열쇠 */
-function IconKey() {
-  return (
-    <svg {...SVG}>
-      <circle cx="8" cy="15" r="3.4" />
-      <path d="m10.5 12.5 8-8" />
-      <path d="m16.5 6.5 2 2" />
-      <path d="m14 9 2 2" />
-    </svg>
-  );
-}
-
-/* 계정 — 사람 머리와 어깨 */
-function IconUser() {
-  return (
-    <svg {...SVG}>
-      <circle cx="12" cy="8" r="3.6" />
-      <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
-    </svg>
-  );
-}
-
-function IconMegaphone() {
-  return (
-    <svg {...SVG}>
-      <path d="M4 10v4a1 1 0 0 0 1 1h3l7 4V5L8 9H5a1 1 0 0 0-1 1Z" />
-      <path d="M18.5 9.5a3.5 3.5 0 0 1 0 5" />
-    </svg>
-  );
-}
-
+/** 로그아웃 상태에서 가입·로그인 화면(Home)을 내는 해시. 이 밖의 해시(없음 · #how 같은 랜딩 앵커)는 랜딩이다.
+ *  #account · #feedback 도 포함하는 이유: 로그아웃·세션 만료 직후 해시가 그대로 남아 있어, 랜딩으로 보내면
+ *  방금 쓰던 사람이 로그인 화면이 아니라 소개 페이지를 만난다(그전에는 늘 Home 이었다). */
+const AUTH_HASHES = new Set(["#login", "#signup", "#account", "#feedback"]);
 
 /** 계정이 바뀌면 작업 화면을 다시 마운트한다. */
 export default function App() {
@@ -412,9 +360,11 @@ export default function App() {
   // #admin 은 로그인 전에도 열린다(2026-10-05). 관리자 API 는 계정과 무관하게 X-Admin-Token 만 보는데,
   // 이 해시 분기가 로그인 뒤에만 서는 WorkspaceApp 안에 있어 계정 없는 운영자는 화면에 못 들어왔다.
   // 로그인 상태의 경로(WorkspaceApp 의 isAdmin)는 그대로 둔다 — 작업 화면 상태를 지키려고 언마운트하지 않는다.
-  const [adminHash, setAdminHash] = useState(() => window.location.hash === "#admin");
+  // 로그아웃 상태의 화면(랜딩 · 가입/로그인 · 관리자)도 같은 해시가 가른다(2026-10-08). 랜딩의 CTA 가 `#signup` · `#login` 이다.
+  const [hash, setHash] = useState(() => window.location.hash);
+  const adminHash = hash === "#admin";
   useEffect(() => {
-    const onHash = () => setAdminHash(window.location.hash === "#admin");
+    const onHash = () => setHash(window.location.hash);
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -433,7 +383,10 @@ export default function App() {
     });
     return () => { alive = false; };
   }, [token, retry]);
-  if (!token) return adminHash ? <AdminCoverage /> : <Home />;
+  if (!token) {
+    if (adminHash) return <AdminCoverage />;
+    return AUTH_HASHES.has(hash) ? <Home /> : <Landing />;
+  }
   if (!workspace) return <main className="acct"><h1>PlaceOS</h1><p role="status">{error || "내 사업 정보 불러오는 중…"}</p>
     {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>다시 시도</Button>}
     <Button variant="ghost" onClick={clearToken}>로그인 화면으로</Button></main>;
