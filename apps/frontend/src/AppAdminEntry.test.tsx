@@ -21,7 +21,9 @@ vi.mock("@/lib/api", async (original) => ({
 }));
 
 const ADMIN_HEADING = "PlaceOS 관리자";   // 관리자 콘솔 제목(AdminCoverage.tsx) — 바꾸면 이 줄과 AppAuth.test.tsx 를 같이 고친다
+// 로그아웃 첫 화면은 랜딩이다(2026-10-08 — pages/Landing.tsx). 가입·로그인(Home)은 #login · #signup 으로 든다.
 const HOME_HEADING = /내 사업의 시작/;
+const LANDING_HEADING = /어느 건물 몇 층이 비었는지/;
 const goTo = (hash: string) => act(() => {
   window.location.hash = hash;
   window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -43,17 +45,17 @@ it("로그아웃 상태로 #admin 을 열면 관리자 화면이 뜬다 — 계�
   expect(getBusinessWorkspace).not.toHaveBeenCalled();
 });
 
-it("이미 열린 화면에서 해시만 바뀌어도(새로고침 없이) 홈 ↔ 관리자를 따라간다", async () => {
+it("이미 열린 화면에서 해시만 바뀌어도(새로고침 없이) 랜딩 ↔ 관리자를 따라간다", async () => {
   render(<App />);
-  expect(screen.getByRole("heading", { name: HOME_HEADING })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: LANDING_HEADING })).toBeTruthy();
   goTo("#admin");
   expect(await screen.findByRole("heading", { name: ADMIN_HEADING })).toBeTruthy();
   goTo("");
-  expect(await screen.findByRole("heading", { name: HOME_HEADING })).toBeTruthy();
+  expect(await screen.findByRole("heading", { name: LANDING_HEADING })).toBeTruthy();
 });
 
-it("#admin 이 아니면 로그인 전 첫 화면은 그대로 홈이다 — 관리자 화면이 새어 나오지 않는다", () => {
+it("#admin 이 아니면 로그인 전 첫 화면은 랜딩이다 — 관리자 화면이 새어 나오지 않는다", () => {
   render(<App />);
-  expect(screen.getByRole("heading", { name: HOME_HEADING })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: LANDING_HEADING })).toBeTruthy();
   expect(screen.queryByRole("heading", { name: ADMIN_HEADING })).toBeNull();
 });
