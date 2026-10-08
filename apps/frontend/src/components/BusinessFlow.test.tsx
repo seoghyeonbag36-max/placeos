@@ -74,6 +74,8 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     const table = screen.getByRole("table", { name: /카페·디저트 기준 상권 순위/ });
     expect(within(table).getByRole("button", { name: "연남동 상권 보기" })).toBeTruthy();
     expect(screen.getByText(/매출·생존율이 아닙니다/)).toBeTruthy();
+    // 상세 출처는 접혀 있어도 필수 해석 안내와 상권 이동은 유지된다.
+    expect(screen.getByRole("button", { name: "데이터 기준·출처", expanded: false })).toBeTruthy();
 
     // 칩이 목적과 업종을 말하고, 카드가 접혔고, 서버 저장 요청에 남았다
     expect(screen.getByRole("button", { name: /카페·디저트 창업/ })).toBeTruthy();
@@ -115,6 +117,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(mineRow.textContent).toContain("지금");
     expect(within(mineRow).queryByRole("button")).toBeNull();   // 지금 업종으로는 계산 버튼이 없다
     expect(within(table).getByText("모델 밖")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "데이터 기준·출처", expanded: false })).toBeTruthy();
 
     fireEvent.click(within(table).getByRole("button", { name: "카페·디저트로 입점 계산" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
