@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Login from "./Login";
 import Signup from "./Signup";
 import type { AccountScreen } from "@/components/AccountDialog";
+import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import { getAuthProviders } from "@/lib/api";
 import "./Account.css";
 
@@ -30,6 +31,8 @@ export default function Home() {
       <h1>내 사업의 시작,<br />내게 맞는 상권에서.</h1>
       <p className="acct-lede">창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 홍보 준비까지 이어가세요.</p>
       <p>직접 입력한 사업 정보는 본인 계정에서만 확인할 수 있습니다.</p>
+      {/* 구글 OAuth 앱 게시는 홈페이지에서 처리방침으로 가는 링크를 요구한다(docs/runbook-custom-domain-placeos-kr-2026-10-08.md §5). */}
+      <p className="acct-muted home-policy"><a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침 (새 창)</a></p>
     </header>
     <section aria-label="계정 시작">{screen === "signup"
       ? <Signup go={go} googleClientId={google} />

@@ -16,9 +16,20 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="PlaceOS" />
     <title>PlaceOS — 상권 디지털 트윈</title>
+    <meta name="description" content="창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 검증 program 준비까지 이어가는 PlaceOS 작업 공간." />
   </head>
   <body>
     <div id="root"></div>
+    <!-- JS 를 못 돌리는 방문자·크롤러용. 화면은 React 가 그리지만, 홈페이지에서 처리방침으로 가는 링크는
+         JS 없이도 보여야 한다(구글 OAuth 앱 게시 요건). -->
+    <noscript>
+      <main style="max-width:640px;margin:48px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.6">
+        <h1>PlaceOS</h1>
+        <p>창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 검증 program 준비까지 이어가는 작업 공간입니다.
+           이 서비스는 JavaScript 가 켜져 있어야 쓸 수 있습니다.</p>
+        <p><a href="/privacy.html">개인정보 처리방침</a></p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

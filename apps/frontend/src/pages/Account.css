@@ -165,6 +165,9 @@
 .acct-alt[open] > summary { margin-bottom: var(--sp-2); }
 .acct-hint { margin: var(--sp-3) 0 0; }
 .acct-privacy { margin: var(--sp-4) 0 0; }
+/* 처리방침 링크 — 홈 첫 화면과 가입·로그인 안내문 둘 다 같은 모양(2026-10-08) */
+.acct-privacy a, .home-policy a { color: var(--brand-pressed); text-underline-offset: 2px; }
+.acct-privacy a:focus-visible, .home-policy a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .acct-leave { margin-top: var(--sp-5); padding-top: var(--sp-4); border-top: 1px solid var(--line); }
 .acct-leave > p { margin: 0 0 var(--sp-3); }
 .acct-leave .acct-error { margin-top: var(--sp-2); }
