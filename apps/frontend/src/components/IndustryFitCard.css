@@ -2,8 +2,11 @@
 
 .fitcard {
   display: grid; gap: var(--sp-2);
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  container: industry-fit / inline-size;
   margin: 0 0 var(--sp-4);
-  padding: 14px 16px;
+  padding: var(--sp-3) var(--sp-4);
   background: var(--track-platform-soft);
   border: 1px solid color-mix(in srgb, var(--track-platform) 30%, var(--line));
   border-radius: var(--radius-md, 12px);
@@ -19,7 +22,7 @@
 .fitcard :is(button):focus-visible { outline: 2px solid var(--track-platform); outline-offset: 2px; }
 
 .fit-eyebrow { font-size: 11px; font-weight: var(--fw-bold, 700); letter-spacing: .04em; color: var(--track-platform); }
-.fitcard h2 { margin: 0; font-size: 17px; line-height: 1.4; font-weight: var(--fw-bold, 700); text-wrap: balance; }
+.fitcard h2 { margin: 0; font-size: 17px; line-height: 1.4; font-weight: var(--fw-bold, 700); text-wrap: balance; overflow-wrap: anywhere; }
 .fitcard h2 b { color: var(--track-platform); }
 .fit-sub { font-weight: var(--fw-semibold, 600); }
 .fit-muted { color: var(--muted); font-weight: var(--fw-regular, 400); font-size: 13px; }
@@ -29,25 +32,56 @@
 .fit-loading { color: var(--muted); }
 .fit-note { margin: 0; font-size: var(--fs-caption, 12px); line-height: var(--lh-caption, 1.45); color: var(--muted); }
 .fit-src { margin: 0; font-size: 11px; color: var(--muted); }
+.fit-source-disclosure { min-width: 0; }
+.fit-source-toggle {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  max-width: 100%; text-align: left;
+  min-height: 44px; padding: var(--sp-2); border: 1px solid var(--line);
+  border-radius: var(--radius-md, 12px); background: var(--surface);
+  color: var(--track-platform); font: inherit; font-size: var(--fs-caption, 12px);
+  cursor: pointer;
+}
+.fit-source-toggle:hover { background: var(--track-platform-soft); }
+.fit-help-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  width: 1.4em; height: 1.4em; border: 1px solid currentColor; border-radius: 50%;
+  font-weight: var(--fw-semibold, 600);
+}
+.fit-source-disclosure .fit-src {
+  margin-top: var(--sp-2); padding: var(--sp-2);
+  line-height: var(--lh-caption, 1.45); overflow-wrap: anywhere;
+}
+.fit-source-toggle > span:last-child { margin-left: auto; flex-shrink: 0; }
 
-.fit-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; }
-.fit-facts > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+/* 뷰포트 대신 카드의 실제 가용 폭을 기준으로 지표를 배치한다. */
+.fit-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; }
+.fit-facts > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: var(--sp-2); min-width: 0; }
 .fit-facts dt { font-size: 11px; color: var(--muted); }
-.fit-facts dd { margin: 0; font-size: 13px; font-weight: var(--fw-bold, 700); font-variant-numeric: tabular-nums; }
+.fit-facts dd { margin: 0; font-size: 13px; font-weight: var(--fw-bold, 700); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .fit-facts dd small { display: block; font-size: 10.5px; font-weight: var(--fw-regular, 400); color: var(--muted); }
 
-.fit-table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.fit-table-wrap { min-width: 0; max-width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
 .fit-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .fit-table caption { text-align: left; padding: 8px 10px 4px; font-size: 12px; font-weight: var(--fw-semibold, 600); color: var(--muted); }
 .fit-table th, .fit-table td { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: middle; }
 .fit-table thead th { font-size: 11px; font-weight: var(--fw-semibold, 600); color: var(--muted); white-space: nowrap; }
-.fit-table tbody th { font-weight: var(--fw-semibold, 600); }
+.fit-table tbody th { min-width: 6em; font-weight: var(--fw-semibold, 600); word-break: keep-all; }
 .fit-table tbody th small { display: block; font-size: 10.5px; font-weight: var(--fw-regular, 400); color: var(--muted); }
 .fit-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fit-table tr.is-current { background: color-mix(in srgb, var(--track-platform) 7%, var(--surface)); }
-.fit-tag { font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: var(--fw-bold, 700); background: var(--track-platform); color: var(--on-accent); }
+.fit-tag { display: inline-block; white-space: nowrap; font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: var(--fw-bold, 700); background: var(--track-platform); color: var(--on-accent); }
 .fit-here { font-size: 11px; color: var(--muted); white-space: nowrap; }
 
 @media (max-width: 560px) {
-  .fit-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fitcard { padding: var(--sp-3); }
+  .fit-source-toggle { width: 100%; }
+}
+
+@container industry-fit (min-width: 44rem) {
+  .fit-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container industry-fit (max-width: 20rem) {
+  .fit-facts { grid-template-columns: minmax(0, 1fr); }
+  .fit-source-toggle { width: 100%; }
 }

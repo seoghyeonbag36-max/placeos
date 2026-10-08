@@ -55,6 +55,24 @@ function Eyebrow({ goal }: { goal: BusinessProfile["goal"] }) {
   return <div className="fit-eyebrow">내 업종으로 본 상권 · {GOALS.find((g) => g.key === goal)?.label}</div>;
 }
 
+/** 상세 출처만 접는다. 원문과 필수 해석 안내는 바꾸지 않는다. */
+function SourceDisclosure({ source }: { source: string }) {
+  const contentId = useId();
+  const [open, setOpen] = useState(false);
+  if (!source?.trim()) return null;
+  return (
+    <div className="fit-source-disclosure">
+      <button type="button" className="fit-source-toggle" aria-expanded={open}
+        aria-controls={contentId} onClick={() => setOpen((value) => !value)}>
+        <span className="fit-help-icon" aria-hidden="true">?</span>
+        데이터 기준·출처
+        <span aria-hidden="true">{open ? "▴" : "▾"}</span>
+      </button>
+      <p id={contentId} className="fit-src" hidden={!open}>{source}</p>
+    </div>
+  );
+}
+
 /* ── 창업 · 상권 옮기기: 상권 순위 ─────────────────────────────────────────── */
 
 function DistrictRankCard({ business, ind, districtId, districts, onDistrictChange }: CardProps) {
@@ -146,7 +164,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
           </table>
         </div>
       )}
-      <p className="fit-src">{fit.source}</p>
+      <SourceDisclosure key={ind.key} source={fit.source} />
     </section>
   );
 }
@@ -247,7 +265,7 @@ function PivotCard({ business, ind, districtId, districts, onDistrictChange, onT
           </tbody>
         </table>
       </div>
-      <p className="fit-src">{mix.source}</p>
+      <SourceDisclosure key={districtId} source={mix.source} />
     </section>
   );
 }
