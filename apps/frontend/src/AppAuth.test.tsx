@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
-import { clearToken, saveToken } from "@/lib/session";
+import { clearToken, saveToken, loadToken } from "@/lib/session";
+import { installFetchStub } from "@/test/fetchStub";
 import { getBusinessWorkspace, login, listIndustries, listDistricts } from "@/lib/api";
 import type { BusinessState } from "@/lib/businessProfile";
 
@@ -18,6 +19,31 @@ beforeEach(() => {
   vi.mocked(getBusinessWorkspace).mockReset();
   vi.mocked(listIndustries).mockResolvedValue({ industries: [] });
   vi.mocked(listDistricts).mockResolvedValue([]);
+});
+
+it("해시 없는 소셜 callback도 랜딩 대신 로그인 교환을 처리하고 내 사업 화면을 연다", async () => {
+  vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
+  sessionStorage.setItem("placeos.social-login.v1", JSON.stringify({ provider: "naver", state: "mock-state", verifier: "v".repeat(43) }));
+  window.history.replaceState(null, "", "/?social=naver&code=mock-code&state=mock-state");
+  const api = installFetchStub([{ match: /\/social\/naver\/callback$/, body: { access_token: "social-user", token_type: "bearer" } }]);
+  render(<App />);
+  expect(await screen.findByLabelText("사업 이름 (선택)")).toBeTruthy();
+  expect(loadToken()).toBe("social-user");
+  expect(getBusinessWorkspace).toHaveBeenCalledWith("social-user");
+  expect(api.count(/\/social\/naver\/callback$/)).toBe(1);
+  expect(window.location.search).toBe("");
+});
+
+it("기존 세션의 사업 정보가 도착해도 소셜 callback을 중단하지 않는다", async () => {
+  vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
+  saveToken("previous-user");
+  sessionStorage.setItem("placeos.social-login.v1", JSON.stringify({ provider: "kakao", state: "mock-state", verifier: "v".repeat(43) }));
+  window.history.replaceState(null, "", "/?social=kakao&code=mock-code&state=mock-state");
+  installFetchStub([{ match: /\/social\/kakao\/callback$/, body: { access_token: "next-user", token_type: "bearer" } }]);
+  render(<App />);
+  await waitFor(() => expect(loadToken()).toBe("next-user"));
+  expect(getBusinessWorkspace).toHaveBeenCalledWith("previous-user");
+  expect(getBusinessWorkspace).toHaveBeenCalledWith("next-user");
 });
 afterEach(() => { clearToken(); window.location.hash = ""; });
 

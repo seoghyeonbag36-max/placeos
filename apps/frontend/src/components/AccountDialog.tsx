@@ -18,6 +18,7 @@ export interface AccountScreenProps {
   /** 구글 로그인 클라이언트 ID(2026-10-05). 있으면 로그인·가입 화면이 구글 버튼을 먼저 그린다.
    *  첫 화면(Home)이 `/auth/providers` 로 한 번 물어 넘긴다 — 화면마다 따로 묻지 않는다. */
   googleClientId?: string | null;
+  socialProviders?: { naver_enabled?: boolean; kakao_enabled?: boolean };
 }
 
 /** 각 화면의 제목 h2 가 쓰는 id — 대화상자의 접근 가능한 이름이 된다 */

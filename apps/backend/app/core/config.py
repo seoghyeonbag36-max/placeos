@@ -68,6 +68,13 @@ class Settings(BaseSettings):
     # 그대로 싣는다. 클라이언트 비밀(secret)은 쓰지 않는다: ID 토큰 흐름은 서버가 구글 공개키로
     # 서명만 확인한다(services/google_auth.py · docs/decision-lightweight-first-2026-10-05.md §1).
     google_client_id: str = ""
+    # 로그인 전용 키. 지도·검색·수집 키와 공유하지 않는다. 미설정 시 버튼과 API를 끈다.
+    naver_login_client_id: str = ""
+    naver_login_client_secret: str = ""
+    naver_login_redirect_uri: str = ""
+    kakao_login_client_id: str = ""
+    kakao_login_client_secret: str = ""
+    kakao_login_redirect_uri: str = ""
     # CORS 허용 오리진
     cors_origins: list[str] = ["http://localhost:5173"]
     # LLM API (PPPP 마케팅 콘텐츠 생성)

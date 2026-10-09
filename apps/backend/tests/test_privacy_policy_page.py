@@ -40,6 +40,7 @@ TABLE_TO_POLICY_WORD = {
     "business_workspaces": "사업 정보",
     "revoked_tokens": "로그아웃",
     "pilot_feedback": "피드백",
+    "social_identities": "고유 사용자 ID",
 }
 
 

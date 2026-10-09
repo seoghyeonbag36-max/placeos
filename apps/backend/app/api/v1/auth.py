@@ -9,6 +9,7 @@ districts·ai·...)는 이 라우터와 무관하게 그대로 공개로 남는�
 구글 계정으로 들어오게 한다(docs/decision-lightweight-first-2026-10-05.md §1).
 """
 from __future__ import annotations
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
@@ -21,8 +22,9 @@ from app.schemas.auth import (
     ApiKeyCreatedResponse, ApiKeyCreateRequest, ApiKeyOut, AuthProviders, GoogleLoginRequest,
     LoginRequest, MeResponse, OrgOut, SignupRequest, TokenResponse, BusinessWorkspaceData,
     SavedResultIn, SavedResultOut,
+    SocialStartRequest, SocialStartResponse, SocialLoginRequest,
 )
-from app.services import auth_service, business_workspace, google_auth, rate_limit
+from app.services import auth_service, business_workspace, google_auth, rate_limit, social_auth
 
 router = APIRouter()
 
@@ -73,9 +75,50 @@ def login(req: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
 
 
 @router.get("/providers", response_model=AuthProviders)
-def providers() -> AuthProviders:
+def providers(response: Response) -> AuthProviders:
     """화면이 어떤 로그인 수단을 그릴지. 설정이 비어 있으면 구글 버튼을 그리지 않는다."""
-    return AuthProviders(google_client_id=settings.google_client_id or None)
+    response.headers["Cache-Control"] = "no-store"
+    return AuthProviders(google_client_id=settings.google_client_id or None,
+                         naver_enabled=social_auth.enabled("naver"), kakao_enabled=social_auth.enabled("kakao"))
+
+
+@router.post("/social/{provider}/start", response_model=SocialStartResponse)
+def social_start(provider: Literal["naver", "kakao"], req: SocialStartRequest,
+                 response: Response) -> SocialStartResponse:
+    if not social_auth.enabled(provider):
+        raise HTTPException(404, "이 로그인 수단이 설정되지 않았습니다")
+    response.headers["Cache-Control"] = "no-store"
+    return SocialStartResponse(**social_auth.start(provider, req.org_name))
+
+
+@router.post("/social/{provider}/callback", response_model=TokenResponse)
+def social_callback(provider: Literal["naver", "kakao"], req: SocialLoginRequest,
+                    response: Response, db: Session = Depends(get_db)) -> TokenResponse:
+    if not social_auth.enabled(provider):
+        raise HTTPException(404, "이 로그인 수단이 설정되지 않았습니다")
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        social_auth.validate_state(provider, req.state, req.verifier)
+        identity = social_auth.exchange(provider, req.code, req.state)
+    except social_auth.SocialAuthInvalid:
+        raise HTTPException(401, "로그인 요청을 확인하지 못했습니다. 로그인 버튼부터 다시 시작해 주세요")
+    except social_auth.SocialAuthUnavailable:
+        raise HTTPException(503, "인증 서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요")
+    try:
+        token, created = auth_service.login_with_social(db, identity.provider, identity.subject, identity.email, req.org_name)
+    except auth_service.SocialEmailRequired:
+        raise HTTPException(422, "첫 가입에는 이메일 제공 동의가 필요합니다. 계정의 이메일을 확인한 뒤 다시 시도해 주세요")
+    except auth_service.SocialSchemaUnavailable:
+        raise HTTPException(503, "로그인 저장소 준비가 완료되지 않았습니다. 운영자가 DB 마이그레이션을 적용해야 합니다")
+    except auth_service.EmailAlreadyRegistered:
+        raise HTTPException(409, "같은 이메일의 계정이 있습니다. 기존 가입 수단으로 로그인해 주세요. 계정을 자동 연결하지 않습니다")
+    except auth_service.InvalidCredentials:
+        raise HTTPException(401, "로그인을 확인하지 못했습니다")
+    except auth_service.SignupRateLimited as exc:
+        raise _too_many(exc.retry_after, _SIGNUP_LIMITED)
+    if created:
+        response.status_code = 201
+    return TokenResponse(access_token=token)
 
 
 @router.post("/google", response_model=TokenResponse)

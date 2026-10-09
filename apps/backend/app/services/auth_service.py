@@ -8,14 +8,15 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, select, update, inspect
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.core.security import (
     UNUSABLE_PASSWORD, generate_api_key, has_usable_password, hash_api_key, hash_password,
     issue_access_token, verify_password,
 )
-from app.models.auth import ApiKey, AuditLog, BusinessWorkspace, Membership, Org, User
+from app.models.auth import ApiKey, AuditLog, BusinessWorkspace, Membership, Org, User, SocialIdentity
 from app.models.feedback import PilotFeedback
 from app.services import rate_limit
 
@@ -30,6 +31,19 @@ class EmailAlreadyRegistered(Exception):
 
 class InvalidCredentials(Exception):
     pass
+
+
+class SocialEmailRequired(Exception):
+    pass
+
+
+class SocialSchemaUnavailable(Exception):
+    pass
+
+
+def _has_social_schema(db: Session) -> bool:
+    """배포와 마이그레이션 사이에도 기존 인증·탈퇴를 유지한다. 값은 추정하지 않는다."""
+    return inspect(db.connection()).has_table(SocialIdentity.__tablename__)
 
 
 class ApiKeyNotFound(Exception):
@@ -127,6 +141,9 @@ def login_with_google(db: Session, email: str, org_name: str | None = None) -> t
         db.refresh(org)
         return issue_access_token(user, org), True
 
+    # 새 소셜 계정은 이메일만으로 구글과 연결하지 않는다. 기존 구글 계약은 유지한다.
+    if _has_social_schema(db) and db.execute(select(SocialIdentity.id).filter_by(user_id=user.id)).first():
+        raise InvalidCredentials(email)
     membership = db.execute(select(Membership).filter_by(user_id=user.id)).scalars().first()
     if membership is None:
         raise InvalidCredentials(email)
@@ -194,8 +211,50 @@ def delete_account(db: Session, user: User) -> None:
                .values(detail=""))
     db.execute(update(AuditLog).where(AuditLog.user_id == uid).values(user_id=None))
     db.execute(delete(Membership).where(Membership.user_id == uid))
+    if _has_social_schema(db):
+        db.execute(delete(SocialIdentity).where(SocialIdentity.user_id == uid))
     db.execute(delete(User).where(User.id == uid))
     db.commit()
+
+
+def login_with_social(db: Session, provider: str, subject: str, email: str | None,
+                      org_name: str | None = None) -> tuple[str, bool]:
+    """제공자·고유 ID로 로그인. 첫 가입의 이메일은 필수이며 자동 병합은 거부한다."""
+    if not _has_social_schema(db):
+        raise SocialSchemaUnavailable()
+    identity = db.execute(select(SocialIdentity).filter_by(provider=provider, subject=subject)).scalar_one_or_none()
+    if identity is not None:
+        user = db.get(User, identity.user_id)
+        membership = db.execute(select(Membership).filter_by(user_id=identity.user_id)).scalars().first()
+        if user is None or membership is None:
+            raise InvalidCredentials()
+        org = db.get(Org, membership.org_id)
+        if org is None:
+            raise InvalidCredentials()
+        db.add(AuditLog(org_id=org.id, user_id=user.id, action="login", detail=provider))
+        db.commit()
+        return issue_access_token(user, org), False
+    if not email:
+        raise SocialEmailRequired()
+    if db.execute(select(User.id).filter_by(email=email)).first():
+        raise EmailAlreadyRegistered()
+    _claim_signup_slot()
+    org = Org(name=(org_name or "").strip() or DEFAULT_ORG_NAME)
+    user = User(email=email, hashed_password=UNUSABLE_PASSWORD)
+    try:
+        db.add_all([org, user])
+        db.flush()
+        db.add_all([Membership(org_id=org.id, user_id=user.id, role="admin"),
+                    SocialIdentity(user_id=user.id, provider=provider, subject=subject),
+                    AuditLog(org_id=org.id, user_id=user.id, action="signup", detail=provider)])
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        # 동시 가입은 중복 조직을 남기지 않는다. 같은 ID가 이미 커밋됐다면 재로그인이다.
+        if db.execute(select(SocialIdentity.id).filter_by(provider=provider, subject=subject)).first():
+            return login_with_social(db, provider, subject, email, org_name)
+        raise EmailAlreadyRegistered() from exc
+    return issue_access_token(user, org), True
 
 
 # ── API 키 ─────────────────────────────────────────────────────────────────────

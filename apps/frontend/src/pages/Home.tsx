@@ -4,6 +4,7 @@ import Signup from "./Signup";
 import type { AccountScreen } from "@/components/AccountDialog";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import { getAuthProviders } from "@/lib/api";
+import type { AuthProviders } from "@/lib/api";
 import "./Account.css";
 
 export default function Home() {
@@ -11,10 +12,11 @@ export default function Home() {
   // 구글 로그인이 켜져 있는가(2026-10-05) — 서버 설정 하나(GOOGLE_CLIENT_ID)가 정한다. 못 물어보면
   // (서버 다운·옛 서버) 이메일 폼만 그린다. 구글 버튼이 없어도 들어올 길은 남아 있어야 한다.
   const [google, setGoogle] = useState<string | null>(null);
+  const [social, setSocial] = useState<AuthProviders | undefined>();
   useEffect(() => {
     let alive = true;
     getAuthProviders()
-      .then((p) => { if (alive) setGoogle(p.google_client_id ?? null); })
+      .then((p) => { if (alive) { setGoogle(p.google_client_id ?? null); setSocial(p); } })
       .catch(() => { /* 이메일 폼만 — 위 주석 */ });
     return () => { alive = false; };
   }, []);
@@ -49,7 +51,7 @@ export default function Home() {
       </p>
     </header>
     <section aria-label="계정 시작">{screen === "signup"
-      ? <Signup go={go} googleClientId={google} />
-      : <Login go={go} googleClientId={google} />}</section>
+      ? <Signup go={go} googleClientId={google} socialProviders={social} />
+      : <Login go={go} googleClientId={google} socialProviders={social} />}</section>
   </main>;
 }

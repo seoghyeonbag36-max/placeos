@@ -130,12 +130,12 @@ def test_unconfigured_client_id_rejects_everything():
 
 def test_providers_hides_google_when_unconfigured(monkeypatch):
     monkeypatch.setattr(settings, "google_client_id", "")
-    assert client.get(f"{V1}/auth/providers").json() == {"google_client_id": None}
+    assert client.get(f"{V1}/auth/providers").json()["google_client_id"] is None
     assert client.post(f"{V1}/auth/google", json={"credential": _id_token()}).status_code == 404
 
 
 def test_providers_exposes_public_client_id(google_on):
-    assert client.get(f"{V1}/auth/providers").json() == {"google_client_id": CLIENT_ID}
+    assert client.get(f"{V1}/auth/providers").json()["google_client_id"] == CLIENT_ID
 
 
 # ── 3. 가입·로그인 ──────────────────────────────────────────────────────────
