@@ -7,6 +7,7 @@
  */
 import { useEffect, useId, useRef, useState } from "react";
 import DistrictPicker from "@/components/DistrictPicker";
+import { IndustryDetailSelect } from "@/components/IndustryDetailFields";
 import type { DistrictSummary, IndustryOption } from "@/lib/api";
 import { GOALS, businessChipText, toward, type BusinessGoal, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { isEditableTarget } from "@/lib/keyboard";
@@ -36,6 +37,8 @@ export default function BusinessSetup({
   const [industryKey, setIndustryKey] = useState<string | null>(saved?.industryKey ?? null);
   // 바꾸기만 — 바꿀 업종(선택). Posting·Program 의 업종 기본값이 된다(lib/businessProfile.workIndustryKey).
   const [targetKey, setTargetKey] = useState<string | null>(saved?.targetIndustryKey ?? null);
+  const [detailKey, setDetailKey] = useState(saved?.industryDetailKey ?? "");
+  const [targetDetail, setTargetDetail] = useState(saved?.targetIndustryDetailKey ?? "");
   const [home, setHome] = useState<string>(saved?.homeDistrictId ?? districtId);
   const [businessName, setBusinessName] = useState(saved?.businessName ?? "");
   const [description, setDescription] = useState(saved?.description ?? "");
@@ -48,6 +51,7 @@ export default function BusinessSetup({
       setGoal(saved?.goal ?? null);
       setIndustryKey(saved?.industryKey ?? null);
       setTargetKey(saved?.targetIndustryKey ?? null);
+      setDetailKey(saved?.industryDetailKey ?? ""); setTargetDetail(saved?.targetIndustryDetailKey ?? "");
       setHome(saved?.homeDistrictId ?? districtId);
       setBusinessName(saved?.businessName ?? "");
       setDescription(saved?.description ?? "");
@@ -124,14 +128,16 @@ export default function BusinessSetup({
                 {list.map((i) => (
                   <label key={i.key} className={"biz-ind" + (industryKey === i.key ? " on" : "")}>
                     <input type="radio" name={`${cardId}-ind`} value={i.key} checked={industryKey === i.key}
-                      onChange={() => setIndustryKey(i.key)} />
+                      onChange={() => { setIndustryKey(i.key); setDetailKey(""); }} />
                     <b>{i.label}</b>
-                    {(!i.model_label || i.fit_unavailable_reason) && <small>상권 비교만</small>}
+                    {(!i.model_label || i.fit_unavailable_reason) && <small title={i.fit_unavailable_reason ?? "추천 모델이 다루지 않는 업종"}>추천 순위 미제공</small>}
                   </label>
                 ))}
               </div>
             )}
           </fieldset>
+
+          {industryKey && <IndustryDetailSelect parent={industryKey} value={detailKey} onChange={setDetailKey} />}
 
           {goal === "pivot" && list && (
             <fieldset className="biz-inds">
@@ -140,19 +146,20 @@ export default function BusinessSetup({
               <div className="biz-ind-grid">
                 <label className={"biz-ind" + (target === null ? " on" : "")}>
                   <input type="radio" name={`${cardId}-target`} value="" checked={target === null}
-                    onChange={() => setTargetKey(null)} />
+                    onChange={() => { setTargetKey(null); setTargetDetail(""); }} />
                   <b>아직 모름</b>
                 </label>
                 {list.filter((i) => i.key !== industryKey).map((i) => (
                   <label key={i.key} className={"biz-ind" + (target === i.key ? " on" : "")}>
                     <input type="radio" name={`${cardId}-target`} value={i.key} checked={target === i.key}
-                      onChange={() => setTargetKey(i.key)} aria-label={`${toward(i.label)} 바꾸기`} />
+                      onChange={() => { setTargetKey(i.key); setTargetDetail(""); }} aria-label={`${toward(i.label)} 바꾸기`} />
                     <b>{i.label}</b>
                   </label>
                 ))}
               </div>
             </fieldset>
           )}
+          {goal === "pivot" && target && <IndustryDetailSelect parent={target} value={targetDetail} onChange={setTargetDetail} />}
 
           {needsHome && (
             <div className="biz-home">
@@ -167,7 +174,8 @@ export default function BusinessSetup({
             <button type="button" className="biz-start" disabled={!ready || saving}
               onClick={() => ready && onStart({ goal: goal!, industryKey: industryKey!, homeDistrictId: needsHome ? home : null,
                 businessName: businessName.trim() || null, description: description.trim() || null,
-                ...(goal === "pivot" ? { targetIndustryKey: target } : {}) })}>
+                ...(detailKey ? { industryDetailKey: detailKey } : {}),
+                ...(goal === "pivot" ? { targetIndustryKey: target, ...(target && targetDetail ? { targetIndustryDetailKey: targetDetail } : {}) } : {}) })}>
               시작
             </button>
             <button type="button" className="biz-browse" disabled={saving} onClick={onBrowse}>그냥 둘러보기</button>

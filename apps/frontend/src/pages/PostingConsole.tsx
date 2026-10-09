@@ -13,6 +13,7 @@ import { mapLabelHTML, shortManwon } from "@/design/components/MapMarkerPin";
 import { colors } from "@/design/tokens/colors";
 import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { type Ground } from "@/components/Verdict";
+import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult, IndustryCompetitionPanel } from "@/components/IndustryDetailFields";
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
 
@@ -58,21 +59,23 @@ interface PostingConsoleProps {
   onMakeProgram?: (handoff: ProgramHandoff) => void;
   /** 「내 사업」 업종의 입력어(화면설계서 3판). 업종칸의 기본값이다 — 상권·자리를 바꾸면 빈칸이 아니라 이 값으로 돌아간다. */
   defaultIndustry?: string;
+  defaultDetailKey?: string;
   /** Platform 업종 바꾸기 표 「이 업종으로 입점 계산 →」. 있으면 `defaultIndustry` 보다 앞선다. */
   industryRequest?: { input: string; requestId: number };
 }
 interface Calculation {
   result: SimulateResult;
-  input: { district_id: string; unit_id: string; industry_type?: string; strategy?: string; prem?: number };
+  input: { district_id: string; unit_id: string; industry_type?: string; strategy?: string; prem?: number;
+    industry_detail_key?: string; operating_inputs?: Record<string, number> };
 }
 
-export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, industryRequest }: PostingConsoleProps = {}) {
-  return <PostingSession key={`${selection ? `${selection.districtId}:${selection.buildingId}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}`}
+export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest }: PostingConsoleProps = {}) {
+  return <PostingSession key={`${selection ? `${selection.districtId}:${selection.buildingId}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}|${defaultIndustry ?? ""}|${defaultDetailKey ?? ""}`}
     selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram}
-    defaultIndustry={defaultIndustry} industryRequest={industryRequest} />;
+    defaultIndustry={defaultIndustry} defaultDetailKey={defaultDetailKey} industryRequest={industryRequest} />;
 }
 
-function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, defaultIndustry, industryRequest }: PostingConsoleProps) {
+function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest }: PostingConsoleProps) {
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
   const [ownDistrict, setOwnDistrict] = useState(selection?.districtId ?? sharedDistrict ?? DEFAULT_DISTRICT);
   const controlled = sharedDistrict !== undefined && onDistrictChange !== undefined;
@@ -87,6 +90,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const baseIndustry = industryRequest?.input ?? defaultIndustry ?? "";
   const baseSource = industryRequest ? "Platform 에서 고른 업종으로 채웠습니다" : defaultIndustry ? "내 사업 기준으로 채웠습니다" : "";
   const [industry, setIndustry] = useState(baseIndustry);
+  const [detailKey, setDetailKey] = useState(industryRequest ? "" : defaultDetailKey ?? "");
+  const [operating, setOperating] = useState<Record<string, string>>({});
   const [prem, setPrem] = useState("");
   const [strategy, setStrategy] = useState("");
   const [recs, setRecs] = useState<IndustryRec[] | null>(null);
@@ -136,11 +141,13 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   function chooseDistrict(id: string) {
     clearCalculation(); setUnits([]); setUnitId(""); setRecs(null); setHandoffNote("");
     setIndustry(baseIndustry); setPrem(""); setStrategy(""); setDistrictId(id);
+    setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
   }
 
   function chooseUnit(id: string) {
     clearCalculation(); setRecs(null); setErr(null);
     setIndustry(baseIndustry); setPrem(""); setStrategy(""); setUnitId(id);
+    setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
     setHandoffNote("");
   }
 
@@ -148,6 +155,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   useEffect(() => {
     let live = true;
     setUnits([]); setUnitId(""); setRecs(null); setErr(null);
+    setOperating({}); setCalculation(null); setPrevious(null); setBusy(false);
+    lastCalculation.current = null; requestSerial.current += 1;
     getPostings(districtId)
       .then((p) => {
         if (!live) return;
@@ -200,13 +209,19 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         strategy: strategy || undefined,
         prem: Number.isFinite(parsed as number) ? (parsed as number) : undefined,
       };
+      if (detailKey) {
+        input.industry_detail_key = detailKey;
+        input.operating_inputs = Object.fromEntries(Object.entries(operating).filter(([, v]) => v.trim() !== "").map(([k, v]) => [k, Number(v)]));
+        if (Object.values(input.operating_inputs).some((v) => !Number.isFinite(v))) throw new Error("운영 조건에 유효한 숫자를 입력해 주세요.");
+        input.prem = undefined; input.strategy = undefined;
+      }
       const r = await simulateRevenue(input);
       if (serial !== requestSerial.current) return;
       // 서버가 유닛을 찾지 못하면 첫 유닛으로 폴백할 수 있어 응답도 대조한다.
       if (r.district_id !== input.district_id || r.unit_id !== input.unit_id) throw new Error("선택한 자리와 계산 응답이 일치하지 않습니다.");
       const before = lastCalculation.current;
       const sameScope = before && before.input.district_id === input.district_id && before.input.unit_id === input.unit_id
-        && before.input.industry_type === input.industry_type && before.input.strategy === input.strategy
+        && !detailKey && before.input.industry_type === input.industry_type && before.input.strategy === input.strategy
         && before.input.prem !== input.prem && before.result.source === r.source && before.result.inputs_quarter === r.inputs_quarter
         && Object.entries(r.scenarios).every(([key, tier]) => before.result.scenarios[key]?.basis === tier.basis);
       setPrevious(sameScope ? before : null);
@@ -249,7 +264,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     onMakeProgram({
       districtId, unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
       area: unit.area, floor: unit.floor, rent: unit.rent,
-      industry: used?.input.industry_type || unit.was?.trim() || null,
+      industry: used?.result.industry_type || used?.input.industry_type || unit.was?.trim() || null,
       strategy: best ? (TIER_LABEL[best[0]]?.name ?? best[1].name) : null,
     });
   }
@@ -317,14 +332,14 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
           <label className="field">
             <span className="flabel">업종</span>
-            <input value={industry} onChange={(e) => setIndustry(e.target.value)}
+            <input value={industry} onChange={(e) => { setIndustry(e.target.value); setDetailKey(""); setOperating({}); clearCalculation(); }}
               placeholder="예: 카페 (비우면 자리 기본값)" />
             {recs && recs.length > 0 && (
               <span className="chips">
                 {recs.map((r) => (
                   <button type="button" key={r.industry}
                     className={"chip" + (industry === r.industry ? " on" : "")}
-                    onClick={() => setIndustry(r.industry)}>
+                    onClick={() => { setIndustry(r.industry); setDetailKey(""); setOperating({}); clearCalculation(); }}>
                     {r.industry} {Math.round(r.score * 100)}%
                   </button>
                 ))}
@@ -336,6 +351,13 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             )}
           </label>
 
+          <IndustryDetailSelect value={detailKey} onChange={(key, option) => {
+            setDetailKey(key); setOperating({}); clearCalculation();
+            if (option) setIndustry(option.label);
+          }} />
+          {detailKey && <IndustryOperatingFields detailKey={detailKey} values={operating}
+            onChange={(key, value) => { setOperating((v) => ({ ...v, [key]: value })); clearCalculation(); }} />}
+          {!detailKey && <>
           <div className="ptitle posting-input-step">2. 비용 조건 입력</div>
           <label className="field">
             <span className="flabel">권리금 <em>직접 입력</em></span>
@@ -359,6 +381,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           </label>
 
           </details>
+          </>}
 
           <Button className="run" type="submit" disabled={busy || !unitId}>
             {busy ? "계산 중…" : "시뮬레이션"}
@@ -371,9 +394,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit}
               onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
           )}
-          <div className="posting-result-heading"><h2>세 가격대의 비용과 회수기간</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
+          <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
+          {detailKey && <IndustryCompetitionPanel districtId={districtId} detailKey={detailKey} />}
+          {result?.unavailable_reason && <p role="status">{result.unavailable_reason}</p>}
+          {result?.economics && <IndustryEconomicsResult result={result.economics} />}
           {!result && !busy && <div className="empty">자리를 고르면 계산한다.</div>}
-          {result && (
+          {result && !result.economics && result.calculation_status !== "unavailable" && (
             <>
               {calculation && <div className="posting-input-summary">
                 계산에 사용한 입력: {calculation.input.industry_type || "자리 기본 업종"} · 권리금 {calculation.input.prem === undefined ? "미입력 · 0 전제" : won(calculation.input.prem)} · {TIER_LABEL[calculation.input.strategy ?? ""]?.name ?? "세 전략 비교"}
@@ -438,6 +464,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
                 }} />
             </>
           )}
+          {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy} onSaved={() => setSavedTick((n) => n + 1)}
+            build={() => ({ kind: "posting", title: `${districts.find((d) => d.id === districtId)?.name ?? districtId} · ${result.economics!.label} 운영 시나리오`,
+              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
         </div>
       </div>
@@ -449,6 +478,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 function SavedPostingView({ item }: { item: SavedResult }) {
   const saved = item.payload as Partial<Calculation> & { unitName?: string | null };
   const r = saved.result;
+  if (r?.economics) return <IndustryEconomicsResult result={r.economics} />;
   if (!r?.scenarios) return <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
   return (
     <div className="saved-posting">
@@ -545,6 +575,13 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
   // ⚠ 전략 이름은 `TIER_LABEL[key]` 로 읽는다. `scenario.name` 은 백엔드가 원시 키
   //   ("value")를 주기도 해서 그대로 쓰면 화면 나머지(TierCard)와 다른 이름이 뜬다.
   const entries = Object.entries(result.scenarios);
+  if (result.economics || result.calculation_status === "unavailable") {
+    return {
+      verdict: result.economics?.status === "calculated" ? `${result.economics.label} 운영 조건으로 계산했습니다.` : result.unavailable_reason ?? "운영 조건 입력이 필요합니다.",
+      grounds: [{ label: "계산 근거", value: result.economics ? "사용자 입력 시나리오" : "업종별 근거 입력 필요", source: "입지 추천·매출 예측과 별도" }],
+      sources: ["사용자 입력 운영 조건 · 조건부 계산"],
+    };
+  }
   const label = (key: string, s: TierScenario) => TIER_LABEL[key]?.name ?? s.name;
   const viable = entries.filter(([, t]) => t.viable);
   // 추천 전략이 회수 불가일 수는 없지만, 백엔드가 recommended 를 안 준 경우를 대비해

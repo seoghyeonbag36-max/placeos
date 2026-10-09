@@ -51,7 +51,8 @@ describe("PostingConsole — API 경로", () => {
   it("마운트하면 목록 → 그 거점의 실측 자리 → 시뮬레이션 순으로 부른다", async () => {
     await waitFor(() => expect(api.count(/\/ai\/simulate-revenue$/)).toBe(1));
 
-    expect(api.urls().slice(0, 2)).toEqual([
+    // 업종 메타데이터는 독립 호출이다. 자리 계산의 의존 순서만 고정한다.
+    expect(api.urls().filter((u) => !u.endsWith("/ai/industry-details")).slice(0, 2)).toEqual([
       "GET /api/v1/commercial-districts",
       "GET /api/v1/commercial-districts/garosugil/postings",
     ]);

@@ -1,0 +1,3 @@
+# 상위 규칙에서 제외된 새 세부 업종 집계만 배포에 싣는다.
+!gold/industry_detail/
+!gold/industry_detail/competition.json

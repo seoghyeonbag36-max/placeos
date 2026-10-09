@@ -5,7 +5,9 @@
 """
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 from app.schemas.district import TierScenario
 
@@ -22,6 +24,8 @@ class SimulateRequest(BaseModel):
     # 실측 감도(270유닛 전수): 추천 5.2% 뒤집힘 · roi 중앙 1.6개월(p90 15.5) ·
     # 회수가부 판정은 0건 변화. → docs/feature-posting.md §0-K
     prem: int | None = None
+    industry_detail_key: str | None = Field(default=None, max_length=100)
+    operating_inputs: dict[str, Any] | None = None
 
 
 class SimulateResult(BaseModel):
@@ -42,3 +46,6 @@ class SimulateResult(BaseModel):
     # 세 전략 모두 회수 불가일 때만 채워진다 — "추천이 없다"와 "이 자리는 회수가
     # 안 된다"를 구분한다. 예전에는 둘 다 빈 값으로 조용히 같아 보였다.
     unviable_note: str | None = None
+    calculation_status: str = "calculated"
+    unavailable_reason: str | None = None
+    economics: dict[str, Any] | None = None

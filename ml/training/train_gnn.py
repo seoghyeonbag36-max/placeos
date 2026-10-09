@@ -143,7 +143,7 @@ SEED = 42
 #   group_mapped (b) 7종만           — 사상 안 된 노드를 **모집단에서 뺀다**(옛 카카오 모집단에 가장 가깝다)
 #   lcls         (c) 상가정보 대분류  — category_group_src(indsLclsNm) 10종. **어휘가 바뀐다**
 #   category2        category 2단계   — 세분 업종 진단용(옛 카카오 노드 전용)
-LABEL_LEVELS = ("group", "group_mapped", "category2", "lcls")
+LABEL_LEVELS = ("group", "group_mapped", "category2", "lcls", "business_detail")
 
 # 산출물 저장이 허용되는 어휘 — 서빙(체크포인트 classes · recommend json)이 7종 문자열을
 # 전제하기 때문이다. group 과 group_mapped 는 **같은 7종 문자열**을 쓰므로(전자는 여기에
@@ -237,6 +237,19 @@ def _label_population(nodes: pd.DataFrame, edges: pd.DataFrame,
       '물리적으로 옆에 가게가 몇 개 있나'를 온전히 보고 싶다면 필터 전 엣지로 차수를
       세야 하는데, 그건 (b)안과 다른 실험이다(모집단이 아니라 피처를 바꾸는 것이다).
     """
+    if level == "business_detail":
+        from data.config.industry_details import classify
+        if "inds_scls" not in nodes:
+            raise ValueError("세부 업종 실험은 상가정보 소분류 inds_scls가 필요합니다")
+        labels = nodes["inds_scls"].fillna("").map(classify)
+        counts = labels.value_counts()
+        # 기존 희소 클래스의 '기타' 병합 대신 모집단에서 제외하고 지원 수를 보고한다.
+        keep = labels.notna() & labels.map(counts).ge(MIN_CLASS_NODES)
+        kept = nodes[keep].reset_index(drop=True)
+        if kept.empty:
+            raise ValueError("학습 가능한 세부 업종 표본이 없습니다")
+        ids = set(kept["node_id"])
+        return kept, edges[edges["src"].isin(ids) & edges["dst"].isin(ids)].reset_index(drop=True), int((~keep).sum())
     if level != "group_mapped":
         return nodes, edges, 0
     if not _has_group(nodes):
@@ -280,7 +293,12 @@ def _labels(nodes: pd.DataFrame, level: str = "group") -> tuple[np.ndarray, list
     """
     if level not in LABEL_LEVELS:
         raise ValueError(f"label level 은 {'|'.join(LABEL_LEVELS)} — 받은 값 {level!r}")
-    if level == "lcls":
+    if level == "business_detail":
+        from data.config.industry_details import classify
+        raw = nodes["inds_scls"].fillna("").map(classify)
+        if raw.isna().any():
+            raise ValueError("세부 업종 모집단 필터가 선행되어야 합니다")
+    elif level == "lcls":
         if "category_group_src" not in nodes:
             raise ValueError(
                 "lcls 라벨은 category_group_src(상가정보 indsLclsNm) 컬럼을 요구한다 — "
@@ -1116,6 +1134,9 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
     topk_idx = logits.topk(k, dim=1).indices.numpy()
     m_hit = np.array([y_np[i] in topk_idx[i] for i in range(len(y_np))])
     p_hit = np.array([yt in top3_by_d.get(d, [major]) for yt, d in zip(y_np, did)])
+    if label_level == "business_detail":
+        from ml.training.industry_detail_metrics import per_class_metrics
+        metrics["per_class"] = per_class_metrics(classes, y_np, pred, tr, te, m_hit, p_hit)
     by_d: dict[str, list[int]] = {}
     for d in np.unique(did[te]):
         s = te & (did == d)

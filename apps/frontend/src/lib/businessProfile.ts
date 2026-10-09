@@ -26,6 +26,8 @@ export interface BusinessProfile {
   homeDistrictId: string | null;
   /** 바꾸기만: **바꿀** 업종(2026-10-06). 아직 모르면 null. Posting·Program 의 업종 기본값이 이것이다 */
   targetIndustryKey?: string | null;
+  industryDetailKey?: string | null;
+  targetIndustryDetailKey?: string | null;
 }
 
 /** unset = 처음 방문(카드를 편다) · browsing = 「그냥 둘러보기」 · set = 설정됨 */

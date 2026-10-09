@@ -535,6 +535,9 @@ export interface SimulateResult {
   inputs_quarter: string | null;
   /** 세 전략 모두 회수 불가일 때만 채워진다 — "추천이 없다"와 "회수가 안 된다"는 다르다. */
   unviable_note: string | null;
+  calculation_status?: "calculated" | "needs_inputs" | "unavailable";
+  unavailable_reason?: string | null;
+  economics?: IndustryEconomics | null;
 }
 
 /** 입점 시뮬레이션(Posting) — 외부 AI 창업 코파일럿 어댑터 경유(미설정 시 3-Tier 폴백).
@@ -543,7 +546,32 @@ export interface SimulateResult {
 export const simulateRevenue = (req: {
   district_id: string; unit_id?: string; industry_type?: string;
   strategy?: string; prem?: number;
+  industry_detail_key?: string; operating_inputs?: Record<string, number>;
 }) => postJSON<SimulateResult>("/ai/simulate-revenue", req);
+
+export interface OperatingField {
+  key: string; label: string; unit: string; min: number; max: number;
+}
+export interface IndustryDetail {
+  key: string; parent: string; label: string; family: string; evidence_needed: string;
+  fields: OperatingField[]; recommendation_available: boolean; recommendation_reason: string;
+}
+export interface IndustryEconomics {
+  detail_key: string; label: string; status: "calculated" | "needs_inputs";
+  required_inputs: OperatingField[]; input_fields: OperatingField[]; assumptions: Record<string, number>; provenance: Record<string, string>;
+  source: string; note: string; formula?: string;
+  monthly_revenue: number | null; monthly_cost: number | null; monthly_surplus: number | null;
+  break_even_revenue: number | null; payback_months: number | null; payback_unavailable_reason?: string | null;
+}
+export interface IndustryCompetition {
+  district_id: string; detail_key: string; count: number | null; unavailable_reason: string | null;
+  coverage: { collected_on: string; sample_n: number; radius_m: number; source: string;
+    invalid_n: number; duplicate_n: number; conflicting_ids_n: number; floor_known_n: number; building_known_n: number } | null;
+  note: string | null; source_url: string | null;
+}
+export const listIndustryDetails = () => getJSON<{ details: IndustryDetail[] }>("/ai/industry-details").then((r) => r.details);
+export const getIndustryCompetition = (district: string, detail: string) =>
+  getJSON<IndustryCompetition>(`/ai/industry-competition?district_id=${encodeURIComponent(district)}&detail_key=${encodeURIComponent(detail)}`);
 
 /* ===== Platform 정체성·자리 제안 — GET /commercial-districts/{id}/platform ===== */
 
