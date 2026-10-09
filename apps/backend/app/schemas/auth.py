@@ -27,6 +27,25 @@ class GoogleLoginRequest(BaseModel):
 class AuthProviders(BaseModel):
     """화면이 그릴 로그인 수단. 구글 클라이언트 ID 는 공개값이다(구글 버튼이 그대로 싣는다)."""
     google_client_id: str | None = None
+    naver_enabled: bool = False
+    kakao_enabled: bool = False
+
+
+class SocialStartRequest(BaseModel):
+    org_name: str | None = Field(default=None, max_length=200)
+
+
+class SocialStartResponse(BaseModel):
+    authorization_url: str
+    state: str
+    verifier: str
+
+
+class SocialLoginRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=4096)
+    state: str = Field(min_length=1, max_length=4096)
+    verifier: str = Field(min_length=32, max_length=128)
+    org_name: str | None = Field(default=None, max_length=200)
 
 
 class TokenResponse(BaseModel):

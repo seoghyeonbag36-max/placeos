@@ -13,6 +13,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/design/components/Button";
 import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
 import GoogleSignIn from "@/components/GoogleSignIn";
+import SocialSignIn from "@/components/SocialSignIn";
 import PrivacyNote from "@/components/PrivacyNote";
 import { signup } from "@/lib/api";
 import { isAlreadyRegistered, signupErrorText } from "@/lib/authText";
@@ -24,7 +25,9 @@ const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 200;
 const ORG_NAME_MAX = 200;
 
-export default function Signup({ go, googleClientId }: AccountScreenProps) {
+export default function Signup({ go, googleClientId, socialProviders }: AccountScreenProps) {
+  const socialEnabled = Boolean(socialProviders?.naver_enabled || socialProviders?.kakao_enabled);
+  const hasProvider = Boolean(googleClientId || socialEnabled);
   const [orgName, setOrgName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,19 +70,19 @@ export default function Signup({ go, googleClientId }: AccountScreenProps) {
   const orgField = (
     <div className="acct-field">
       <label htmlFor="signup-org">사업 이름 또는 작업 공간 이름</label>
-      <input id="signup-org" name="organization" autoComplete="organization" required={!googleClientId}
+      <input id="signup-org" name="organization" autoComplete="organization" required={!hasProvider}
         maxLength={ORG_NAME_MAX} placeholder="예: ○○커피 · ○○ 창업 준비"
-        aria-describedby={googleClientId ? "signup-org-hint" : undefined}
+        aria-describedby={hasProvider ? "signup-org-hint" : undefined}
         value={orgName} onChange={(e) => setOrgName(e.target.value)} />
-      {googleClientId && (
-        <small id="signup-org-hint">구글로 시작하면 비워 둬도 됩니다 — 「내 작업 공간」으로 시작합니다.</small>
+      {hasProvider && (
+        <small id="signup-org-hint">간편 로그인으로 시작하면 비워 둬도 됩니다 — 「내 작업 공간」으로 시작합니다.</small>
       )}
     </div>
   );
 
   const passwordForm = (
     <form className="acct-form" method="post" noValidate onSubmit={submit}>
-      {!googleClientId && orgField}
+      {!hasProvider && orgField}
       <label className="acct-field">
         <span>이메일</span>
         <input type="email" name="email" autoComplete="email" required value={email}
@@ -118,12 +121,13 @@ export default function Signup({ go, googleClientId }: AccountScreenProps) {
         창업을 준비하는 사업 이름을 적어 주세요. 아직 상호가 없다면 직접 정한 작업 공간 이름을 사용할 수 있습니다. 사업 정보는 로그인 후 입력합니다.
       </p>
 
-      {googleClientId ? (
+      {hasProvider ? (
         <>
           {orgField}
-          <GoogleSignIn clientId={googleClientId} orgName={orgName} onSignedIn={() => go("account")} />
+          <SocialSignIn providers={socialProviders} orgName={orgName} />
+          {googleClientId && <GoogleSignIn clientId={googleClientId} orgName={orgName} onSignedIn={() => go("account")} />}
           <details className="acct-alt">
-            <summary>구글 계정 없이 이메일·비밀번호로 가입</summary>
+            <summary>{socialEnabled ? "이메일·비밀번호로 가입" : "구글 계정 없이 이메일·비밀번호로 가입"}</summary>
             {passwordForm}
           </details>
         </>

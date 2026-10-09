@@ -1010,7 +1010,13 @@ export const revokeApiKey = (token: string, keyId: string) =>
  */
 
 /** 화면이 그릴 로그인 수단(AuthProviders). `google_client_id` 가 null 이면 구글 버튼을 그리지 않는다 */
-export interface AuthProviders { google_client_id: string | null }
+export interface AuthProviders { google_client_id: string | null; naver_enabled?: boolean; kakao_enabled?: boolean }
+export type SocialProvider = "naver" | "kakao";
+export interface SocialLoginStart { authorization_url: string; state: string; verifier: string }
+export const startSocialLogin = (provider: SocialProvider, orgName?: string) =>
+  authRequest<SocialLoginStart>("POST", `/social/${provider}/start`, { body: { org_name: orgName?.trim() || undefined } });
+export const completeSocialLogin = (provider: SocialProvider, req: { code: string; state: string; verifier: string; org_name?: string }) =>
+  authRequest<AuthToken>("POST", `/social/${provider}/callback`, { body: req });
 export const getAuthProviders = () => authRequest<AuthProviders>("GET", "/providers");
 /** 구글 ID 토큰으로 로그인 — 201(처음이라 가입) · 200 · 401(확인 실패) · 404(구글 로그인 꺼짐) · 503(구글 공개키 못 받음) */
 export const loginWithGoogle = (req: { credential: string; org_name?: string }) =>

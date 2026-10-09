@@ -11,13 +11,14 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/design/components/Button";
 import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
 import GoogleSignIn from "@/components/GoogleSignIn";
+import SocialSignIn from "@/components/SocialSignIn";
 import PrivacyNote from "@/components/PrivacyNote";
 import { login } from "@/lib/api";
 import { loginErrorText } from "@/lib/authText";
 import { saveToken } from "@/lib/session";
 import "./Account.css";
 
-export default function Login({ go, googleClientId }: AccountScreenProps) {
+export default function Login({ go, googleClientId, socialProviders }: AccountScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -48,6 +49,7 @@ export default function Login({ go, googleClientId }: AccountScreenProps) {
       <h2 id={ACCOUNT_TITLE_ID}>로그인</h2>
       <p className="acct-lede">로그인하면 내 창업 사업 정보를 저장하고 이어서 작업할 수 있습니다.</p>
 
+      <SocialSignIn providers={socialProviders} />
       {googleClientId && (
         <>
           <GoogleSignIn clientId={googleClientId} onSignedIn={() => go("account")} />

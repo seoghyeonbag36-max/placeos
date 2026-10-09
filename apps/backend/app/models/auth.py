@@ -63,6 +63,18 @@ class Membership(Base):
     user: Mapped["User"] = relationship(back_populates="memberships")
 
 
+class SocialIdentity(Base):
+    """제공자가 인증한 고유 ID. 이메일 일치만으로 계정을 연결하지 않는다."""
+    __tablename__ = "social_identities"
+    __table_args__ = (UniqueConstraint("provider", "subject", name="uq_social_provider_subject"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    provider: Mapped[str] = mapped_column(String(20))
+    subject: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class ApiKey(Base):
     """조직 단위 API 키. 원문은 저장하지 않고 해시만 남긴다(발급 응답에만 원문 노출)."""
 

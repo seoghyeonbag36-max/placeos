@@ -1,5 +1,7 @@
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
+import SocialCallback from "@/pages/SocialCallback";
+import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
 import { IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
@@ -355,6 +357,7 @@ const AUTH_HASHES = new Set(["#login", "#signup", "#account", "#feedback"]);
 
 /** 계정이 바뀌면 작업 화면을 다시 마운트한다. */
 export default function App() {
+  const [socialCallback, setSocialCallback] = useState(hasSocialCallback);
   const [token, setToken] = useState(loadToken);
   const [workspace, setWorkspace] = useState<BusinessState | null>(null);
   const [error, setError] = useState("");
@@ -366,12 +369,12 @@ export default function App() {
   const [hash, setHash] = useState(() => window.location.hash);
   const adminHash = hash === "#admin";
   useEffect(() => {
-    const onHash = () => setHash(window.location.hash);
+    const onHash = () => { setHash(window.location.hash); setSocialCallback(false); };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
   useEffect(() => {
-    const changed = () => { setWorkspace(null); setError(""); setToken(loadToken()); };
+    const changed = () => { setSocialCallback(false); setWorkspace(null); setError(""); setToken(loadToken()); };
     window.addEventListener(SESSION_CHANGED_EVENT, changed);
     return () => window.removeEventListener(SESSION_CHANGED_EVENT, changed);
   }, []);
@@ -385,6 +388,7 @@ export default function App() {
     });
     return () => { alive = false; };
   }, [token, retry]);
+  if (socialCallback) return <SocialCallback />;
   if (!token) {
     if (adminHash) return <AdminCoverage />;
     return AUTH_HASHES.has(hash) ? <Home /> : <Landing />;
