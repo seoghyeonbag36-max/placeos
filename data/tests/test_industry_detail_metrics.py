@@ -1,5 +1,8 @@
 """합성 예측으로 업종별 결측과 같은 분할 기준선 집계를 검증한다."""
-import numpy as np
+import pytest
+
+# 최소 데이터 CI에는 ML 선택 의존성이 없다. 설치된 환경에서 지표를 검증한다.
+np = pytest.importorskip("numpy", reason="세부 업종 ML 지표는 numpy가 필요합니다")
 from ml.training.industry_detail_metrics import per_class_metrics
 
 
