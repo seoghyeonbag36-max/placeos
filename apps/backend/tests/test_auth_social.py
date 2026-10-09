@@ -213,5 +213,5 @@ def test_pre_migration_social_login_fails_explicitly(social):
     client, factory, _, _ = social
     SocialIdentity.__table__.drop(factory.kw["bind"])
     r = client.post(f"{V1}/social/naver/callback", json=attempt(client, "naver"))
-    assert r.status_code == 503 and "마이그레이션" in r.json()["detail"]
+    assert r.status_code == 503 and "준비 중" in r.json()["detail"]
     assert count(factory, User) == 0

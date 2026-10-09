@@ -109,7 +109,7 @@ def social_callback(provider: Literal["naver", "kakao"], req: SocialLoginRequest
     except auth_service.SocialEmailRequired:
         raise HTTPException(422, "첫 가입에는 이메일 제공 동의가 필요합니다. 계정의 이메일을 확인한 뒤 다시 시도해 주세요")
     except auth_service.SocialSchemaUnavailable:
-        raise HTTPException(503, "로그인 저장소 준비가 완료되지 않았습니다. 운영자가 DB 마이그레이션을 적용해야 합니다")
+        raise HTTPException(503, "이 로그인 수단은 아직 준비 중입니다. 기존 가입 수단으로 로그인해 주세요")
     except auth_service.EmailAlreadyRegistered:
         raise HTTPException(409, "같은 이메일의 계정이 있습니다. 기존 가입 수단으로 로그인해 주세요. 계정을 자동 연결하지 않습니다")
     except auth_service.InvalidCredentials:
