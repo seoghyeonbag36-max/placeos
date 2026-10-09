@@ -206,7 +206,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     const picked = industryList?.find((i) => i.input === input);
     if (profile?.goal === "pivot" && picked && picked.key !== profile.industryKey
         && picked.key !== profile.targetIndustryKey) {
-      const next: BusinessState = { status: "set", profile: { ...profile, targetIndustryKey: picked.key } };
+      const next: BusinessState = { status: "set", profile: { ...profile, targetIndustryKey: picked.key, targetIndustryDetailKey: null } };
       setBusiness(next);
       saveBusinessWorkspace(token, next).catch(() => { /* 위 주석 */ });
     }
@@ -306,7 +306,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           {view === "posting" && (
             <TrackMapFrame track="posting" label="입점 계산">
               <PostingConsole selection={postingSelection} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input} industryRequest={postingIndustry} />
+                onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input}
+                defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
+                industryRequest={postingIndustry} />
             </TrackMapFrame>
           )}
           {view === "program" && (

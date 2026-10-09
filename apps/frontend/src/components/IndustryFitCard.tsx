@@ -16,6 +16,7 @@ import {
 } from "@/lib/api";
 import { GOALS, topic, toward, type BusinessProfile } from "@/lib/businessProfile";
 import "./IndustryFitCard.css";
+import { IndustryCompetitionPanel } from "@/components/IndustryDetailFields";
 
 const TOP_N = 5;
 const FIT_NOTE = "입지 적합도는 비슷한 입지에 그 업종이 이미 모여 있는 정도를 모델이 배운 값입니다 — 매출·생존율이 아닙니다. 순위로만 읽으세요.";
@@ -44,9 +45,13 @@ export default function IndustryFitCard(props: IndustryFitCardProps) {
       </div>
     );
   }
-  return business.goal === "pivot"
+  return <>
+    {business.industryDetailKey && <IndustryCompetitionPanel districtId={props.districtId} detailKey={business.industryDetailKey} />}
+    {business.industryDetailKey && <p className="fit-note">아래 적합도는 상위 업종({ind.label}) 참고 비교입니다. 선택한 세부 업종의 추천 점수가 아닙니다.</p>}
+    {business.goal === "pivot"
     ? <PivotCard {...props} business={business} ind={ind} />
-    : <DistrictRankCard {...props} business={business} ind={ind} />;
+    : <DistrictRankCard {...props} business={business} ind={ind} />}
+  </>;
 }
 
 type CardProps = IndustryFitCardProps & { business: BusinessProfile; ind: IndustryOption };

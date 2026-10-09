@@ -76,6 +76,8 @@ class BusinessProfile(BaseModel):
     # 바꾸기만: **바꿀** 업종(2026-10-06). 아직 모르면 비운다. Posting·Program 의 업종 기본값이 이것이다 —
     # 종전에는 바꾸기 사용자에게도 industryKey(버릴 업종)가 기본값으로 채워졌다(finding-project-review §2-1).
     targetIndustryKey: str | None = Field(default=None, max_length=200)
+    industryDetailKey: str | None = Field(default=None, max_length=100)
+    targetIndustryDetailKey: str | None = Field(default=None, max_length=100)
 
     @model_validator(mode="after")
     def require_district(self) -> "BusinessProfile":
@@ -83,6 +85,15 @@ class BusinessProfile(BaseModel):
             raise ValueError("현재 상권이 필요합니다")
         if self.goal != "pivot" and self.targetIndustryKey:
             raise ValueError("바꿀 업종은 업종 바꾸기에서만 정합니다")
+        from app.services.industry_detail import get
+        for key, parent in ((self.industryDetailKey, self.industryKey),
+                            (self.targetIndustryDetailKey, self.targetIndustryKey)):
+            if key:
+                item = get(key)
+                if item is None or item["parent"] != parent:
+                    raise ValueError("세부 업종이 선택한 상위 업종과 일치하지 않습니다")
+        if self.goal != "pivot" and self.targetIndustryDetailKey:
+            raise ValueError("바꿀 세부 업종은 업종 바꾸기에서만 정합니다")
         return self
 
 

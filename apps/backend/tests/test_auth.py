@@ -226,7 +226,8 @@ def test_user_workspace_isolation():
     a, b = _auth("a@acme.com"), _auth("b@acme.com")
     data = {"status": "set", "profile": {"goal": "start", "industryKey": "coffee", "homeDistrictId": None, "businessName": "내 카페", "description": "동네 주민을 위한 카페"}}
     assert client.post("/api/v1/auth/workspace", headers=a, json=data).status_code == 200
-    assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == {**data["profile"], "targetIndustryKey": None}
+    assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == {
+        **data["profile"], "targetIndustryKey": None, "industryDetailKey": None, "targetIndustryDetailKey": None}
     assert client.get("/api/v1/auth/workspace", headers=b).json()["status"] == "unset"
     assert client.get("/api/v1/auth/workspace").status_code == 401
     assert client.post("/api/v1/auth/workspace", headers=b, json={**data, "user_id": "someone-else"}).status_code == 422

@@ -170,3 +170,14 @@ def test_edge_index_drops_dangling_endpoints_on_its_own():
     ei = tg._edge_index(nodes, edges, keep=None)
     assert ei.shape[1] == 0        # 살아남는 엣지가 없다
     assert ei.dtype == torch.long  # 빈 엣지여도 dtype 이 흔들리면 모델이 못 받는다
+
+
+def test_business_detail_experiment_keeps_distinct_labels_and_cannot_save():
+    nodes = pd.DataFrame([{"node_id": f"{name}:{n}", "inds_scls": name}
+                          for name in ("요리 주점", "미술학원", "요가/필라테스 학원", "모르는 업종") for n in range(12)])
+    edges = pd.DataFrame({"src": ["요리 주점:0", "모르는 업종:0"], "dst": ["미술학원:0", "미술학원:0"]})
+    kept, filtered, dropped = tg._label_population(nodes, edges, "business_detail")
+    _, classes = tg._labels(kept, "business_detail")
+    assert set(classes) == {"bar_cooking", "education_art", "fitness_studio"}
+    assert dropped == 12 and len(filtered) == 1
+    assert "business_detail" not in tg.SAVEABLE_LABEL_LEVELS

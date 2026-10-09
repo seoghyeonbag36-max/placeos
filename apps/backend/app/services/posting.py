@@ -22,6 +22,7 @@ from app.core.config import settings
 from app.services import districts as svc
 from app.services import posting_copilot
 from app.services import posting_inputs
+from app.services import industry_detail
 
 
 def _call_copilot(district_id: str, unit: dict,
@@ -53,7 +54,8 @@ def _call_copilot(district_id: str, unit: dict,
 
 def simulate(district_id: str, unit_id: str | None = None,
              industry_type: str | None = None, strategy: str | None = None,
-             prem: int | None = None) -> dict | None:
+             prem: int | None = None, industry_detail_key: str | None = None,
+             operating_inputs: dict | None = None) -> dict | None:
     """공실 유닛의 입점 시뮬레이션. 코파일럿 우선, 실패 시 3-Tier 폴백.
 
     strategy(premium/value/factory) 지정 시 해당 전략만, 미지정 시 3전략 비교 반환.
@@ -64,7 +66,32 @@ def simulate(district_id: str, unit_id: str | None = None,
     units = svc.resolved_units(district_id)
     if not units:
         return None
-    unit = next((u for u in units if u["id"] == unit_id), units[0])
+    unit = next((u for u in units if u["id"] == unit_id), None) if unit_id else units[0]
+    if unit is None:
+        return None
+    if operating_inputs is not None and not industry_detail_key:
+        raise ValueError("운영 입력에는 세부 업종이 필요합니다")
+    if industry_detail_key:
+        from app.services import business_fit
+        item = industry_detail.get(industry_detail_key)
+        if item is None:
+            raise ValueError("알 수 없는 세부 업종")
+        parent = business_fit.get(item["parent"])
+        allowed = {item["label"], item["key"], parent["key"], parent["label"], parent["input"]}
+        if industry_type and industry_type.strip() not in allowed:
+            raise ValueError("세부 업종과 업종 입력이 일치하지 않습니다")
+        economics = industry_detail.calculate(industry_detail_key, operating_inputs or {})
+        return {"district_id": district_id, "unit_id": unit["id"],
+                "industry_type": economics["label"], "scenarios": {},
+                "source": "user_input_scenario", "calculation_status": economics["status"],
+                "unavailable_reason": "필수 운영 조건을 모두 입력해 주세요" if economics["status"] == "needs_inputs" else None,
+                "economics": economics}
+    # 외식 평균 3-Tier를 다른 업종의 손익처럼 내보내지 않는다.
+    # 업종 미선택은 종전 참고 계산이며 선택된 외식 업종도 세부 업종 예측이 아니다.
+    if industry_type and industry_type.strip() not in {"카페", "카페·디저트", "음식점", "cafe", "restaurant"}:
+        return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
+                "scenarios": {}, "source": "unavailable", "calculation_status": "unavailable",
+                "unavailable_reason": "선택 업종의 손익에는 세부 업종과 운영 조건이 필요합니다. 아래 세부 업종에서 입력해 주세요."}
     if prem is not None:
         # 음수 권리금은 계약 위반이다 — 0 으로 잘라 내리지 않고 거부하면 400 이 필요한데,
         # 이 경로는 어떤 입력에도 같은 스키마를 돌려주는 것이 계약이라 0 으로 눕힌다.

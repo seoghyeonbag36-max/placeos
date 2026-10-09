@@ -6,6 +6,7 @@ from app.schemas.posting import SimulateRequest, SimulateResult
 from app.services import business_fit as fit_svc
 from app.services import industry_recommend as industry_svc
 from app.services import posting as posting_svc
+from app.services import industry_detail as detail_svc
 from app.services import vacancy_forecast as vacancy_svc
 
 router = APIRouter()
@@ -96,6 +97,23 @@ async def industry_fit_by_district(industry: str) -> dict[str, object]:
     return out
 
 
+@router.get("/industry-details")
+async def industry_details() -> dict[str, object]:
+    """세부 업종 선택과 운영 입력 계약. 추천 가능 여부와 분리한다."""
+    return {"details": detail_svc.options()}
+
+
+@router.get("/industry-competition")
+async def industry_competition(district_id: str, detail_key: str) -> dict:
+    """수집 범위·기준일·누락을 동반한 세부 업종 경쟁점 관측."""
+    if district_id not in {r["id"] for r in fit_svc._served()}:
+        raise HTTPException(status_code=404, detail="서빙 대상 상권이 아닙니다")
+    try:
+        return detail_svc.competition(district_id, detail_key)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @router.get("/district-industries/{district_id}")
 async def district_industries(district_id: str) -> dict[str, object]:
     """한 상권 안에서 업종 12종을 견준다 — 업종 바꾸기 사업자용."""
@@ -111,8 +129,12 @@ async def simulate_revenue(req: SimulateRequest) -> dict:
 
     코파일럿(settings.posting_copilot_url) 미설정 시 내부 3-Tier 폴백으로 응답한다.
     """
-    result = posting_svc.simulate(req.district_id, req.unit_id,
-                                  req.industry_type, req.strategy, req.prem)
+    try:
+        result = posting_svc.simulate(req.district_id, req.unit_id,
+                                      req.industry_type, req.strategy, req.prem,
+                                      req.industry_detail_key, req.operating_inputs)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if result is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {req.district_id}")
     return result
