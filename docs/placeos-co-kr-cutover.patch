@@ -1,0 +1,82 @@
+diff --git a/apps/frontend/index.html b/apps/frontend/index.html
+index 63f5700..3462fb7 100644
+--- a/apps/frontend/index.html
++++ b/apps/frontend/index.html
+@@ -17,6 +17,13 @@
+     <meta name="apple-mobile-web-app-title" content="PlaceOS" />
+     <title>PlaceOS — 상권 디지털 트윈</title>
+     <meta name="description" content="창업할 업종과 사업 방향을 저장하고, 상권 탐색부터 입점 계산과 검증 program 준비까지 이어가는 PlaceOS 작업 공간." />
++    <!-- placeos.co.kr DNS·인증서·지도·로그인 허용 원본 확인 후 배포한다. -->
++    <link rel="canonical" href="https://placeos.co.kr/" />
++    <meta property="og:type" content="website" />
++    <meta property="og:title" content="PlaceOS — 상권 디지털 트윈" />
++    <meta property="og:description" content="상권 탐색부터 공간 선택, 입점 비용 계산과 검증 준비까지 이어가는 PlaceOS." />
++    <meta property="og:url" content="https://placeos.co.kr/" />
++    <meta property="og:image" content="https://placeos.co.kr/icons/icon-512.png" />
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/apps/frontend/src/lib/canonicalHost.test.ts b/apps/frontend/src/lib/canonicalHost.test.ts
+index 9d2e7d9..cbc5eda 100644
+--- a/apps/frontend/src/lib/canonicalHost.test.ts
++++ b/apps/frontend/src/lib/canonicalHost.test.ts
+@@ -3,15 +3,17 @@ import { canonicalRedirect } from "@/lib/canonicalHost";
+ 
+ const at = (hostname: string, pathname = "/", search = "", hash = "") => ({ hostname, pathname, search, hash });
+ 
+-describe("canonicalRedirect — 정식 주소 placeos.web.app 으로 보내기", () => {
++describe("canonicalRedirect — 정식 주소 placeos.co.kr 으로 보내기", () => {
+   it("옛 사이트와 firebaseapp.com 주소는 경로·쿼리·해시를 붙여 정식 주소로 보낸다", () => {
+-    expect(canonicalRedirect(at("spaceos-twin.web.app", "/", "?a=1", "#board"))).toBe("https://placeos.web.app/?a=1#board");
+-    expect(canonicalRedirect(at("placeos.firebaseapp.com", "/", "", "#admin"))).toBe("https://placeos.web.app/#admin");
+-    expect(canonicalRedirect(at("spaceos-twin.firebaseapp.com"))).toBe("https://placeos.web.app/");
++    expect(canonicalRedirect(at("spaceos-twin.web.app", "/", "?a=1", "#board"))).toBe("https://placeos.co.kr/?a=1#board");
++    expect(canonicalRedirect(at("placeos.firebaseapp.com", "/", "", "#admin"))).toBe("https://placeos.co.kr/#admin");
++    expect(canonicalRedirect(at("spaceos-twin.firebaseapp.com"))).toBe("https://placeos.co.kr/");
++    expect(canonicalRedirect(at("placeos.web.app", "/privacy.html", "?a=1", "#board"))).toBe("https://placeos.co.kr/privacy.html?a=1#board");
++    expect(canonicalRedirect(at("www.placeos.co.kr"))).toBe("https://placeos.co.kr/");
+   });
+ 
+   it("정식 주소·로컬 개발·Cloud Run 원본 주소는 건드리지 않는다", () => {
+-    expect(canonicalRedirect(at("placeos.web.app"))).toBeNull();
++    expect(canonicalRedirect(at("placeos.co.kr"))).toBeNull();
+     expect(canonicalRedirect(at("localhost"))).toBeNull();
+     expect(canonicalRedirect(at("spaceos-798830962560.us-central1.run.app"))).toBeNull();
+   });
+diff --git a/apps/frontend/src/lib/canonicalHost.ts b/apps/frontend/src/lib/canonicalHost.ts
+index c0cd88b..72d93df 100644
+--- a/apps/frontend/src/lib/canonicalHost.ts
++++ b/apps/frontend/src/lib/canonicalHost.ts
+@@ -11,10 +11,12 @@
+  *
+  * 경로·쿼리·해시(#admin · #board)는 그대로 붙인다. 로컬 개발·Cloud Run 원본 주소는 건드리지 않는다.
+  */
+-export const CANONICAL_ORIGIN = "https://placeos.web.app";
++export const CANONICAL_ORIGIN = "https://placeos.co.kr";
+ 
+ /** 정식 주소가 아닌 **Firebase 호스트**들. 여기 없는 호스트(localhost·run.app 등)는 그대로 둔다. */
+ const NON_CANONICAL_HOSTS = new Set([
++  "placeos.web.app",
++  "www.placeos.co.kr",
+   "placeos.firebaseapp.com",
+   "spaceos-twin.web.app",
+   "spaceos-twin.firebaseapp.com",
+diff --git a/firebase.json b/firebase.json
+index 4abb7e6..038b03c 100644
+--- a/firebase.json
++++ b/firebase.json
+@@ -52,12 +52,12 @@
+       "redirects": [
+         {
+           "source": "/",
+-          "destination": "https://placeos.web.app/",
++          "destination": "https://placeos.co.kr/",
+           "type": 301
+         },
+         {
+           "source": "/index.html",
+-          "destination": "https://placeos.web.app/",
++          "destination": "https://placeos.co.kr/",
+           "type": 301
+         }
+       ],
