@@ -1,0 +1,21 @@
+/* 공용 교통 패널 — 디자인 토큰 간격과 색을 재사용한다. */
+.travel-time-panel {
+  margin-block: var(--sp-3); padding: var(--sp-3);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--ink); font-size: var(--fs-caption);
+}
+.travel-time-panel summary { cursor: pointer; font-weight: var(--fw-bold); }
+.travel-time-panel p { margin-block: var(--sp-2); }
+.travel-time-panel label { display: grid; gap: var(--sp-1); margin-block: var(--sp-2); min-width: 0; }
+.travel-time-panel select, .travel-time-panel input {
+  box-sizing: border-box; width: 100%; padding: var(--sp-2); min-width: 0;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--ink); font: inherit;
+}
+.travel-time-panel .ds-btn { margin-block: var(--sp-1); padding: var(--sp-2) var(--sp-3); font-size: inherit; }
+.travel-coordinates { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+.travel-results { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
+.travel-result { display: flex; flex-wrap: wrap; gap: var(--sp-2); padding: var(--sp-2); background: var(--bg); border-radius: var(--radius-md); }
+.travel-result small { flex-basis: 100%; }
+.travel-time-panel small, .travel-time-panel .travel-note { color: var(--muted); font-size: inherit; }
+.travel-time-panel [role="alert"] { color: var(--danger-text); }

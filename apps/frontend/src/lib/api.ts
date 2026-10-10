@@ -6,6 +6,32 @@ import { clearToken, loadToken } from "@/lib/session";
 
 const BASE = "/api/v1";
 
+export interface TravelPoint { lat: number; lng: number }
+export interface TravelResult {
+  mode: "driving" | "transit";
+  provider: "kakao_mobility" | "odsay";
+  source: "provider_estimate";
+  time_basis: "current_departure" | "standard_route";
+  status: "ok" | "not_configured" | "no_route" | "unsupported_route" | "upstream_error" | "quota_exceeded";
+  duration_seconds: number | null;
+  distance_meters: number | null;
+  fare_won: number | null;
+  transfers: number | null;
+  walk_seconds: number | null;
+}
+export interface TravelTimes {
+  origin: TravelPoint; destination: TravelPoint; queried_at: string; results: TravelResult[];
+}
+
+export async function getTravelTimes(origin: TravelPoint, destination: TravelPoint, signal?: AbortSignal): Promise<TravelTimes> {
+  const res = await analysisFetch("/travel/times", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ origin, destination }), signal,
+  });
+  if (!res.ok) throw new Error(`교통 조회 실패: ${res.status}`);
+  return res.json();
+}
+
 /**
  * 로그인 세션이 분석 요청 도중 만료·폐기됐다는 신호(2026-09-28 P1). `App` 이 받아 알림을 띄운다.
  * detail 없음 — 받는 쪽은 "세션이 끝났다" 하나만 알면 된다.
@@ -29,7 +55,7 @@ export const SESSION_EXPIRED_EVENT = "placeos:session-expired";
  *
  * `X-API-Key` 를 직접 실은 호출에는 토큰을 섞지 않는다 — 그 401 은 키의 실패이지 세션의 실패가 아니다.
  */
-async function analysisFetch(path: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}): Promise<Response> {
+async function analysisFetch(path: string, init: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal } = {}): Promise<Response> {
   const url = `${BASE}${path}`;
   const token = loadToken();
   const hasApiKey = Object.keys(init.headers ?? {}).some((h) => h.toLowerCase() === "x-api-key");
