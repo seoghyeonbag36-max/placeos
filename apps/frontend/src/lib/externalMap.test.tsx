@@ -38,14 +38,13 @@ describe("카카오맵 링크", () => {
   });
 });
 
-describe("BuildingViewer — 거리뷰가 실패해도 링크는 남는다", () => {
-  it("네이버 거리뷰가 실패하면 원인과 함께 카카오맵 링크로 안내한다", async () => {
+describe("BuildingViewer — 위치 링크", () => {
+  it("거리뷰를 제거해도 카카오맵 위치 링크는 남는다", async () => {
     render(<BuildingViewer b={{ name: "테스트빌딩", capacity: 3, active: 1, statusColor: "#e5484d", center: AT }} />);
-    expect((await screen.findByText(/네이버 지도 인증 실패/)).textContent).toContain("카카오맵 링크");
+    expect(screen.getByRole("region", { name: "공실 이력" })).toBeTruthy();
     const pos = screen.getByRole("link", { name: /카카오맵에서 위치 보기/ }) as HTMLAnchorElement;
-    const road = screen.getByRole("link", { name: /카카오맵 로드뷰/ }) as HTMLAnchorElement;
+    expect(screen.queryByRole("link", { name: /카카오맵 로드뷰/ })).toBeNull();
     expect(pos.href).toBe(kakaoMapUrl(AT, "테스트빌딩"));
-    expect(road.href).toBe(kakaoRoadviewUrl(AT));
     expect(pos.target).toBe("_blank");
     expect(pos.rel).toContain("noopener");
   });

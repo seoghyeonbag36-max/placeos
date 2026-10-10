@@ -99,13 +99,7 @@ export default function DistrictPicker({
     if (d) setAnnounce(`상권 ${d.name} 선택됨`);
   }, [value, districts]);
 
-  const tail = suffix ?? ((d: DistrictSummary) => {
-    // 공실률은 실측이 있을 때만. 없는 값을 0 으로 그리지 않는다.
-    // "실측 없음"(안 쟀다)과 "대표값 미제공"(쟀지만 대표하지 못한다)은 다른 말이다.
-    if (d.vacancy_withheld) return "대표값 미제공";
-    return d.vacancy_rate !== null && Number.isFinite(d.vacancy_rate)
-      ? `공실 ${d.vacancy_rate.toFixed(1)}%` : "실측 없음";
-  });
+  const tail = suffix ?? ((d: DistrictSummary) => d.gu);
 
   return (
     <>

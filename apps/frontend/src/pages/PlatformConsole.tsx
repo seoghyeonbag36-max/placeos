@@ -25,7 +25,7 @@ import "./PlatformConsole.css";
 /**
  * 고객용 상권 분석 — 상권 요약, 공간 후보, 공실 전망과 추천 업종을 보여준다.
  * 내부 파일 경로·모델 검증 지표는 표시하지 않는다. 실측·합성 구분과 추천의 한계는 유지한다.
- * 전망은 기존 신뢰성 게이트를 그대로 사용하며, 통과 전에는 현재 공실률을 참고값으로 표시한다.
+ * 공실률은 소개 요약에 한 번만 표시하고, 전망은 기존 신뢰성 게이트를 유지한다.
  */
 
 const DEFAULT_DISTRICT = "garosugil";
@@ -256,7 +256,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
       <Fold title="공실 전망과 추천 업종"
         summary={modelFoldSummary(fc, rec)}>
         <div className="cols">
-          <ForecastCard fc={fc} err={fcErr} quarters={quarters} onQuarters={setQuarters} hub={hub} />
+          <ForecastCard fc={fc} err={fcErr} quarters={quarters} onQuarters={setQuarters} />
           <RecommendCard rec={rec} err={recErr} />
         </div>
       </Fold>
@@ -494,7 +494,7 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
 /** 「모델 근거」가 접힌 채로도 무엇이 들어 있는지 — 두 모델의 대표 수치 한 줄. */
 function modelFoldSummary(fc: VacancyForecast | null, rec: IndustryRecommend | null): ReactNode {
   const parts: ReactNode[] = [];
-  if (fc && fc.model !== "lstm-stub") parts.push(lstmPromoted(fc.skill) ? "공실률 추정 전망" : "현재 공실률 기준");
+  if (fc && fc.model !== "lstm-stub") parts.push(lstmPromoted(fc.skill) ? "공간 변화 전망" : "전망 검증 중");
   if (rec && rec.model !== "gnn-stub" && rec.recommendations.length) {
     parts.push(<>추천 1위 <b>{rec.recommendations[0].industry}</b> {pct(rec.recommendations[0].score)}</>);
   }
@@ -835,7 +835,7 @@ function SiteCard({ site, seq, selected, disabled, onToggle, onOpenInPage }: {
         {site.area_py != null ? `${site.area_py}평` : "면적 미제공"}
         {` · ${site.floor || "층 미제공"}`}
         {site.capacity != null && ` · ${site.capacity}호`}
-        {site.vacancy_rate != null ? ` · 공실 ${site.vacancy_rate}%` : " · 공실률 미제공"}
+
       </div>
 
       {site.recommendations.length > 0 ? (
@@ -873,14 +873,12 @@ function SiteCard({ site, seq, selected, disabled, onToggle, onOpenInPage }: {
 
 /* ───────────────── 근거 ①: LSTM 공실 예측 ───────────────── */
 
-function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
+function ForecastCard({ fc, err, quarters, onQuarters }: {
   fc: VacancyForecast | null; err: string | null;
-  quarters: number; onQuarters: (q: number) => void; hub?: DistrictSummary;
+  quarters: number; onQuarters: (q: number) => void;
 }) {
   const stub = fc?.model === "lstm-stub";
   const promoted = lstmPromoted(fc?.skill ?? null);
-  const baseVac = hub?.vacancy_rate ?? null;
-  const approxPct = approxVacancyPct(fc, hub);
   return (
     <section className="card">
       <div className="chead"><h2>공실 전망 <span className="badge is-warn">{promoted ? "추정" : "현재값 기준"}</span></h2></div>
@@ -891,13 +889,9 @@ function ForecastCard({ fc, err, quarters, onQuarters, hub }: {
         {promoted && <div className="seg" role="group" aria-label="전망 기간">
           {QUARTERS.map((q) => <button key={q} aria-pressed={quarters === q} className={quarters === q ? "on" : ""} onClick={() => onQuarters(q)}>+{q}분기</button>)}
         </div>}
-        <div className="big"><div className="bigval">
-          <MeasuredValue value={promoted ? approxPct : baseVac} unit="%" absent={hub?.vacancy_withheld ? "대표값 미제공" : "정보 없음"} />
-          <small>{promoted ? quarterLabel(fc.forecast_quarter ?? fc.horizons[fc.horizon_quarters - 1]?.quarter) : "다음 분기 참고값"}</small>
-        </div></div>
         <p className="recnote">{promoted
-          ? "현재 공실률에 예상 변화를 반영한 근사값입니다."
-          : "예측의 신뢰성을 확인 중이므로 현재 공실률을 참고값으로 표시합니다. 미래 변화가 없다는 뜻은 아닙니다."}</p>
+          ? "공간 변화 전망은 모델 근거를 참고하세요. 입점 판단은 개별 자리 조건으로 비교하세요."
+          : "예측의 신뢰성을 확인 중입니다. 미래 변화가 없다는 뜻은 아닙니다."}</p>
       </>}
     </section>
   );
@@ -928,18 +922,11 @@ function RecommendCard({ rec, err }: { rec: IndustryRecommend | null; err: strin
 
 /* ───────────────── 감성 (시드) ───────────────── */
 
-/** 구역 공실률 색 — 거점 카드와 같은 눈금을 쓴다(두 화면이 다른 색을 내면 안 된다). */
-function zoneVacHex(v: number): string {
-  if (v >= 25) return "#D95C4A";
-  if (v >= 15) return "#E0A03A";
-  return "#22B07D";
-}
-
 function SentimentSection({ zones, hub }: { zones: Zone[] | null; hub?: DistrictSummary }) {
   return (
-    <Fold title="동네별 공실 현황" badge="행정동 실측"
+    <Fold title="동네별 공간 현황" badge="행정동 실측"
       summary={zones === null ? "구역 불러오는 중…" : `행정동 ${zones.length}개`}>
-      <div className="zonenote">행정동별 점포·건물 수와 공실률을 비교하세요.</div>
+      <div className="zonenote">행정동별 점포·건물 수를 비교하세요.</div>
       {hub && <CaveatNote district={hub} />}
       {!zones && <div className="empty">구역 불러오는 중…</div>}
       {zones && zones.length === 0 && (
@@ -953,10 +940,6 @@ function SentimentSection({ zones, hub }: { zones: Zone[] | null; hub?: District
           <div key={z.id} className="zone">
             <div className="zhead">
               <span className="zname">{z.n}</span>
-              <span className="zscore"
-                    style={{ color: z.vacancy_rate === null ? undefined : zoneVacHex(z.vacancy_rate) }}>
-                {z.vacancy_rate === null ? "—" : `${z.vacancy_rate.toFixed(1)}%`}
-              </span>
             </div>
             <div className="zmeta">
               {z.grp} · 점포 {z.stores?.toLocaleString() ?? "—"} · 건물 {z.buildings ?? "—"}동

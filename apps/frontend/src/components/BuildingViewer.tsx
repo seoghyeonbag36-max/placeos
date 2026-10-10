@@ -1,21 +1,5 @@
-// BuildingViewer — 건물 하나를 **2D 층 스택 + 네이버 거리뷰**로 본다 (Page).
-//
-// 2026-09-05 에 3D 디지털 트윈(BuildingTwin, @react-three/fiber)을 걷어내고 이 자리를
-// 대신한다. 트윈이 그리던 절차적 박스는 실측 형상이 아니었다 — 층 상태만 색으로
-// 말하고 있었고, 그건 2D 로 더 정확하고 더 싸게 그려진다(번들 832KB → 0).
-//
-// **3D 를 없앤 것이지 층 표현을 없앤 것이 아니다.** 층 근거(com_floors·occ_floors)를
-// 가진 건물이 31,782동이라, 층을 못 그리면 그 실측이 화면에서 통째로 사라진다.
-//
-// 거리뷰가 채우는 자리는 다른 것이다: "가보지 않고 그 자리의 성격을 본다".
-// ⚠ 촬영 시점이 몇 년 전일 수 있어 **공실 판정의 근거가 아니다.** 그래서 촬영일을
-//   반드시 같이 그린다 — 안 밝히면 사용자가 눈으로 본 셔터를 현재 상태로 읽는다.
-//
-// 2026-10-05: 아래에 **카카오맵 링크**(위치·로드뷰)를 단다. 거리뷰는 네이버 지도 SDK 에 묶여 있어
-//   한도·도메인 등록 문제로 안 뜰 수 있는데, 링크는 키가 필요 없다(lib/externalMap.ts).
-import { useEffect, useRef, useState } from "react";
-import { kakaoMapUrl, kakaoRoadviewUrl } from "@/lib/externalMap";
-import { describeNaverMapError, renderStreetView, type PanoramaInfo } from "@/lib/naverMap";
+// 건물 상세 — 2D 층 근거와 공실 이력. 확인되지 않은 이력은 채우지 않는다.
+import { kakaoMapUrl } from "@/lib/externalMap";
 import "./BuildingViewer.css";
 
 export interface ViewerBuilding {
@@ -25,7 +9,7 @@ export interface ViewerBuilding {
   floors?: number;     // 건축물대장 지상 **층** 수 — 스택의 실제 높이
   statusColor: string; // 공실 상태색
   statusLabel?: string;
-  center?: { lat: number; lng: number };   // 거리뷰가 바라볼 대상
+  center?: { lat: number; lng: number };   // 건물 위치
   // ── 층 실배치 근거 (gold page_building_master.geojson, 층 근거가 있는 건물만) ──
   comFloors?: number[];
   occFloors?: number[];
@@ -110,80 +94,7 @@ export function FloorStack({ b }: { b: ViewerBuilding }) {
   );
 }
 
-/** 네이버 거리뷰. 파노라마가 없는 좌표는 정상 상태이므로 폴백 문구를 그린다. */
-export function StreetView({ center, name }: { center?: { lat: number; lng: number }; name: string }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [info, setInfo] = useState<PanoramaInfo | null>(null);
-  const [state, setState] = useState<"loading" | "ok" | "none" | "error">("loading");
-  const [err, setErr] = useState<string>("");
-
-  useEffect(() => {
-    if (!center || !ref.current) { setState("none"); return; }
-    // ⚠ 파노라마는 **이 이펙트만의 자식 div** 위에 만든다. 컨테이너를 공유하면
-    //    StrictMode 의 이중 마운트에서 경합이 난다: 마운트1이 A 를 만들고 즉시
-    //    언마운트되는데, 그 사이 마운트2가 같은 element 에 B 를 만들고, 뒤늦게
-    //    A 의 Promise 가 풀리며 `destroy()` 가 공유 컨테이너를 비워 **B 의 DOM 까지**
-    //    지운다. 메타(B의 init)는 남고 그림만 사라져서 "거리뷰가 느리다"로 보인다
-    //    (2026-09-05 /verify 에서 자식 노드 0개로 실측). 자식을 나누면 A 의 정리가
-    //    A 것만 걷어간다.
-    const host = document.createElement("div");
-    host.style.cssText = "width:100%;height:100%";
-    ref.current.appendChild(host);
-
-    let live = true;
-    let cleanup: (() => void) | null = null;
-    setState("loading");
-    renderStreetView(host, center)
-      .then(({ info: i, destroy }) => {
-        cleanup = destroy;
-        if (!live) { destroy(); return; }
-        setInfo(i);
-        setState(i ? "ok" : "none");
-      })
-      .catch((e) => { if (live) { setErr(describeNaverMapError(e)); setState("error"); } });
-    return () => { live = false; cleanup?.(); host.remove(); };
-  }, [center?.lat, center?.lng]);
-
-  return (
-    <div className="sview">
-      {/* ⚠ 이 컨테이너를 **숨기지 않는다.** `display:none` 인 채로 Panorama 를 만들면
-          SDK 가 크기를 0 으로 보고 타일을 한 장도 안 심는다 — 메타(촬영일·거리)는
-          정상으로 오는데 그림만 없어서, 화면상 "거리뷰가 좀 느리네"로 보인다
-          (2026-09-05 /verify 에서 자식 노드 0개로 실측). 상태 문구는 위에 덮는다. */}
-      <div ref={ref} className="sview-canvas" />
-      {state === "loading" && <div className="sview-msg over">거리뷰 불러오는 중…</div>}
-      {state === "none" && (
-        <div className="sview-msg over">
-          이 자리에는 거리뷰가 없다 — 도로에서 떨어진 골목·부지에서 정상적으로 일어난다.
-          {center && " 아래 카카오맵 로드뷰로도 확인해 볼 수 있다."}
-        </div>
-      )}
-      {state === "error" && (
-        <div className="sview-msg over err">
-          {err}
-          {center && <><br />아래 카카오맵 링크로 그 자리를 볼 수 있다.</>}
-        </div>
-      )}
-      {state === "ok" && (
-        <div className="sview-meta">
-          {/* 촬영일을 안 밝히면 사용자가 본 셔터를 현재 상태로 읽는다. 이 목록의
-              공실 판정은 대장·점포 데이터에서 나오지 실사에서 나오지 않는다. */}
-          {info?.photodate
-            ? <><b>{String(info.photodate).slice(0, 10)}</b> 촬영</>
-            : <>촬영 시점 미상</>}
-          {info?.distanceM != null && <> · {name} 에서 {info.distanceM}m</>}
-          {info?.address && <> · {info.address}</>}
-          <br />
-          <span className="dim">
-            거리뷰는 <b>과거 시점의 실사</b>다 — 공실 여부의 근거가 아니다(그건 대장·점포 데이터에서 온다).
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** 층 스택 + 거리뷰를 한 화면에. 두 호출부(MapShell·PageDashboard)가 같은 것을 본다. */
+/** 층 근거와 확인 가능한 이력을 함께 표시한다. */
 export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
   const measured = stackBasis(b) === "measured";
   return (
@@ -193,17 +104,19 @@ export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
           <FloorStack b={b} />
         </div>
         <div className="bviewer-street">
-          <StreetView center={b.center} name={b.name} />
+          <section aria-label="공실 이력">
+            <h3>공실 이력</h3>
+            <dl><dt>이전 업종</dt><dd>확인 자료 없음</dd>
+              <dt>폐업일</dt><dd>확인 자료 없음</dd>
+              <dt>공실 기간</dt><dd>확인 자료 없음</dd></dl>
+            <p>이 공실에 귀속된 영업·폐업 이력이 아직 제공되지 않습니다.</p>
+          </section>
         </div>
       </div>
       {b.center && (
         <p className="bviewer-links">
           <a href={kakaoMapUrl(b.center, b.name)} target="_blank" rel="noopener noreferrer">
             카카오맵에서 위치 보기<span className="sr-only">(새 창)</span>
-          </a>
-          {" · "}
-          <a href={kakaoRoadviewUrl(b.center)} target="_blank" rel="noopener noreferrer">
-            카카오맵 로드뷰<span className="sr-only">(새 창)</span>
           </a>
         </p>
       )}

@@ -23,18 +23,19 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-# 검증 방식. 셋을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다.
+# 검증 방식. 방식을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다.
 #   popup     팝업스토어 — 짧고(며칠~몇 주) 자리를 빌린다. 신호는 유입·체류·구매전환
 #   soft_open 가오픈 — 실제 운영을 축소해 연다. 신호는 객단가·회전·재료 소진·응대 부하
+#   actual_open 정식 개업 후 검증 — 실매출·비용·손익을 기록한다. 실적 존재를 가정하지 않는다.
 #   mvp       최소 실현 제품 — 매대·예약·사전주문처럼 점포 없이도 된다. 신호는 사전수요
-ValidationMode = Literal["popup", "soft_open", "mvp"]
+ValidationMode = Literal["popup", "soft_open", "mvp", "actual_open"]
 
 # 누가 묻는가. 같은 아이템이라도 예비창업자는 **자리부터** 찾고, 기창업자는 **옮길지**를
 # 묻는다. 생성물의 어조와 오프라인 협업 주체가 갈린다.
 FounderStage = Literal["pre_founder", "founder"]
 
 MODE_LABEL: dict[str, str] = {
-    "popup": "팝업스토어", "soft_open": "가오픈", "mvp": "MVP 테스트",
+    "popup": "팝업스토어", "soft_open": "가오픈", "mvp": "MVP 테스트", "actual_open": "실제 창업",
 }
 STAGE_LABEL: dict[str, str] = {
     "pre_founder": "예비창업자", "founder": "기창업자",
@@ -250,7 +251,7 @@ class ProgramPlan(BaseModel):
     """
     item: str
     category: str
-    mode: str                         # popup | soft_open | mvp
+    mode: str                         # popup | soft_open | mvp | actual_open
     stage: str                        # pre_founder | founder
     online: list[ChannelPlan]
     offline: list[ChannelPlan]

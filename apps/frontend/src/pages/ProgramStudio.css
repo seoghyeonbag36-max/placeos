@@ -197,3 +197,6 @@
 .progstudio .flabel, .progstudio .fhint, .progstudio .fhint > summary { font-size: var(--fs-caption); line-height: var(--lh-caption); }
 .progstudio .field input, .progstudio .field select { min-height: 44px; }
 .progstudio .arrival { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+
+/* 네 가지 검증 방식은 좁은 패널에서도 두 칸으로 읽는다. */
+.progstudio .seg.seg4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

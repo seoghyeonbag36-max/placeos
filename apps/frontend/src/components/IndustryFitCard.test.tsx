@@ -61,7 +61,8 @@ describe("상세 출처 접기", () => {
   it("상세 출처를 접어도 적합도 한계와 미제공·표본 안내는 보인다", async () => {
     mount();
     await screen.findByRole("button", { name: "데이터 기준·출처" });
-    for (const text of [/매출·생존율이 아닙니다/, "인접 상권 표본", "실측 없음", "미제공"]) {
+    expect(screen.queryByText("공실률")).toBeNull();
+    for (const text of [/매출·생존율이 아닙니다/, "인접 상권 표본", "미제공"]) {
       expect(screen.getAllByText(text).every((node) => !node.closest("[hidden]"))).toBe(true);
     }
   });

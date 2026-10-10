@@ -17,7 +17,6 @@ export default function PlatformComparison({ sites, districtName, source, distin
     { label: "면적", value: (site) => numberOrAbsent(site.area_py, "평") },
     { label: "층", value: (site) => site.floor || "미제공" },
     { label: "재고", value: (site) => numberOrAbsent(site.capacity, "호") },
-    { label: "공실률", value: (site) => numberOrAbsent(site.vacancy_rate, "%") },
     { label: "추천 노드까지 거리", value: (site) => numberOrAbsent(site.matched_distance_m, "m", "매칭 거리 미제공") },
     { label: "GNN 추천 점수 (0~1)", value: (site) => site.recommendations.length
       ? <ul className="platform-comparison-recs">{site.recommendations.map((rec) => (

@@ -74,6 +74,15 @@ function deferred<T = ProgramPlan>() {
 }
 
 describe("ProgramStudio — 검증 브리프", () => {
+  it("실제 창업 선택을 생성 API에 전달하고 결과 라벨을 표시한다", async () => {
+    const api = mount({ result: { ...PLAN, mode: "actual_open" } });
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    fireEvent.click(screen.getByRole("radio", { name: "실제 창업" }));
+    fireEvent.click(submitButton());
+    await editor();
+    expect(api.matching(/\/marketing\/generate$/)[0].body).toMatchObject({ mode: "actual_open" });
+    expect(screen.getByText(/카페 · 실제 창업/)).toBeTruthy();
+  });
   // ⚠ 파일 첫 테스트라 모듈 변환 비용을 혼자 진다. 전체 병렬에서 5초 기본 한도를 넘긴 적이 있어
   //   (2026-09-13) 동작 판정이 아니라 대기 한도만 늘린다.
   it("아이템·업종·검증 방식·단계와 조건을 브리프 계약 그대로 보낸다", { timeout: 20000 }, async () => {
