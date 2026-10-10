@@ -95,7 +95,8 @@ describe("PlatformConsole — 동일 상권 후보 비교", () => {
     fireEvent.click(title.closest("summary")!);
     await screen.findByText("현재값 기준");
     const forecast = screen.getByText("공실 전망").closest("section")!;
-    expect(forecast.textContent).toContain("12.3");
+    expect(forecast.textContent).not.toContain("12.3");
+    expect(screen.getAllByText("12.3%")).toHaveLength(1);
     expect(forecast.textContent).toContain("미래 변화가 없다는 뜻은 아닙니다");
     expect(document.body.textContent).not.toContain("9.876");
   });
@@ -176,8 +177,8 @@ describe("PlatformConsole — 동일 상권 후보 비교", () => {
     expect(within(region).getByText(DISTINCT_NOTE)).toBeTruthy();
     expect(within(rowValue(region, "면적")).getAllByRole("cell").map((cell) => cell.textContent))
       .toEqual(["31.23456평", "0평", "미제공"]);
-    expect(within(rowValue(region, "공실률")).getAllByRole("cell").map((cell) => cell.textContent))
-      .toEqual(["12.34567%", "0%", "미제공"]);
+    expect(within(region).queryByText("공실률")).toBeNull();
+    expect(within(region).queryByText("12.34567%")).toBeNull();
     expect(within(rowValue(region, "추천 노드까지 거리")).getAllByRole("cell").map((cell) => cell.textContent))
       .toEqual(["23.45678m", "0m", "매칭 거리 미제공"]);
     expect(within(rowValue(region, "GNN 추천 점수")).getAllByRole("cell").map((cell) => cell.textContent))

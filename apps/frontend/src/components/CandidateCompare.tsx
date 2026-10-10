@@ -48,7 +48,6 @@ export default function CandidateCompare({ districtName, candidates, notes, onNo
             <thead><tr><th scope="col">비교 항목</th>{candidates.map((c) => <th scope="col" key={c.id}>{c.name}</th>)}</tr></thead>
             <tbody>
               <tr><th scope="row">공실 상태</th>{candidates.map((c) => <td key={c.id}>{c.statusLabel}</td>)}</tr>
-              <tr><th scope="row">공실률(추정)</th>{candidates.map((c) => <td key={c.id}>{c.vacancyRate === null ? "산정 불가" : `${c.vacancyRate}%`}</td>)}</tr>
               <tr><th scope="row">상가 수용 / 영업</th>{candidates.map((c) => <td key={c.id}>{c.capacity}호 / {c.active}호</td>)}</tr>
               <tr><th scope="row">대표 업종</th>{candidates.map((c) => <td key={c.id}>{c.industry || "미상"}</td>)}</tr>
               <tr><th scope="row">지상 층수</th>{candidates.map((c) => <td key={c.id}>{c.floors && c.floors > 0 ? `${c.floors}층` : "확인되지 않음"}</td>)}</tr>

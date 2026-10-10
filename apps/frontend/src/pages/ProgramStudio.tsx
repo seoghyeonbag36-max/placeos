@@ -280,7 +280,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
           <Field label="검증 방식" required group
             hint="방식마다 기간 안에 잴 수 있는 것이 다르다 — 팝업은 유입, 가오픈은 객단가·회전, MVP 는 사전 수요. 지표도 이에 맞춰 나온다.">
-            <div className="seg seg3" role="radiogroup" aria-label="검증 방식">
+            <div className="seg seg4" role="radiogroup" aria-label="검증 방식">
               {VALIDATION_MODES.map((m) => (
                 <button key={m.key} type="button" role="radio" aria-checked={form.mode === m.key}
                   className={form.mode === m.key ? "on" : ""} onClick={() => changeField("mode", m.key)} title={m.hint}>

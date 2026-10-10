@@ -3,22 +3,19 @@ import { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import {
   BASIS_LABEL,
   listDistricts, getDistrict, getPostings, getMarketing, getVacancyHeatmap, getBuildingVacancy,
-  getFloorVacancies, getForecastSkill,
+  getFloorVacancies,
 } from "@/lib/api";
 import type {
   DistrictSummary, DistrictDetail, Posting, Marketing, TierScenario, VacancyHeatmap, GeoJSONFC,
-  VacancySource, FloorVacancyList, FloorVacancyUnit, ForecastSkill,
+  VacancySource, FloorVacancyList, FloorVacancyUnit,
 } from "@/lib/api";
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
-import { directionLine, errorLine, foldReason, lstmPromoted, pendingLine } from "@/lib/forecastSkill";
-import AlignedAnchor from "@/components/AlignedAnchor";
 import LoginHint from "@/components/LoginHint";
 import { useSignedIn } from "@/hooks/useSignedIn";
-import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import { colors } from "@/design/tokens/colors";
 import "./PageDashboard.css";
 
-// 거리뷰 SDK·층 스택을 끌고 들어오므로 눌렀을 때만 받는다.
+// 층 근거·공실 이력을 끌고 들어오므로 눌렀을 때만 받는다.
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
 
 // 건물 공실 상태 → 색·라벨 (design 토큰 vacancy 색계열 재사용 — MapShell 과 동일 규칙)
@@ -32,7 +29,7 @@ const B_STATUS: Record<string, { color: string; label: string }> = {
 interface TwinSel {
   name: string; capacity: number; active: number; status: string;
   floors?: number;
-  /** 거리뷰가 바라볼 대상. 없으면 거리뷰 자리에 "이 자리에는 거리뷰가 없다"가 뜬다. */
+  /** 건물 위치 — 외부 지도 링크에 사용한다. */
   center?: { lat: number; lng: number };
   // 층 실배치 — 층 근거가 있는 건물에만 실린다(없으면 층 스택이 근사로 폴백).
   comFloors?: number[]; occFloors?: number[]; unknownN?: number;
@@ -55,7 +52,6 @@ interface TwinSel {
 //     중간대(10~30%)의 색차가 죽는다.
 // 범례 눈금은 색 상한(VAC_SCALE_MAX)을 따라간다 — 범례와 셀 색이 어긋나면 안 된다.
 export const VAC_SCALE_MAX = 50;
-const VAC_BAR_MAX = 35;
 
 // 감성(높을수록 좋음): 낮음 #E03E36 → 높음 #22B07D
 export function sentHex(s: number): string {
@@ -153,12 +149,6 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
               : <>{kpi.sent.toFixed(1)}<small>pt</small></>}</div>
           {/* 분모를 밝힌다 — 감성 소스가 없는 거점(경기)은 평균에서 뺐다. */}
           <div className="d">추정치 · {kpi.sentN}/{kpi.n}거점 실측</div></div>
-        <div className="kpi"><div className="l">평균 공실률</div>
-          <div className="v" style={{ color: kpi.vac === null ? undefined : vacHex(kpi.vac) }}>
-            {kpi.vac === null ? <span className="value-absent">실측 없음</span>
-              : <>{kpi.vac.toFixed(1)}<small>%</small></>}</div>
-          {/* 분모를 밝힌다 — 대표값을 내린 거점은 평균에서 뺐다. */}
-          <div className="d">100m 그리드 · {kpi.vacN}/{kpi.n}거점 · 실측 {kpi.gold} / 합성 {kpi.n - kpi.gold}</div></div>
         <div className="kpi"><div className="l">공실 호실 합계</div><div className="v">{kpi.vacant.toLocaleString()}<small>개</small></div><div className="d">실측 거점은 건축물대장 호실 기준</div></div>
       </div>
 
@@ -180,24 +170,12 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
                   title="이 거점에는 감성 소스가 없다 — 0 이 아니라 재지 않은 것이다">감성 실측 없음</span></div>
               : <Bar k="감성" v={s.sentiment} max={100} color={sentHex(s.sentiment)}
                      text={`${s.sentiment.toFixed(1)}pt`} />}
-            {/* 대표값을 내린 거점은 막대를 그리지 않는다 — 길이 0 짜리 막대는 "공실 0%"
-                로 읽힌다. 왜 없는지는 카드를 눌러 들어가면 CaveatNote 가 전문으로 밝힌다. */}
-            {s.vacancy_rate === null || s.vacancy_rate === undefined
-              ? <div className="dmeta"><span className="value-absent"
-                  title={s.vacancy_withheld
-                    ? "쟀지만 거점을 대표하지 못해 내렸다 — 계획상가 밀집"
-                    : "이 거점에는 공실 실측이 없다"}>
-                  {s.vacancy_withheld ? "공실 대표값 미제공" : "공실 실측 없음"}</span></div>
-              : <Bar k="공실" v={s.vacancy_rate} max={VAC_BAR_MAX} color={vacHex(s.vacancy_rate)}
-                     text={`${s.vacancy_rate.toFixed(1)}%`} />}
             <div className="dmeta">
               <span>리뷰 {s.reviews === null || s.reviews === undefined
                 ? <span className="value-absent">없음</span> : s.reviews.toLocaleString()}</span>
               <span>공실 {s.vacant_units}개</span>
               {s.risk_zones !== null && s.risk_zones !== undefined &&
                 <span className={s.risk_zones > 0 ? "risk" : ""}>위험구역 {s.risk_zones}</span>}
-              <AlignedAnchor src={s} className="anchorchip" />
-              <Pred current={s.vacancy_rate} rate={s.predicted_rate} delta={s.predicted_delta} direction={s.predicted_direction} />
             </div>
             <div className="dtiers">
               {(["premium", "value", "factory"] as const).map((t) => (
@@ -212,57 +190,6 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
 
       <div className="foot">시드 데이터(app/data/seoul_pages.py) — 수집 파이프라인(Gold) 적재 시 실측으로 자동 교체 · PlaceOS PPPP</div>
     </div></div>
-  );
-}
-
-/** 판정은 화면 전체에서 한 번만 받는다 — 거점 카드마다 부르지 않는다 */
-let skillReq: Promise<ForecastSkill | null> | null = null;
-function useForecastSkill(): ForecastSkill | null | undefined {
-  const [skill, setSkill] = useState<ForecastSkill | null | undefined>(undefined);
-  useEffect(() => {
-    let live = true;
-    skillReq ??= getForecastSkill().catch(() => null);
-    skillReq.then((s) => { if (live) setSkill(s); });
-    return () => { live = false; };
-  }, []);
-  return skill;
-}
-
-/** 다음 분기 공실 배지.
- *
- *  2026-09-28 B안: LSTM 이 오차 축에서 지속성(직전 분기값 그대로)보다 못해(참고 판정),
- *  **기본 표시는 지속성**이다 — 다음 분기 = 현재 공실률. LSTM 값은 Platform 「모델 근거」
- *  의 실험 모델 칸으로 내렸고, 여기 title 에 왜 내렸는지를 판정(응답 `skill`)으로 적는다.
- *  두 축 게이트가 모두 `실력` 이 되면(`lstmPromoted`) LSTM 배지로 돌아간다.
- *  성능 숫자는 박지 않는다 — 판정을 못 읽으면 숫자 없는 문구만 남는다.
- *  forecast 미배포(rate null) 거점에는 배지를 그리지 않는다(종전과 같은 자리 규칙). */
-function Pred({ current, rate, delta, direction }: {
-  current: number | null | undefined;
-  rate: number | null; delta: number | null; direction: "up" | "down" | null;
-}) {
-  const skill = useForecastSkill();
-  if (rate == null || delta == null) return null;
-  const detail = skill
-    ? [errorLine(skill), directionLine(skill), pendingLine(skill)].filter(Boolean).join("\n")
-    : null;
-  if (lstmPromoted(skill)) {
-    const up = direction === "up";
-    return (
-      <span className="pred" style={{ color: up ? "#c2410c" : "#1d6feb" }}
-        title={`Platform·LSTM 다음 분기 공실 예측\n${detail}`}>
-        예측 {rate.toFixed(1)}% {up ? "▲" : "▼"}{Math.abs(delta).toFixed(1)}
-      </span>
-    );
-  }
-  if (current == null) return null;
-  return (
-    <span className="pred pred-persist"
-      title={"다음 분기 기본값은 지속성(현재 공실률 그대로)이다.\n"
-        + foldReason(skill)
-        + (detail ? `\n${detail}` : "")
-        + "\nLSTM 예측은 Platform 「모델 근거」의 실험 모델 칸에 있다."}>
-      다음 분기 {current.toFixed(1)}%<small> 지속성</small>
-    </span>
   );
 }
 
@@ -334,7 +261,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
   const [layer, setLayer] = useState<"buildings" | "grid">("buildings");
   const [mapReady, setMapReady] = useState(false);
   const [mapErr, setMapErr] = useState<string | null>(null);
-  const [sel, setSel] = useState<TwinSel | null>(null);   // 클릭한 건물(층 스택·거리뷰 대상)
+  const [sel, setSel] = useState<TwinSel | null>(null);   // 클릭한 건물(층 근거·공실 이력 대상)
   const [twinOpen, setTwinOpen] = useState(false);
 
   const clearOverlays = () => {
@@ -412,7 +339,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
 
     if (layer === "buildings" && bld) {
       // 공실 지도: 공실의심(empty) 건물만 개별 red dot 으로 — "어디가 비었나".
-      // 만실·부분공실·고공실은 숨긴다(PlaceOS 공실 개별값 목표: 진짜 빈 건물만). 점 클릭 → 상세+거리뷰.
+      // 만실·부분공실·고공실은 숨긴다(PlaceOS 공실 개별값 목표: 진짜 빈 건물만). 점 클릭 → 상세+공실 이력.
       bld.features.forEach((f) => {
         const p = f.properties;
         if (p.status !== "empty") return;
@@ -438,7 +365,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
             `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:8px 11px;`
             + `font:700 11.5px 'Pretendard','Malgun Gothic',sans-serif;color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:200px">`
             + `${p.name || "건물"} · <span style="color:${st.color}">${st.label}</span><br>`
-            + `<span style="color:#6b7280;font-weight:600">공실률(추정) ${p.vacancy_rate}% · 영업 ${p.active}/${p.capacity}호`
+            + `<span style="color:#6b7280;font-weight:600">영업 ${p.active}/${p.capacity}호`
             + `${p.industry ? " · " + p.industry : ""}</span></div>`,
           );
           info.open(map, c);
@@ -469,7 +396,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
           info.setContent(
             `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:7px 11px;`
             + `font:700 11.5px 'Pretendard','Malgun Gothic',sans-serif;color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.12)">`
-            + `공실률 <span style="color:${vacHex(c.v)}">${c.v.toFixed(1)}%</span>`
+            + `공간 현황`
             + `<span style="color:#6b7280;font-weight:600"> · 점포 ${c.stores} · 공실 ${c.vac_n}</span></div>`,
           );
           info.open(map, new naver.maps.LatLng(c.c_lat, c.c_lng));
@@ -495,7 +422,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
           onClick={() => setLayer("buildings")}>공실 건물</button>
         <button className={layer === "grid" ? "on" : ""} onClick={() => setLayer("grid")}>100m 그리드</button>
         {sel && layer === "buildings" && (
-          <button className="twinbtn" onClick={() => setTwinOpen(true)}>🏢 {sel.name} · 층별 공실 · 거리뷰</button>
+          <button className="twinbtn" onClick={() => setTwinOpen(true)}>🏢 {sel.name} · 층별 공실 · 공실 이력</button>
         )}
       </div>
 
@@ -507,20 +434,16 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
             <span className="ml-chip"><i style={{ background: B_STATUS.empty.color }} />공실의심</span>
             {bld && (() => {
               const vac = bld.features.filter((f) => f.properties.status === "empty").length;
-              return <span className="ml-stat">공실의심 {vac.toLocaleString()}동(추정) · 점 클릭 시 상세·거리뷰</span>;
+              return <span className="ml-stat">공실의심 {vac.toLocaleString()}동(추정) · 점 클릭 시 상세·공실 이력</span>;
             })()}
           </>
         ) : (
           <>
-            <span className="ml-label">공실률</span>
+            <span className="ml-label">공실 분포</span>
             <span className="ml-grad" />
-            <span className="ml-ticks"><em>0%</em><em>{VAC_SCALE_MAX}%+</em></span>
+            <span className="ml-ticks"><em>낮음</em><em>높음</em></span>
             {hm && (
               <span className="ml-stat">
-                {VACANCY_LABEL.primary} {hm.avg_vacancy === null || hm.avg_vacancy === undefined
-                  ? <b className="value-absent" title="쟀지만 거점을 대표하지 못해 내렸다">대표값 미제공</b>
-                  : <b style={{ color: vacHex(hm.avg_vacancy) }}>{hm.avg_vacancy.toFixed(1)}%</b>}
-                {" "}<Pred current={hm.avg_vacancy} rate={hm.predicted_rate} delta={hm.predicted_delta} direction={hm.predicted_direction} />
                 {" "}· 셀 {hm.cells.length} · 영업 {hm.sum_stores.toLocaleString()} · 공실 {hm.sum_vac}
                 {" "}<SourceBadge source={hm.vacancy_source} />
                 {hm.vacancy_source === "gold" && hm.buildings != null && (
@@ -528,7 +451,6 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
                     {hm.excluded_mall ? ` · 집합 ${hm.excluded_mall}동 제외` : ""}
                   </>
                 )}
-                {" "}<AlignedAnchor src={hm} className="anchorchip" />
               </span>
             )}
             <span className="ml-hint">셀 클릭 시 상세</span>
@@ -536,12 +458,12 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
         )}
       </div>
 
-      {/* 건물 상세 — 2D 층 스택 + 네이버 거리뷰 (2026-09-05 에 3D 트윈을 대체했다) */}
+      {/* 건물 상세 — 2D 층 근거 + 공실 이력 (2026-09-05 에 3D 트윈을 대체했다) */}
       {twinOpen && sel && (
         <div className="twinmodal" onClick={() => setTwinOpen(false)}>
           <div className="twinbox" onClick={(e) => e.stopPropagation()}>
             <div className="twinhead">
-              <span>{sel.name} · 층별 공실 · 거리뷰</span>
+              <span>{sel.name} · 층별 공실 · 공실 이력</span>
               <button onClick={() => setTwinOpen(false)}>✕</button>
             </div>
             <div className="twincanvas">
@@ -748,10 +670,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           <button className="back" onClick={onBack}>← 거점 보드</button>
           <h1>{summary.name}</h1>
           <div className="sub">
-            {detail?.sub ?? summary.note} · {VACANCY_LABEL.primary}{" "}
-            <MeasuredValue value={summary.vacancy_rate} unit="%"
-              absent={summary.vacancy_withheld ? "대표값 미제공" : "실측 없음"} />
-            {" "}<Pred current={summary.vacancy_rate} rate={summary.predicted_rate} delta={summary.predicted_delta} direction={summary.predicted_direction} />
+            {detail?.sub ?? summary.note}
             {" "}· 감성 <MeasuredValue value={summary.sentiment} unit="pt" />
             {summary.rec_top ? ` · 추천 상위 Tier ${summary.rec_top}` : ""}
           </div>
@@ -787,10 +706,6 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                    style={{ borderTopColor: z.vacancy_rate === null ? undefined : vacHex(z.vacancy_rate) }}>
                 <div className="zhead">
                   <span className="zname">{z.n}</span>
-                  <span className="zscore"
-                        style={{ color: z.vacancy_rate === null ? undefined : vacHex(z.vacancy_rate) }}>
-                    {z.vacancy_rate === null ? "—" : `${z.vacancy_rate.toFixed(1)}%`}
-                  </span>
                   <Src src="gold" />
                 </div>
                 <div className="zmeta">

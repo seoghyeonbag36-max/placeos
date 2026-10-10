@@ -404,10 +404,10 @@ describe("MapShell — 사이드패널", () => {
     expect(await screen.findByText(/3동 · 실측\(추정\)/)).toBeTruthy();
     expect(screen.getByText("가로수 A")).toBeTruthy();
     expect(screen.getByText("가로수 C")).toBeTruthy();
-    // 거점 대표값도 같이 밝힌다.
+    // 공실률 숫자는 Platform 소개에만 표시한다.
     // 주 지표는 §4-2 라벨로 적는다(2026-09-28) — 대조 지표와 같은 "공실률" 이름을 쓰지 않는다.
-    expect(screen.getByText(/거점 전체 공실률 \(실측·호실 기준\) 12\.3%/)).toBeTruthy();
-    // 내부 대조 지표는 고객 화면에서 생략하며 주 공실률과 실측 표시는 유지한다.
+    expect(screen.queryByText(/거점 전체 공실률/)).toBeNull();
+    // Page에서는 비율을 반복하지 않고 실측 출처를 유지한다.
     expect(screen.queryByText(/정렬 격차/)).toBeNull();
     expect(screen.queryByText(/\+2\.4%p/)).toBeNull();
   });

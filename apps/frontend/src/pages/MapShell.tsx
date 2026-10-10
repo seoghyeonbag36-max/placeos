@@ -25,11 +25,10 @@ import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatm
 import { colors } from "@/design/tokens/colors";
 import { topic } from "@/lib/businessProfile";
 import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/MapMarkerPin";
-import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "@/styles/tokens.css";
 import "./MapShell.css";
 
-// 거리뷰 SDK·층 스택을 끌고 들어오므로 눌렀을 때만 받는다.
+// 층 근거·공실 이력을 끌고 들어오므로 눌렀을 때만 받는다.
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
 
 // 가로수길 코어 (강남구 신사동) — poc-building-vacancy.md §0.5. 거점 목록이 오기 전 초기 중심.
@@ -706,11 +705,6 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           <div className="sp-title">{hub?.name ?? "가로수길"} · 건물 공실</div>
           <div className="sp-sub">
             {hub ? `${hub.gu} · ` : ""}{currentInventory ? <>{filtered.length.toLocaleString()}동 · {src === "api" ? "실측" : "샘플"}(추정)</> : "건물 불러오는 중…"}
-            {/* 거점 대표값이 없으면 그 사실을 적는다 — 조용히 빠지면 있는 값을 못 본
-                것처럼 읽힌다. 아래 건물 목록은 그대로다(내린 것은 대표값뿐이다). */}
-            {hub && (hub.vacancy_rate !== null && Number.isFinite(hub.vacancy_rate)
-              ? ` · ${VACANCY_LABEL.primary} ${hub.vacancy_rate.toFixed(1)}%`
-              : hub.vacancy_withheld ? " · 거점 대표값 미제공" : "")}
           </div>
         </div>
         {/* 임대시세 레이어의 첫 답 — "이 상권, 층마다 평당 월 얼마인가". 격자 색이 아니라 숫자다. */}
@@ -832,7 +826,6 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                   );
                 })()}
               </span>
-              <span className="b-vac num" style={{ color: STATUS[b.status].color }}>{vacRate(b)}%</span>
             </button>
             <button className="save-candidate" type="button" aria-label={`${b.name} 후보 ${savedIds.includes(b.id) ? "해제" : "저장"}`}
               aria-pressed={savedIds.includes(b.id)} disabled={src !== "api" || (!savedIds.includes(b.id) && savedIds.length >= 3)}
@@ -845,7 +838,6 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           <div className="b-detail">
             <button className="building-back" type="button" onClick={() => setWorkspace((w) => ({ ...w, selectedId: null }))}>← 건물 목록</button>
             <div className="b-name">{selected.name}</div>
-            <div className="row"><span>공실률(추정)</span><span className="num" style={{ color: STATUS[selected.status].color }}>{vacRate(selected)}%</span></div>
             <div className="row"><span>상태</span><span>{STATUS[selected.status].label}</span></div>
             <div className="row"><span>상가 수용 / 영업</span><span>{selected.capacity}호 / {selected.active}호</span></div>
             <div className="row"><span>대표 업종</span><span>{selected.industry || "미상"}</span></div>
@@ -906,7 +898,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               </div>
             )}
 
-            <button className="b-twin" onClick={() => setTwinOpen(true)}>층별 공실 · 거리뷰 보기</button>
+            <button className="b-twin" onClick={() => setTwinOpen(true)}>층별 공실 · 공실 이력 보기</button>
             <button className="save-candidate detail-save" type="button" aria-pressed={savedIds.includes(selected.id)}
               disabled={src !== "api" || (!savedIds.includes(selected.id) && savedIds.length >= 3)}
               onClick={() => toggleSaved(selected.id)}>{savedIds.includes(selected.id) ? "✓ 후보 저장됨" : "+ 이 건물 후보 저장"}</button>
@@ -997,12 +989,12 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
         )}
       </div>
 
-      {/* 건물 상세 — 2D 층 스택 + 네이버 거리뷰 (2026-09-05 에 3D 트윈을 대체했다) */}
+      {/* 건물 상세 — 2D 층 근거 + 공실 이력 (2026-09-05 에 3D 트윈을 대체했다) */}
       {twinOpen && selected && (
         <div className="twin-modal" onClick={() => setTwinOpen(false)}>
           <div className="twin-box" onClick={(e) => e.stopPropagation()}>
             <div className="twin-head">
-              <span>{selected.name} · 층별 공실 · 거리뷰</span>
+              <span>{selected.name} · 층별 공실 · 공실 이력</span>
               <button onClick={() => setTwinOpen(false)}>✕</button>
             </div>
             <div className="twin-canvas">

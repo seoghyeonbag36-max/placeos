@@ -1,0 +1,33 @@
+{
+  "draft_content_check": {
+    "result": "PASS",
+    "posts": 5,
+    "slides": 15,
+    "pppp_mapping": "1:1"
+  },
+  "draft_render_check": {
+    "result": "PASS",
+    "png_count": 15,
+    "size": [
+      1080,
+      1350
+    ],
+    "files": [
+      "01-why-placeos-01",
+      "01-why-placeos-02",
+      "01-why-placeos-03",
+      "02-platform-01",
+      "02-platform-02",
+      "02-platform-03",
+      "03-page-01",
+      "03-page-02",
+      "03-page-03",
+      "04-posting-01",
+      "04-posting-02",
+      "04-posting-03",
+      "05-program-01",
+      "05-program-02",
+      "05-program-03"
+    ]
+  }
+}

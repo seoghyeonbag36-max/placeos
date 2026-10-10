@@ -29,6 +29,7 @@
 """
 from __future__ import annotations
 
+import ast
 import json
 import sys
 from dataclasses import dataclass, field
@@ -1231,6 +1232,23 @@ def _context_kinds() -> dict[str, int]:
     return out
 
 
+def _literal_options(source: str, alias: str) -> set[str]:
+    """Literal 별칭의 실제 선언을 읽는다. 주석·표기 순서에 기대지 않는다."""
+    for node in ast.parse(source).body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(target, ast.Name) and target.id == alias for target in node.targets):
+            continue
+        value = node.value
+        if not (isinstance(value, ast.Subscript)
+                and isinstance(value.value, ast.Name) and value.value.id == "Literal"):
+            return set()
+        items = value.slice.elts if isinstance(value.slice, ast.Tuple) else [value.slice]
+        return {item.value for item in items
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)}
+    return set()
+
+
 def program_track(total: int) -> Track:
     """대상 재정의(2026-09-17) 기준 — 예비창업자와, 팝업스토어·가오픈·MVP 로 아이템을 검증하려는
     기창업자.
@@ -1257,7 +1275,7 @@ def program_track(total: int) -> Track:
     # 검사하며, 화면이 생성 함수를 부르고 판정표를 그려야 한다.
     validation_ok = (
         "class ProgramBrief" in schema_src
-        and 'Literal["popup", "soft_open", "mvp"]' in schema_src
+        and {"popup", "soft_open", "mvp"}.issubset(_literal_options(schema_src, "ValidationMode"))
         and "class ValidationSignal" in schema_src and "decision: str" in schema_src
         and "signals" in mkt_src and "_MODE_SIGNAL" in mkt_src
         and "unproven_experience_claim" in ha_src and "missing_decision_rule" in ha_src

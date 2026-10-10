@@ -102,7 +102,6 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   const homeId = business.goal === "move" ? business.homeDistrictId : null;
   const home = homeId ? byId.get(homeId) ?? null : null;
   const hereName = here?.name ?? districts.find((d) => d.id === districtId)?.name ?? districtId;
-  const vac = (id: string) => districts.find((d) => d.id === id);
 
   // 표: (옮기기) 지금 상권 고정 → 순위 상위 5 → 지금 보는 상권이 그 밖이면 한 줄 더
   const rows: Array<{ row: IndustryFitRow; tag?: string }> = [];
@@ -127,7 +126,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
           : <> <span className="fit-muted">순위 없음(이 상권은 모델 산출물이 없습니다)</span></>)}
       </h2>
       {!fit.model_covered && (
-        <p className="fit-uncovered">{topic(ind.label)} 적합도 순위를 내지 않습니다{fit.fit_unavailable_reason ? ` — ${fit.fit_unavailable_reason}` : " — 모델 추천 대상 밖"}. 같은 업종 비중·임대료·공실률은 그대로 보여줍니다.</p>
+        <p className="fit-uncovered">{topic(ind.label)} 적합도 순위를 내지 않습니다{fit.fit_unavailable_reason ? ` — ${fit.fit_unavailable_reason}` : " — 모델 추천 대상 밖"}. 같은 업종 비중·임대료를 보여줍니다.</p>
       )}
       {diff != null && (
         <p className="fit-diff">지금 상권({home!.name}) 대비 적합도 <b>{diff > 0 ? "+" : ""}{diff.toFixed(1)}%p</b></p>
@@ -135,7 +134,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
       {home && home.district_id === districtId && (
         <p className="fit-diff">지금 가게 상권을 보고 있습니다 — 아래 표에서 다른 상권과 견주세요.</p>
       )}
-      {here && <Facts row={here} seoulFit={fit.seoul_fit} covered={fit.model_covered} district={vac(districtId)} />}
+      {here && <Facts row={here} seoulFit={fit.seoul_fit} covered={fit.model_covered} />}
       {/* 적합도·순위를 읽는 법이라 순위가 없으면 싣지 않는다 */}
       {fit.model_covered && <p className="fit-note">{FIT_NOTE}</p>}
 
@@ -143,11 +142,10 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
         <div className="fit-table-wrap">
           <table className="fit-table">
             <caption>{ind.label} 기준 상권 순위 · 상위 {TOP_N}</caption>
-            <thead><tr><th scope="col">순위</th><th scope="col">상권</th><th scope="col">적합도</th><th scope="col">같은 업종</th><th scope="col">1층 평당</th><th scope="col">공실률</th><th scope="col"><span className="sr-only">이동</span></th></tr></thead>
+            <thead><tr><th scope="col">순위</th><th scope="col">상권</th><th scope="col">적합도</th><th scope="col">같은 업종</th><th scope="col">1층 평당</th><th scope="col"><span className="sr-only">이동</span></th></tr></thead>
             <tbody>
               {rows.map(({ row, tag }) => {
                 const current = row.district_id === districtId;
-                const d = vac(row.district_id);
                 return (
                   <tr key={`${tag ?? "r"}-${row.district_id}`} className={current ? "is-current" : undefined}>
                     <td className="num">{row.fit_rank ?? "—"}</td>
@@ -155,7 +153,6 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
                     <td className="num">{pct1(row.fit) ?? "미제공"}</td>
                     <td className="num">{shareText(row)}</td>
                     <td className="num">{row.rent_1f_per_pyeong != null ? `${row.rent_1f_per_pyeong}만` : "미제공"}</td>
-                    <td className="num">{vacancyText(d)}</td>
                     <td>
                       {current
                         ? <span className="fit-here">보는 중</span>
@@ -174,15 +171,14 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   );
 }
 
-function Facts({ row, seoulFit, covered, district }: {
-  row: IndustryFitRow; seoulFit: number | null; covered: boolean; district?: DistrictSummary;
+function Facts({ row, seoulFit, covered }: {
+  row: IndustryFitRow; seoulFit: number | null; covered: boolean;
 }) {
   return (
     <dl className="fit-facts">
       {covered && <div><dt>입지 적합도</dt><dd>{pct1(row.fit) ?? "미제공"}{seoulFit != null && <small> 서울 평균 {pct1(seoulFit)}</small>}</dd></div>}
       <div><dt>같은 업종</dt><dd>{shareText(row)}</dd></div>
       <div><dt>1층 평당 월세</dt><dd>{row.rent_1f_per_pyeong != null ? `${row.rent_1f_per_pyeong}만원` : "미제공"}{row.rent_shared && <small> 인접 상권 표본</small>}</dd></div>
-      <div><dt>공실률</dt><dd>{vacancyText(district)}</dd></div>
     </dl>
   );
 }
@@ -192,11 +188,7 @@ function shareText(row: { same_n: number | null; same_share: number | null; samp
   return row.sample_n != null ? `${pct1(row.same_share)} (${row.same_n}/${row.sample_n}곳)` : `${pct1(row.same_share)} (${row.same_n}곳)`;
 }
 
-function vacancyText(d?: DistrictSummary): string {
-  if (!d) return "—";
-  if (d.vacancy_withheld) return "대표값 미제공";
-  return d.vacancy_rate != null && Number.isFinite(d.vacancy_rate) ? `${d.vacancy_rate.toFixed(1)}%` : "실측 없음";
-}
+
 
 /* ── 업종 바꾸기: 이 상권 업종 순위 ─────────────────────────────────────────── */
 

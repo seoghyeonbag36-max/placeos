@@ -166,6 +166,11 @@ def brief_context(brief: dict | None) -> str | None:
     if b.get("tier"):
         lines.append(f"- Posting 3-Tier 선택: {b['tier']}")
 
+    if b.get("mode") == "actual_open":
+        lines.append("- 실제 창업: 정식 개업 후 실매출·실비용으로 손익을 검증하는 계획이다. "
+                     "실측 비용이 없으면 손익분기 목표 금액을 지어내지 않는다. "
+                     "이 방식 선택만으로 개업 완료나 고객·후기·매출 실적이 확인되지는 않는다.")
+
     lines.append("- ⚠ 이 자리에서 이 아이템으로 장사한 적이 **없다**. 단골·기존 고객·"
                  "방문 후기처럼 이미 쌓인 경험을 전제하는 제안은 사실이 아니다. "
                  "재방문율·후기 수집은 앞으로 **측정할 지표**로는 정상이다.")

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
+import AreaBepPlanner from "@/components/AreaBepPlanner";
 import {
   BASIS_LABEL, getPostings, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
@@ -351,6 +352,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             )}
           </label>
 
+          {unit && !detailKey && <AreaBepPlanner key={`${districtId}:${unit.id}`} unit={unit} />}
           <IndustryDetailSelect value={detailKey} onChange={(key, option) => {
             setDetailKey(key); setOperating({}); clearCalculation();
             if (option) setIndustry(option.label);

@@ -1,0 +1,9 @@
+.area-bep { margin: var(--sp-3) 0; padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.area-bep summary { cursor: pointer; font-weight: var(--fw-semibold); }
+.area-bep p { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.area-bep-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.area-bep-fields label { display: grid; gap: var(--sp-1); font-size: var(--fs-caption); }
+.area-bep-fields small { display: block; color: var(--muted); }
+.area-bep-fields input { width: 100%; box-sizing: border-box; padding: var(--sp-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.area-bep dd { margin: var(--sp-1) 0 var(--sp-2); font-weight: var(--fw-semibold); }
+@media (max-width: 480px) { .area-bep-fields { grid-template-columns: 1fr; } }

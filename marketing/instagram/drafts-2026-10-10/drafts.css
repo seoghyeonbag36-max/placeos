@@ -1,0 +1,9 @@
+.draft-art h1 { font-size:82px; letter-spacing:-5px; }
+.draft-art .eyebrow { font-size:26px; letter-spacing:0; }
+.draft-art .journey { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:44px; }
+.journey-tile { height:144px; padding:25px 28px; border:2px solid #D9E4E3; border-radius:20px; background:#FFFFFF; }
+.journey-tile.current { background:#DDEFF0; border-color:#8BCBD2; }
+.journey-tile small { display:block; font-size:22px; color:#526474; }
+.journey-tile h2 { font-size:33px; letter-spacing:-1px; margin:16px 0 0; }
+.draft-art .callout { font-size:28px; }
+.draft-art .foot strong { font-size:25px; }

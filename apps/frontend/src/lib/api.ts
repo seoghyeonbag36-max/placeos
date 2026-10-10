@@ -815,7 +815,7 @@ export const getDistrictIndustries = (districtId: string) =>
 
 /** 검증 방식. 셋을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다 —
  *  팝업은 유입, 가오픈은 객단가·회전, MVP 는 사전 수요를 본다. */
-export type ValidationMode = "popup" | "soft_open" | "mvp";
+export type ValidationMode = "popup" | "soft_open" | "mvp" | "actual_open";
 
 /** 누가 묻는가. 예비창업자는 자리부터 찾고, 기창업자는 옮길지를 묻는다. */
 export type FounderStage = "pre_founder" | "founder";
@@ -823,11 +823,12 @@ export type FounderStage = "pre_founder" | "founder";
 export const VALIDATION_MODES: { key: ValidationMode; label: string; hint: string }[] = [
   { key: "popup", label: "팝업스토어", hint: "빈 자리를 며칠~몇 주 빌려 유입과 구매를 본다" },
   { key: "soft_open", label: "가오픈", hint: "운영을 축소해 열고 객단가·회전을 본다" },
+  { key: "actual_open", label: "실제 창업", hint: "정식 개업 후 매출·비용을 기록해 손익과 운영을 검증한다" },
   { key: "mvp", label: "MVP 테스트", hint: "점포 없이 사전예약·사전주문으로 수요만 본다" },
 ];
 
 export const MODE_LABEL: Record<string, string> = {
-  popup: "팝업스토어", soft_open: "가오픈", mvp: "MVP 테스트",
+  popup: "팝업스토어", soft_open: "가오픈", mvp: "MVP 테스트", actual_open: "실제 창업",
 };
 export const STAGE_LABEL: Record<string, string> = {
   pre_founder: "예비창업자", founder: "기창업자",
