@@ -125,10 +125,14 @@ def _get(key: str, sid: str, start: int, end: int) -> dict | None:
         return None
 
 
-def _hub_pairs(slug: str) -> set[tuple[str, str]]:
-    """거점 stores_raw 의 lnoAdr 에서 (구, 동) 쌍 집합 파생."""
+def _hub_pairs(slug: str, stores: list[dict] | None = None) -> set[tuple[str, str]]:
+    """거점 stores_raw 의 lnoAdr 에서 (구, 동) 쌍 집합 파생.
+
+    stores 를 주면 그 목록에서 뽑는다 — 아직 bronze 에 쓰지 않은 스냅샷(변환 dry-run)
+    으로도 수집기와 같은 필터를 만들기 위해서다(data/collectors/import_acquisition.py).
+    """
     pairs: set[tuple[str, str]] = set()
-    for s in load_latest(slug, "stores_raw.json") or []:
+    for s in (stores if stores is not None else load_latest(slug, "stores_raw.json")) or []:
         m = _GU_DONG.search(s.get("lnoAdr", "") or "")
         if m:
             pairs.add((m.group(1), m.group(2)))
