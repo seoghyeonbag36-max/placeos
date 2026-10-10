@@ -615,6 +615,12 @@ export interface OperatingField {
 export interface IndustryDetail {
   key: string; parent: string; label: string; family: string; evidence_needed: string;
   fields: OperatingField[]; recommendation_available: boolean; recommendation_reason: string;
+  benchmark?: {
+    values: Record<string, { value: number; original_value: number; table: string; page: number; conversion: string }>;
+    source: { title: string; url: string; survey_year: number; published_on: string; geography: string;
+      category: string; sample_n: number; category_match: "broader_category" | "exact_category" } | null;
+    note: string; unavailable: Record<string, string>;
+  };
 }
 export interface IndustryEconomics {
   detail_key: string; label: string; status: "calculated" | "needs_inputs";

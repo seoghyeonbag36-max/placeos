@@ -75,21 +75,12 @@ const emptyForm = (stage: FounderStage = "pre_founder"): FormState => ({
   budgetMin: "", budgetMax: "", differentiatorsText: "",
 });
 
-/** 데모용 예시 입력. **가상의 아이템**이다 — 실존 브랜드의 계획처럼 읽히지 않게 이름부터 예시임을 밝힌다. */
-const SAMPLE: FormState = {
-  item: "예시 — 산미 중심 스페셜티 원두 팝업",
-  category: "카페",
-  mode: "popup",
-  stage: "pre_founder",
-  districtId: "garosugil",
-  address: "",
-  hypothesis: "가로수길 20~30대 직장인에게 산미가 강한 싱글오리진이 통한다",
-  targetCustomer: "20~30대 직장인",
-  startDate: "",
-  runDays: "10",
-  budgetMin: "300000",
-  budgetMax: "800000",
-  differentiatorsText: ["주간 단위 원두 교체", "로스팅 당일 추출"].join("\n"),
+/** 가상 검증 예시의 방식별 행동. 실제 고객 수요나 업종 평균이 아니다. */
+const EXAMPLE_ACTION: Record<ValidationMode, string> = {
+  popup: "팝업 방문 후 구매 의사를 보인다",
+  soft_open: "가오픈 체험 후 재방문 의사를 보인다",
+  mvp: "MVP 소개 후 사전 신청 의사를 보인다",
+  actual_open: "실제 창업 후 구매하고 다시 이용할 의사를 보인다",
 };
 
 const linesOf = (t: string) => t.split("\n").map((s) => s.trim()).filter(Boolean);
@@ -99,8 +90,8 @@ const toInt = (t: string): number | undefined => {
 };
 
 export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss, defaultCategory, businessGoal }: {
-  /** 지도가 비출 상권(App 공유 상권). 폼의 「거점」을 고르지 않았을 때 카메라만 여기로 간다 —
-   *  **생성 요청에는 넣지 않는다.** 컨텍스트 결합은 사용자가 폼에서 고른 것만 쓴다. */
+  /** 지도가 비출 상권(App 공유 상권). 자동으로 생성 요청에 넣지 않으며,
+   * 「예시 채우기」를 누르면 아직 선택하지 않은 상권칸에만 반영한다. */
   mapDistrictId?: string;
   /** Posting → Program 인계. 거점·업종·주소를 채우고 그 공실을 **검증할 자리**(unit_id)로 싣는다.
    *  App 이 인계마다 key 를 바꿔 새로 마운트하므로 초기값으로만 읽는다. */
@@ -116,7 +107,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const [form, setForm] = useState<FormState>(() => handoff
     ? { ...emptyForm(baseStage), districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.unitName }
     : { ...emptyForm(baseStage), category: defaultCategory ?? "" });
-  // 「검증할 자리」 안내·지도 핀. 폼을 통째로 갈아엎는 동작(비우기·예시)이나 거점 변경에서 걷는다 —
+  // 「검증할 자리」 안내·지도 핀. 비우기나 거점 변경에서 걷는다 —
   // 폼은 다른 상권이 됐는데 안내와 unit_id 만 남으면 엉뚱한 자리를 검증 무대로 싣는다.
   const [arrival, setArrivalState] = useState<ProgramHandoff | null>(handoff ?? null);
   const setArrival = (next: null) => { setArrivalState(next); onArrivalDismiss?.(); };
@@ -132,6 +123,9 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const [error, setError] = useState<string | null>(null);
   // 비우기·입력 변경 뒤 늦게 도착한 이전 요청이 초안을 되살리지 않게 한다.
   const generationVersion = useRef(0);
+  // 이전 자동 예시만 새 선택에 맞춰 갱신한다. 사용자가 고친 문구는 보존한다.
+  const exampleValues = useRef<Partial<FormState>>({});
+  const districtSelected = useRef(false);
   useEffect(() => () => { generationVersion.current += 1; }, []);
 
   useEffect(() => {
@@ -169,8 +163,33 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   function changeField<K extends keyof FormState>(k: K, value: FormState[K]) {
     // 생성 원본의 입력이 바뀌면 이전 응답·초안·근거를 새 브리프에 붙이지 않는다.
     discardResult();
+    delete exampleValues.current[k];
+    if (k === "districtId") districtSelected.current = true;
     if (k === "districtId" && arrival && value !== arrival.districtId) setArrival(null);
     setForm((f) => ({ ...f, [k]: value }));
+  }
+
+  function fillExample() {
+    const category = form.category.trim() || defaultCategory?.trim() || "카페";
+    const districtId = form.districtId || (!districtSelected.current && districts?.some((d) => d.id === mapDistrictId) ? mapDistrictId! : "");
+    const district = districts?.find((d) => d.id === districtId);
+    const place = district?.name ?? (districtId ? "선택한 상권" : "검증할 상권");
+    const generated: Partial<FormState> = {};
+    function fill(k: "item" | "hypothesis" | "targetCustomer" | "runDays" | "differentiatorsText", sample: string) {
+      if (form[k].trim() && form[k] !== exampleValues.current[k]) return form[k];
+      generated[k] = sample;
+      return sample;
+    }
+    const item = fill("item", `예시 — ${category} ${MODE_LABEL[form.mode]} ${form.stage === "founder" ? "신규 아이템" : "창업 아이템"}`);
+    const targetCustomer = fill("targetCustomer", `${place}에서 ${category} 이용에 관심 있는 방문 고객`);
+    const hypothesis = fill("hypothesis", `예시 가설 — ${targetCustomer}이(가) '${item}'의 ${EXAMPLE_ACTION[form.mode]}`);
+    const differentiatorsText = fill("differentiatorsText", `${category} 고객이 원하는 구성을 선택할 수 있게 제공\n${MODE_LABEL[form.mode]} 참여 고객 의견을 반영해 구성 개선`);
+    const runDays = fill("runDays", "10");
+    const emptyBudget = !form.budgetMin.trim() && !form.budgetMax.trim();
+    setForm({ ...form, category, districtId, item, targetCustomer, hypothesis, differentiatorsText, runDays,
+      budgetMin: emptyBudget ? "300000" : form.budgetMin, budgetMax: emptyBudget ? "800000" : form.budgetMax });
+    exampleValues.current = generated;
+    discardResult();
   }
 
   function discardResult() {
@@ -257,14 +276,14 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
           <div className="ptitle">
             검증 브리프
             <div className="ptools">
-              <Button variant="ghost" type="button" className="ghost" onClick={() => {
-                setForm(SAMPLE); setArrival(null); discardResult();
-              }}>예시 채우기</Button>
+              <Button variant="ghost" type="button" className="ghost" onClick={fillExample}>예시 채우기</Button>
               <Button variant="ghost" type="button" className="ghost" onClick={() => {
                 setForm(emptyForm(baseStage)); setArrival(null); discardResult();
+                exampleValues.current = {}; districtSelected.current = false;
               }}>비우기</Button>
             </div>
           </div>
+          <p>예시 채우기는 선택한 단계·검증 방식·업종·상권을 유지합니다. 예시 문구·기간·예산은 가상 입력이며 실측·평균값이 아닙니다. 직접 작성한 내용은 보존합니다.</p>
 
           <Field label="단계" required group>
             <div className="seg" role="radiogroup" aria-label="단계">
@@ -307,7 +326,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
               ? "상권 목록을 불러오지 못했습니다. 상권 정보 없이 생성할 수 있습니다."
               : "선택한 상권의 특성을 검증 계획에 반영합니다."}
             count={districts?.length ? `${districts.length}곳` : undefined}>
-            <select value={form.districtId} onChange={(e) => changeField("districtId", e.target.value)} disabled={districts === null}>
+            <select aria-label="상권" value={form.districtId} onChange={(e) => changeField("districtId", e.target.value)} disabled={districts === null}>
               <option value="">{districts === null ? "거점 불러오는 중…" : "— 결합 안 함 —"}</option>
               {(districts ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
