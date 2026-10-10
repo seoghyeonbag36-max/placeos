@@ -2,7 +2,7 @@
   "slug": "gurojeonhwa",
   "hub_name": "구로전화국",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:45",
+  "built_at": "2026-10-11T07:20:49",
   "shown": 729,
   "excluded_total": 1787,
   "excluded_unknown": 1,
@@ -11,8 +11,8 @@
   "coverage_pct": 29.0,
   "status": {
     "full": 336,
-    "partial": 140,
-    "high": 89,
+    "partial": 141,
+    "high": 88,
     "empty": 164
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 114,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 27.2,
+  "reference_vacancy_pct": 27.1,
   "reference_buildings": 342,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 26.5,
+  "mixed_vacancy_pct": 26.4,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 301,
-      "active": 620,
+      "active": 621,
       "capacity": 791,
-      "vacancy_pct": 21.6
+      "vacancy_pct": 21.5
     },
     "expos_units": {
       "buildings": 41,

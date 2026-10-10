@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>광화문",
   "anchor_vac_small_pct": 0.944655669105075,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 16.3,
-  "alpha_street": 0.321,
-  "gap_pp": 11.1,
+  "estimated_vacancy_pct": 16.2,
+  "alpha_street": 0.323,
+  "gap_pp": 11.0,
   "buildings_used": 350,
   "rone_aligned": {
     "mid": {
       "buildings": 165,
       "vacancy_units_pct": 34.2,
       "buildings_floor": 165,
-      "vacancy_floor_hi_pct": 22.9,
-      "vacancy_floor_lo_pct": 50.6,
-      "vacancy_area_pct": 22.7,
+      "vacancy_floor_hi_pct": 22.7,
+      "vacancy_floor_lo_pct": 50.4,
+      "vacancy_area_pct": 22.2,
       "anchor_pct": 5.24,
-      "gap_pp": 17.5
+      "gap_pp": 17.0
     },
     "small": {
       "buildings": 294,

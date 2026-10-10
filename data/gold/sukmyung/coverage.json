@@ -2,7 +2,7 @@
   "slug": "sukmyung",
   "hub_name": "숙대입구",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:16",
+  "built_at": "2026-10-11T07:19:58",
   "shown": 600,
   "excluded_total": 1419,
   "excluded_unknown": 21,
@@ -11,8 +11,8 @@
   "coverage_pct": 29.7,
   "status": {
     "full": 311,
-    "partial": 102,
-    "high": 37,
+    "partial": 103,
+    "high": 36,
     "empty": 150
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 56,
     "stores+ledger+pip": 24
   },
-  "reference_vacancy_pct": 21.9,
+  "reference_vacancy_pct": 21.7,
   "reference_buildings": 343,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 21.0,
+  "mixed_vacancy_pct": 20.8,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 309,
-      "active": 570,
+      "active": 572,
       "capacity": 687,
-      "vacancy_pct": 17.0
+      "vacancy_pct": 16.7
     },
     "expos_units": {
       "buildings": 34,

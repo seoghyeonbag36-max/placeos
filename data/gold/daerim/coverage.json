@@ -2,7 +2,7 @@
   "slug": "daerim",
   "hub_name": "대림역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:32",
+  "built_at": "2026-10-11T07:20:41",
   "shown": 642,
   "excluded_total": 2151,
   "excluded_unknown": 11,
@@ -10,8 +10,8 @@
   "excluded_determined": 214,
   "coverage_pct": 23.0,
   "status": {
-    "full": 426,
-    "partial": 80,
+    "full": 427,
+    "partial": 79,
     "high": 26,
     "empty": 110
   },
@@ -27,9 +27,9 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 377,
-      "active": 817,
+      "active": 818,
       "capacity": 920,
-      "vacancy_pct": 11.2
+      "vacancy_pct": 11.1
     },
     "expos_units": {
       "buildings": 38,

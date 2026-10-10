@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>신림역",
   "anchor_vac_small_pct": 2.69838662578479,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 15.9,
-  "alpha_street": 0.456,
-  "gap_pp": 8.6,
+  "estimated_vacancy_pct": 15.8,
+  "alpha_street": 0.459,
+  "gap_pp": 8.5,
   "buildings_used": 723,
   "rone_aligned": {
     "mid": {
       "buildings": 535,
       "vacancy_units_pct": 20.9,
       "buildings_floor": 535,
-      "vacancy_floor_hi_pct": 17.5,
-      "vacancy_floor_lo_pct": 31.3,
-      "vacancy_area_pct": 13.4,
+      "vacancy_floor_hi_pct": 17.2,
+      "vacancy_floor_lo_pct": 30.7,
+      "vacancy_area_pct": 13.1,
       "anchor_pct": 7.25,
-      "gap_pp": 6.1
+      "gap_pp": 5.8
     },
     "small": {
       "buildings": 94,

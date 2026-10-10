@@ -2,7 +2,7 @@
   "slug": "gunja",
   "hub_name": "군자역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:03",
+  "built_at": "2026-10-11T07:19:50",
   "shown": 435,
   "excluded_total": 1620,
   "excluded_unknown": 4,
@@ -10,8 +10,8 @@
   "excluded_determined": 222,
   "coverage_pct": 21.2,
   "status": {
-    "full": 274,
-    "partial": 59,
+    "full": 279,
+    "partial": 54,
     "high": 35,
     "empty": 67
   },
@@ -21,16 +21,16 @@
     "pip_only": 27,
     "stores+ledger+pip": 2
   },
-  "reference_vacancy_pct": 14.6,
+  "reference_vacancy_pct": 14.1,
   "reference_buildings": 324,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 14.4,
+  "mixed_vacancy_pct": 13.8,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 295,
-      "active": 663,
+      "active": 667,
       "capacity": 767,
-      "vacancy_pct": 13.6
+      "vacancy_pct": 13.0
     },
     "expos_units": {
       "buildings": 29,

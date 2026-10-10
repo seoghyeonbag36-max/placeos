@@ -2,7 +2,7 @@
   "slug": "seoulsup",
   "hub_name": "서울숲 아틀리에길",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:13:27",
+  "built_at": "2026-10-11T07:18:36",
   "shown": 695,
   "excluded_total": 913,
   "excluded_unknown": 56,
@@ -10,9 +10,9 @@
   "excluded_determined": 149,
   "coverage_pct": 43.2,
   "status": {
-    "full": 387,
-    "partial": 82,
-    "high": 112,
+    "full": 390,
+    "partial": 80,
+    "high": 111,
     "empty": 114
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 37,
     "stores+ledger+pip": 11
   },
-  "reference_vacancy_pct": 34.1,
+  "reference_vacancy_pct": 33.7,
   "reference_buildings": 360,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 67.5,
+  "mixed_vacancy_pct": 67.4,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 338,
-      "active": 724,
+      "active": 730,
       "capacity": 846,
-      "vacancy_pct": 14.4
+      "vacancy_pct": 13.7
     },
     "expos_units": {
       "buildings": 22,

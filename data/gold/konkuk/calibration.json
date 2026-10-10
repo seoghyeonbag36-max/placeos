@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>건대입구",
   "anchor_vac_small_pct": 11.196552576399,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 9.3,
-  "alpha_street": 1.026,
-  "gap_pp": -0.2,
+  "estimated_vacancy_pct": 9.2,
+  "alpha_street": 1.037,
+  "gap_pp": -0.3,
   "buildings_used": 485,
   "rone_aligned": {
     "mid": {
       "buildings": 441,
       "vacancy_units_pct": 14.7,
       "buildings_floor": 441,
-      "vacancy_floor_hi_pct": 10.6,
-      "vacancy_floor_lo_pct": 26.7,
-      "vacancy_area_pct": 8.8,
+      "vacancy_floor_hi_pct": 10.4,
+      "vacancy_floor_lo_pct": 26.4,
+      "vacancy_area_pct": 8.7,
       "anchor_pct": 9.54,
-      "gap_pp": -0.7
+      "gap_pp": -0.8
     },
     "small": {
       "buildings": 109,

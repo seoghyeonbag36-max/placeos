@@ -2,7 +2,7 @@
   "slug": "hapjeong",
   "hub_name": "합정",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:13:39",
+  "built_at": "2026-10-11T07:18:49",
   "shown": 290,
   "excluded_total": 435,
   "excluded_unknown": 5,
@@ -10,10 +10,10 @@
   "excluded_determined": 90,
   "coverage_pct": 40.0,
   "status": {
-    "full": 174,
-    "partial": 36,
-    "high": 33,
-    "empty": 47
+    "full": 177,
+    "partial": 35,
+    "high": 32,
+    "empty": 46
   },
   "source": {
     "stores+ledger": 221,
@@ -21,16 +21,16 @@
     "polygon_only": 45,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 42.1,
+  "reference_vacancy_pct": 41.7,
   "reference_buildings": 177,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 65.0,
+  "mixed_vacancy_pct": 64.9,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 153,
-      "active": 348,
+      "active": 353,
       "capacity": 402,
-      "vacancy_pct": 13.4
+      "vacancy_pct": 12.2
     },
     "expos_units": {
       "buildings": 24,

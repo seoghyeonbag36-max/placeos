@@ -2,7 +2,7 @@
   "slug": "mullae",
   "hub_name": "문래동 창작촌",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:07",
+  "built_at": "2026-10-11T07:19:10",
   "shown": 1253,
   "excluded_total": 1149,
   "excluded_unknown": 26,
@@ -11,8 +11,8 @@
   "coverage_pct": 52.2,
   "status": {
     "full": 636,
-    "partial": 112,
-    "high": 37,
+    "partial": 113,
+    "high": 36,
     "empty": 468
   },
   "source": {
@@ -21,16 +21,16 @@
     "polygon_only": 467,
     "stores+ledger+pip": 27
   },
-  "reference_vacancy_pct": 16.4,
+  "reference_vacancy_pct": 16.2,
   "reference_buildings": 413,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 8.8,
+  "mixed_vacancy_pct": 8.7,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 348,
-      "active": 601,
+      "active": 605,
       "capacity": 704,
-      "vacancy_pct": 14.6
+      "vacancy_pct": 14.1
     },
     "expos_units": {
       "buildings": 65,

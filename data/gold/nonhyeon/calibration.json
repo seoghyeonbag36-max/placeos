@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>논현역",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 18.3,
-  "alpha_street": 0.944,
-  "gap_pp": 1.0,
+  "estimated_vacancy_pct": 17.8,
+  "alpha_street": 0.971,
+  "gap_pp": 0.5,
   "buildings_used": 650,
   "rone_aligned": {
     "mid": {
       "buildings": 695,
       "vacancy_units_pct": 30.2,
       "buildings_floor": 695,
-      "vacancy_floor_hi_pct": 16.7,
-      "vacancy_floor_lo_pct": 30.7,
-      "vacancy_area_pct": 19.4,
+      "vacancy_floor_hi_pct": 15.8,
+      "vacancy_floor_lo_pct": 29.1,
+      "vacancy_area_pct": 18.5,
       "anchor_pct": 17.28,
-      "gap_pp": 2.1
+      "gap_pp": 1.2
     },
     "small": {
       "buildings": 52,

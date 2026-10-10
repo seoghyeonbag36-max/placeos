@@ -12,18 +12,18 @@
       "buildings": 294,
       "vacancy_units_pct": 17.9,
       "buildings_floor": 294,
-      "vacancy_floor_hi_pct": 16.5,
-      "vacancy_floor_lo_pct": 31.1,
-      "vacancy_area_pct": 16.2,
+      "vacancy_floor_hi_pct": 16.2,
+      "vacancy_floor_lo_pct": 30.7,
+      "vacancy_area_pct": 15.8,
       "anchor_pct": 7.97,
-      "gap_pp": 8.2
+      "gap_pp": 7.8
     },
     "small": {
       "buildings": 115,
       "vacancy_units_pct": 8.4,
       "buildings_floor": 115,
       "vacancy_floor_hi_pct": 7.7,
-      "vacancy_floor_lo_pct": 32.2,
+      "vacancy_floor_lo_pct": 31.5,
       "vacancy_area_pct": 9.4
     },
     "mall": {

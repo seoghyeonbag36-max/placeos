@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>화곡",
   "anchor_vac_small_pct": 9.24871311112664,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 17.9,
-  "alpha_street": 0.89,
-  "gap_pp": 2.0,
+  "estimated_vacancy_pct": 17.7,
+  "alpha_street": 0.9,
+  "gap_pp": 1.8,
   "buildings_used": 405,
   "rone_aligned": {
     "mid": {
       "buildings": 328,
       "vacancy_units_pct": 14.9,
       "buildings_floor": 328,
-      "vacancy_floor_hi_pct": 14.9,
-      "vacancy_floor_lo_pct": 29.1,
-      "vacancy_area_pct": 14.1,
+      "vacancy_floor_hi_pct": 13.7,
+      "vacancy_floor_lo_pct": 27.3,
+      "vacancy_area_pct": 13.3,
       "anchor_pct": 15.93,
-      "gap_pp": -1.8
+      "gap_pp": -2.6
     },
     "small": {
       "buildings": 72,

@@ -2,7 +2,7 @@
   "slug": "yeouido",
   "hub_name": "여의도",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:03",
+  "built_at": "2026-10-11T07:19:08",
   "shown": 250,
   "excluded_total": 94,
   "excluded_unknown": 51,
@@ -28,9 +28,9 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 73,
-      "active": 317,
+      "active": 318,
       "capacity": 347,
-      "vacancy_pct": 8.6
+      "vacancy_pct": 8.4
     },
     "expos_units": {
       "buildings": 60,

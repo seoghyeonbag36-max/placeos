@@ -2,7 +2,7 @@
   "slug": "guui",
   "hub_name": "구의역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:35",
+  "built_at": "2026-10-11T07:20:43",
   "shown": 590,
   "excluded_total": 1872,
   "excluded_unknown": 16,
@@ -10,8 +10,8 @@
   "excluded_determined": 305,
   "coverage_pct": 24.0,
   "status": {
-    "full": 415,
-    "partial": 52,
+    "full": 416,
+    "partial": 51,
     "high": 39,
     "empty": 84
   },
@@ -21,16 +21,16 @@
     "pip_only": 81,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 13.1,
+  "reference_vacancy_pct": 13.0,
   "reference_buildings": 387,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 12.3,
+  "mixed_vacancy_pct": 12.2,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 326,
-      "active": 660,
+      "active": 661,
       "capacity": 722,
-      "vacancy_pct": 8.6
+      "vacancy_pct": 8.4
     },
     "expos_units": {
       "buildings": 61,

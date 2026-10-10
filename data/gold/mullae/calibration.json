@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>영등포역",
   "anchor_vac_small_pct": 3.07654031986746,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 8.8,
-  "alpha_street": 1.81,
-  "gap_pp": -7.1,
+  "estimated_vacancy_pct": 8.7,
+  "alpha_street": 1.831,
+  "gap_pp": -7.2,
   "buildings_used": 656,
   "rone_aligned": {
     "mid": {
       "buildings": 229,
       "vacancy_units_pct": 27.3,
       "buildings_floor": 229,
-      "vacancy_floor_hi_pct": 21.9,
-      "vacancy_floor_lo_pct": 35.7,
-      "vacancy_area_pct": 12.7,
+      "vacancy_floor_hi_pct": 20.9,
+      "vacancy_floor_lo_pct": 34.4,
+      "vacancy_area_pct": 12.3,
       "anchor_pct": 15.93,
-      "gap_pp": -3.2
+      "gap_pp": -3.6
     },
     "small": {
       "buildings": 292,

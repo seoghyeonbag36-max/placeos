@@ -2,7 +2,7 @@
   "slug": "sungshin",
   "hub_name": "성신여대·돈암",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:33",
+  "built_at": "2026-10-11T07:19:30",
   "shown": 713,
   "excluded_total": 983,
   "excluded_unknown": 6,
@@ -10,9 +10,9 @@
   "excluded_determined": 219,
   "coverage_pct": 42.0,
   "status": {
-    "full": 449,
-    "partial": 99,
-    "high": 44,
+    "full": 452,
+    "partial": 97,
+    "high": 43,
     "empty": 121
   },
   "source": {
@@ -21,16 +21,16 @@
     "stores+ledger+pip": 14,
     "pip_only": 24
   },
-  "reference_vacancy_pct": 25.2,
+  "reference_vacancy_pct": 24.8,
   "reference_buildings": 383,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 25.6,
+  "mixed_vacancy_pct": 25.4,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 361,
-      "active": 769,
+      "active": 773,
       "capacity": 892,
-      "vacancy_pct": 13.8
+      "vacancy_pct": 13.3
     },
     "expos_units": {
       "buildings": 22,

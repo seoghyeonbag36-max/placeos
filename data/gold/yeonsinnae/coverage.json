@@ -2,7 +2,7 @@
   "slug": "yeonsinnae",
   "hub_name": "연신내",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:32",
+  "built_at": "2026-10-11T07:20:08",
   "shown": 846,
   "excluded_total": 2512,
   "excluded_unknown": 9,
@@ -10,9 +10,9 @@
   "excluded_determined": 281,
   "coverage_pct": 25.2,
   "status": {
-    "full": 515,
-    "partial": 139,
-    "high": 70,
+    "full": 524,
+    "partial": 132,
+    "high": 68,
     "empty": 122
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 59,
     "stores+ledger+pip": 13
   },
-  "reference_vacancy_pct": 21.0,
+  "reference_vacancy_pct": 20.3,
   "reference_buildings": 575,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 17.6,
+  "mixed_vacancy_pct": 17.0,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 503,
-      "active": 1076,
+      "active": 1088,
       "capacity": 1234,
-      "vacancy_pct": 12.8
+      "vacancy_pct": 11.8
     },
     "expos_units": {
       "buildings": 72,

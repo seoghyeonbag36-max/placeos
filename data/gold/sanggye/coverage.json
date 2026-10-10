@@ -2,7 +2,7 @@
   "slug": "sanggye",
   "hub_name": "상계",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:48",
+  "built_at": "2026-10-11T07:20:17",
   "shown": 690,
   "excluded_total": 1643,
   "excluded_unknown": 21,
@@ -11,8 +11,8 @@
   "coverage_pct": 29.6,
   "status": {
     "full": 479,
-    "partial": 76,
-    "high": 43,
+    "partial": 78,
+    "high": 41,
     "empty": 92
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 89,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 14.7,
+  "reference_vacancy_pct": 14.6,
   "reference_buildings": 365,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 6.6,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 323,
-      "active": 600,
+      "active": 602,
       "capacity": 688,
-      "vacancy_pct": 12.8
+      "vacancy_pct": 12.5
     },
     "expos_units": {
       "buildings": 42,

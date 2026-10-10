@@ -3,27 +3,27 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>잠실/송파",
   "anchor_vac_small_pct": 6.5731457912479,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 18.4,
-  "alpha_street": 0.948,
-  "gap_pp": 1.0,
+  "estimated_vacancy_pct": 18.2,
+  "alpha_street": 0.958,
+  "gap_pp": 0.8,
   "buildings_used": 385,
   "rone_aligned": {
     "mid": {
       "buildings": 373,
       "vacancy_units_pct": 17.6,
       "buildings_floor": 373,
-      "vacancy_floor_hi_pct": 11.5,
-      "vacancy_floor_lo_pct": 23.8,
-      "vacancy_area_pct": 13.8,
+      "vacancy_floor_hi_pct": 11.4,
+      "vacancy_floor_lo_pct": 23.5,
+      "vacancy_area_pct": 13.4,
       "anchor_pct": 17.44,
-      "gap_pp": -3.6
+      "gap_pp": -4.0
     },
     "small": {
       "buildings": 33,
       "vacancy_units_pct": 19.2,
       "buildings_floor": 33,
       "vacancy_floor_hi_pct": 11.5,
-      "vacancy_floor_lo_pct": 17.3,
+      "vacancy_floor_lo_pct": 15.4,
       "vacancy_area_pct": 12.5,
       "anchor_pct": 6.57,
       "gap_pp": 5.9

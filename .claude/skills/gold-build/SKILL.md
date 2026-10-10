@@ -29,9 +29,13 @@ Gold 만 읽는다. 순서를 어기면 조용히 결손이 영구화된다 — 
 
 ```bash
 # 한 거점 Page 재빌드 (수집은 그대로 두고 빌드만)
+# recalc_floor_ouln 을 빼면 지도(_aggregate)는 새 attrs 를 읽는데 앵커(calibrate 가 읽는 행의
+# active_floors_lo/hi)는 옛 값이라 둘이 갈라진다 — attrs 바로 뒤에 돈다(2026-10-11).
 python -m data.pipelines.build_building_attrs <slug>
+python -m data.pipelines.recalc_floor_ouln <slug>
 python -m data.pipelines.build_page_master <slug>
 python -m data.pipelines.build_vacant_units <slug>
+python -m data.pipelines.build_vacant_floor_units <slug>
 python -m data.pipelines.calibrate_vacancy
 
 # 행정동 실측 구역 — 반드시 build_page_master **뒤에** 돈다(그 산출물을 읽는다).

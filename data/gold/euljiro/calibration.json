@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>을지로",
   "anchor_vac_small_pct": 2.5903100817027,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 50.2,
+  "estimated_vacancy_pct": 50.1,
   "alpha_street": 0.245,
-  "gap_pp": 37.9,
+  "gap_pp": 37.8,
   "buildings_used": 917,
   "rone_aligned": {
     "mid": {
       "buildings": 750,
       "vacancy_units_pct": 34.7,
       "buildings_floor": 750,
-      "vacancy_floor_hi_pct": 23.9,
-      "vacancy_floor_lo_pct": 40.9,
-      "vacancy_area_pct": 26.7,
+      "vacancy_floor_hi_pct": 23.7,
+      "vacancy_floor_lo_pct": 40.6,
+      "vacancy_area_pct": 26.6,
       "anchor_pct": 12.28,
-      "gap_pp": 14.4
+      "gap_pp": 14.3
     },
     "small": {
       "buildings": 418,

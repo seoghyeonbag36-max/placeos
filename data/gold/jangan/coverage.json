@@ -2,7 +2,7 @@
   "slug": "jangan",
   "hub_name": "장안동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:59",
+  "built_at": "2026-10-11T07:19:48",
   "shown": 313,
   "excluded_total": 300,
   "excluded_unknown": 5,
@@ -10,9 +10,9 @@
   "excluded_determined": 63,
   "coverage_pct": 51.1,
   "status": {
-    "full": 160,
+    "full": 163,
     "partial": 51,
-    "high": 32,
+    "high": 29,
     "empty": 70
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 7,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 42.4,
+  "reference_vacancy_pct": 41.7,
   "reference_buildings": 176,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 31.4,
+  "mixed_vacancy_pct": 31.0,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 142,
-      "active": 379,
+      "active": 387,
       "capacity": 445,
-      "vacancy_pct": 14.8
+      "vacancy_pct": 13.0
     },
     "expos_units": {
       "buildings": 34,

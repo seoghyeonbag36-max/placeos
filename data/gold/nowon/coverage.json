@@ -2,7 +2,7 @@
   "slug": "nowon",
   "hub_name": "노원역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:08",
+  "built_at": "2026-10-11T07:20:29",
   "shown": 409,
   "excluded_total": 468,
   "excluded_unknown": 27,
@@ -10,8 +10,8 @@
   "excluded_determined": 131,
   "coverage_pct": 46.6,
   "status": {
-    "full": 281,
-    "partial": 73,
+    "full": 285,
+    "partial": 69,
     "high": 27,
     "empty": 28
   },
@@ -21,16 +21,16 @@
     "pip_only": 24,
     "stores+ledger+pip": 4
   },
-  "reference_vacancy_pct": 25.4,
+  "reference_vacancy_pct": 25.3,
   "reference_buildings": 263,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 25.4,
+  "mixed_vacancy_pct": 25.3,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 199,
-      "active": 608,
+      "active": 612,
       "capacity": 649,
-      "vacancy_pct": 6.3
+      "vacancy_pct": 5.7
     },
     "expos_units": {
       "buildings": 64,

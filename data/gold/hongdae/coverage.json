@@ -2,7 +2,7 @@
   "slug": "hongdae",
   "hub_name": "홍대",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:13:13",
+  "built_at": "2026-10-11T07:18:22",
   "shown": 1324,
   "excluded_total": 880,
   "excluded_unknown": 27,
@@ -10,9 +10,9 @@
   "excluded_determined": 313,
   "coverage_pct": 60.1,
   "status": {
-    "full": 736,
-    "partial": 303,
-    "high": 96,
+    "full": 754,
+    "partial": 290,
+    "high": 91,
     "empty": 189
   },
   "source": {
@@ -21,16 +21,16 @@
     "polygon_only": 179,
     "stores+ledger+pip": 5
   },
-  "reference_vacancy_pct": 33.1,
+  "reference_vacancy_pct": 32.3,
   "reference_buildings": 1025,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 32.0,
+  "mixed_vacancy_pct": 31.2,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 973,
-      "active": 2555,
+      "active": 2592,
       "capacity": 3075,
-      "vacancy_pct": 16.9
+      "vacancy_pct": 15.7
     },
     "expos_units": {
       "buildings": 52,

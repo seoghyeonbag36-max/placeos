@@ -2,7 +2,7 @@
   "slug": "bonseobu",
   "hub_name": "본서부병원",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:47",
+  "built_at": "2026-10-11T07:20:53",
   "shown": 597,
   "excluded_total": 1870,
   "excluded_unknown": 8,
@@ -10,10 +10,10 @@
   "excluded_determined": 245,
   "coverage_pct": 24.2,
   "status": {
-    "full": 267,
-    "partial": 133,
-    "high": 71,
-    "empty": 126
+    "full": 275,
+    "partial": 129,
+    "high": 66,
+    "empty": 127
   },
   "source": {
     "stores+ledger": 431,
@@ -21,16 +21,16 @@
     "pip_only": 39,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 21.3,
+  "reference_vacancy_pct": 20.0,
   "reference_buildings": 392,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 23.9,
+  "mixed_vacancy_pct": 22.4,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 282,
-      "active": 638,
+      "active": 653,
       "capacity": 803,
-      "vacancy_pct": 20.5
+      "vacancy_pct": 18.7
     },
     "expos_units": {
       "buildings": 110,

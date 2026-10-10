@@ -2,7 +2,7 @@
   "slug": "yangjae",
   "hub_name": "양재역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:26",
+  "built_at": "2026-10-11T07:20:38",
   "shown": 549,
   "excluded_total": 616,
   "excluded_unknown": 9,
@@ -10,9 +10,9 @@
   "excluded_determined": 122,
   "coverage_pct": 47.1,
   "status": {
-    "full": 311,
-    "partial": 102,
-    "high": 54,
+    "full": 314,
+    "partial": 100,
+    "high": 53,
     "empty": 82
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 42,
     "stores+ledger+pip": 2
   },
-  "reference_vacancy_pct": 19.9,
+  "reference_vacancy_pct": 19.6,
   "reference_buildings": 367,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 23.1,
+  "mixed_vacancy_pct": 22.9,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 308,
-      "active": 904,
+      "active": 909,
       "capacity": 1052,
-      "vacancy_pct": 14.1
+      "vacancy_pct": 13.6
     },
     "expos_units": {
       "buildings": 59,

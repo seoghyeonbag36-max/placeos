@@ -2,7 +2,7 @@
   "slug": "poi",
   "hub_name": "포이사거리",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:19",
+  "built_at": "2026-10-11T07:20:35",
   "shown": 880,
   "excluded_total": 713,
   "excluded_unknown": 1,
@@ -10,8 +10,8 @@
   "excluded_determined": 106,
   "coverage_pct": 55.2,
   "status": {
-    "full": 442,
-    "partial": 148,
+    "full": 443,
+    "partial": 147,
     "high": 91,
     "empty": 199
   },
@@ -23,13 +23,13 @@
   "reference_vacancy_pct": 17.6,
   "reference_buildings": 592,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 17.3,
+  "mixed_vacancy_pct": 17.2,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 544,
-      "active": 1319,
+      "active": 1320,
       "capacity": 1596,
-      "vacancy_pct": 17.4
+      "vacancy_pct": 17.3
     },
     "expos_units": {
       "buildings": 48,

@@ -2,7 +2,7 @@
   "slug": "sinchon",
   "hub_name": "신촌·이대",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:14",
+  "built_at": "2026-10-11T07:19:15",
   "shown": 1451,
   "excluded_total": 2249,
   "excluded_unknown": 18,
@@ -10,9 +10,9 @@
   "excluded_determined": 360,
   "coverage_pct": 39.2,
   "status": {
-    "full": 784,
-    "partial": 301,
-    "high": 117,
+    "full": 792,
+    "partial": 294,
+    "high": 116,
     "empty": 249
   },
   "source": {
@@ -21,16 +21,16 @@
     "polygon_only": 244,
     "stores+ledger+pip": 23
   },
-  "reference_vacancy_pct": 23.7,
+  "reference_vacancy_pct": 23.3,
   "reference_buildings": 815,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 24.1,
+  "mixed_vacancy_pct": 23.7,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 710,
-      "active": 1664,
+      "active": 1677,
       "capacity": 2031,
-      "vacancy_pct": 18.1
+      "vacancy_pct": 17.4
     },
     "expos_units": {
       "buildings": 105,

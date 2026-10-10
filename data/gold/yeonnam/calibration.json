@@ -3,28 +3,28 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>동교/연남",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 50.9,
-  "alpha_street": 0.098,
-  "gap_pp": 45.9,
+  "estimated_vacancy_pct": 50.6,
+  "alpha_street": 0.099,
+  "gap_pp": 45.6,
   "buildings_used": 934,
   "rone_aligned": {
     "mid": {
       "buildings": 860,
       "vacancy_units_pct": 26.9,
       "buildings_floor": 860,
-      "vacancy_floor_hi_pct": 17.6,
-      "vacancy_floor_lo_pct": 26.1,
-      "vacancy_area_pct": 23.9,
+      "vacancy_floor_hi_pct": 16.9,
+      "vacancy_floor_lo_pct": 25.3,
+      "vacancy_area_pct": 22.8,
       "anchor_pct": 5.0,
-      "gap_pp": 18.9
+      "gap_pp": 17.8
     },
     "small": {
       "buildings": 206,
       "vacancy_units_pct": 16.5,
       "buildings_floor": 206,
-      "vacancy_floor_hi_pct": 11.1,
-      "vacancy_floor_lo_pct": 22.8,
-      "vacancy_area_pct": 6.8
+      "vacancy_floor_hi_pct": 10.8,
+      "vacancy_floor_lo_pct": 22.5,
+      "vacancy_area_pct": 6.6
     },
     "mall": {
       "buildings": 79,

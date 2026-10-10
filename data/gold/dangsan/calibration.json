@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>당산역",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 32.2,
-  "alpha_street": 0.228,
-  "gap_pp": 24.9,
+  "estimated_vacancy_pct": 32.1,
+  "alpha_street": 0.229,
+  "gap_pp": 24.8,
   "buildings_used": 193,
   "rone_aligned": {
     "mid": {
       "buildings": 116,
       "vacancy_units_pct": 25.9,
       "buildings_floor": 116,
-      "vacancy_floor_hi_pct": 17.0,
-      "vacancy_floor_lo_pct": 31.7,
-      "vacancy_area_pct": 13.5,
+      "vacancy_floor_hi_pct": 16.5,
+      "vacancy_floor_lo_pct": 31.2,
+      "vacancy_area_pct": 12.9,
       "anchor_pct": 7.34,
-      "gap_pp": 6.2
+      "gap_pp": 5.6
     },
     "small": {
       "buildings": 22,

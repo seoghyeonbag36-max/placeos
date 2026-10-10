@@ -193,15 +193,16 @@ def licensed_floors(slug: str) -> dict[str, dict]:
     return _licensed_pip(polys["features"], slug, dong_map, sig[0][0] if sig else "")
 
 
-def store_floors(slug: str) -> tuple[dict[str, list], dict[str, int]]:
+def store_floors(slug: str, rows: list[dict] | None = None) -> tuple[dict[str, list], dict[str, int]]:
     """상가정보 원본 → (지번별 점포 확인 지상층, 지번별 층 미상 점포 수).
 
     flrNo 는 '1' / 'B1' / '지' / 공란이 섞여 있다. 공란이 약 30% 라 층 단위 점유는
     단일 값이 아니라 상·하한 밴드로만 말할 수 있다(공란·지하는 지상층 판정에서 뺀다).
+    rows 를 주면 그 스냅샷을 쓴다 — 학원 층 해소와 같은 스냅샷이어야 층 미상 수를 바로 뺄 수 있다.
     """
     known: dict[str, set] = defaultdict(set)
     unknown: dict[str, int] = defaultdict(int)
-    for r in _latest_stores(slug):
+    for r in (_latest_stores(slug) if rows is None else rows):
         pnu = r.get("lnoCd")
         if not pnu:
             continue
@@ -225,6 +226,42 @@ def _latest_stores(slug: str) -> list[dict]:
 # '점포가 확인된 층 = 상업층' 규칙을 그대로 쓰면 아파트 층이 상가로 들어온다. 분모 안 층의
 # 점유를 확인할 뿐이다. → docs/finding-page-oct-refresh-2026-10-10.md §4
 _ACA_SUFFIX = re.compile(r"(학원|교습소|어학원)")
+# NEIS 상세주소의 지하 약어('지1층'·'B1층'·'비1층')는 인허가 규칙이 지상층으로 읽는다 — 먼저 '지하'로
+# 바꾼다. 앞 글자가 한글·영문이면 약어가 아니다('번지 1층'·'외1필지 2층'·'B동').
+_ACA_BASEMENT = re.compile(r"(?<![가-힣A-Za-z])(?:[Bb]|지|비)\s?(\d+)\s*층")
+# 지하에서 시작하는 범위('지하1층~4층'·'B1~4층')는 지상 1층부터 그 층까지다 — 먼저 '1~M층'으로 바꾼다.
+_ACA_BASE_RANGE = re.compile(r"(?<![가-힣A-Za-z])(?:지하|지|[Bb]|비)\s?\d+\s*층?\s*[~\-]\s*(\d+)\s*층")
+# 범위 '2~4층'·'2-4층' 은 사이 층까지 편다(인허가 규칙은 양 끝만 남긴다).
+_ACA_RANGE = re.compile(r"(\d+)\s*[~\-]\s*(\d+)\s*층")
+# 괄호 안에 층 표기만 있는 경우(', (3층)')만 괄호째 읽는다. 참고항목 '(대치동, 3층빌딩)' 의 건물명은 층이 아니다.
+_ACA_PAREN_FLOOR = re.compile(r"\(\s*((?:지상|지하)?\s*[\d\s,~.\-]+층(?:\s*\d+\s*호)?)\s*\)")
+# 점 목록 '1.2층' 은 쉼표 목록으로 바꾼다.
+_ACA_DOTS = re.compile(r"(\d+)\.(\d+)\s*층")
+# 해소 대상 — 층 미상 상가정보 점포 중 학원일 수 있는 것만(교육 대분류 · 독서실). 업종을 안 보면
+# 'YBM어학원' 이 같은 지번의 '씨제이올리브영종로YBM점' 을 해소한다(2026-10-11 검토).
+_EDU_LCLS = ("교육",)
+
+
+def _expand(m: re.Match) -> str:
+    a, b = int(m.group(1)), int(m.group(2))
+    if 0 < a <= b < 100 and b - a <= 20:
+        return ",".join(str(i) for i in range(a, b + 1)) + "층"
+    return m.group(0)
+
+
+def aca_floor_nos(detail: object) -> set[int]:
+    """NEIS 상세주소 → 지상 층번호 집합. 지하·층 미표기는 빈 집합.
+
+    괄호 참고항목(법정동·건물명)을 떼고 읽되, 괄호 안에 층 표기만 있는 행(', (3층)')은 그 괄호를 읽는다.
+    """
+    s = _ACA_BASE_RANGE.sub(lambda m: f"1~{m.group(1)}층", str(detail or ""))
+    s = _ACA_BASEMENT.sub(lambda m: f"지하{m.group(1)}층", s)
+    s = _ACA_DOTS.sub(lambda m: f"{m.group(1)},{m.group(2)}층", _ACA_RANGE.sub(_expand, s))
+    floors, _found = lic_floors(re.sub(r"\([^)]*\)", "", s))
+    if not floors:
+        for g in _ACA_PAREN_FLOOR.findall(s):
+            floors |= lic_floors(g)[0]
+    return floors
 
 
 def road_key(addr: object) -> str:
@@ -243,9 +280,11 @@ def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
 
     · 도로명주소 키가 **지번 하나**에만 걸릴 때만 붙인다. 여러 지번이면(대단지·다필지) 버린다 —
       층은 맞아도 엉뚱한 지번의 층이 될 수 있다.
-    · 층은 상세주소에서 인허가와 같은 규칙(`lic_floors`)으로 읽는다. 지하·층 미표기는 근거가 아니다.
-    · 같은 지번에 층 미상(flrNo 공란) 상가정보 점포가 **이름이 맞게** 있으면 그 점포의 층을 이 학원이
-      밝힌 것이다(`resolved`). 소비처가 층 미상 수에서 빼야 같은 업소를 두 번 세지 않는다.
+    · 층은 `aca_floor_nos` 로 읽는다(인허가 규칙 + 지하 약어·범위·괄호 보정). 지하·층 미표기는 근거가 아니다.
+    · 같은 지번에 층 미상(flrNo 공란) **교육·독서실** 상가정보 점포가 이름이 맞게 있으면 그 점포의 층을
+      이 학원이 밝힌 것이다(`resolved`). 소비처가 층 미상 수에서 빼야 같은 업소를 두 번 세지 않는다.
+      상호가 달라(브랜드↔법인명) 못 맞춘 잔여는 상한(hi)에 남는다 — 81거점 실측 36필지·38층(분모의
+      0.04%). 업종으로 짝지으면 다른 업소를 묶을 위험이 같은 크기라 짝짓지 않는다.
     · 층 미상 학원은 상한 배정(spare)에 보태지 않는다 — 상가정보 공란과 같은 업소일 수 있다.
     """
     out: dict[str, dict] = defaultdict(lambda: {"floors": set(), "n": 0, "resolved": 0})
@@ -262,7 +301,7 @@ def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
             continue
         pnu = next(iter(pnus))
         stats["matched"] += 1
-        floors, _found = lic_floors(re.sub(r"\([^)]*\)", "", str(a.get("FA_RDNDA") or "")))
+        floors = aca_floor_nos(a.get("FA_RDNDA"))
         if not floors:
             continue
         stats["with_floor"] += 1
@@ -281,7 +320,7 @@ def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
 
 
 def _store_roads_and_blanks(stores: list[dict]) -> tuple[dict[str, set[str]], dict[str, list[str]]]:
-    """상가정보 → (도로명 키 → 지번 집합, 지번 → 층 미상 점포 이름 키 목록)."""
+    """상가정보 → (도로명 키 → 지번 집합, 지번 → 층 미상 교육·독서실 점포 이름 키 목록)."""
     roads: dict[str, set[str]] = defaultdict(set)
     blanks: dict[str, list[str]] = defaultdict(list)
     for r in stores:
@@ -290,7 +329,8 @@ def _store_roads_and_blanks(stores: list[dict]) -> tuple[dict[str, set[str]], di
             continue
         if (k := road_key(r.get("rdnmAdr"))):
             roads[k].add(pnu)
-        if not str(r.get("flrNo") or "").strip():
+        if not str(r.get("flrNo") or "").strip() and (
+                r.get("indsLclsNm") in _EDU_LCLS or "독서실" in str(r.get("indsSclsNm") or "")):
             blanks[pnu].append(_name_key(r.get("bizesNm")))
     return roads, blanks
 
@@ -332,7 +372,8 @@ def run(slug: str) -> int:
             if st["flr_rows"] >= prev.get("flr_rows", 0):
                 prev.update(_flr_out(st))
 
-    known, unknown = store_floors(slug)
+    stores = _latest_stores(slug)
+    known, unknown = store_floors(slug, stores)
     for pnu, floors in known.items():
         acc.setdefault(pnu, {})["store_flr_nos"] = floors
     for pnu, n in unknown.items():
@@ -346,7 +387,7 @@ def run(slug: str) -> int:
     # 학원 층(NEIS) — 정규화본이 없으면 아무것도 더하지 않는다(종전 산출물과 같다).
     aca_note = ""
     if academies := load_latest_academies():
-        s_roads, blanks = _store_roads_and_blanks(_latest_stores(slug))
+        s_roads, blanks = _store_roads_and_blanks(stores)
         road2pnu: dict[str, set[str]] = defaultdict(set)
         for roads in (ledger_roads, s_roads):
             for k, v in roads.items():

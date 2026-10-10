@@ -2,7 +2,7 @@
   "slug": "bulgwang",
   "hub_name": "불광",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:29",
+  "built_at": "2026-10-11T07:20:06",
   "shown": 576,
   "excluded_total": 1966,
   "excluded_unknown": 2,
@@ -10,9 +10,9 @@
   "excluded_determined": 234,
   "coverage_pct": 22.7,
   "status": {
-    "full": 313,
-    "partial": 78,
-    "high": 59,
+    "full": 315,
+    "partial": 77,
+    "high": 58,
     "empty": 126
   },
   "source": {
@@ -21,16 +21,16 @@
     "stores+ledger": 367,
     "stores+ledger+pip": 40
   },
-  "reference_vacancy_pct": 13.9,
+  "reference_vacancy_pct": 13.7,
   "reference_buildings": 305,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 8.2,
+  "mixed_vacancy_pct": 8.1,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 265,
-      "active": 570,
+      "active": 572,
       "capacity": 665,
-      "vacancy_pct": 14.3
+      "vacancy_pct": 14.0
     },
     "expos_units": {
       "buildings": 40,

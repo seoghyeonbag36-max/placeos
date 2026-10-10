@@ -2,7 +2,7 @@
   "slug": "jamsil",
   "hub_name": "잠실·롯데월드타워",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:00",
+  "built_at": "2026-10-11T07:19:04",
   "shown": 576,
   "excluded_total": 688,
   "excluded_unknown": 44,
@@ -11,8 +11,8 @@
   "coverage_pct": 45.6,
   "status": {
     "full": 400,
-    "partial": 54,
-    "high": 82,
+    "partial": 55,
+    "high": 81,
     "empty": 40
   },
   "source": {
@@ -20,16 +20,16 @@
     "stores+ledger": 409,
     "polygon_only": 38
   },
-  "reference_vacancy_pct": 15.5,
+  "reference_vacancy_pct": 15.4,
   "reference_buildings": 322,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 7.8,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 257,
-      "active": 730,
+      "active": 731,
       "capacity": 820,
-      "vacancy_pct": 11.0
+      "vacancy_pct": 10.9
     },
     "expos_units": {
       "buildings": 65,

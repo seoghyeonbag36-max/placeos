@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
   "anchor_vac_small_pct": 4.91596973317403,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 17.3,
-  "alpha_street": 0.448,
-  "gap_pp": 9.5,
+  "estimated_vacancy_pct": 17.2,
+  "alpha_street": 0.451,
+  "gap_pp": 9.4,
   "buildings_used": 618,
   "rone_aligned": {
     "mid": {
       "buildings": 639,
       "vacancy_units_pct": 39.5,
       "buildings_floor": 639,
-      "vacancy_floor_hi_pct": 19.1,
-      "vacancy_floor_lo_pct": 33.6,
-      "vacancy_area_pct": 23.4,
+      "vacancy_floor_hi_pct": 18.8,
+      "vacancy_floor_lo_pct": 33.1,
+      "vacancy_area_pct": 23.0,
       "anchor_pct": 7.75,
-      "gap_pp": 15.6
+      "gap_pp": 15.2
     },
     "small": {
       "buildings": 57,

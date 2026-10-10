@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>혜화동",
   "anchor_vac_small_pct": 2.12870907400035,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 27.4,
-  "alpha_street": 0.12,
-  "gap_pp": 24.1,
+  "estimated_vacancy_pct": 27.0,
+  "alpha_street": 0.122,
+  "gap_pp": 23.7,
   "buildings_used": 635,
   "rone_aligned": {
     "mid": {
       "buildings": 360,
       "vacancy_units_pct": 28.2,
       "buildings_floor": 360,
-      "vacancy_floor_hi_pct": 19.4,
-      "vacancy_floor_lo_pct": 34.9,
-      "vacancy_area_pct": 21.2,
+      "vacancy_floor_hi_pct": 19.0,
+      "vacancy_floor_lo_pct": 33.9,
+      "vacancy_area_pct": 20.7,
       "anchor_pct": 3.29,
-      "gap_pp": 17.9
+      "gap_pp": 17.4
     },
     "small": {
       "buildings": 188,

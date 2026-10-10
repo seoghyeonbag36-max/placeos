@@ -2,7 +2,7 @@
   "slug": "ydp-gucheong",
   "hub_name": "영등포구청역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:14",
+  "built_at": "2026-10-11T07:20:32",
   "shown": 669,
   "excluded_total": 735,
   "excluded_unknown": 29,
@@ -10,9 +10,9 @@
   "excluded_determined": 144,
   "coverage_pct": 47.6,
   "status": {
-    "full": 328,
-    "partial": 89,
-    "high": 67,
+    "full": 330,
+    "partial": 88,
+    "high": 66,
     "empty": 185
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 50,
     "stores+ledger+pip": 5
   },
-  "reference_vacancy_pct": 17.3,
+  "reference_vacancy_pct": 16.7,
   "reference_buildings": 306,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 19.1,
+  "mixed_vacancy_pct": 18.7,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 247,
-      "active": 471,
+      "active": 478,
       "capacity": 569,
-      "vacancy_pct": 17.2
+      "vacancy_pct": 16.0
     },
     "expos_units": {
       "buildings": 59,

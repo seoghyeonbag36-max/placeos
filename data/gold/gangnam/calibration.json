@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>강남대로",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 41.7,
-  "alpha_street": 0.165,
-  "gap_pp": 34.8,
+  "estimated_vacancy_pct": 41.4,
+  "alpha_street": 0.167,
+  "gap_pp": 34.5,
   "buildings_used": 755,
   "rone_aligned": {
     "mid": {
       "buildings": 636,
       "vacancy_units_pct": 22.6,
       "buildings_floor": 636,
-      "vacancy_floor_hi_pct": 16.6,
-      "vacancy_floor_lo_pct": 28.1,
-      "vacancy_area_pct": 17.0,
+      "vacancy_floor_hi_pct": 15.7,
+      "vacancy_floor_lo_pct": 26.3,
+      "vacancy_area_pct": 16.1,
       "anchor_pct": 6.89,
-      "gap_pp": 10.1
+      "gap_pp": 9.2
     },
     "small": {
       "buildings": 57,

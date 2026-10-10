@@ -98,6 +98,8 @@ def test_coverage_counts_determination_apart_from_unknown() -> None:
     # 커버리지가 오른 이유가 '판정 제외'라는 것이 산출물에 남아야 한다. 이 값이 없으면
     # 다음 사람은 분모가 왜 줄었는지 알 길이 없다.
     assert cov["excluded_determined"] > 0
-    # 대표 공실률은 이 작업으로 움직이지 않는다 — 원래 정밀 분모만 세었기 때문이다.
-    assert cov["reference_vacancy_pct"] == 9.5
+    # 대표 공실률은 이 작업(no_com_floor 분리)으로는 움직이지 않는다 — 원래 정밀 분모만 세었기 때문이다.
+    # 값 자체는 재수집으로 움직인다: 9.5 → 7.8 은 2026-10-11 10월 상가정보·인허가·대장 갱신과
+    # 학원(NEIS) 층 근거 반영이다(docs/finding-page-oct-refresh-2026-10-10.md).
+    assert cov["reference_vacancy_pct"] == 7.8
     assert "floor_approx" not in cov["by_capacity_method"]

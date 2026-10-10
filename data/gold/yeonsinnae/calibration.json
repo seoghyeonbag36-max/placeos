@@ -3,27 +3,27 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>연신내",
   "anchor_vac_small_pct": 2.96491099259773,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 17.6,
-  "alpha_street": 0.755,
-  "gap_pp": 4.3,
+  "estimated_vacancy_pct": 17.0,
+  "alpha_street": 0.782,
+  "gap_pp": 3.7,
   "buildings_used": 666,
   "rone_aligned": {
     "mid": {
       "buildings": 458,
       "vacancy_units_pct": 19.3,
       "buildings_floor": 458,
-      "vacancy_floor_hi_pct": 15.9,
-      "vacancy_floor_lo_pct": 28.6,
-      "vacancy_area_pct": 11.9,
+      "vacancy_floor_hi_pct": 14.4,
+      "vacancy_floor_lo_pct": 26.4,
+      "vacancy_area_pct": 10.7,
       "anchor_pct": 13.3,
-      "gap_pp": -1.4
+      "gap_pp": -2.6
     },
     "small": {
       "buildings": 158,
       "vacancy_units_pct": 13.8,
       "buildings_floor": 158,
       "vacancy_floor_hi_pct": 11.4,
-      "vacancy_floor_lo_pct": 26.8,
+      "vacancy_floor_lo_pct": 26.4,
       "vacancy_area_pct": 12.6,
       "anchor_pct": 2.96,
       "gap_pp": 9.6

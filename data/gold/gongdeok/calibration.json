@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>공덕역",
   "anchor_vac_small_pct": 4.5318602643061,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 69.2,
+  "estimated_vacancy_pct": 69.1,
   "alpha_street": 0.054,
-  "gap_pp": 65.5,
+  "gap_pp": 65.4,
   "buildings_used": 368,
   "rone_aligned": {
     "mid": {
       "buildings": 150,
       "vacancy_units_pct": 17.6,
       "buildings_floor": 150,
-      "vacancy_floor_hi_pct": 14.3,
-      "vacancy_floor_lo_pct": 25.4,
-      "vacancy_area_pct": 8.7,
+      "vacancy_floor_hi_pct": 13.6,
+      "vacancy_floor_lo_pct": 24.0,
+      "vacancy_area_pct": 8.4,
       "anchor_pct": 3.7,
-      "gap_pp": 5.0
+      "gap_pp": 4.7
     },
     "small": {
       "buildings": 101,

@@ -3,30 +3,30 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>홍대/합정",
   "anchor_vac_small_pct": 14.908475883587,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 32.0,
-  "alpha_street": 0.253,
-  "gap_pp": 23.9,
+  "estimated_vacancy_pct": 31.2,
+  "alpha_street": 0.26,
+  "gap_pp": 23.1,
   "buildings_used": 1100,
   "rone_aligned": {
     "mid": {
       "buildings": 1151,
       "vacancy_units_pct": 27.0,
       "buildings_floor": 1151,
-      "vacancy_floor_hi_pct": 19.1,
-      "vacancy_floor_lo_pct": 27.8,
-      "vacancy_area_pct": 23.0,
+      "vacancy_floor_hi_pct": 17.9,
+      "vacancy_floor_lo_pct": 26.3,
+      "vacancy_area_pct": 21.5,
       "anchor_pct": 8.1,
-      "gap_pp": 14.9
+      "gap_pp": 13.4
     },
     "small": {
       "buildings": 217,
       "vacancy_units_pct": 16.4,
       "buildings_floor": 217,
-      "vacancy_floor_hi_pct": 13.7,
-      "vacancy_floor_lo_pct": 25.5,
-      "vacancy_area_pct": 8.6,
+      "vacancy_floor_hi_pct": 13.4,
+      "vacancy_floor_lo_pct": 25.2,
+      "vacancy_area_pct": 8.5,
       "anchor_pct": 14.91,
-      "gap_pp": -6.3
+      "gap_pp": -6.4
     },
     "mall": {
       "buildings": 85,

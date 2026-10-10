@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>테헤란로",
   "anchor_vac_small_pct": 1.02678444048604,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 11.3,
-  "alpha_street": 0.801,
-  "gap_pp": 2.3,
+  "estimated_vacancy_pct": 11.0,
+  "alpha_street": 0.823,
+  "gap_pp": 2.0,
   "buildings_used": 628,
   "rone_aligned": {
     "mid": {
       "buildings": 552,
       "vacancy_units_pct": 29.2,
       "buildings_floor": 552,
-      "vacancy_floor_hi_pct": 19.7,
-      "vacancy_floor_lo_pct": 30.7,
-      "vacancy_area_pct": 22.1,
+      "vacancy_floor_hi_pct": 18.8,
+      "vacancy_floor_lo_pct": 29.3,
+      "vacancy_area_pct": 20.9,
       "anchor_pct": 9.05,
-      "gap_pp": 13.1
+      "gap_pp": 11.9
     },
     "small": {
       "buildings": 47,

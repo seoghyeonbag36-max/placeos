@@ -2,7 +2,7 @@
   "slug": "sillim",
   "hub_name": "신림역·별빛거리",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:14:30",
+  "built_at": "2026-10-11T07:19:27",
   "shown": 1175,
   "excluded_total": 2134,
   "excluded_unknown": 9,
@@ -10,8 +10,8 @@
   "excluded_determined": 348,
   "coverage_pct": 35.5,
   "status": {
-    "full": 558,
-    "partial": 127,
+    "full": 560,
+    "partial": 125,
     "high": 81,
     "empty": 409
   },
@@ -21,16 +21,16 @@
     "pip_only": 49,
     "stores+ledger+pip": 13
   },
-  "reference_vacancy_pct": 15.9,
+  "reference_vacancy_pct": 15.8,
   "reference_buildings": 640,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 15.9,
+  "mixed_vacancy_pct": 15.8,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 560,
-      "active": 1213,
+      "active": 1215,
       "capacity": 1436,
-      "vacancy_pct": 15.5
+      "vacancy_pct": 15.4
     },
     "expos_units": {
       "buildings": 80,

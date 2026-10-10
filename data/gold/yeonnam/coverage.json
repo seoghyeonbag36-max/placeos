@@ -2,7 +2,7 @@
   "slug": "yeonnam",
   "hub_name": "연남동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:13:17",
+  "built_at": "2026-10-11T07:18:25",
   "shown": 1133,
   "excluded_total": 1587,
   "excluded_unknown": 17,
@@ -10,9 +10,9 @@
   "excluded_determined": 427,
   "coverage_pct": 41.7,
   "status": {
-    "full": 674,
-    "partial": 206,
-    "high": 96,
+    "full": 684,
+    "partial": 198,
+    "high": 94,
     "empty": 157
   },
   "source": {
@@ -21,16 +21,16 @@
     "pip_only": 56,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 21.9,
+  "reference_vacancy_pct": 21.3,
   "reference_buildings": 854,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 50.9,
+  "mixed_vacancy_pct": 50.6,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 795,
-      "active": 1882,
+      "active": 1898,
       "capacity": 2194,
-      "vacancy_pct": 14.2
+      "vacancy_pct": 13.5
     },
     "expos_units": {
       "buildings": 59,

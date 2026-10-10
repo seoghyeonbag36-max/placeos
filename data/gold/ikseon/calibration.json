@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>종로",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 56.2,
+  "estimated_vacancy_pct": 56.1,
   "alpha_street": 0.164,
-  "gap_pp": 47.0,
+  "gap_pp": 46.9,
   "buildings_used": 1281,
   "rone_aligned": {
     "mid": {
       "buildings": 603,
       "vacancy_units_pct": 31.2,
       "buildings_floor": 603,
-      "vacancy_floor_hi_pct": 24.1,
-      "vacancy_floor_lo_pct": 43.4,
-      "vacancy_area_pct": 22.0,
+      "vacancy_floor_hi_pct": 23.8,
+      "vacancy_floor_lo_pct": 42.9,
+      "vacancy_area_pct": 21.8,
       "anchor_pct": 9.2,
-      "gap_pp": 12.8
+      "gap_pp": 12.6
     },
     "small": {
       "buildings": 655,

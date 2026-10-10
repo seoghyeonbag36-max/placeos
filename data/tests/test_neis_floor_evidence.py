@@ -12,7 +12,12 @@ import json
 from pathlib import Path
 
 from data.collectors import neis_academies
-from data.pipelines.build_building_attrs import _store_roads_and_blanks, academy_floors, road_key
+from data.pipelines.build_building_attrs import (
+    _store_roads_and_blanks,
+    aca_floor_nos,
+    academy_floors,
+    road_key,
+)
 from data.pipelines.build_page_master import _aggregate
 
 PNU_A = "1168010700105110001"
@@ -47,8 +52,10 @@ def test_unique_parcel_floor_and_ambiguity() -> None:
 
 def test_blank_floor_store_resolved_once() -> None:
     stores = [
-        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 강남구 도산대로 1", "flrNo": "", "bizesNm": "가나다수학학원"},
-        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 강남구 도산대로 1", "flrNo": "1", "bizesNm": "편의점"},
+        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 강남구 도산대로 1", "flrNo": "", "bizesNm": "가나다수학학원",
+         "indsLclsNm": "교육"},
+        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 강남구 도산대로 1", "flrNo": "1", "bizesNm": "편의점",
+         "indsLclsNm": "소매"},
     ]
     roads, blanks = _store_roads_and_blanks(stores)
     assert roads == {road_key("서울특별시 강남구 도산대로 1"): {PNU_A}}
@@ -88,3 +95,35 @@ def test_read_run_validates_total_ids_and_office(tmp_path: Path) -> None:
     (tmp_path / "neis_001.json").write_text(json.dumps(_neis_page(other, 1)), encoding="utf-8")
     rows, info = neis_academies.read_run(tmp_path)
     assert rows == [] and info["non_b10"] == 1
+
+
+def test_resolution_pool_is_education_only() -> None:
+    """층 미상 점포 해소는 교육·독서실 업종만 — 'YBM어학원' 이 'YBM점'(소매)을 해소하면 안 된다."""
+    stores = [
+        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 종로구 종로 1", "flrNo": "", "bizesNm": "씨제이올리브영종로YBM점",
+         "indsLclsNm": "소매"},
+        {"lnoCd": PNU_A, "rdnmAdr": "서울특별시 종로구 종로 1", "flrNo": "", "bizesNm": "열공독서실",
+         "indsLclsNm": "예술·스포츠", "indsSclsNm": "독서실/스터디 카페"},
+    ]
+    roads, blanks = _store_roads_and_blanks(stores)
+    assert blanks == {PNU_A: ["열공독서실"]}
+    out, _ = academy_floors([_aca("YBM어학원", "서울특별시 종로구 종로 1", ", 5층")], roads, blanks)
+    assert out[PNU_A]["resolved"] == 0
+
+
+def test_academy_floor_parse_cases() -> None:
+    """NEIS 상세주소 층 해석 — 지하 약어·지하에서 시작하는 범위·괄호 안 건물명."""
+    cases = {
+        ", 3층 301호 (개포동, 삼성빌딩)": [3],
+        ", 지1층 B125호(도곡동)": [],            # 지하 약어
+        ", B1층 12호": [],
+        ", 2~4층": [2, 3, 4],                   # 범위는 사이 층까지
+        ", 1.2층": [1, 2],
+        ", (3층)": [3],                         # 괄호 안에 층 표기만
+        ", 301호 (대치동, 3층빌딩)": [],         # 참고항목의 건물명은 층이 아니다
+        "외1필지 2층": [2],                      # '필지' 의 '지' 는 지하 약어가 아니다
+        ", 지하1층~4층": [1, 2, 3, 4],           # 지하에서 시작하는 범위 → 지상 1층부터
+        ", B1~3층": [1, 2, 3],
+        ", 301호": [],
+    }
+    assert {k: sorted(aca_floor_nos(k)) for k in cases} == cases

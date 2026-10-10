@@ -211,12 +211,26 @@ def _count_measured_foot_hubs() -> int | None:
     None 은 "못 셌다" 이고 호출부가 종전 0.5 가중으로 물러난다 — 0 으로 세면 실측이
     있는데도 진행률이 떨어져 보인다.
     """
+    b = _foot_breakdown()
+    return None if b is None else b["measured"]
+
+
+def _foot_breakdown() -> dict | None:
+    """`_count_measured_foot_hubs` 의 내역 — {measured, single[], tie[]}. 못 세면 None.
+
+    `single` 은 유닛이 1개라 가를 것이 없는 거점, `tie` 는 유닛이 **전부 한 집계구**에 있어
+    유동값이 같은 거점이다. 둘 다 실측으로 센다 — 집계구가 공개 생활인구의 가장 고운 입도라
+    `tie` 는 '못 쟀다'가 아니라 **'쟀더니 같다'** 이고, 수집으로는 바뀌지 않는 입도 상한이다
+    (2026-09-05 `area` 0.5 가중을 걷어낸 것과 같은 원칙). 값이 하나라도 비면(None) 결손이라
+    세지 않는다. 2026-10-11 10월 갱신으로 seoulsup·banpo·garak 의 유닛이 한 집계구에 모이며
+    드러났다 — 유닛 1개일 때는 세고 2개가 같은 자리일 때는 안 세는 비대칭이었다.
+    """
     try:
         sys.path.insert(0, str(ROOT / "apps" / "backend"))
         from app.services import districts as _d
         from app.services import posting_inputs as _pi
 
-        n = 0
+        out: dict = {"measured": 0, "single": [], "tie": []}
         # ⚠ `_d.DISTRICTS` 가 아니라 `_d.PAGES` 를 돈다. DISTRICTS 는 **시드 54거점**이라
         #   이 게이트가 구조적으로 54 를 못 넘었다 — 2026-09-04 에 서울 2차 12거점이
         #   `foot 66/66` 인데 '거점 내 서열 실측 54/66' 으로 찍힌 것이 그 때문이고,
@@ -226,13 +240,19 @@ def _count_measured_foot_hubs() -> int | None:
             units = _d.resolved_units(d["id"]) or []
             if len(units) < 2:
                 # 유닛이 1개뿐이면 가를 것이 없다 — "못 가른다"와 구분해 실측으로 센다
-                n += 1 if units else 0
+                if units:
+                    out["measured"] += 1
+                    out["single"].append(d["id"])
                 continue
-            for src in (_pi._unit_jipgyegu_flpop, _pi._unit_trdar_flpop):
-                if _pi._measured_offsets(src(d["id"], units)) is not None:
-                    n += 1
-                    break
-        return n
+            if any(_pi._measured_offsets(src(d["id"], units)) is not None
+                   for src in (_pi._unit_jipgyegu_flpop, _pi._unit_trdar_flpop)):
+                out["measured"] += 1
+                continue
+            jg = _pi._unit_jipgyegu_flpop(d["id"], units) or []
+            if jg and all(v is not None for v in jg) and len(set(jg)) == 1:
+                out["measured"] += 1
+                out["tie"].append(d["id"])
+        return out
     except Exception:
         return None
 
@@ -868,8 +888,13 @@ def posting_track(total: int) -> Track:
             area += 1
     # 최근접 상권으로 거점 내 서열이 갈리는 거점 수 — 손으로 적지 않고 센다.
     # 못 세면(None) 종전 0.5 가중으로 물러난다.
-    foot_measured = _count_measured_foot_hubs()
+    foot_bd = _foot_breakdown()
+    foot_measured = None if foot_bd is None else foot_bd["measured"]
     foot_score = foot_measured if foot_measured is not None else 0.5 * foot
+    foot_flat = ("" if foot_bd is None else
+                 f"유닛 1개 {len(foot_bd['single'])}곳({'·'.join(foot_bd['single']) or '없음'}) · "
+                 f"유닛이 전부 한 집계구 {len(foot_bd['tie'])}곳({'·'.join(foot_bd['tie']) or '없음'} — "
+                 f"쟀더니 같다, 입도 상한 · 2026-10-11)")
     # 분모가 4 → **3** 이다(2026-08-24 결정, docs/feature-posting.md §0-K).
     # `prem`(권리금)은 공개 통계가 없고 실제로도 임대인·기존 임차인과의 협상값이라
     # **수집으로는 영영 안 채워진다.** 0/54 를 계속 세면 "언젠가 수집하면 된다"로
@@ -886,8 +911,8 @@ def posting_track(total: int) -> Track:
            f"경계로는 37.5% — 집계구 재획정 탓이지 포맷 문제가 아니었다). 유닛 "
            f"**528/528 배정** · 525유닛이 `flpop+jipgyegu`. 종전에 '원리적으로 못 "
            f"가른다'던 nokdu(상권 1곳 → 집계구 6개) · euljiro(유닛이 300m 안 → 7개)가 "
-           f"**갈린다**. 남은 3거점(anam·garak·yeouido)은 못 가르는 게 아니라 "
-           f"**유닛이 1개씩**이라 가를 것이 없다. "
+           f"**갈린다**. 서열이 안 갈리는 거점은 못 가르는 게 아니라 가를 것이 없다 — "
+           f"{foot_flat}. "
            f"⚠ **2026-09-05 정정 — 위 '집계구 생활인구'가 12거점에서 참이 아니었다.** "
            f"이 수는 집계구·상권 **둘 중 하나라도** 서열이 갈리면 세므로, 서울 3차 "
            f"12거점이 상권(`flpop+trdar`)으로 물러나 있는 동안에도 66/66 으로 찍혔다 "

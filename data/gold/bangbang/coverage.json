@@ -2,7 +2,7 @@
   "slug": "bangbang",
   "hub_name": "뱅뱅사거리",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:16:03",
+  "built_at": "2026-10-11T07:20:26",
   "shown": 729,
   "excluded_total": 555,
   "excluded_unknown": 3,
@@ -10,8 +10,8 @@
   "excluded_determined": 103,
   "coverage_pct": 56.8,
   "status": {
-    "full": 458,
-    "partial": 122,
+    "full": 464,
+    "partial": 116,
     "high": 61,
     "empty": 88
   },
@@ -20,16 +20,16 @@
     "pip_only": 101,
     "polygon_only": 88
   },
-  "reference_vacancy_pct": 12.7,
+  "reference_vacancy_pct": 12.4,
   "reference_buildings": 463,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 13.1,
+  "mixed_vacancy_pct": 12.9,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 377,
-      "active": 1152,
+      "active": 1161,
       "capacity": 1296,
-      "vacancy_pct": 11.1
+      "vacancy_pct": 10.4
     },
     "expos_units": {
       "buildings": 86,

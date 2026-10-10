@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>독산/시흥",
   "anchor_vac_small_pct": 15.4131150089385,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 26.5,
-  "alpha_street": 0.556,
-  "gap_pp": 11.8,
+  "estimated_vacancy_pct": 26.4,
+  "alpha_street": 0.558,
+  "gap_pp": 11.7,
   "buildings_used": 451,
   "rone_aligned": {
     "mid": {
       "buildings": 319,
       "vacancy_units_pct": 24.3,
       "buildings_floor": 319,
-      "vacancy_floor_hi_pct": 24.6,
-      "vacancy_floor_lo_pct": 44.3,
-      "vacancy_area_pct": 23.7,
+      "vacancy_floor_hi_pct": 24.4,
+      "vacancy_floor_lo_pct": 44.0,
+      "vacancy_area_pct": 23.6,
       "anchor_pct": 14.74,
-      "gap_pp": 9.0
+      "gap_pp": 8.9
     },
     "small": {
       "buildings": 44,

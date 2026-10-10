@@ -2,7 +2,7 @@
   "slug": "hyehwa",
   "hub_name": "혜화·대학로",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T00:15:17",
+  "built_at": "2026-10-11T07:19:59",
   "shown": 865,
   "excluded_total": 1590,
   "excluded_unknown": 13,
@@ -10,8 +10,8 @@
   "excluded_determined": 250,
   "coverage_pct": 35.2,
   "status": {
-    "full": 511,
-    "partial": 131,
+    "full": 516,
+    "partial": 126,
     "high": 76,
     "empty": 147
   },
@@ -21,16 +21,16 @@
     "pip_only": 87,
     "stores+ledger+pip": 9
   },
-  "reference_vacancy_pct": 23.7,
+  "reference_vacancy_pct": 23.4,
   "reference_buildings": 509,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 27.4,
+  "mixed_vacancy_pct": 27.0,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 469,
-      "active": 995,
+      "active": 999,
       "capacity": 1173,
-      "vacancy_pct": 15.2
+      "vacancy_pct": 14.8
     },
     "expos_units": {
       "buildings": 40,

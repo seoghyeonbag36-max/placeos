@@ -1,10 +1,10 @@
 {
   "source": "Gold 건물 마스터(com_floors·occ_floors·unknown_n) + 건축물대장 층별개요(bronze bldg_flr_raw — 층별 면적·주용도)",
-  "built_at": "2026-10-10T15:17:26+00:00",
+  "built_at": "2026-10-10T22:21:29+00:00",
   "note": "유닛 = (건물, 층). vacant_units.json 과 **다른 것을 센다** — 저쪽은 통째로 빈 건물 1동 = 유닛 1개(3-Tier ROI 모델의 표본)이고, 여기는 빈 층이 있는 모든 건물의 층마다 1개(화면에 거는 매물 목록)라 `partial` 건물이 들어온다. 층을 쪼갠 표본으로 ROI 트립와이어를 재면 중앙값 유닛이 상층부로 올라가 프라임 프리미엄 부호가 뒤집힌다 — 2026-08-26 에 실측하고 되돌린 자리다(docs/feature-posting.md §0-Q). 그래서 이 파일은 그 표본을 대체하지 않는다. certainty=confirmed 는 층 미상 점포(상가정보 flrNo 공란 약 30%)를 낮은 층부터 다 앉히고도 남은 층이라 비었음이 확정이고, probable 은 그 배정에 먹힌 층이라 층 미상 점포가 다른 층에 있으면 빈다 — 둘을 같은 것으로 그리지 말 것. 배정 규칙은 build_page_master._aggregate 의 상한 계산과 같다. area 는 그 층의 층별개요 실측 면적이다(vacant_units 의 균등분할과 다르다). ⚠ 한 층에 호실이 여럿이면 **그 층 전체**의 면적이며, 호실 단위로는 내려갈 수 없다(§0-R·§0-S). purps 는 대장이 그 층에 허용한 용도다 — 업종 후보를 거르는 근거이지 현재 영업 중인 업종이 아니다.",
   "counts": {
-    "units": 152,
-    "confirmed": 122,
+    "units": 150,
+    "confirmed": 120,
     "probable": 30,
     "buildings": 79
   },
@@ -89,7 +89,7 @@
       "purps": "일반음식점",
       "bld_status": "partial",
       "bld_floors": 5,
-      "bld_vacancy_rate": 50.0,
+      "bld_vacancy_rate": 25.0,
       "com_floors": [
         1,
         2,
@@ -98,7 +98,8 @@
       ],
       "occ_floors": [
         2,
-        3
+        3,
+        4
       ],
       "unknown_n": 0,
       "was": "기타 보건"
@@ -2570,36 +2571,6 @@
       "was": "의약·화장품 소매"
     },
     {
-      "id": "vfu-1130510300100460021-4",
-      "building_id": "1130510300100460021-1",
-      "pnu": "1130510300100460021",
-      "bldgs_on_pnu": 1,
-      "n": "현정빌딩",
-      "lat": 37.635675,
-      "lng": 127.02028,
-      "floor": 4,
-      "floor_label": "4F",
-      "certainty": "confirmed",
-      "area": 30,
-      "area_m2": 98.7,
-      "purps": "학원",
-      "bld_status": "partial",
-      "bld_floors": 5,
-      "bld_vacancy_rate": 50.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [
-        2,
-        3
-      ],
-      "unknown_n": 0,
-      "was": "기타 보건"
-    },
-    {
       "id": "vfu-1130510300100100026-4",
       "building_id": "1130510300100100026-1",
       "pnu": "1130510300100100026",
@@ -2872,7 +2843,7 @@
       "purps": "기타교육연구시설",
       "bld_status": "partial",
       "bld_floors": 7,
-      "bld_vacancy_rate": 28.6,
+      "bld_vacancy_rate": 14.3,
       "com_floors": [
         1,
         2,
@@ -2885,6 +2856,7 @@
       "occ_floors": [
         2,
         3,
+        6,
         7
       ],
       "unknown_n": 2,
@@ -3159,40 +3131,6 @@
       ],
       "unknown_n": 0,
       "was": "스포츠 서비스"
-    },
-    {
-      "id": "vfu-1130510300101910006-6",
-      "building_id": "1130510300101910006-1",
-      "pnu": "1130510300101910006",
-      "bldgs_on_pnu": 1,
-      "n": "상목빌딩",
-      "lat": 37.639142,
-      "lng": 127.026458,
-      "floor": 6,
-      "floor_label": "6F",
-      "certainty": "confirmed",
-      "area": 53,
-      "area_m2": 175.3,
-      "purps": "학원",
-      "bld_status": "partial",
-      "bld_floors": 7,
-      "bld_vacancy_rate": 28.6,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "occ_floors": [
-        2,
-        3,
-        7
-      ],
-      "unknown_n": 2,
-      "was": "주점"
     },
     {
       "id": "vfu-1130510100101580010-6",
@@ -3744,7 +3682,7 @@
       "purps": "소매점",
       "bld_status": "partial",
       "bld_floors": 7,
-      "bld_vacancy_rate": 28.6,
+      "bld_vacancy_rate": 14.3,
       "com_floors": [
         1,
         2,
@@ -3757,6 +3695,7 @@
       "occ_floors": [
         2,
         3,
+        6,
         7
       ],
       "unknown_n": 2,
@@ -4396,7 +4335,7 @@
       "purps": "치과의원",
       "bld_status": "partial",
       "bld_floors": 7,
-      "bld_vacancy_rate": 28.6,
+      "bld_vacancy_rate": 14.3,
       "com_floors": [
         1,
         2,
@@ -4409,6 +4348,7 @@
       "occ_floors": [
         2,
         3,
+        6,
         7
       ],
       "unknown_n": 2,

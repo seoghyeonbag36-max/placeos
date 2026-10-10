@@ -12,11 +12,11 @@
       "buildings": 357,
       "vacancy_units_pct": 24.0,
       "buildings_floor": 357,
-      "vacancy_floor_hi_pct": 19.2,
-      "vacancy_floor_lo_pct": 33.2,
-      "vacancy_area_pct": 20.9,
+      "vacancy_floor_hi_pct": 18.8,
+      "vacancy_floor_lo_pct": 32.8,
+      "vacancy_area_pct": 20.6,
       "anchor_pct": 1.25,
-      "gap_pp": 19.6
+      "gap_pp": 19.3
     },
     "small": {
       "buildings": 101,

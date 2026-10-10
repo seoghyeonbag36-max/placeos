@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>숙명여대",
   "anchor_vac_small_pct": 8.0492254856366,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 21.0,
-  "alpha_street": 0.233,
-  "gap_pp": 16.1,
+  "estimated_vacancy_pct": 20.8,
+  "alpha_street": 0.235,
+  "gap_pp": 15.9,
   "buildings_used": 399,
   "rone_aligned": {
     "mid": {
       "buildings": 209,
       "vacancy_units_pct": 31.9,
       "buildings_floor": 209,
-      "vacancy_floor_hi_pct": 23.2,
-      "vacancy_floor_lo_pct": 35.6,
-      "vacancy_area_pct": 25.0,
+      "vacancy_floor_hi_pct": 22.9,
+      "vacancy_floor_lo_pct": 34.9,
+      "vacancy_area_pct": 24.8,
       "anchor_pct": 4.88,
-      "gap_pp": 20.1
+      "gap_pp": 19.9
     },
     "small": {
       "buildings": 208,
