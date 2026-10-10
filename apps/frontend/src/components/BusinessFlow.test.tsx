@@ -51,13 +51,34 @@ function mount(extra: Route[] = []) {
 }
 
 describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => {
+  it("기타는 이름 입력 후 저장하고 미지원 분석을 대신 계산하지 않는다", async () => {
+    mount();
+    const card = await screen.findByRole("region", { name: "어떤 가게를 열고 싶으세요?" });
+    fireEvent.click(within(card).getByRole("radio", { name: /새로 창업/ }));
+    fireEvent.click(await within(card).findByRole("radio", { name: /기타 · 직접 입력/ }));
+    const start = within(card).getByRole("button", { name: "시작" }) as HTMLButtonElement;
+    expect(start.disabled).toBe(true);
+    const input = within(card).getByLabelText(/기타 업종명/);
+    fireEvent.change(input, { target: { value: "   " } });
+    expect(start.disabled).toBe(true);
+    fireEvent.change(input, { target: { value: " 도자기 공방 " } });
+    fireEvent.click(start);
+    await waitFor(() => expect(savedBusiness).toMatchObject({ status: "set", profile: { industryKey: "other", customIndustry: "도자기 공방" } }));
+    expect(await screen.findByText("도자기 공방 · 직접 입력 업종", {}, TAB_LOAD)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /도자기 공방 창업/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    expect(await screen.findByText(/매출·순익·회수기간 자동 계산은 미지원/, {}, TAB_LOAD)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Program" }));
+    const category = await screen.findByPlaceholderText("예: 카페", {}, TAB_LOAD);
+    expect((category as HTMLInputElement).value).toBe("도자기 공방");
+  });
   it("C-08 · C-09 · C-10 처음 방문에 카드가 뜨고, 채워야 시작되며, 시작하면 Platform 이 내 업종 기준 상권 순위를 먼저 답한다", async () => {
     mount([{
       match: /ai\/industry-fit\?industry=cafe/,
       body: { industry: INDUSTRIES[0], model_covered: true, seoul_fit: 0.2, ranked_n: 2, source: "src", note: "note",
         districts: [fitRow("yeonnam", "연남동", 0.24, 1), fitRow("garosugil", "가로수길", 0.18, 2)] },
     }]);
-    const card = await screen.findByRole("region", { name: "무엇을 하려고 하세요?" });
+    const card = await screen.findByRole("region", { name: "어떤 가게를 열고 싶으세요?" });
     const start = within(card).getByRole("button", { name: "시작" }) as HTMLButtonElement;
     expect(start.disabled).toBe(true);
 
@@ -79,23 +100,23 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
 
     // 칩이 목적과 업종을 말하고, 카드가 접혔고, 서버 저장 요청에 남았다
     expect(screen.getByRole("button", { name: /카페·디저트 창업/ })).toBeTruthy();
-    expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "어떤 가게를 열고 싶으세요?" })).toBeNull();
     expect(savedBusiness)
       .toEqual({ status: "set", profile: { goal: "start", industryKey: "cafe", homeDistrictId: null, businessName: null, description: null } });
   });
 
   it("「그냥 둘러보기」는 언제나 눌리고, 다시 열어도 카드가 펴지지 않는다", async () => {
     mount();
-    const card = await screen.findByRole("region", { name: "무엇을 하려고 하세요?" });
+    const card = await screen.findByRole("region", { name: "어떤 가게를 열고 싶으세요?" });
     fireEvent.click(within(card).getByRole("button", { name: "그냥 둘러보기" }));
-    await waitFor(() => expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("region", { name: "어떤 가게를 열고 싶으세요?" })).toBeNull());
     // 첫 화면이 Platform 이 된 뒤(2026-09-26)로 「내 사업 설정」은 **둘**이다 — 셸의 칩과
     // Platform 빈 카드(IndustryFitCard)의 버튼. 여기서 보려는 건 칩이라 aria-expanded 로 가른다.
     expect(screen.getByRole("button", { name: /내 사업 설정/, expanded: false })).toBeTruthy();
     cleanup();
     mount();
     await screen.findByRole("button", { name: /내 사업 설정/, expanded: false });
-    expect(screen.queryByRole("region", { name: "무엇을 하려고 하세요?" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "어떤 가게를 열고 싶으세요?" })).toBeNull();
   });
 
   it("PL-10 · PS-08 업종 바꾸기면 이 상권 업종 순위에 지금 업종이 표시되고, 다른 업종으로 입점 계산하면 Posting 업종칸이 채워진다", async () => {
@@ -159,7 +180,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
 
   it("(2026-10-06) 카드에서 업종 바꾸기를 고르면 「바꿀 업종(선택)」 칸이 뜨고, 고른 값이 저장된다", async () => {
     mount();
-    const card = await screen.findByRole("region", { name: "무엇을 하려고 하세요?" });
+    const card = await screen.findByRole("region", { name: "어떤 가게를 열고 싶으세요?" });
     expect(within(card).queryByText(/무엇으로 바꿀지 정했나요/)).toBeNull();   // 목적을 고르기 전·창업·옮기기에는 없다
     fireEvent.click(within(card).getByRole("radio", { name: /지금 상권에서 업종 바꾸기/ }));
     expect(within(card).getByText(/무엇으로 바꿀지 정했나요/)).toBeTruthy();

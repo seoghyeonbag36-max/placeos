@@ -6,6 +6,20 @@ import { clearToken, loadToken } from "@/lib/session";
 
 const BASE = "/api/v1";
 
+export type FounderCosts = Record<"deposit" | "premium" | "fitout" | "equipment" | "rent" | "maintenance" | "other_monthly" | "budget", number | null> & { reserve_months: number };
+export interface FounderAssessment {
+  source: "user_input"; currency: "KRW"; known_initial: number; known_monthly: number;
+  required_cash: number | null; budget_remaining: number | null; missing_fields: string[];
+  status: "incomplete" | "within_budget" | "over_budget" | "budget_unknown"; note: string;
+}
+export async function assessFounderCosts(costs: FounderCosts, signal?: AbortSignal): Promise<FounderAssessment> {
+  const response = await analysisFetch("/founder/costs", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(costs), signal,
+  });
+  if (!response.ok) throw new Error("비용을 검토하지 못했습니다. 입력값을 확인하고 다시 시도해 주세요.");
+  return response.json();
+}
+
 export interface BenchmarkIndustry { key: string; label: string }
 export interface BenchmarkPlace {
   id: string; name: string; category: string; address: string; phone: string | null;
