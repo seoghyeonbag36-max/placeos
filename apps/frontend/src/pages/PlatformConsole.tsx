@@ -13,6 +13,7 @@ import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { mapLabelHTML } from "@/design/components/MapMarkerPin";
 import IndustryFitCard from "@/components/IndustryFitCard";
+import BenchmarkExplorer from "@/components/BenchmarkExplorer";
 import { findIndustry, type BusinessProfile } from "@/lib/businessProfile";
 import { lstmPromoted } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
@@ -233,6 +234,11 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
       {hub && <TravelTimePanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
+      <BenchmarkExplorer key={`${districtId}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
+        districtId={districtId}
+        defaultIndustry={business?.goal === "pivot"
+          ? business.targetIndustryDetailKey ?? business.targetIndustryKey ?? ""
+          : business?.industryDetailKey ?? business?.industryKey ?? ""} />
 
       {profErr && (
         <div className="err">

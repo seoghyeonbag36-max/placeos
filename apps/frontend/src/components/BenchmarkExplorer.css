@@ -1,0 +1,8 @@
+.benchmark-explorer { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.benchmark-explorer p, .benchmark-explorer small { color: var(--muted); }
+.benchmark-explorer select { max-width: 100%; }
+.benchmark-explorer ul { list-style: none; padding: 0; max-height: 320px; overflow-y: auto; }
+.benchmark-explorer li { border-bottom: 1px solid var(--line); }
+.benchmark-explorer small { display: block; }
+.benchmark-explorer button[aria-pressed="true"] { outline: 2px solid var(--brand); }
+.benchmark-explorer a { color: var(--brand); }
