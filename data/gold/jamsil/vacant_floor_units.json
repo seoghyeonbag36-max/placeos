@@ -1,12 +1,12 @@
 {
   "source": "Gold 건물 마스터(com_floors·occ_floors·unknown_n) + 건축물대장 층별개요(bronze bldg_flr_raw — 층별 면적·주용도)",
-  "built_at": "2026-09-05T02:10:50+00:00",
+  "built_at": "2026-10-10T15:17:16+00:00",
   "note": "유닛 = (건물, 층). vacant_units.json 과 **다른 것을 센다** — 저쪽은 통째로 빈 건물 1동 = 유닛 1개(3-Tier ROI 모델의 표본)이고, 여기는 빈 층이 있는 모든 건물의 층마다 1개(화면에 거는 매물 목록)라 `partial` 건물이 들어온다. 층을 쪼갠 표본으로 ROI 트립와이어를 재면 중앙값 유닛이 상층부로 올라가 프라임 프리미엄 부호가 뒤집힌다 — 2026-08-26 에 실측하고 되돌린 자리다(docs/feature-posting.md §0-Q). 그래서 이 파일은 그 표본을 대체하지 않는다. certainty=confirmed 는 층 미상 점포(상가정보 flrNo 공란 약 30%)를 낮은 층부터 다 앉히고도 남은 층이라 비었음이 확정이고, probable 은 그 배정에 먹힌 층이라 층 미상 점포가 다른 층에 있으면 빈다 — 둘을 같은 것으로 그리지 말 것. 배정 규칙은 build_page_master._aggregate 의 상한 계산과 같다. area 는 그 층의 층별개요 실측 면적이다(vacant_units 의 균등분할과 다르다). ⚠ 한 층에 호실이 여럿이면 **그 층 전체**의 면적이며, 호실 단위로는 내려갈 수 없다(§0-R·§0-S). purps 는 대장이 그 층에 허용한 용도다 — 업종 후보를 거르는 근거이지 현재 영업 중인 업종이 아니다.",
   "counts": {
-    "units": 111,
-    "confirmed": 86,
-    "probable": 25,
-    "buildings": 49
+    "units": 110,
+    "confirmed": 89,
+    "probable": 21,
+    "buildings": 52
   },
   "units": [
     {
@@ -37,39 +37,6 @@
       ],
       "unknown_n": 0,
       "was": "일반 교육"
-    },
-    {
-      "id": "vfu-1171011100100660000-1",
-      "building_id": "1171011100100660000-1",
-      "pnu": "1171011100100660000",
-      "bldgs_on_pnu": 1,
-      "n": "덕림빌딩",
-      "lat": 37.512997,
-      "lng": 127.108111,
-      "floor": 1,
-      "floor_label": "1F",
-      "certainty": "confirmed",
-      "area": 83,
-      "area_m2": 274.7,
-      "purps": "일반음식점",
-      "bld_status": "partial",
-      "bld_floors": 8,
-      "bld_vacancy_rate": 20.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4,
-        6
-      ],
-      "occ_floors": [
-        2,
-        3,
-        4,
-        6
-      ],
-      "unknown_n": 0,
-      "was": "애완동물·용품 소매"
     },
     {
       "id": "vfu-1171011100100710004-1",
@@ -187,6 +154,30 @@
       "was": "중식"
     },
     {
+      "id": "vfu-1171010400100430012-1",
+      "building_id": "1171010400100430012-1",
+      "pnu": "1171010400100430012",
+      "bldgs_on_pnu": 1,
+      "n": "송파동 43-12",
+      "lat": 37.509156,
+      "lng": 127.10956,
+      "floor": 1,
+      "floor_label": "1F",
+      "certainty": "confirmed",
+      "area": 18,
+      "area_m2": 59.4,
+      "purps": "소매점",
+      "bld_status": "empty",
+      "bld_floors": 3,
+      "bld_vacancy_rate": 100.0,
+      "com_floors": [
+        1
+      ],
+      "occ_floors": [],
+      "unknown_n": 0,
+      "was": "섬유·의복·신발 소매"
+    },
+    {
       "id": "vfu-1171010400100070000-2",
       "building_id": "1171010400100070000-1",
       "pnu": "1171010400100070000",
@@ -255,7 +246,7 @@
       "purps": "일반음식점",
       "bld_status": "partial",
       "bld_floors": 6,
-      "bld_vacancy_rate": 40.0,
+      "bld_vacancy_rate": 20.0,
       "com_floors": [
         1,
         2,
@@ -265,6 +256,7 @@
       ],
       "occ_floors": [
         1,
+        3,
         5,
         6
       ],
@@ -406,6 +398,36 @@
       "was": "오락용품 소매"
     },
     {
+      "id": "vfu-1171010400100360006-2",
+      "building_id": "1171010400100360006-1",
+      "pnu": "1171010400100360006",
+      "bldgs_on_pnu": 1,
+      "n": "전체",
+      "lat": 37.509322,
+      "lng": 127.10778,
+      "floor": 2,
+      "floor_label": "2F",
+      "certainty": "confirmed",
+      "area": 49,
+      "area_m2": 162.0,
+      "purps": "휴게음식점",
+      "bld_status": "partial",
+      "bld_floors": 0,
+      "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "occ_floors": [
+        1,
+        5
+      ],
+      "unknown_n": 0,
+      "was": "기타 간이"
+    },
+    {
       "id": "vfu-1171011100100690000-2",
       "building_id": "1171011100100690000-1",
       "pnu": "1171011100100690000",
@@ -461,61 +483,6 @@
       "was": "비알코올 "
     },
     {
-      "id": "vfu-1171011100100980007-2",
-      "building_id": "1171011100100980007-1",
-      "pnu": "1171011100100980007",
-      "bldgs_on_pnu": 1,
-      "n": "초원소금구이",
-      "lat": 37.513122,
-      "lng": 127.110493,
-      "floor": 2,
-      "floor_label": "2F",
-      "certainty": "confirmed",
-      "area": 40,
-      "area_m2": 132.7,
-      "purps": "기타제1종근린생활시설",
-      "bld_status": "partial",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 50.0,
-      "com_floors": [
-        1,
-        2
-      ],
-      "occ_floors": [
-        1
-      ],
-      "unknown_n": 0,
-      "was": "비알코올 "
-    },
-    {
-      "id": "vfu-1171011100100380011-2",
-      "building_id": "1171011100100380011-1",
-      "pnu": "1171011100100380011",
-      "bldgs_on_pnu": 1,
-      "n": "방이동 38-11",
-      "lat": 37.515498,
-      "lng": 127.110094,
-      "floor": 2,
-      "floor_label": "2F",
-      "certainty": "confirmed",
-      "area": 35,
-      "area_m2": 115.0,
-      "purps": "소매점",
-      "bld_status": "partial",
-      "bld_floors": 5,
-      "bld_vacancy_rate": 33.3,
-      "com_floors": [
-        1,
-        2,
-        3
-      ],
-      "occ_floors": [
-        3
-      ],
-      "unknown_n": 1,
-      "was": "욕탕·신체관리"
-    },
-    {
       "id": "vfu-1171011100100590013-2",
       "building_id": "1171011100100590013-1",
       "pnu": "1171011100100590013",
@@ -536,8 +503,10 @@
         1,
         2
       ],
-      "occ_floors": [],
-      "unknown_n": 1,
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
       "was": "한식"
     },
     {
@@ -676,6 +645,33 @@
       ],
       "unknown_n": 0,
       "was": "한식"
+    },
+    {
+      "id": "vfu-1171011100100590014-2",
+      "building_id": "1171011100100590014-1",
+      "pnu": "1171011100100590014",
+      "bldgs_on_pnu": 1,
+      "n": "방이동 59-14",
+      "lat": 37.514711,
+      "lng": 127.110339,
+      "floor": 2,
+      "floor_label": "2F",
+      "certainty": "confirmed",
+      "area": 26,
+      "area_m2": 85.0,
+      "purps": "일반음식점",
+      "bld_status": "partial",
+      "bld_floors": 4,
+      "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        2
+      ],
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "was": "스포츠 서비스"
     },
     {
       "id": "vfu-1171010400100300010-2",
@@ -876,36 +872,95 @@
       "was": "중식"
     },
     {
-      "id": "vfu-1171011100100350008-3",
-      "building_id": "1171011100100350008-1",
-      "pnu": "1171011100100350008",
+      "id": "vfu-1171010400100320002-3",
+      "building_id": "1171010400100320002-1",
+      "pnu": "1171010400100320002",
       "bldgs_on_pnu": 1,
-      "n": "두양빌딩",
-      "lat": 37.516327,
-      "lng": 127.110193,
+      "n": "더블유123빌딩",
+      "lat": 37.510106,
+      "lng": 127.1063,
       "floor": 3,
       "floor_label": "3F",
       "certainty": "confirmed",
-      "area": 68,
-      "area_m2": 225.1,
-      "purps": "의원",
+      "area": 82,
+      "area_m2": 270.3,
+      "purps": "사진관",
       "bld_status": "partial",
-      "bld_floors": 6,
-      "bld_vacancy_rate": 40.0,
+      "bld_floors": 8,
+      "bld_vacancy_rate": 25.0,
       "com_floors": [
         1,
         2,
         3,
-        5,
         6
       ],
       "occ_floors": [
         1,
-        5,
+        6
+      ],
+      "unknown_n": 1,
+      "was": "서양식"
+    },
+    {
+      "id": "vfu-1171010400100070012-3",
+      "building_id": "1171010400100070012-1",
+      "pnu": "1171010400100070012",
+      "bldgs_on_pnu": 1,
+      "n": "송파동 7-12",
+      "lat": 37.509374,
+      "lng": 127.105367,
+      "floor": 3,
+      "floor_label": "3F",
+      "certainty": "confirmed",
+      "area": 67,
+      "area_m2": 222.3,
+      "purps": "휴게음식점",
+      "bld_status": "partial",
+      "bld_floors": 6,
+      "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "occ_floors": [
+        1,
+        2
+      ],
+      "unknown_n": 0,
+      "was": "한식"
+    },
+    {
+      "id": "vfu-1171011100100650004-3",
+      "building_id": "1171011100100650004-1",
+      "pnu": "1171011100100650004",
+      "bldgs_on_pnu": 1,
+      "n": "방이동 65-4",
+      "lat": 37.513235,
+      "lng": 127.108124,
+      "floor": 3,
+      "floor_label": "3F",
+      "certainty": "confirmed",
+      "area": 60,
+      "area_m2": 199.5,
+      "purps": "일반음식점",
+      "bld_status": "partial",
+      "bld_floors": 6,
+      "bld_vacancy_rate": 25.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "occ_floors": [
+        1,
+        2,
         6
       ],
       "unknown_n": 0,
-      "was": "기타 간이"
+      "was": "일반 교육"
     },
     {
       "id": "vfu-1171011100100930007-3",
@@ -993,6 +1048,35 @@
       "was": "오락용품 소매"
     },
     {
+      "id": "vfu-1171010400100070007-3",
+      "building_id": "1171010400100070007-1",
+      "pnu": "1171010400100070007",
+      "bldgs_on_pnu": 1,
+      "n": "송파동 7-7",
+      "lat": 37.508539,
+      "lng": 127.104641,
+      "floor": 3,
+      "floor_label": "3F",
+      "certainty": "confirmed",
+      "area": 47,
+      "area_m2": 155.1,
+      "purps": "의원",
+      "bld_status": "partial",
+      "bld_floors": 6,
+      "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 1,
+      "was": "비알코올 "
+    },
+    {
       "id": "vfu-1171010400100360006-3",
       "building_id": "1171010400100360006-1",
       "pnu": "1171010400100360006",
@@ -1016,9 +1100,10 @@
         5
       ],
       "occ_floors": [
-        1
+        1,
+        5
       ],
-      "unknown_n": 1,
+      "unknown_n": 0,
       "was": "기타 간이"
     },
     {
@@ -1112,32 +1197,34 @@
       "was": "교육 지원"
     },
     {
-      "id": "vfu-1171010400100570010-3",
-      "building_id": "1171010400100570010-1",
-      "pnu": "1171010400100570010",
+      "id": "vfu-1171011100100640003-3",
+      "building_id": "1171011100100640003-1",
+      "pnu": "1171011100100640003",
       "bldgs_on_pnu": 1,
-      "n": "송파동 57-10",
-      "lat": 37.511181,
-      "lng": 127.108442,
+      "n": "방이동 64-3",
+      "lat": 37.514036,
+      "lng": 127.108043,
       "floor": 3,
       "floor_label": "3F",
       "certainty": "confirmed",
-      "area": 37,
-      "area_m2": 122.3,
-      "purps": "학원",
-      "bld_status": "high",
-      "bld_floors": 5,
-      "bld_vacancy_rate": 66.7,
+      "area": 35,
+      "area_m2": 115.4,
+      "purps": "기타제1종근린생활시설",
+      "bld_status": "partial",
+      "bld_floors": 4,
+      "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
+        2,
         3,
         4
       ],
       "occ_floors": [
-        1
+        1,
+        2
       ],
       "unknown_n": 0,
-      "was": "섬유·의복·신발 소매"
+      "was": "유원지·오락"
     },
     {
       "id": "vfu-1171010400100570001-3",
@@ -1345,35 +1432,6 @@
       "was": "중식"
     },
     {
-      "id": "vfu-1171010400100320000-4",
-      "building_id": "1171010400100320000-1",
-      "pnu": "1171010400100320000",
-      "bldgs_on_pnu": 1,
-      "n": "대림빌딩",
-      "lat": 37.510038,
-      "lng": 127.10595,
-      "floor": 4,
-      "floor_label": "4F",
-      "certainty": "confirmed",
-      "area": 95,
-      "area_m2": 314.3,
-      "purps": "미용원",
-      "bld_status": "partial",
-      "bld_floors": 5,
-      "bld_vacancy_rate": 50.0,
-      "com_floors": [
-        1,
-        2,
-        4,
-        5
-      ],
-      "occ_floors": [
-        1
-      ],
-      "unknown_n": 1,
-      "was": "스포츠 서비스"
-    },
-    {
       "id": "vfu-1171011100100650006-4",
       "building_id": "1171011100100650006-1",
       "pnu": "1171011100100650006",
@@ -1494,7 +1552,7 @@
       "purps": "학원",
       "bld_status": "partial",
       "bld_floors": 6,
-      "bld_vacancy_rate": 25.0,
+      "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
         2,
@@ -1504,7 +1562,7 @@
       "occ_floors": [
         1
       ],
-      "unknown_n": 2,
+      "unknown_n": 1,
       "was": "비알코올 "
     },
     {
@@ -1538,6 +1596,33 @@
       "was": "기타 숙박"
     },
     {
+      "id": "vfu-1171010400100290006-4",
+      "building_id": "1171010400100290006-1",
+      "pnu": "1171010400100290006",
+      "bldgs_on_pnu": 1,
+      "n": "송파동 29-6",
+      "lat": 37.508992,
+      "lng": 127.106245,
+      "floor": 4,
+      "floor_label": "4F",
+      "certainty": "confirmed",
+      "area": 39,
+      "area_m2": 130.3,
+      "purps": "탁구장",
+      "bld_status": "partial",
+      "bld_floors": 5,
+      "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        4
+      ],
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "was": "서양식"
+    },
+    {
       "id": "vfu-1171010400100570010-4",
       "building_id": "1171010400100570010-1",
       "pnu": "1171010400100570010",
@@ -1551,16 +1636,17 @@
       "area": 37,
       "area_m2": 122.3,
       "purps": "학원",
-      "bld_status": "high",
+      "bld_status": "partial",
       "bld_floors": 5,
-      "bld_vacancy_rate": 66.7,
+      "bld_vacancy_rate": 33.3,
       "com_floors": [
         1,
         3,
         4
       ],
       "occ_floors": [
-        1
+        1,
+        3
       ],
       "unknown_n": 0,
       "was": "섬유·의복·신발 소매"
@@ -1581,7 +1667,7 @@
       "purps": "기타제2종근린생활시설",
       "bld_status": "partial",
       "bld_floors": 4,
-      "bld_vacancy_rate": 25.0,
+      "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
         2,
@@ -1592,7 +1678,7 @@
         1,
         2
       ],
-      "unknown_n": 1,
+      "unknown_n": 0,
       "was": "유원지·오락"
     },
     {
@@ -1808,7 +1894,7 @@
       "purps": "의원",
       "bld_status": "partial",
       "bld_floors": 6,
-      "bld_vacancy_rate": 25.0,
+      "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
         2,
@@ -1819,42 +1905,8 @@
         1,
         2
       ],
-      "unknown_n": 1,
+      "unknown_n": 0,
       "was": "한식"
-    },
-    {
-      "id": "vfu-1171011100100620003-5",
-      "building_id": "1171011100100620003-1",
-      "pnu": "1171011100100620003",
-      "bldgs_on_pnu": 1,
-      "n": "평원빌딩",
-      "lat": 37.513499,
-      "lng": 127.108374,
-      "floor": 5,
-      "floor_label": "5F",
-      "certainty": "confirmed",
-      "area": 56,
-      "area_m2": 184.5,
-      "purps": "학원",
-      "bld_status": "partial",
-      "bld_floors": 6,
-      "bld_vacancy_rate": 16.7,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "occ_floors": [
-        1,
-        2,
-        4,
-        6
-      ],
-      "unknown_n": 1,
-      "was": "기타 교육"
     },
     {
       "id": "vfu-1171010400100270012-5",
@@ -1981,33 +2033,61 @@
       "was": "기타 숙박"
     },
     {
-      "id": "vfu-1171010400100360006-5",
-      "building_id": "1171010400100360006-1",
-      "pnu": "1171010400100360006",
+      "id": "vfu-1171010500101600007-5",
+      "building_id": "1171010500101600007-1",
+      "pnu": "1171010500101600007",
       "bldgs_on_pnu": 1,
-      "n": "전체",
-      "lat": 37.509322,
-      "lng": 127.10778,
+      "n": "석촌동 160-7",
+      "lat": 37.507093,
+      "lng": 127.102441,
       "floor": 5,
       "floor_label": "5F",
       "certainty": "confirmed",
-      "area": 25,
-      "area_m2": 84.2,
-      "purps": "일반음식점",
+      "area": 10,
+      "area_m2": 31.5,
+      "purps": "기타제1종근린생활시설",
       "bld_status": "partial",
-      "bld_floors": 0,
+      "bld_floors": 5,
       "bld_vacancy_rate": 50.0,
+      "com_floors": [
+        1,
+        5
+      ],
+      "occ_floors": [],
+      "unknown_n": 1,
+      "was": "일반 교육"
+    },
+    {
+      "id": "vfu-1171011100100640006-5",
+      "building_id": "1171011100100640006-1",
+      "pnu": "1171011100100640006",
+      "bldgs_on_pnu": 1,
+      "n": "경진빌딩",
+      "lat": 37.514421,
+      "lng": 127.109142,
+      "floor": 5,
+      "floor_label": "5F",
+      "certainty": "confirmed",
+      "area": 10,
+      "area_m2": 31.9,
+      "purps": "기타제2종근린생활시설",
+      "bld_status": "partial",
+      "bld_floors": 5,
+      "bld_vacancy_rate": 20.0,
       "com_floors": [
         1,
         2,
         3,
+        4,
         5
       ],
       "occ_floors": [
-        1
+        1,
+        2,
+        3
       ],
       "unknown_n": 1,
-      "was": "기타 간이"
+      "was": "유원지·오락"
     },
     {
       "id": "vfu-1171010400100320000-5",
@@ -2025,7 +2105,7 @@
       "purps": "총포판매사",
       "bld_status": "partial",
       "bld_floors": 5,
-      "bld_vacancy_rate": 50.0,
+      "bld_vacancy_rate": 25.0,
       "com_floors": [
         1,
         2,
@@ -2033,7 +2113,8 @@
         5
       ],
       "occ_floors": [
-        1
+        1,
+        4
       ],
       "unknown_n": 1,
       "was": "스포츠 서비스"
@@ -2829,57 +2910,29 @@
       "was": "오락용품 소매"
     },
     {
-      "id": "vfu-1171011100100590013-1",
-      "building_id": "1171011100100590013-1",
-      "pnu": "1171011100100590013",
+      "id": "vfu-1171010500101600007-1",
+      "building_id": "1171010500101600007-1",
+      "pnu": "1171010500101600007",
       "bldgs_on_pnu": 1,
-      "n": "방이동 59-13",
-      "lat": 37.514846,
-      "lng": 127.110192,
+      "n": "석촌동 160-7",
+      "lat": 37.507093,
+      "lng": 127.102441,
       "floor": 1,
       "floor_label": "1F",
       "certainty": "probable",
-      "area": 33,
-      "area_m2": 109.6,
-      "purps": "일반음식점",
+      "area": 29,
+      "area_m2": 97.2,
+      "purps": "소매점",
       "bld_status": "partial",
-      "bld_floors": 2,
+      "bld_floors": 5,
       "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
-        2
+        5
       ],
       "occ_floors": [],
       "unknown_n": 1,
-      "was": "한식"
-    },
-    {
-      "id": "vfu-1171011100100380011-1",
-      "building_id": "1171011100100380011-1",
-      "pnu": "1171011100100380011",
-      "bldgs_on_pnu": 1,
-      "n": "방이동 38-11",
-      "lat": 37.515498,
-      "lng": 127.110094,
-      "floor": 1,
-      "floor_label": "1F",
-      "certainty": "probable",
-      "area": 33,
-      "area_m2": 107.7,
-      "purps": "단란주점",
-      "bld_status": "partial",
-      "bld_floors": 5,
-      "bld_vacancy_rate": 33.3,
-      "com_floors": [
-        1,
-        2,
-        3
-      ],
-      "occ_floors": [
-        3
-      ],
-      "unknown_n": 1,
-      "was": "욕탕·신체관리"
+      "was": "일반 교육"
     },
     {
       "id": "vfu-1171010200100010000-1",
@@ -2924,7 +2977,7 @@
       "purps": "휴게음식점",
       "bld_status": "partial",
       "bld_floors": 5,
-      "bld_vacancy_rate": 50.0,
+      "bld_vacancy_rate": 25.0,
       "com_floors": [
         1,
         2,
@@ -2932,10 +2985,41 @@
         5
       ],
       "occ_floors": [
-        1
+        1,
+        4
       ],
       "unknown_n": 1,
       "was": "스포츠 서비스"
+    },
+    {
+      "id": "vfu-1171010400100320002-2",
+      "building_id": "1171010400100320002-1",
+      "pnu": "1171010400100320002",
+      "bldgs_on_pnu": 1,
+      "n": "더블유123빌딩",
+      "lat": 37.510106,
+      "lng": 127.1063,
+      "floor": 2,
+      "floor_label": "2F",
+      "certainty": "probable",
+      "area": 83,
+      "area_m2": 273.8,
+      "purps": "일반음식점",
+      "bld_status": "partial",
+      "bld_floors": 8,
+      "bld_vacancy_rate": 25.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "occ_floors": [
+        1,
+        6
+      ],
+      "unknown_n": 1,
+      "was": "서양식"
     },
     {
       "id": "vfu-1171011100100930007-2",
@@ -2968,35 +3052,6 @@
       "was": "기타 숙박"
     },
     {
-      "id": "vfu-1171010400100360006-2",
-      "building_id": "1171010400100360006-1",
-      "pnu": "1171010400100360006",
-      "bldgs_on_pnu": 1,
-      "n": "전체",
-      "lat": 37.509322,
-      "lng": 127.10778,
-      "floor": 2,
-      "floor_label": "2F",
-      "certainty": "probable",
-      "area": 49,
-      "area_m2": 162.0,
-      "purps": "휴게음식점",
-      "bld_status": "partial",
-      "bld_floors": 0,
-      "bld_vacancy_rate": 50.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        5
-      ],
-      "occ_floors": [
-        1
-      ],
-      "unknown_n": 1,
-      "was": "기타 간이"
-    },
-    {
       "id": "vfu-1171010400100070007-2",
       "building_id": "1171010400100070007-1",
       "pnu": "1171010400100070007",
@@ -3012,7 +3067,7 @@
       "purps": "의원",
       "bld_status": "partial",
       "bld_floors": 6,
-      "bld_vacancy_rate": 25.0,
+      "bld_vacancy_rate": 50.0,
       "com_floors": [
         1,
         2,
@@ -3022,7 +3077,7 @@
       "occ_floors": [
         1
       ],
-      "unknown_n": 2,
+      "unknown_n": 1,
       "was": "비알코올 "
     },
     {
@@ -3092,129 +3147,6 @@
       ],
       "unknown_n": 1,
       "was": "식료품 소매"
-    },
-    {
-      "id": "vfu-1171010400100070012-3",
-      "building_id": "1171010400100070012-1",
-      "pnu": "1171010400100070012",
-      "bldgs_on_pnu": 1,
-      "n": "송파동 7-12",
-      "lat": 37.509374,
-      "lng": 127.105367,
-      "floor": 3,
-      "floor_label": "3F",
-      "certainty": "probable",
-      "area": 67,
-      "area_m2": 222.3,
-      "purps": "휴게음식점",
-      "bld_status": "partial",
-      "bld_floors": 6,
-      "bld_vacancy_rate": 25.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        5
-      ],
-      "occ_floors": [
-        1,
-        2
-      ],
-      "unknown_n": 1,
-      "was": "한식"
-    },
-    {
-      "id": "vfu-1171010400100070007-3",
-      "building_id": "1171010400100070007-1",
-      "pnu": "1171010400100070007",
-      "bldgs_on_pnu": 1,
-      "n": "송파동 7-7",
-      "lat": 37.508539,
-      "lng": 127.104641,
-      "floor": 3,
-      "floor_label": "3F",
-      "certainty": "probable",
-      "area": 47,
-      "area_m2": 155.1,
-      "purps": "의원",
-      "bld_status": "partial",
-      "bld_floors": 6,
-      "bld_vacancy_rate": 25.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [
-        1
-      ],
-      "unknown_n": 2,
-      "was": "비알코올 "
-    },
-    {
-      "id": "vfu-1171011100100620003-3",
-      "building_id": "1171011100100620003-1",
-      "pnu": "1171011100100620003",
-      "bldgs_on_pnu": 1,
-      "n": "평원빌딩",
-      "lat": 37.513499,
-      "lng": 127.108374,
-      "floor": 3,
-      "floor_label": "3F",
-      "certainty": "probable",
-      "area": 39,
-      "area_m2": 129.5,
-      "purps": "학원",
-      "bld_status": "partial",
-      "bld_floors": 6,
-      "bld_vacancy_rate": 16.7,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "occ_floors": [
-        1,
-        2,
-        4,
-        6
-      ],
-      "unknown_n": 1,
-      "was": "기타 교육"
-    },
-    {
-      "id": "vfu-1171011100100640003-3",
-      "building_id": "1171011100100640003-1",
-      "pnu": "1171011100100640003",
-      "bldgs_on_pnu": 1,
-      "n": "방이동 64-3",
-      "lat": 37.514036,
-      "lng": 127.108043,
-      "floor": 3,
-      "floor_label": "3F",
-      "certainty": "probable",
-      "area": 35,
-      "area_m2": 115.4,
-      "purps": "기타제1종근린생활시설",
-      "bld_status": "partial",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 25.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [
-        1,
-        2
-      ],
-      "unknown_n": 1,
-      "was": "유원지·오락"
     },
     {
       "id": "vfu-1171010400100070004-4",
@@ -3316,6 +3248,38 @@
       ],
       "unknown_n": 1,
       "was": "주점"
+    },
+    {
+      "id": "vfu-1171011100100640006-4",
+      "building_id": "1171011100100640006-1",
+      "pnu": "1171011100100640006",
+      "bldgs_on_pnu": 1,
+      "n": "경진빌딩",
+      "lat": 37.514421,
+      "lng": 127.109142,
+      "floor": 4,
+      "floor_label": "4F",
+      "certainty": "probable",
+      "area": 8,
+      "area_m2": 27.9,
+      "purps": "기타제2종근린생활시설",
+      "bld_status": "partial",
+      "bld_floors": 5,
+      "bld_vacancy_rate": 20.0,
+      "com_floors": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "occ_floors": [
+        1,
+        2,
+        3
+      ],
+      "unknown_n": 1,
+      "was": "유원지·오락"
     },
     {
       "id": "vfu-1171011100100650000-5",

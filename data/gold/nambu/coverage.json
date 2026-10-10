@@ -2,41 +2,41 @@
   "slug": "nambu",
   "hub_name": "남부터미널",
   "tier": "Tier1(대장)",
-  "built_at": "2026-09-04T23:30:07",
-  "shown": 490,
-  "excluded_total": 576,
+  "built_at": "2026-10-11T00:15:08",
+  "shown": 483,
+  "excluded_total": 583,
   "excluded_unknown": 9,
-  "excluded_non_commercial": 491,
-  "excluded_determined": 76,
-  "coverage_pct": 46.0,
+  "excluded_non_commercial": 482,
+  "excluded_determined": 92,
+  "coverage_pct": 45.3,
   "status": {
-    "full": 238,
-    "partial": 69,
-    "high": 69,
-    "empty": 114
+    "full": 216,
+    "partial": 98,
+    "high": 57,
+    "empty": 112
   },
   "source": {
-    "stores+ledger": 312,
-    "polygon_only": 114,
-    "pip_only": 63,
+    "stores+ledger": 343,
+    "polygon_only": 108,
+    "pip_only": 31,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 61.9,
-  "reference_buildings": 269,
+  "reference_vacancy_pct": 61.3,
+  "reference_buildings": 286,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 75.0,
+  "mixed_vacancy_pct": 74.3,
   "by_capacity_method": {
     "floor_ouln": {
-      "buildings": 220,
-      "active": 586,
-      "capacity": 670,
-      "vacancy_pct": 12.5
+      "buildings": 234,
+      "active": 602,
+      "capacity": 709,
+      "vacancy_pct": 15.1
     },
     "expos_units": {
-      "buildings": 49,
-      "active": 636,
-      "capacity": 2534,
-      "vacancy_pct": 74.9
+      "buildings": 52,
+      "active": 665,
+      "capacity": 2569,
+      "vacancy_pct": 74.1
     }
   },
   "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."

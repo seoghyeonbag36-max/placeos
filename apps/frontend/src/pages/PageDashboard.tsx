@@ -522,7 +522,7 @@ function FloorVacancies({ list }: { list: FloorVacancyList | null }) {
   return (
     <>
       <h2 className="sec">층별 공실 매물 <small>
-        Page · 건축물대장 층별개요 + 상가정보 층 표기 실측 — 어느 층이 비었고 몇 평인가.
+        Page · 건축물대장 층별개요 + 상가정보·인허가·나이스 학원 층 표기 실측 — 어느 층이 비었고 몇 평인가.
         {" "}면적은 <b>그 층의</b> 대장 실측이다(건물 평균을 나눈 값이 아니다)
       </small></h2>
 

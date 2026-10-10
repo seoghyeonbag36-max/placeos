@@ -3,30 +3,30 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>건대입구",
   "anchor_vac_small_pct": 11.196552576399,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 16.5,
-  "alpha_street": 0.578,
-  "gap_pp": 7.0,
+  "estimated_vacancy_pct": 12.3,
+  "alpha_street": 0.776,
+  "gap_pp": 2.8,
   "buildings_used": 425,
   "rone_aligned": {
     "mid": {
       "buildings": 386,
       "vacancy_units_pct": 14.7,
       "buildings_floor": 386,
-      "vacancy_floor_hi_pct": 14.9,
-      "vacancy_floor_lo_pct": 31.0,
-      "vacancy_area_pct": 15.7,
+      "vacancy_floor_hi_pct": 11.3,
+      "vacancy_floor_lo_pct": 27.0,
+      "vacancy_area_pct": 12.1,
       "anchor_pct": 9.54,
-      "gap_pp": 6.2
+      "gap_pp": 2.6
     },
     "small": {
       "buildings": 47,
-      "vacancy_units_pct": 12.5,
+      "vacancy_units_pct": 12.3,
       "buildings_floor": 47,
-      "vacancy_floor_hi_pct": 14.1,
-      "vacancy_floor_lo_pct": 28.1,
-      "vacancy_area_pct": 13.3,
+      "vacancy_floor_hi_pct": 6.2,
+      "vacancy_floor_lo_pct": 18.5,
+      "vacancy_area_pct": 5.2,
       "anchor_pct": 11.2,
-      "gap_pp": 2.1
+      "gap_pp": -6.0
     },
     "mall": {
       "buildings": 99,

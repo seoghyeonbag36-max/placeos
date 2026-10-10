@@ -6,7 +6,8 @@ silver/{거점}/building_attrs.json 에 캐시한다.
 
   · R-ONE 모집단 판정용 — 일반/집합, 지상층수, 연면적, 표제부 주용도
   · 층 단위 매칭용     — 층별개요의 지상 상업층 번호, 상가정보 점포의 층(flrNo),
-                         인허가 영업 업소의 층(주소 문자열, 영업 중의 86.3%에 있다)
+                         인허가 영업 업소의 층(주소 문자열, 영업 중의 86.3%에 있다),
+                         학원·교습소의 층(NEIS 상세주소 — 분모 안 층의 점유 확인에만 쓴다)
   · 면적 기준 대조용   — 지상 상업층 면적(일반) / 상업 전유면적(집합)
 
 수집기가 소유한 gold/building_vacancy.json 을 건드리지 않는 사이드카라 프론트·백엔드
@@ -30,6 +31,7 @@ from pathlib import Path
 
 from data.collectors.building_vacancy import NON_CAPACITY_PURPS
 from data.collectors.common import BRONZE, SILVER, load_latest
+from data.collectors.neis_academies import load_latest_academies
 from data.config.page_hubs import ACTIVE_HUBS, get_hub
 
 # R-ONE 중대형/소규모 표본이 되는 '상가건물'의 표제부 주용도. 업무시설·숙박시설은
@@ -197,11 +199,9 @@ def store_floors(slug: str) -> tuple[dict[str, list], dict[str, int]]:
     flrNo 는 '1' / 'B1' / '지' / 공란이 섞여 있다. 공란이 약 30% 라 층 단위 점유는
     단일 값이 아니라 상·하한 밴드로만 말할 수 있다(공란·지하는 지상층 판정에서 뺀다).
     """
-    ps = sorted((BRONZE / slug).glob("*/stores_raw.json"))
-    rows = json.loads(ps[-1].read_text(encoding="utf-8")) if ps else []
     known: dict[str, set] = defaultdict(set)
     unknown: dict[str, int] = defaultdict(int)
-    for r in rows:
+    for r in _latest_stores(slug):
         pnu = r.get("lnoCd")
         if not pnu:
             continue
@@ -213,9 +213,93 @@ def store_floors(slug: str) -> tuple[dict[str, list], dict[str, int]]:
     return {k: sorted(v) for k, v in known.items()}, dict(unknown)
 
 
+def _latest_stores(slug: str) -> list[dict]:
+    ps = sorted((BRONZE / slug).glob("*/stores_raw.json"))
+    return json.loads(ps[-1].read_text(encoding="utf-8")) if ps else []
+
+
+# ── 학원 층 근거(NEIS, 2026-10-10) ─────────────────────────────────────────
+# 상세주소 ", 3층 301호 (개포동, 삼성빌딩)" 의 층. NEIS 에는 좌표·지번이 없어 **도로명주소**로
+# 지번(PNU)에 붙인다 — 대장 표제부 newPlatPlc 와 상가정보 rdnmAdr↔lnoCd 가 그 사전이다.
+# 이 근거는 **분모를 넓히지 않는다**(recalc_floor_ouln): 교습소는 주거 동에 있을 수 있어
+# '점포가 확인된 층 = 상업층' 규칙을 그대로 쓰면 아파트 층이 상가로 들어온다. 분모 안 층의
+# 점유를 확인할 뿐이다. → docs/finding-page-oct-refresh-2026-10-10.md §4
+_ACA_SUFFIX = re.compile(r"(학원|교습소|어학원)")
+
+
+def road_key(addr: object) -> str:
+    """도로명주소 비교 키 — 괄호 참고항목(법정동·건물명)과 공백을 뗀다."""
+    return re.sub(r"\s+", "", re.sub(r"\([^)]*\)", "", str(addr or "")))
+
+
+def _name_key(name: object) -> str:
+    s = _ACA_SUFFIX.sub("", re.sub(r"\([^)]*\)", "", str(name or "")))
+    return re.sub(r"[^0-9A-Za-z가-힣]", "", s).lower()
+
+
+def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
+                   blank_names: dict[str, list[str]]) -> tuple[dict[str, dict], dict[str, int]]:
+    """NEIS 행 → ({pnu: {floors, n, resolved}}, 매칭 통계).
+
+    · 도로명주소 키가 **지번 하나**에만 걸릴 때만 붙인다. 여러 지번이면(대단지·다필지) 버린다 —
+      층은 맞아도 엉뚱한 지번의 층이 될 수 있다.
+    · 층은 상세주소에서 인허가와 같은 규칙(`lic_floors`)으로 읽는다. 지하·층 미표기는 근거가 아니다.
+    · 같은 지번에 층 미상(flrNo 공란) 상가정보 점포가 **이름이 맞게** 있으면 그 점포의 층을 이 학원이
+      밝힌 것이다(`resolved`). 소비처가 층 미상 수에서 빼야 같은 업소를 두 번 세지 않는다.
+    · 층 미상 학원은 상한 배정(spare)에 보태지 않는다 — 상가정보 공란과 같은 업소일 수 있다.
+    """
+    out: dict[str, dict] = defaultdict(lambda: {"floors": set(), "n": 0, "resolved": 0})
+    stats = {"rows": len(academies), "matched": 0, "ambiguous": 0, "with_floor": 0}
+    pool = {k: list(v) for k, v in blank_names.items()}
+    for a in academies:
+        if str(a.get("REG_STTUS_NM") or "") not in ("개원", ""):
+            continue
+        pnus = road2pnu.get(road_key(a.get("FA_RDNMA")))
+        if not pnus:
+            continue
+        if len(pnus) > 1:
+            stats["ambiguous"] += 1
+            continue
+        pnu = next(iter(pnus))
+        stats["matched"] += 1
+        floors, _found = lic_floors(re.sub(r"\([^)]*\)", "", str(a.get("FA_RDNDA") or "")))
+        if not floors:
+            continue
+        stats["with_floor"] += 1
+        o = out[pnu]
+        o["floors"] |= floors
+        o["n"] += 1
+        nk = _name_key(a.get("ACA_NM"))
+        names = pool.get(pnu) or []
+        hit = next((i for i, s in enumerate(names)
+                    if len(nk) >= 3 and len(s) >= 3 and (nk in s or s in nk)), None)
+        if hit is not None:
+            names.pop(hit)
+            o["resolved"] += 1
+    return ({k: {"floors": sorted(v["floors"]), "n": v["n"], "resolved": v["resolved"]}
+             for k, v in out.items()}, stats)
+
+
+def _store_roads_and_blanks(stores: list[dict]) -> tuple[dict[str, set[str]], dict[str, list[str]]]:
+    """상가정보 → (도로명 키 → 지번 집합, 지번 → 층 미상 점포 이름 키 목록)."""
+    roads: dict[str, set[str]] = defaultdict(set)
+    blanks: dict[str, list[str]] = defaultdict(list)
+    for r in stores:
+        pnu = r.get("lnoCd")
+        if not pnu:
+            continue
+        if (k := road_key(r.get("rdnmAdr"))):
+            roads[k].add(pnu)
+        if not str(r.get("flrNo") or "").strip():
+            blanks[pnu].append(_name_key(r.get("bizesNm")))
+    return roads, blanks
+
+
 def run(slug: str) -> int:
     """거점 하나의 building_attrs.json 산출. 반환: 지번 수."""
     acc: dict[str, dict] = {}
+    # 표제부 도로명주소 → 지번. 학원(NEIS) 층 근거를 지번에 붙이는 사전이다 — attrs 에는 싣지 않는다.
+    ledger_roads: dict[str, set[str]] = defaultdict(set)
     # 날짜별 체크포인트가 여러 벌 있다 — 근거가 더 많은 쪽을 남긴다(빈 레코드가
     # 나중 날짜라는 이유로 덮어쓰지 않도록).
     for p in sorted((BRONZE / slug).glob("*/bldg_ledger_raw.json")):
@@ -228,6 +312,8 @@ def run(slug: str) -> int:
                 cur, st = pnu, _new_acc()
             if row is not None:
                 fold_ledger(st, lst, row)
+                if lst == "title" and (k := road_key(row.get("newPlatPlc"))):
+                    ledger_roads[k].add(pnu)
         if cur is not None and (a := _ledger_out(st)) and len(a) >= len(acc.get(cur, {})):
             acc[cur] = {**acc.get(cur, {}), **a}
     for p in sorted((BRONZE / slug).glob("*/bldg_flr_raw.json")):
@@ -257,6 +343,26 @@ def run(slug: str) -> int:
         a["lic_n"] = lic["n"]
         a["lic_unknown"] = lic["unknown"]
 
+    # 학원 층(NEIS) — 정규화본이 없으면 아무것도 더하지 않는다(종전 산출물과 같다).
+    aca_note = ""
+    if academies := load_latest_academies():
+        s_roads, blanks = _store_roads_and_blanks(_latest_stores(slug))
+        road2pnu: dict[str, set[str]] = defaultdict(set)
+        for roads in (ledger_roads, s_roads):
+            for k, v in roads.items():
+                road2pnu[k] |= v
+        aca, stats = academy_floors(academies, road2pnu, blanks)
+        for pnu, o in aca.items():
+            a = acc.setdefault(pnu, {})
+            a["aca_flr_nos"] = o["floors"]
+            a["aca_n"] = o["n"]
+            if o["resolved"]:
+                # 층 미상이던 상가정보 점포의 층을 학원이 밝혔다 — 층 미상 수에서 뺀다(이중 계상 방지).
+                a["aca_resolved"] = o["resolved"]
+                a["store_flr_unknown"] = max((a.get("store_flr_unknown") or 0) - o["resolved"], 0)
+        aca_note = (f" · 학원층 {len(aca)} (매칭 {stats['matched']} · 층표기 {stats['with_floor']} · "
+                    f"다지번 제외 {stats['ambiguous']})")
+
     for pnu, a in acc.items():
         # 집합건물 판정 — 전유부가 있거나 표제부 등록구분이 '집합'.
         a["is_mall"] = bool(a.get("expos_rows")) or a.get("regstr_gb") == "집합"
@@ -273,8 +379,8 @@ def run(slug: str) -> int:
     shop = sum(1 for a in acc.values() if a["is_shop"])
     print(f"[attrs:{slug}] 지번 {len(acc)} (집합 {mall} · 상가주용도 {shop} · "
           f"층별개요 {sum(1 for a in acc.values() if a.get('com_flr_nos'))} · "
-          f"점포층 {len(known)} · 인허가층 {sum(1 for a in acc.values() if a.get('lic_flr_nos'))}) "
-          f"→ silver/{slug}/building_attrs.json")
+          f"점포층 {len(known)} · 인허가층 {sum(1 for a in acc.values() if a.get('lic_flr_nos'))}"
+          f"{aca_note}) → silver/{slug}/building_attrs.json")
     return len(acc)
 
 

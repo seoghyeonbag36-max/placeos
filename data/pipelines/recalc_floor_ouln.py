@@ -152,6 +152,9 @@ def run(slug: str, apply: bool, legacy: bool = False) -> dict | None:
         store_nos = set(at.get("store_flr_nos") or []) | set(at.get("lic_flr_nos") or [])
         floors = (com_nos if legacy
                   else capacity_floors(com_nos, store_nos, at.get("grnd_flr") or 0))
+        # 학원(NEIS) 층은 **분자에만** 더한다 — 분모를 넓히지 않는다(교습소는 주거 동에 있을 수
+        # 있다, build_building_attrs §학원 층 근거). 분모 밖 층이면 occupied_floors 의 교집합이 거른다.
+        occ_nos = store_nos | set(at.get("aca_flr_nos") or [])
         n_com = len(floors) if not legacy else _commercial_floors(recs)
         if not n_com:
             # 상업층 0. 값을 지어내지 않는 것(2026-07-26 교정)은 그대로 두되, **라벨은
@@ -180,7 +183,7 @@ def run(slug: str, apply: bool, legacy: bool = False) -> dict | None:
         else:
             # 층 단위 매칭 — 분자도 층으로 센다(상한을 대표값으로).
             lo, hi = occupied_floors(
-                floors, store_nos,
+                floors, occ_nos,
                 (at.get("store_flr_unknown") or 0) + (at.get("lic_unknown") or 0))
             occ = round(hi / cap, 3) if cap else 0.0
             vac = round((1 - occ) * 100, 1)
