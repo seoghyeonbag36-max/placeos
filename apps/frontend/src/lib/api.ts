@@ -1295,3 +1295,18 @@ export const saveResult = (token: string, body: SavedResultInput) =>
   authRequest<SavedResult>("POST", "/results", { token, body });
 export const deleteSavedResult = (token: string, id: string) =>
   authRequest<{ ok: boolean }>("DELETE", `/results/${encodeURIComponent(id)}`, { token });
+
+
+export interface AddressCandidate { address: string; point: TravelPoint; source: "kakao_local" }
+export interface AddressSearchResponse {
+  status: "ok" | "no_results" | "not_configured" | "upstream_error" | "quota_exceeded";
+  candidates: AddressCandidate[];
+}
+export async function searchTravelAddresses(query: string, signal?: AbortSignal): Promise<AddressSearchResponse> {
+  const res = await analysisFetch("/travel/addresses", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }), signal,
+  });
+  if (!res.ok) throw new Error("주소 검색 실패");
+  return res.json();
+}

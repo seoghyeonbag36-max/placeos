@@ -1,11 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import TravelTimePanel from "./TravelTimePanel";
-import { district } from "@/test/fixtures";
 import type { TravelTimes } from "@/lib/api";
 
 const destination = { lat: 37.52, lng: 127.02 };
-const districts = [district("origin", { name: "출발 상권", center: [37.55, 126.97] })];
 // 테스트 전용 합성 응답. TODO: 실제 데이터는 /travel/times의 제공사 예상값을 사용한다.
 const RESPONSE: TravelTimes = {
   origin: { lat: 37.55, lng: 126.97 }, destination, queried_at: "2026-10-10T01:00:00Z",
@@ -20,14 +18,63 @@ const RESPONSE: TravelTimes = {
 };
 
 function panel(key = "first") {
-  return <TravelTimePanel key={key} destination={destination} destinationName="목적 건물" districts={districts} />;
+  return <TravelTimePanel key={key} destination={destination} destinationName="목적 건물" />;
 }
-function openAndChoose(value = "origin") {
+function openAndChoose(value = "coordinates") {
   fireEvent.click(screen.getByText("차량·대중교통 소요시간"));
   fireEvent.change(screen.getByLabelText("교통 출발지"), { target: { value } });
+  if (value === "coordinates") {
+    fireEvent.change(screen.getByLabelText("출발 위도"), { target: { value: "37.55" } });
+    fireEvent.change(screen.getByLabelText("출발 경도"), { target: { value: "126.97" } });
+  }
 }
 
 describe("교통 소요시간", () => {
+  it("주소 검색 결과가 없으면 안내하고 조회를 막는다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "no_results", candidates: [] }) }));
+    render(panel());
+    fireEvent.click(screen.getByText("차량·대중교통 소요시간"));
+    fireEvent.change(screen.getByLabelText("출발지 주소"), { target: { value: "없는 주소" } });
+    fireEvent.click(screen.getByRole("button", { name: "주소 검색" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("주소를 찾지 못했습니다");
+    expect((screen.getByRole("button", { name: "소요시간 조회" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+  it("주소를 검색하고 결과를 선택해야 시간을 조회하며 주소 수정은 이전 선택을 지운다", async () => {
+    const fetch = vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ status: "ok", candidates: [
+      { address: "서울 중구 세종대로 110", point: RESPONSE.origin, source: "kakao_local" },
+    ] }) }).mockResolvedValueOnce({ ok: true, json: async () => RESPONSE });
+    vi.stubGlobal("fetch", fetch);
+    render(panel());
+    fireEvent.click(screen.getByText("차량·대중교통 소요시간"));
+    expect(screen.queryByText("출발 상권 중심")).toBeNull();
+    fireEvent.change(screen.getByLabelText("출발지 주소"), { target: { value: "서울 세종대로 110" } });
+    fireEvent.click(screen.getByRole("button", { name: "주소 검색" }));
+    const result = await screen.findByLabelText("서울 중구 세종대로 110");
+    expect((screen.getByRole("button", { name: "소요시간 조회" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(fetch.mock.calls[0][0]).toBe("/api/v1/travel/addresses");
+    fireEvent.click(result);
+    fireEvent.click(screen.getByRole("button", { name: "소요시간 조회" }));
+    expect(await screen.findByText("약 16분")).toBeTruthy();
+    expect(JSON.parse(fetch.mock.calls[1][1].body).origin).toEqual(RESPONSE.origin);
+    fireEvent.change(screen.getByLabelText("출발지 주소"), { target: { value: "다른 주소" } });
+    expect(screen.queryByText("약 16분")).toBeNull();
+    expect((screen.getByRole("button", { name: "소요시간 조회" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("주소가 없거나 늦게 반환된 검색 결과로 출발지를 채우지 않는다", async () => {
+    let resolve!: (value: unknown) => void;
+    const fetch = vi.fn().mockReturnValue(new Promise((r) => { resolve = r; }));
+    vi.stubGlobal("fetch", fetch);
+    render(panel());
+    fireEvent.click(screen.getByText("차량·대중교통 소요시간"));
+    fireEvent.change(screen.getByLabelText("출발지 주소"), { target: { value: "서울 세종대로 110" } });
+    fireEvent.click(screen.getByRole("button", { name: "주소 검색" }));
+    fireEvent.change(screen.getByLabelText("출발지 주소"), { target: { value: "다른 주소" } });
+    expect(fetch.mock.calls[0][1].signal.aborted).toBe(true);
+    await act(async () => resolve({ ok: true, json: async () => ({ status: "no_results", candidates: [] }) }));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect((screen.getByRole("button", { name: "소요시간 조회" }) as HTMLButtonElement).disabled).toBe(true);
+  });
   it("버튼으로만 조회하고 API 경로·좌표·출처와 부분 실패를 표시한다", async () => {
     const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => RESPONSE });
     vi.stubGlobal("fetch", fetch);
@@ -48,6 +95,7 @@ describe("교통 소요시간", () => {
 
   it("좌표가 비었거나 범위 밖이면 조회하지 않는다", () => {
     render(panel()); openAndChoose("coordinates");
+    fireEvent.change(screen.getByLabelText("출발 위도"), { target: { value: "" } });
     const button = screen.getByRole("button", { name: "소요시간 조회" }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     fireEvent.change(screen.getByLabelText("출발 위도"), { target: { value: "91" } });
@@ -80,7 +128,7 @@ describe("교통 소요시간", () => {
     await act(async () => resolve({ ok: true, json: async () => RESPONSE }));
     expect(screen.queryByText("약 16분")).toBeNull();
     fireEvent.click(screen.getByText("차량·대중교통 소요시간"));
-    expect((screen.getByLabelText("교통 출발지") as HTMLSelectElement).value).toBe("");
+    expect((screen.getByLabelText("교통 출발지") as HTMLSelectElement).value).toBe("address");
   });
 
   it("위치 권한 거부를 표시하고 대체 좌표를 넣지 않는다", async () => {
