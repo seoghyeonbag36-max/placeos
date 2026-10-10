@@ -111,7 +111,7 @@ export default function Landing() {
         <section className="lp-hero" aria-labelledby="lp-h1">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <p className="lp-eyebrow">창업 · 업종 바꾸기 · 상권 옮기기</p>
+              <p className="lp-eyebrow">창업자 전용 부동산 앱</p>
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다.</h1>
               <p className="lp-lede">
                 업종은 정했는데 어느 상권, 어느 자리가 맞는지 모르겠다면. PlaceOS 는 서울 {LANDING_HUBS}개 상권의 공실을

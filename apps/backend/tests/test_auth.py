@@ -227,7 +227,8 @@ def test_user_workspace_isolation():
     data = {"status": "set", "profile": {"goal": "start", "industryKey": "coffee", "homeDistrictId": None, "businessName": "내 카페", "description": "동네 주민을 위한 카페"}}
     assert client.post("/api/v1/auth/workspace", headers=a, json=data).status_code == 200
     assert client.get("/api/v1/auth/workspace", headers=a).json()["profile"] == {
-        **data["profile"], "targetIndustryKey": None, "industryDetailKey": None, "targetIndustryDetailKey": None}
+        **data["profile"], "targetIndustryKey": None, "industryDetailKey": None, "targetIndustryDetailKey": None,
+        "customIndustry": None, "targetCustomIndustry": None}
     assert client.get("/api/v1/auth/workspace", headers=b).json()["status"] == "unset"
     assert client.get("/api/v1/auth/workspace").status_code == 401
     assert client.post("/api/v1/auth/workspace", headers=b, json={**data, "user_id": "someone-else"}).status_code == 422
@@ -271,3 +272,33 @@ def test_login_after_logout_issues_fresh_token():
     client.post("/api/v1/auth/logout", headers=headers)
     token = client.post("/api/v1/auth/login", json={"email": "key@acme.com", "password": "hunter2hunter"}).json()["access_token"]
     assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
+
+def test_custom_industry_workspace_round_trip():
+    headers = _auth("pottery@acme.com")
+    data = {"status": "set", "profile": {"goal": "start", "industryKey": "other", "customIndustry": "  도자기 공방  "}}
+    assert client.post("/api/v1/auth/workspace", headers=headers, json=data).status_code == 200
+    loaded = client.get("/api/v1/auth/workspace", headers=headers).json()
+    assert loaded["profile"]["customIndustry"] == "도자기 공방"
+    assert loaded["profile"]["industryKey"] == "other"
+    assert loaded["source"] == "user_input"
+
+
+@pytest.mark.parametrize("profile", [
+    {"goal": "start", "industryKey": "other"},
+    {"goal": "start", "industryKey": "other", "customIndustry": "   "},
+    {"goal": "start", "industryKey": "cafe", "customIndustry": "도자기 공방"},
+    {"goal": "pivot", "homeDistrictId": "garosugil", "industryKey": "cafe", "targetIndustryKey": "other"},
+    {"goal": "start", "industryKey": "other", "customIndustry": "a" * 121},
+])
+def test_custom_industry_rejects_invalid_contract(profile):
+    headers = _auth("invalid-other@acme.com")
+    assert client.post("/api/v1/auth/workspace", headers=headers, json={"status": "set", "profile": profile}).status_code == 422
+
+def test_pivot_to_custom_industry_workspace_round_trip():
+    headers = _auth("pivot-other@acme.com")
+    profile = {"goal": "pivot", "homeDistrictId": "garosugil", "industryKey": "cafe", "targetIndustryKey": "other", "targetCustomIndustry": "도자기 공방"}
+    assert client.post("/api/v1/auth/workspace", headers=headers, json={"status": "set", "profile": profile}).status_code == 200
+    loaded = client.get("/api/v1/auth/workspace", headers=headers).json()["profile"]
+    assert loaded["industryKey"] == "cafe"
+    assert loaded["targetCustomIndustry"] == "도자기 공방"

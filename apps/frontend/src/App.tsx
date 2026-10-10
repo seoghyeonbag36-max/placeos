@@ -11,10 +11,11 @@ import AdminCoverage from "@/pages/AdminCoverage";
 import MapHost from "@/components/MapHost";
 import TrackMapFrame from "@/components/TrackMapFrame";
 import BusinessSetup from "@/components/BusinessSetup";
+import FounderPlanner from "@/components/FounderPlanner";
 import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { Button } from "@/design/components/Button";
 import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
-import { businessChipText, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
+import { businessChipText, customWorkIndustry, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import "./App.css";
 
@@ -198,6 +199,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // Posting·Program 의 업종 **기본값** — 해 볼 업종이다. 바꾸기면 바꿀 업종(없으면 빈칸)이고, 지금(버릴) 업종이
   // 아니다(2026-10-06 · docs/finding-project-review-4roles-2026-10-06.md §2-1).
   const workIndustry = findIndustry(industryList, workIndustryKey(profile));
+  const customIndustry = customWorkIndustry(profile);
   // Platform 업종 바꾸기 표 → Posting 업종칸(인계 표 「Platform → Posting」).
   const [postingIndustry, setPostingIndustry] = useState<{ input: string; requestId: number }>();
   const tryIndustry = useCallback((input: string) => {
@@ -307,23 +309,28 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             myIndustry={myIndustry} />}
           {view === "posting" && (
             <TrackMapFrame track="posting" label="입점 계산">
-              <PostingConsole selection={postingSelection} districtId={districtId} onDistrictChange={setDistrictId}
+              {customIndustry ? <div className="fitcard"><h2>{customIndustry} · 입점 비용 검토</h2>
+                <p>이 업종의 매출·순익·회수기간 자동 계산은 미지원입니다. ‘입점 준비’에서 직접 확인한 계약 금액을 비교하세요.</p>
+                <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
+                <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
+              </div> : <PostingConsole selection={postingSelection} districtId={districtId} onDistrictChange={setDistrictId}
                 onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
-                industryRequest={postingIndustry} />
+                industryRequest={postingIndustry} />}
             </TrackMapFrame>
           )}
           {view === "program" && (
             <TrackMapFrame track="program" label="검증 program">
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={workIndustry?.input} businessGoal={profile?.goal} />
+                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
             </TrackMapFrame>
           )}
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
       </MapHost>
+      <FounderPlanner selection={postingSelection} />
       {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}
       {saveError && <p className="session-note" role="alert">{saveError}</p>}
       <span className="sr-only" aria-live="polite">{bizAnnounce}</span>

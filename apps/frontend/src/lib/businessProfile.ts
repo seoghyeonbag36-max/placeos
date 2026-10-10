@@ -28,6 +28,8 @@ export interface BusinessProfile {
   targetIndustryKey?: string | null;
   industryDetailKey?: string | null;
   targetIndustryDetailKey?: string | null;
+  customIndustry?: string | null;
+  targetCustomIndustry?: string | null;
 }
 
 /** unset = 처음 방문(카드를 편다) · browsing = 「그냥 둘러보기」 · set = 설정됨 */
@@ -57,7 +59,10 @@ export function loadBusiness(): BusinessState {
       const home = typeof p.homeDistrictId === "string" && p.homeDistrictId ? p.homeDistrictId : null;
       // 바꾸기·옮기기인데 지금 상권이 없으면 깨진 값이다 — 처음 방문으로 되돌려 다시 묻는다.
       if (p.goal !== "start" && !home) return { status: "unset" };
-      return { status: "set", profile: { goal: p.goal, industryKey: p.industryKey, homeDistrictId: p.goal === "start" ? null : home } };
+      if (p.industryKey === "other" && (typeof p.customIndustry !== "string" || !p.customIndustry.trim())) return { status: "unset" };
+      return { status: "set", profile: { goal: p.goal, industryKey: p.industryKey,
+        homeDistrictId: p.goal === "start" ? null : home,
+        ...(p.industryKey === "other" ? { customIndustry: p.customIndustry.trim() } : {}) } };
     }
   } catch {
     // 읽기가 막히거나 JSON 이 깨졌다 — 처음 방문으로 본다.
@@ -84,17 +89,23 @@ export const findIndustry = (industries: IndustryOption[] | null | undefined, ke
 export const workIndustryKey = (profile: BusinessProfile | null | undefined): string | null =>
   !profile ? null : profile.goal === "pivot" ? profile.targetIndustryKey ?? null : profile.industryKey;
 
+export const customWorkIndustry = (profile: BusinessProfile | null | undefined): string | undefined =>
+  workIndustryKey(profile) !== "other" ? undefined
+    : (profile?.goal === "pivot" ? profile.targetCustomIndustry : profile?.customIndustry)?.trim() || undefined;
+
 /** 칩 문구 — 목적과 업종(·지금 상권)을 한 줄로. 업종 목록이 아직 없으면 key 를 그대로 쓰지 않고 「내 사업」. */
 export function businessChipText(state: BusinessState, industries: IndustryOption[] | null | undefined,
   districts: DistrictSummary[] | null | undefined): string {
   if (state.status !== "set") return "내 사업 설정";
   const { goal, industryKey, homeDistrictId } = state.profile;
-  const ind = findIndustry(industries, industryKey);
+  const ind = industryKey === "other" && state.profile.customIndustry
+    ? { label: state.profile.customIndustry } : findIndustry(industries, industryKey);
   if (!ind) return "내 사업";
   const home = districts?.find((d) => d.id === homeDistrictId)?.name ?? "지금 상권";
   if (goal === "start") return `${ind.label} 창업`;
   if (goal === "pivot") {
-    const target = findIndustry(industries, state.profile.targetIndustryKey);
+    const target = state.profile.targetIndustryKey === "other" && state.profile.targetCustomIndustry
+      ? { label: state.profile.targetCustomIndustry } : findIndustry(industries, state.profile.targetIndustryKey);
     return target ? `${home} · ${ind.label}에서 ${toward(target.label)} 바꾸기` : `${home} · ${ind.label}에서 업종 바꾸기`;
   }
   return `${ind.label} · ${home}에서 옮기기`;

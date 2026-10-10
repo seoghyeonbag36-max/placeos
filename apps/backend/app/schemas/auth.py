@@ -97,9 +97,21 @@ class BusinessProfile(BaseModel):
     targetIndustryKey: str | None = Field(default=None, max_length=200)
     industryDetailKey: str | None = Field(default=None, max_length=100)
     targetIndustryDetailKey: str | None = Field(default=None, max_length=100)
+    customIndustry: str | None = Field(default=None, max_length=120)
+    targetCustomIndustry: str | None = Field(default=None, max_length=120)
 
     @model_validator(mode="after")
     def require_district(self) -> "BusinessProfile":
+        # 기타는 모델 분류가 아닌 사용자 입력이다. 이름 없이 저장하거나 기존 분류에 섞지 않는다.
+        for key, name in ((self.industryKey, "customIndustry"),
+                          (self.targetIndustryKey, "targetCustomIndustry")):
+            value = getattr(self, name)
+            value = value.strip() if value else None
+            setattr(self, name, value)
+            if key == "other" and not value:
+                raise ValueError("기타 업종명을 직접 입력해 주세요")
+            if key != "other" and value:
+                raise ValueError("직접 입력 업종명은 기타에서만 사용합니다")
         if self.goal != "start" and not self.homeDistrictId:
             raise ValueError("현재 상권이 필요합니다")
         if self.goal != "pivot" and self.targetIndustryKey:

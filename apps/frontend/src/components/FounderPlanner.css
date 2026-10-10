@@ -1,0 +1,19 @@
+.founder-trigger { position: fixed; right: var(--sp-4); bottom: var(--sp-4); z-index: 1200; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--ui-navy); color: var(--surface); padding: var(--sp-3) var(--sp-4); cursor: pointer; }
+.founder-planner { width: min(900px, 90vw); max-height: 85dvh; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--sp-5); background: var(--surface); color: var(--ink); font-family: inherit; }
+.founder-planner::backdrop { background: color-mix(in srgb, var(--ink) 40%, transparent); }
+.founder-planner header { display: flex; justify-content: space-between; align-items: start; gap: var(--sp-3); }
+.founder-planner header p, .founder-planner footer, .founder-planner small { color: var(--text-secondary); }
+.founder-planner h2 { margin-top: 0; }
+.founder-planner button { padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg); color: var(--ink); cursor: pointer; }
+.founder-planner button:disabled { opacity: .5; cursor: default; }
+.founder-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0; }
+.founder-tabs [aria-pressed="true"] { background: var(--ui-navy); color: var(--surface); }
+.founder-table { overflow-x: auto; }
+.founder-table table { width: 100%; border-collapse: collapse; }
+.founder-table th, .founder-table td { text-align: left; padding: var(--sp-3); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.founder-table small { display: block; }
+.founder-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.founder-fields label, .founder-note { display: grid; gap: var(--sp-2); }
+.founder-planner input[type="number"], .founder-planner textarea { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--sp-2); color: var(--ink); background: var(--surface); font: inherit; }
+.founder-check { display: flex; gap: var(--sp-2); margin: var(--sp-2) 0; }
+.founder-note, .founder-draft, .founder-planner footer { margin: var(--sp-4) 0; }

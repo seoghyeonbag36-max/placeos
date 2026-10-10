@@ -35,6 +35,11 @@ export interface IndustryFitCardProps {
 
 export default function IndustryFitCard(props: IndustryFitCardProps) {
   const { business, industries, onOpenBusiness } = props;
+  if (business?.industryKey === "other") return <div className="fitcard fitcard-empty">
+    <strong>{business.customIndustry} · 직접 입력 업종</strong>
+    <p>이 업종의 상권 추천 순위는 제공하지 않습니다. 지도에서 공실·임대시세를 탐색하고, 직접 확인한 계약 비용을 비교할 수 있습니다.</p>
+    {onOpenBusiness && <button type="button" onClick={onOpenBusiness}>내 사업 수정</button>}
+  </div>;
   const ind = business && industries?.find((i) => i.key === business.industryKey);
   if (!business || !ind) {
     if (!onOpenBusiness) return null;

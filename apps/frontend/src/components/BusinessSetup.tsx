@@ -42,6 +42,8 @@ export default function BusinessSetup({
   const [home, setHome] = useState<string>(saved?.homeDistrictId ?? districtId);
   const [businessName, setBusinessName] = useState(saved?.businessName ?? "");
   const [description, setDescription] = useState(saved?.description ?? "");
+  const [customIndustry, setCustomIndustry] = useState(saved?.customIndustry ?? "");
+  const [targetCustomIndustry, setTargetCustomIndustry] = useState(saved?.targetCustomIndustry ?? "");
   const list = Array.isArray(industries) ? industries : null;
 
   // 카드를 다시 펼 때는 저장된 값에서 시작한다(칩으로 연 편집이 이전 편집의 잔여를 들고 오지 않게).
@@ -55,6 +57,8 @@ export default function BusinessSetup({
       setHome(saved?.homeDistrictId ?? districtId);
       setBusinessName(saved?.businessName ?? "");
       setDescription(saved?.description ?? "");
+      setCustomIndustry(saved?.customIndustry ?? "");
+      setTargetCustomIndustry(saved?.targetCustomIndustry ?? "");
     }
     wasOpen.current = open;
   }, [open, saved, districtId]);
@@ -82,9 +86,10 @@ export default function BusinessSetup({
 
   const needsHome = goal === "pivot" || goal === "move";
   // 지금 업종과 같은 업종으로 "바꾸기"는 뜻이 없다 — 지금 업종을 바꾸면 바꿀 업종이 그것과 겹칠 때 비운다.
-  const target = goal === "pivot" && targetKey && targetKey !== industryKey ? targetKey : null;
+  const target = goal === "pivot" && targetKey && (targetKey !== industryKey || targetKey === "other") ? targetKey : null;
   const homeOk = !needsHome || districts.some((d) => d.id === home);
-  const ready = !!goal && !!industryKey && !!list?.some((i) => i.key === industryKey) && homeOk;
+  const ready = !!goal && !!industryKey && (industryKey === "other" ? !!customIndustry.trim() : !!list?.some((i) => i.key === industryKey)) && homeOk
+    && (target !== "other" || (!!targetCustomIndustry.trim() && (industryKey !== "other" || customIndustry.trim() !== targetCustomIndustry.trim())));
   const chipText = businessChipText(state, list, districts);
 
   return (
@@ -96,7 +101,7 @@ export default function BusinessSetup({
 
       {open && (
         <section id={cardId} className="biz-card" aria-labelledby={`${cardId}-h`}>
-          <h2 id={`${cardId}-h`} ref={headRef} tabIndex={-1}>무엇을 하려고 하세요?</h2>
+          <h2 id={`${cardId}-h`} ref={headRef} tabIndex={-1}>어떤 가게를 열고 싶으세요?</h2>
           <p className="biz-sub">업종과 지금 가게를 알려주면 네 화면이 그 기준으로 답합니다. 직접 입력한 정보는 본인 계정에 저장됩니다.</p>
           <label className="acct-field"><span>사업 이름 (선택)</span>
             <input value={businessName} maxLength={200} onChange={(e) => setBusinessName(e.target.value)} />
@@ -133,11 +138,20 @@ export default function BusinessSetup({
                     {(!i.model_label || i.fit_unavailable_reason) && <small title={i.fit_unavailable_reason ?? "추천 모델이 다루지 않는 업종"}>추천 순위 미제공</small>}
                   </label>
                 ))}
+                <label className={"biz-ind" + (industryKey === "other" ? " on" : "")}>
+                  <input type="radio" name={`${cardId}-ind`} checked={industryKey === "other"}
+                    onChange={() => { setIndustryKey("other"); setDetailKey(""); }} />
+                  <b>기타 · 직접 입력</b><small>추천 순위 미제공</small>
+                </label>
               </div>
             )}
           </fieldset>
 
-          {industryKey && <IndustryDetailSelect parent={industryKey} value={detailKey} onChange={setDetailKey} />}
+          {industryKey === "other" && <label className="acct-field"><span>기타 업종명 (필수)</span>
+            <input maxLength={120} value={customIndustry} placeholder="예: 도자기 공방" onChange={(e) => setCustomIndustry(e.target.value)} />
+            <small>직접 입력한 업종으로 저장합니다. 업종별 추천·자동 수익 계산은 제공되지 않으며, 지도 탐색·계약 비용 검토·검증 program을 사용할 수 있습니다.</small>
+          </label>}
+          {industryKey && industryKey !== "other" && <IndustryDetailSelect parent={industryKey} value={detailKey} onChange={setDetailKey} />}
 
           {goal === "pivot" && list && (
             <fieldset className="biz-inds">
@@ -156,10 +170,19 @@ export default function BusinessSetup({
                     <b>{i.label}</b>
                   </label>
                 ))}
+                <label className={"biz-ind" + (target === "other" ? " on" : "")}>
+                  <input type="radio" name={`${cardId}-target`} checked={target === "other"}
+                    onChange={() => { setTargetKey("other"); setTargetDetail(""); }} aria-label="기타 업종으로 바꾸기" />
+                  <b>기타 · 직접 입력</b>
+                </label>
               </div>
             </fieldset>
           )}
-          {goal === "pivot" && target && <IndustryDetailSelect parent={target} value={targetDetail} onChange={setTargetDetail} />}
+          {goal === "pivot" && target === "other" && <label className="acct-field"><span>바꿀 기타 업종명 (필수)</span>
+            <input maxLength={120} value={targetCustomIndustry} placeholder="예: 도자기 공방" onChange={(e) => setTargetCustomIndustry(e.target.value)} />
+            <small>업종별 추천·자동 수익 계산은 미지원입니다. 검증 program에는 입력한 업종명을 사용합니다.</small>
+          </label>}
+          {goal === "pivot" && target && target !== "other" && <IndustryDetailSelect parent={target} value={targetDetail} onChange={setTargetDetail} />}
 
           {needsHome && (
             <div className="biz-home">
@@ -174,6 +197,8 @@ export default function BusinessSetup({
             <button type="button" className="biz-start" disabled={!ready || saving}
               onClick={() => ready && onStart({ goal: goal!, industryKey: industryKey!, homeDistrictId: needsHome ? home : null,
                 businessName: businessName.trim() || null, description: description.trim() || null,
+                ...(industryKey === "other" ? { customIndustry: customIndustry.trim() } : {}),
+                ...(goal === "pivot" && target === "other" ? { targetCustomIndustry: targetCustomIndustry.trim() } : {}),
                 ...(detailKey ? { industryDetailKey: detailKey } : {}),
                 ...(goal === "pivot" ? { targetIndustryKey: target, ...(target && targetDetail ? { targetIndustryDetailKey: targetDetail } : {}) } : {}) })}>
               시작
