@@ -19,3 +19,6 @@
 .travel-result small { flex-basis: 100%; }
 .travel-time-panel small, .travel-time-panel .travel-note { color: var(--muted); font-size: inherit; }
 .travel-time-panel [role="alert"] { color: var(--danger-text); }
+
+.travel-time-panel input[type="radio"] { width: auto; }
+.travel-time-panel fieldset { border: 1px solid var(--line); border-radius: var(--radius-md); margin-block: var(--sp-2); }

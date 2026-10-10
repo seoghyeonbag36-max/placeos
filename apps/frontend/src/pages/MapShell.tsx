@@ -843,7 +843,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <div className="row"><span>상가 수용 / 영업</span><span>{selected.capacity}호 / {selected.active}호</span></div>
             <div className="row"><span>대표 업종</span><span>{selected.industry || "미상"}</span></div>
             {src === "api" && <TravelTimePanel key={`${districtId}:${selected.id}:${selected.center.lat}:${selected.center.lng}`}
-              districts={hubs} destination={selected.center} destinationName={selected.name} />}
+              destination={selected.center} destinationName={selected.name} />}
 
             {/* 이 건물의 빈 층이 **각각 월 얼마인가** — 임대시세 레이어의 답이 건물 단위로 내려온 자리.
                 층이 없으면(빈 층 없음 · R-ONE 미제공) 그 사실을 적는다 — 0 원처럼 비워 두지 않는다. */}

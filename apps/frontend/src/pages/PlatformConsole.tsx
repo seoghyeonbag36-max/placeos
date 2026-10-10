@@ -231,7 +231,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         )}
       </div>
 
-      {hub && <TravelTimePanel key={`${districtId}:${hub.center.join(":")}`} districts={districts}
+      {hub && <TravelTimePanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
 
       {profErr && (

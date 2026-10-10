@@ -16,7 +16,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
-from app.schemas.travel import TravelRequest, TravelResponse, TravelResult
+from app.schemas.travel import TravelRequest, TravelResponse, TravelResult, AddressCandidate, AddressSearchResponse, TravelPoint
 
 DRIVING_URL = "https://apis-navi.kakaomobility.com/v1/directions"
 TRANSIT_URL = "https://api.odsay.com/v1/api/searchPubTransPathT"
@@ -128,3 +128,32 @@ async def get_travel_times(request: TravelRequest) -> TravelResponse:
         results = await asyncio.gather(*(_lookup(mode, request, client) for mode in ("driving", "transit")))
     return TravelResponse(origin=request.origin, destination=request.destination,
                           queried_at=queried_at, results=results)
+
+
+async def search_addresses(query: str) -> AddressSearchResponse:
+    """카카오 주소 검색의 실제 주소만 반환한다. 주소·키는 기록하지 않는다."""
+
+    key = settings.kakao_mobility_api_key
+    if not key.strip():
+        return AddressSearchResponse(status="not_configured")
+    if not _reserve_call():
+        return AddressSearchResponse(status="quota_exceeded")
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(3.0), follow_redirects=False) as client:
+            response = await client.get("https://dapi.kakao.com/v2/local/search/address.json",
+                                        headers={"Authorization": f"KakaoAK {key}"},
+                                        params={"query": query.strip(), "size": 10})
+            response.raise_for_status()
+            documents = response.json()["documents"]
+            if not isinstance(documents, list):
+                raise ValueError("주소 응답 형식 오류")
+            candidates = []
+            for item in documents:
+                # 동·도로 중심을 실제 건물 주소처럼 사용하지 않는다.
+                if item["address_type"] not in {"REGION_ADDR", "ROAD_ADDR"}:
+                    continue
+                candidates.append(AddressCandidate(address=item["address_name"],
+                    point=TravelPoint(lat=float(item["y"]), lng=float(item["x"]))))
+            return AddressSearchResponse(status="ok" if candidates else "no_results", candidates=candidates)
+    except (httpx.HTTPError, ValueError, KeyError, TypeError, AttributeError):
+        return AddressSearchResponse(status="upstream_error")

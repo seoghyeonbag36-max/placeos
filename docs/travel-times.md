@@ -1,11 +1,19 @@
 # 차량·대중교통 예상시간
 
 Platform의 상권 중심, Page의 실측 건물 상세, Posting의 선택 매물에서
-「차량·대중교통 소요시간」을 펼친다. 출발지는 다른 상권 중심·현재 위치·위경도 직접 입력 중
-고른다. 위치 권한은 「현재 위치 확인」을 누를 때 요청하며, 제공사 전송은 「소요시간 조회」를
+「차량·대중교통 소요시간」을 펼친다. 출발지는 주소 검색이 기본이며 현재 위치·위경도 직접 입력도
+가능하다. 도로명·건물번호 또는 지번을 입력하고 「주소 검색」 후 결과에서 실제 주소를 선택한다.
+주소 검색은 카카오에 입력 주소를 전송하며, 동·도로 중심만 나온 결과는 사용하지 않는다.
+위치 권한은 「현재 위치 확인」을 누를 때 요청하며, 교통 제공사 전송은 「소요시간 조회」를
 누를 때만 한다. 목적지나 출발지 변경 시 이전 요청·결과를 폐기한다.
 
 ## 입력과 출처
+
+`POST /api/v1/travel/addresses`는 `{query}`를 받는다(공백 제거 후 2~200자).
+카카오 주소 검색 API의 실제 주소와 WGS84 좌표를 `candidates`로 반환하며 각 후보의
+출처는 `source: kakao_local`이다. 결과 없음·설정 누락·상한 초과·외부 오류는 빈 후보와
+명시적 상태로 반환한다. 임의 좌표를 채우지 않는다. 주소 변경 시 선택·시간·진행 요청을 폐기한다.
+공식 계약: https://developers.kakao.com/docs/ko/kakaomap/rest-api
 
 `POST /api/v1/travel/times`의 body는 `origin`, `destination` 각각 `{lat, lng}`다.
 좌표는 유한한 위도 -90~90, 경도 -180~180이어야 하며 잘못된 입력은 422다.
@@ -36,14 +44,14 @@ ODSAY_API_KEY=
 TRAVEL_DAILY_CAP_PER_INSTANCE=1000
 ```
 
-카카오 REST API 키의 길찾기 사용 권한과 ODsay 서버 호출/IP 허용을 제공사 콘솔에서 설정한다.
+카카오 REST API 키의 길찾기·주소 검색 사용 권한과 ODsay 서버 호출/IP 허용을 제공사 콘솔에서 설정한다.
 설정값은 `app.core.config.settings`를 거친다. 저장소에 키를 커밋하지 않는다.
 
 두 수단은 병렬 조회하며 HTTP 단계별 timeout은 3초다. 외부 호출 지연 때문에 API p95 200ms를
 보장할 수 없다. 지도 초기 로딩에서는 호출하지 않는다. 경로·좌표는 서버에 저장·캐시하지 않는다.
 
 상한은 프로세스별 24시간 **외부 호출 횟수**다. 두 수단 조회 한 번은 최대 2회이며 실패 호출도
-센다. 0이면 외부 조회를 차단한다. 재시작 시 초기화되고 여러 인스턴스에서는 각자 센다.
+센다. 주소 검색도 1회씩 같은 상한에 포함한다. 0이면 외부 조회를 차단한다. 재시작 시 초기화되고 여러 인스턴스에서는 각자 센다.
 정확한 월별 비용 제한은 제공사 콘솔에서 별도로 관리한다.
 
 ### Cloud Run 운영 연동
@@ -63,8 +71,9 @@ Firebase 도메인을 등록해도 Cloud Run 호출을 허용하지 않는다. C
 - Cloud Run `spaceos`를 Direct VPC egress / all-traffic으로 연결한다.
 - 할당된 고정 IPv4를 ODsay Server 허용 IP에 추가한 뒤 **운영 사이트**에서 실호출을 검증한다.
 
-이 구성은 고정 IP·NAT·트래픽의 추가 비용이 발생한다. 아직 적용되지 않은 구성안이며,
-비용 선택을 확인한 후 구축한다. 네트워크 변경 후 다른 외부 연동도 함께 확인한다.
+이 구성은 고정 IP·NAT·트래픽의 추가 비용이 발생한다. 사용자 승인 후 구축했으며
+운영 송신 IP는 `34.122.121.96`이다. ODsay 등록과 운영 교통 실호출도 확인했다.
+네트워크 변경 후 다른 외부 연동도 함께 확인한다.
 근거: [Cloud Run 고정 송신 IP](https://docs.cloud.google.com/run/docs/configuring/static-outbound-ip),
 [Cloud NAT 요금](https://cloud.google.com/nat/pricing).
 
@@ -77,7 +86,7 @@ Firebase 도메인을 등록해도 Cloud Run 호출을 허용하지 않는다. C
 
 ```powershell
 cd apps/backend
-python -m pytest tests/test_travel_times.py tests/test_travel_live.py -q
+python -m pytest tests/test_travel_address.py tests/test_travel_times.py tests/test_travel_live.py -q
 # 두 제공사의 실제 응답 검증: 키 설정 후 실행, 외부 조회 2회 발생
 $env:PLACEOS_LIVE_TRAVEL="1"
 python -m pytest tests/test_travel_live.py -v

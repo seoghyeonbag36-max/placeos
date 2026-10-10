@@ -2,7 +2,8 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, StringConstraints, model_validator
+from typing import Annotated
 
 
 class TravelPoint(BaseModel):
@@ -45,3 +46,18 @@ class TravelResponse(BaseModel):
     destination: TravelPoint
     queried_at: datetime
     results: list[TravelResult]
+
+
+class AddressSearchRequest(BaseModel):
+    query: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=200)]
+
+
+class AddressCandidate(BaseModel):
+    address: str = Field(min_length=1)
+    point: TravelPoint
+    source: Literal["kakao_local"] = "kakao_local"
+
+
+class AddressSearchResponse(BaseModel):
+    status: Literal["ok", "no_results", "not_configured", "upstream_error", "quota_exceeded"]
+    candidates: list[AddressCandidate] = Field(default_factory=list)

@@ -299,7 +299,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </div>
       )}
 
-      {unit && <TravelTimePanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`} districts={districts}
+      {unit && <TravelTimePanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
         destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} />}
 
       <div className="cols">
