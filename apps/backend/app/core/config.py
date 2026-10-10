@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 카카오·네이버 수집 키는 예전부터 `data/.env` 에 산다 — 수집기(data/collectors)가 거기서 읽는다.
@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://spaceos:spaceos@localhost:5432/spaceos"
     # Redis (캐싱 / Celery 브로커)
     redis_url: str = "redis://localhost:6379/0"
+    # 길찾기 전용 서버 키. 미설정 수단은 수치를 반환하지 않는다.
+    kakao_mobility_api_key: str = ""
+    odsay_api_key: str = ""
+    # 프로세스별 외부 호출 상한(24시간). 인스턴스 수만큼 늘고 재시작 시 초기화된다.
+    travel_daily_cap_per_instance: int = Field(default=1000, ge=0)
     # dev | prod. 미지정 시 _detect_env() 가 플랫폼 표식(K_SERVICE)으로 판정한다.
     app_env: str = ""
     # 계정층 JWT — 기본값은 로컬 개발용이다. 배포 환경은 .env 로 반드시 덮어쓸 것

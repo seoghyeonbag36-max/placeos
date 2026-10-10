@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import AreaBepPlanner from "@/components/AreaBepPlanner";
+import TravelTimePanel from "@/components/TravelTimePanel";
 import {
   BASIS_LABEL, getPostings, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
@@ -297,6 +298,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             : "입력 조건을 확인하고 잠시 후 다시 시도해 주세요."}</div>
         </div>
       )}
+
+      {unit && <TravelTimePanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`} districts={districts}
+        destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} />}
 
       <div className="cols">
         {/* ── 입력 ── */}
