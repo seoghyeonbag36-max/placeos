@@ -25,12 +25,16 @@ describe("네이버·카카오 로그인", () => {
     expect(screen.getByText("이메일·비밀번호로 가입").closest("details")?.open).toBe(false);
   });
 
-  it("미설정이면 소셜 버튼을 표시하지 않는다", async () => {
+  it("미설정이어도 두 버튼을 표시하되 로그인 시도를 막는다", async () => {
     installFetchStub([{ match: /\/auth\/providers$/, body: { google_client_id: null, naver_enabled: false, kakao_enabled: false } }]);
     render(<Home />);
     await screen.findByLabelText("이메일");
-    expect(screen.queryByRole("button", { name: "네이버로 계속하기" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "카카오로 계속하기" })).toBeNull();
+    expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/준비 중인 로그인 수단은 아직 사용할 수 없습니다/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
+    expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it.each(["naver", "kakao"] as const)("%s: 이동 전에 현재 탭에 확인값과 사업 이름을 보관한다", async (provider) => {
@@ -44,6 +48,20 @@ describe("네이버·카카오 로그인", () => {
     expect(navigation).toHaveBeenCalledWith(url);
     expect(api.calls[0].body).toEqual({ org_name: "내 사업" });
     expect(url).not.toContain(verifier);
+  });
+
+  it.each(["naver", "kakao"] as const)("%s: 화면 버튼으로 실제 시작 API를 호출한다", async (provider) => {
+    const redirect = `${window.location.origin}/?social=${provider}`;
+    const host = provider === "naver" ? "nid.naver.com" : "kauth.kakao.com";
+    const url = `https://${host}/oauth/authorize?state=mock-state&redirect_uri=${encodeURIComponent(redirect)}`;
+    const api = installFetchStub([{ match: /\/social\/(naver|kakao)\/start$/, body: { authorization_url: url, state: "mock-state", verifier } }]);
+    const navigation = vi.spyOn(socialNavigation, "assign").mockImplementation(() => {});
+    render(<Signup go={vi.fn()} socialProviders={{ naver_enabled: true, kakao_enabled: true }} />);
+    fireEvent.change(screen.getByLabelText("사업 이름 또는 작업 공간 이름"), { target: { value: "도자기 공방" } });
+    fireEvent.click(screen.getByRole("button", { name: provider === "naver" ? "네이버로 계속하기" : "카카오로 계속하기" }));
+    await waitFor(() => expect(navigation).toHaveBeenCalledWith(url));
+    expect(api.calls[0].url).toContain(`/social/${provider}/start`);
+    expect(api.calls[0].body).toEqual({ org_name: "도자기 공방" });
   });
 
   it("다른 origin의 callback 설정은 이동 전에 거부한다", async () => {

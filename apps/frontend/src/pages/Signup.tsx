@@ -121,10 +121,10 @@ export default function Signup({ go, googleClientId, socialProviders }: AccountS
         창업을 준비하는 사업 이름을 적어 주세요. 아직 상호가 없다면 직접 정한 작업 공간 이름을 사용할 수 있습니다. 사업 정보는 로그인 후 입력합니다.
       </p>
 
+      {hasProvider && orgField}
+      <SocialSignIn providers={socialProviders} orgName={orgName} />
       {hasProvider ? (
         <>
-          {orgField}
-          <SocialSignIn providers={socialProviders} orgName={orgName} />
           {googleClientId && <GoogleSignIn clientId={googleClientId} orgName={orgName} onSignedIn={() => go("account")} />}
           <details className="acct-alt">
             <summary>{socialEnabled ? "이메일·비밀번호로 가입" : "구글 계정 없이 이메일·비밀번호로 가입"}</summary>
