@@ -6,6 +6,26 @@ import { clearToken, loadToken } from "@/lib/session";
 
 const BASE = "/api/v1";
 
+export interface BenchmarkIndustry { key: string; label: string }
+export interface BenchmarkPlace {
+  id: string; name: string; category: string; address: string; phone: string | null;
+  lat: number; lng: number; place_url: string; distance_m: number;
+}
+export interface BenchmarkPlaces {
+  district_id: string; industry_key: string; source: "kakao_local"; scope: "measured_cells";
+  queried_at: string; truncated: boolean; note: string; places: BenchmarkPlace[];
+}
+export const listBenchmarkIndustries = () =>
+  getJSON<{ industries: BenchmarkIndustry[] }>("/benchmark/industries").then((r) => r.industries);
+export async function getBenchmarkPlaces(district: string, industry: string): Promise<BenchmarkPlaces> {
+  const res = await analysisFetch(`/benchmark/places?district_id=${encodeURIComponent(district)}&industry_key=${encodeURIComponent(industry)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(typeof body?.detail === "string" ? body.detail : "점포 검색을 불러오지 못했습니다.");
+  }
+  return res.json();
+}
+
 export interface TravelPoint { lat: number; lng: number }
 export interface TravelResult {
   mode: "driving" | "transit";

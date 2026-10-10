@@ -58,6 +58,8 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     # 길찾기 전용 서버 키. 미설정 수단은 수치를 반환하지 않는다.
     kakao_mobility_api_key: str = ""
+    # Platform 벤치마킹 점포 검색 전용(Local API). 브라우저로 보내지 않는다.
+    kakao_rest_api_key: str = ""
     odsay_api_key: str = ""
     # 프로세스별 외부 호출 상한(24시간). 인스턴스 수만큼 늘고 재시작 시 초기화된다.
     travel_daily_cap_per_instance: int = Field(default=1000, ge=0)
@@ -100,10 +102,10 @@ class Settings(BaseSettings):
     login_failures_per_email: int = 10         # 15분 안에 이 횟수를 틀리면 그 이메일의 비밀번호 로그인 429
     # 관리자 화면은 한 번 열 때 관리자 API 를 여러 개 부른다 — 토큰을 잘못 넣은 한 번이 실패 여러 건이다.
     admin_failures_per_instance: int = 50      # 15분 안의 관리자 토큰 실패(전역)
-    # (2026-09-17) 카카오 로컬·네이버 검색 키는 서버 설정에서 뺐다. Program 의 가게 반자동 조회
-    # (/marketing/places·/reviews)만 쓰던 값인데, 대상이 영업 중인 가게에서 검증하려는 창업자로
-    # 바뀌면서 그 조회가 삭제됐다. 데이터 수집기는 data/.env 를 직접 읽으므로 영향이 없고,
-    # env 에 키가 남아 있어도 extra="ignore" 라 기동은 그대로다. → docs/feature-program.md §0-V
+    # (2026-09-17) Program 의 카카오 로컬·네이버 검색 설정은 제거했다.
+    # 카카오 Local 키는 Platform 벤치마킹 후보 탐색용으로 다시 읽는다.
+    # Program 대상이 검증하려는 창업자로 바뀌면서 /marketing/places·/reviews는 삭제됐다.
+    # 네이버 검색 키는 여전히 서버 설정에서 제외한다. → docs/feature-program.md §0-V
 
     @model_validator(mode="after")
     def _guard_prod_secrets(self) -> "Settings":
