@@ -3,5 +3,8 @@
 .industry-operating,.industry-economics,.industry-competition{min-width:0;margin:var(--sp-3) 0;padding:var(--sp-3);border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .industry-operating p,.industry-economics p,.industry-competition p{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
 .industry-operating label{display:grid;gap:var(--sp-2);font-size:13px}
+.industry-operating button{padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text-primary);font:inherit;cursor:pointer}
+.industry-operating button:disabled{opacity:.5;cursor:default}
+.industry-operating small{line-height:1.5;overflow-wrap:anywhere}
 .industry-economics dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2)}
 .industry-economics dd{margin:0;text-align:right;font-weight:700}

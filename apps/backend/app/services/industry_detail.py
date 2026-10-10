@@ -8,6 +8,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from app.services.industry_benchmarks import benchmark
+
 ROOT = Path(__file__).resolve().parents[4]
 COMPETITION = ROOT / "data/gold/industry_detail/competition.json"
 
@@ -57,6 +59,7 @@ def fields(family: str) -> list[dict]:
 def options() -> list[dict]:
     return [{**{k: i[k] for k in ("key", "parent", "label", "family", "evidence_needed")},
              "fields": fields(i["family"]),
+             "benchmark": benchmark(i["key"], fields(i["family"])),
              "recommendation_available": False,
              "recommendation_reason": "세부 업종 추천 모델은 검증·공개 전입니다"} for i in catalog()]
 

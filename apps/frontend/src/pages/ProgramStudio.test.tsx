@@ -5,7 +5,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ProgramStudio from "@/pages/ProgramStudio";
-import type { ProgramPlan } from "@/lib/api";
+import type { ProgramPlan, ValidationMode } from "@/lib/api";
+import { district } from "@/test/fixtures";
 import { clearToken, saveToken } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import { installFetchStub, type ApiCall, type Route } from "@/test/fetchStub";
@@ -74,6 +75,78 @@ function deferred<T = ProgramPlan>() {
 }
 
 describe("ProgramStudio — 검증 브리프", () => {
+  it.each([
+    ["팝업스토어", "popup"], ["가오픈", "soft_open"], ["MVP 테스트", "mvp"], ["실제 창업", "actual_open"],
+  ] as const)("예시 채우기는 선택한 기창업자·%s·업종·상권을 보존해 생성 요청에 보낸다", async (label, mode: ValidationMode) => {
+    const api = mount({ routes: [{ match: /\/commercial-districts$/, body: [district("yeonnam", { name: "연남동", gu: "마포구" })] }] });
+    const hub = screen.getByRole("combobox", { name: "상권" }) as HTMLSelectElement;
+    await waitFor(() => expect(hub.disabled).toBe(false));
+    fireEvent.change(hub, { target: { value: "yeonnam" } });
+    fireEvent.change(screen.getByPlaceholderText("예: 카페"), { target: { value: "요리 주점" } });
+    fireEvent.click(screen.getByRole("radio", { name: /기창업자/ }));
+    fireEvent.click(screen.getByRole("radio", { name: label }));
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    expect(screen.getByRole("radio", { name: label }).getAttribute("aria-checked")).toBe("true");
+    expect(screen.getByRole("radio", { name: /기창업자/ }).getAttribute("aria-checked")).toBe("true");
+    expect(hub.value).toBe("yeonnam");
+    expect((screen.getByPlaceholderText("예: 카페") as HTMLInputElement).value).toBe("요리 주점");
+    const hypothesis = (screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value;
+    expect(hypothesis).toContain("연남동");
+    expect(hypothesis).toContain("요리 주점");
+    expect(hypothesis).not.toMatch(/가로수길|산미|직장인/);
+    fireEvent.click(submitButton());
+    await editor();
+    expect(api.matching(/\/marketing\/generate$/)[0].body).toMatchObject({
+      stage: "founder", mode, category: "요리 주점", district_id: "yeonnam", hypothesis,
+    });
+  });
+
+  it("지도 선택 상권·내 사업 업종으로 예시를 채우고 직접 결합 안 함을 고르면 유지한다", async () => {
+    mount({ props: { mapDistrictId: "yeonnam", defaultCategory: "미용실", businessGoal: "move" },
+      routes: [{ match: /\/commercial-districts$/, body: [district("yeonnam", { name: "연남동" })] }] });
+    const hub = screen.getByRole("combobox", { name: "상권" }) as HTMLSelectElement;
+    await waitFor(() => expect(hub.disabled).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    expect(hub.value).toBe("yeonnam");
+    expect((screen.getByPlaceholderText("예: 산미 중심 원두 팝업") as HTMLInputElement).value).toContain("미용실");
+    fireEvent.change(hub, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    expect(hub.value).toBe("");
+    expect((screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value).not.toContain("연남동");
+  });
+
+  it("선택을 바꾼 뒤 다시 채우면 이전 자동 예시를 갱신하고 직접 작성한 내용은 보존한다", async () => {
+    mount({ routes: [{ match: /\/commercial-districts$/, body: [district("yeonnam", { name: "연남동" })] }] });
+    const hub = screen.getByRole("combobox", { name: "상권" }) as HTMLSelectElement;
+    await waitFor(() => expect(hub.disabled).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    fireEvent.change(hub, { target: { value: "yeonnam" } });
+    fireEvent.change(screen.getByPlaceholderText("예: 카페"), { target: { value: "의류" } });
+    fireEvent.click(screen.getByRole("radio", { name: "MVP 테스트" }));
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    expect((screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value).toMatch(/연남동.*의류.*사전 신청/);
+    fireEvent.change(screen.getByPlaceholderText("예: 산미 중심 원두 팝업"), { target: { value: "내 의류 아이템" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "검증 가설" }), { target: { value: "내가 작성한 가설" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "예산 하한(원)" }), { target: { value: "1000000" } });
+    fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));
+    expect((screen.getByPlaceholderText("예: 산미 중심 원두 팝업") as HTMLInputElement).value).toBe("내 의류 아이템");
+    expect((screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value).toBe("내가 작성한 가설");
+    expect((screen.getByRole("textbox", { name: "예산 하한(원)" }) as HTMLInputElement).value).toBe("1000000");
+  });
+
+  it("예시 채우기는 Posting에서 넘긴 검증 자리·주소·전략을 유지한다", async () => {
+    const handoff: ProgramHandoff = { districtId: "yeonnam", unitId: "vu-y1", unitName: "연남동 검증 자리",
+      lat: 37.56, lng: 126.92, area: 20, floor: "1F", rent: 300, industry: "의류", strategy: "가성비" };
+    const api = mount({ props: { handoff }, routes: [{ match: /\/commercial-districts$/, body: [district("yeonnam", { name: "연남동" })] }] });
+    await waitFor(() => expect((screen.getByRole("combobox", { name: "상권" }) as HTMLSelectElement).disabled).toBe(false));
+    generate();
+    await editor();
+    expect(screen.getByText("검증할 자리", { selector: "b" })).toBeTruthy();
+    expect(api.matching(/\/marketing\/generate$/)[0].body).toMatchObject({
+      district_id: "yeonnam", category: "의류", address: "연남동 검증 자리", unit_id: "vu-y1", tier: "가성비",
+    });
+  });
+
   it("실제 창업 선택을 생성 API에 전달하고 결과 라벨을 표시한다", async () => {
     const api = mount({ result: { ...PLAN, mode: "actual_open" } });
     fireEvent.click(screen.getByRole("button", { name: "예시 채우기" }));

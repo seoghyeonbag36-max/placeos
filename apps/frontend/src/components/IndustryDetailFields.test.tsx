@@ -1,12 +1,13 @@
 /** 합성 API 응답으로 입력·계산·결측 표시를 검증한다. 실매출 자료가 아니다. */
 import { expect, it } from "vitest";
+import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings } from "@/test/fixtures";
 import type { IndustryDetail, IndustryEconomics } from "@/lib/api";
 import PostingConsole from "@/pages/PostingConsole";
 import BusinessSetup from "@/components/BusinessSetup";
-import { IndustryCompetitionPanel } from "./IndustryDetailFields";
+import { IndustryCompetitionPanel, IndustryOperatingFields } from "./IndustryDetailFields";
 
 const option: IndustryDetail = {
   key: "lodging_hotel", parent: "lodging", label: "호텔·리조트", family: "rooms",
@@ -24,6 +25,45 @@ const economics: IndustryEconomics = {
   source: "user_input_scenario", note: "사용자 입력에 따른 조건부 계산입니다.", formula: "객실 수 × 점유율 × 영업일 × 단가",
   monthly_revenue: 1500, monthly_cost: 600, monthly_surplus: 900, break_even_revenue: 375, payback_months: 1.1,
 };
+
+// 동작 검증용 합성 응답. 실제 통계값 검증은 백엔드 계약 테스트에서 수행한다.
+const benchmarkOption: IndustryDetail = { ...option, benchmark: {
+  values: {
+    capacity: { value: 20, original_value: 20, table: "표 A", page: 1, conversion: "정수" },
+    price: { value: 10, original_value: 100000, table: "표 B", page: 2, conversion: "원 → 만원 환산" },
+  },
+  source: { title: "테스트 통계", url: "https://example.org/statistics", survey_year: 2025,
+    published_on: "2026-02-28", geography: "전국", category: "숙박 참고 업종", sample_n: 10, category_match: "broader_category" },
+  note: "별도 세부 업종 평균이 없는 참고 통계입니다.", unavailable: { utilization: "평균 없음", days: "평균 없음" },
+} };
+
+function OperatingHarness({ detailKey = option.key }: { detailKey?: string }) {
+  const [values, setValues] = useState<Record<string, string>>({ capacity: "7" });
+  return <IndustryOperatingFields detailKey={detailKey} values={values}
+    onChange={(key, value) => setValues((v) => ({ ...v, [key]: value }))} />;
+}
+
+it("평균 버튼은 빈칸만 채우고 기존 값과 근거 없는 빈칸을 보존한다", async () => {
+  installFetchStub([{ match: /\/ai\/industry-details$/, body: { details: [benchmarkOption] } }]);
+  render(<OperatingHarness />);
+  fireEvent.click(await screen.findByRole("button", { name: "참고 업종 평균으로 빈칸 채우기" }));
+  expect((screen.getByRole("spinbutton", { name: /객실 수/ }) as HTMLInputElement).value).toBe("7");
+  expect((screen.getByRole("spinbutton", { name: /객실 단가/ }) as HTMLInputElement).value).toBe("10");
+  expect((screen.getByRole("spinbutton", { name: /객실 점유율/ }) as HTMLInputElement).value).toBe("");
+  expect((screen.getByRole("button", { name: /빈칸 채우기/ }) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.getByRole("link", { name: "테스트 통계" }).getAttribute("href")).toBe("https://example.org/statistics");
+  expect(screen.getByText(/별도 세부 업종 평균이 없는/)).toBeTruthy();
+});
+
+it("평균 없는 업종은 자동 채우기를 비활성화하고 다른 업종 참고값을 표시하지 않는다", async () => {
+  installFetchStub([{ match: /\/ai\/industry-details$/, body: { details: [benchmarkOption, { ...option, key: "other" }] } }]);
+  const view = render(<OperatingHarness />);
+  await screen.findByRole("link", { name: "테스트 통계" });
+  view.rerender(<OperatingHarness detailKey="other" />);
+  expect((screen.getByRole("button", { name: "업종 평균으로 빈칸 채우기" }) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.queryByRole("link", { name: "테스트 통계" })).toBeNull();
+  expect(screen.getByText(/검증된 평균 자료가 없어/)).toBeTruthy();
+});
 
 it("숙박 운영 입력을 API로 보내고 결과 출처를 표시하며 수정 시 이전 계산을 걷는다", async () => {
   const api = installFetchStub([

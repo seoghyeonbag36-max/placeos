@@ -41,14 +41,34 @@ export function IndustryOperatingFields({ detailKey, values, onChange }: {
   const option = options?.find((o) => o.key === detailKey);
   if (!detailKey) return null;
   if (!option) return <p role="status">{failed ? "운영 입력 항목을 불러오지 못했습니다." : options ? "지원하지 않는 세부 업종입니다." : "운영 입력 항목을 불러오는 중…"}</p>;
+  const benchmark = option.benchmark;
+  const source = benchmark?.source;
+  const fillable = option.fields.filter((f) => {
+    const value = benchmark?.values[f.key]?.value;
+    return value != null && Number.isFinite(value) && value >= f.min && value <= f.max
+      && (!(f.key === "capacity" || f.key === "days") || Number.isInteger(value));
+  });
+  const empty = fillable.filter((f) => !(values[f.key] ?? "").trim());
   return <fieldset className="industry-operating">
     <legend>{option.label} 운영 조건 · 직접 입력</legend>
     <p>{option.evidence_needed}</p>
+    <button type="button" disabled={!source || empty.length === 0} onClick={() => {
+      for (const f of empty) onChange(f.key, String(benchmark!.values[f.key].value));
+    }}>{source?.category_match === "broader_category" ? "참고 업종 평균으로 빈칸 채우기" : "업종 평균으로 빈칸 채우기"}</button>
+    {source ? <div className="industry-benchmark">
+      <p>{benchmark?.note} 기존 입력은 유지하며 평균이 확인된 항목의 빈칸만 채웁니다.</p>
+      <p>출처: <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>
+        {" · "}{source.geography} · {source.category} · 사례 {source.sample_n}개 · 게시 {source.published_on}</p>
+    </div> : <p role="status">이 세부 업종에 대응하는 검증된 평균 자료가 없어 자동으로 채울 수 없습니다.</p>}
     <p>빈칸은 0으로 계산하지 않습니다. 비율 0.5는 50%입니다. 월 수익은 선납금 중 해당 월에 귀속되는 금액을 기준으로 입력하세요.</p>
     {option.fields.map((f) => <label key={f.key} className="field">
       <span>{f.label} · {f.unit}</span>
       <input type="number" step={f.key === "capacity" || f.key === "days" ? "1" : "any"} min={f.min} max={f.max}
         value={values[f.key] ?? ""} onChange={(e) => onChange(f.key, e.target.value)} placeholder="미입력" />
+      {source && benchmark?.values[f.key] ? <small>통계 참고값: {benchmark.values[f.key].value} {f.unit}
+        {" · "}{benchmark.values[f.key].table}, {benchmark.values[f.key].page}쪽
+        {" · "}원문 평균 {benchmark.values[f.key].original_value} · {benchmark.values[f.key].conversion}</small>
+        : <small>{benchmark?.unavailable[f.key] ?? "검증된 평균 자료가 없습니다. 직접 입력하세요."}</small>}
     </label>)}
   </fieldset>;
 }
