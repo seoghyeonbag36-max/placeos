@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "01-why-placeos",
+    "title": "PlaceOS를 시작한 이유",
+    "frame": "PPPP · 브랜드 이야기",
+    "status": "2026-10-10 창업자 직접 제공 계기에 기반한 브랜드 서사 초안",
+    "slides": [
+      {"eyebrow": "PlaceOS를 시작한 이유", "heading": "공실을 보며,<br><span class='accent'>끊긴 창업의 흐름</span>을<br>생각했습니다.", "intro": "창업과 재창업의 사이클을<br>다시 연결할 수 없을까?", "kind": "journey", "footer": "PlaceOS가 시작된 질문 →"},
+      {"eyebrow": "공실을 바라보는 우리의 관점", "heading": "빈 공간을 넘어,<br><span class='accent'>다음 창업의 자리.</span>", "rows": [["공실을 보는 시선", "창업과 재창업의 사이클이 끊긴 자리"], ["정보를 보는 방식", "SNS·AI·IT 데이터로 디지털 재정의"], ["우리가 돕고 싶은 일", "사람들이 창업을 더 잘 준비하는 것"]], "callout": "부동산 정보를<br><span>다음 창업의 판단으로 연결하고 싶었습니다.</span>", "footer": "상권·공간·가격대·검증을 연결하기 →"},
+      {"eyebrow": "그래서, PlaceOS", "heading": "다음 창업이<br><span class='accent'>이어질 수 있도록.</span>", "intro": "디지털로 재정의한 부동산 정보로<br>창업과 재창업의 준비를 돕습니다.", "rows": [["상권 → 공간", "Platform에서 읽고, Page에서 살펴보고"], ["가격대 → 검증", "Posting에서 비교하고, Program으로 확인"]], "callout": "좋은 입점은,<br><span>상권을 읽는 것부터.</span>", "footer": "여러분에게 공실은 어떤 공간으로 보이나요?"}
+    ],
+    "caption": "PlaceOS를 시작한 이유.\n\n우리는 공실을 ‘창업과 재창업의 사이클이 끊긴 자리’로 보았습니다. 빈 공간을 보며, 다음 창업으로 이어지는 흐름을 다시 연결할 수 없을까 생각했습니다.\n\n사람들이 창업을 더 잘할 수 있도록 돕고 싶었습니다. 그래서 SNS·AI·IT 데이터를 활용해 부동산 정보를 디지털로 재정의하고, 창업과 재창업의 판단에 필요한 정보로 제공하고자 합니다.\n\n어떤 상권에서 시작할지, 어떤 공간을 볼지, 어느 가격대로 준비할지, 아이템이 통하는지 어떻게 확인할지.\nPlatform → Page → Posting → Program으로 네 질문을 연결합니다.\n\n좋은 입점은, 상권을 읽는 것부터.\n여러분에게 공실은 어떤 공간으로 보이나요?\n\n#PlaceOS #창업과재창업 #상권분석 #입점준비 #브랜드출점",
+    "sources": ["2026-10-10 창업자 직접 제공: 공실을 창업과 재창업의 사이클이 끊김으로 보는 관점·SNS/AI/IT 데이터 활용 의도", "CLAUDE.md §Project Identity·PPPP Framework", "AGENTS.md §PPPP"],
+    "review": "공실에 대한 창업자의 관점으로 서술했다. 공실 발생 원인 전체를 입증한 통계적 결론으로 표현하지 않는다. SNS 데이터 활용은 창업 의도이며 모든 기능에 배선 완료됐다는 주장이 아니다."
+  },
+  {
+    "slug": "02-platform",
+    "title": "Platform이 뭐야?",
+    "frame": "Place → Platform",
+    "status": "저장소 정의에 기반한 기능 소개 초안",
+    "slides": [
+      {"eyebrow": "Platform이 뭐야? · Place → Platform", "heading": "상권을,<br><span class='accent'>내 사업의 무대</span>로<br>읽는 것.", "intro": "어떤 고객과 업종이 있는 상권인지,<br>우리 아이템의 후보 무대를 살펴봅니다.", "kind": "journey", "footer": "첫 번째 질문: 어떤 상권인가? →"},
+      {"eyebrow": "Platform · 상권을 읽는 단계", "heading": "유명한 상권이면<br><span class='accent'>충분할까요?</span>", "rows": [["상권의 맥락", "주변 업종과 인구 흐름을 살펴봅니다."], ["우리 업종의 후보", "업종 추천을 검토의 출발점으로 씁니다."], ["자료의 범위", "기준일·출처·대상 범위를 확인합니다."]], "callout": "추천은 판단을 돕는 정보입니다.<br><span>현장 확인과 사업 조건을 함께 보세요.</span>", "footer": "내 사업에 맞는 무대를 찾는 과정 →"},
+      {"eyebrow": "Platform에서 Page로", "heading": "상권을 읽었다면,<br><span class='accent'>다음은 공간.</span>", "intro": "검토할 상권을 정했다면,<br>그 안에서 후보 자리를 살펴볼 차례입니다.", "rows": [["Platform의 질문", "이 상권은 어떤 플랫폼인가?"], ["Page로 이어지는 질문", "이 플랫폼 안에 어떤 공간을 놓을까?"]], "callout": "다음 게시물에서는<br><span>Page를 소개합니다.</span>", "footer": "저장하고, 다음 후보 상권을 볼 때 확인하세요."}
+    ],
+    "caption": "Platform이 뭐야?\n\nPlaceOS는 상권을 내 사업이 놓일 ‘플랫폼’으로 읽습니다. 어떤 고객과 업종이 있는지, 우리 아이템은 어떤 맥락에서 검토할 수 있을지 살펴보는 단계입니다.\n\nPlatform의 질문은 ‘이 상권은 어떤 플랫폼인가?’입니다.\n상권 자료와 업종 추천을 통해 후보 상권을 검토하는 출발점을 제공합니다.\n\n추천 결과가 성공을 보장하지는 않습니다. 자료의 출처·기준일·범위를 확인하고, 현장과 사업 조건을 함께 살펴봐야 합니다.\n\n상권을 읽었다면 다음은 그 안의 공간. 다음 게시물에서 Page를 소개합니다.\n\n#PlaceOS #Platform #상권분석 #입지검토 #브랜드출점",
+    "sources": ["CLAUDE.md §PPPP Framework", "docs/feature-platform.md 도입부", "scripts/pppp_status.py 실행 결과"],
+    "review": "공실 예측 정확도·창업 성공률·미래 매출을 주장하지 않는다. 감성 지표를 넣지 않는다."
+  },
+  {
+    "slug": "03-page",
+    "title": "Page가 뭐야?",
+    "frame": "Product → Page",
+    "status": "저장소 정의에 기반한 기능 소개 초안",
+    "slides": [
+      {"eyebrow": "Page가 뭐야? · Product → Page", "heading": "상권 안에서<br><span class='accent'>내 매장의 자리</span>를<br>살펴보는 것.", "intro": "어느 건물, 어느 층을 볼지.<br>입점 후보 공간을 구체적으로 확인합니다.", "kind": "journey", "footer": "두 번째 질문: 어떤 공간인가? →"},
+      {"eyebrow": "Page · 후보 공간을 보는 단계", "heading": "같은 상권에도<br><span class='accent'>자리는 다르니까.</span>", "rows": [["공실 히트맵", "후보 공간의 분포를 지도에서 살펴봅니다."], ["건물과 층", "층별 목록과 건물 정보를 확인합니다."], ["주변 거리", "거리뷰로 주변 환경을 살펴봅니다."]], "callout": "실제 임대 가능 여부와 공간 상태는<br><span>현장에서 다시 확인하세요.</span>", "footer": "상권에서 건물·층으로 좁혀 보기 →"},
+      {"eyebrow": "Page에서 Posting으로", "heading": "마음에 든 자리,<br><span class='accent'>비용도 맞을까?</span>", "intro": "후보 공간을 찾았다면,<br>어떤 비용 수준으로 준비할지 비교합니다.", "rows": [["Page의 질문", "이 플랫폼 안에 어떤 페이지를 놓을까?"], ["Posting으로 이어지는 질문", "이 자리에서 어떤 가격대로 준비할까?"]], "callout": "다음 게시물에서는<br><span>Posting을 소개합니다.</span>", "footer": "저장하고, 현장 방문 전에 꺼내 보세요."}
+    ],
+    "caption": "Page가 뭐야?\n\n상권이 플랫폼이라면, 그 안에 놓일 매장의 자리와 공간을 ‘Page’라는 관점으로 살펴봅니다.\n\nPage의 질문은 ‘이 플랫폼 안에 어떤 페이지를 놓을까?’입니다.\n공실 히트맵으로 분포를 보고, 건물과 층별 목록을 확인하고, 거리뷰로 주변 환경을 살펴봅니다. 상권을 보던 시선을 구체적인 건물과 층으로 좁히는 단계입니다.\n\n지도에 표시된 정보만으로 현재 임대 가능 여부나 공간 상태가 확정되지는 않습니다. 현장 확인과 실제 임대 조건 확인이 필요합니다.\n\n후보 공간을 찾았다면, 다음은 그 자리에서 준비할 비용. 다음 게시물에서 Posting을 소개합니다.\n\n#PlaceOS #Page #공실지도 #입점공간 #매장입지",
+    "sources": ["CLAUDE.md §PPPP Framework", "docs/feature-page.md 도입부·2D 층 스택 정의"],
+    "review": "3D 디지털 트윈이나 실시간 임대 보장을 주장하지 않는다. 공실 정보를 현재 임대 확정 정보로 표현하지 않는다."
+  },
+  {
+    "slug": "04-posting",
+    "title": "Posting이 뭐야?",
+    "frame": "Price → Posting",
+    "status": "저장소 정의에 기반한 기능 소개 초안",
+    "slides": [
+      {"eyebrow": "Posting이 뭐야? · Price → Posting", "heading": "내 매장의 자리,<br><span class='accent'>어떤 비용으로</span><br>준비할까?", "intro": "공간을 골랐다면, 다음은 가격대.<br>입점 조건과 비용의 가정을 비교합니다.", "kind": "journey", "footer": "세 번째 질문: 어떤 가격대인가? →"},
+      {"eyebrow": "Posting · 가격대를 비교하는 단계", "heading": "월세에서<br><span class='accent'>전체 비용으로.</span>", "rows": [["입점 조건 확인", "임대료와 실제 권리금 조건을 확인합니다."], ["준비 수준 비교", "고급화·가성비·기능중심을 비교합니다."], ["회수기간 검토", "입력 조건과 계산 가정을 함께 읽습니다."]], "callout": "비용과 회수기간은 조건에 따른 계산.<br><span>확정 수익이나 보장 기간이 아닙니다.</span>", "footer": "같은 조건 위에서 가격대를 비교하기 →"},
+      {"eyebrow": "Posting에서 Program으로", "heading": "비용을 봤다면,<br><span class='accent'>통하는지 확인.</span>", "intro": "이 아이템과 자리가 맞는지,<br>작게 실행하고 확인할 방법을 준비합니다.", "rows": [["Posting의 질문", "어떤 가격대의 공간을 준비할까?"], ["Program으로 이어지는 질문", "어떤 검증으로 다음 결정을 내릴까?"]], "callout": "다음 게시물에서는<br><span>Program을 소개합니다.</span>", "footer": "후보 공간과 함께, 비용 조건도 저장하세요."}
+    ],
+    "caption": "Posting이 뭐야?\n\nPlaceOS에서 Posting은 입점할 공간의 가격대와 준비 수준을 비교하는 관점입니다.\n\n질문은 ‘어떤 가격대의 페이지를 이 상권에 놓을까?’입니다.\n임대료와 권리금 같은 조건을 확인하고, 고급화·가성비·기능중심의 준비 수준을 비교하며, 비용과 회수기간을 검토합니다.\n\n권리금은 실제 협의 조건을 입력해야 합니다. 비용과 회수기간은 입력 조건과 가정에 따라 달라지는 계산이며, 확정 수익이나 회수 시점을 보장하지 않습니다.\n\n가격대를 검토했다면 다음은 아이템 검증. 다음 게시물에서 Program을 소개합니다.\n\n#PlaceOS #Posting #입점비용 #창업준비 #매장창업",
+    "sources": ["CLAUDE.md §PPPP Framework", "docs/feature-posting.md 도입부·prem 입력 계약", "AGENTS.md §0 출처 원칙"],
+    "review": "권리금·회수기간·매출의 임의 수치를 넣지 않는다. Posting은 Price와 대응한다."
+  },
+  {
+    "slug": "05-program",
+    "title": "Program이 뭐야?",
+    "frame": "Promotion → Program",
+    "status": "저장소 정의에 기반한 기능 소개 초안",
+    "slides": [
+      {"eyebrow": "Program이 뭐야? · Promotion → Program", "heading": "이 아이템,<br><span class='accent'>이 상권에서</span><br>통할까?", "intro": "팝업·가오픈·MVP로 실행하고,<br>무엇을 확인할지 먼저 정합니다.", "kind": "journey", "footer": "네 번째 질문: 어떻게 검증할까? →"},
+      {"eyebrow": "Program · 검증을 설계하는 단계", "heading": "알리는 방법과<br><span class='accent'>확인할 기준까지.</span>", "rows": [["검증 계획", "아이템·가설·기간·예산을 정리합니다."], ["온라인과 오프라인", "모객 초안과 자리·연계 후보를 준비합니다."], ["판단할 지표", "측정 방법·목표선·기각 조건을 정합니다."]], "callout": "시작하기 전에 정합니다.<br><span>어떤 결과면 계속하고, 바꿀 것인지.</span>", "footer": "실행과 판단을 함께 준비하기 →"},
+      {"eyebrow": "PPPP의 네 질문을 연결하면", "heading": "한 번의 선택보다,<br><span class='accent'>확인하며 다음으로.</span>", "intro": "상권 → 공간 → 가격대 → 검증.<br>다음 결정을 위한 근거를 쌓는 흐름입니다.", "rows": [["검증하려는 창업자에게", "예비창업자·새 아이템을 검토하는 창업자"], ["실행 결과를 읽을 때", "정해 둔 지표로 판단하고 계획을 조정"]], "callout": "지금 검토하는 아이템에서<br><span>가장 먼저 확인하고 싶은 것은 뭔가요?</span>", "footer": "프로필 링크에서 PlaceOS 살펴보기 ↗"}
+    ],
+    "caption": "Program이 뭐야?\n\n‘이 아이템이 이 상권에서 통하는지, 어떻게 확인할까?’\nProgram은 이 질문을 실행 계획과 판단 기준으로 정리하는 단계입니다.\n\n예비창업자와 새 아이템을 검증하려는 창업자가 팝업스토어·가오픈·MVP 같은 방식으로 확인할 수 있도록, 온라인 모객 초안과 오프라인 자리·연계 후보, 검증 지표를 함께 준비합니다.\n\n무엇을 측정할지, 목표선은 무엇인지, 어떤 결과면 가설을 바꿀지. 시작 전에 기준을 정하는 것이 핵심입니다. 실제 실행과 측정은 운영자가 진행합니다.\n\nPlatform에서 상권을 읽고, Page에서 공간을 보고, Posting에서 가격대를 비교하고, Program으로 검증을 준비합니다.\n\n지금 검토하는 아이템에서 가장 먼저 확인하고 싶은 것은 무엇인가요?\n\n#PlaceOS #Program #창업검증 #팝업스토어 #가오픈",
+    "sources": ["CLAUDE.md §PPPP Framework", "docs/feature-program.md §0-V", "apps/backend/app/schemas/marketing.py ValidationMode·ProgramBrief (읽기만 수행)"],
+    "review": "문서에 명시된 팝업·가오픈·MVP를 예로 사용한다. 작업 중 코드에 추가된 actual_open은 이 초안의 확정 기능으로 홍보하지 않는다. 광고 자동 집행·협업 확정·성과 보장을 주장하지 않는다."
+  }
+]

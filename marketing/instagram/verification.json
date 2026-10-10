@@ -1,0 +1,30 @@
+{
+  "logo_export_check": {
+    "result": "PASS",
+    "logo_size": [
+      2172,
+      724
+    ]
+  },
+  "instagram_copy_check": {
+    "result": "PASS",
+    "bio_characters": 89
+  },
+  "template_render_check": {
+    "result": "PASS",
+    "templates": [
+      "post-01-cover",
+      "post-02-checklist",
+      "post-03-cta",
+      "post-04-data-template",
+      "story-01-question",
+      "story-02-checklist",
+      "story-03-link"
+    ]
+  },
+  "ad_source_check": {
+    "result": "PASS",
+    "official_source_links": 7,
+    "note": "링크·출처 구분의 정적 검증이며 실제 광고 계정 검증은 아님"
+  }
+}
