@@ -1,6 +1,13 @@
 /* 「내 사업」 카드 + 칩 — 화면설계서 3판 공통 프레임.
    오버레이 층(.map-overlays, 레일 오른쪽) 기준으로 선다. 색은 토큰에서만 가져온다. */
 
+/* 우측 상단 버튼들이 같은 기준선과 8px 간격을 공유한다. */
+:root {
+  --workspace-control-inset: var(--sp-3);
+  --workspace-control-height: 40px;
+  --workspace-control-gap: var(--sp-2);
+}
+
 .biz {
   position: absolute; inset: 0;
   pointer-events: none;           /* 빈 자리는 지도 드래그가 통과한다 */
@@ -11,9 +18,9 @@
 .biz > * { pointer-events: auto; }
 
 .biz-chip {
-  position: absolute; top: 12px; right: 12px;
+  position: absolute; top: var(--workspace-control-inset); right: var(--workspace-control-inset);
   display: flex; align-items: center; gap: 6px;
-  max-width: 300px; height: 40px; padding: 0 14px;
+  max-width: 300px; height: var(--workspace-control-height); padding: 0 14px;
   border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); color: var(--ink);
   box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
@@ -76,7 +83,8 @@
 .biz-browse { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 
 @media (max-width: 768px) {
-  .biz-chip { top: 8px; right: 8px; max-width: 45%; height: 36px; padding: 0 10px; font-size: 12px; }
+  :root { --workspace-control-inset: var(--sp-2); --workspace-control-height: 36px; }
+  .biz-chip { top: var(--workspace-control-inset); right: var(--workspace-control-inset); max-width: 45%; height: var(--workspace-control-height); padding: 0 10px; font-size: 12px; }
   .biz-card { top: 8px; left: 8px; right: 8px; transform: none; width: auto; max-height: 70dvh; }
   .biz-ind-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

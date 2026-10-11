@@ -1,4 +1,4 @@
-.founder-trigger { position: fixed; right: var(--sp-4); bottom: var(--sp-4); z-index: 1200; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--ui-navy); color: var(--surface); padding: var(--sp-3) var(--sp-4); cursor: pointer; }
+.founder-trigger { position: fixed; right: var(--workspace-control-inset, var(--sp-3)); top: calc(var(--workspace-control-inset, var(--sp-3)) + var(--workspace-control-height, 40px) + var(--workspace-control-gap, var(--sp-2))); z-index: 1200; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--ui-navy); color: var(--surface); padding: var(--sp-3) var(--sp-4); cursor: pointer; }
 .founder-planner { width: min(900px, 90vw); max-height: 85dvh; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--sp-5); background: var(--surface); color: var(--ink); font-family: inherit; }
 .founder-planner::backdrop { background: color-mix(in srgb, var(--ink) 40%, transparent); }
 .founder-planner header { display: flex; justify-content: space-between; align-items: start; gap: var(--sp-3); }
