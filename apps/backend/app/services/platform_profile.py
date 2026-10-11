@@ -32,7 +32,7 @@ CSV 파서는 `services/marketing` 에 한 벌만 둔다 — 두 벌이 되면 �
 """
 from __future__ import annotations
 
-from app.services import industry_recommend, marketing, vacant_inventory
+from app.services import collected_context, industry_recommend, marketing, vacant_inventory
 
 # 카카오 플레이스 업종(말단 라벨)을 사람이 읽는 군으로 묶는 규칙.
 # 부분문자열 우선순위 매칭이라 **순서가 규칙의 일부다** — 위에서 먼저 걸리면 끝난다.
@@ -232,6 +232,7 @@ def identity(district_id: str) -> dict | None:
         "keywords": _keywords(rows),
         "trends": _trends(rows),
         "demand": _demand(rows),
+        "collected": collected_context.for_district(district_id),
         "source": ("카카오 플레이스(업종) · 네이버 블로그(키워드) · 네이버 데이터랩"
                    "(검색 트렌드) · 서울 상권분석 TRDAR(수요신호) — "
                    "gold/{거점}/program_content_context.csv"),

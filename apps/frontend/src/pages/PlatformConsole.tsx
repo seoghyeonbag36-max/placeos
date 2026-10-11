@@ -655,6 +655,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
             자주 언급되는 단어입니다. 긍정·부정 평가를 뜻하지 않습니다.
           </div>
 
+          {ident.collected && <CollectedSection data={ident.collected} />}
           {trends.length > 0 && (
             <div className="trends">
               {trends.map((t) => (
@@ -679,6 +680,25 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
 
     </Fold>
   );
+}
+
+/** 수집 원문 링크와 행정동 소비를 공간 단위와 함께 표시한다. */
+export function CollectedSection({ data }: { data: NonNullable<NonNullable<PlatformProfile["identity"]>["collected"]> }) {
+  const channels: Record<string, string> = { blog: "블로그", cafearticle: "카페글", news: "뉴스" };
+  return <div className="panel">
+    <h3>이 상권의 온라인 이야기<small>네이버 검색 표본</small></h3>
+    <p className="pnote">{data.online.note} 수집일 {data.online.collected_at?.slice(0, 10) ?? "미확인"} · 중복 제외 표본 {data.online.sample_count}건</p>
+    {data.online.items.length === 0 ? <p>수집된 검색 콘텐츠가 없습니다.</p> : data.online.items.map(item =>
+      <p key={item.link}><small>{channels[item.channel] ?? item.channel} · {item.published_at ?? "작성일 미제공"}</small><br />
+        <a href={item.link} target="_blank" rel="noopener noreferrer">{item.title || "원문 보기"}</a><br />
+        <small>검색어: {item.query}</small></p>)}
+    <h3>주변 행정동 소비<small>주변 점포가 속한 행정동 전체</small></h3>
+    <p className="pnote">{data.consumption.note}</p>
+    {data.consumption.districts.length === 0 ? <p>코드가 일치하는 행정동 소비 자료가 없습니다.</p> :
+      data.consumption.districts.map(d => <p key={d.code}>{d.name} · {d.quarter.slice(0, 4)}년 {d.quarter.slice(4)}분기 ·
+        {d.total_won == null ? " 금액 미제공" : ` ${(d.total_won / 100000000).toLocaleString("ko-KR", { maximumFractionDigits: 1 })}억 원`}</p>)}
+    <p className="pnote">{data.consumption.source}</p>
+  </div>;
 }
 
 /** 검색 트렌드 스파크라인 — 값의 절대 눈금이 아니라 흐름을 보여주는 용도다. */
