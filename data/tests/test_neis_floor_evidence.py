@@ -13,6 +13,8 @@ from pathlib import Path
 
 from data.collectors import neis_academies
 from data.pipelines.build_building_attrs import (
+    _name_key,
+    _same_business,
     _store_roads_and_blanks,
     aca_floor_nos,
     academy_floors,
@@ -127,3 +129,17 @@ def test_academy_floor_parse_cases() -> None:
         ", 301호": [],
     }
     assert {k: sorted(aca_floor_nos(k)) for k in cases} == cases
+
+
+def test_same_business_rules() -> None:
+    """같은 업소 판정 — 포함·일치·오타·상호, 그리고 숫자로 갈리는 관(館)은 다른 업소다."""
+    same = [("깨움학원", "깨움"),                              # 일치(2자)
+            ("퀀텀과학학원", "퀸텀과학"),                       # 오타 한 글자
+            ("압구정파인만중2관학원", "압구정파인만교육"),       # 상호: 브랜드 ↔ 법인명
+            ("메이플베어어학학원", "메이플베어주"),
+            ("가나다수학학원", "가나다 수학학원")]               # 포함
+    other = [("잇올스파르타목동1독학재수학원", "잇올스파르타목동3독학재수"),   # 관 번호만 다르다
+             ("팬더중국어교습소", "팬더공부방"),                               # 앞 2자만 같다
+             ("뮤스토리미술학원", "심포니발레스튜디오")]
+    assert all(_same_business(_name_key(a), _name_key(b)) for a, b in same)
+    assert not any(_same_business(_name_key(a), _name_key(b)) for a, b in other)

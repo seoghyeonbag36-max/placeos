@@ -274,6 +274,43 @@ def _name_key(name: object) -> str:
     return re.sub(r"[^0-9A-Za-z가-힣]", "", s).lower()
 
 
+def _same_business(a: str, s: str) -> bool:
+    """학원명 키 a 와 상가정보 점포명 키 s 가 같은 업소를 가리키는가 (2026-10-11 보강).
+
+    순서대로 하나라도 맞으면 같다고 본다. 숫자가 갈리는 차이(목동1관 ↔ 목동3관)는 다른
+    관이라 어느 규칙에서도 같다고 보지 않는다.
+      · 포함 — 한쪽이 다른 쪽을 품는다(둘 다 3자 이상). 종전 규칙
+      · 일치 — 키가 같다(2자 이상, '깨움학원' ↔ '깨움')
+      · 오타 — 한 글자만 다르다(4자 이상, '퀀텀과학' ↔ '퀸텀과학')
+      · 상호 — 앞 4자 이상이 같고 그 뒤가 숫자로 갈리지 않는다(브랜드 ↔ 법인명:
+        '압구정파인만중2관' ↔ '압구정파인만교육', '메이플베어어학' ↔ '메이플베어주')
+    81거점 실측(10-11): 잔여 411지번에서 일치 6 · 오타 2 · 상호 31쌍이 새로 맞았고, 나머지는
+    태권도장·필라테스·유학원처럼 NEIS 에 없는 **다른 업소**였다 — 업종만으로 짝지으면 그 업소를 지운다.
+    """
+    if len(a) >= 3 and len(s) >= 3 and (a in s or s in a):
+        return True
+    if len(a) >= 2 and a == s:
+        return True
+    if min(len(a), len(s)) >= 4 and abs(len(a) - len(s)) <= 1:
+        if len(a) == len(s):
+            diff = [(x, y) for x, y in zip(a, s) if x != y]
+            if len(diff) == 1 and not any(c.isdigit() for c in diff[0]):
+                return True
+        else:
+            short, long_ = (a, s) if len(a) < len(s) else (s, a)
+            for i in range(len(long_)):
+                if long_[:i] + long_[i + 1:] == short:
+                    if not long_[i].isdigit():
+                        return True
+                    break
+    n = 0
+    for x, y in zip(a, s):
+        if x != y:
+            break
+        n += 1
+    return n >= 4 and not (a[n:n + 1].isdigit() or s[n:n + 1].isdigit())
+
+
 def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
                    blank_names: dict[str, list[str]]) -> tuple[dict[str, dict], dict[str, int]]:
     """NEIS 행 → ({pnu: {floors, n, resolved}}, 매칭 통계).
@@ -281,10 +318,9 @@ def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
     · 도로명주소 키가 **지번 하나**에만 걸릴 때만 붙인다. 여러 지번이면(대단지·다필지) 버린다 —
       층은 맞아도 엉뚱한 지번의 층이 될 수 있다.
     · 층은 `aca_floor_nos` 로 읽는다(인허가 규칙 + 지하 약어·범위·괄호 보정). 지하·층 미표기는 근거가 아니다.
-    · 같은 지번에 층 미상(flrNo 공란) **교육·독서실** 상가정보 점포가 이름이 맞게 있으면 그 점포의 층을
-      이 학원이 밝힌 것이다(`resolved`). 소비처가 층 미상 수에서 빼야 같은 업소를 두 번 세지 않는다.
-      상호가 달라(브랜드↔법인명) 못 맞춘 잔여는 상한(hi)에 남는다 — 81거점 실측 36필지·38층(분모의
-      0.04%). 업종으로 짝지으면 다른 업소를 묶을 위험이 같은 크기라 짝짓지 않는다.
+    · 같은 지번에 층 미상(flrNo 공란) **교육·독서실** 상가정보 점포가 같은 업소이면(`_same_business` —
+      포함·일치·오타·상호) 그 점포의 층을 이 학원이 밝힌 것이다(`resolved`). 소비처가 층 미상 수에서
+      빼야 같은 업소를 두 번 세지 않는다. 업종만으로는 짝짓지 않는다 — 남은 쌍은 대부분 다른 업소다.
     · 층 미상 학원은 상한 배정(spare)에 보태지 않는다 — 상가정보 공란과 같은 업소일 수 있다.
     """
     out: dict[str, dict] = defaultdict(lambda: {"floors": set(), "n": 0, "resolved": 0})
@@ -310,8 +346,7 @@ def academy_floors(academies: list[dict], road2pnu: dict[str, set[str]],
         o["n"] += 1
         nk = _name_key(a.get("ACA_NM"))
         names = pool.get(pnu) or []
-        hit = next((i for i, s in enumerate(names)
-                    if len(nk) >= 3 and len(s) >= 3 and (nk in s or s in nk)), None)
+        hit = next((i for i, s in enumerate(names) if _same_business(nk, s)), None)
         if hit is not None:
             names.pop(hit)
             o["resolved"] += 1
