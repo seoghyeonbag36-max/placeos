@@ -28,10 +28,10 @@ PPPP 4트랙에 1:1로 4편을 쓰지만, **실증 밀도는 같지 않다.** �
 
 | 편 | 트랙 | 성격 | 실증 밀도 |
 |---|------|------|---------|
-| [P1](paper-platform.md) | Platform | **실증 + 방법론** — GNN 업종추천의 성능 천장 규명 | 가장 두껍다 (ablation 4종 · McNemar · 검정력 계산) |
-| [P2](paper-page.md) | Page | **데이터 품질·계산 재현성** — 동결한 공공행정자료 결합 산출물의 계산적 속성 | 구조 감사·반복 재현·순서 민감도 분석. 현실 공실 정확도는 미평가 |
-| [P3](paper-posting.md) | Posting | **한계 규명** — 공개 데이터로 층·면적 축 ROI를 정밀화할 수 없는 이유 | 중간 (기각 기록은 많고 양성 결과가 적다) |
-| [P4](paper-program.md) | Program | **시스템/설계** — LLM 마케팅 생성의 사실성 가드레일 | 가장 얇다 (정량 평가 미착수) |
+| [P1](논문%20초안/paper-platform.md) | Platform | **실증 + 방법론** — GNN 업종추천의 성능 천장 규명 | 가장 두껍다 (ablation 4종 · McNemar · 검정력 계산) |
+| [P2](논문%20초안/paper-page.md) | Page | **데이터 품질·계산 재현성** — 동결한 공공행정자료 결합 산출물의 계산적 속성 | 구조 감사·반복 재현·순서 민감도 분석. 현실 공실 정확도는 미평가 |
+| [P3](논문%20초안/paper-posting.md) | Posting | **한계 규명** — 공개 데이터로 층·면적 축 ROI를 정밀화할 수 없는 이유 | 중간 (기각 기록은 많고 양성 결과가 적다) |
+| [P4](논문%20초안/paper-program.md) | Program | **시스템/설계** — LLM 마케팅 생성의 사실성 가드레일 | 가장 얇다 (정량 평가 미착수) |
 
 ⚠ **P4 는 지금 재료로 실증 논문이 되지 않는다.** 시스템 논문(설계 + 제약 분석)으로 쓰거나,
 연구계획서의 "향후 연구"로 돌리는 편이 정직하다. 억지로 실험을 지어내지 말 것.
@@ -51,12 +51,20 @@ PPPP 4트랙에 1:1로 4편을 쓰지만, **실증 밀도는 같지 않다.** �
 
 ## 지금 상태
 
+**2026-10-11 재작성(AI/MIS Q1 문헌 반영):** 네 원고(`논문 초안/paper-*.md`)의 서론·관련 연구·논의·한계·참고문헌을 AI/MIS Q1 저널 문헌 기준으로 다시 썼다. 실험 수치·가설 판정·기각·한계는 바꾸지 않았다(이전판 대비 수치 토큰 누락 0건). 원고 위치는 `docs/papers/`에서 `논문 초안/`으로 바뀌었고 직전 판은 [이전판 사본](논문%20초안/이전판_10-11갱신본/README.md)에 있다. 인용 문헌의 확인 범위와 저널 분류는 [문헌 근거](evidence-index.md#literature-q1-20261011)에 등재했다 — 서지(Crossref)와 초록까지만 확인했고 전문은 읽지 않았으며, Q1은 SCImago(SJR) 기준이고 Clarivate JCR 사분위는 확인하지 않았다. 제출용 Word는 `python docs/papers/build_papers_docx.py --src "docs/papers/논문 초안" --out "docs/papers/output/대학원 리크루팅 제출용" --stamp 20261011`로 만들고, 같은 인자로 `verify_paper_submission.py`를 돌려 구조를 검수한다. 페이지 배치는 Word PDF 변환으로 육안 확인했다. `output/`의 09-19·09-20판 Word와 `lx/`·`kiit/` 파생 원고는 이번 재작성의 대상이 아니다.
+
+**2026-10-11 원고 갱신:** 네 `paper-*.md`의 연구 출발점을 공실의 창업·재창업 순환 단절, 현장 유동인구 관찰, 디지털 접근성·IT/SNS/AI 검색의 영향에 관한 미검증 질문, 창업가를 위한 디지털 상권 정의로 보완했다. 현행 PPPP 대응을 명시하고 Platform 조건 F 재학습·검색 근거, Page 조건 G 앵커 대조·현장 라벨 설계, Posting 매출 커버리지·기준점 해석, Program 호출 정책·행사 연결을 별도 절로 반영했다. 역사적 실험의 모집단과 음성 결과·미검증 성과 가설은 유지한다. [이번 근거와 검증 범위](evidence-index.md#pppp-update-20261011)
+
+이번 갱신 대상은 네 Markdown 원고와 근거 인덱스다. `output/`의 기존 Word 파일과 `lx/`·`kiit/`의 제출처별 파생 원고는 이번 갱신본이 아니며, 최신 원고로 사용하려면 별도 동기화와 검수가 필요하다. 기존 `verify_paper_submission.py`의 Word 구조 통과는 최신 Markdown과 Word의 내용 일치를 보증하지 않는다.
+
+갱신 검수는 `test_paper_numeric_evidence`(본문 수치의 인덱스 대조), `test_paper_local_links`(로컬 링크), `test_research_background`(연구 동기), `test_preserved_verdicts`(기존 가설 판정·기각·한계 문단 보존), `test_refresh_evidence_matches_artifacts`(보강 수치와 Gold·보존 JSON 대조)라는 이름으로 읽기 전용 검사를 실행해 통과했다. 이 이름들은 이번 검수 명령의 검사 항목이며 저장소에 새 pytest 파일을 추가한 것은 아니다. 기존 구현 계약은 `apps/backend`에서 `python -m pytest tests/test_collected_context.py tests/test_program_llm_gate.py tests/test_posting_revenue.py -q`를 실행해 **40 passed**를 확인했다. `git diff --check`도 통과했다. 이는 문서·구현 계약 검사이며 LLM 실호출, 독립 현장 정답 평가, 사업 성과 검증은 아니다.
+
 **2026-09-20 수정:** 네 원고와 Word 파일에 연구질문 RQ·가설·가설 검증 판정표를 명시했다. 관측 결과의 기술적 지지, 계산 반례에 의한 반증, 통계적으로 지지되지 않은 가설 및 미검증 성과 가설을 구분한다. 보존 결과를 사전등록 확인 실험으로 소급하지 않는다. Word 파일명은 최초 작성일을 유지한다.
 
 **2026-09-19 집필 갱신:** Platform·Page·Posting·Program 네 편 모두 초록부터 참고문헌까지 원고 초안을 작성했고, `output/PlaceOS_<트랙>_논문_20260919.docx`에 Word 파일을 생성했다. 한글 글꼴 포함, XML 무결성, 필수 절·링크·수치 인덱스 및 Platform 쌍대검정 요약 검산은 `verify_paper_submission.py`로 확인했다. Word PDF 변환이 완료되지 않아 페이지 이미지에 대한 시각 검수는 미완료다. 아래는 이전 연구 단계의 기록이며 현재 집필 상태보다 우선하지 않는다.
 
 **2026-09-07 산출물 기준:** Page는 [조건 D 근거 등재](evidence-index.md#page-condition-d)와
-[원고](paper-page.md)의 §2.4 방법론·§3 결과 작성을 완료했다. 저자 공개본의 읽기 범위,
+[원고](논문%20초안/paper-page.md)의 §3.4 방법론·§4 결과 작성을 완료했다(2026-10-11 재작성 전 번호는 §2.4·§3). 저자 공개본의 읽기 범위,
 보존 근거 검산 및 PC 재검증 결과는 [연구 진행 기록](page-study/README.md)에 있다.
 나머지 Page 절과 다른 P 원고는 뼈대 상태이며, 각 파일의 `<!-- FILL -->` 표시는 남은 집필 자리다.
 최종 원고나 제출물의 완성을 뜻하지 않는다.
