@@ -49,36 +49,36 @@ blog_keyword,점심,18
 blog_keyword,데이트,17
 blog_keyword,압구정로,17
 blog_keyword,복이오복국,17
-category,미용실,191
-category,백반/한정식,161
-category,경양식,137
-category,기타 의류 소매업,112
-category,피부 관리실,89
-category,피부/비뇨기과 의원,78
-category,일식 회/초밥,78
+category,미용실,188
+category,백반/한정식,137
+category,경양식,134
+category,피부 관리실,100
+category,피부/비뇨기과 의원,87
+category,기타 의류 소매업,86
+category,일식 회/초밥,83
 category,카페,76
+category,요가/필라테스 학원,72
 category,화장품 소매업,72
-category,요가/필라테스 학원,69
 category,예술품 소매업,61
 category,시계/귀금속 소매업,57
-category,여성 의류 소매업,53
-category,헬스장,50
-category,요리 주점,48
-category,결혼 상담 서비스업,43
-category,꽃집,41
+category,요리 주점,55
+category,여성 의류 소매업,54
 category,편의점,40
-category,운동용품 소매업,37
-category,성형외과 의원,33
-category,내과/소아과 의원,33
-category,입시·교과학원,31
-category,가방 소매업,28
-category,남성 의류 소매업,26
-category,돼지고기 구이/찜,26
-category,네일숍,24
-category,빵/도넛,22
-category,일반 유흥 주점,21
+category,헬스장,39
+category,결혼 상담 서비스업,38
+category,꽃집,38
+category,성형외과 의원,37
+category,입시·교과학원,30
+category,돼지고기 구이/찜,28
+category,네일숍,27
+category,가방 소매업,24
+category,내과/소아과 의원,24
+category,빵/도넛,23
+category,운동용품 소매업,21
+category,일반 유흥 주점,20
 category,김밥/만두/분식,20
-category,골프 연습장,19
+category,기타 교육지원 서비스업,20
+category,남성 의류 소매업,19
 trend:청담동 명품거리,2024-08-01,0.911
 trend:청담동 명품거리,2024-09-01,0.89748
 trend:청담동 명품거리,2024-10-01,0.91995

@@ -48,7 +48,7 @@ Claude Code(CLI) 기반 PlaceOS 개발 가이드. PPPP 프레임워크 4기능�
 | [finding-map-provider-google-2026-09-15.md](finding-map-provider-google-2026-09-15.md) | 지도 공급자 재검증(네이버·카카오 → 구글) — **전환하지 않는다**. 부산물로 드러난 **카카오 로컬 영구저장 약관 저촉**은 저장층을 상가정보로 옮겨 해소(§7-2) |
 | [finding-sbiz365-mcp-2026-09-15.md](finding-sbiz365-mcp-2026-09-15.md) | 소상공인365·창업 API·MCP 연동 판정 — **소상공인365 는 붙이지 않는다**(행정동 입도 · 이미 보유 · Iframe 이라 Bronze 불가). MCP 는 **서버 방향으로만**. 재평가 트리거는 전화 한 통 하나(§3-B) |
 | [finding-project-review-4roles-2026-10-06.md](finding-project-review-4roles-2026-10-06.md) | 저장소 4역할 점검(기획·개발·테스트·리뷰보안, 읽기 전용) — 먼저 할 일은 **보안 1순위(비공개 사본) · 공개 저장소 위생 · 배포를 CI 전체에 묶기**. compose 로컬 스택 기동 불가, 바꾸기 사용자 업종 기본값 역전, Ruflo 데몬 metrics 불신 |
-| [finding-page-oct-refresh-2026-10-10.md](finding-page-oct-refresh-2026-10-10.md) | 10월 상가정보·인허가 변환 + 대장 2,918동 + 학원(NEIS) 층 근거로 Page 81거점 재빌드 — 정렬 격차 중앙 **+9.6 → +7.6%p**. 개선은 학원 층 몫이고 점포 갱신만으로는 나아지지 않았다(과대추정 원인은 분자 결손) |
+| [finding-page-oct-refresh-2026-10-10.md](finding-page-oct-refresh-2026-10-10.md) | 10월 상가정보·인허가 변환 + 대장 2,918동 + 학원(NEIS) 층 근거로 Page 81거점 재빌드 — 정렬 격차 중앙 **+9.6 → +7.6%p**. 개선은 학원 층 몫이고 점포 갱신만으로는 나아지지 않았다(과대추정 원인은 분자 결손). 후속(10-11): 인허가 27종 재수집 · 같은 업소 판정 보강 · Platform·GNN 10월 점포 재학습(`실력` +3.63%p) · 현장 라벨 458층 표본·채점기 |
 
 ## 진행률은 문서에서 읽지 않는다
 
