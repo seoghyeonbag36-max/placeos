@@ -675,6 +675,12 @@ export interface PlatformIdentity {
   keywords: { words: { word: string; n: number }[]; dropped: number; scanned: number };
   trends: TrendSeries[];
   demand: DemandSignal;
+  collected?: {
+    online: { items: { channel: string; title: string; link: string; published_at: string | null; query: string }[];
+      sample_count: number; collected_at: string | null; note: string };
+    consumption: { districts: { code: string; name: string; quarter: string; total_won: number | null }[];
+      source: string; note: string };
+  } | null;
   source: string;
 }
 
