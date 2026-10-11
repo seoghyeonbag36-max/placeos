@@ -2,7 +2,7 @@
   "slug": "konkuk",
   "hub_name": "건대입구·화양동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:19:07",
+  "built_at": "2026-10-11T13:47:58",
   "shown": 585,
   "excluded_total": 1479,
   "excluded_unknown": 14,
@@ -11,25 +11,25 @@
   "coverage_pct": 28.3,
   "status": {
     "full": 412,
-    "partial": 64,
+    "partial": 65,
     "high": 23,
-    "empty": 86
+    "empty": 85
   },
   "source": {
     "stores+ledger": 485,
     "polygon_only": 83,
     "pip_only": 17
   },
-  "reference_vacancy_pct": 9.5,
+  "reference_vacancy_pct": 9.4,
   "reference_buildings": 444,
   "reference_coverage_pct": 100.0,
-  "mixed_vacancy_pct": 9.2,
+  "mixed_vacancy_pct": 9.1,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 419,
-      "active": 971,
+      "active": 973,
       "capacity": 1059,
-      "vacancy_pct": 8.3
+      "vacancy_pct": 8.1
     },
     "expos_units": {
       "buildings": 25,

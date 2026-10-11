@@ -2,7 +2,7 @@
   "slug": "suyu",
   "hub_name": "수유",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:20:05",
+  "built_at": "2026-10-11T13:49:05",
   "shown": 1137,
   "excluded_total": 2756,
   "excluded_unknown": 44,
@@ -28,8 +28,8 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 579,
-      "active": 1280,
-      "capacity": 1414,
+      "active": 1281,
+      "capacity": 1415,
       "vacancy_pct": 9.5
     },
     "expos_units": {

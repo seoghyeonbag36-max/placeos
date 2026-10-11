@@ -3,17 +3,17 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>도산대로",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 18.5,
-  "alpha_street": 0.52,
-  "gap_pp": 8.9,
+  "estimated_vacancy_pct": 18.4,
+  "alpha_street": 0.523,
+  "gap_pp": 8.8,
   "buildings_used": 879,
   "rone_aligned": {
     "mid": {
       "buildings": 1036,
       "vacancy_units_pct": 31.3,
       "buildings_floor": 1036,
-      "vacancy_floor_hi_pct": 21.0,
-      "vacancy_floor_lo_pct": 31.7,
+      "vacancy_floor_hi_pct": 20.9,
+      "vacancy_floor_lo_pct": 31.6,
       "vacancy_area_pct": 23.3,
       "anchor_pct": 9.62,
       "gap_pp": 13.7

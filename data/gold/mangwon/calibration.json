@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>망원역",
   "anchor_vac_small_pct": 0.967777182311531,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 28.9,
-  "alpha_street": 0.061,
-  "gap_pp": 27.1,
+  "estimated_vacancy_pct": 29.0,
+  "alpha_street": 0.06,
+  "gap_pp": 27.2,
   "buildings_used": 740,
   "rone_aligned": {
     "mid": {
       "buildings": 627,
       "vacancy_units_pct": 25.4,
       "buildings_floor": 627,
-      "vacancy_floor_hi_pct": 15.4,
-      "vacancy_floor_lo_pct": 23.9,
-      "vacancy_area_pct": 17.7,
+      "vacancy_floor_hi_pct": 15.5,
+      "vacancy_floor_lo_pct": 24.0,
+      "vacancy_area_pct": 17.8,
       "anchor_pct": 1.75,
-      "gap_pp": 15.9
+      "gap_pp": 16.0
     },
     "small": {
       "buildings": 115,

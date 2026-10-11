@@ -2,7 +2,7 @@
   "slug": "gwangjang",
   "hub_name": "광장시장·종로4가",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:18:56",
+  "built_at": "2026-10-11T13:47:46",
   "shown": 1743,
   "excluded_total": 1081,
   "excluded_unknown": 27,
@@ -10,8 +10,8 @@
   "excluded_determined": 235,
   "coverage_pct": 61.7,
   "status": {
-    "full": 534,
-    "partial": 242,
+    "full": 535,
+    "partial": 241,
     "high": 142,
     "empty": 825
   },
@@ -28,8 +28,8 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 577,
-      "active": 1138,
-      "capacity": 1496,
+      "active": 1140,
+      "capacity": 1498,
       "vacancy_pct": 23.9
     },
     "expos_units": {

@@ -1,6 +1,6 @@
 {
   "source": "서울 열린데이터광장 OA-14979 집계구 단위 생활인구(내국인) × SGIS 과거집계구 2016 4Q 경계 PIP 배정",
-  "built_at": "2026-10-10T22:32:27+00:00",
+  "built_at": "2026-10-11T04:56:57+00:00",
   "sample_days": [
     "2026-07-01",
     "2026-07-02",
@@ -2661,9 +2661,9 @@
       "weekend": 706.8,
       "weekend_ratio": 1.324
     },
-    "hannam|vu-1117013100107360002-1": {
+    "hannam|vu-1117013100107360021-1": {
       "district_id": "hannam",
-      "unit_id": "vu-1117013100107360002-1",
+      "unit_id": "vu-1117013100107360021-1",
       "oa_code": "1103074050014",
       "foot_value": 1938.5,
       "weekday": 1957.6,
@@ -3228,18 +3228,18 @@
       "weekend": 123.7,
       "weekend_ratio": 1.043
     },
-    "itaewon|vu-1117013100107360002-1": {
+    "itaewon|vu-1117013100107360021-1": {
       "district_id": "itaewon",
-      "unit_id": "vu-1117013100107360002-1",
+      "unit_id": "vu-1117013100107360021-1",
       "oa_code": "1103074050014",
       "foot_value": 1938.5,
       "weekday": 1957.6,
       "weekend": 1890.9,
       "weekend_ratio": 0.966
     },
-    "itaewon|vu-1117013100107360002-2": {
+    "itaewon|vu-1117013100107360002-1": {
       "district_id": "itaewon",
-      "unit_id": "vu-1117013100107360002-2",
+      "unit_id": "vu-1117013100107360002-1",
       "oa_code": "1103074050014",
       "foot_value": 1938.5,
       "weekday": 1957.6,
@@ -3678,15 +3678,6 @@
       "weekend": 3656.4,
       "weekend_ratio": 1.125
     },
-    "konkuk|vu-1121510700100030070-1": {
-      "district_id": "konkuk",
-      "unit_id": "vu-1121510700100030070-1",
-      "oa_code": "1105053010009",
-      "foot_value": 301.5,
-      "weekday": 308.6,
-      "weekend": 283.7,
-      "weekend_ratio": 0.919
-    },
     "konkuk|vu-1121510500100070007-1": {
       "district_id": "konkuk",
       "unit_id": "vu-1121510500100070007-1",
@@ -3767,6 +3758,15 @@
       "weekday": 910.4,
       "weekend": 1116.2,
       "weekend_ratio": 1.226
+    },
+    "konkuk|vu-1121510500100060015-1": {
+      "district_id": "konkuk",
+      "unit_id": "vu-1121510500100060015-1",
+      "oa_code": "1105067010004",
+      "foot_value": 1186.6,
+      "weekday": 1208.0,
+      "weekend": 1133.0,
+      "weekend_ratio": 0.938
     },
     "kyunghee|vu-1123010900103350015-1": {
       "district_id": "kyunghee",
@@ -6135,15 +6135,6 @@
       "weekend": 3619.0,
       "weekend_ratio": 1.217
     },
-    "sillim|vu-1162010100109720036-1": {
-      "district_id": "sillim",
-      "unit_id": "vu-1162010100109720036-1",
-      "oa_code": "1121052010002",
-      "foot_value": 4709.7,
-      "weekday": 5045.5,
-      "weekend": 3870.3,
-      "weekend_ratio": 0.767
-    },
     "sillim|vu-1162010200114560001-1": {
       "district_id": "sillim",
       "unit_id": "vu-1162010200114560001-1",
@@ -6233,6 +6224,15 @@
       "weekday": 576.7,
       "weekend": 852.6,
       "weekend_ratio": 1.478
+    },
+    "sillim|vu-1162010200114580030-1": {
+      "district_id": "sillim",
+      "unit_id": "vu-1162010200114580030-1",
+      "oa_code": "1121069010005",
+      "foot_value": 567.7,
+      "weekday": 522.9,
+      "weekend": 679.7,
+      "weekend_ratio": 1.3
     },
     "sinchon|vu-1144011000101070088-1": {
       "district_id": "sinchon",

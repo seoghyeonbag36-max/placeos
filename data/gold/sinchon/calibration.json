@@ -3,14 +3,14 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>신촌/이대",
   "anchor_vac_small_pct": 19.5356602590119,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 23.7,
-  "alpha_street": 0.493,
-  "gap_pp": 12.0,
+  "estimated_vacancy_pct": 23.8,
+  "alpha_street": 0.491,
+  "gap_pp": 12.1,
   "buildings_used": 1108,
   "rone_aligned": {
     "mid": {
       "buildings": 678,
-      "vacancy_units_pct": 30.5,
+      "vacancy_units_pct": 30.4,
       "buildings_floor": 678,
       "vacancy_floor_hi_pct": 21.1,
       "vacancy_floor_lo_pct": 33.2,

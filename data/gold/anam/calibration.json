@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>성신여대",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 14.3,
-  "alpha_street": 0.894,
-  "gap_pp": 1.5,
+  "estimated_vacancy_pct": 14.2,
+  "alpha_street": 0.9,
+  "gap_pp": 1.4,
   "buildings_used": 447,
   "rone_aligned": {
     "mid": {
       "buildings": 375,
       "vacancy_units_pct": 23.5,
       "buildings_floor": 375,
-      "vacancy_floor_hi_pct": 18.7,
-      "vacancy_floor_lo_pct": 33.3,
-      "vacancy_area_pct": 18.6,
+      "vacancy_floor_hi_pct": 18.6,
+      "vacancy_floor_lo_pct": 33.2,
+      "vacancy_area_pct": 18.5,
       "anchor_pct": 12.78,
-      "gap_pp": 5.8
+      "gap_pp": 5.7
     },
     "small": {
       "buildings": 101,

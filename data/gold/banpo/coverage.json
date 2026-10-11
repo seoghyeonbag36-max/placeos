@@ -2,7 +2,7 @@
   "slug": "banpo",
   "hub_name": "고속터미널·반포",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:19:11",
+  "built_at": "2026-10-11T13:48:01",
   "shown": 134,
   "excluded_total": 184,
   "excluded_unknown": 9,
@@ -10,8 +10,8 @@
   "excluded_determined": 62,
   "coverage_pct": 42.1,
   "status": {
-    "full": 57,
-    "partial": 31,
+    "full": 56,
+    "partial": 32,
     "high": 38,
     "empty": 8
   },
@@ -21,16 +21,16 @@
     "pip_only": 3,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 74.1,
+  "reference_vacancy_pct": 74.2,
   "reference_buildings": 80,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 88.7,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 55,
-      "active": 246,
+      "active": 245,
       "capacity": 266,
-      "vacancy_pct": 7.5
+      "vacancy_pct": 7.9
     },
     "expos_units": {
       "buildings": 25,

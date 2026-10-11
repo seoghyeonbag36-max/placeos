@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>이태원",
   "anchor_vac_small_pct": 3.85089245838018,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 23.5,
-  "alpha_street": 0.609,
-  "gap_pp": 9.2,
+  "estimated_vacancy_pct": 23.6,
+  "alpha_street": 0.607,
+  "gap_pp": 9.3,
   "buildings_used": 453,
   "rone_aligned": {
     "mid": {
       "buildings": 333,
       "vacancy_units_pct": 24.0,
       "buildings_floor": 333,
-      "vacancy_floor_hi_pct": 21.7,
+      "vacancy_floor_hi_pct": 21.8,
       "vacancy_floor_lo_pct": 36.3,
-      "vacancy_area_pct": 22.4,
+      "vacancy_area_pct": 22.5,
       "anchor_pct": 14.31,
-      "gap_pp": 8.1
+      "gap_pp": 8.2
     },
     "small": {
       "buildings": 126,

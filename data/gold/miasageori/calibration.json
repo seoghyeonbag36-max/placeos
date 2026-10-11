@@ -3,9 +3,9 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>미아사거리",
   "anchor_vac_small_pct": 9.0332654790052,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 18.3,
-  "alpha_street": 0.373,
-  "gap_pp": 11.5,
+  "estimated_vacancy_pct": 18.2,
+  "alpha_street": 0.375,
+  "gap_pp": 11.4,
   "buildings_used": 551,
   "rone_aligned": {
     "mid": {

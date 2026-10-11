@@ -2,7 +2,7 @@
   "slug": "chungmuro",
   "hub_name": "충무로",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:19:54",
+  "built_at": "2026-10-11T13:48:50",
   "shown": 2034,
   "excluded_total": 1419,
   "excluded_unknown": 44,
@@ -11,8 +11,8 @@
   "coverage_pct": 58.9,
   "status": {
     "full": 861,
-    "partial": 229,
-    "high": 143,
+    "partial": 230,
+    "high": 142,
     "empty": 801
   },
   "source": {
@@ -28,8 +28,8 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 759,
-      "active": 1793,
-      "capacity": 2092,
+      "active": 1795,
+      "capacity": 2094,
       "vacancy_pct": 14.3
     },
     "expos_units": {

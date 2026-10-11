@@ -2,23 +2,23 @@
   "slug": "myeongdong",
   "hub_name": "명동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:18:30",
-  "shown": 1079,
-  "excluded_total": 491,
+  "built_at": "2026-10-11T13:47:20",
+  "shown": 1081,
+  "excluded_total": 489,
   "excluded_unknown": 66,
-  "excluded_non_commercial": 328,
+  "excluded_non_commercial": 326,
   "excluded_determined": 97,
-  "coverage_pct": 68.7,
+  "coverage_pct": 68.9,
   "status": {
-    "full": 617,
-    "partial": 154,
-    "high": 132,
-    "empty": 176
+    "full": 619,
+    "partial": 156,
+    "high": 131,
+    "empty": 175
   },
   "source": {
     "stores+ledger": 712,
-    "pip_only": 124,
-    "polygon_only": 172,
+    "pip_only": 127,
+    "polygon_only": 171,
     "stores+ledger+pip": 71
   },
   "reference_vacancy_pct": 56.4,
@@ -28,13 +28,13 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 620,
-      "active": 1899,
-      "capacity": 2286,
-      "vacancy_pct": 16.9
+      "active": 1900,
+      "capacity": 2288,
+      "vacancy_pct": 17.0
     },
     "expos_units": {
       "buildings": 31,
-      "active": 425,
+      "active": 426,
       "capacity": 3043,
       "vacancy_pct": 86.0
     }

@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>압구정",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 25.1,
-  "alpha_street": 0.316,
-  "gap_pp": 17.2,
+  "estimated_vacancy_pct": 24.7,
+  "alpha_street": 0.321,
+  "gap_pp": 16.8,
   "buildings_used": 668,
   "rone_aligned": {
     "mid": {
       "buildings": 751,
       "vacancy_units_pct": 30.7,
       "buildings_floor": 751,
-      "vacancy_floor_hi_pct": 23.8,
-      "vacancy_floor_lo_pct": 33.3,
-      "vacancy_area_pct": 27.5,
+      "vacancy_floor_hi_pct": 23.6,
+      "vacancy_floor_lo_pct": 33.1,
+      "vacancy_area_pct": 27.3,
       "anchor_pct": 7.92,
-      "gap_pp": 19.6
+      "gap_pp": 19.4
     },
     "small": {
       "buildings": 66,

@@ -2,39 +2,39 @@
   "slug": "gangnam",
   "hub_name": "강남역·강남대로",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:18:48",
-  "shown": 988,
-  "excluded_total": 665,
+  "built_at": "2026-10-11T13:47:39",
+  "shown": 987,
+  "excluded_total": 666,
   "excluded_unknown": 28,
-  "excluded_non_commercial": 511,
+  "excluded_non_commercial": 512,
   "excluded_determined": 126,
-  "coverage_pct": 59.8,
+  "coverage_pct": 59.7,
   "status": {
-    "full": 532,
+    "full": 533,
     "partial": 196,
-    "high": 88,
+    "high": 86,
     "empty": 172
   },
   "source": {
     "stores+ledger": 752,
-    "pip_only": 66,
+    "pip_only": 65,
     "polygon_only": 167,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 31.0,
+  "reference_vacancy_pct": 30.9,
   "reference_buildings": 673,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 41.4,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 546,
-      "active": 2094,
-      "capacity": 2373,
-      "vacancy_pct": 11.8
+      "active": 2101,
+      "capacity": 2375,
+      "vacancy_pct": 11.5
     },
     "expos_units": {
       "buildings": 127,
-      "active": 1978,
+      "active": 1979,
       "capacity": 3528,
       "vacancy_pct": 43.9
     }

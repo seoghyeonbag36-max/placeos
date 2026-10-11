@@ -3,9 +3,9 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>왕십리",
   "anchor_vac_small_pct": 0.0,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 20.9,
+  "estimated_vacancy_pct": 21.0,
   "alpha_street": 0.086,
-  "gap_pp": 19.1,
+  "gap_pp": 19.2,
   "buildings_used": 783,
   "rone_aligned": {
     "mid": {
@@ -13,7 +13,7 @@
       "vacancy_units_pct": 22.0,
       "buildings_floor": 458,
       "vacancy_floor_hi_pct": 17.7,
-      "vacancy_floor_lo_pct": 31.8,
+      "vacancy_floor_lo_pct": 31.7,
       "vacancy_area_pct": 18.0,
       "anchor_pct": 1.8,
       "gap_pp": 16.2

@@ -2,7 +2,7 @@
   "slug": "gildong",
   "hub_name": "길동역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:20:28",
+  "built_at": "2026-10-11T13:49:36",
   "shown": 590,
   "excluded_total": 1548,
   "excluded_unknown": 8,
@@ -21,15 +21,15 @@
     "pip_only": 28,
     "stores+ledger+pip": 3
   },
-  "reference_vacancy_pct": 18.5,
+  "reference_vacancy_pct": 18.4,
   "reference_buildings": 399,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 22.6,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 290,
-      "active": 682,
-      "capacity": 758,
+      "active": 683,
+      "capacity": 759,
       "vacancy_pct": 10.0
     },
     "expos_units": {

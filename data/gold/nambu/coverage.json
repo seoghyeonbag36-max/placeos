@@ -2,7 +2,7 @@
   "slug": "nambu",
   "hub_name": "남부터미널",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:19:55",
+  "built_at": "2026-10-11T13:48:52",
   "shown": 483,
   "excluded_total": 583,
   "excluded_unknown": 9,
@@ -28,9 +28,9 @@
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 234,
-      "active": 608,
-      "capacity": 709,
-      "vacancy_pct": 14.2
+      "active": 607,
+      "capacity": 708,
+      "vacancy_pct": 14.3
     },
     "expos_units": {
       "buildings": 52,

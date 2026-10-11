@@ -3,9 +3,9 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>군자",
   "anchor_vac_small_pct": 6.83743606138107,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 13.8,
-  "alpha_street": 0.556,
-  "gap_pp": 6.1,
+  "estimated_vacancy_pct": 13.9,
+  "alpha_street": 0.552,
+  "gap_pp": 6.2,
   "buildings_used": 342,
   "rone_aligned": {
     "mid": {

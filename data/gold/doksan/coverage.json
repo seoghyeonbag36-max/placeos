@@ -2,21 +2,21 @@
   "slug": "doksan",
   "hub_name": "독산",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:20:21",
-  "shown": 245,
-  "excluded_total": 610,
+  "built_at": "2026-10-11T13:49:27",
+  "shown": 244,
+  "excluded_total": 611,
   "excluded_unknown": 2,
-  "excluded_non_commercial": 455,
+  "excluded_non_commercial": 456,
   "excluded_determined": 153,
-  "coverage_pct": 28.7,
+  "coverage_pct": 28.5,
   "status": {
     "full": 137,
-    "partial": 29,
+    "partial": 28,
     "high": 12,
     "empty": 67
   },
   "source": {
-    "pip_only": 45,
+    "pip_only": 44,
     "stores+ledger": 133,
     "polygon_only": 67
   },

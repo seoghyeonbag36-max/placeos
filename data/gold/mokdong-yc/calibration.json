@@ -3,9 +3,9 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>목동",
   "anchor_vac_small_pct": 1.57689061754669,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 10.6,
-  "alpha_street": 0.943,
-  "gap_pp": 0.6,
+  "estimated_vacancy_pct": 10.5,
+  "alpha_street": 0.952,
+  "gap_pp": 0.5,
   "buildings_used": 397,
   "rone_aligned": {
     "mid": {

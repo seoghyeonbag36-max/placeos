@@ -1,12 +1,12 @@
 {
   "source": "Gold 건물 마스터(com_floors·occ_floors·unknown_n) + 건축물대장 층별개요(bronze bldg_flr_raw — 층별 면적·주용도)",
-  "built_at": "2026-10-10T22:21:12+00:00",
+  "built_at": "2026-10-11T04:50:31+00:00",
   "note": "유닛 = (건물, 층). vacant_units.json 과 **다른 것을 센다** — 저쪽은 통째로 빈 건물 1동 = 유닛 1개(3-Tier ROI 모델의 표본)이고, 여기는 빈 층이 있는 모든 건물의 층마다 1개(화면에 거는 매물 목록)라 `partial` 건물이 들어온다. 층을 쪼갠 표본으로 ROI 트립와이어를 재면 중앙값 유닛이 상층부로 올라가 프라임 프리미엄 부호가 뒤집힌다 — 2026-08-26 에 실측하고 되돌린 자리다(docs/feature-posting.md §0-Q). 그래서 이 파일은 그 표본을 대체하지 않는다. certainty=confirmed 는 층 미상 점포(상가정보 flrNo 공란 약 30%)를 낮은 층부터 다 앉히고도 남은 층이라 비었음이 확정이고, probable 은 그 배정에 먹힌 층이라 층 미상 점포가 다른 층에 있으면 빈다 — 둘을 같은 것으로 그리지 말 것. 배정 규칙은 build_page_master._aggregate 의 상한 계산과 같다. area 는 그 층의 층별개요 실측 면적이다(vacant_units 의 균등분할과 다르다). ⚠ 한 층에 호실이 여럿이면 **그 층 전체**의 면적이며, 호실 단위로는 내려갈 수 없다(§0-R·§0-S). purps 는 대장이 그 층에 허용한 용도다 — 업종 후보를 거르는 근거이지 현재 영업 중인 업종이 아니다.",
   "counts": {
-    "units": 541,
-    "confirmed": 456,
-    "probable": 85,
-    "buildings": 301
+    "units": 537,
+    "confirmed": 453,
+    "probable": 84,
+    "buildings": 300
   },
   "units": [
     {
@@ -3345,33 +3345,6 @@
       ],
       "unknown_n": 0,
       "was": "한식"
-    },
-    {
-      "id": "vfu-1144012400105700030-2",
-      "building_id": "1144012400105700030-1",
-      "pnu": "1144012400105700030",
-      "bldgs_on_pnu": 1,
-      "n": "성산",
-      "lat": 37.558643,
-      "lng": 126.920195,
-      "floor": 2,
-      "floor_label": "2F",
-      "certainty": "confirmed",
-      "area": 37,
-      "area_m2": 122.6,
-      "purps": "기타제2종근린생활시설",
-      "bld_status": "high",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 75.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [],
-      "unknown_n": 1,
-      "was": "자동차 수리·세차"
     },
     {
       "id": "vfu-1144012100101620008-2",
@@ -6868,33 +6841,6 @@
       "was": "기타 숙박"
     },
     {
-      "id": "vfu-1144012400105700030-3",
-      "building_id": "1144012400105700030-1",
-      "pnu": "1144012400105700030",
-      "bldgs_on_pnu": 1,
-      "n": "성산",
-      "lat": 37.558643,
-      "lng": 126.920195,
-      "floor": 3,
-      "floor_label": "3F",
-      "certainty": "confirmed",
-      "area": 37,
-      "area_m2": 122.6,
-      "purps": "기타제2종근린생활시설",
-      "bld_status": "high",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 75.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [],
-      "unknown_n": 1,
-      "was": "자동차 수리·세차"
-    },
-    {
       "id": "vfu-1144012100102000027-3",
       "building_id": "1144012100102000027-1",
       "pnu": "1144012100102000027",
@@ -9225,33 +9171,6 @@
       "was": "오락용품 소매"
     },
     {
-      "id": "vfu-1144012400105700030-4",
-      "building_id": "1144012400105700030-1",
-      "pnu": "1144012400105700030",
-      "bldgs_on_pnu": 1,
-      "n": "성산",
-      "lat": 37.558643,
-      "lng": 126.920195,
-      "floor": 4,
-      "floor_label": "4F",
-      "certainty": "confirmed",
-      "area": 37,
-      "area_m2": 122.6,
-      "purps": "기타제2종근린생활시설",
-      "bld_status": "high",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 75.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [],
-      "unknown_n": 1,
-      "was": "자동차 수리·세차"
-    },
-    {
       "id": "vfu-1144012000103450030-4",
       "building_id": "1144012000103450030-1",
       "pnu": "1144012000103450030",
@@ -9469,13 +9388,17 @@
       "purps": "학원",
       "bld_status": "partial",
       "bld_floors": 4,
-      "bld_vacancy_rate": 50.0,
+      "bld_vacancy_rate": 25.0,
       "com_floors": [
         1,
+        2,
+        3,
         4
       ],
       "occ_floors": [
-        1
+        1,
+        2,
+        3
       ],
       "unknown_n": 0,
       "was": "비알코올 "
@@ -14217,33 +14140,6 @@
       ],
       "unknown_n": 1,
       "was": "기타 생활용품 소매"
-    },
-    {
-      "id": "vfu-1144012400105700030-1",
-      "building_id": "1144012400105700030-1",
-      "pnu": "1144012400105700030",
-      "bldgs_on_pnu": 1,
-      "n": "성산",
-      "lat": 37.558643,
-      "lng": 126.920195,
-      "floor": 1,
-      "floor_label": "1F",
-      "certainty": "probable",
-      "area": 37,
-      "area_m2": 122.6,
-      "purps": "기타제1종근린생활시설",
-      "bld_status": "high",
-      "bld_floors": 4,
-      "bld_vacancy_rate": 75.0,
-      "com_floors": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "occ_floors": [],
-      "unknown_n": 1,
-      "was": "자동차 수리·세차"
     },
     {
       "id": "vfu-1144012000103320030-1",

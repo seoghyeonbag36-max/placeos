@@ -2,7 +2,7 @@
   "slug": "guui",
   "hub_name": "구의역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:20:43",
+  "built_at": "2026-10-11T13:49:59",
   "shown": 590,
   "excluded_total": 1872,
   "excluded_unknown": 16,
@@ -11,8 +11,8 @@
   "coverage_pct": 24.0,
   "status": {
     "full": 416,
-    "partial": 51,
-    "high": 39,
+    "partial": 52,
+    "high": 38,
     "empty": 84
   },
   "source": {

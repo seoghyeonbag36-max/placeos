@@ -10,13 +10,13 @@
   "rone_aligned": {
     "mid": {
       "buildings": 229,
-      "vacancy_units_pct": 27.3,
+      "vacancy_units_pct": 27.4,
       "buildings_floor": 229,
       "vacancy_floor_hi_pct": 20.9,
-      "vacancy_floor_lo_pct": 34.4,
-      "vacancy_area_pct": 12.3,
+      "vacancy_floor_lo_pct": 34.3,
+      "vacancy_area_pct": 12.2,
       "anchor_pct": 15.93,
-      "gap_pp": -3.6
+      "gap_pp": -3.7
     },
     "small": {
       "buildings": 292,

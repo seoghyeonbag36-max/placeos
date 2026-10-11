@@ -2,7 +2,7 @@
   "slug": "nonhyeon",
   "hub_name": "논현동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-11T07:19:38",
+  "built_at": "2026-10-11T13:48:33",
   "shown": 842,
   "excluded_total": 1073,
   "excluded_unknown": 17,
@@ -10,9 +10,9 @@
   "excluded_determined": 185,
   "coverage_pct": 44.0,
   "status": {
-    "full": 498,
-    "partial": 128,
-    "high": 81,
+    "full": 500,
+    "partial": 127,
+    "high": 80,
     "empty": 135
   },
   "source": {
@@ -21,7 +21,7 @@
     "polygon_only": 130,
     "pip_only": 62
   },
-  "reference_vacancy_pct": 16.0,
+  "reference_vacancy_pct": 15.9,
   "reference_buildings": 625,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 17.8,
@@ -29,8 +29,8 @@
     "floor_ouln": {
       "buildings": 562,
       "active": 1614,
-      "capacity": 1850,
-      "vacancy_pct": 12.8
+      "capacity": 1849,
+      "vacancy_pct": 12.7
     },
     "expos_units": {
       "buildings": 63,

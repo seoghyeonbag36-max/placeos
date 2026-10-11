@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>청담",
   "anchor_vac_small_pct": 2.02790292899167,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 21.1,
-  "alpha_street": 1.281,
-  "gap_pp": -5.9,
+  "estimated_vacancy_pct": 20.9,
+  "alpha_street": 1.293,
+  "gap_pp": -6.1,
   "buildings_used": 488,
   "rone_aligned": {
     "mid": {
       "buildings": 512,
       "vacancy_units_pct": 33.3,
       "buildings_floor": 512,
-      "vacancy_floor_hi_pct": 24.5,
-      "vacancy_floor_lo_pct": 33.5,
-      "vacancy_area_pct": 27.8,
+      "vacancy_floor_hi_pct": 24.4,
+      "vacancy_floor_lo_pct": 33.4,
+      "vacancy_area_pct": 27.6,
       "anchor_pct": 27.03,
-      "gap_pp": 0.8
+      "gap_pp": 0.6
     },
     "small": {
       "buildings": 42,
