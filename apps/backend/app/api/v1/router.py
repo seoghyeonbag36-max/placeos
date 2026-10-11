@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.deps import track_access
 from app.api.v1 import (
-    admin, ai, auth, benchmark, buildings, districts, feedback, founder, heatmap, marketing, metrics, travel,
+    admin, ai, auth, benchmark, buildings, districts, feedback, founder, heatmap, marketing, metrics, travel, visitor_feedback,
 )
 
 # 분석 API 공통 — 자격증명이 오면 신원을 밝히고 사용량을 남긴다(익명은 그대로 통과).
@@ -33,3 +33,6 @@ api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 # 파일럿 피드백 — KPI③ 입력. 인증 필수라 익명 데모 트래픽이 PMF 로 새지 않는다.
 api_router.include_router(feedback.router, prefix="/feedback", tags=["feedback"],
                           dependencies=_tracked)
+
+# 방문자 의견은 분석 사용량과 별도로 접수한다.
+api_router.include_router(visitor_feedback.router, prefix="/visitor-feedback", tags=["visitor-feedback"])

@@ -162,12 +162,12 @@ describe("AdminCoverage — #admin 이 KPI② 도 같은 토큰으로 부른다"
     expect(calls[0].headers["X-Admin-Token"]).toBe("good");
   });
 
-  it("섹션 내비는 세 칸 이름을 갖고, 해시(#admin)를 건드리지 않는다", () => {
+  it("섹션 내비는 네 칸 이름을 갖고, 해시(#admin)를 건드리지 않는다", () => {
     window.location.hash = "#admin";
     render(<AdminCoverage />);
     const nav = screen.getByRole("navigation", { name: "관리자 섹션" });
     expect(within(nav).getAllByRole("button").map((b) => b.textContent))
-      .toEqual(["KPI② 성능", "KPI③ 고객 검증", "지도 커버리지"]);
+      .toEqual(["KPI② 성능", "KPI③ 고객 검증", "방문자 의견", "지도 커버리지"]);
     fireEvent.click(within(nav).getByRole("button", { name: "KPI③ 고객 검증" }));
     expect(window.location.hash).toBe("#admin");
   });

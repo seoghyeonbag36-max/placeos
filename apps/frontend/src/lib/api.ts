@@ -1356,3 +1356,20 @@ export async function searchTravelAddresses(query: string, signal?: AbortSignal)
   if (!res.ok) throw new Error("주소 검색 실패");
   return res.json();
 }
+
+/** 방문자 직접 제출 의견. 익명 접수이며 파일럿 NPS와 별도다. */
+export interface VisitorFeedbackInput { category: "review" | "bug" | "suggestion"; message: string; page: string; contact?: string }
+export const submitVisitorFeedback = (body: VisitorFeedbackInput) =>
+  accountRequest<{ id: string; created_at: string }>("POST", "/visitor-feedback", { body });
+
+export interface VisitorFeedbackRecord { id: string; category: string; message: string; page: string; contact: string | null; status: string; notification_status: string; created_at: string }
+export async function visitorFeedbackAdmin(token: string, id?: string, status?: string, offset = 0): Promise<VisitorFeedbackRecord[]> {
+  const res = await fetch(`${BASE}/visitor-feedback${id ? `/${id}` : `?offset=${offset}`}`, {
+    method: id ? "PATCH" : "GET",
+    headers: { "X-Admin-Token": token, ...(id ? { "Content-Type": "application/json" } : {}) },
+    ...(id ? { body: JSON.stringify({ status }) } : {}),
+  });
+  if (!res.ok) throw new ApiError(res.status, null, "방문자 의견 관리 요청 실패");
+  const data = await res.json() as VisitorFeedbackRecord | VisitorFeedbackRecord[];
+  return Array.isArray(data) ? data : [data];
+}

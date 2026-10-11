@@ -1,3 +1,4 @@
+import AdminVisitorFeedback from "./AdminVisitorFeedback";
 import { useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
@@ -26,6 +27,7 @@ const TOKEN_KEY = "spaceos.adminToken";
 const SECTIONS = [
   { id: "admin-kpi2", label: "KPI② 성능" },
   { id: "admin-kpi3", label: "KPI③ 고객 검증" },
+  { id: "admin-visitor-feedback", label: "방문자 의견" },
   { id: "admin-coverage", label: "지도 커버리지" },
 ] as const;
 
@@ -114,6 +116,7 @@ export default function AdminCoverage() {
 
       <AdminLatency request={panels} />
       <AdminKpi3 request={panels} />
+      <AdminVisitorFeedback request={panels} />
 
       <h2 className="admin-kpi3-title" id="admin-coverage">지도 커버리지</h2>
       <p className="admin-cov-note">
