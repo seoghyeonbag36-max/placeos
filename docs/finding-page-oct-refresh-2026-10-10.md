@@ -139,7 +139,8 @@ GNN 판정 — **`실력`, 서빙 교체**(`python scripts/kpi_baseline.py`). �
 - **블라인드** — `labels.csv` 와 입력 페이지에는 계층·예측이 없다. `key.csv`·`design.json` 은 채점기만 읽는다.
 - **입력** — claude.ai 비공개 페이지(소유자만 열람, 함께 할 사람은 페이지의 공유 메뉴에서 기여자 이상으로 추가). 층마다
   네이버 지도·카카오 로드뷰 링크와 상태(공실·부분공실·영업·불명)·입주 용도·확인 방법·날짜·메모를 저장하고,
-  `labels.csv` 형식으로 내보낸다.
+  `labels.csv` 형식으로 내보낸다. 페이지 원본은 `data/validation/label_sheet/`(`index.html` + 표본의 블라인드 열만
+  담은 `sample.json`) — 라벨은 페이지의 db `labels` 컬렉션에 문서 하나당 한 층(`fs-<지번>-<층>`)으로 남는다.
 - **채점** — 내보낸 파일을 `data/validation/floor_sample_20261011/labels.csv` 로 덮고
   `python -m data.validation.score_floor_labels --tag 20261011 --json reports/floor_labels_20261011.json`.
   화면 빈 층 정밀도(엄격=공실 · 관대=공실+부분공실) · 층 공실률 · 재현율을 계층 가중으로 내고, 지번 군집 부트스트랩

@@ -1,0 +1,354 @@
+<title>층 공실 검증 시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 현장 조사표: 한 화면 = 한 층. 상단에 진행률·필터 띠, 아래로 조사 카드가 쌓인다(폰 한 손 조작). */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #18201d;
+  --muted: #5b6662;
+  --line: #d6dcd9;
+  --accent: #0f5e59;
+  --accent-ink: #ffffff;
+  --vac: #b4400f;
+  --part: #a86b12;
+  --open: #2c7148;
+  --unk: #66707a;
+  --chip: #e8edeb;
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111614; --surface: #1a211e; --ink: #e7ecea; --muted: #9aa6a1; --line: #2f3a36;
+    --accent: #58b8ae; --accent-ink: #0b1513; --vac: #f08a5d; --part: #e3b04b; --open: #6cc492;
+    --unk: #a3adb6; --chip: #26302c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111614; --surface: #1a211e; --ink: #e7ecea; --muted: #9aa6a1; --line: #2f3a36;
+  --accent: #58b8ae; --accent-ink: #0b1513; --vac: #f08a5d; --part: #e3b04b; --open: #6cc492;
+  --unk: #a3adb6; --chip: #26302c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 0 48px; }
+header.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); padding-block: 12px 10px; display: grid; gap: 10px;
+}
+h1 { font-size: 1.15rem; font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.sub { color: var(--muted); font-size: 0.85rem; margin: 2px 0 0; }
+.progress { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.meter { flex: 1 1 160px; height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; min-width: 0; }
+.meter > i { display: block; height: 100%; background: var(--accent); width: 0%; transition: width .3s; }
+.count { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.9rem; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filters select, .filters input { font: inherit; font-size: 0.9rem; padding: 7px 10px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); min-width: 0; }
+.filters input { flex: 1 1 140px; }
+.banner { margin-top: 14px; padding: 10px 12px; border-radius: var(--r); background: var(--chip); color: var(--ink); font-size: 0.88rem; }
+.banner[hidden] { display: none; }
+details.guide { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; }
+details.guide summary { cursor: pointer; font-weight: 600; }
+details.guide table { border-collapse: collapse; width: 100%; font-size: 0.86rem; margin-top: 8px; }
+details.guide td, details.guide th { border-top: 1px solid var(--line); padding: 6px 6px; text-align: left; vertical-align: top; }
+.guide-scroll { overflow-x: auto; }
+.list { display: grid; gap: 12px; margin-top: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.card.done { border-left: 4px solid var(--state, var(--accent)); }
+.head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.floor { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.hub { font-size: 0.78rem; font-weight: 600; color: var(--accent); background: var(--chip); padding: 2px 8px; border-radius: 99px; letter-spacing: .02em; }
+.addr { font-size: 0.95rem; min-width: 0; overflow-wrap: anywhere; user-select: text; }
+.meta { color: var(--muted); font-size: 0.82rem; display: flex; gap: 12px; flex-wrap: wrap; }
+.meta code { font-family: var(--mono); font-size: 0.78rem; }
+.links { display: flex; gap: 8px; flex-wrap: wrap; }
+.links a { font-size: 0.85rem; color: var(--accent); text-decoration: none; border: 1px solid var(--line); padding: 5px 10px; border-radius: 8px; }
+.links a:hover { border-color: var(--accent); }
+.group { display: grid; gap: 6px; }
+.group > span { font-size: 0.78rem; color: var(--muted); letter-spacing: .04em; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg button { font: inherit; font-size: 0.9rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; min-height: 40px; }
+.seg button[aria-pressed="true"] { background: var(--sel, var(--accent)); border-color: var(--sel, var(--accent)); color: var(--accent-ink); font-weight: 600; }
+.seg button[data-v="공실"] { --sel: var(--vac); }
+.seg button[data-v="부분공실"] { --sel: var(--part); }
+.seg button[data-v="영업"] { --sel: var(--open); }
+.seg button[data-v="불명"] { --sel: var(--unk); }
+.row2 { display: flex; gap: 8px; flex-wrap: wrap; }
+.row2 input { font: inherit; font-size: 0.9rem; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); min-width: 0; }
+.row2 input[type="date"] { flex: 0 1 170px; }
+.row2 input.memo { flex: 1 1 180px; }
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.save { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer; min-height: 40px; }
+.save:disabled { opacity: .45; cursor: not-allowed; }
+.ghost { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.note { font-size: 0.82rem; color: var(--muted); }
+.summary { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.9rem; }
+.pill { font-weight: 600; padding: 2px 10px; border-radius: 99px; color: var(--accent-ink); background: var(--state, var(--accent)); }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+.foot { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .meter > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div>
+      <h1>층 공실 검증 시트</h1>
+      <p class="sub" id="sub">표본을 불러오는 중…</p>
+    </div>
+    <div class="progress">
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <span class="count" id="count">0 / 0</span>
+    </div>
+    <div class="filters">
+      <select id="f-hub" aria-label="거점"><option value="">전체 거점</option></select>
+      <select id="f-state" aria-label="상태">
+        <option value="todo">미확인만</option>
+        <option value="all">전체</option>
+        <option value="done">확인함</option>
+      </select>
+      <input id="f-q" type="search" placeholder="주소로 찾기" aria-label="주소로 찾기">
+    </div>
+  </header>
+
+  <p class="banner" id="banner" hidden></p>
+
+  <details class="guide">
+    <summary>라벨 기준 (먼저 읽기)</summary>
+    <p>한 장 = <b>한 지번의 한 층</b>입니다. 한 지번에 동이 여럿이면 그 지번의 같은 층 전체를 하나로 봅니다. 층은 지상 기준입니다.</p>
+    <p><b>블라인드</b>: PlaceOS 화면에서 이 건물을 미리 보지 마세요. 예측을 알고 보면 판정이 예측 쪽으로 기웁니다.</p>
+    <div class="guide-scroll">
+      <table>
+        <tr><th>상태</th><th>뜻</th></tr>
+        <tr><td>공실</td><td>그 층에 영업·입주 중인 호실이 없다 (임대 현수막·잠김·빈 사무실·철거 중 포함)</td></tr>
+        <tr><td>부분공실</td><td>입주한 호실과 빈 호실이 섞여 있다</td></tr>
+        <tr><td>영업</td><td>빈 호실이 없거나 거의 없다. 점포가 아니라 사무실·학원·병원·주거로 쓰여도 영업</td></tr>
+        <tr><td>불명</td><td>들어가 볼 수 없고 외부 정보로도 판정할 수 없다 (채점에서 빠진다)</td></tr>
+      </table>
+    </div>
+    <p>확인 방법은 그대로 적습니다. 거리뷰만 보고 판정한 상층은 <b>로드뷰</b>로 적으세요. 촬영 시점이 몇 년 전일 수 있어 따로 갈라 봅니다.</p>
+  </details>
+
+  <div class="list" id="list" aria-live="polite"></div>
+  <p class="empty" id="empty" hidden></p>
+
+  <div class="foot">
+    <button class="ghost" id="export" type="button" hidden>labels.csv 내보내기</button>
+    <span class="note" id="foot-note"></span>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const STATES = ["공실", "부분공실", "영업", "불명"];
+  const USES = ["점포", "사무실", "학원", "의원", "주거", "창고", "기타"];
+  const METHODS = ["현장", "로드뷰", "전화", "중개사", "기타"];
+  const STATE_VAR = { "공실": "--vac", "부분공실": "--part", "영업": "--open", "불명": "--unk" };
+  const $ = (id) => document.getElementById(id);
+
+  let sample = { items: [], tag: "" };
+  const labels = new Map();          // id -> 저장된 라벨
+  const drafts = new Map();          // id -> 편집 중인 값
+  const editing = new Set();         // 저장 뒤 다시 여는 카드
+  let db = null, me = null, canWrite = true, downloads = null;
+
+  const today = () => {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  };
+
+  function draftOf(id) {
+    if (!drafts.has(id)) {
+      const s = labels.get(id) || {};
+      drafts.set(id, {
+        label_actual: s.label_actual || "", label_use: s.label_use || "",
+        label_method: s.label_method || "", label_date: s.label_date || today(), memo: s.memo || "",
+      });
+    }
+    return drafts.get(id);
+  }
+
+  function el(tag, attrs = {}, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const k of kids) if (k != null) n.append(k);
+    return n;
+  }
+
+  function seg(name, values, current, onPick) {
+    const box = el("div", { class: "seg", role: "group", "aria-label": name });
+    for (const v of values) {
+      box.append(el("button", { type: "button", "data-v": v, "aria-pressed": String(current === v),
+        text: v, onclick: () => onPick(current === v && name !== "상태" ? "" : v) }));
+    }
+    return box;
+  }
+
+  function links(it) {
+    const [lat, lng] = (it.coord || "").split(",");
+    const box = el("div", { class: "links" });
+    if (it.naver_link) box.append(el("a", { href: it.naver_link, target: "_blank", rel: "noopener", text: "네이버 지도" }));
+    if (lat && lng) {
+      box.append(el("a", { href: `https://map.kakao.com/link/roadview/${lat},${lng}`, target: "_blank", rel: "noopener", text: "카카오 로드뷰" }));
+      box.append(el("a", { href: `https://map.kakao.com/link/map/${encodeURIComponent(it.address)},${lat},${lng}`, target: "_blank", rel: "noopener", text: "카카오맵" }));
+    }
+    return box;
+  }
+
+  function cardFor(it) {
+    const saved = labels.get(it.id);
+    const card = el("article", { class: "card" + (saved ? " done" : ""), id: "c-" + it.id });
+    if (saved) card.style.setProperty("--state", `var(${STATE_VAR[saved.label_actual] || "--accent"})`);
+    card.append(
+      el("div", { class: "head" },
+        el("span", { class: "floor", text: it.floor }),
+        el("span", { class: "hub", text: it.hub })),
+      el("div", { class: "addr", text: it.address }),
+      el("div", { class: "meta" },
+        el("span", { text: it.bld_floors ? `건물 지상 ${it.bld_floors}층` : "층수 미상" }),
+        Number(it.bldgs_on_pnu) > 1 ? el("span", { text: `같은 지번 ${it.bldgs_on_pnu}동 — 층 전체를 하나로` }) : null,
+        el("code", { text: it.id })),
+      links(it),
+    );
+    if (saved && !editing.has(it.id)) {
+      const parts = [saved.label_actual, saved.label_use, saved.label_method, saved.label_date].filter(Boolean);
+      card.append(el("div", { class: "summary" },
+        el("span", { class: "pill", text: saved.label_actual }),
+        el("span", { text: parts.slice(1).join(" · ") }),
+        saved.memo ? el("span", { class: "note", text: saved.memo }) : null,
+        canWrite && db ? el("button", { class: "ghost", type: "button", text: "고치기",
+          onclick: () => { editing.add(it.id); drafts.delete(it.id); render(); } }) : null));
+      return card;
+    }
+    const d = draftOf(it.id);
+    const rerender = () => { const fresh = cardFor(it); card.replaceWith(fresh); };
+    card.append(el("div", { class: "group" }, el("span", { text: "이 층의 상태" }),
+      seg("상태", STATES, d.label_actual, (v) => { d.label_actual = v; if (v === "공실" || v === "불명") d.label_use = ""; rerender(); })));
+    if (d.label_actual === "영업" || d.label_actual === "부분공실") {
+      card.append(el("div", { class: "group" }, el("span", { text: "입주 용도" }),
+        seg("용도", USES, d.label_use, (v) => { d.label_use = v; rerender(); })));
+    }
+    card.append(el("div", { class: "group" }, el("span", { text: "어떻게 확인했나" }),
+      seg("방법", METHODS, d.label_method, (v) => { d.label_method = v; rerender(); })));
+    const date = el("input", { type: "date", id: "d-" + it.id, value: d.label_date, "aria-label": "확인 날짜",
+      oninput: (e) => { d.label_date = e.target.value; } });
+    const memo = el("input", { class: "memo", type: "text", id: "m-" + it.id, value: d.memo, placeholder: "메모 (선택)",
+      "aria-label": "메모", oninput: (e) => { d.memo = e.target.value; } });
+    card.append(el("div", { class: "row2" }, date, memo));
+    const ready = d.label_actual && d.label_method && /^\d{4}-\d{2}-\d{2}$/.test(d.label_date);
+    const status = el("span", { class: "note" });
+    const save = el("button", { class: "save", type: "button", text: "저장", disabled: !ready || !db || !canWrite,
+      onclick: async () => {
+        save.disabled = true; status.textContent = "저장 중…";
+        const body = { label_actual: d.label_actual, label_use: d.label_use, label_method: d.label_method,
+          label_date: d.label_date, memo: d.memo.trim(), by: me, at: new Date().toISOString() };
+        try {
+          await db.collection("labels").doc(it.id).set(body);
+          labels.set(it.id, body); editing.delete(it.id); drafts.delete(it.id);
+          render();
+        } catch (e) {
+          if (e && e.code === "invalid_argument") { canWrite = false; showBanner("이 보기에서는 저장할 수 없습니다. 기여자 이상 권한으로 열어 주세요."); }
+          status.textContent = e && e.code === "quota_exceeded" ? "저장 공간이 찼습니다." : "저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.";
+          save.disabled = false;
+        }
+      } });
+    const acts = el("div", { class: "actions" }, save, status);
+    if (saved) acts.append(el("button", { class: "ghost", type: "button", text: "취소",
+      onclick: () => { editing.delete(it.id); drafts.delete(it.id); render(); } }));
+    card.append(acts);
+    return card;
+  }
+
+  function filtered() {
+    const hub = $("f-hub").value, st = $("f-state").value, q = $("f-q").value.trim();
+    return sample.items.filter((it) =>
+      (!hub || it.hub === hub) &&
+      (st === "all" || (st === "done") === labels.has(it.id)) &&
+      (!q || it.address.includes(q)));
+  }
+
+  function render() {
+    const total = sample.items.length;
+    const done = sample.items.filter((it) => labels.has(it.id)).length;
+    const unknown = sample.items.filter((it) => (labels.get(it.id) || {}).label_actual === "불명").length;
+    $("count").textContent = `${done} / ${total}` + (unknown ? ` · 불명 ${unknown}` : "");
+    $("meter").style.width = total ? `${(100 * done / total).toFixed(1)}%` : "0%";
+    const rows = filtered();
+    const list = $("list");
+    list.replaceChildren(...rows.slice(0, 120).map(cardFor));
+    const empty = $("empty");
+    empty.hidden = rows.length > 0;
+    empty.textContent = total ? "이 조건에 맞는 층이 없습니다." : "표본을 불러오지 못했습니다.";
+    $("foot-note").textContent = rows.length > 120 ? `조건에 맞는 ${rows.length}층 중 앞 120층만 보입니다. 거점이나 주소로 좁혀 주세요.` : "";
+  }
+
+  function showBanner(text) { const b = $("banner"); b.textContent = text; b.hidden = !text; }
+
+  function toCsv() {
+    const cols = ["id", "hub", "address", "floor", "bld_floors", "bldgs_on_pnu", "naver_link", "coord",
+      "label_actual", "label_use", "label_date", "label_method", "memo"];
+    const esc = (v) => { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const lines = [cols.join(",")];
+    for (const it of sample.items) {
+      const l = labels.get(it.id) || {};
+      lines.push(cols.map((c) => esc(c in l ? l[c] : it[c])).join(","));
+    }
+    return "﻿" + lines.join("\n") + "\n";
+  }
+
+  async function boot() {
+    try {
+      const res = await fetch("sample.json");
+      sample = await res.json();
+    } catch (e) { sample = { items: [], tag: "" }; }
+    const hubs = [...new Set(sample.items.map((it) => it.hub))].sort((a, b) => a.localeCompare(b, "ko"));
+    for (const h of hubs) $("f-hub").append(el("option", { value: h, text: h }));
+    $("sub").textContent = sample.items.length
+      ? `표본 ${sample.tag} · ${sample.items.length}층 · ${hubs.length}거점 — 각 층의 지금 상태를 현장이나 로드뷰로 확인해 적습니다`
+      : "표본 파일이 없습니다.";
+    for (const id of ["f-hub", "f-state"]) $(id).addEventListener("change", render);
+    $("f-q").addEventListener("input", render);
+    render();
+
+    const claude = window.claude;
+    if (!claude || !claude.use) { showBanner("이 보기에서는 저장할 수 없습니다. claude.ai 에서 여세요."); return; }
+    const [dbNs, userNs, dl] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("downloads")]);
+    downloads = dl;
+    if (downloads) {
+      $("export").hidden = false;
+      $("export").addEventListener("click", async () => {
+        try { await downloads.save({ filename: `labels_${sample.tag || "floor_sample"}.csv`, data: toCsv() }); }
+        catch (e) { if (e && e.code !== "declined") $("foot-note").textContent = "파일을 만들지 못했습니다."; }
+      });
+    }
+    if (!dbNs) { showBanner("저장하려면 claude.ai 에 로그인한 상태로 여세요. 지금은 읽기만 됩니다."); render(); return; }
+    db = dbNs;
+    if (userNs) {
+      me = await userNs.id();
+      const w = await userNs.can("data.write");
+      if (w === false) { canWrite = false; showBanner("보기 권한이라 저장할 수 없습니다. 기여자 이상 권한으로 열어 주세요."); }
+    }
+    db.collection("labels").onSnapshot((snap) => {
+      labels.clear();
+      for (const d of snap.docs) if (d.exists) labels.set(d.id, d.data());
+      render();
+    }, () => showBanner("저장된 라벨을 불러오지 못했습니다. 새로고침해 주세요."));
+  }
+
+  boot();
+})();
+</script>
