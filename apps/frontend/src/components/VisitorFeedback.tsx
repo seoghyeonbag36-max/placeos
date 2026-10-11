@@ -59,8 +59,6 @@ export default function VisitorFeedback() {
         <small>의견과 현재 페이지를 운영자에게 전달합니다. 연락처는 답변을 위해 선택적으로 수집합니다. <a href="/privacy.html" target="_blank" rel="noopener noreferrer">개인정보 처리방침</a></small>
         {error && <p role="alert">{error}</p>}
         <button type="submit" disabled={pending || !category || !message.trim() || (reply && !contact.trim())}>{pending ? "보내는 중…" : "의견 보내기"}</button>
-        <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer">인스타그램에서 직접 DM 보내기</a>
-        <small>프로필로 이동한 뒤 직접 메시지를 보내 주세요.</small>
       </form>}
     </section>}
     <button ref={trigger} className="visitor-feedback-trigger" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>의견 보내기</button>
