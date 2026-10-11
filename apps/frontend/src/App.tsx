@@ -1,3 +1,4 @@
+import VisitorFeedback from "@/components/VisitorFeedback";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -363,7 +364,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
 const AUTH_HASHES = new Set(["#login", "#signup", "#account", "#feedback"]);
 
 /** 계정이 바뀌면 작업 화면을 다시 마운트한다. */
-export default function App() {
+function AppContent() {
   const [socialCallback, setSocialCallback] = useState(hasSocialCallback);
   const [token, setToken] = useState(loadToken);
   const [workspace, setWorkspace] = useState<BusinessState | null>(null);
@@ -404,4 +405,8 @@ export default function App() {
     {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>다시 시도</Button>}
     <Button variant="ghost" onClick={clearToken}>로그인 화면으로</Button></main>;
   return <WorkspaceApp key={token} token={token} initialBusiness={workspace} />;
+}
+
+export default function App() {
+  return <><AppContent /><VisitorFeedback /></>;
 }

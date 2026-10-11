@@ -15,6 +15,8 @@ from app.core.db import Base                  # noqa: E402
 from app.models import auth as _auth_models   # noqa: E402,F401  — 모델을 메타데이터에 등록
 from app.models import feedback as _fb_models  # noqa: E402,F401  — 같은 이유(KPI③ 표)
 
+from app.models import visitor_feedback as _visitor_models  # noqa: E402,F401
+
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

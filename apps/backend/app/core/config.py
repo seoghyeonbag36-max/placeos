@@ -54,6 +54,14 @@ class Settings(BaseSettings):
     # PostgreSQL + PostGIS — 계정/DB 이름 spaceos 는 이미 만들어진 로컬·컨테이너 DB 다.
     # 브랜드(PlaceOS)와 별개로 두지 않으면 기존 개발 DB 에 붙지 못한다(2026-09-12).
     database_url: str = "postgresql://spaceos:spaceos@localhost:5432/spaceos"
+    # 방문자 의견 SMTP 연결. 비밀값은 환경변수로만 주입한다.
+    feedback_smtp_host: str = ""
+    feedback_smtp_port: int = 587
+    feedback_smtp_user: str = ""
+    feedback_smtp_password: str = ""
+    feedback_mail_from: str = ""
+    feedback_mail_to: str = "seoghyeonbag36@gmail.com"
+    visitor_feedback_hourly_cap: int = Field(default=100, ge=1)
     # Redis (캐싱 / Celery 브로커)
     redis_url: str = "redis://localhost:6379/0"
     # 길찾기 전용 서버 키. 미설정 수단은 수치를 반환하지 않는다.

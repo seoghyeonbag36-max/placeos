@@ -16,6 +16,8 @@
 docs/runbook-custom-domain-placeos-kr-2026-10-08.md §5.
 """
 from __future__ import annotations
+from app.models import visitor_feedback as _visitor_models  # noqa: F401
+
 
 import re
 from pathlib import Path
@@ -40,6 +42,7 @@ TABLE_TO_POLICY_WORD = {
     "business_workspaces": "사업 정보",
     "revoked_tokens": "로그아웃",
     "pilot_feedback": "피드백",
+    "visitor_feedback": "방문자 의견",
     "social_identities": "고유 사용자 ID",
 }
 
