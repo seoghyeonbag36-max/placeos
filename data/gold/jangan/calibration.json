@@ -6,31 +6,31 @@
   "estimated_vacancy_pct": 31.0,
   "alpha_street": 0.371,
   "gap_pp": 19.5,
-  "buildings_used": 236,
+  "buildings_used": 237,
   "rone_aligned": {
     "mid": {
-      "buildings": 215,
-      "vacancy_units_pct": 13.9,
-      "buildings_floor": 215,
-      "vacancy_floor_hi_pct": 15.0,
-      "vacancy_floor_lo_pct": 33.7,
-      "vacancy_area_pct": 10.6,
+      "buildings": 217,
+      "vacancy_units_pct": 13.8,
+      "buildings_floor": 217,
+      "vacancy_floor_hi_pct": 16.3,
+      "vacancy_floor_lo_pct": 29.8,
+      "vacancy_area_pct": 12.5,
       "anchor_pct": 11.52,
-      "gap_pp": -0.9
+      "gap_pp": 1.0
     },
     "small": {
       "buildings": 14,
       "vacancy_units_pct": 0.0,
       "buildings_floor": 14,
-      "vacancy_floor_hi_pct": 5.9,
+      "vacancy_floor_hi_pct": 11.8,
       "vacancy_floor_lo_pct": 41.2,
-      "vacancy_area_pct": 9.8,
+      "vacancy_area_pct": 12.7,
       "anchor_pct": 12.6,
-      "gap_pp": -2.8
+      "gap_pp": 0.1
     },
     "mall": {
-      "buildings": 51,
-      "vacancy_units_pct": 62.5,
+      "buildings": 53,
+      "vacancy_units_pct": 62.6,
       "buildings_floor": 1,
       "vacancy_floor_hi_pct": 0.0,
       "vacancy_floor_lo_pct": 0.0,
@@ -39,11 +39,11 @@
     "note": "R-ONE 정렬 지표(2026-08-01). mid=중대형 앵커 대조 대상(일반건축물·상가 주용도·3층 이상 또는 330㎡ 초과), small=소규모 앵커, mall=집합건축물(**중대형 앵커 대조 금지** — R-ONE 집합상가는 별도 계열). 대표값 = vacancy_area_pct(면적가중·층 점유 상한). 층 밴드는 상가정보 flrNo 공란 약 30% 에서 오는 불확실성이며 lo/hi 사이가 참값 구간이다."
   },
   "primary": {
-    "estimated_vacancy_pct": 32.9,
-    "buildings": 296,
+    "estimated_vacancy_pct": 33.0,
+    "buildings": 300,
     "anchor_pct": 11.52,
-    "alpha": 0.35,
-    "gap_pp": 21.4,
+    "alpha": 0.349,
+    "gap_pp": 21.5,
     "coverage_pct": 100.0,
     "excluded_floor_approx": 0
   },
@@ -53,27 +53,27 @@
       "anchor_pct": 11.52,
       "alpha": 1.238,
       "gap_pp": -2.2,
-      "buildings": 246
+      "buildings": 248
     },
     "mall": {
-      "estimated_vacancy_pct": 60.7,
+      "estimated_vacancy_pct": 60.8,
       "anchor_pct": 11.52,
-      "alpha": 0.19,
-      "gap_pp": 49.2,
-      "buildings": 50
+      "alpha": 0.189,
+      "gap_pp": 49.3,
+      "buildings": 52
     }
   },
   "methods": {
     "expos_units": {
-      "estimated_vacancy_pct": 60.7,
-      "buildings": 50,
+      "estimated_vacancy_pct": 60.8,
+      "buildings": 52,
       "anchor_pct": 11.52,
-      "alpha": 0.19,
-      "gap_pp": 49.2
+      "alpha": 0.189,
+      "gap_pp": 49.3
     },
     "floor_ouln": {
       "estimated_vacancy_pct": 9.3,
-      "buildings": 246,
+      "buildings": 248,
       "anchor_pct": 11.52,
       "alpha": 1.238,
       "gap_pp": -2.2

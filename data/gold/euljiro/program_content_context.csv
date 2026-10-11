@@ -49,36 +49,36 @@ blog_keyword,타코,15
 blog_keyword,호선,15
 blog_keyword,카페가,15
 blog_keyword,올디스타코,15
-category,백반/한정식,588
-category,카페,370
-category,시계/귀금속 소매업,326
-category,요리 주점,242
-category,편의점,121
+category,백반/한정식,562
+category,카페,389
+category,시계/귀금속 소매업,341
+category,요리 주점,258
+category,편의점,123
+category,펜션,123
 category,돼지고기 구이/찜,114
-category,경양식,107
-category,일반 유흥 주점,107
-category,꽃집,100
-category,펜션,99
-category,슈퍼마켓,96
-category,여관/모텔,90
-category,일식 회/초밥,90
-category,김밥/만두/분식,88
-category,국/탕/찌개류,83
-category,미용실,81
-category,기타 의류 소매업,80
-category,생맥주 전문,75
-category,시계/귀금속/악기 수리업,66
+category,일반 유흥 주점,111
+category,경양식,109
+category,슈퍼마켓,102
+category,꽃집,98
+category,일식 회/초밥,98
+category,김밥/만두/분식,96
+category,국/탕/찌개류,92
+category,생맥주 전문,86
+category,여관/모텔,85
+category,미용실,77
+category,시계/귀금속/악기 수리업,69
+category,기타 의류 소매업,66
+category,화장품 소매업,63
 category,중국집,61
-category,그 외 기타 상품 전문 소매업,61
-category,화장품 소매업,56
-category,전기용품/조명장치 소매업,52
-category,기타 교육지원 서비스업,47
-category,약국,47
-category,국수/칼국수,46
-category,치과의원,46
-category,가전제품 소매업,42
-category,가발 소매업,42
-category,치킨,40
+category,호텔/리조트,56
+category,기숙사/고시원,53
+category,기타 교육지원 서비스업,52
+category,약국,51
+category,전기용품/조명장치 소매업,48
+category,치과의원,47
+category,치킨,46
+category,국수/칼국수,45
+category,가전제품 소매업,43
 trend:을지로(힙지로),2024-08-01,2.98282
 trend:을지로(힙지로),2024-09-01,2.97118
 trend:을지로(힙지로),2024-10-01,3.28771

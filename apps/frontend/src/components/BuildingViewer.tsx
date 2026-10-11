@@ -123,7 +123,7 @@ export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
       <div className="bviewer-legend">
         {measured ? (
           <>
-            <b style={{ color: OCCUPIED }}>영업</b> = 점포·인허가로 확인된 층
+            <b style={{ color: OCCUPIED }}>영업</b> = 점포·인허가·학원 등록으로 확인된 층
             ({b.occFloors?.join("·") || "없음"})
             {b.unknownN ? <> · <b style={{ color: UNCERTAIN }}>층 미상</b> = 층을 모르는 점포 {b.unknownN}곳이 앉을 수 있는 층</> : null}
             {" · "}<b style={{ color: b.statusColor }}>공실</b>
@@ -131,7 +131,7 @@ export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
             {" · "}상업 {b.comFloors?.length}개 층 중 {b.active}개 영업
             {b.floors ? ` · 지상 ${b.floors}층` : ""}
             <br />
-            <span className="dim">근거: 건축물대장 층별개요 + 상가정보 층 표기 — 층 배치는 실측이다</span>
+            <span className="dim">근거: 건축물대장 층별개요 + 상가정보·인허가·나이스 학원 층 표기 — 층 배치는 실측이다</span>
           </>
         ) : (
           <>

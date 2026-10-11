@@ -9,8 +9,15 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from scripts import quota_preflight as qp
+
+# `app.data.measured_pages` 를 직접 import 하는 테스트가 있다 — 이 파일만 돌려도 찾도록 백엔드
+# 경로를 넣는다(전체 묶음에서는 앞선 테스트가 넣어 줘서 순서에 따라 통과·실패가 갈렸다).
+_BACKEND = str(Path(__file__).resolve().parents[2] / "apps" / "backend")
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
 
 
 def test_paused_excludes_exactly_the_unserved_cities(monkeypatch):
@@ -44,3 +51,20 @@ def test_unreadable_decision_excludes_nothing(monkeypatch):
     monkeypatch.setitem(sys.modules, "app.data.measured_pages", None)
 
     assert qp._paused() == set()
+
+
+def test_unseen_buildings_counts_new_storefront_buildings_only():
+    """점포 스냅샷의 건물 중 대장 행이 없는 것만 센다 — 사무실형 업종·429 강등 규칙은 수집기와 같다."""
+    import importlib
+    qp = importlib.import_module("scripts.quota_preflight")
+    stores = [
+        {"bldMngNo": "A", "indsLclsNm": "음식"},
+        {"bldMngNo": "B", "indsLclsNm": "소매"},
+        {"bldMngNo": "C", "indsLclsNm": "부동산"},      # 사무실형 — 수집기도 그룹에서 뺀다
+        {"bldMngNo": "", "indsLclsNm": "음식"},          # 건물관리번호 없음
+        {"bldMngNo": "D", "indsLclsNm": "음식"},
+    ]
+    rows = [{"bdMgtSn": "A", "capacity_method": "floor_ouln"},
+            {"bdMgtSn": "D", "capacity_method": "rate_limited"}]   # 강등은 완료가 아니다
+    assert qp.unseen_buildings(stores, rows) == 2       # B · D
+    assert qp.unseen_buildings([], rows) == 0

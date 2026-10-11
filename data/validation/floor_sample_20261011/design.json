@@ -1,0 +1,731 @@
+{
+  "kind": "floor-stratified-random",
+  "created": "2026-10-11T05:03:02+00:00",
+  "tag": "20261011",
+  "seed": 42,
+  "scale": 1.25,
+  "hubs": [
+    "garosugil",
+    "apgujeong-rodeo",
+    "hongdae",
+    "yeonnam",
+    "ikseon",
+    "seochon",
+    "myeongdong",
+    "euljiro",
+    "seongsu",
+    "seoulsup",
+    "itaewon",
+    "hannam",
+    "songridan",
+    "gangnam",
+    "hapjeong",
+    "mangwon",
+    "samcheong",
+    "gwangjang",
+    "dongdaemun",
+    "jamsil",
+    "konkuk",
+    "yeouido",
+    "mullae",
+    "banpo",
+    "sinchon",
+    "yeonhui",
+    "cheongnyangni",
+    "sharosugil",
+    "nokdu",
+    "sillim",
+    "noryangjin",
+    "sungshin",
+    "anam",
+    "cheongdam",
+    "dosan",
+    "nonhyeon",
+    "teheran",
+    "seolleung",
+    "yongsan",
+    "namdaemun",
+    "cityhall",
+    "jamsilsaenae",
+    "garak",
+    "jangan",
+    "gongdeok",
+    "gunja",
+    "chungmuro",
+    "nambu",
+    "kyunghee",
+    "wangsimni",
+    "sadang",
+    "sukmyung",
+    "hyehwa",
+    "dangsan",
+    "miasageori",
+    "suyu",
+    "bulgwang",
+    "yeonsinnae",
+    "hwagok",
+    "kkachisan",
+    "mokdong-yc",
+    "sanggye",
+    "sangbong",
+    "oryudong",
+    "doksan",
+    "cheonho",
+    "bangbang",
+    "gildong",
+    "nowon",
+    "gurodigital",
+    "ydp-gucheong",
+    "seochoyeok",
+    "poi",
+    "dogok",
+    "yangjae",
+    "jamsil-tour",
+    "daerim",
+    "guui",
+    "maebong",
+    "gurojeonhwa",
+    "bonseobu"
+  ],
+  "n_hubs_in_frame": 81,
+  "frame": {
+    "rows_with_duplicates": 87637,
+    "unique": 78511,
+    "cross_hub_duplicates": 8457,
+    "cross_hub_class_conflicts": 77,
+    "skipped_hubs": []
+  },
+  "snapshots": {
+    "garosugil": {
+      "master_sha12": "48877138ab1c",
+      "units_sha12": "ed56a97ab7ef",
+      "units_built_at": "2026-10-11T04:50:31+00:00",
+      "rows": 2180
+    },
+    "apgujeong-rodeo": {
+      "master_sha12": "687c3f971cde",
+      "units_sha12": "2c09e733e486",
+      "units_built_at": "2026-10-11T04:50:31+00:00",
+      "rows": 2260
+    },
+    "hongdae": {
+      "master_sha12": "6c6648fa7a62",
+      "units_sha12": "b2f7d6ae43ed",
+      "units_built_at": "2026-10-11T04:50:31+00:00",
+      "rows": 3059
+    },
+    "yeonnam": {
+      "master_sha12": "5a3242ab70da",
+      "units_sha12": "879cff4ae66d",
+      "units_built_at": "2026-10-11T04:50:32+00:00",
+      "rows": 2199
+    },
+    "ikseon": {
+      "master_sha12": "8b13b516755a",
+      "units_sha12": "573c52c4f150",
+      "units_built_at": "2026-10-11T04:50:32+00:00",
+      "rows": 2189
+    },
+    "seochon": {
+      "master_sha12": "4e3892d83a7c",
+      "units_sha12": "99b085f6bf55",
+      "units_built_at": "2026-10-11T04:50:32+00:00",
+      "rows": 877
+    },
+    "myeongdong": {
+      "master_sha12": "4853aee89799",
+      "units_sha12": "afb3d9b80700",
+      "units_built_at": "2026-10-11T04:50:32+00:00",
+      "rows": 2252
+    },
+    "euljiro": {
+      "master_sha12": "9eb4516e0dc4",
+      "units_sha12": "17d48aa2fedd",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 2168
+    },
+    "seongsu": {
+      "master_sha12": "9dcc4a20782d",
+      "units_sha12": "38b13e218a5f",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 882
+    },
+    "seoulsup": {
+      "master_sha12": "ef9572e42f40",
+      "units_sha12": "908d3c55eba3",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 846
+    },
+    "itaewon": {
+      "master_sha12": "4ec2e2cd6cab",
+      "units_sha12": "60b9f924e1b4",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 1018
+    },
+    "hannam": {
+      "master_sha12": "40b238f24494",
+      "units_sha12": "b9bbf288a0f9",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 881
+    },
+    "songridan": {
+      "master_sha12": "94fcd0ab008d",
+      "units_sha12": "1e59a2baca5d",
+      "units_built_at": "2026-10-11T04:50:33+00:00",
+      "rows": 879
+    },
+    "gangnam": {
+      "master_sha12": "ec3e67976e3e",
+      "units_sha12": "e3a0b1cac741",
+      "units_built_at": "2026-10-11T04:50:34+00:00",
+      "rows": 2375
+    },
+    "hapjeong": {
+      "master_sha12": "b0b75d0cf70c",
+      "units_sha12": "b408395608c5",
+      "units_built_at": "2026-10-11T04:50:34+00:00",
+      "rows": 402
+    },
+    "mangwon": {
+      "master_sha12": "db85188b45bb",
+      "units_sha12": "461aec7330c8",
+      "units_built_at": "2026-10-11T04:50:34+00:00",
+      "rows": 1452
+    },
+    "samcheong": {
+      "master_sha12": "b69bf41c369b",
+      "units_sha12": "2fb442b6846c",
+      "units_built_at": "2026-10-11T04:50:34+00:00",
+      "rows": 497
+    },
+    "gwangjang": {
+      "master_sha12": "589db7e3b6dc",
+      "units_sha12": "990c72f4c389",
+      "units_built_at": "2026-10-11T04:50:35+00:00",
+      "rows": 1498
+    },
+    "dongdaemun": {
+      "master_sha12": "90cedc4dd757",
+      "units_sha12": "c4bb425943dc",
+      "units_built_at": "2026-10-11T04:50:35+00:00",
+      "rows": 2819
+    },
+    "jamsil": {
+      "master_sha12": "b64a0c4cff10",
+      "units_sha12": "6ffc596c8ed0",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 820
+    },
+    "konkuk": {
+      "master_sha12": "8d0804f5c017",
+      "units_sha12": "aa6f3a87c1b8",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 1059
+    },
+    "yeouido": {
+      "master_sha12": "227f80721ea1",
+      "units_sha12": "ee23f237be7d",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 347
+    },
+    "mullae": {
+      "master_sha12": "755c53a87782",
+      "units_sha12": "c8c15c356144",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 705
+    },
+    "banpo": {
+      "master_sha12": "e94d6885652a",
+      "units_sha12": "018579fa3e2f",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 266
+    },
+    "sinchon": {
+      "master_sha12": "be4e000053ba",
+      "units_sha12": "f3322e983d34",
+      "units_built_at": "2026-10-11T04:50:36+00:00",
+      "rows": 2030
+    },
+    "yeonhui": {
+      "master_sha12": "cf0eaef751aa",
+      "units_sha12": "89e521118da0",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 628
+    },
+    "cheongnyangni": {
+      "master_sha12": "1b9025b4a1c0",
+      "units_sha12": "caaa916f453e",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 1299
+    },
+    "sharosugil": {
+      "master_sha12": "36cc873738c3",
+      "units_sha12": "6843726b0b46",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 804
+    },
+    "nokdu": {
+      "master_sha12": "13e19189c6a3",
+      "units_sha12": "ce3b8aab3077",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 449
+    },
+    "sillim": {
+      "master_sha12": "df930ff0fa66",
+      "units_sha12": "2d7f414206f1",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 1437
+    },
+    "noryangjin": {
+      "master_sha12": "fab1d0ad4b98",
+      "units_sha12": "101c9fca50d9",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 598
+    },
+    "sungshin": {
+      "master_sha12": "41d2edd340f0",
+      "units_sha12": "f99832f40756",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 892
+    },
+    "anam": {
+      "master_sha12": "bddbb3aad147",
+      "units_sha12": "0ca9f75db941",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 719
+    },
+    "cheongdam": {
+      "master_sha12": "76a841d56206",
+      "units_sha12": "427f4238872d",
+      "units_built_at": "2026-10-11T04:50:37+00:00",
+      "rows": 1423
+    },
+    "dosan": {
+      "master_sha12": "57b822e720cc",
+      "units_sha12": "4be0a5b6ab8e",
+      "units_built_at": "2026-10-11T04:50:38+00:00",
+      "rows": 2793
+    },
+    "nonhyeon": {
+      "master_sha12": "cb3d0c86f4c0",
+      "units_sha12": "965e139722ef",
+      "units_built_at": "2026-10-11T04:50:38+00:00",
+      "rows": 1849
+    },
+    "teheran": {
+      "master_sha12": "852fdb852918",
+      "units_sha12": "81a2528d1e12",
+      "units_built_at": "2026-10-11T04:50:38+00:00",
+      "rows": 2013
+    },
+    "seolleung": {
+      "master_sha12": "88b077b7a4eb",
+      "units_sha12": "14e04f2e9603",
+      "units_built_at": "2026-10-11T04:50:38+00:00",
+      "rows": 2170
+    },
+    "yongsan": {
+      "master_sha12": "4ae81a677abb",
+      "units_sha12": "6776c3ce27f5",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 309
+    },
+    "namdaemun": {
+      "master_sha12": "af3469bf9d6d",
+      "units_sha12": "7954a4d03d01",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 509
+    },
+    "cityhall": {
+      "master_sha12": "d7e0c6ef19c9",
+      "units_sha12": "70b92eeed007",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 1143
+    },
+    "jamsilsaenae": {
+      "master_sha12": "abe220db2b82",
+      "units_sha12": "a1c52eca3856",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 739
+    },
+    "garak": {
+      "master_sha12": "9576450982a8",
+      "units_sha12": "23182d66d271",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 88
+    },
+    "jangan": {
+      "master_sha12": "8739ac3246e6",
+      "units_sha12": "d3e4a868779c",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 445
+    },
+    "gongdeok": {
+      "master_sha12": "dd442405be66",
+      "units_sha12": "512910bc29cd",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 487
+    },
+    "gunja": {
+      "master_sha12": "8d1757921a74",
+      "units_sha12": "587828d26772",
+      "units_built_at": "2026-10-11T04:50:39+00:00",
+      "rows": 767
+    },
+    "chungmuro": {
+      "master_sha12": "b10bd6a3c50b",
+      "units_sha12": "6b8507272765",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 2094
+    },
+    "nambu": {
+      "master_sha12": "43a2f92f2876",
+      "units_sha12": "37624ad6230e",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 708
+    },
+    "kyunghee": {
+      "master_sha12": "30d16e6210d2",
+      "units_sha12": "f85208f0162e",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 675
+    },
+    "wangsimni": {
+      "master_sha12": "0ca8c0256368",
+      "units_sha12": "647c672ecf23",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 1101
+    },
+    "sadang": {
+      "master_sha12": "66d28970f74c",
+      "units_sha12": "72d42d0b93e8",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 726
+    },
+    "sukmyung": {
+      "master_sha12": "54e1b0245415",
+      "units_sha12": "03864f5244eb",
+      "units_built_at": "2026-10-11T04:50:40+00:00",
+      "rows": 687
+    },
+    "hyehwa": {
+      "master_sha12": "2a26f4e5d692",
+      "units_sha12": "50eab0dd5cfb",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 1173
+    },
+    "dangsan": {
+      "master_sha12": "88bd9e1ab2f0",
+      "units_sha12": "340383ce7374",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 345
+    },
+    "miasageori": {
+      "master_sha12": "c90b22c037ef",
+      "units_sha12": "b6277fe74e69",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 842
+    },
+    "suyu": {
+      "master_sha12": "adc5b19f9c5f",
+      "units_sha12": "df5ddb8630d0",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 1415
+    },
+    "bulgwang": {
+      "master_sha12": "dd7697c1d025",
+      "units_sha12": "3c46117d87f6",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 665
+    },
+    "yeonsinnae": {
+      "master_sha12": "f4c104a1fab7",
+      "units_sha12": "b2bdfcfb8ddd",
+      "units_built_at": "2026-10-11T04:50:41+00:00",
+      "rows": 1234
+    },
+    "hwagok": {
+      "master_sha12": "fd6a7dd3c316",
+      "units_sha12": "a6d70a8f8122",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 761
+    },
+    "kkachisan": {
+      "master_sha12": "669a30a761d0",
+      "units_sha12": "89b5eab1f36d",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 685
+    },
+    "mokdong-yc": {
+      "master_sha12": "85e8de76fb50",
+      "units_sha12": "8990a3edffc1",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 713
+    },
+    "sanggye": {
+      "master_sha12": "bebb79cec80a",
+      "units_sha12": "ca8cf3f64034",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 688
+    },
+    "sangbong": {
+      "master_sha12": "114980393062",
+      "units_sha12": "3636846e8ac7",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 590
+    },
+    "oryudong": {
+      "master_sha12": "25c06abf76b7",
+      "units_sha12": "db38ba90ddb8",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 375
+    },
+    "doksan": {
+      "master_sha12": "422ab6cbd4f0",
+      "units_sha12": "69b9335c3930",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 97
+    },
+    "cheonho": {
+      "master_sha12": "8c67667d0d7d",
+      "units_sha12": "796bd74286be",
+      "units_built_at": "2026-10-11T04:50:42+00:00",
+      "rows": 826
+    },
+    "bangbang": {
+      "master_sha12": "9fb62201aa4b",
+      "units_sha12": "0b0d27bc1ab8",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 1296
+    },
+    "gildong": {
+      "master_sha12": "2e98773fb022",
+      "units_sha12": "c90060d17f38",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 759
+    },
+    "nowon": {
+      "master_sha12": "dbec7d96df47",
+      "units_sha12": "5b2b25c39d20",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 649
+    },
+    "gurodigital": {
+      "master_sha12": "6f410b5ce4c5",
+      "units_sha12": "a3346334e0cd",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 518
+    },
+    "ydp-gucheong": {
+      "master_sha12": "102f46ad57b3",
+      "units_sha12": "66ac9b7e049d",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 569
+    },
+    "seochoyeok": {
+      "master_sha12": "95eeec64d2e8",
+      "units_sha12": "6a302831375e",
+      "units_built_at": "2026-10-11T04:50:43+00:00",
+      "rows": 1455
+    },
+    "poi": {
+      "master_sha12": "e96e325048ab",
+      "units_sha12": "5cea4a294b16",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 1596
+    },
+    "dogok": {
+      "master_sha12": "db99eb417006",
+      "units_sha12": "913f69b0497f",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 947
+    },
+    "yangjae": {
+      "master_sha12": "2860e3dc4205",
+      "units_sha12": "0268779c9d80",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 1052
+    },
+    "jamsil-tour": {
+      "master_sha12": "ade65b1ed2b7",
+      "units_sha12": "80e5c42f3c48",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 624
+    },
+    "daerim": {
+      "master_sha12": "84a12263fddb",
+      "units_sha12": "7d7833296218",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 920
+    },
+    "guui": {
+      "master_sha12": "8ed4ee872bde",
+      "units_sha12": "a641fc986a3e",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 722
+    },
+    "maebong": {
+      "master_sha12": "fb8aa0d7d735",
+      "units_sha12": "ad6319014794",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 1015
+    },
+    "gurojeonhwa": {
+      "master_sha12": "c3a9471b0ff4",
+      "units_sha12": "1087e5a0a0fd",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 791
+    },
+    "bonseobu": {
+      "master_sha12": "cf75feefb7ec",
+      "units_sha12": "ca7214f51a1c",
+      "units_built_at": "2026-10-11T04:50:44+00:00",
+      "rows": 803
+    }
+  },
+  "unit": "(pnu, floor) — 고유 지번·층. 인접 거점 중복은 첫 거점이 가진다",
+  "strata": {
+    "vacant_confirmed|1F": {
+      "N": 1069,
+      "target": 63,
+      "n": 63,
+      "weight": 16.968254,
+      "census": false
+    },
+    "vacant_confirmed|2F+": {
+      "N": 9237,
+      "target": 125,
+      "n": 125,
+      "weight": 73.896,
+      "census": false
+    },
+    "vacant_probable|1F": {
+      "N": 1145,
+      "target": 25,
+      "n": 25,
+      "weight": 45.8,
+      "census": false
+    },
+    "vacant_probable|2F+": {
+      "N": 1411,
+      "target": 63,
+      "n": 63,
+      "weight": 22.396825,
+      "census": false
+    },
+    "occupied|1F": {
+      "N": 22792,
+      "target": 50,
+      "n": 50,
+      "weight": 455.84,
+      "census": false
+    },
+    "occupied|2F+": {
+      "N": 33389,
+      "target": 75,
+      "n": 75,
+      "weight": 445.186667,
+      "census": false
+    },
+    "unlisted|1F": {
+      "N": 2682,
+      "target": 19,
+      "n": 19,
+      "weight": 141.157895,
+      "census": false
+    },
+    "unlisted|2F+": {
+      "N": 6786,
+      "target": 38,
+      "n": 38,
+      "weight": 178.578947,
+      "census": false
+    }
+  },
+  "n_total": 458,
+  "sample_by_hub": {
+    "hongdae": 20,
+    "sinchon": 17,
+    "ikseon": 16,
+    "gwangjang": 15,
+    "poi": 15,
+    "cheongdam": 14,
+    "cheongnyangni": 14,
+    "dongdaemun": 13,
+    "nonhyeon": 12,
+    "dosan": 11,
+    "gangnam": 11,
+    "sillim": 11,
+    "hwagok": 11,
+    "apgujeong-rodeo": 10,
+    "garosugil": 10,
+    "seolleung": 9,
+    "yeonnam": 9,
+    "dogok": 8,
+    "sharosugil": 8,
+    "euljiro": 8,
+    "ydp-gucheong": 8,
+    "myeongdong": 7,
+    "cheonho": 7,
+    "seongsu": 7,
+    "bangbang": 6,
+    "hyehwa": 6,
+    "itaewon": 6,
+    "mangwon": 6,
+    "suyu": 6,
+    "anam": 6,
+    "konkuk": 6,
+    "miasageori": 6,
+    "mullae": 5,
+    "daerim": 5,
+    "nambu": 5,
+    "maebong": 5,
+    "seochon": 5,
+    "songridan": 5,
+    "bulgwang": 5,
+    "seochoyeok": 5,
+    "gildong": 5,
+    "noryangjin": 5,
+    "bonseobu": 5,
+    "cityhall": 4,
+    "hannam": 4,
+    "seoulsup": 4,
+    "wangsimni": 4,
+    "jamsilsaenae": 4,
+    "gongdeok": 4,
+    "sungshin": 4,
+    "gurodigital": 4,
+    "gunja": 3,
+    "namdaemun": 3,
+    "dangsan": 3,
+    "jangan": 3,
+    "guui": 3,
+    "yangjae": 3,
+    "kyunghee": 3,
+    "teheran": 3,
+    "sadang": 3,
+    "chungmuro": 2,
+    "sukmyung": 2,
+    "yeouido": 2,
+    "sanggye": 2,
+    "yeonsinnae": 2,
+    "gurojeonhwa": 2,
+    "sangbong": 2,
+    "samcheong": 2,
+    "nowon": 2,
+    "yeonhui": 1,
+    "nokdu": 1,
+    "mokdong-yc": 1,
+    "jamsil-tour": 1,
+    "yongsan": 1,
+    "hapjeong": 1,
+    "kkachisan": 1
+  },
+  "inference": "가중치 w = N_h / n_h. 추론 범위는 `hubs` 에 든 거점의 틀(frame)이다 — 거점을 일부만 골랐으면 81거점으로 일반화하지 않는다. 화면 빈 층의 precision = 계층 vacant_confirmed·vacant_probable 안에서 라벨이 공실인 비율(엄격) 또는 공실+부분공실(관대) — 둘 다 보고한다. 놓친 공실(recall)과 층 공실률은 occupied·unlisted 계층의 라벨을 w 로 가중해 얻는다. 같은 지번의 여러 층은 상관되니 구간은 pnu 단위 군집 부트스트랩으로.",
+  "label_values": [
+    "공실",
+    "부분공실",
+    "영업",
+    "불명"
+  ]
+}

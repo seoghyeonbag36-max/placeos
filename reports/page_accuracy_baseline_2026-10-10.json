@@ -1,0 +1,1732 @@
+{
+ "summary": {
+  "hubs": 81,
+  "aligned_gap_pp": {
+   "n": 81,
+   "median": 9.6,
+   "mean": 8.96
+  },
+  "gap_over": 70,
+  "gap_abs_gt10": 39,
+  "gap_abs_le3": 11,
+  "anchor_in_floor_band": 8,
+  "aligned_vacancy_pct": {
+   "n": 81,
+   "median": 19.3,
+   "mean": 18.51
+  },
+  "master_totals": {
+   "buildings": 61496,
+   "with_com_floors": 36200,
+   "com_floors": 105127,
+   "occ_floors": 70947,
+   "unknown_n": 19308,
+   "with_com_no_occ": 4112
+  },
+  "confirmed_floor_share_pct": 67.49,
+  "vacant_floor_units": 15366
+ },
+ "hubs": {
+  "anam": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>성신여대",
+   "mid": {
+    "buildings": 139,
+    "vacancy_floor_hi_pct": 6.0,
+    "vacancy_floor_lo_pct": 23.8,
+    "vacancy_area_pct": 5.5,
+    "anchor_pct": 12.78,
+    "gap_pp": -7.3
+   },
+   "master": {
+    "buildings": 988,
+    "with_com_floors": 145,
+    "com_floors": 440,
+    "occ_floors": 340,
+    "unknown_n": 83,
+    "with_com_no_occ": 0
+   },
+   "vacant_floor_units": 19,
+   "vacant_units": 1
+  },
+  "apgujeong-rodeo": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>압구정",
+   "mid": {
+    "buildings": 741,
+    "vacancy_floor_hi_pct": 20.9,
+    "vacancy_floor_lo_pct": 35.0,
+    "vacancy_area_pct": 23.8,
+    "anchor_pct": 7.92,
+    "gap_pp": 15.9
+   },
+   "master": {
+    "buildings": 769,
+    "with_com_floors": 608,
+    "com_floors": 2336,
+    "occ_floors": 1617,
+    "unknown_n": 331,
+    "with_com_no_occ": 51
+   },
+   "vacant_floor_units": 477,
+   "vacant_units": 12
+  },
+  "bangbang": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
+   "mid": {
+    "buildings": 405,
+    "vacancy_floor_hi_pct": 18.4,
+    "vacancy_floor_lo_pct": 30.6,
+    "vacancy_area_pct": 17.1,
+    "anchor_pct": 7.75,
+    "gap_pp": 9.3
+   },
+   "master": {
+    "buildings": 718,
+    "with_com_floors": 415,
+    "com_floors": 1467,
+    "occ_floors": 1045,
+    "unknown_n": 202,
+    "with_com_no_occ": 23
+   },
+   "vacant_floor_units": 241,
+   "vacant_units": 12
+  },
+  "banpo": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>교대역",
+   "mid": {
+    "buildings": 47,
+    "vacancy_floor_hi_pct": 12.8,
+    "vacancy_floor_lo_pct": 30.1,
+    "vacancy_area_pct": 3.6,
+    "anchor_pct": 3.74,
+    "gap_pp": -0.1
+   },
+   "master": {
+    "buildings": 134,
+    "with_com_floors": 59,
+    "com_floors": 283,
+    "occ_floors": 203,
+    "unknown_n": 52,
+    "with_com_no_occ": 4
+   },
+   "vacant_floor_units": 32,
+   "vacant_units": 6
+  },
+  "bonseobu": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>불광역",
+   "mid": {
+    "buildings": 344,
+    "vacancy_floor_hi_pct": 29.6,
+    "vacancy_floor_lo_pct": 42.7,
+    "vacancy_area_pct": 29.4,
+    "anchor_pct": 14.12,
+    "gap_pp": 15.3
+   },
+   "master": {
+    "buildings": 574,
+    "with_com_floors": 311,
+    "com_floors": 873,
+    "occ_floors": 517,
+    "unknown_n": 110,
+    "with_com_no_occ": 35
+   },
+   "vacant_floor_units": 248,
+   "vacant_units": 12
+  },
+  "bulgwang": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>불광역",
+   "mid": {
+    "buildings": 216,
+    "vacancy_floor_hi_pct": 26.5,
+    "vacancy_floor_lo_pct": 41.5,
+    "vacancy_area_pct": 24.0,
+    "anchor_pct": 14.12,
+    "gap_pp": 9.9
+   },
+   "master": {
+    "buildings": 559,
+    "with_com_floors": 318,
+    "com_floors": 839,
+    "occ_floors": 466,
+    "unknown_n": 137,
+    "with_com_no_occ": 46
+   },
+   "vacant_floor_units": 189,
+   "vacant_units": 12
+  },
+  "cheongdam": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>청담",
+   "mid": {
+    "buildings": 508,
+    "vacancy_floor_hi_pct": 22.0,
+    "vacancy_floor_lo_pct": 35.8,
+    "vacancy_area_pct": 24.6,
+    "anchor_pct": 27.03,
+    "gap_pp": -2.4
+   },
+   "master": {
+    "buildings": 636,
+    "with_com_floors": 408,
+    "com_floors": 1451,
+    "occ_floors": 958,
+    "unknown_n": 214,
+    "with_com_no_occ": 42
+   },
+   "vacant_floor_units": 344,
+   "vacant_units": 12
+  },
+  "cheongnyangni": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>청량리",
+   "mid": {
+    "buildings": 398,
+    "vacancy_floor_hi_pct": 22.7,
+    "vacancy_floor_lo_pct": 44.9,
+    "vacancy_area_pct": 20.0,
+    "anchor_pct": 12.28,
+    "gap_pp": 7.7
+   },
+   "master": {
+    "buildings": 2110,
+    "with_com_floors": 1009,
+    "com_floors": 1994,
+    "occ_floors": 1170,
+    "unknown_n": 534,
+    "with_com_no_occ": 215
+   },
+   "vacant_floor_units": 262,
+   "vacant_units": 12
+  },
+  "cheonho": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>천호",
+   "mid": {
+    "buildings": 294,
+    "vacancy_floor_hi_pct": 22.8,
+    "vacancy_floor_lo_pct": 38.5,
+    "vacancy_area_pct": 22.5,
+    "anchor_pct": 8.63,
+    "gap_pp": 13.9
+   },
+   "master": {
+    "buildings": 642,
+    "with_com_floors": 392,
+    "com_floors": 915,
+    "occ_floors": 603,
+    "unknown_n": 152,
+    "with_com_no_occ": 63
+   },
+   "vacant_floor_units": 168,
+   "vacant_units": 12
+  },
+  "chungmuro": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>충무로",
+   "mid": {
+    "buildings": 604,
+    "vacancy_floor_hi_pct": 19.3,
+    "vacancy_floor_lo_pct": 40.2,
+    "vacancy_area_pct": 23.0,
+    "anchor_pct": 3.05,
+    "gap_pp": 20.0
+   },
+   "master": {
+    "buildings": 2041,
+    "with_com_floors": 942,
+    "com_floors": 2537,
+    "occ_floors": 1700,
+    "unknown_n": 517,
+    "with_com_no_occ": 113
+   },
+   "vacant_floor_units": 325,
+   "vacant_units": 12
+  },
+  "cityhall": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>시청",
+   "mid": {
+    "buildings": 326,
+    "vacancy_floor_hi_pct": 28.8,
+    "vacancy_floor_lo_pct": 51.8,
+    "vacancy_area_pct": 19.8,
+    "anchor_pct": 11.72,
+    "gap_pp": 8.1
+   },
+   "master": {
+    "buildings": 635,
+    "with_com_floors": 422,
+    "com_floors": 1583,
+    "occ_floors": 1011,
+    "unknown_n": 440,
+    "with_com_no_occ": 73
+   },
+   "vacant_floor_units": 83,
+   "vacant_units": 10
+  },
+  "daerim": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>신림역",
+   "mid": {
+    "buildings": 413,
+    "vacancy_floor_hi_pct": 18.8,
+    "vacancy_floor_lo_pct": 34.4,
+    "vacancy_area_pct": 21.8,
+    "anchor_pct": 7.25,
+    "gap_pp": 14.5
+   },
+   "master": {
+    "buildings": 632,
+    "with_com_floors": 446,
+    "com_floors": 1063,
+    "occ_floors": 729,
+    "unknown_n": 165,
+    "with_com_no_occ": 44
+   },
+   "vacant_floor_units": 173,
+   "vacant_units": 12
+  },
+  "dangsan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>당산역",
+   "mid": {
+    "buildings": 114,
+    "vacancy_floor_hi_pct": 15.2,
+    "vacancy_floor_lo_pct": 33.4,
+    "vacancy_area_pct": 12.1,
+    "anchor_pct": 7.34,
+    "gap_pp": 4.8
+   },
+   "master": {
+    "buildings": 244,
+    "with_com_floors": 136,
+    "com_floors": 393,
+    "occ_floors": 284,
+    "unknown_n": 62,
+    "with_com_no_occ": 8
+   },
+   "vacant_floor_units": 47,
+   "vacant_units": 5
+  },
+  "dogok": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>테헤란로",
+   "mid": {
+    "buildings": 343,
+    "vacancy_floor_hi_pct": 17.3,
+    "vacancy_floor_lo_pct": 29.9,
+    "vacancy_area_pct": 20.8,
+    "anchor_pct": 9.05,
+    "gap_pp": 11.8
+   },
+   "master": {
+    "buildings": 620,
+    "with_com_floors": 347,
+    "com_floors": 1036,
+    "occ_floors": 737,
+    "unknown_n": 150,
+    "with_com_no_occ": 28
+   },
+   "vacant_floor_units": 169,
+   "vacant_units": 12
+  },
+  "doksan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>독산/시흥",
+   "mid": {
+    "buildings": 48,
+    "vacancy_floor_hi_pct": 33.6,
+    "vacancy_floor_lo_pct": 55.7,
+    "vacancy_area_pct": 31.9,
+    "anchor_pct": 14.74,
+    "gap_pp": 17.2
+   },
+   "master": {
+    "buildings": 230,
+    "with_com_floors": 59,
+    "com_floors": 138,
+    "occ_floors": 61,
+    "unknown_n": 38,
+    "with_com_no_occ": 15
+   },
+   "vacant_floor_units": 36,
+   "vacant_units": 5
+  },
+  "dongdaemun": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>동대문",
+   "mid": {
+    "buildings": 914,
+    "vacancy_floor_hi_pct": 25.6,
+    "vacancy_floor_lo_pct": 48.7,
+    "vacancy_area_pct": 22.6,
+    "anchor_pct": 17.39,
+    "gap_pp": 5.2
+   },
+   "master": {
+    "buildings": 2813,
+    "with_com_floors": 1405,
+    "com_floors": 3431,
+    "occ_floors": 1953,
+    "unknown_n": 884,
+    "with_com_no_occ": 285
+   },
+   "vacant_floor_units": 599,
+   "vacant_units": 12
+  },
+  "dosan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>도산대로",
+   "mid": {
+    "buildings": 1017,
+    "vacancy_floor_hi_pct": 19.4,
+    "vacancy_floor_lo_pct": 34.1,
+    "vacancy_area_pct": 20.9,
+    "anchor_pct": 9.62,
+    "gap_pp": 11.3
+   },
+   "master": {
+    "buildings": 1096,
+    "with_com_floors": 806,
+    "com_floors": 2941,
+    "occ_floors": 2058,
+    "unknown_n": 421,
+    "with_com_no_occ": 63
+   },
+   "vacant_floor_units": 564,
+   "vacant_units": 12
+  },
+  "euljiro": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>을지로",
+   "mid": {
+    "buildings": 734,
+    "vacancy_floor_hi_pct": 22.1,
+    "vacancy_floor_lo_pct": 42.9,
+    "vacancy_area_pct": 24.4,
+    "anchor_pct": 12.28,
+    "gap_pp": 12.1
+   },
+   "master": {
+    "buildings": 1972,
+    "with_com_floors": 844,
+    "com_floors": 2585,
+    "occ_floors": 1732,
+    "unknown_n": 572,
+    "with_com_no_occ": 85
+   },
+   "vacant_floor_units": 331,
+   "vacant_units": 12
+  },
+  "gangnam": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>강남대로",
+   "mid": {
+    "buildings": 624,
+    "vacancy_floor_hi_pct": 14.3,
+    "vacancy_floor_lo_pct": 29.4,
+    "vacancy_area_pct": 13.6,
+    "anchor_pct": 6.89,
+    "gap_pp": 6.7
+   },
+   "master": {
+    "buildings": 987,
+    "with_com_floors": 576,
+    "com_floors": 2549,
+    "occ_floors": 1905,
+    "unknown_n": 381,
+    "with_com_no_occ": 33
+   },
+   "vacant_floor_units": 301,
+   "vacant_units": 12
+  },
+  "garak": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>가락시장",
+   "mid": {
+    "buildings": 36,
+    "vacancy_floor_hi_pct": 14.4,
+    "vacancy_floor_lo_pct": 35.9,
+    "vacancy_area_pct": 1.1,
+    "anchor_pct": 11.19,
+    "gap_pp": -10.1
+   },
+   "master": {
+    "buildings": 284,
+    "with_com_floors": 242,
+    "com_floors": 4126,
+    "occ_floors": 2524,
+    "unknown_n": 1589,
+    "with_com_no_occ": 1
+   },
+   "vacant_floor_units": 17,
+   "vacant_units": 1
+  },
+  "garosugil": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>신사역",
+   "mid": {
+    "buildings": 758,
+    "vacancy_floor_hi_pct": 18.1,
+    "vacancy_floor_lo_pct": 34.0,
+    "vacancy_area_pct": 19.0,
+    "anchor_pct": 18.23,
+    "gap_pp": 0.8
+   },
+   "master": {
+    "buildings": 840,
+    "with_com_floors": 619,
+    "com_floors": 2166,
+    "occ_floors": 1482,
+    "unknown_n": 347,
+    "with_com_no_occ": 47
+   },
+   "vacant_floor_units": 411,
+   "vacant_units": 12
+  },
+  "gildong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>천호",
+   "mid": {
+    "buildings": 330,
+    "vacancy_floor_hi_pct": 18.7,
+    "vacancy_floor_lo_pct": 34.7,
+    "vacancy_area_pct": 19.5,
+    "anchor_pct": 8.63,
+    "gap_pp": 10.9
+   },
+   "master": {
+    "buildings": 571,
+    "with_com_floors": 329,
+    "com_floors": 868,
+    "occ_floors": 570,
+    "unknown_n": 152,
+    "with_com_no_occ": 41
+   },
+   "vacant_floor_units": 150,
+   "vacant_units": 12
+  },
+  "gongdeok": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>공덕역",
+   "mid": {
+    "buildings": 148,
+    "vacancy_floor_hi_pct": 12.6,
+    "vacancy_floor_lo_pct": 28.0,
+    "vacancy_area_pct": 8.0,
+    "anchor_pct": 3.7,
+    "gap_pp": 4.3
+   },
+   "master": {
+    "buildings": 426,
+    "with_com_floors": 232,
+    "com_floors": 588,
+    "occ_floors": 449,
+    "unknown_n": 90,
+    "with_com_no_occ": 18
+   },
+   "vacant_floor_units": 55,
+   "vacant_units": 3
+  },
+  "gunja": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>군자",
+   "mid": {
+    "buildings": 315,
+    "vacancy_floor_hi_pct": 15.3,
+    "vacancy_floor_lo_pct": 33.7,
+    "vacancy_area_pct": 17.5,
+    "anchor_pct": 7.67,
+    "gap_pp": 9.8
+   },
+   "master": {
+    "buildings": 435,
+    "with_com_floors": 303,
+    "com_floors": 802,
+    "occ_floors": 584,
+    "unknown_n": 125,
+    "with_com_no_occ": 17
+   },
+   "vacant_floor_units": 110,
+   "vacant_units": 11
+  },
+  "gurodigital": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>독산/시흥",
+   "mid": {
+    "buildings": 200,
+    "vacancy_floor_hi_pct": 20.4,
+    "vacancy_floor_lo_pct": 36.3,
+    "vacancy_area_pct": 18.6,
+    "anchor_pct": 14.74,
+    "gap_pp": 3.9
+   },
+   "master": {
+    "buildings": 528,
+    "with_com_floors": 233,
+    "com_floors": 728,
+    "occ_floors": 477,
+    "unknown_n": 117,
+    "with_com_no_occ": 34
+   },
+   "vacant_floor_units": 134,
+   "vacant_units": 12
+  },
+  "gurojeonhwa": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>독산/시흥",
+   "mid": {
+    "buildings": 319,
+    "vacancy_floor_hi_pct": 25.3,
+    "vacancy_floor_lo_pct": 45.0,
+    "vacancy_area_pct": 24.3,
+    "anchor_pct": 14.74,
+    "gap_pp": 9.6
+   },
+   "master": {
+    "buildings": 649,
+    "with_com_floors": 379,
+    "com_floors": 1047,
+    "occ_floors": 632,
+    "unknown_n": 196,
+    "with_com_no_occ": 56
+   },
+   "vacant_floor_units": 224,
+   "vacant_units": 12
+  },
+  "guui": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>건대입구",
+   "mid": {
+    "buildings": 386,
+    "vacancy_floor_hi_pct": 14.9,
+    "vacancy_floor_lo_pct": 31.0,
+    "vacancy_area_pct": 15.7,
+    "anchor_pct": 9.54,
+    "gap_pp": 6.2
+   },
+   "master": {
+    "buildings": 561,
+    "with_com_floors": 355,
+    "com_floors": 783,
+    "occ_floors": 535,
+    "unknown_n": 140,
+    "with_com_no_occ": 44
+   },
+   "vacant_floor_units": 117,
+   "vacant_units": 12
+  },
+  "gwangjang": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>종로",
+   "mid": {
+    "buildings": 508,
+    "vacancy_floor_hi_pct": 33.1,
+    "vacancy_floor_lo_pct": 55.8,
+    "vacancy_area_pct": 33.4,
+    "anchor_pct": 9.2,
+    "gap_pp": 24.2
+   },
+   "master": {
+    "buildings": 1742,
+    "with_com_floors": 657,
+    "com_floors": 1707,
+    "occ_floors": 927,
+    "unknown_n": 422,
+    "with_com_no_occ": 121
+   },
+   "vacant_floor_units": 394,
+   "vacant_units": 12
+  },
+  "hannam": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>이태원",
+   "mid": {
+    "buildings": 326,
+    "vacancy_floor_hi_pct": 18.2,
+    "vacancy_floor_lo_pct": 38.2,
+    "vacancy_area_pct": 20.4,
+    "anchor_pct": 14.31,
+    "gap_pp": 6.1
+   },
+   "master": {
+    "buildings": 714,
+    "with_com_floors": 420,
+    "com_floors": 1056,
+    "occ_floors": 707,
+    "unknown_n": 200,
+    "with_com_no_occ": 56
+   },
+   "vacant_floor_units": 147,
+   "vacant_units": 12
+  },
+  "hapjeong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>홍대/합정",
+   "mid": {
+    "buildings": 306,
+    "vacancy_floor_hi_pct": 16.3,
+    "vacancy_floor_lo_pct": 28.7,
+    "vacancy_area_pct": 20.4,
+    "anchor_pct": 8.1,
+    "gap_pp": 12.3
+   },
+   "master": {
+    "buildings": 292,
+    "with_com_floors": 178,
+    "com_floors": 455,
+    "occ_floors": 358,
+    "unknown_n": 54,
+    "with_com_no_occ": 8
+   },
+   "vacant_floor_units": 49,
+   "vacant_units": 5
+  },
+  "hongdae": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>홍대/합정",
+   "mid": {
+    "buildings": 1129,
+    "vacancy_floor_hi_pct": 17.0,
+    "vacancy_floor_lo_pct": 29.5,
+    "vacancy_area_pct": 20.1,
+    "anchor_pct": 8.1,
+    "gap_pp": 12.0
+   },
+   "master": {
+    "buildings": 1325,
+    "with_com_floors": 1031,
+    "com_floors": 3249,
+    "occ_floors": 2353,
+    "unknown_n": 427,
+    "with_com_no_occ": 48
+   },
+   "vacant_floor_units": 559,
+   "vacant_units": 12
+  },
+  "hwagok": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>화곡",
+   "mid": {
+    "buildings": 328,
+    "vacancy_floor_hi_pct": 18.7,
+    "vacancy_floor_lo_pct": 32.9,
+    "vacancy_area_pct": 19.3,
+    "anchor_pct": 15.93,
+    "gap_pp": 3.4
+   },
+   "master": {
+    "buildings": 557,
+    "with_com_floors": 334,
+    "com_floors": 845,
+    "occ_floors": 565,
+    "unknown_n": 130,
+    "with_com_no_occ": 30
+   },
+   "vacant_floor_units": 145,
+   "vacant_units": 12
+  },
+  "hyehwa": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>혜화동",
+   "mid": {
+    "buildings": 355,
+    "vacancy_floor_hi_pct": 17.7,
+    "vacancy_floor_lo_pct": 35.8,
+    "vacancy_area_pct": 18.6,
+    "anchor_pct": 3.29,
+    "gap_pp": 15.3
+   },
+   "master": {
+    "buildings": 864,
+    "with_com_floors": 566,
+    "com_floors": 1421,
+    "occ_floors": 932,
+    "unknown_n": 284,
+    "with_com_no_occ": 81
+   },
+   "vacant_floor_units": 204,
+   "vacant_units": 12
+  },
+  "ikseon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>종로",
+   "mid": {
+    "buildings": 593,
+    "vacancy_floor_hi_pct": 23.2,
+    "vacancy_floor_lo_pct": 45.7,
+    "vacancy_area_pct": 21.1,
+    "anchor_pct": 9.2,
+    "gap_pp": 11.9
+   },
+   "master": {
+    "buildings": 1748,
+    "with_com_floors": 1150,
+    "com_floors": 2678,
+    "occ_floors": 1571,
+    "unknown_n": 717,
+    "with_com_no_occ": 266
+   },
+   "vacant_floor_units": 441,
+   "vacant_units": 12
+  },
+  "itaewon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>이태원",
+   "mid": {
+    "buildings": 363,
+    "vacancy_floor_hi_pct": 17.4,
+    "vacancy_floor_lo_pct": 35.7,
+    "vacancy_area_pct": 16.8,
+    "anchor_pct": 14.31,
+    "gap_pp": 2.5
+   },
+   "master": {
+    "buildings": 845,
+    "with_com_floors": 505,
+    "com_floors": 1267,
+    "occ_floors": 897,
+    "unknown_n": 204,
+    "with_com_no_occ": 53
+   },
+   "vacant_floor_units": 150,
+   "vacant_units": 12
+  },
+  "jamsil": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>잠실/송파",
+   "mid": {
+    "buildings": 283,
+    "vacancy_floor_hi_pct": 12.8,
+    "vacancy_floor_lo_pct": 26.0,
+    "vacancy_area_pct": 15.1,
+    "anchor_pct": 17.44,
+    "gap_pp": -2.3
+   },
+   "master": {
+    "buildings": 579,
+    "with_com_floors": 276,
+    "com_floors": 887,
+    "occ_floors": 695,
+    "unknown_n": 102,
+    "with_com_no_occ": 10
+   },
+   "vacant_floor_units": 111,
+   "vacant_units": 12
+  },
+  "jamsil-tour": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>잠실/송파",
+   "mid": {
+    "buildings": 229,
+    "vacancy_floor_hi_pct": 18.0,
+    "vacancy_floor_lo_pct": 30.9,
+    "vacancy_area_pct": 18.8,
+    "anchor_pct": 17.44,
+    "gap_pp": 1.4
+   },
+   "master": {
+    "buildings": 375,
+    "with_com_floors": 241,
+    "com_floors": 710,
+    "occ_floors": 459,
+    "unknown_n": 101,
+    "with_com_no_occ": 13
+   },
+   "vacant_floor_units": 127,
+   "vacant_units": 12
+  },
+  "jamsilsaenae": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>잠실새내역",
+   "mid": {
+    "buildings": 247,
+    "vacancy_floor_hi_pct": 9.1,
+    "vacancy_floor_lo_pct": 23.9,
+    "vacancy_area_pct": 9.0,
+    "anchor_pct": 4.15,
+    "gap_pp": 4.8
+   },
+   "master": {
+    "buildings": 415,
+    "with_com_floors": 303,
+    "com_floors": 956,
+    "occ_floors": 747,
+    "unknown_n": 136,
+    "with_com_no_occ": 11
+   },
+   "vacant_floor_units": 76,
+   "vacant_units": 3
+  },
+  "jangan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>장안동",
+   "mid": {
+    "buildings": 215,
+    "vacancy_floor_hi_pct": 15.0,
+    "vacancy_floor_lo_pct": 33.7,
+    "vacancy_area_pct": 10.6,
+    "anchor_pct": 11.52,
+    "gap_pp": -0.9
+   },
+   "master": {
+    "buildings": 315,
+    "with_com_floors": 172,
+    "com_floors": 555,
+    "occ_floors": 387,
+    "unknown_n": 105,
+    "with_com_no_occ": 8
+   },
+   "vacant_floor_units": 70,
+   "vacant_units": 5
+  },
+  "kkachisan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>까치산역",
+   "mid": {
+    "buildings": 274,
+    "vacancy_floor_hi_pct": 21.7,
+    "vacancy_floor_lo_pct": 39.3,
+    "vacancy_area_pct": 22.0,
+    "anchor_pct": 7.69,
+    "gap_pp": 14.3
+   },
+   "master": {
+    "buildings": 553,
+    "with_com_floors": 336,
+    "com_floors": 785,
+    "occ_floors": 494,
+    "unknown_n": 154,
+    "with_com_no_occ": 38
+   },
+   "vacant_floor_units": 161,
+   "vacant_units": 12
+  },
+  "konkuk": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>건대입구",
+   "mid": {
+    "buildings": 432,
+    "vacancy_floor_hi_pct": 9.4,
+    "vacancy_floor_lo_pct": 28.8,
+    "vacancy_area_pct": 9.8,
+    "anchor_pct": 9.54,
+    "gap_pp": 0.3
+   },
+   "master": {
+    "buildings": 585,
+    "with_com_floors": 446,
+    "com_floors": 1183,
+    "occ_floors": 852,
+    "unknown_n": 237,
+    "with_com_no_occ": 32
+   },
+   "vacant_floor_units": 94,
+   "vacant_units": 10
+  },
+  "kyunghee": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>경희대",
+   "mid": {
+    "buildings": 282,
+    "vacancy_floor_hi_pct": 12.9,
+    "vacancy_floor_lo_pct": 29.8,
+    "vacancy_area_pct": 9.9,
+    "anchor_pct": 5.23,
+    "gap_pp": 4.7
+   },
+   "master": {
+    "buildings": 513,
+    "with_com_floors": 333,
+    "com_floors": 722,
+    "occ_floors": 536,
+    "unknown_n": 108,
+    "with_com_no_occ": 24
+   },
+   "vacant_floor_units": 74,
+   "vacant_units": 4
+  },
+  "maebong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>테헤란로",
+   "mid": {
+    "buildings": 397,
+    "vacancy_floor_hi_pct": 22.5,
+    "vacancy_floor_lo_pct": 35.1,
+    "vacancy_area_pct": 26.4,
+    "anchor_pct": 9.05,
+    "gap_pp": 17.4
+   },
+   "master": {
+    "buildings": 564,
+    "with_com_floors": 362,
+    "com_floors": 1074,
+    "occ_floors": 709,
+    "unknown_n": 144,
+    "with_com_no_occ": 39
+   },
+   "vacant_floor_units": 249,
+   "vacant_units": 12
+  },
+  "mangwon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>망원역",
+   "mid": {
+    "buildings": 613,
+    "vacancy_floor_hi_pct": 13.7,
+    "vacancy_floor_lo_pct": 25.7,
+    "vacancy_area_pct": 16.5,
+    "anchor_pct": 1.75,
+    "gap_pp": 14.7
+   },
+   "master": {
+    "buildings": 959,
+    "with_com_floors": 645,
+    "com_floors": 1574,
+    "occ_floors": 1200,
+    "unknown_n": 179,
+    "with_com_no_occ": 29
+   },
+   "vacant_floor_units": 198,
+   "vacant_units": 12
+  },
+  "miasageori": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>미아사거리",
+   "mid": {
+    "buildings": 276,
+    "vacancy_floor_hi_pct": 23.7,
+    "vacancy_floor_lo_pct": 37.2,
+    "vacancy_area_pct": 20.8,
+    "anchor_pct": 6.82,
+    "gap_pp": 14.0
+   },
+   "master": {
+    "buildings": 745,
+    "with_com_floors": 466,
+    "com_floors": 1056,
+    "occ_floors": 686,
+    "unknown_n": 170,
+    "with_com_no_occ": 64
+   },
+   "vacant_floor_units": 184,
+   "vacant_units": 12
+  },
+  "mokdong-yc": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>목동",
+   "mid": {
+    "buildings": 327,
+    "vacancy_floor_hi_pct": 19.3,
+    "vacancy_floor_lo_pct": 32.4,
+    "vacancy_area_pct": 21.6,
+    "anchor_pct": 10.0,
+    "gap_pp": 11.6
+   },
+   "master": {
+    "buildings": 476,
+    "with_com_floors": 281,
+    "com_floors": 765,
+    "occ_floors": 526,
+    "unknown_n": 102,
+    "with_com_no_occ": 28
+   },
+   "vacant_floor_units": 145,
+   "vacant_units": 12
+  },
+  "mullae": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>영등포역",
+   "mid": {
+    "buildings": 226,
+    "vacancy_floor_hi_pct": 20.4,
+    "vacancy_floor_lo_pct": 38.2,
+    "vacancy_area_pct": 11.7,
+    "anchor_pct": 15.93,
+    "gap_pp": -4.2
+   },
+   "master": {
+    "buildings": 1247,
+    "with_com_floors": 474,
+    "com_floors": 981,
+    "occ_floors": 698,
+    "unknown_n": 151,
+    "with_com_no_occ": 53
+   },
+   "vacant_floor_units": 96,
+   "vacant_units": 8
+  },
+  "myeongdong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>명동",
+   "mid": {
+    "buildings": 639,
+    "vacancy_floor_hi_pct": 21.5,
+    "vacancy_floor_lo_pct": 42.6,
+    "vacancy_area_pct": 9.7,
+    "anchor_pct": 6.47,
+    "gap_pp": 3.2
+   },
+   "master": {
+    "buildings": 1084,
+    "with_com_floors": 731,
+    "com_floors": 2638,
+    "occ_floors": 1704,
+    "unknown_n": 603,
+    "with_com_no_occ": 92
+   },
+   "vacant_floor_units": 409,
+   "vacant_units": 12
+  },
+  "nambu": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
+   "mid": {
+    "buildings": 246,
+    "vacancy_floor_hi_pct": 16.4,
+    "vacancy_floor_lo_pct": 35.3,
+    "vacancy_area_pct": 30.4,
+    "anchor_pct": 7.75,
+    "gap_pp": 22.6
+   },
+   "master": {
+    "buildings": 490,
+    "with_com_floors": 242,
+    "com_floors": 723,
+    "occ_floors": 504,
+    "unknown_n": 132,
+    "with_com_no_occ": 18
+   },
+   "vacant_floor_units": 100,
+   "vacant_units": 12
+  },
+  "namdaemun": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>남대문",
+   "mid": {
+    "buildings": 194,
+    "vacancy_floor_hi_pct": 30.0,
+    "vacancy_floor_lo_pct": 54.9,
+    "vacancy_area_pct": 22.9,
+    "anchor_pct": 13.93,
+    "gap_pp": 9.0
+   },
+   "master": {
+    "buildings": 385,
+    "with_com_floors": 193,
+    "com_floors": 590,
+    "occ_floors": 333,
+    "unknown_n": 178,
+    "with_com_no_occ": 28
+   },
+   "vacant_floor_units": 102,
+   "vacant_units": 10
+  },
+  "nokdu": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>신림역",
+   "mid": {
+    "buildings": 356,
+    "vacancy_floor_hi_pct": 40.1,
+    "vacancy_floor_lo_pct": 63.3,
+    "vacancy_area_pct": 26.8,
+    "anchor_pct": 7.25,
+    "gap_pp": 19.5
+   },
+   "master": {
+    "buildings": 282,
+    "with_com_floors": 213,
+    "com_floors": 529,
+    "occ_floors": 301,
+    "unknown_n": 95,
+    "with_com_no_occ": 26
+   },
+   "vacant_floor_units": 99,
+   "vacant_units": 12
+  },
+  "nonhyeon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>논현역",
+   "mid": {
+    "buildings": 678,
+    "vacancy_floor_hi_pct": 15.2,
+    "vacancy_floor_lo_pct": 31.7,
+    "vacancy_area_pct": 17.2,
+    "anchor_pct": 17.28,
+    "gap_pp": -0.1
+   },
+   "master": {
+    "buildings": 843,
+    "with_com_floors": 573,
+    "com_floors": 1870,
+    "occ_floors": 1320,
+    "unknown_n": 312,
+    "with_com_no_occ": 43
+   },
+   "vacant_floor_units": 284,
+   "vacant_units": 12
+  },
+  "noryangjin": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>노량진",
+   "mid": {
+    "buildings": 269,
+    "vacancy_floor_hi_pct": 31.2,
+    "vacancy_floor_lo_pct": 55.2,
+    "vacancy_area_pct": 10.4,
+    "anchor_pct": 8.92,
+    "gap_pp": 1.5
+   },
+   "master": {
+    "buildings": 497,
+    "with_com_floors": 307,
+    "com_floors": 837,
+    "occ_floors": 383,
+    "unknown_n": 249,
+    "with_com_no_occ": 83
+   },
+   "vacant_floor_units": 106,
+   "vacant_units": 12
+  },
+  "nowon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>상계역",
+   "mid": {
+    "buildings": 195,
+    "vacancy_floor_hi_pct": 12.6,
+    "vacancy_floor_lo_pct": 27.3,
+    "vacancy_area_pct": 7.7,
+    "anchor_pct": 7.97,
+    "gap_pp": -0.3
+   },
+   "master": {
+    "buildings": 398,
+    "with_com_floors": 233,
+    "com_floors": 734,
+    "occ_floors": 532,
+    "unknown_n": 113,
+    "with_com_no_occ": 19
+   },
+   "vacant_floor_units": 88,
+   "vacant_units": 8
+  },
+  "oryudong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>오류동역",
+   "mid": {
+    "buildings": 124,
+    "vacancy_floor_hi_pct": 18.8,
+    "vacancy_floor_lo_pct": 43.5,
+    "vacancy_area_pct": 22.8,
+    "anchor_pct": 1.47,
+    "gap_pp": 21.3
+   },
+   "master": {
+    "buildings": 342,
+    "with_com_floors": 176,
+    "com_floors": 400,
+    "occ_floors": 244,
+    "unknown_n": 95,
+    "with_com_no_occ": 27
+   },
+   "vacant_floor_units": 65,
+   "vacant_units": 11
+  },
+  "poi": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
+   "mid": {
+    "buildings": 639,
+    "vacancy_floor_hi_pct": 22.7,
+    "vacancy_floor_lo_pct": 37.7,
+    "vacancy_area_pct": 27.0,
+    "anchor_pct": 7.75,
+    "gap_pp": 19.2
+   },
+   "master": {
+    "buildings": 859,
+    "with_com_floors": 567,
+    "com_floors": 1632,
+    "occ_floors": 1029,
+    "unknown_n": 248,
+    "with_com_no_occ": 62
+   },
+   "vacant_floor_units": 400,
+   "vacant_units": 12
+  },
+  "sadang": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>사당",
+   "mid": {
+    "buildings": 318,
+    "vacancy_floor_hi_pct": 12.4,
+    "vacancy_floor_lo_pct": 24.9,
+    "vacancy_area_pct": 14.1,
+    "anchor_pct": 8.48,
+    "gap_pp": 5.6
+   },
+   "master": {
+    "buildings": 349,
+    "with_com_floors": 271,
+    "com_floors": 846,
+    "occ_floors": 691,
+    "unknown_n": 103,
+    "with_com_no_occ": 10
+   },
+   "vacant_floor_units": 59,
+   "vacant_units": 4
+  },
+  "samcheong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>광화문",
+   "mid": {
+    "buildings": 157,
+    "vacancy_floor_hi_pct": 20.3,
+    "vacancy_floor_lo_pct": 51.4,
+    "vacancy_area_pct": 18.8,
+    "anchor_pct": 5.24,
+    "gap_pp": 13.6
+   },
+   "master": {
+    "buildings": 614,
+    "with_com_floors": 327,
+    "com_floors": 583,
+    "occ_floors": 303,
+    "unknown_n": 201,
+    "with_com_no_occ": 101
+   },
+   "vacant_floor_units": 87,
+   "vacant_units": 7
+  },
+  "sangbong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>상봉역",
+   "mid": {
+    "buildings": 317,
+    "vacancy_floor_hi_pct": 23.0,
+    "vacancy_floor_lo_pct": 41.7,
+    "vacancy_area_pct": 25.9,
+    "anchor_pct": 9.14,
+    "gap_pp": 16.8
+   },
+   "master": {
+    "buildings": 573,
+    "with_com_floors": 321,
+    "com_floors": 697,
+    "occ_floors": 447,
+    "unknown_n": 131,
+    "with_com_no_occ": 47
+   },
+   "vacant_floor_units": 136,
+   "vacant_units": 12
+  },
+  "sanggye": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>상계역",
+   "mid": {
+    "buildings": 294,
+    "vacancy_floor_hi_pct": 22.7,
+    "vacancy_floor_lo_pct": 35.4,
+    "vacancy_area_pct": 22.1,
+    "anchor_pct": 7.97,
+    "gap_pp": 14.1
+   },
+   "master": {
+    "buildings": 642,
+    "with_com_floors": 360,
+    "com_floors": 744,
+    "occ_floors": 488,
+    "unknown_n": 113,
+    "with_com_no_occ": 48
+   },
+   "vacant_floor_units": 152,
+   "vacant_units": 12
+  },
+  "seochon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>도심>광화문",
+   "mid": {
+    "buildings": 209,
+    "vacancy_floor_hi_pct": 18.0,
+    "vacancy_floor_lo_pct": 36.1,
+    "vacancy_area_pct": 23.8,
+    "anchor_pct": 5.24,
+    "gap_pp": 18.6
+   },
+   "master": {
+    "buildings": 846,
+    "with_com_floors": 556,
+    "com_floors": 1112,
+    "occ_floors": 658,
+    "unknown_n": 301,
+    "with_com_no_occ": 155
+   },
+   "vacant_floor_units": 127,
+   "vacant_units": 12
+  },
+  "seochoyeok": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
+   "mid": {
+    "buildings": 322,
+    "vacancy_floor_hi_pct": 12.3,
+    "vacancy_floor_lo_pct": 24.0,
+    "vacancy_area_pct": 15.3,
+    "anchor_pct": 7.75,
+    "gap_pp": 7.5
+   },
+   "master": {
+    "buildings": 619,
+    "with_com_floors": 417,
+    "com_floors": 1582,
+    "occ_floors": 1248,
+    "unknown_n": 173,
+    "with_com_no_occ": 28
+   },
+   "vacant_floor_units": 182,
+   "vacant_units": 12
+  },
+  "seolleung": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>테헤란로",
+   "mid": {
+    "buildings": 509,
+    "vacancy_floor_hi_pct": 15.5,
+    "vacancy_floor_lo_pct": 30.3,
+    "vacancy_area_pct": 15.8,
+    "anchor_pct": 9.05,
+    "gap_pp": 6.8
+   },
+   "master": {
+    "buildings": 848,
+    "with_com_floors": 544,
+    "com_floors": 2208,
+    "occ_floors": 1658,
+    "unknown_n": 297,
+    "with_com_no_occ": 17
+   },
+   "vacant_floor_units": 318,
+   "vacant_units": 12
+  },
+  "seongsu": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>뚝섬",
+   "mid": {
+    "buildings": 347,
+    "vacancy_floor_hi_pct": 16.0,
+    "vacancy_floor_lo_pct": 34.7,
+    "vacancy_area_pct": 16.7,
+    "anchor_pct": 1.25,
+    "gap_pp": 15.4
+   },
+   "master": {
+    "buildings": 831,
+    "with_com_floors": 481,
+    "com_floors": 1311,
+    "occ_floors": 880,
+    "unknown_n": 269,
+    "with_com_no_occ": 82
+   },
+   "vacant_floor_units": 131,
+   "vacant_units": 12
+  },
+  "seoulsup": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>뚝섬",
+   "mid": {
+    "buildings": 312,
+    "vacancy_floor_hi_pct": 14.9,
+    "vacancy_floor_lo_pct": 27.4,
+    "vacancy_area_pct": 20.3,
+    "anchor_pct": 1.25,
+    "gap_pp": 19.0
+   },
+   "master": {
+    "buildings": 698,
+    "with_com_floors": 440,
+    "com_floors": 1186,
+    "occ_floors": 816,
+    "unknown_n": 183,
+    "with_com_no_occ": 55
+   },
+   "vacant_floor_units": 110,
+   "vacant_units": 12
+  },
+  "sharosugil": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>서울대입구역",
+   "mid": {
+    "buildings": 338,
+    "vacancy_floor_hi_pct": 16.1,
+    "vacancy_floor_lo_pct": 32.0,
+    "vacancy_area_pct": 14.6,
+    "anchor_pct": 2.93,
+    "gap_pp": 11.7
+   },
+   "master": {
+    "buildings": 570,
+    "with_com_floors": 365,
+    "com_floors": 930,
+    "occ_floors": 693,
+    "unknown_n": 123,
+    "with_com_no_occ": 32
+   },
+   "vacant_floor_units": 95,
+   "vacant_units": 10
+  },
+  "sillim": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>신림역",
+   "mid": {
+    "buildings": 523,
+    "vacancy_floor_hi_pct": 16.4,
+    "vacancy_floor_lo_pct": 32.5,
+    "vacancy_area_pct": 12.2,
+    "anchor_pct": 7.25,
+    "gap_pp": 4.9
+   },
+   "master": {
+    "buildings": 1183,
+    "with_com_floors": 607,
+    "com_floors": 1616,
+    "occ_floors": 1134,
+    "unknown_n": 256,
+    "with_com_no_occ": 71
+   },
+   "vacant_floor_units": 170,
+   "vacant_units": 12
+  },
+  "sinchon": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>신촌/이대",
+   "mid": {
+    "buildings": 664,
+    "vacancy_floor_hi_pct": 21.2,
+    "vacancy_floor_lo_pct": 36.6,
+    "vacancy_area_pct": 19.8,
+    "anchor_pct": 11.68,
+    "gap_pp": 8.1
+   },
+   "master": {
+    "buildings": 1443,
+    "with_com_floors": 921,
+    "com_floors": 2768,
+    "occ_floors": 1862,
+    "unknown_n": 457,
+    "with_com_no_occ": 89
+   },
+   "vacant_floor_units": 395,
+   "vacant_units": 12
+  },
+  "songridan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>잠실/송파",
+   "mid": {
+    "buildings": 371,
+    "vacancy_floor_hi_pct": 11.1,
+    "vacancy_floor_lo_pct": 25.6,
+    "vacancy_area_pct": 13.2,
+    "anchor_pct": 17.44,
+    "gap_pp": -4.2
+   },
+   "master": {
+    "buildings": 453,
+    "with_com_floors": 322,
+    "com_floors": 932,
+    "occ_floors": 727,
+    "unknown_n": 122,
+    "with_com_no_occ": 16
+   },
+   "vacant_floor_units": 95,
+   "vacant_units": 12
+  },
+  "sukmyung": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>숙명여대",
+   "mid": {
+    "buildings": 206,
+    "vacancy_floor_hi_pct": 22.8,
+    "vacancy_floor_lo_pct": 37.9,
+    "vacancy_area_pct": 23.6,
+    "anchor_pct": 4.88,
+    "gap_pp": 18.7
+   },
+   "master": {
+    "buildings": 600,
+    "with_com_floors": 353,
+    "com_floors": 787,
+    "occ_floors": 552,
+    "unknown_n": 118,
+    "with_com_no_occ": 35
+   },
+   "vacant_floor_units": 127,
+   "vacant_units": 12
+  },
+  "sungshin": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>성신여대",
+   "mid": {
+    "buildings": 325,
+    "vacancy_floor_hi_pct": 19.3,
+    "vacancy_floor_lo_pct": 36.8,
+    "vacancy_area_pct": 16.0,
+    "anchor_pct": 12.78,
+    "gap_pp": 3.2
+   },
+   "master": {
+    "buildings": 714,
+    "with_com_floors": 523,
+    "com_floors": 1279,
+    "occ_floors": 870,
+    "unknown_n": 247,
+    "with_com_no_occ": 65
+   },
+   "vacant_floor_units": 128,
+   "vacant_units": 12
+  },
+  "suyu": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>수유",
+   "mid": {
+    "buildings": 535,
+    "vacancy_floor_hi_pct": 20.0,
+    "vacancy_floor_lo_pct": 32.9,
+    "vacancy_area_pct": 22.6,
+    "anchor_pct": 8.04,
+    "gap_pp": 14.6
+   },
+   "master": {
+    "buildings": 1095,
+    "with_com_floors": 789,
+    "com_floors": 1907,
+    "occ_floors": 1275,
+    "unknown_n": 292,
+    "with_com_no_occ": 73
+   },
+   "vacant_floor_units": 287,
+   "vacant_units": 12
+  },
+  "teheran": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>테헤란로",
+   "mid": {
+    "buildings": 533,
+    "vacancy_floor_hi_pct": 16.7,
+    "vacancy_floor_lo_pct": 31.8,
+    "vacancy_area_pct": 17.9,
+    "anchor_pct": 9.05,
+    "gap_pp": 8.9
+   },
+   "master": {
+    "buildings": 871,
+    "with_com_floors": 564,
+    "com_floors": 2106,
+    "occ_floors": 1596,
+    "unknown_n": 277,
+    "with_com_no_occ": 22
+   },
+   "vacant_floor_units": 285,
+   "vacant_units": 12
+  },
+  "wangsimni": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>왕십리",
+   "mid": {
+    "buildings": 450,
+    "vacancy_floor_hi_pct": 17.3,
+    "vacancy_floor_lo_pct": 34.2,
+    "vacancy_area_pct": 17.4,
+    "anchor_pct": 1.8,
+    "gap_pp": 15.6
+   },
+   "master": {
+    "buildings": 987,
+    "with_com_floors": 631,
+    "com_floors": 1458,
+    "occ_floors": 1006,
+    "unknown_n": 240,
+    "with_com_no_occ": 56
+   },
+   "vacant_floor_units": 176,
+   "vacant_units": 12
+  },
+  "yangjae": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>남부터미널",
+   "mid": {
+    "buildings": 333,
+    "vacancy_floor_hi_pct": 19.8,
+    "vacancy_floor_lo_pct": 32.7,
+    "vacancy_area_pct": 18.7,
+    "anchor_pct": 7.75,
+    "gap_pp": 10.9
+   },
+   "master": {
+    "buildings": 534,
+    "with_com_floors": 346,
+    "com_floors": 1187,
+    "occ_floors": 787,
+    "unknown_n": 162,
+    "with_com_no_occ": 20
+   },
+   "vacant_floor_units": 228,
+   "vacant_units": 12
+  },
+  "ydp-gucheong": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>당산역",
+   "mid": {
+    "buildings": 340,
+    "vacancy_floor_hi_pct": 20.4,
+    "vacancy_floor_lo_pct": 35.9,
+    "vacancy_area_pct": 23.4,
+    "anchor_pct": 7.34,
+    "gap_pp": 16.1
+   },
+   "master": {
+    "buildings": 652,
+    "with_com_floors": 307,
+    "com_floors": 711,
+    "occ_floors": 405,
+    "unknown_n": 150,
+    "with_com_no_occ": 37
+   },
+   "vacant_floor_units": 139,
+   "vacant_units": 12
+  },
+  "yeonhui": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>동교/연남",
+   "mid": {
+    "buildings": 227,
+    "vacancy_floor_hi_pct": 17.1,
+    "vacancy_floor_lo_pct": 36.2,
+    "vacancy_area_pct": 15.8,
+    "anchor_pct": 5.0,
+    "gap_pp": 10.8
+   },
+   "master": {
+    "buildings": 477,
+    "with_com_floors": 256,
+    "com_floors": 653,
+    "occ_floors": 426,
+    "unknown_n": 132,
+    "with_com_no_occ": 36
+   },
+   "vacant_floor_units": 119,
+   "vacant_units": 12
+  },
+  "yeonnam": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>동교/연남",
+   "mid": {
+    "buildings": 836,
+    "vacancy_floor_hi_pct": 15.2,
+    "vacancy_floor_lo_pct": 27.6,
+    "vacancy_area_pct": 20.8,
+    "anchor_pct": 5.0,
+    "gap_pp": 15.8
+   },
+   "master": {
+    "buildings": 1133,
+    "with_com_floors": 816,
+    "com_floors": 2286,
+    "occ_floors": 1741,
+    "unknown_n": 254,
+    "with_com_no_occ": 35
+   },
+   "vacant_floor_units": 296,
+   "vacant_units": 12
+  },
+  "yeonsinnae": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>연신내",
+   "mid": {
+    "buildings": 458,
+    "vacancy_floor_hi_pct": 23.0,
+    "vacancy_floor_lo_pct": 34.8,
+    "vacancy_area_pct": 18.1,
+    "anchor_pct": 13.3,
+    "gap_pp": 4.8
+   },
+   "master": {
+    "buildings": 816,
+    "with_com_floors": 575,
+    "com_floors": 1399,
+    "occ_floors": 933,
+    "unknown_n": 185,
+    "with_com_no_occ": 55
+   },
+   "vacant_floor_units": 302,
+   "vacant_units": 12
+  },
+  "yeouido": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>영등포신촌>영등포역",
+   "mid": {
+    "buildings": 18,
+    "vacancy_floor_hi_pct": 12.7,
+    "vacancy_floor_lo_pct": 33.1,
+    "vacancy_area_pct": 20.1,
+    "anchor_pct": 15.93,
+    "gap_pp": 4.2
+   },
+   "master": {
+    "buildings": 250,
+    "with_com_floors": 124,
+    "com_floors": 463,
+    "occ_floors": 351,
+    "unknown_n": 82,
+    "with_com_no_occ": 12
+   },
+   "vacant_floor_units": 29,
+   "vacant_units": 1
+  },
+  "yongsan": {
+   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>기타>용산역",
+   "mid": {
+    "buildings": 102,
+    "vacancy_floor_hi_pct": 20.2,
+    "vacancy_floor_lo_pct": 35.9,
+    "vacancy_area_pct": 9.7,
+    "anchor_pct": 14.15,
+    "gap_pp": -4.5
+   },
+   "master": {
+    "buildings": 411,
+    "with_com_floors": 233,
+    "com_floors": 535,
+    "occ_floors": 409,
+    "unknown_n": 87,
+    "with_com_no_occ": 21
+   },
+   "vacant_floor_units": 40,
+   "vacant_units": 4
+  }
+ }
+}

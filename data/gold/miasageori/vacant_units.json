@@ -1,177 +1,8 @@
 {
   "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
-  "built_at": "2026-08-31T13:26:55+00:00",
+  "built_at": "2026-10-11T04:50:24+00:00",
   "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
   "units": [
-    {
-      "id": "vu-1130510100100540255-1",
-      "n": "미아동 54-255",
-      "grp": "주점",
-      "lat": 37.61295,
-      "lng": 127.031893,
-      "area": 19,
-      "floor": "1~2F",
-      "floor_mix": {
-        "1F": 0.4843,
-        "2F": 0.5157
-      },
-      "vac_floor_mix": {
-        "1F": 0.4843,
-        "2F": 0.5157
-      },
-      "vac_floor_mix_lo": {
-        "1F": 0.4843,
-        "2F": 0.5157
-      },
-      "occ_floors": [],
-      "unknown_n": 0,
-      "floor_basis": "flr_ouln",
-      "was": "주점",
-      "capacity": 2,
-      "active": 0,
-      "vacancy_rate": 100.0,
-      "bld_floors": 2,
-      "com_area_m2": 128.8
-    },
-    {
-      "id": "vu-1130510100100750089-1",
-      "n": "일부호",
-      "grp": "주점",
-      "lat": 37.613456,
-      "lng": 127.031591,
-      "area": 18,
-      "floor": "1F",
-      "floor_mix": {
-        "1F": 1.0
-      },
-      "vac_floor_mix": {
-        "1F": 1.0
-      },
-      "vac_floor_mix_lo": {
-        "1F": 1.0
-      },
-      "occ_floors": [],
-      "unknown_n": 0,
-      "floor_basis": "flr_ouln",
-      "was": "주점",
-      "capacity": 1,
-      "active": 0,
-      "vacancy_rate": 100.0,
-      "bld_floors": 2,
-      "com_area_m2": 58.7
-    },
-    {
-      "id": "vu-1130510100100490160-1",
-      "n": "미아동 49-160",
-      "grp": "한식",
-      "lat": 37.612426,
-      "lng": 127.034874,
-      "area": 40,
-      "floor": "1~5F",
-      "floor_mix": {
-        "1F": 0.2829,
-        "2F": 0.2829,
-        "3F": 0.2829,
-        "5F": 0.1512
-      },
-      "vac_floor_mix": {
-        "1F": 0.2829,
-        "2F": 0.2829,
-        "3F": 0.2829,
-        "5F": 0.1512
-      },
-      "vac_floor_mix_lo": {
-        "2F": 0.3946,
-        "3F": 0.3946,
-        "5F": 0.2109
-      },
-      "occ_floors": [],
-      "unknown_n": 1,
-      "floor_basis": "flr_ouln",
-      "was": "한식",
-      "capacity": 4,
-      "active": 1,
-      "vacancy_rate": 75.0,
-      "bld_floors": 5,
-      "com_area_m2": 533.9
-    },
-    {
-      "id": "vu-1130510100100710005-1",
-      "n": "엠파크",
-      "grp": "욕탕·신체관리",
-      "lat": 37.613204,
-      "lng": 127.030417,
-      "area": 166,
-      "floor": "1~7F",
-      "floor_mix": {
-        "1F": 0.1361,
-        "2F": 0.1608,
-        "3F": 0.1608,
-        "4F": 0.1608,
-        "5F": 0.1608,
-        "6F": 0.1608,
-        "7F": 0.0599
-      },
-      "vac_floor_mix": {
-        "1F": 0.2006,
-        "2F": 0.237,
-        "4F": 0.237,
-        "6F": 0.237,
-        "7F": 0.0883
-      },
-      "vac_floor_mix_lo": {
-        "1F": 0.2006,
-        "2F": 0.237,
-        "4F": 0.237,
-        "6F": 0.237,
-        "7F": 0.0883
-      },
-      "occ_floors": [
-        3,
-        5
-      ],
-      "unknown_n": 0,
-      "floor_basis": "flr_ouln",
-      "was": "욕탕·신체관리",
-      "capacity": 7,
-      "active": 2,
-      "vacancy_rate": 71.4,
-      "bld_floors": 3,
-      "com_area_m2": 3849.3
-    },
-    {
-      "id": "vu-1130510100100450004-1",
-      "n": "중간호",
-      "grp": "유원지·오락",
-      "lat": 37.611104,
-      "lng": 127.032727,
-      "area": 50,
-      "floor": "1~3F",
-      "floor_mix": {
-        "1F": 0.3318,
-        "2F": 0.3341,
-        "3F": 0.3341
-      },
-      "vac_floor_mix": {
-        "2F": 0.5,
-        "3F": 0.5
-      },
-      "vac_floor_mix_lo": {
-        "2F": 0.5,
-        "3F": 0.5
-      },
-      "occ_floors": [
-        1
-      ],
-      "unknown_n": 0,
-      "floor_basis": "flr_ouln",
-      "was": "유원지·오락",
-      "capacity": 3,
-      "active": 1,
-      "vacancy_rate": 66.7,
-      "bld_floors": 4,
-      "com_area_m2": 500.4
-    },
     {
       "id": "vu-1130510100108620002-1",
       "n": "미아동 862-2",
@@ -302,39 +133,6 @@
       "com_area_m2": 476.6
     },
     {
-      "id": "vu-1129013400100320000-1",
-      "n": "길음동 32",
-      "grp": "유원지·오락",
-      "lat": 37.61208,
-      "lng": 127.029941,
-      "area": 37,
-      "floor": "1~3F",
-      "floor_mix": {
-        "1F": 0.3551,
-        "2F": 0.3224,
-        "3F": 0.3224
-      },
-      "vac_floor_mix": {
-        "1F": 0.5241,
-        "2F": 0.4759
-      },
-      "vac_floor_mix_lo": {
-        "1F": 0.5241,
-        "2F": 0.4759
-      },
-      "occ_floors": [
-        3
-      ],
-      "unknown_n": 0,
-      "floor_basis": "flr_ouln",
-      "was": "유원지·오락",
-      "capacity": 3,
-      "active": 1,
-      "vacancy_rate": 66.7,
-      "bld_floors": 3,
-      "com_area_m2": 371.4
-    },
-    {
       "id": "vu-1129013600101460000-1",
       "n": "칸",
       "grp": "철물·건설자재 소매",
@@ -399,6 +197,204 @@
       "vacancy_rate": 66.7,
       "bld_floors": 5,
       "com_area_m2": 320.9
+    },
+    {
+      "id": "vu-1130510100100030861-1",
+      "n": "미아동 3-861",
+      "grp": "기타 교육",
+      "lat": 37.616992,
+      "lng": 127.033461,
+      "area": 32,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 교육",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 5,
+      "com_area_m2": 315.9
+    },
+    {
+      "id": "vu-1130510100100360010-1",
+      "n": "미아동 36-10",
+      "grp": "이용·미용",
+      "lat": 37.611898,
+      "lng": 127.031354,
+      "area": 24,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3169,
+        "2F": 0.3415,
+        "3F": 0.3415
+      },
+      "vac_floor_mix": {
+        "1F": 0.4813,
+        "3F": 0.5187
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.4813,
+        "3F": 0.5187
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "이용·미용",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 236.3
+    },
+    {
+      "id": "vu-1129013600100790118-1",
+      "n": "하월곡동 79-118",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 37.611262,
+      "lng": 127.03502,
+      "area": 17,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 165.0
+    },
+    {
+      "id": "vu-1129013600100790118-2",
+      "n": "하월곡동 79-118",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 37.61121,
+      "lng": 127.035102,
+      "area": 17,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 165.0
+    },
+    {
+      "id": "vu-1129013400100320001-1",
+      "n": "길음동 32-1",
+      "grp": "이용·미용",
+      "lat": 37.6123,
+      "lng": 127.029674,
+      "area": 14,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "이용·미용",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 140.5
+    },
+    {
+      "id": "vu-1130510100108600262-1",
+      "n": "미아동 860-262",
+      "grp": "주점",
+      "lat": 37.612394,
+      "lng": 127.0314,
+      "area": 13,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "주점",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 131.4
     }
   ]
 }

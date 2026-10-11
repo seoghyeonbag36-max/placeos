@@ -87,7 +87,9 @@ def buildings(slug: str, cache: dict) -> dict[str, dict]:
             "known": at.get("rone_size") is not None,
             "area": at.get("com_area_flr") or at.get("com_area") or 0.0,
             "floors": at.get("com_flr_nos") or [],
-            "store_floors": set(at.get("store_flr_nos") or []),
+            # 학원(NEIS) 층도 확인층이다 — store_flr_unknown 은 학원이 밝힌 만큼 이미 줄어 있으므로
+            # 여기서 빼면 같은 업소가 확인층에서도 미상에서도 사라진다(파이프라인과 같은 규칙).
+            "store_floors": set(at.get("store_flr_nos") or []) | set(at.get("aca_flr_nos") or []),
             "store_unknown": at.get("store_flr_unknown") or 0,
         })
         d["act"] += r.get("active", 0)

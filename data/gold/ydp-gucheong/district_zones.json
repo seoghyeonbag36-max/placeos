@@ -1,12 +1,12 @@
 {
  "slug": "ydp-gucheong",
- "built_at": "2026-09-24T08:13:03+00:00",
+ "built_at": "2026-10-11T04:52:09+00:00",
  "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
  "method": "adong_knn9",
  "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
  "assign": {
-  "counted_buildings": 246,
-  "knn_vs_pnu_compared": 246,
+  "counted_buildings": 247,
+  "knn_vs_pnu_compared": 247,
   "knn_vs_pnu_agree_pct": 99.2
  },
  "dropped_spillover": [
@@ -21,8 +21,8 @@
    "n": "당산2동",
    "buildings": 4,
    "stores": 59,
-   "capacity": 12,
-   "active": 10
+   "capacity": 13,
+   "active": 11
   },
   {
    "n": "문래동",
@@ -34,8 +34,8 @@
  ],
  "residual": {
   "buildings": 8,
-  "capacity": 28,
-  "active": 15
+  "capacity": 29,
+  "active": 16
  },
  "zones": [
   {
@@ -45,9 +45,9 @@
    "lng": 126.89434,
    "stores": 2221,
    "buildings": 138,
-   "capacity": 334,
-   "active": 264,
-   "vacancy_rate": 20.96,
+   "capacity": 339,
+   "active": 289,
+   "vacancy_rate": 14.75,
    "s": null,
    "d": null,
    "r": null,
@@ -57,13 +57,13 @@
   {
    "n": "양평1동",
    "grp": "양평동1가",
-   "lat": 37.524176,
-   "lng": 126.889657,
+   "lat": 37.524163,
+   "lng": 126.889656,
    "stores": 1431,
-   "buildings": 100,
-   "capacity": 196,
-   "active": 156,
-   "vacancy_rate": 20.41,
+   "buildings": 101,
+   "capacity": 201,
+   "active": 173,
+   "vacancy_rate": 13.93,
    "s": null,
    "d": null,
    "r": null,

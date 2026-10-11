@@ -53,8 +53,9 @@ def buildings(slug: str) -> list[dict]:
             "lo": r["active_floors_lo"], "hi": r["active_floors_hi"],
             "cap": r["capacity"], "size": at.get("rone_size"),
             "area": at.get("com_area_flr") or 0.0,
-            # 점포(상가정보) ∪ 인허가로 층이 확인된 집합 — 분자의 하한 근거
-            "known": set(at.get("store_flr_nos") or []) | set(at.get("lic_flr_nos") or []),
+            # 점포(상가정보) ∪ 인허가 ∪ 학원(NEIS)으로 층이 확인된 집합 — 분자의 하한 근거(recalc 와 같은 규칙)
+            "known": (set(at.get("store_flr_nos") or []) | set(at.get("lic_flr_nos") or [])
+                      | set(at.get("aca_flr_nos") or [])),
         }
     return list(per.values())
 

@@ -1,46 +1,31 @@
 {
  "slug": "anam",
- "built_at": "2026-09-05T11:04:10+00:00",
+ "built_at": "2026-10-11T04:52:04+00:00",
  "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
  "method": "adong_knn9",
  "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
  "assign": {
-  "counted_buildings": 113,
-  "knn_vs_pnu_compared": 113,
-  "knn_vs_pnu_agree_pct": 100.0
+  "counted_buildings": 321,
+  "knn_vs_pnu_compared": 321,
+  "knn_vs_pnu_agree_pct": 99.4
  },
- "dropped_spillover": [
-  {
-   "n": "신설동",
-   "buildings": 4,
-   "stores": 95,
-   "capacity": 8,
-   "active": 8
-  },
-  {
-   "n": "동선동",
-   "buildings": 1,
-   "stores": 106,
-   "capacity": 2,
-   "active": 2
-  }
- ],
+ "dropped_spillover": [],
  "residual": {
-  "buildings": 5,
-  "capacity": 10,
-  "active": 10
+  "buildings": 0,
+  "capacity": 0,
+  "active": 0
  },
  "zones": [
   {
    "n": "안암동",
    "grp": "안암동5가",
-   "lat": 37.585383,
-   "lng": 127.028876,
-   "stores": 1077,
-   "buildings": 81,
-   "capacity": 248,
-   "active": 242,
-   "vacancy_rate": 2.42,
+   "lat": 37.585725,
+   "lng": 127.027396,
+   "stores": 1106,
+   "buildings": 230,
+   "capacity": 516,
+   "active": 465,
+   "vacancy_rate": 9.88,
    "s": null,
    "d": null,
    "r": null,
@@ -50,13 +35,13 @@
   {
    "n": "보문동",
    "grp": "보문동4가",
-   "lat": 37.583742,
-   "lng": 127.02014,
-   "stores": 513,
-   "buildings": 20,
-   "capacity": 63,
-   "active": 58,
-   "vacancy_rate": 7.94,
+   "lat": 37.583177,
+   "lng": 127.020434,
+   "stores": 535,
+   "buildings": 59,
+   "capacity": 132,
+   "active": 107,
+   "vacancy_rate": 18.94,
    "s": null,
    "d": null,
    "r": null,
@@ -66,18 +51,50 @@
   {
    "n": "제기동",
    "grp": "제기동",
-   "lat": 37.582709,
-   "lng": 127.03026,
-   "stores": 114,
-   "buildings": 7,
-   "capacity": 22,
-   "active": 20,
-   "vacancy_rate": 9.09,
+   "lat": 37.582563,
+   "lng": 127.030289,
+   "stores": 108,
+   "buildings": 15,
+   "capacity": 40,
+   "active": 27,
+   "vacancy_rate": 32.5,
    "s": null,
    "d": null,
    "r": null,
    "f": [],
    "id": "z3"
+  },
+  {
+   "n": "동선동",
+   "grp": "동선동2가",
+   "lat": 37.589635,
+   "lng": 127.020147,
+   "stores": 112,
+   "buildings": 9,
+   "capacity": 16,
+   "active": 10,
+   "vacancy_rate": 37.5,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  },
+  {
+   "n": "신설동",
+   "grp": "용두동",
+   "lat": 37.581757,
+   "lng": 127.028937,
+   "stores": 69,
+   "buildings": 8,
+   "capacity": 15,
+   "active": 14,
+   "vacancy_rate": 6.67,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z5"
   }
  ]
 }

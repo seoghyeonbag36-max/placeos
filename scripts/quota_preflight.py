@@ -9,7 +9,8 @@
   2. 전원 — 배터리면 느려진다. 기전은 CPU가 아니라 무선 어댑터 절전(AC 0 / DC 2)이고
      이 작업은 네트워크 바운드라 정확히 거기서 아프다. 덮개를 닫으면 아예 언다
   3. 커밋 여유 — 1~2GB 면 회색 화면·무증상 크래시가 온다. 재부팅만 듣는다
-  4. 잔여 — 전유부(대장) 미수집 거점과, 층별개요 **미시도** 동수.
+  4. 잔여 — 전유부(대장) 미수집 거점, **대장 미조회 건물**(최신 점포 스냅샷에 있고 대장 행이
+     없는 bdMgtSn — 파일이 있어도 생긴다, 2026-10-10), 층별개요 **미시도** 동수.
      층별개요 잔여는 '미시도'와 '판정완료(상업층 0 확정)'로 갈라서 찍는다.
      붙여 쓸 명령줄에는 미시도가 있는 거점만 넣는다 — 잔여 동수로 고르면
      회수율 0 인 거점에 콜을 태운다(2026-08-19 에 672콜/22동으로 겪었다).
@@ -31,6 +32,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from data.collectors.building_vacancy import NON_STOREFRONT_LCLS  # noqa: E402
 from data.collectors.common import load_env  # noqa: E402
 from data.config.page_hubs import (  # noqa: E402
     ALL_HUBS,
@@ -208,19 +210,45 @@ def _gold(slug: str) -> list | None:
         return None
 
 
+def unseen_buildings(stores: list[dict], rows: list[dict]) -> int:
+    """최신 점포 스냅샷의 건물(bdMgtSn) 중 대장 행이 없는 수 — 수집기가 다음 실행에서 조회할 대상.
+
+    `building_vacancy.run_hub` 는 기존 행을 두고 **새 bdMgtSn 만** 대장을 조회한다(그룹 규칙도
+    같다: bldMngNo 있음 · 사무실형 업종 제외). 그래서 파일이 있어 '미수집 0' 이어도 점포 스냅샷이
+    새로 들어오면 대장 미조회 건물이 생긴다 — 2026-10-10 10월 스냅샷 2,918동(anam 은 7월부터
+    642동)이 "전유부 잔여 없음" 아래 숨어 있었다. 429 강등 행은 완료로 치지 않는다(수집기와 같다).
+    """
+    done = {r.get("bdMgtSn") for r in rows
+            if r.get("bdMgtSn") and r.get("capacity_method") != "rate_limited"}
+    seen = {s.get("bldMngNo") for s in stores
+            if s.get("bldMngNo") and s.get("indsLclsNm") not in NON_STOREFRONT_LCLS}
+    return len(seen - done)
+
+
+def _latest_stores(slug: str) -> list[dict]:
+    days = sorted((BRONZE / slug).glob("*/stores_raw.json"))
+    try:
+        return json.loads(days[-1].read_text(encoding="utf-8")) if days else []
+    except Exception:  # noqa: BLE001  깨진 스냅샷 하나가 프리플라이트를 막지 않게
+        return []
+
+
 def report_remaining() -> None:
     """전유부(대장) 잔여와 층별개요 대상을 gold 에서 유도해 출력한다."""
     paused = _paused()
-    missing, partial = [], []
+    missing, partial, unseen = [], [], []
     for slug in ALL_HUBS:
         if slug in paused:                # 서빙 보류 도시 — 오늘 쿼터를 태우지 않는다
             continue
         rows = _gold(slug)
         if rows is None or not rows:
             missing.append(slug)          # 파일이 없거나 0동 = 미수집
-        elif any(r.get("capacity_method") == "rate_limited" for r in rows):
+            continue
+        if any(r.get("capacity_method") == "rate_limited" for r in rows):
             partial.append((slug, sum(1 for r in rows
                                       if r.get("capacity_method") == "rate_limited")))
+        if n := unseen_buildings(_latest_stores(slug), rows):
+            unseen.append((slug, n))
 
     live = len(ALL_HUBS) - len(paused)
     print(f"\n■ 전유부(대장) — 미수집 {len(missing)}거점 / 서빙 대상 {live}")
@@ -236,10 +264,16 @@ def report_remaining() -> None:
     if partial:
         print("  429 강등이 남은 거점(재실행하면 자동 재수집): "
               + " ".join(f"{s}({n})" for s, n in partial))
+    if unseen:
+        print(f"  대장 미조회 건물 {sum(n for _, n in unseen)}동 / {len(unseen)}거점 "
+              "(최신 점포 스냅샷에 있고 대장 행이 없다 — 재실행하면 새 건물만 조회한다): "
+              + " ".join(f"{s}({n})" for s, n in unseen))
 
     # 붙여 쓸 명령줄까지 찍는다 — 층별개요만 찍고 전유부는 슬러그만 나열하던 것을 맞춘다
     # (2026-08-15). 429 강등 거점도 같은 실행에서 자동 재수집되므로 뒤에 붙인다.
-    todo = missing + [s for s, _ in partial]
+    # 대장 미조회 건물이 있는 거점도 같은 명령으로 채운다(2026-10-10).
+    todo = missing + [s for s, _ in partial] + [s for s, _ in unseen
+                                                 if s not in {p for p, _ in partial}]
     if todo:
         for label, grp in _GROUPS:
             part = [s for s in todo if s in grp]

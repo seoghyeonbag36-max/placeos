@@ -3,20 +3,20 @@
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 서울>강남>교대역",
   "anchor_vac_small_pct": 0.491807309895983,
   "ref_garosu_street_2024_pct": null,
-  "estimated_vacancy_pct": 89.0,
+  "estimated_vacancy_pct": 88.7,
   "alpha_street": 0.042,
-  "gap_pp": 85.3,
+  "gap_pp": 85.0,
   "buildings_used": 124,
   "rone_aligned": {
     "mid": {
       "buildings": 47,
       "vacancy_units_pct": 15.5,
       "buildings_floor": 47,
-      "vacancy_floor_hi_pct": 12.8,
-      "vacancy_floor_lo_pct": 30.1,
-      "vacancy_area_pct": 3.6,
+      "vacancy_floor_hi_pct": 9.6,
+      "vacancy_floor_lo_pct": 18.3,
+      "vacancy_area_pct": 3.1,
       "anchor_pct": 3.74,
-      "gap_pp": -0.1
+      "gap_pp": -0.6
     },
     "small": {
       "buildings": 3,

@@ -364,8 +364,10 @@ def _aggregate(rows: list[dict], extra: int = 0, fresh: int | None = None,
     if floors:
         at = at or {}
         lic = lic or {}
-        # 분자 = 점포(상가정보 flrNo) ∪ 인허가(주소 층 표기) 로 확인된 층
-        known = set(at.get("store_flr_nos") or []) | set(lic.get("floors") or [])
+        # 분자 = 점포(상가정보 flrNo) ∪ 인허가(주소 층 표기) ∪ 학원(NEIS 상세주소) 로 확인된 층.
+        # 학원 층은 recalc_floor_ouln 과 같이 분모(floors)를 넓히지 않는다 — 아래 교집합이 거른다.
+        known = (set(at.get("store_flr_nos") or []) | set(lic.get("floors") or [])
+                 | set(at.get("aca_flr_nos") or []))
         occ_floors = sorted(floors & known)
         lo = len(occ_floors)
         # 층을 모르는 것만 빈 층에 배정(상한): 상가정보 공란 + 인허가 무표기 + PIP 점포.
@@ -376,7 +378,7 @@ def _aggregate(rows: list[dict], extra: int = 0, fresh: int | None = None,
                        # 층 **번호** 자체 — 3D 트윈이 '몇 층이 비었나'를 실배치로 그리는 근거.
                        # 개수(lo/hi)만 남기면 프론트는 아래부터 채우는 근사밖에 못 한다.
                        "com_floors": sorted(floors),   # 분모: 상업 용도 층
-                       "occ_floors": occ_floors,       # 분자 하한: 점포·인허가로 확인된 층
+                       "occ_floors": occ_floors,       # 분자 하한: 점포·인허가·학원으로 확인된 층
                        "unknown_n": hi - lo,           # 층 미상 점포로 배정된 층 수(상한−하한)
                        "stores": active,                    # 점포 수(참고·하위호환)
                        "occupancy": hi / len(floors)}

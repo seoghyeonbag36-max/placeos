@@ -421,16 +421,19 @@ def test_aligned_gap_uses_rone_aligned_not_primary():
 
 
 def test_aligned_gap_known_hubs():
-    """09-08 판정의 대표 사례(연남) — 옛 격차(+7.5)와 정렬 격차(+15.8)가 갈린다.
+    """09-08 판정의 대표 사례(연남) — 옛 격차(+8.3)와 정렬 격차(+17.6)가 갈린다.
 
     값이 재수집으로 움직이면 이 테스트를 고친다. 격차가 **작아지는 방향으로** 고칠 때는
     calibration.json 이 실제로 그렇게 바뀌었는지 먼저 확인할 것.
+    2026-10-11 20.8 → 22.6(격차 15.8 → 17.6): 10월 상가정보 갱신이 23.9 로 올리고 학원(NEIS)
+    층 근거가 22.8, 인허가 27종 재수집이 22.6 으로 내렸다. 앵커(5.0)는 그대로다
+    → docs/finding-page-oct-refresh-2026-10-10.md
     """
     hm = client.get(f"{V1}/heatmap/vacancy", params={"district": "yeonnam"}).json()
-    assert hm["aligned_vacancy_pct"] == pytest.approx(20.8)
+    assert hm["aligned_vacancy_pct"] == pytest.approx(22.6)
     assert hm["anchor_pct"] == pytest.approx(5.0)
-    assert hm["aligned_gap_pp"] == pytest.approx(15.8, abs=0.01)
-    assert hm["anchor_gap_pp"] == pytest.approx(7.53, abs=0.01)
+    assert hm["aligned_gap_pp"] == pytest.approx(17.6, abs=0.01)
+    assert hm["anchor_gap_pp"] == pytest.approx(8.32, abs=0.01)
 
 
 def test_polygon_only_never_counted():

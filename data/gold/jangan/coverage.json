@@ -2,41 +2,41 @@
   "slug": "jangan",
   "hub_name": "장안동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-09-04T23:29:53",
-  "shown": 315,
-  "excluded_total": 298,
-  "excluded_unknown": 4,
-  "excluded_non_commercial": 233,
-  "excluded_determined": 61,
-  "coverage_pct": 51.4,
+  "built_at": "2026-10-11T13:48:45",
+  "shown": 313,
+  "excluded_total": 300,
+  "excluded_unknown": 5,
+  "excluded_non_commercial": 232,
+  "excluded_determined": 63,
+  "coverage_pct": 51.1,
   "status": {
-    "full": 154,
-    "partial": 64,
-    "high": 26,
-    "empty": 71
+    "full": 163,
+    "partial": 51,
+    "high": 29,
+    "empty": 70
   },
   "source": {
-    "stores+ledger": 235,
-    "polygon_only": 71,
-    "pip_only": 8,
+    "stores+ledger": 236,
+    "polygon_only": 69,
+    "pip_only": 7,
     "stores+ledger+pip": 1
   },
-  "reference_vacancy_pct": 41.9,
-  "reference_buildings": 175,
+  "reference_vacancy_pct": 41.7,
+  "reference_buildings": 176,
   "reference_coverage_pct": 100.0,
   "mixed_vacancy_pct": 31.0,
   "by_capacity_method": {
     "floor_ouln": {
       "buildings": 142,
-      "active": 392,
+      "active": 387,
       "capacity": 445,
-      "vacancy_pct": 11.9
+      "vacancy_pct": 13.0
     },
     "expos_units": {
-      "buildings": 33,
-      "active": 262,
-      "capacity": 680,
-      "vacancy_pct": 61.5
+      "buildings": 34,
+      "active": 272,
+      "capacity": 686,
+      "vacancy_pct": 60.3
     }
   },
   "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."
