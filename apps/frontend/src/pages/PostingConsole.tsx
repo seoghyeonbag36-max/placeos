@@ -509,7 +509,9 @@ function TierCard({ tierKey, s, before }: { tierKey: string; s: TierScenario; be
       </div>
       <div className="tsub">{meta.sub}</div>
 
-      <div className="trow"><span>초기 투자</span><span>{won(s.invest_mn)}</span></div>
+      {/* ⚠ invest_mn 은 **백만원** 단위다(백엔드 services/districts: inv × 100 ÷ net = roi_months). 2026-10-13 까지 이 칸이
+          만원으로 찍혀 초기 투자가 100배 작게 보였다 — 화면설계서 5판 §12 U8. #board(PageDashboard)는 「백만」으로 맞게 찍는다 */}
+      <div className="trow"><span>초기 투자</span><span>{won(s.invest_mn * 100)}</span></div>
       <div className="trow"><span>월 비용</span><span>{won(s.month_cost)}</span></div>
       <div className="trow"><span>월 매출</span><span>{won(s.month_rev)}</span></div>
       <div className="trow big">
@@ -523,7 +525,7 @@ function TierCard({ tierKey, s, before }: { tierKey: string; s: TierScenario; be
       </div>
       {before && <div className="tier-difference" aria-label={`${meta.name} 직전 계산과 비교`}>
         <b>직전 계산 대비</b>
-        <span>초기 투자 {difference(s.invest_mn - before.invest_mn, "만원")}</span>
+        <span>초기 투자 {difference((s.invest_mn - before.invest_mn) * 100, "만원")}</span>
         <span>월 순익 {difference(s.month_net - before.month_net, "만원")}</span>
         <span>회수기간 {s.viable && before.viable && s.roi_months != null && before.roi_months != null
           ? difference(s.roi_months - before.roi_months, "개월") : `${before.viable ? `${before.roi_months}개월` : "회수 불가"} → ${s.viable ? `${s.roi_months}개월` : "회수 불가"}`}</span>

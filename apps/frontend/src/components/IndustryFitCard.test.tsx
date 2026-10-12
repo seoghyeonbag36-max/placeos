@@ -13,7 +13,7 @@ const row = { district_id: "test", name: "테스트 상권", gu: "테스트구",
   fit_rank: 1, same_n: null, same_share: null, sample_n: null,
   rent_1f_per_pyeong: null, rent_shared: true };
 const fit: IndustryFit = { industry, model_covered: true, seoul_fit: null, ranked_n: 1,
-  source, note: "합성 픽스처", districts: [row], basis: "floor", n: 0, top: [] };
+  source, note: "합성 픽스처", districts: [row] };
 const mix: DistrictIndustries = { district_id: "test", sample_n: 100, source, note: "합성 픽스처",
   rows: [{ ...industry, fit: 0.2, fit_rank: 1, same_n: null, same_share: null }] };
 

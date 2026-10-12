@@ -68,7 +68,7 @@ export default function FlowApp({ token }: { token: string | null }) {
   const [state, setState] = useState<FlowState>(loadFlow);
   const update = useCallback((fn: (s: FlowState) => FlowState) => {
     setState((s) => { const next = fn(s); if (next !== s) saveFlow(next); return next; });
-  }, []);
+  }, [setState]);
 
   // 모르는 흐름 주소(지도 탐색은 App 이 가른다) → 홈
   const unknown = !route || route.name === "explore";

@@ -102,7 +102,7 @@ PlaceOS 는 지도 위에 **네 트랙(PPPP)** 을 얹는 앱이다. 그래서 �
 
 | 관찰한 기제 | 근거 | **가져올 것 (코드 착지점)** |
 |---|---|---|
-| 컴포넌트에 **position** 을 체크리스트 항목으로 둔다(다이얼로그냐 바텀시트냐) | [TDS 컴포넌트 제작기](https://toss.tech/article/tds-component-making) — 안드로이드에서 **바텀시트가 메뉴보다 클릭율 10% 높았다** | ★ **R4** — `design/components/BottomSheet.tsx` 를 **아무 화면도 안 쓴다**. 모바일(≤768px)에서 `MapShell` 사이드패널을 바텀시트로 내린다 |
+| 컴포넌트에 **position** 을 체크리스트 항목으로 둔다(다이얼로그냐 바텀시트냐) | [TDS 컴포넌트 제작기](https://toss.tech/article/tds-component-making) — 10일 A/B 에서 안드로이드는 **바텀시트보다 메뉴의 아이템 클릭율이 10% 높았고**, 전체 지표는 큰 차이가 없어 둘 다 시스템에 남겼다(2026-10-13 원문 대조로 정정 — 종전 표기는 거꾸로였다) | ★ **R4** — `design/components/BottomSheet.tsx` 를 **아무 화면도 안 쓴다**. 모바일(≤768px)에서 `MapShell` 사이드패널을 바텀시트로 내린다 |
 | 글자가 커질 때 **글자 단위 개행 + 아이콘도 같이 커진다** | TDS 접근성 대응 | 우리 `--fs-*` 5단은 고정 px 이다 → 최소한 **한글 어절 단위 개행**(`word-break: keep-all`)을 전 화면에 건다(R5) |
 | 색 시스템을 7년 만에 갈아끼우면서 **역할(semantic) 이름으로만 쓰게** 했다 | [컬러 시스템 업데이트](https://toss.tech/article/tds-color-system-update) | 우리는 이미 `--track-*` · `--ink` · `--muted` 로 역할명이다 → **하드코딩 hex 463곳**을 계속 줄인다 |
 

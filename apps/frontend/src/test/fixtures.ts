@@ -115,7 +115,8 @@ export function buildings(
 
 function tier(key: string, over: Partial<TierScenario> = {}): TierScenario {
   return {
-    tier: key, name: key, sub: "", invest_mn: 8000, month_cost: 1200,
+    // invest_mn 은 백만원 — 80 = 8,000만원(백엔드 식: invest_mn × 100 ÷ month_net ≈ roi_months)
+    tier: key, name: key, sub: "", invest_mn: 80, month_cost: 1200,
     month_rev: 1800, month_net: 600, roi_months: 14, recommended: key === "value",
     viable: true, basis: "kosis-opex+measured-revenue", ...over,
   };

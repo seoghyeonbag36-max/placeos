@@ -2,6 +2,8 @@
    글자 크기는 rem — 브라우저 글꼴 크기를 따른다(§9). 큰 숫자만 clamp 로 상한을 둔다. */
 
 .flow { min-height: 100dvh; background: var(--surface); color: var(--ink); }
+/* 입력칸 width:100% 에 안쪽 여백이 더해져 375 폭에서 가로로 넘쳤다(2026-10-13 실화면 9~14px) — 흐름 전체를 border-box 로 */
+.flow *, .flow *::before, .flow *::after, .fl-sheet, .fl-sheet * { box-sizing: border-box; }
 
 /* ── 뼈대 ── 질문 화면은 가운데 한 열 560, 목록·비교는 960(§4-1) */
 .fl-screen { --col: 560px; max-width: var(--col); margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
@@ -30,7 +32,7 @@
 .fl-title { margin: 0; font-size: 1.5rem; line-height: 1.375; font-weight: var(--fw-bold); letter-spacing: -.02em; color: var(--grey-800); text-wrap: balance; }
 .fl-title:focus { outline: none; }
 .fl-sub { margin: var(--sp-2) 0 0; font-size: 1.0625rem; line-height: 1.5; color: var(--grey-700); }
-.fl-body { margin-top: var(--sp-5); display: grid; gap: var(--sp-3); min-width: 0; }
+.fl-body { margin-top: var(--sp-5); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); min-width: 0; }
 .fl-h2 { margin: var(--sp-5) 0 0; font-size: 1.0625rem; font-weight: var(--fw-bold); color: var(--grey-900); }
 
 :where(.flow) button:focus-visible, :where(.flow) a:focus-visible, :where(.flow) input:focus-visible,
@@ -101,10 +103,10 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-textfield input, .fl-search input { width: 100%; height: 52px; padding: 0 var(--sp-4); border: 1px solid transparent;
   border-radius: var(--radius-md); background: var(--grey-50); font: inherit; font-size: 1.0625rem; color: var(--ink); }
 .fl-textfield input:focus, .fl-search input:focus { border-color: var(--primary); background: var(--surface); outline: none; }
-.fl-money { display: grid; gap: var(--sp-1); }
+.fl-money { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); min-width: 0; }
 .fl-money-label { font-size: .875rem; font-weight: var(--fw-semibold); color: var(--grey-700); }
 .fl-money-box { display: flex; align-items: baseline; gap: var(--sp-2); border-bottom: 2px solid var(--primary); padding: var(--sp-1) 0; }
-.fl-money-box input { flex: 1; min-width: 0; border: 0; background: none; padding: 0; font: inherit;
+.fl-money-box input { flex: 1; width: 100%; min-width: 0; border: 0; background: none; padding: 0; font: inherit;
   font-size: clamp(1.5rem, 1.25rem + 1vw, 2.25rem); font-weight: var(--fw-bold); color: var(--grey-900); font-variant-numeric: tabular-nums; }
 .fl-money-box input:focus { outline: none; }
 .fl-money-suffix { font-size: 1.25rem; font-weight: var(--fw-semibold); color: var(--grey-600); }
@@ -189,6 +191,7 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 
 .fl-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 var(--sp-2); border-radius: 6px;
   font-size: .75rem; font-weight: var(--fw-bold); white-space: nowrap; vertical-align: middle; }
+.fl-body > .fl-badge { justify-self: start; }   /* 그리드 칸에 늘어나 막대가 되지 않게 */
 .fl-badge.is-real { background: var(--source-real-soft); color: var(--source-real); }
 .fl-badge.is-est { background: var(--caution-soft); color: var(--caution-ink); }
 .fl-badge.is-obs { background: var(--grey-100); color: var(--grey-700); }
@@ -309,9 +312,13 @@ button.fl-row-btn:hover { background: var(--grey-50); }
   .fl-keys { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ── 방문자 의견 버튼(App 전역 · 오른쪽 아래) — 흐름의 하단 버튼·탭을 가리지 않게 위로 올린다.
-   데스크톱은 하단 버튼이 가운데 한 열이라 겹치지 않는다. */
+/* ── 방문자 의견 버튼(App 전역 · 오른쪽 아래) — 모바일 흐름 화면에서는 하단 버튼·카드를 가렸다(2026-10-13 실화면).
+   떠 있는 버튼은 숨기고, 홈·내 정보의 「의견 보내기」가 같은 창을 연다(OPEN_VISITOR_FEEDBACK).
+   창은 탭바 위에 뜬다. 데스크톱은 가운데 한 열이라 겹치지 않아 그대로 둔다. */
 @media (max-width: 1023px) {
-  .flow:has(.has-tab) ~ .visitor-feedback { bottom: calc(68px + env(safe-area-inset-bottom)); }
-  .flow:has(.has-cta) ~ .visitor-feedback { bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .flow ~ .visitor-feedback .visitor-feedback-trigger { display: none; }
+  .flow ~ .visitor-feedback { bottom: calc(68px + env(safe-area-inset-bottom)); }
 }
+
+/* R5 — 고른(추천) 가격대 카드는 바탕이 primary-soft 라 같은 색 배지가 묻힌다 */
+.fl-choice.is-on .fl-badge.is-primary { background: var(--primary); color: #fff; }

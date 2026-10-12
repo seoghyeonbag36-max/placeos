@@ -497,7 +497,9 @@ export const getPostings = (id: string) => getJSON<Posting[]>(`/commercial-distr
 /** 같은 조건(대장 용도·층)의 자리에서 **실제 영업 중인** 업종 분포.
  *  ⚠ 추천이 아니라 관측이다 — 그 자리에서 잘 된다는 뜻이 아니고(매출·생존 미고려),
  *     GNN 업종 추천(`recommendIndustry`)과도 다른 축이다(저쪽은 좌표 기준 · 서빙 어휘 라벨 — 어휘는 산출물이 정한다). */
-export interface IndustryFit {
+/* ⚠ 2026-10-13: 이 이름은 종전에 `IndustryFit` 이었다 — 아래 업종 순위 응답(`IndustryFit`)과 이름이 같아 TypeScript 가
+ *  두 인터페이스를 **합쳐** 버렸다(선언 병합). 층 관측 표에 순위 응답 필드가 전부 필수로 붙어 있었다. 이름을 갈랐다. */
+export interface SiteIndustryFit {
   /** "purps_floor" 용도+층 관측 · "floor" 용도 표본이 얇아 층만 본 폴백 */
   basis: "purps_floor" | "floor" | string;
   n: number;
@@ -527,7 +529,7 @@ export interface FloorVacancyUnit {
   was: string;
   /** 근거가 없으면 **없다**. 빈 배열이 아니라 부재로 온다 —
    *  빈 목록을 주면 "이 자리에 들어갈 업종이 없다"로 읽힌다. */
-  fit?: IndustryFit | null;
+  fit?: SiteIndustryFit | null;
 }
 
 export interface FloorVacancyList {

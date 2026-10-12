@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FloorVacancyUnit, TierScenario } from "@/lib/api";
 import { clearToken, saveToken } from "@/lib/session";
-import { installFetchStub, type FetchStub } from "@/test/fetchStub";
+import { installFetchStub, type ApiCall, type FetchStub } from "@/test/fetchStub";
 import { district, rentHeatmap, rentListing } from "@/test/fixtures";
 import FlowApp from "./FlowApp";
 import { FLOW_KEY } from "./state";
@@ -56,7 +56,7 @@ function stub(extra: Parameters<typeof installFetchStub>[0] = []): FetchStub {
     ]) },
     { match: /\/seongsu\/postings$/, body: [{ id: "vu-B1", n: "B1", grp: "A", lat: 0, lng: 0, area: 19, rent: 412, prem: 0, floor: "1F", was: "카페", foot: "상",
       scenarios: { premium: tier("premium"), value: tier("value"), factory: tier("factory") } }] },
-    { match: /\/ai\/simulate-revenue$/, body: (_m, call) => ({
+    { match: /\/ai\/simulate-revenue$/, body: (_m: RegExpExecArray, call: ApiCall) => ({
       district_id: "seongsu", unit_id: (call.body as { unit_id: string }).unit_id, industry_type: "카페",
       scenarios: { premium: tier("premium", { invest_mn: 34, month_net: 1101, roi_months: 3.1 }), value: tier("value"), factory: tier("factory", { invest_mn: 12, month_net: 395, roi_months: 3.0 }) },
       source: "fallback-3tier", source_note: null, inputs_source: { area: "bldg", rent: "rone", prem: "absent", foot: "seed" }, inputs_quarter: "20262", unviable_note: null,
@@ -67,7 +67,7 @@ function stub(extra: Parameters<typeof installFetchStub>[0] = []): FetchStub {
     { match: /\/marketing\/generate$/, body: { item: "말차 라떼", category: "카페", mode: "soft_open", stage: "pre_founder",
       online: [{ channel: "인스타그램", kind: "online", content: "사전 공지", rationale: "근거" }], offline: [],
       signals: [{ name: "하루 방문 손님", method: "카운터로 센다", target: "40명", decision: "25명 아래면 다른 상권도 봐요" }], ha_check: "", source: "rule-stub" } },
-    { match: /\/auth\/results$/, body: (_m, call) => (call.method === "POST" ? { ...(call.body as object), id: "r1", createdAt: "2026-10-13T00:00:00Z" } : []) },
+    { match: /\/auth\/results$/, body: (_m: RegExpExecArray, call: ApiCall) => (call.method === "POST" ? { ...(call.body as object), id: "r1", createdAt: "2026-10-13T00:00:00Z" } : []) },
     { match: /\/auth\/providers$/, body: { google_client_id: null, naver_enabled: false, kakao_enabled: false } },
     { match: /\/auth\/workspace$/, body: { status: "unset" } },
   ]);

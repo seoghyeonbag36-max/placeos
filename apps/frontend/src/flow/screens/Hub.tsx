@@ -7,6 +7,7 @@ import { getAuthProviders, getMe, logoutSession, type AuthMe, type AuthProviders
 import GoogleSignIn from "@/components/GoogleSignIn";
 import PrivacyNote from "@/components/PrivacyNote";
 import SocialSignIn from "@/components/SocialSignIn";
+import { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import { clearToken } from "@/lib/session";
 import { LOGIN_BENEFITS, useFlow, type LoginReason } from "../context";
@@ -125,7 +126,10 @@ export function Home() {
       <h2 className="fl-h2">저장한 것</h2>
       {token ? (results ? <SavedList items={results} limit={5} /> : <p className="fl-note">불러오는 중…</p>)
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}
-      <div className="fl-actions"><TextButton onClick={() => setReset(true)}>처음부터</TextButton></div>
+      <div className="fl-actions">
+        <TextButton onClick={() => setReset(true)}>처음부터</TextButton>
+        <TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton>
+      </div>
       <Sheet open={reset} onClose={() => setReset(false)} title="처음부터 다시 할까요?">
         <p>고른 목적·업종·상권·자리와 입력한 금액이 지워져요. 저장한 것은 남아요.</p>
         <button type="button" className="fl-btn fl-btn-strong" onClick={() => {
@@ -135,6 +139,9 @@ export function Home() {
     </FlowScreen>
   );
 }
+
+/** 로그인 없이 남기는 의견 창(App 전역 VisitorFeedback)을 연다 */
+const openVisitorFeedback = () => window.dispatchEvent(new Event(OPEN_VISITOR_FEEDBACK));
 
 /** 흐름 주소 → 단계 */
 function stageOf(path: string): string | null {
@@ -162,6 +169,7 @@ export function Me() {
     return (
       <FlowScreen hub tab="me" title="로그인하면 저장한 것을 어디서나 봐요">
         <LoginPanel reason="login" onEmail={() => openAccount("login")} />
+        <div className="fl-actions"><TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton></div>
       </FlowScreen>
     );
   }
@@ -176,7 +184,8 @@ export function Me() {
       </RowList>
       {showSaved && results && <SavedList items={results} onRemove={removeResult} />}
       <RowList label="도움">
-        <Row title="의견 보내기" onClick={() => openAccount("feedback")} />
+        <Row title="의견 보내기" meta="후기·오류·개선 요청" onClick={openVisitorFeedback} />
+        <Row title="추천 의향 · 결제 의향 남기기" meta="시범 운영 조직 설문" onClick={() => openAccount("feedback")} />
         <Row title="API 키 · 계정 관리" meta="탈퇴도 여기서 해요" onClick={() => openAccount("account")} />
       </RowList>
       <div className="fl-actions">
