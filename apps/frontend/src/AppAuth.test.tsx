@@ -46,7 +46,8 @@ it("기존 세션의 사업 정보가 도착해도 소셜 callback을 중단하�
   render(<App />);
   await waitFor(() => expect(loadToken()).toBe("next-user"));
   expect(getBusinessWorkspace).toHaveBeenCalledWith("previous-user");
-  expect(getBusinessWorkspace).toHaveBeenCalledWith("next-user");
+  // 5판: 새 계정의 「내 사업」은 흐름(FlowApp)이 마운트된 뒤 이펙트에서 받는다 — 비동기라 기다린다(CI 에서 순서가 갈렸다)
+  await waitFor(() => expect(getBusinessWorkspace).toHaveBeenCalledWith("next-user"));
 });
 afterEach(() => { clearToken(); window.location.hash = ""; });
 
