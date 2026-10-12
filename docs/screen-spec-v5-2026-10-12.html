@@ -397,7 +397,105 @@ q { quotes:"“" "”"; }
       </ul>
     </section>
 
-<!-- @@STEAL@@ -->
+    <!-- ═════════ 3 훔쳐 온 것 ═════════ -->
+    <section id="steal">
+      <div class="sec-head"><span class="num">§3</span><h2>훔쳐 온 것 · 근거</h2>
+        <p class="lede">토스 제품 원칙·사례·TDS, 원티드 Montage, 그리고 「한 화면 한 질문」의 원전과 반례를 2026-10-12 에 모았다(65항목). <b>수치는 원문을 다시 열어 문장을 대조한 것만</b> 남겼다 — 대조 스크립트가 원문에서 같은 문장을 찾지 못한 수치는 쓰지 않았다. 각 행의 마지막 칸이 이 문서 안의 착지점이다.</p></div>
+
+      <div class="callout warn"><b>수치를 읽는 법.</b> 아래 수치는 전부 <b>남의 제품에서, 그 회사가 스스로 보고한 값</b>이다. 표본·기간·대조군이 공개되지 않은 것이 많고(예: 토스 「60%로 대폭 감소」는 감소폭인지 남은 비율인지 원문이 모호하다), PlaceOS 의 사용자·과업과도 다르다. 그래서 이 수치는 <b>설계 방향의 근거</b>로만 쓰고, 효과는 우리 퍼널로 따로 잰다(§1-5 · KPI 규칙 1·2). 화면 문구·랜딩에 이 수치를 옮겨 적지 않는다.</div>
+
+      <h3>3-1. 토스 제품 원칙 10개 → 착지점</h3>
+      <p class="note" style="margin-top:0">출처: 토스 「What makes a good product?」 2025-09-17 (toss.im/tossfeed/article/tossproductprinciples). 원칙 글 자체에는 사례·수치가 없다 — 수치는 §3-2 의 개별 글에서 온다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>원칙</th><th>한 줄</th><th>5판 착지점</th></tr></thead>
+        <tbody>
+          <tr><th>One Thing</th><td>한 페이지에는 다듬어진 핵심 메시지 하나</td><td>C3 한 화면 한 질문(§4-2) · 모든 Q 화면 · 결과 화면 제목은 결론 한 문장(R1 「…높은 상권이에요」)</td></tr>
+          <tr><th>Easy to Answer</th><td>모든 질문에 3초 안에 답할 수 있는가 <span class="src">원문: "within three seconds"</span></td><td>분류어 대신 사실 질문(Q1 「~해요」 문장) · 3-Tier 를 묻지 않고 월세 상한(Q5)·권리금(Q6)처럼 아는 값을 묻는다 · 선택지 옆에 결과 개수(Q5)</td></tr>
+          <tr><th>Value First</th><td>시간·돈·정보를 요구하기 전에 가치를 먼저</td><td>C5 로그인 시점 — 결과까지 가입 0번 · 로그인은 저장·AI 생성에서만(§4-5 로그인 시트)</td></tr>
+          <tr><th>Explain Why</th><td>왜 해야 하는지 설명했는가</td><td>공통 프레임 ④ 보조 한 줄 = 왜 묻는지(§4-1) · 로그인 시트의 「얻는 것 세 줄」</td></tr>
+          <tr><th>Clear Action</th><td>다음 행동이 한눈에</td><td>하단 고정 버튼 하나 · 문구는 누르면 일어날 일(「상권 순위 보기」 · 「몇 달이면 본전인지 보기」)</td></tr>
+          <tr><th>Context Based</th><td>여정 전체를 보고 설계</td><td>목적별 경로(§2-1) — 바꾸기는 상권 순위를 건너뛰고 지금 상권의 업종 순위(R1-p)로</td></tr>
+          <tr><th>No More Loading</th><td>기다림을 없앴는가</td><td>다음 화면 데이터를 앞 화면에서 미리 받는다(Q2→R1 · R2→Q5·R3) · 스피너 대신 골격(§4-5)</td></tr>
+          <tr><th>Minimum Features</th><td>기능이 많을수록 복잡·느림·버그</td><td>흐름 밖 기능(벤치마킹 가게·소요시간·공실 예측·감성)은 지도 탐색으로(§1-2 · §10) · 「네 질문 중 어디에 답하나」를 말 못 하면 흐름에 넣지 않는다</td></tr>
+          <tr><th>Casual Concept</th><td>어려운 개념은 익숙한 말로</td><td>용어 치환표(§4-4) — 회수기간 → 본전 시점, 공실 → 빈 자리, 3-Tier → 세 가지 가격대</td></tr>
+          <tr><th>Simple Policy</th><td>정책은 단순하게</td><td>「본전 시점은 건물 단위 자리만 계산한다」 「예산 점검은 직접 확인한 금액만 더한다」 두 문장으로 고정(§2-2)</td></tr>
+        </tbody></table></div>
+
+      <h3>3-2. 수치가 공개된 사례 — 원문 대조 완료</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>사례</th><th>수치 (원문 문장 그대로 확인)</th><th>가져온 것 → 착지점</th></tr></thead>
+        <tbody>
+          <tr><th>토스 · 내 보험 조회<span class="src">toss.tech value-first-cost-later · 2023-03-16</span></th><td>비용(정보 입력) 앞에 「가치 미리보기」 화면 한 장 → <b>조회를 끝내는 비율 67% 상승</b>. 같은 글: 「질문이 3,4개 이상이면 사용자는 지치기 시작」 · 「5초 내에 답변하기 어려운 질문」</td><td>첫 결과까지 질문 2개(§1-4) · R1 순위를 비용 질문보다 먼저</td></tr>
+          <tr><th>토스 · 보험금 청구<span class="src">toss.tech insurance-claim-process · 2022-12-14</span></th><td>첫 질문을 「전문가 도움 vs 직접」에서 <b>「서류 있나요?」</b>로 → <b>이탈 50% 감소</b> · 응답 비율 5:4 · 「3초 안에 답이 안나오면 어려운 질문」</td><td>Q1 을 분류어(피벗·이전)가 아닌 사실 문장으로 · Q-p 의 「무엇부터」</td></tr>
+          <tr><th>토스 · 송금 은행 추천<span class="src">toss.tech toss-money-transfer-bank-recommendation · 2024-01-03</span></th><td>은행 1개 추론 정확도 <b>95%</b> → 3개 추천으로 <b>99% 이상</b> · 사용자가 알 필요 없어진 기관 62개 · UT 3차</td><td>Q3 2차안 — 주소로 가까운 상권 3곳 추천(하나로 단정하지 않는다)</td></tr>
+          <tr><th>토스 · 출금이체 안내 문구<span class="src">toss.tech platform-designer-work · 2024-09-03</span></th><td>오해를 미리 푸는 한 줄 → <b>월평균 문의 3,173건 → 446건</b></td><td>R4·R5 의 「호가가 아닌 추정이에요」 경고 한 줄을 접지 않고 늘 보인다</td></tr>
+          <tr><th>토스뱅크 · 비회원 가입 인트로<span class="src">toss.tech 45391 · 2026-02-27</span></th><td>「상담원 컨셉」 → <b>클릭률 10% 이상 · CVR 3% 이상 하락</b>(실패) · 장면을 떠올리게 하는 문구 → <b>CTR 5% 상승</b></td><td>Q1 선택지 설명을 기능명이 아닌 장면 문장으로(「업종은 정했고, 동네를 찾고 있어요」)</td></tr>
+          <tr><th>토스 · 가입 과정<span class="src">toss.tech signup · 2023-09-12</span></th><td>권한·인트로를 줄여도 <b>전환율은 거의 차이 없음</b> · 큰 텍스트 사용자 전환율이 특히 낮음 · 「왜 필요한지」 설명한 안만 처음으로 완료율이 더 높음(큰 차이 아님)</td><td>단계를 빼는 것보다 이유 한 줄(§4-1 ④) · 글자 크기는 rem(§9)</td></tr>
+          <tr><th>토스페이먼츠 · 인스턴트 온보딩<span class="src">tosspayments.com instantonboarding · 2021-09-24</span></th><td>가입 시도 <b>10명 중 4명</b>이 완료 못 함 → 개선 후 <b>10명 중 8명</b>이 한 번에 신청 완료</td><td>같은 정보를 두 번 묻지 않는다 — 흐름에서 고른 업종·상권을 지도 탐색·검증 계획이 이어받는다(§2-3 · §10)</td></tr>
+          <tr><th>토스 · Simplicity 4<span class="src">toss.tech simplicity_behind</span></th><td>세션을 5분 이하로 → <b>평균 완독률 약 12% → 51% 초과</b></td><td>R7 검증 계획은 기각 조건 먼저, 모객·연계는 접어 둔다</td></tr>
+          <tr><th>TDS · 바텀시트 vs 메뉴 A/B<span class="src">toss.tech tds-component-making · 2024-02-19</span></th><td>10일 A/B — Android 에서 메뉴의 아이템 클릭율이 <b>10% 높음</b>, 전체 지표는 큰 변화 없음 → 시스템에 둘 다 남김</td><td>R3 정렬은 시트가 아닌 작은 메뉴(드롭다운) · ⚠ 저장소 네 곳(design/references/INDEX.md 등)이 이 글을 「바텀시트가 낫다」로 거꾸로 인용하고 있다 — §12 에 정정 과제</td></tr>
+          <tr><th>Just Eat · One Thing Per Page<span class="src">Smashing Magazine · Adam Silver · 2017-05-22</span></th><td>한 페이지 체크아웃을 섹션별 페이지로 → <b>연 200만 건 주문 추가</b>("orders, not revenue")</td><td>C3 — 단 「한 가지」는 필드가 아니라 <b>결정 단위</b>다(원문: "not necessarily about having one element")</td></tr>
+          <tr><th>NN/g · 폼 설계<span class="src">nngroup.com web-form-design · 2016-05-01</span></th><td>지침을 지킨 폼의 첫 시도 무오류 제출 <b>78%</b> vs 어긴 폼 <b>42%</b></td><td>입력은 단일 열 · 묻지 않아도 아는 값은 묻지 않는다(R3 카드가 면적·층·월세를 이미 안다)</td></tr>
+          <tr><th>Baymard · 체크아웃 필드 수<span class="src">baymard.com checkout-flow-average-form-fields · 2024-06-26</span></th><td>2024 평균 <b>5.1단계 · 11.3필드</b>, 대부분 필요한 것은 <b>8필드</b> · 성능은 단계 수보다 <b>필드 수</b>가 좌우 · 복잡해서 이탈한 사용자 <b>17%</b></td><td>화면을 나눠도 입력 칸은 늘리지 않는다 — 필수 입력은 목적·업종 2개</td></tr>
+          <tr><th>Baymard · 장바구니 이탈<span class="src">baymard.com cart-abandonment-rate (2026-10-12 열람)</span></th><td>평균 이탈 <b>70.22%</b>(연구 50개) · 이유: 계정 생성 요구 <b>18%</b> · 너무 길거나 복잡 <b>17%</b></td><td>C5 — 결과 전 가입 요구 제거</td></tr>
+          <tr><th>The $300 Million Button<span class="src">centercentre.com · 2009-01-14</span></th><td>「Register」 버튼을 없애고 「Continue」 → <b>구매 고객 45% 증가</b> · 첫해 <b>$300,000,000</b> 추가</td><td>로그인을 흐름의 문이 아니라 저장 버튼 뒤로</td></tr>
+          <tr><th>Baymard · 지연 가입<span class="src">baymard.com delayed-account-creation · 2023-09-19</span></th><td>벤치마크 사이트 <b>42%</b>가 주문 전·중에 가입을 끼워 넣는다 · 처음에 「나중에 계정을 만들 수 있다」고 알릴 것 · 확인 화면에 혜택 3~5개</td><td>Q1 아래 한 줄 「로그인 없이 끝까지」 · 로그인 시트의 얻는 것 세 줄</td></tr>
+          <tr><th>GOV.UK · 진행 표시<span class="src">design-system.service.gov.uk question-pages</span></th><td>Carer's Allowance 팀이 진행 표시를 없앰 → <b>완료율·완료 시간 영향 없음</b> · 「먼저 없이 테스트하라」</td><td>질문 화면에 「3/6」 단계 숫자를 두지 않는다(§4-1 ①) · 단계 표시는 홈에만</td></tr>
+        </tbody></table></div>
+
+      <h3>3-3. 부품 · 토큰 차용 — TDS · Montage</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>부품</th><th>출처 값</th><th>PlaceOS</th></tr></thead>
+        <tbody>
+          <tr><th>Top (질문 머리)</th><td>TDS: 제목 22 Bold grey800 · 부제 17 grey700 · 위아래 24</td><td><code>FlowTop</code> — 웹이라 제목 24(모바일)/28(데스크톱)로 한 단 키움(§4-1)</td></tr>
+          <tr><th>ListRow</th><td>TDS: 왼쪽·가운데·오른쪽 3영역 · 상하 8/12/16/24 · 좌우 20/24 · 로딩은 ListRow.Loader</td><td><code>ChoiceRow</code> · <code>RankRow</code> — R1 의 6열 표(가로 넘침)를 대체</td></tr>
+          <tr><th>FixedBottomCTA</th><td>TDS: 하단 고정 · Single/Double · 키보드 위</td><td><code>BottomCTA</code> — Double 은 진짜 대안이 있을 때만(R4 저장/본전)</td></tr>
+          <tr><th>Action area</th><td>Montage: 라벨 <b>7자 이상이면 Strong</b> · 스크롤 경계 그라데이션 · 닫기와 X 를 함께 쓰지 않는다</td><td>하단 버튼 위 24px 그라데이션 · 상단 바 오른쪽은 닫기 하나</td></tr>
+          <tr><th>Card</th><td>Montage: 썸네일 모바일 <b>4:3</b>·데스크톱 3:2 · Heading 최대 2줄 · Caption 최대 1줄 · 10요소</td><td><code>SpaceCard</code>(R3) — 썸네일 자리에 <b>층 그림</b>(데이터)</td></tr>
+          <tr><th>Filter button</th><td>Montage: 나란한 필터는 Outlined · 다중 선택은 「○○ 외 N개」</td><td>R3 필터 칩 한 줄</td></tr>
+          <tr><th>Toast</th><td>TDS: 기본 3000ms · 버튼 있으면 <b>5000ms</b> · CTA 위에 띄움</td><td>「저장했어요 · 보기」 5초</td></tr>
+          <tr><th>BottomSheet</th><td>TDS: 바깥 클릭 = 닫기 · 본문↔CTA 34</td><td>로그인 시트 · 「왜 이 순서인가요?」 시트 — 진입 직후 띄우지 않는다(앱인토스 다크패턴 정책)</td></tr>
+          <tr><th>Result</th><td>TDS: 그림 → 제목 → 설명 → 버튼</td><td>빈 결과 · 실패 · 「세 가격대 모두 본전이 안 나와요」</td></tr>
+          <tr><th>TextField</th><td>TDS: big · suffix(단위) · 라벨 상시 표시</td><td><code>MoneyField</code> — 「만원」을 placeholder 가 아닌 접미사로(입력하면 단위가 사라지던 문제)</td></tr>
+          <tr><th>색</th><td>TDS: grey50~900 10단 · 같은 「100」이라도 색조마다 대비가 다르다(Grey 100 <b>1.1:1</b> · Red 100 <b>1.34:1</b>, 2025-12-15) · Montage: 의미 층(Foreground·Background·Line…) · Inactive ≠ Disable</td><td>§7 — grey 10단 + 의미 토큰. 옅은 바탕은 대비로 검산해 고른다</td></tr>
+          <tr><th>간격</th><td>Montage: <b>4배수</b> · 시각 보정은 2px(불가피할 때만 1px) · 모바일 2단 거터 <b>20</b></td><td>§7 — 새 화면은 4배수만 · R3 카드 2열 거터 20 → 좁아서 12(§7 근거)</td></tr>
+          <tr><th>앱인토스 가이드</th><td>탭 <b>2~5개</b> · 아이콘 24~40px · 다이얼로그 왼쪽 버튼은 「닫기」 · 기다릴 필요 없는 로딩 애니메이션 금지</td><td>허브 탭 3개(§4-3) · 「닫기」 통일</td></tr>
+        </tbody></table></div>
+
+      <h3>3-4. 한 화면 한 질문 — 근거와 반례</h3>
+      <div class="cols2">
+        <div class="box"><h4>그대로 따른 것</h4><ul>
+          <li><b>GOV.UK Question pages</b> — 한 페이지에 질문 하나로 <i>시작</i>한다. 제목이 곧 질문, 앞 답은 캡션으로</li>
+          <li><b>GDS Design Notes 「One thing per page」(2015)</b> — 단, 근거는 <b>정성적</b>이고 정량 데이터가 없다(한계를 적어 둔다)</li>
+          <li><b>NN/g Wizards(2017)</b> — 낯설고 드문 과업에 맞다. 예비창업자에게 입지 찾기가 그렇다. 각 단계는 그 자체로 완결 · 상태 저장 · 아는 것은 다시 묻지 않는다(§2-3)</li>
+          <li><b>토스 「1 thing for 1 page」(2022-09-20)</b> — 한 화면 한 액션이되, 「다음」을 여러 번 누르게 하지 않고 <b>답한 칸 위로 다음 칸이 쌓이게</b> 한다 → Q8·Q9 의 금액 칸</li>
+        </ul></div>
+        <div class="box"><h4>반례 — 그래서 일부러 나란히 둔 것</h4><ul>
+          <li><b>NN/g Wizards 반례</b> — 비교가 필요한 과업, 단계끼리 얽혀 오가야 하는 과업, 반복 사용자에게는 한 화면 한 단계가 손해다</li>
+          <li>그래서 <b>R1 상권 순위 · R3 빈 자리 · R5 세 가격대</b>는 후보를 한 화면에 나란히 둔다. 그 화면의 질문은 「어느 것?」 하나다</li>
+          <li><b>NN/g Progressive Disclosure(2006)</b> — 공개 단계가 <b>2단을 넘으면</b> 대체로 사용성이 낮다 → 결론 한 줄 + 「자세히」 한 단까지만(§8)</li>
+          <li>B2B 반복 사용자(본사·운용사)는 질문을 건너뛰고 지도 탐색으로 바로 간다(허브 탭 「지도」)</li>
+        </ul></div>
+      </div>
+
+      <h3>3-5. 대체재 관찰 — 2026-10-12 화면 확인(데스크톱 1440×900)</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>서비스</th><th>흐름</th><th>PlaceOS 가 다른 점</th></tr></thead>
+        <tbody>
+          <tr><th>서울시 상권분석서비스 「나도 곧 사장」<span class="src">golmok.seoul.go.kr</span></th><td>문 3개 → 「창업하려는 업종이 있으세요?」(네/아니요) → 업종 → <b>「점포수 상승 지역」 행정동 TOP 10</b>. 로그인 없음</td><td>앞 3단계(목적→업종→지역 순위)를 이미 <b>무료로</b> 준다. 우리는 이 구간을 질문 2개로 지나고, 순위 줄마다 <b>빈 1층 수와 1층 평당 월세</b>를 붙인다(R1)</td></tr>
+          <tr><th>소상공인365 간단분석<span class="src">bigdata.sbiz.or.kr</span></th><td>위치를 먼저 묻고 한 패널에 영역·위치·업종 3입력 → 월 평균 매출·업소 수·유동인구</td><td>숫자 + 한 문장 해설 구조는 빌린다. 3입력을 한 패널에 몰고 「분석하기」를 꺼 두는 방식은 따르지 않는다</td></tr>
+          <tr><th>오픈업 창업 계산기<span class="src">openub.com (v8.5.40)</span></th><td>한 화면 한 질문 마법사 5개(지역구→업종→크기→층→건물 유형) → 예상 창업 비용(첫 월세 + 보증금 + 인테리어)</td><td>우리는 건축물대장으로 크기·층·건물을 <b>이미 안다</b> — 빈 자리 하나를 누르면 그 세 질문을 건너뛴다(R3→R4)</td></tr>
+        </tbody></table></div>
+
+      <h3>3-6. 가져오지 않은 것</h3>
+      <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
+        <li><b>원티드 「일반 지원 대비 4배 이상 합격률」식 배수 표현</b> — 기준·표본이 공개되지 않았다. KPI 규칙 1·2 에 어긋난다. 순위 화면에는 순위만, 근거는 「자세히」 안에 「거점 사전분포 대비 +X%p (95% 구간, n)」</li>
+        <li><b>Montage 피그마 라이브러리·코드</b> — 공개 라이선스 문구를 확인하지 않았다. 원칙과 수치만 가져오고 구현은 우리 토큰으로 새로 짰다</li>
+        <li><b>ProgressStepper 를 질문 화면 기본값으로</b> — GOV.UK 근거(§3-2)로 넣지 않았다. 문서 예시도 3~5단계라 우리 6단계 흐름에는 맞지 않는다</li>
+        <li><b>GOV.UK 의 「Continue」 일률 버튼</b> — 토스·앱인토스의 「누르면 일어날 일」 문구를 택했다(예측 가능한 CTA). 질문 화면은 대부분 선택지를 누르면 바로 넘어가 버튼 자체가 없다</li>
+        <li><b>TDS 「더 큰 텍스트」 배율표 그대로</b> — 네이티브용이다. 웹은 브라우저 글꼴 크기(rem)를 따르게 하고, 큰 숫자에만 상한(clamp)을 둔다(§9)</li>
+      </ul>
+    </section>
 
     <!-- ═════════ 4 공통 프레임 ═════════ -->
     <section id="frame">
@@ -794,6 +892,483 @@ q { quotes:"“" "”"; }
         </div>
       </article>
 
-<!-- @@STAGE3@@ -->
+      <h3 id="s-stage3">5-3. ③ 비용 <span class="tag" style="background:#FBF0FB;color:var(--posting)">POSTING</span></h3>
+      <p class="note" style="margin-top:0">두 갈래다. <b>계산할 수 있는 자리</b>(건물 단위 회수기간 유닛이 있음)는 권리금 한 질문 뒤 본전 시점(R5). <b>계산할 수 없는 자리</b>(약 91%)는 현장에서 받은 금액으로 예산 점검(Q7→Q8→Q9→R6). 계산 못 하는 자리를 계산하는 척하지 않는다.</p>
+
+      <article class="screen" id="Q6">
+        <div class="phone" role="img" aria-label="Q6 권리금 질문: 선택지 세 개와 금액 칸">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">비용 · 성수빌딩 1층</div>
+          <div class="qt">권리금은 얼마로<br>계산할까요?</div>
+          <div class="sub">공개된 통계가 없어서, 아는 금액을 넣어야 정확해져요.</div>
+          <div class="bd">
+            <div class="opt"><b>권리금이 없어요</b><span>0원으로 계산해요</span></div>
+            <div class="opt on"><b>들은 금액이 있어요</b><span>직접 적을게요</span></div>
+            <div class="field">3,000<span>만원</span></div>
+            <div class="opt"><b>아직 몰라요</b><span>0원으로 먼저 볼게요</span></div>
+          </div>
+          <div class="cta">본전 시점 계산하기</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q6</b> · <code>#/premium</code> · 앞: R4(계산 가능)</div>
+          <h3>권리금은 얼마로 계산할까요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>「없어요」 · 「아직 몰라요」는 누르면 바로 R5. 「들은 금액이 있어요」는 <b>그 아래에 금액 칸이 열린다</b>(같은 화면 · 토스 거꾸로 쌓기) → 「본전 시점 계산하기」</dd>
+            <dt>금액 칸</dt><dd>숫자 키패드(<code>inputMode="numeric"</code>) · 단위 「만원」은 접미사로 늘 보인다 · 0~1,000,000 · 천 단위 쉼표</dd>
+            <dt>저장</dt><dd><code>premium</code>: 없음 → <code>0</code>(관측) · 모름 → <code>null</code>(전제) · 금액 → 숫자. 모름은 <code>prem</code> 을 보내지 않아 응답이 <code>inputs_source.prem === "absent"</code> 로 온다(입력 계약 그대로)</dd>
+            <dt>왜 묻나</dt><dd>권리금은 그 자리에 들어갈 사람만 아는 협상값이다. 계산의 유일한 사용자 입력이라 따로 한 화면</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R5">
+        <div class="phone" role="img" aria-label="R5 본전 시점: 결론과 세 가격대 카드">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">비용 · 성수빌딩 1층 · 카페</div>
+          <div class="qt">알뜰하게 하면 약<br>3개월이면 본전이에요</div>
+          <div class="warnline" style="margin-top:2cqw">추정이에요 · 권리금 0원 · 건물 전체 기준</div>
+          <div class="bd" style="gap:1.6cqw">
+            <div class="tier"><b>비싸게</b><span>처음 3,400만원 · 매달 1,101만원 남아요</span><span>약 3개월</span></div>
+            <div class="tier rec"><b>알뜰하게 <span class="bdg p">추천</span></b><span>처음 2,000만원 · 매달 583만원 남아요</span><span>약 3개월</span></div>
+            <div class="tier"><b>꼭 필요한 것만</b><span>처음 1,200만원 · 매달 395만원 남아요</span><span>약 3개월</span></div>
+          </div>
+          <div class="cta two"><span class="w">저장</span><span>작게 먼저 확인하기</span></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R5</b> · <code>#/payback</code> · 앞: Q6</div>
+          <h3>{추천 가격대}로 하면 약 {체감 기간}이면 본전이에요</h3>
+          <dl>
+            <dt>요청</dt><dd><code>POST /ai/simulate-revenue {district_id, unit_id:"vu-…", industry_type: 업종 input, prem?}</code> — 전략은 보내지 않는다(세 가격대 비교)</dd>
+            <dt>결론</dt><dd>추천(<code>recommended</code>) 가격대의 <code>roi_months</code> 를 체감 단위로: 1개월 미만 「한 달 안에」 · 12개월 미만 「약 n개월」 · 그 이상 「약 n년 m개월」. 정밀 값(소수 1자리)은 카드 안 작은 글씨</dd>
+            <dt>세 카드</dt><dd>나란히(C3 반례) — 이름(비싸게·알뜰하게·꼭 필요한 것만) · <b>처음 드는 돈</b> = <code>invest_mn</code> × 100 만원(⚠ 백만원 단위다) · <b>매달 남는 돈</b> = <code>month_net</code> 만원 · 본전 시점. <code>viable=false</code> 면 「이 가격대로는 본전이 안 나와요」(모른다와 안 된다를 가른다). 카드를 누르면 그 가격대를 고른다(<code>tier</code> — 검증 계획이 이어받는다)</dd>
+            <dt>경고 한 줄</dt><dd>늘 보인다: 「추정이에요 · 권리금 {0원 / n만원} · 건물 전체 기준」. <code>basis="rent+fitout"</code> 이면 「원가·인건비가 빠진 계산이에요」를 덧붙인다</dd>
+            <dt>자세히</dt><dd>매출·비용(<code>month_rev</code>·<code>month_cost</code>) · 입력 출처(<code>inputs_source</code> 면적·임대료·권리금·유동) · 기준 분기 · 계산 경로(<code>source</code> 코파일럿/폴백, <code>source_note</code>)</dd>
+            <dt>모두 안 됨</dt><dd>Result: 제목 <q>세 가격대 모두 본전이 안 나와요</q> · <code>unviable_note</code> · 버튼 「다른 빈 자리 보기」(R3) · 보조 「작게 먼저 확인하기」</dd>
+            <dt>계산 불가</dt><dd><code>calculation_status !== "calculated"</code> 또는 실패 → 결과 화면 <q>이 자리는 본전 시점을 계산하지 못했어요</q> + 「현장 금액으로 예산 점검」(Q7)</dd>
+            <dt>버튼</dt><dd>주 「작게 먼저 확인하기」 → Q10 · 보조 「저장」(로그인 · <code>kind:"posting"</code>)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q7">
+        <div class="phone" role="img" aria-label="Q7 쓸 수 있는 돈 질문: 금액 입력">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">비용 · 예산 점검</div>
+          <div class="qt">창업에 쓸 수 있는 돈은<br>얼마예요?</div>
+          <div class="sub">대출까지 더한 금액이면 돼요. 이 금액과 견줘 볼게요.</div>
+          <div class="bd"><div class="field">8,000<span>만원</span></div><div class="link">아직 몰라요</div></div>
+          <div class="cta">다음</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q7</b> · <code>#/budget</code> · 앞: R4(계산 불가) · R5 「자세히」</div>
+          <h3>창업에 쓸 수 있는 돈은 얼마예요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>금액 한 칸(만원) → 「다음」 · 텍스트 버튼 「아직 몰라요」(예산 없이 Q8 — 결과는 「예산을 모르면 잔액은 못 내요」)</dd>
+            <dt>저장</dt><dd><code>costs.budget</code> = 만원 × 10,000(원). 서버 계약은 원 단위 정수다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q8">
+        <div class="phone" role="img" aria-label="Q8 받은 계약 금액: 칸이 하나씩 쌓인다">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">비용 · 성수빌딩 1층</div>
+          <div class="qt">현장에서 들은 금액을<br>적어 주세요</div>
+          <div class="sub">모르는 칸은 비워 두세요. 추정치는 섞지 않아요.</div>
+          <div class="bd">
+            <div class="field">300<span>만원 · 월세</span></div>
+            <div class="field empty">보증금<span>만원</span></div>
+          </div>
+          <div class="cta">다음</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q8</b> · <code>#/contract</code> · 앞: Q7</div>
+          <h3>현장에서 들은 금액을 적어 주세요</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>칸 넷을 <b>한 화면에서 하나씩</b>: 보증금 → 월세 → 관리비 → 권리금. 한 칸을 채우거나 「모름」을 누르면 다음 칸이 그 아래 열리고, 이미 답한 칸은 위에 남아 고칠 수 있다(토스 거꾸로 쌓기 · OTP-16). 넷 다 지나면 「다음」</dd>
+            <dt>왜 한 화면</dt><dd>네 금액은 「현장에서 들은 계약 조건」이라는 <b>한 결정 단위</b>다(Adam Silver: 한 가지는 필드가 아니라 결정) — 화면을 넷으로 쪼개면 「다음」만 네 번 누른다</dd>
+            <dt>추정을 넣지 않는 이유</dt><dd>R4 의 월세 추정을 미리 채우지 않는다. 예산 점검은 <b>직접 확인한 금액만</b> 더한다는 정책(§3-1 Simple Policy). 추정은 R4 에서 이미 봤다</dd>
+            <dt>저장</dt><dd><code>deposit · rent · maintenance · premium</code>(원). 빈칸은 <code>null</code>(미확인) · 0 은 확인된 무료</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q9">
+        <div class="phone" role="img" aria-label="Q9 인테리어와 설비 금액">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">비용 · 성수빌딩 1층</div>
+          <div class="qt">인테리어·설비에는<br>얼마를 생각하세요?</div>
+          <div class="sub">견적을 받았다면 그 금액을, 아니면 비워 두세요.</div>
+          <div class="bd"><div class="field">2,500<span>만원 · 인테리어</span></div><div class="field empty">설비·집기<span>만원</span></div></div>
+          <div class="cta">예산 점검하기</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q9</b> · <code>#/fitout</code> · 앞: Q8</div>
+          <h3>인테리어·설비에는 얼마를 생각하세요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>두 칸(인테리어 → 설비·집기)을 Q8 과 같은 방식으로 → 「예산 점검하기」</dd>
+            <dt>요청</dt><dd><code>POST /founder/costs</code> — 위 6칸 + <code>budget</code> + <code>other_monthly: null</code> + <code>reserve_months: 3</code>(바꾸기는 R6 자세히)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R6">
+        <div class="phone" role="img" aria-label="R6 예산 점검 결과">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">비용 · 예산 점검</div>
+          <div class="qt">예산보다 1,250만원<br>더 필요해요</div>
+          <div class="sub">월 고정비 3개월치를 예비비로 더했어요.</div>
+          <div class="bd" style="gap:1.4cqw">
+            <div class="kv"><span>처음 필요한 돈</span><b>9,250만원</b><span>쓸 수 있는 돈</span><b>8,000만원</b><span>모르는 금액</span><b>관리비</b></div>
+          </div>
+          <div class="cta two"><span class="w">저장</span><span>작게 먼저 확인하기</span></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R6</b> · <code>#/budget-check</code> · 앞: Q9</div>
+          <h3>결론 넷 중 하나</h3>
+          <dl>
+            <dt>결론</dt><dd><ul><li><code>within_budget</code> → <q>예산 안에 들어와요</q> · 보조 <q>{잔액}이 남아요</q></li>
+              <li><code>over_budget</code> → <q>예산보다 {부족액} 더 필요해요</q></li>
+              <li><code>budget_unknown</code> → <q>처음에 {required_cash}이 필요해요</q> · 보조 <q>쓸 수 있는 돈을 적으면 남는지 볼 수 있어요</q></li>
+              <li><code>incomplete</code> → <q>아직 모르는 금액이 있어요</q> · 모르는 칸 목록 + 각 칸으로 돌아가는 링크. 총액을 만들지 않는다(서버도 <code>required_cash=null</code>)</li></ul></dd>
+            <dt>숫자</dt><dd>원 → 만원으로 반올림해 체감 단위(「9,250만원」 · 1억 이상 「1억 2,500만원」). 정밀 값은 자세히</dd>
+            <dt>자세히</dt><dd>초기 비용 소계(<code>known_initial</code>) · 월 고정비 소계(<code>known_monthly</code>) · 예비비 개월(0~36, 바꾸면 다시 계산) · 서버 <code>note</code> · 「중개사에게 보낼 문의 초안 복사」(종전 FounderPlanner 문구)</dd>
+            <dt>버튼</dt><dd>주 「작게 먼저 확인하기」 → Q10 · 보조 「저장」(로그인 · <code>kind:"posting"</code>, payload 에 <code>budget_check</code>)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <h3 id="s-stage4">5-4. ④ 작게 확인 <span class="tag" style="background:#FBF0F5;color:var(--program)">PROGRAM</span></h3>
+
+      <article class="screen" id="Q10">
+        <div class="phone" role="img" aria-label="Q10 검증 방식 질문: 선택지 넷">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">작게 확인 · 카페·디저트</div>
+          <div class="qt">어떻게 먼저<br>확인해 볼까요?</div>
+          <div class="sub">크게 열기 전에 통하는지부터 봐요.</div>
+          <div class="bd">
+            <div class="opt"><b>팝업스토어</b><span>며칠~몇 주 빈 자리를 빌려 팔아 봐요</span></div>
+            <div class="opt on"><b>가오픈</b><span>작게 열고 손님 반응을 봐요</span></div>
+            <div class="opt"><b>사전 예약</b><span>가게 없이 예약·주문부터 받아 봐요</span></div>
+            <div class="opt"><b>바로 창업</b><span>정식으로 열고 기록하며 확인해요</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q10</b> · <code>#/validate</code> · 앞: R5 · R6 · Q-p · 홈</div>
+          <h3>어떻게 먼저 확인해 볼까요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>한 줄을 누른다 → Q11. <code>mode</code> = popup · soft_open · mvp · actual_open</dd>
+            <dt>단계</dt><dd>묻지 않는다 — 목적에서 정한다: 창업 → <code>pre_founder</code> · 바꾸기·옮기기 → <code>founder</code>(이미 아는 것은 다시 묻지 않는다)</dd>
+            <dt>왜 이 질문이 먼저</dt><dd>방식마다 판정에 쓸 신호가 다르다(팝업=유입 · 가오픈=객단가·회전 · 사전 예약=수요). 아이템보다 먼저 정해야 검증 지표가 갈린다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q11">
+        <div class="phone" role="img" aria-label="Q11 아이템 입력">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">작게 확인 · 가오픈</div>
+          <div class="qt">무엇을 팔아 볼까요?</div>
+          <div class="sub">한 줄이면 돼요. 검증 계획의 주인공이에요.</div>
+          <div class="bd"><div class="field" style="font-size:5.4cqw">말차 크림 라떼와 구움과자<span></span></div></div>
+          <div class="cta">다음</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q11</b> · <code>#/item</code> · 앞: Q10</div>
+          <h3>무엇을 팔아 볼까요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>한 줄(1~200자) → 「다음」. 비면 버튼이 꺼진다</dd>
+            <dt>업종</dt><dd>묻지 않는다 — 흐름의 업종(바꾸기는 바꿀 업종)을 <code>category</code> 로 쓴다. 기타는 직접 적은 업종</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q12">
+        <div class="phone" role="img" aria-label="Q12 기간 질문">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">작게 확인 · 말차 크림 라떼</div>
+          <div class="qt">얼마 동안 해 볼까요?</div>
+          <div class="bd">
+            <div class="opt"><b>3일</b></div><div class="opt on"><b>1주</b></div><div class="opt"><b>2주</b></div><div class="opt"><b>4주</b></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q12</b> · <code>#/period</code> · 앞: Q11</div>
+          <h3>얼마 동안 해 볼까요?</h3>
+          <dl><dt>답하는 법</dt><dd>누르면 바로 Q13. <code>run_days</code> = 3 · 7 · 14 · 28</dd>
+            <dt>뺀 것</dt><dd>시작일은 묻지 않는다 — 계획에 날짜가 꼭 필요하지 않다(브리프 선택 항목)</dd></dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q13">
+        <div class="phone" role="img" aria-label="Q13 검증 예산 질문">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">작게 확인 · 1주</div>
+          <div class="qt">확인하는 데 얼마까지<br>쓸 수 있어요?</div>
+          <div class="bd">
+            <div class="opt"><b>100만원 안쪽</b></div><div class="opt on"><b>100~300만원</b></div><div class="opt"><b>300~1,000만원</b></div><div class="opt"><b>아직 몰라요</b></div>
+          </div>
+          <div class="sub" style="position:absolute;bottom:6cqw;font-size:3.2cqw">검증 계획은 로그인하면 만들어요.</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q13</b> · <code>#/test-budget</code> · 앞: Q12</div>
+          <h3>확인하는 데 얼마까지 쓸 수 있어요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>누르면 바로 계획 만들기. 로그인 안 했으면 <b>이때</b> 로그인 시트(C5 — AI 생성은 로그인한 호출에만 열린다). 로그인하면 바로 생성 → R7</dd>
+            <dt>값</dt><dd>구간 → <code>budget_krw_min/max</code> 한 쌍(10만~100만 · 100만~300만 · 300만~1,000만 · 모름 = 둘 다 비움). 서버는 반쪽만 오면 422 를 낸다</dd>
+            <dt>기다림</dt><dd>생성은 수 초 걸린다 — 골격 대신 단계 문구 셋(<q>상권 자료를 모으고 있어요 → 모객 방법을 고르고 있어요 → 판단 기준을 세우고 있어요</q>, 각 2초 · 실제 진행이 아니라 대기 안내라는 것을 문구가 속이지 않게 「~하고 있어요」로만)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R7">
+        <div class="phone" role="img" aria-label="R7 검증 계획: 기각 조건이 먼저">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">작게 확인 · 가오픈 · 1주</div>
+          <div class="qt">이 숫자가 안 나오면<br>다른 방법을 봐요</div>
+          <div class="bd" style="gap:1.6cqw">
+            <div class="tier rec"><b>하루 방문 손님</b><span>목표 40명 · <b>25명 아래면</b> 다른 상권도 봐요</span></div>
+            <div class="tier"><b>재방문 비율</b><span>목표 20% · <b>10% 아래면</b> 메뉴를 바꿔 봐요</span></div>
+            <div class="opt" style="padding:2.4cqw 3cqw"><b style="font-size:3.6cqw">손님 모으기 3 · 자리·연계 2 ›</b></div>
+          </div>
+          <div class="cta two"><span class="w">저장</span><span>홈으로</span></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R7</b> · <code>#/plan</code> · 앞: Q13(+로그인)</div>
+          <h3>이 숫자가 안 나오면 다른 방법을 봐요</h3>
+          <dl>
+            <dt>요청</dt><dd><code>POST /marketing/generate</code> — item · category · mode · stage · district_id · unit_id(자리를 골랐으면 <code>vu-…</code>, 층 자리면 비움) · run_days · budget · tier(R5 에서 고른 것)</dd>
+            <dt>순서</dt><dd>① <b>검증 지표 카드</b>(<code>signals</code>: 이름 · 목표 · <b>판단선 <code>decision</code> 굵게</b> · 재는 법은 자세히) ② 「손님 모으기 n」(online) · 「자리·연계 n」(offline) — 접힌 목록, 펼치면 채널·내용·근거 ③ 차별점·가설은 이 화면에서 묻지 않았으므로 표시하지 않는다</dd>
+            <dt>기본 예시일 때</dt><dd><code>source === "rule-stub"</code> → 제목 위 띠 <q>AI 생성 대신 기본 예시를 보여 드려요</q>. <code>stub_reason="llm_quota"</code> 면 <q>오늘 AI 생성 한도를 다 썼어요. 내일 다시 만들 수 있어요</q>(실패가 아니다). violation 이 있으면 <q>생성한 내용이 확인을 통과하지 못해 기본 예시로 바꿨어요</q></dd>
+            <dt>HA 경고</dt><dd><code>ha_findings</code> warning 은 자세히 안 「확인이 필요한 표현」 목록</dd>
+            <dt>버튼</dt><dd>주 「홈으로」 · 보조 「저장」(<code>kind:"program"</code>)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <h3 id="s-hub">5-5. 홈 · 지도 · 내 정보 · 로그인 시트</h3>
+
+      <article class="screen" id="H">
+        <div class="phone" role="img" aria-label="H 홈: 네 단계 진행과 저장한 것">
+          <div class="bar"><b style="color:var(--ink);font-size:4.4cqw">PlaceOS</b><span class="sp"></span></div>
+          <div class="qt" style="font-size:6cqw">카페·디저트 창업 준비</div>
+          <div class="bd" style="gap:0">
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>상권</b><em>성수동 카페거리</em></div><span class="rt">✓</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>빈 자리</b><em>성수빌딩 1층</em></div><span class="rt">✓</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>비용</b><em>아직이에요</em></div><span class="rt link">이어서 ›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>작게 확인</b><em>아직이에요</em></div><span class="rt"></span></div>
+          </div>
+          <div class="tab"><b>홈</b><span>지도</span><span>내 정보</span></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>H</b> · <code>#/home</code> · 진입: 로그인한 사용자의 첫 화면 · 흐름의 「닫기」</div>
+          <h3>{업종} {목적} 준비</h3>
+          <dl>
+            <dt>네 줄</dt><dd>상권 · 빈 자리 · 비용 · 작게 확인 — 각 줄에 고른 값(없으면 <q>아직이에요</q>). 다음 할 줄에만 「이어서 ›」(마지막 질문 화면으로). 영문 단계명(PLATFORM…)은 줄 아래 작은 회색</dd>
+            <dt>저장한 것</dt><dd>로그인: <code>GET /auth/results</code> 최근 5건(자리 · 본전 · 검증 계획) · 비로그인: <q>저장하려면 로그인해요</q> 한 줄 + 로그인 버튼(시트가 아니라 화면 안 버튼 — 사용자가 누를 때만)</dd>
+            <dt>아직 아무것도 없을 때</dt><dd>제목 <q>어떤 준비를 하고 계세요?</q> 아래 Q1 선택지 세 줄을 그대로(홈이 곧 시작)</dd>
+            <dt>처음부터</dt><dd>텍스트 버튼 → 확인 다이얼로그 「처음부터 다시 할까요? 고른 것이 지워져요」 · 왼쪽 「닫기」 오른쪽 「처음부터」</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="M">
+        <div class="phone" role="img" aria-label="M 내 정보">
+          <div class="bar"><b style="color:var(--ink);font-size:4.4cqw">내 정보</b></div>
+          <div class="bd" style="gap:0">
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>me@example.com</b><em>내 작업 공간</em></div></div>
+            <div class="row" style="grid-template-columns:1fr auto"><b style="font-size:3.9cqw">저장한 것</b><span class="rt">12 ›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><b style="font-size:3.9cqw">의견 보내기</b><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><b style="font-size:3.9cqw">API 키 · 계정 관리</b><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><b style="font-size:3.9cqw;color:var(--muted)">로그아웃</b></div>
+          </div>
+          <div class="tab"><span>홈</span><span>지도</span><b>내 정보</b></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>M</b> · <code>#/me</code></div>
+          <h3>내 정보</h3>
+          <dl>
+            <dt>로그인 전</dt><dd>로그인 시트와 같은 내용을 화면 안에(얻는 것 세 줄 + 구글·네이버·카카오·이메일)</dd>
+            <dt>로그인 후</dt><dd>이메일·조직 · 저장한 것(목록 · 지우기) · 의견 보내기(<code>#feedback</code>) · API 키·탈퇴(<code>#account</code> — 종전 계정 창 그대로) · 개인정보 처리방침 · 로그아웃</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="L">
+        <div class="phone" role="img" aria-label="로그인 시트">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="qt" style="font-size:5.6cqw;color:var(--grey-400)">성수빌딩 1층</div>
+          <div class="dim"></div>
+          <div class="sheet">
+            <b style="font-size:5.2cqw">저장하려면 로그인해요</b>
+            <span style="font-size:3.4cqw;color:var(--sub)">✓ 고른 자리와 계산을 다른 기기에서도 봐요<br>✓ 후보를 모아 나란히 견줘요<br>✓ AI 가 검증 계획을 만들어 줘요</span>
+            <div class="opt" style="text-align:center;padding:2.6cqw"><b style="font-size:3.8cqw">Google 로 계속하기</b></div>
+            <div class="opt" style="text-align:center;padding:2.6cqw;background:#03C75A;color:#fff"><b style="font-size:3.8cqw">네이버로 계속하기</b></div>
+            <div class="link" style="text-align:center">이메일로 · 닫기</div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>L</b> · 로그인 시트 · 여는 곳: 저장 ♡ · 결과 「저장」 · Q13 · 홈·내 정보의 로그인 버튼</div>
+          <h3>저장하려면 로그인해요 <span class="note" style="font-weight:400;font-size:13px">(Q13: 검증 계획은 로그인하면 만들어요)</span></h3>
+          <dl>
+            <dt>얻는 것</dt><dd>세 줄(Baymard: 혜택 3~5개 · 토스 가입 실험: 「왜」를 설명한 안만 완료율이 올랐다)</dd>
+            <dt>수단</dt><dd>구글(<code>GOOGLE_CLIENT_ID</code> 있을 때) · 네이버 · 카카오(켜진 것만, 꺼진 것은 「준비 중」) · 이메일(종전 <code>#login</code> 화면으로). 수집 안내(PrivacyNote)는 시트 아래</dd>
+            <dt>돌아오기</dt><dd>로그인하면 시트를 닫고 <b>하려던 일을 이어서 한다</b>(저장 · 계획 생성). 네이버·카카오는 페이지를 떠나므로 떠나기 전 주소(<code>#/…</code>)와 할 일을 <code>sessionStorage</code> 에 두고, 돌아오면 그 화면으로 복귀한다</dd>
+            <dt>옮기기</dt><dd>로그인하는 순간 흐름 답(목적·업종·지금 상권·바꿀 업종)을 계정의 「내 사업」(<code>POST /auth/workspace</code>)에 쓴다 — 지도 탐색이 같은 값을 읽는다</dd>
+            <dt>닫기</dt><dd>바깥 누르기 · Esc · 「닫기」. 닫아도 보던 화면은 그대로다</dd>
+          </dl>
+        </div>
+      </article>
+    </section>
+
+    <!-- ═════════ 6 컴포넌트 ═════════ -->
+    <section id="components">
+      <div class="sec-head"><span class="num">§6</span><h2>컴포넌트</h2>
+        <p class="lede">새 흐름의 부품은 <code>apps/frontend/src/flow/ui.tsx</code> 한 파일에 모은다. 지도 탐색(종전 화면)은 종전 부품(<code>design/components/</code>)을 그대로 쓴다.</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>부품</th><th>쓰는 곳</th><th>규칙</th></tr></thead>
+        <tbody>
+          <tr><th><code>FlowScreen</code></th><td>모든 Q·R 화면</td><td>§4-1 다섯 칸. 화면에 들어오면 제목(<code>h1</code>)에 포커스. <code>tabs</code> 를 주면 하단 탭바(허브만)</td></tr>
+          <tr><th><code>TopBar</code></th><td>모든 흐름 화면</td><td>왼쪽 「뒤로」(첫 화면은 없음) · 오른쪽 하나(닫기 · ♡ · 지도). 높이 56</td></tr>
+          <tr><th><code>ChoiceList</code> · <code>ChoiceRow</code></th><td>Q1 · Q-p · Q5 · Q6 · Q10 · Q12 · Q13</td><td><code>role="radiogroup"</code> · 행은 <code>role="radio"</code> · ↑↓ 이동 · Enter/Space 선택 · 오른쪽 값(개수 등)은 <code>aria-describedby</code></td></tr>
+          <tr><th><code>TileGrid</code></th><td>Q2</td><td>3열(데스크톱 4열) · 이모지는 <code>aria-hidden</code> · 아래 보조 줄 한 줄</td></tr>
+          <tr><th><code>RankRow</code></th><td>R1 · R1-p · Q3 · Q4</td><td>왼쪽 순위 · 가운데 이름+보조 · 오른쪽 숫자 두 줄. 행 전체가 버튼(<code>&lt;button&gt;</code>)</td></tr>
+          <tr><th><code>SpaceCard</code></th><td>R3</td><td>Montage Card — 층 그림 4:3 · 층 오버레이 · ♡(<code>aria-pressed</code>) · 제목 2줄 말줄임 · 월세 1줄. DOM 순서 = 읽는 순서(이름 → 월세 → 면적 → 배지)</td></tr>
+          <tr><th><code>FloorStack</code></th><td>SpaceCard 썸네일 · R4</td><td>층마다 막대 하나(최대 8층, 넘으면 위를 접고 「+n층」) · 빈 층 = 빨강 채움 · 추정 빈 층 = 빗금 · 영업 = 회색 · 고른 층 = 테두리. 색만으로 말하지 않는다(빗금·테두리)</td></tr>
+          <tr><th><code>FilterChips</code></th><td>R3</td><td>한 줄 가로 스크롤 · 켠 칩은 진한 바탕 · <code>aria-pressed</code></td></tr>
+          <tr><th><code>MoneyField</code></th><td>Q6 · Q7 · Q8 · Q9</td><td>큰 숫자(28/700) · 접미사 「만원」 상시 · 쉼표 · <code>inputMode="numeric"</code> · 라벨 상시</td></tr>
+          <tr><th><code>BottomCTA</code></th><td>입력·결과 화면</td><td>하단 고정 · 높이 56 · 모서리 16 · 위 그라데이션 24 · Double 은 왼쪽 약한 버튼(보조) + 오른쪽 강한 버튼. 키보드가 올라오면 키보드 위</td></tr>
+          <tr><th><code>Sheet</code></th><td>로그인 · 왜 이 순서인가요 · 정렬</td><td><code>&lt;dialog&gt;</code> 모달 · 딤 누르면 닫힘 · Esc · 포커스 가둠·복귀 · 위 손잡이</td></tr>
+          <tr><th><code>Toast</code></th><td>저장</td><td>버튼 있으면 5초 · CTA 위 16 · <code>role="status"</code></td></tr>
+          <tr><th><code>Skeleton</code></th><td>목록 · 카드</td><td>최종 높이와 같게 · 움직임 줄이기 설정이면 정지</td></tr>
+          <tr><th><code>ResultView</code></th><td>빈 결과 · 실패 · 계산 불가</td><td>제목 · 한 줄 이유 · 출구 버튼 하나(+보조 하나까지)</td></tr>
+          <tr><th><code>Badge</code></th><td>카드 · 상세</td><td>약한(weak) 한 체계: 확정(실측 초록) · 추정(호박) · 관측(회색) · 본전 계산(primary) · 지금(primary)</td></tr>
+          <tr><th><code>Details</code></th><td>결과 화면 「자세히」</td><td><code>&lt;details&gt;</code> 한 단만(공개 2단 상한)</td></tr>
+          <tr><th><code>TabBar</code></th><td>H · M</td><td>3탭 · 모바일 하단 56 + safe-area · 데스크톱 상단 오른쪽</td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- ═════════ 7 토큰 ═════════ -->
+    <section id="tokens">
+      <div class="sec-head"><span class="num">§7</span><h2>토큰</h2>
+        <p class="lede">단일 출처는 <code>apps/frontend/src/styles/tokens.css</code> 다. 5판은 기존 이름을 지우지 않고 <b>새 이름을 더하고</b>, 같은 역할인 기존 이름(글자·선·바탕)을 새 값으로 다시 가리킨다 — 지도 탐색 화면도 같은 회색을 쓰게 된다.</p></div>
+      <div class="cols2">
+        <div class="box"><h4>색 — 회색 10단 + 의미</h4><ul>
+          <li><code>--grey-50…900</code> = <span class="mono">F9FAFB · F2F4F6 · E5E8EB · D1D6DB · B0B8C1 · 8B95A1 · 6B7684 · 4E5968 · 333D4B · 191F28</span> (TDS 회색 단계와 같은 값)</li>
+          <li><code>--primary #0B7A87</code>(흰 바탕 <b>5.06:1</b>) · <code>--primary-pressed #08626D</code>(7.05:1) · <code>--primary-soft #E8F5F6</code>(그 위 primary 글자 4.54:1). 종전 <code>--brand #0EA5B7</code> 은 흰 바탕 <b>2.96:1</b> 이라 <b>글자·버튼 바탕에 쓰지 않는다</b> — 로고 마크·지도 장식에만</li>
+          <li><code>--real #0F7A55</code>/<code>-soft</code> 확정·실측 · <code>--warn #8A5A00</code>/<code>-soft</code> 추정·주의 · <code>--danger #C62F2A</code>/<code>-soft</code> 오류. 세 쌍 모두 자기 soft 위 4.5:1 이상</li>
+          <li>재지정: <code>--ink → grey-900</code> · <code>--muted → grey-600</code> · <code>--line → grey-200</code> · <code>--bg → grey-100</code></li>
+          <li>⚠ <code>--muted</code>(grey600)는 회색 바탕(grey100) 위에서 <b>4.19:1</b> — 작은 글자는 흰 표면에서만. 회색 바탕 위 보조 글자는 <code>--sub</code>(grey700)</li>
+          <li><code>grey-500</code>(3.04:1)은 비활성·placeholder·아이콘만 — 정보를 담은 글자에 쓰지 않는다</li>
+        </ul></div>
+        <div class="box"><h4>글자 · 간격 · 모서리</h4><ul>
+          <li>흐름 글자 다섯 단(rem — 브라우저 글꼴 크기를 따른다): 질문 제목 <b>1.5rem/1.375</b>(데스크톱 1.75rem) · 큰 숫자 <b>1.75rem</b>(최대 2.25rem, clamp) · 선택지·본문 <b>1.0625rem(17)</b> · 보조 <b>0.9375rem(15)</b> · 캡션 <b>0.8125rem(13)</b></li>
+          <li>종전 5단(12·15·19·24·30)은 지도 탐색에 그대로. 흐름은 위 다섯 단만</li>
+          <li>간격 4배수(<code>--sp-*</code> 그대로) · 화면 좌우 20(데스크톱 24) · 행 상하 16 · 카드 2열 거터 12(375 폭에서 20 이면 카드가 152px 로 좁아 제목이 3줄이 된다)</li>
+          <li>모서리: 행·카드 <code>--radius-md 12</code> · 버튼·시트 <code>--radius-lg 16</code> · 칩 <code>--radius-pill 999px</code>(신설)</li>
+          <li>그림자: 카드 없음(선 대신 회색 바탕 차이로) · 시트 <code>--shadow-sheet</code> · 토스트 <code>--shadow-card</code></li>
+          <li>다크 모드: 앱은 <b>2차</b>(§12). 이 문서만 다크를 지원한다</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ═════════ 8 근거 표기 ═════════ -->
+    <section id="rules">
+      <div class="sec-head"><span class="num">§8</span><h2>근거 표기</h2>
+        <p class="lede">3판 근거 표기 규칙(제1원칙: 실측·추정·관측·가정을 섞어 보이지 않는다)을 <b>두 단</b>으로 싣는다.</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>단</th><th>보이는 것</th><th>예</th></tr></thead>
+        <tbody>
+          <tr><th>1단 (늘 보임)</th><td>결론 아래 <b>한 줄</b> — 그 숫자를 오해하지 않게 하는 문장 하나 + 성격 배지</td><td>R1 「매출 순위는 아니에요」 · R4 「호가가 아닌 추정이에요」 · R5 「추정이에요 · 권리금 0원 · 건물 전체 기준」 · R3 「실제 매물인지는 현장에서 꼭 확인해요」</td></tr>
+          <tr><th>2단 (「자세히」)</th><td>출처 · 기준 시점 · 표본 수 · 계산식 · 판정(베이스라인 대비 +%p, 95% 구간)</td><td>R1 시트 · R4 「근거 더 보기」 · R5·R6·R7 자세히</td></tr>
+        </tbody></table></div>
+      <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch;margin-top:12px">
+        <li>숫자는 응답에서만 — 화면 코드에 상권 수·거점 수·정확도를 적지 않는다(랜딩 규칙과 같다)</li>
+        <li>없는 값은 0 이 아니라 문장으로 — 「이 상권은 임대료 통계가 없어요」. 이웃 값으로 채우지 않는다</li>
+        <li>성능 수치(GNN 판정)는 2단에만, 판정 어휘(<code>실력</code> 등)와 구간을 함께. 공실 예측(LSTM)은 흐름에서 쓰지 않는다(⏳ 확인대기)</li>
+      </ul>
+    </section>
+
+    <!-- ═════════ 9 접근성 ═════════ -->
+    <section id="a11y">
+      <div class="sec-head"><span class="num">§9</span><h2>접근성</h2></div>
+      <div class="cols2">
+        <div class="box"><h4>구조</h4><ul>
+          <li>화면마다 <code>h1</code> 하나 = 질문/결론. 화면이 바뀌면 <code>h1</code> 에 포커스(스크린리더가 새 질문을 읽는다)</li>
+          <li>선택지 묶음은 <code>radiogroup</code>, 결과 목록은 <code>list</code> · 행은 진짜 <code>&lt;button&gt;</code></li>
+          <li>개수가 바뀌는 제목(R3)은 <code>aria-live="polite"</code></li>
+          <li>보이는 순서 = DOM 순서(Montage Card 원칙) — 썸네일 위 ♡ 도 DOM 에서는 제목 뒤</li>
+        </ul></div>
+        <div class="box"><h4>입력 · 보기</h4><ul>
+          <li>누르는 자리 최소 44×44(행 56 · 버튼 56)</li>
+          <li>글자는 rem — 브라우저 글꼴 크기를 키우면 따라 커진다. 큰 숫자만 상한</li>
+          <li>색만으로 말하지 않는다: 층 그림은 빗금·테두리, 배지는 글자</li>
+          <li>움직임 줄이기 설정이면 골격 애니메이션·화면 전환 없음</li>
+          <li>대비 AA(4.5:1) — §7 값은 검산했다</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ═════════ 10 지도 탐색 ═════════ -->
+    <section id="explore">
+      <div class="sec-head"><span class="num">§10</span><h2>지도 탐색 — 종전 4트랙 화면</h2>
+        <p class="lede">3·4판의 지도 + 네 트랙 패널은 지우지 않는다. 반복 사용자(본사·운용사)와 「자세히」의 끝에 남는다. 주소는 <code>#/explore</code>, 허브 탭 「지도」.</p></div>
+      <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
+        <li><b>로그인 없이 연다.</b> 비로그인이면 「내 사업」을 흐름의 답에서 만들어 넘기고, 저장(<code>/auth/workspace</code>)은 건너뛴다. 로그인했으면 종전처럼 계정 값을 쓴다</li>
+        <li>흐름에서 고른 상권을 이어받는다(C2). 흐름의 R2 「지도에서 자세히」 · R3 「지도」가 같은 상권으로 연다</li>
+        <li>레일 맨 위에 「홈」(<code>#/home</code>)을 더한다 — 지도 탐색에서 흐름으로 돌아가는 길</li>
+        <li>안의 규칙(C1 지도 하나 · 탭 전환 시 재생성 금지 · 4레이어 · 거리뷰 모달)은 3·4판 그대로</li>
+        <li>안의 문구·패널 구성은 이번 판에서 바꾸지 않는다 — 토큰(회색·글자색)만 5판 값을 따른다. 다음 판 과제(§12)</li>
+      </ul>
+    </section>
+
+    <!-- ═════════ 11 통과 조건 ═════════ -->
+    <section id="checks">
+      <div class="sec-head"><span class="num">§11</span><h2>통과 조건</h2>
+        <p class="lede">구현이 이 문서를 따랐는지 확인하는 항목. 테스트 이름은 <code>apps/frontend/src/flow/*.test.tsx</code> 에서 같은 ID 로 찾는다.</p></div>
+      <ul class="checks">
+        <li data-id="F-01">로그인하지 않은 방문자가 Q1 → Q2 두 번 눌러 R1 상권 순위를 본다(가입·로그인 요청 0번)</li>
+        <li data-id="F-02">모든 Q 화면의 <code>h1</code> 은 하나이고 물음표로 끝나며, 하단 강한 버튼은 많아야 하나다</li>
+        <li data-id="F-03">선택지를 누르면 버튼을 더 누르지 않고 다음 화면으로 간다(Q1·Q2·Q5·Q10·Q12)</li>
+        <li data-id="F-04">브라우저 뒤로가기와 화면 「뒤로」가 앞 질문으로 가고, 앞 답이 선택된 채 남아 있다</li>
+        <li data-id="F-05">새로고침해도 마지막 답이 남는다(localStorage) · 업종을 바꾸면 상권 뒤 답이 비워진다</li>
+        <li data-id="F-06">모델 밖 업종은 R1 에 순위 대신 「상권 순위를 아직 못 드려요」와 「상권 직접 고르기」가 나온다</li>
+        <li data-id="F-07">R1 행마다 빈 1층 수가 응답(<code>by_floor["1"]</code>)에서 온다 · 1층 평당 월세가 없으면 그 문구</li>
+        <li data-id="F-08">R4 에서 계산 가능한 자리만 「몇 달이면 본전인지 보기」가 주 버튼이다 · 아니면 「후보로 저장하기」</li>
+        <li data-id="F-09">R5 처음 드는 돈은 <code>invest_mn × 100</code> 만원이다(백만원 단위)</li>
+        <li data-id="F-10">♡·저장·계획 만들기를 누르면 그때 로그인 시트가 뜨고, 로그인하면 하려던 일이 이어진다</li>
+        <li data-id="F-11">R6 은 모르는 금액이 있으면 총액을 내지 않고 모르는 칸을 말한다</li>
+        <li data-id="F-12">R7 은 검증 지표의 판단선(<code>decision</code>)을 모객·연계보다 먼저 보인다 · 기본 예시면 그 사실을 띠로 말한다</li>
+        <li data-id="F-13">질문 화면에 지도 SDK 를 불러오지 않는다(R4 와 지도 탐색에서만)</li>
+        <li data-id="F-14">375×812 · 1440×900 에서 가로 스크롤이 없고 하단 버튼이 내용을 가리지 않는다(실화면 캡처)</li>
+        <li data-id="F-15">지도 탐색(<code>#/explore</code>)이 로그인 없이 열리고 종전 4트랙 테스트가 그대로 통과한다</li>
+        <li data-id="F-16"><code>npm run build</code> · <code>npm test</code> · <code>npm run lint</code> 통과</li>
+      </ul>
+    </section>
+
+    <!-- ═════════ 12 미해결 · 변경 이력 ═════════ -->
+    <section id="open">
+      <div class="sec-head"><span class="num">§12</span><h2>미해결 · 변경 이력</h2></div>
+      <h3 style="margin-top:0">미해결</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>무엇</th><th>왜 아직</th></tr></thead>
+        <tbody>
+          <tr><th>U1</th><td>업종 바꾸기 사업자의 <b>지금 가게 자리</b>로 본전 계산</td><td>지금 가게의 면적·월세를 받을 입력 계약이 없다. Q-p 가 한계를 말한다</td></tr>
+          <tr><th>U2</th><td>퍼널 계측 <code>client:flow_*</code>(화면별 진입·응답·이탈)</td><td>KPI② 창구는 지연(ms) 표본만 받는다 — 횟수 표본은 새 계측기가 필요하다. <b>배선 전에는 「흐름이 나아졌다」를 쓰지 않는다</b>(KPI 규칙 4)</td></tr>
+          <tr><th>U3</th><td>Q3 주소로 가까운 상권 3곳 추천</td><td>2차 — 주소 검색 API 는 있다</td></tr>
+          <tr><th>U4</th><td>Q4 목록의 「빈 층 n곳」</td><td>상권마다 요청 81회 — 요약 응답에 빈 층 수를 싣는 백엔드 변경이 먼저</td></tr>
+          <tr><th>U5</th><td>앱 다크 모드</td><td>지도 타일·거리뷰가 밝은 화면 전제다. 흐름 화면부터 2차</td></tr>
+          <tr><th>U6</th><td>지도 탐색 안 문구를 해요체·5판 말투로</td><td>패널 넷의 문구가 테스트로 잠겨 있다 — 다음 판에서 화면별로</td></tr>
+          <tr><th>U7</th><td>TDS 바텀시트 A/B 인용 정정 — 저장소 네 곳(design/references/INDEX.md:105 · BottomSheet.tsx:11 · design.css:67 · MapShell.css:328)이 원문과 반대로 「바텀시트가 메뉴보다 10% 높다」고 적었다</td><td>원문: 「Android는 바텀시트보다 <b>메뉴에서</b> 아이템 클릭율이 10% 더 높음」 · <b>5판 작업에서 함께 고친다</b></td></tr>
+          <tr><th>U8</th><td>종전 Posting 화면이 <code>invest_mn</code>(백만원)을 「만원」으로 찍어 초기 투자를 100배 작게 보였다</td><td>2026-10-13 발견(<code>invest_mn×100÷month_net = roi_months</code> 로 단위 확인) · <b>5판 작업에서 함께 고친다</b></td></tr>
+        </tbody></table></div>
+      <h3>변경 이력</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>날짜</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><th>2026-10-12</th><td>5판 착수 — 디자이너 피드백 4개. 조사(토스·TDS·원티드·한 화면 한 질문 65항목, 수치 원문 대조) · §0~§2 · §4 · §5-1 · §5-2 작성 중 세션 한도로 중단(기록 없음)</td></tr>
+          <tr><th>2026-10-13</th><td>대화 기록에서 복원해 §3 · §5-3~§12 완성. 구현: <code>apps/frontend/src/flow/</code></td></tr>
+        </tbody></table></div>
+    </section>
   </main>
 </div>
