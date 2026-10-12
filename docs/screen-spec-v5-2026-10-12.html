@@ -1,0 +1,799 @@
+<title>PlaceOS 화면설계서 5판</title>
+<meta name="description" content="한 화면 한 질문 — 우선순위로 다시 짠 PlaceOS 사용자 흐름과 화면 24개. 토스 UX·원티드 UI 사례와 수치(원문 대조), 컴포넌트·토큰·통과 조건 (2026-10-12, 디자이너 피드백 4개 반영)">
+<style>
+/* ── 이 문서의 토큰 — 앱 apps/frontend/src/styles/tokens.css 5판 값과 같다(단일 출처는 앱이다) ── */
+:root {
+  --grey-50:#F9FAFB; --grey-100:#F2F4F6; --grey-200:#E5E8EB; --grey-300:#D1D6DB; --grey-400:#B0B8C1;
+  --grey-500:#8B95A1; --grey-600:#6B7684; --grey-700:#4E5968; --grey-800:#333D4B; --grey-900:#191F28;
+  --primary:#0B7A87; --primary-pressed:#08626D; --primary-soft:#E8F5F6; --brand:#0EA5B7;
+  --real:#0F7A55; --real-soft:#E3F5EE; --warn:#8A5A00; --warn-soft:#FDF5E3; --danger:#C62F2A; --danger-soft:#FDEDEC;
+  --empty:#E03E36; --high:#F2682C; --partial:#EFA50F; --full:#22B07D;
+  --platform:#6460C4; --page:#753DA6; --posting:#A23C9F; --program:#7E2F53;
+  --bg:#F2F4F6; --surface:#FFFFFF; --ink:var(--grey-900); --sub:var(--grey-700); --muted:var(--grey-600); --line:var(--grey-200);
+  --shadow:0 1px 2px rgba(25,31,40,.06), 0 4px 12px rgba(25,31,40,.05);
+  --sans:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#101318; --surface:#191E26; --ink:#EEF1F4; --sub:#C3CAD3; --muted:#9AA4B0; --line:#2B323C;
+    --grey-50:#1C222B; --grey-100:#222933; --grey-200:#2B323C;
+    --primary:#4FC3CF; --primary-pressed:#7AD3DC; --primary-soft:#14303A;
+    --real:#5FCB9D; --real-soft:#15302A; --warn:#E9C06A; --warn-soft:#35291A; --danger:#F08A84; --danger-soft:#3A1F1E;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#101318; --surface:#191E26; --ink:#EEF1F4; --sub:#C3CAD3; --muted:#9AA4B0; --line:#2B323C;
+  --grey-50:#1C222B; --grey-100:#222933; --grey-200:#2B323C;
+  --primary:#4FC3CF; --primary-pressed:#7AD3DC; --primary-soft:#14303A;
+  --real:#5FCB9D; --real-soft:#15302A; --warn:#E9C06A; --warn-soft:#35291A; --danger:#F08A84; --danger-soft:#3A1F1E;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased; word-break:keep-all; overflow-wrap:anywhere; }
+a { color: var(--primary); }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+code { background: var(--surface); border:1px solid var(--line); border-radius:5px; padding:0 5px; }
+h1,h2,h3,h4 { line-height:1.3; margin:0; text-wrap: balance; }
+
+.shell { display:grid; grid-template-columns: 228px minmax(0,1fr); gap:40px; max-width:1260px; margin:0 auto; padding-inline:24px; }
+.index { position:sticky; top:0; align-self:start; padding-block:32px; max-height:100vh; overflow-y:auto; }
+.brand { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.brand .mark { width:34px; height:34px; border-radius:10px; background:var(--primary); color:#fff; display:grid; place-items:center; font-weight:700; }
+.brand b { font-size:15px; } .brand span { display:block; font-size:11.5px; color:var(--muted); line-height:1.35; }
+.index nav { display:grid; gap:1px; }
+.index a { display:grid; grid-template-columns:24px 1fr; gap:6px; text-decoration:none; padding:6px 10px; border-radius:9px; font-size:13.5px; color:var(--sub); }
+.index a:hover { background:var(--surface); color:var(--ink); }
+.index a .n { font-family:var(--mono); font-size:11px; color:var(--muted); }
+.index .sep { height:1px; background:var(--line); margin:8px 4px; }
+
+main { padding-block:32px 96px; min-width:0; }
+.doc-head { padding-bottom:26px; border-bottom:1px solid var(--line); }
+.eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.doc-head h1 { font-size:clamp(28px,4vw,40px); font-weight:700; letter-spacing:-.02em; margin-top:6px; }
+.doc-head p { max-width:72ch; color:var(--sub); margin:12px 0 0; }
+.meta { display:flex; flex-wrap:wrap; gap:8px 24px; margin:16px 0 0; font-size:13px; }
+.meta div { display:grid; } .meta dt { color:var(--muted); font-size:11.5px; } .meta dd { margin:0; font-weight:600; }
+
+section { padding-top:56px; scroll-margin-top:12px; }
+.sec-head { display:grid; gap:6px; margin-bottom:18px; }
+.sec-head h2 { font-size:25px; font-weight:700; letter-spacing:-.015em; }
+.sec-head .num { font-family:var(--mono); color:var(--primary); font-size:14px; font-weight:600; }
+.lede { color:var(--sub); max-width:74ch; margin:0; }
+h3 { font-size:17px; font-weight:700; margin:34px 0 10px; }
+h4 { font-size:14px; font-weight:700; margin:0 0 6px; }
+p { margin:0 0 12px; max-width:74ch; }
+
+.table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table { width:100%; border-collapse:collapse; font-size:13.5px; line-height:1.55; }
+th, td { text-align:left; vertical-align:top; padding:10px 14px; border-bottom:1px solid var(--line); }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom:0; }
+thead th { font-size:11.5px; font-weight:600; color:var(--muted); background:var(--grey-50); white-space:nowrap; }
+tbody th { font-weight:600; white-space:nowrap; }
+td.c, th.c { text-align:center; } .tnum { font-variant-numeric:tabular-nums; }
+q { quotes:"“" "”"; }
+.tag { display:inline-block; font-size:11px; font-weight:700; border-radius:6px; padding:1px 7px; white-space:nowrap; background:var(--grey-100); color:var(--sub); }
+.tag.p { background:var(--primary-soft); color:var(--primary); }
+.tag.real { background:var(--real-soft); color:var(--real); }
+.tag.est { background:var(--warn-soft); color:var(--warn); }
+.tag.no { background:var(--danger-soft); color:var(--danger); }
+.src { display:block; font-size:11.5px; color:var(--muted); margin-top:2px; font-family:var(--mono); }
+.box { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+.box ul, .box ol { margin:0; padding-left:18px; display:grid; gap:4px; font-size:14px; }
+.cols2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:12px; }
+.cols3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:12px; }
+.note { font-size:13px; color:var(--muted); margin-top:10px; }
+.callout { border-left:3px solid var(--primary); background:var(--primary-soft); border-radius:0 12px 12px 0; padding:12px 16px; margin:14px 0; font-size:14px; }
+.callout.warn { border-color:var(--warn); background:var(--warn-soft); }
+.score { display:inline-grid; place-items:center; width:26px; height:22px; border-radius:6px; font-weight:700; font-size:12px; font-variant-numeric:tabular-nums; }
+.s3 { background:var(--primary); color:#fff; } .s2 { background:var(--primary-soft); color:var(--primary); } .s1 { background:var(--grey-100); color:var(--muted); }
+.checks { list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:14px; background:var(--surface); overflow:hidden; }
+.checks li { display:grid; grid-template-columns:96px 1fr; gap:10px; padding:10px 14px; border-top:1px solid var(--line); font-size:14px; }
+.checks li:first-child { border-top:0; }
+.checks li::before { content:attr(data-id); font-family:var(--mono); font-size:11.5px; color:var(--primary); padding-top:2px; }
+
+/* ── 흐름 지도 ── */
+.flowmap { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--surface); }
+.stage { padding:16px 14px 18px; border-left:1px solid var(--line); display:grid; gap:8px; align-content:start; position:relative; }
+.stage:first-child { border-left:0; }
+.stage::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:var(--tc); }
+.stage .st { font-family:var(--mono); font-size:11px; color:var(--tc); font-weight:600; letter-spacing:.04em; }
+.stage h4 { font-size:16px; margin:0; }
+.stage .q { font-size:13px; color:var(--sub); }
+.node { display:block; border:1px solid var(--line); border-radius:10px; padding:7px 9px; font-size:12.5px; background:var(--grey-50); text-decoration:none; color:var(--ink); }
+.node b { font-family:var(--mono); font-size:11px; color:var(--muted); margin-right:6px; }
+.node.r { background:var(--surface); border-color:color-mix(in srgb, var(--tc) 45%, var(--line)); }
+.node.opt { border-style:dashed; }
+.arrow { text-align:center; color:var(--muted); font-size:12px; line-height:1; }
+[data-st="1"] { --tc: var(--platform); } [data-st="2"] { --tc: var(--page); } [data-st="3"] { --tc: var(--posting); } [data-st="4"] { --tc: var(--program); }
+
+/* ── 폰 와이어프레임 ──
+   375pt 폭 기준을 컨테이너 쿼리 단위로 줄였다. 1cqw ≈ 3.75px(실제 화면 기준). */
+.screen { display:grid; grid-template-columns:236px minmax(0,1fr); gap:28px; align-items:start; padding:26px 0; border-top:1px solid var(--line); scroll-margin-top:12px; }
+.screen:first-of-type { border-top:0; }
+.phone { container-type:inline-size; position:relative; width:236px; aspect-ratio:9/19.3; border-radius:30px; overflow:hidden; background:var(--surface);
+  border:1px solid var(--grey-300); box-shadow:var(--shadow); font-size:4cqw; line-height:1.4; color:var(--ink); }
+.phone .bar { height:12cqw; display:flex; align-items:center; gap:3cqw; padding:0 5.5cqw; font-size:3.6cqw; color:var(--muted); }
+.phone .bar .bk { font-size:7cqw; color:var(--grey-800); line-height:1; }
+.phone .bar .sp { flex:1; }
+.phone .cap { padding:2cqw 6.4cqw 0; font-size:3.5cqw; color:var(--muted); font-weight:600; }
+.phone .qt { padding:1.6cqw 6.4cqw 0; font-size:6.6cqw; font-weight:700; line-height:1.36; letter-spacing:-.02em; color:var(--grey-800); }
+.phone .sub { padding:2cqw 6.4cqw 0; font-size:3.9cqw; color:var(--sub); }
+.phone .bd { padding:5cqw 6.4cqw; display:grid; gap:2.4cqw; }
+.phone .opt { border-radius:3.6cqw; background:var(--grey-50); padding:3.6cqw 4cqw; }
+.phone .opt b { display:block; font-size:4.3cqw; } .phone .opt span { display:block; font-size:3.4cqw; color:var(--muted); margin-top:.6cqw; }
+.phone .opt.on { background:var(--primary-soft); box-shadow:inset 0 0 0 .5cqw var(--primary); }
+.phone .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:2cqw; }
+.phone .tile { border-radius:3.6cqw; background:var(--grey-50); padding:3cqw 1cqw; text-align:center; font-size:3.3cqw; font-weight:600; }
+.phone .tile i { display:block; font-style:normal; font-size:6.5cqw; line-height:1.2; }
+.phone .tile small { display:block; font-weight:400; color:var(--muted); font-size:2.7cqw; }
+.phone .row { display:grid; grid-template-columns:7cqw 1fr auto; gap:3cqw; align-items:center; padding:3cqw 0; border-bottom:1px solid var(--grey-100); }
+.phone .row .rk { font-size:5cqw; font-weight:700; color:var(--primary); text-align:center; }
+.phone .row b { display:block; font-size:4.2cqw; } .phone .row em { font-style:normal; font-size:3.3cqw; color:var(--muted); }
+.phone .row .rt { text-align:right; font-size:3.4cqw; color:var(--sub); } .phone .row .rt b { font-size:3.9cqw; color:var(--ink); }
+.phone .row.pin { background:var(--grey-50); border-radius:3cqw; padding:3cqw 2cqw; border:0; }
+.phone .cta { position:absolute; left:5cqw; right:5cqw; bottom:5cqw; height:14.5cqw; border-radius:4cqw; background:var(--primary); color:#fff;
+  display:grid; place-items:center; font-weight:700; font-size:4.4cqw; box-shadow:0 -6cqw 6cqw -2cqw var(--surface); }
+.phone .cta.two { display:grid; grid-template-columns:1fr 1.6fr; gap:2.4cqw; background:none; box-shadow:none; }
+.phone .cta.two span { display:grid; place-items:center; border-radius:4cqw; background:var(--primary); color:#fff; }
+.phone .cta.two span.w { background:var(--primary-soft); color:var(--primary); }
+.phone .cta.off { background:var(--grey-200); color:var(--grey-500); }
+.phone .link { font-size:3.6cqw; color:var(--primary); font-weight:600; }
+.phone .chips { display:flex; gap:1.6cqw; overflow:hidden; padding:0 6.4cqw; }
+.phone .chip { flex:none; border-radius:99px; border:1px solid var(--grey-200); padding:1.3cqw 3cqw; font-size:3.2cqw; font-weight:600; white-space:nowrap; }
+.phone .chip.on { background:var(--grey-900); border-color:var(--grey-900); color:#fff; }
+.phone .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:3cqw; padding:3cqw 6.4cqw; }
+.phone .card { display:grid; gap:1cqw; }
+.phone .thumb { aspect-ratio:4/3; border-radius:3cqw; background:var(--grey-100); position:relative; display:grid; place-items:end center; padding-bottom:2cqw; }
+.phone .thumb .fl { width:44%; display:grid; gap:.6cqw; }
+.phone .thumb .fl i { display:block; height:2.4cqw; border-radius:.6cqw; background:var(--grey-300); }
+.phone .thumb .fl i.v { background:var(--empty); } .phone .thumb .fl i.p { background:repeating-linear-gradient(45deg,var(--partial) 0 1cqw,transparent 1cqw 2cqw); }
+.phone .thumb .ov { position:absolute; left:2cqw; top:2cqw; font-size:2.8cqw; font-weight:700; background:rgba(25,31,40,.72); color:#fff; border-radius:1.4cqw; padding:.4cqw 1.6cqw; }
+.phone .thumb .hr { position:absolute; right:2cqw; top:1.4cqw; font-size:4.6cqw; color:var(--grey-500); }
+.phone .card b { font-size:3.6cqw; line-height:1.35; } .phone .card .pr { font-size:3.7cqw; font-weight:700; color:var(--primary); }
+.phone .card small { font-size:2.9cqw; color:var(--muted); }
+.phone .bdg { display:inline-block; font-size:2.7cqw; font-weight:700; border-radius:1.2cqw; padding:.3cqw 1.4cqw; background:var(--grey-100); color:var(--sub); margin-right:1cqw; }
+.phone .bdg.real { background:var(--real-soft); color:var(--real); } .phone .bdg.est { background:var(--warn-soft); color:var(--warn); } .phone .bdg.p { background:var(--primary-soft); color:var(--primary); }
+.phone .hero { font-size:9cqw; font-weight:700; letter-spacing:-.02em; color:var(--grey-900); font-variant-numeric:tabular-nums; }
+.phone .kv { display:grid; grid-template-columns:1fr auto; gap:1cqw 3cqw; font-size:3.6cqw; } .phone .kv span { color:var(--muted); } .phone .kv b { font-variant-numeric:tabular-nums; }
+.phone .tier { border-radius:3cqw; background:var(--grey-50); padding:3cqw; display:grid; gap:.8cqw; font-size:3.3cqw; }
+.phone .tier.rec { background:var(--primary-soft); box-shadow:inset 0 0 0 .4cqw var(--primary); }
+.phone .tier b { font-size:3.9cqw; }
+.phone .warnline { margin:0 6.4cqw; border-radius:2.4cqw; background:var(--warn-soft); color:var(--warn); font-size:3.2cqw; padding:2cqw 3cqw; font-weight:600; }
+.phone .field { border-bottom:.5cqw solid var(--primary); font-size:7cqw; font-weight:700; padding:1cqw 0; display:flex; justify-content:space-between; }
+.phone .field span { color:var(--grey-400); font-weight:600; } .phone .field.empty { border-color:var(--grey-300); color:var(--grey-400); }
+.phone .tab { position:absolute; left:0; right:0; bottom:0; height:15cqw; border-top:1px solid var(--grey-100); background:var(--surface); display:flex; justify-content:space-around; align-items:center; font-size:3cqw; color:var(--grey-500); }
+.phone .tab b { color:var(--grey-900); }
+.phone .map { height:34cqw; background:
+    linear-gradient(90deg, transparent 30%, #fff 30% 32%, transparent 32% 66%, #fff 66% 68%, transparent 68%),
+    linear-gradient(0deg, transparent 40%, #fff 40% 42%, transparent 42%), #E6ECEF; position:relative; }
+.phone .map::after { content:"●"; position:absolute; left:47%; top:36%; color:var(--empty); font-size:6cqw; }
+.phone .sheet { position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:6cqw 6cqw 0 0; box-shadow:0 -2cqw 8cqw rgba(25,31,40,.18); padding:3cqw 6.4cqw 22cqw; display:grid; gap:2cqw; }
+.phone .sheet::before { content:""; justify-self:center; width:10cqw; height:1.2cqw; border-radius:9cqw; background:var(--grey-300); }
+.phone .dim { position:absolute; inset:0; background:rgba(25,31,40,.42); }
+.phone .prog { display:flex; gap:1.2cqw; padding:0 6.4cqw; }
+.phone .prog i { flex:1; height:1.2cqw; border-radius:9cqw; background:var(--grey-200); } .phone .prog i.on { background:var(--primary); }
+.phone .stepper { display:grid; grid-template-columns:repeat(4,1fr); gap:1cqw; font-size:2.9cqw; text-align:center; color:var(--muted); }
+.phone .stepper span::before { content:""; display:block; height:1.2cqw; border-radius:9cqw; background:var(--grey-200); margin-bottom:1cqw; }
+.phone .stepper span.done::before, .phone .stepper span.cur::before { background:var(--primary); } .phone .stepper span.cur { color:var(--ink); font-weight:700; }
+.phone .skel { height:3cqw; border-radius:1.4cqw; background:var(--grey-100); }
+.spec .sid { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.spec .sid b { color:var(--primary); }
+.spec h3 { margin:2px 0 10px; font-size:20px; }
+.spec dl { display:grid; grid-template-columns:96px 1fr; gap:6px 14px; margin:0; font-size:14px; }
+.spec dt { color:var(--muted); font-weight:600; font-size:12.5px; padding-top:2px; }
+.spec dd { margin:0; }
+.spec dd ul { margin:0; padding-left:18px; display:grid; gap:3px; }
+@media (max-width:980px) {
+  .shell { grid-template-columns:minmax(0,1fr); gap:0; padding-inline:16px; }
+  .index { position:static; padding-block:24px 0; max-height:none; }
+  .index nav { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .flowmap { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .stage:nth-child(3) { border-left:0; } .stage:nth-child(n+3) { border-top:1px solid var(--line); }
+  .cols2, .cols3 { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:640px) {
+  .screen { grid-template-columns:minmax(0,1fr); justify-items:center; }
+  .screen .spec { justify-self:stretch; }
+  .flowmap { grid-template-columns:minmax(0,1fr); }
+  .stage { border-left:0; border-top:1px solid var(--line); } .stage:first-child { border-top:0; }
+  .spec dl { grid-template-columns:minmax(0,1fr); } .spec dt { padding-top:6px; }
+  .checks li { grid-template-columns:minmax(0,1fr); }
+}
+</style>
+
+<div class="shell">
+  <aside class="index" aria-label="목차">
+    <div class="brand"><span class="mark" aria-hidden="true">P</span><div><b>PlaceOS</b><span>화면설계서 5판 · 2026-10-12<br>한 화면 한 질문</span></div></div>
+    <nav>
+      <a href="#feedback"><span class="n">0</span>피드백 → 이 문서</a>
+      <a href="#priority"><span class="n">1</span>우선순위</a>
+      <a href="#flow"><span class="n">2</span>사용자 흐름</a>
+      <a href="#steal"><span class="n">3</span>훔쳐 온 것 · 근거</a>
+      <a href="#frame"><span class="n">4</span>공통 프레임</a>
+      <div class="sep" role="presentation"></div>
+      <a href="#s-stage1"><span class="n">5-1</span>① 상권 찾기</a>
+      <a href="#s-stage2"><span class="n">5-2</span>② 빈 자리</a>
+      <a href="#s-stage3"><span class="n">5-3</span>③ 비용</a>
+      <a href="#s-stage4"><span class="n">5-4</span>④ 작게 확인</a>
+      <a href="#s-hub"><span class="n">5-5</span>홈 · 지도 · 내 정보</a>
+      <div class="sep" role="presentation"></div>
+      <a href="#components"><span class="n">6</span>컴포넌트</a>
+      <a href="#tokens"><span class="n">7</span>토큰</a>
+      <a href="#rules"><span class="n">8</span>근거 표기</a>
+      <a href="#a11y"><span class="n">9</span>접근성</a>
+      <a href="#explore"><span class="n">10</span>지도 탐색(종전 4트랙)</a>
+      <a href="#checks"><span class="n">11</span>통과 조건</a>
+      <a href="#open"><span class="n">12</span>미해결 · 변경 이력</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="doc-head">
+      <div class="eyebrow">Screen specification · 5판</div>
+      <h1>PlaceOS 화면설계서 — 한 화면 한 질문</h1>
+      <p>3·4판은 <b>지도를 배경으로 깔고 네 트랙(Platform·Page·Posting·Program)을 패널로 띄우는</b> 구조였다. 한 패널에 질문이 4~6개(상권·자리·업종·세부 업종·권리금·운영 조건)가 겹쳐 있었고, 처음 온 사람은 로그인부터 해야 했다. 5판은 <b>우선순위로 흐름을 다시 짜고</b>, 그 흐름을 <b>한 화면에 한 질문</b>씩 묻는 화면 24개로 나눈다. 묻는 순서는 PPPP 그대로다 — <b>어떤 상권인가 → 어느 빈 자리인가 → 얼마면 되나 → 통하는지 어떻게 확인하나.</b></p>
+      <p>3·4판의 <b>데이터 규칙</b>(근거 표기 · 공실 4단계 정의 · 임대료 식 · 업종 12종 대응표 · 인계 계약)은 그대로 유효하다. 바뀌는 것은 <b>화면 구성·흐름·말투·시각 토큰</b>이다. 화면 구성에서 3·4판과 이 문서가 다르면 이 문서를 따른다.</p>
+      <dl class="meta">
+        <div><dt>판</dt><dd>5판 · 2026-10-12</dd></div>
+        <div><dt>대체하는 것</dt><dd>3·4판(screen-spec-pppp-2026-09-13.html)의 화면 구성 · 공통 프레임 C1</dd></div>
+        <div><dt>기준 화면</dt><dd>모바일 375×812 · 데스크톱 1440×900</dd></div>
+        <div><dt>대상 독자</dt><dd>디자이너 · 기획 · 개발</dd></div>
+        <div><dt>코드</dt><dd><code>apps/frontend/src/flow/</code> · <code>src/design/components/</code></dd></div>
+      </dl>
+    </header>
+
+    <!-- ═════════ 0 피드백 ═════════ -->
+    <section id="feedback">
+      <div class="sec-head"><span class="num">§0</span><h2>디자이너 피드백 4개 → 이 문서의 어디</h2>
+        <p class="lede">피드백을 받아쓰지 않고, 각 항목이 화면에서 무엇으로 바뀌었는지 찾아갈 수 있게 적었다.</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>피드백</th><th>5판에서 바뀐 것</th><th>위치</th></tr></thead>
+        <tbody>
+          <tr><th>1</th><td>PlaceOS 의 우선순위를 정할 것</td><td>기능 10개를 <b>네 기준</b>(고객이 먼저 묻는 것 · 데이터를 믿을 수 있는가 · 공공 서비스에 없는가 · 다음 행동으로 이어지는가)으로 점수 매겨 <b>핵심 경로 · 자세히 · 흐름 밖</b>으로 갈랐다. 1순위는 「내 업종에 맞는 상권과 그 안의 빈 자리」다</td><td><a href="#priority">§1</a></td></tr>
+          <tr><th>2</th><td>우선순위로 사용자 흐름을 설계할 것</td><td>목적 3개 × 단계 4개 흐름. <b>첫 결과까지 질문 2개 · 가입 0번</b>. 로그인은 저장하거나 검증 계획을 만들 때만 묻는다</td><td><a href="#flow">§2</a></td></tr>
+          <tr><th>3</th><td>토스 UX · 원티드 UI 사례와 데이터를 훔쳐 올 것</td><td>토스 제품 원칙 10개 · 수치가 공개된 토스 사례 8건 · TDS 컴포넌트 · 원티드 Montage(카드·필터·하단 버튼·진행 표시)를 화면별 착지점과 함께 표로. 수치는 <b>원문에서 다시 확인한 것만</b> 남겼다</td><td><a href="#steal">§3</a></td></tr>
+          <tr><th>4</th><td>한 화면 한 질문, 최대한 쉽고 직관적으로</td><td>화면 24개가 질문 하나 또는 결론 하나만 갖는다. 해요체 · 체감 단위 먼저 · 용어 치환표. 비교가 일인 화면(상권 순위 · 빈 자리 · 세 가지 가격대)은 <b>일부러 한 화면에 나란히</b> 둔다(반례 근거 §3-4)</td><td><a href="#frame">§4</a> · <a href="#s-stage1">§5</a></td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- ═════════ 1 우선순위 ═════════ -->
+    <section id="priority">
+      <div class="sec-head"><span class="num">§1</span><h2>우선순위</h2>
+        <p class="lede">주요 고객(2026-09-13 재정의)은 <b>업종이 정해진 예비창업자</b>, 그리고 <b>지금 가게의 업종을 바꾸거나 같은 업종으로 상권을 옮기려는 사업자</b>다. 이들이 앱을 열 때 머릿속 한 문장은 <q>카페를 하려는데, 어느 동네 어느 빈 자리가 월 얼마고, 몇 달이면 본전인가?</q> 이다.</p></div>
+
+      <h3>1-1. 기준 넷</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>기준</th><th>묻는 것</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><th>A. 먼저 묻는 것인가</th><td>고객의 머릿속 한 문장에서 몇 번째로 나오는 질문인가</td><td>주요 고객 정의(3판 §주요 고객) · 페르소나 여정(docs/ux-persona-journey-2026-09-07.md)</td></tr>
+          <tr><th>B. 믿을 수 있는가</th><td>실측인가 · 베이스라인을 이긴 모델인가 · 추정·가정이 얼마나 섞였나</td><td><code>python scripts/pppp_status.py</code> · <code>python scripts/kpi_baseline.py</code> (KPI 규칙 1~4)</td></tr>
+          <tr><th>C. 공공 서비스에 없는가</th><td>서울시 상권분석서비스 · 소상공인365 가 무료로 이미 주는가</td><td>§3-5 대체재 관찰(2026-10-12)</td></tr>
+          <tr><th>D. 다음 행동으로 이어지는가</th><td>이 답을 받으면 사용자가 무엇을 하게 되나(발품 · 계약 문의 · 작게 팔아 보기)</td><td>인계 계약(3판 §흐름과 인계)</td></tr>
+        </tbody></table></div>
+
+      <h3>1-2. 기능별 점수 <span class="note" style="font-weight:400;margin:0">3 = 강함 · 2 = 보통 · 1 = 약함 — 숫자는 2026-10-12 로컬 API·산출물에서 센 값</span></h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>기능</th><th class="c">A</th><th class="c">B</th><th class="c">C</th><th class="c">D</th><th>근거 한 줄</th><th>5판 자리</th></tr></thead>
+        <tbody>
+          <tr><th>빈 자리 — 건물·층 공실 <span class="src">Page</span></th><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s3">3</span></td><td>81/81 상권 건축물대장 실측. 층 단위 빈 자리는 앞 20개 상권만 세도 5,824곳(1층 1,159곳). 공공 서비스는 행정동 집계까지만 준다</td><td><span class="tag p">핵심 경로</span></td></tr>
+          <tr><th>업종 기준 상권 순위 <span class="src">Platform</span></th><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td>GNN 업종 추천은 거점 사전분포 대비 <b>+3.63%p [3.00, 4.25]</b>로 실력 판정. 단 12종 중 <b>6종</b>만 순위가 나오고, 공공 서비스도 업종별 지역 순위를 준다</td><td><span class="tag p">핵심 경로</span></td></tr>
+          <tr><th>층별 월 임대료 추정 <span class="src">Page</span></th><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td>R-ONE × 층 계수 × 대장 면적. 호가가 아닌 추정이고 보증금·권리금·관리비가 빠진다</td><td><span class="tag p">핵심 경로</span></td></tr>
+          <tr><th>본전 시점 — 세 가지 가격대 <span class="src">Posting</span></th><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td>권리금 0 전제가 기본이고 매출은 추정이다. 계산할 수 있는 자리는 상권당 최대 12곳(총 854) — 층 단위 빈 자리의 약 9%뿐</td><td><span class="tag p">핵심 경로 끝</span> 계산 가능한 자리만</td></tr>
+          <tr><th>예산 점검 — 직접 확인한 금액 <span class="src">Posting</span></th><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s3">3</span></td><td>사용자가 현장에서 받은 금액만 더한다(추정을 섞지 않는다). 발품 뒤에 쓰는 기능</td><td><span class="tag p">핵심 경로 끝</span> 계산 불가 자리의 길</td></tr>
+          <tr><th>검증 program <span class="src">Program</span></th><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s3">3</span></td><td class="c"><span class="score s3">3</span></td><td>기각 조건까지 내는 곳은 대체재에 없다. LLM 생성이라 로그인한 호출만 AI 를 쓰고, HA 검증을 거친다</td><td><span class="tag">선택 단계</span> 결과 뒤에 제안</td></tr>
+          <tr><th>상권 정체성 원자료 <span class="src">Platform</span></th><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td>업종 구성·시간대·키워드는 판단을 돕지만 첫 질문이 아니다</td><td><span class="tag">상권 소개 4줄 + 자세히</span></td></tr>
+          <tr><th>유동인구·인구밀도 레이어 <span class="src">Page</span></th><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td>집계구 단위 — 격자 실측이 아니다</td><td><span class="tag">지도 탐색</span></td></tr>
+          <tr><th>공실 예측 <span class="src">Platform · LSTM</span></th><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s2">2</span></td><td class="c"><span class="score s1">1</span></td><td>두 축 모두 <b>⏳ 확인대기</b> — 2026Q3 데이터 전에는 닫히지 않는다. KPI 규칙상 흐름에서 쓰지 않는다</td><td><span class="tag no">흐름 밖</span> 지도 탐색의 모델 근거에만</td></tr>
+          <tr><th>감성·리뷰 축</th><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td class="c"><span class="score s1">1</span></td><td>전 거점 미측정(null)</td><td><span class="tag no">흐름 밖</span></td></tr>
+        </tbody></table></div>
+
+      <h3>1-3. 결론 — 무엇을 먼저 보여 주나</h3>
+      <div class="cols2">
+        <div class="box"><h4>P1 · 핵심 가치 — 「어느 상권, 어느 빈 자리」</h4><ul>
+          <li>업종 → 상권 순위 → 상권 한 곳 → <b>그 상권의 빈 층과 월 임대료</b></li>
+          <li>공공 대체재가 업종별 지역 순위까지는 무료로 준다(§3-5). 그래서 <b>순위 화면에 이미 빈 1층 수와 1층 평당 월세가 보여야</b> 우리를 쓸 이유가 생긴다</li>
+        </ul></div>
+        <div class="box"><h4>P2 · 판단 — 「얼마면 되나」</h4><ul>
+          <li>계산할 수 있는 자리 → 권리금 한 질문 → <b>본전 시점</b>(세 가지 가격대를 나란히)</li>
+          <li>계산할 수 없는 자리 → 저장 → 현장 금액으로 <b>예산 점검</b>. 계산 못 하는 자리를 계산하는 척하지 않는다</li>
+        </ul></div>
+        <div class="box"><h4>P3 · 다음 행동 — 「작게 먼저 확인」</h4><ul>
+          <li>결과 화면의 주 버튼. 방식 → 아이템 → 기간 → 예산 → 검증 계획(기각 조건 먼저)</li>
+          <li>업종을 바꾸려는 사업자에게는 비용보다 <b>이쪽이 먼저</b>다(지금 가게 자리 계산은 아직 없다)</li>
+        </ul></div>
+        <div class="box"><h4>P4 · 근거와 탐색 — 「자세히」</h4><ul>
+          <li>지도 4레이어, 정체성 원자료, 모델 근거, 소요시간, 벤치마킹 가게 찾기는 <b>지도 탐색</b>(종전 4트랙 화면)과 결과 화면의 「자세히」로 옮긴다</li>
+          <li>공개 단계는 2단까지(§3-4 NN/g)</li>
+        </ul></div>
+      </div>
+
+      <h3>1-4. 이 우선순위가 바꾸는 것</h3>
+      <ol style="padding-left:20px;display:grid;gap:6px;max-width:80ch">
+        <li><b>첫 결과까지 질문 2개 · 가입 0번.</b> 목적과 업종만 고르면 상권 순위가 뜬다(바꾸기·옮기기는 지금 상권 하나 더). 3·4판은 가입 → 카드 하나에 다섯 칸 → 시작이었다.</li>
+        <li><b>로그인은 저장할 때.</b> 후보 저장 · 결과 저장 · 검증 계획 만들기 · 내 정보에서만 묻는다. 그때까지 고른 것은 그대로 계정으로 옮긴다.</li>
+        <li><b>지도는 「어디」를 고를 때만.</b> 질문 화면에는 지도를 깔지 않는다. 자리 상세에 작은 지도, 목록에서 「지도로 보기」, 그리고 지도 탐색(종전 화면)에 그대로 남는다.</li>
+        <li><b>계산 가능 여부를 먼저 말한다.</b> 빈 자리 카드에 「본전 계산 가능」 배지와 필터를 둔다. 약 9%만 계산된다는 사실을 숨기지 않는다.</li>
+        <li><b>PPPP 는 단계 이름 밑으로.</b> 화면 본문에서는 「상권 · 빈 자리 · 비용 · 작게 확인」을 쓰고, Platform·Page·Posting·Program 은 홈의 단계 표시와 지도 탐색에만 남긴다.</li>
+        <li><b>흐름 밖으로 뺀 것을 화면에 다시 들이지 않는다.</b> 새 기능은 「네 단계 중 어느 질문에 답하나」를 말하지 못하면 흐름에 넣지 않는다(토스 Minimum Features, §3-1).</li>
+      </ol>
+
+      <h3>1-5. 잘 됐는지 무엇으로 아나</h3>
+      <p>토스·원티드의 수치는 남의 제품에서 나온 것이고 대부분 자체 보고다(§3-2). 그래서 5판은 <b>우리 퍼널을 질문 단위로 잰다</b> — 화면마다 진입·응답·이탈을 <code>client:flow_*</code> 표본으로 남기고(KPI② 와 같은 창구), <b>종전 화면(지도 탐색)과의 차이</b>로만 판정한다(KPI 규칙 1·2). 표본이 쌓이기 전에는 「좋아졌다」를 쓰지 않는다.</p>
+    </section>
+
+    <!-- ═════════ 2 흐름 ═════════ -->
+    <section id="flow">
+      <div class="sec-head"><span class="num">§2</span><h2>사용자 흐름</h2>
+        <p class="lede">네 단계는 PPPP 순서다. 단계 안의 화면 하나는 질문 하나(Q) 또는 결론 하나(R)만 갖는다. 실선 상자는 모두가 지나는 화면, 점선은 목적·데이터에 따라 갈리는 화면이다.</p></div>
+
+      <div class="flowmap" role="img" aria-label="네 단계 흐름 지도: 상권 찾기, 빈 자리, 비용, 작게 확인">
+        <div class="stage" data-st="1"><span class="st">① 상권 · PLATFORM</span><h4>어느 상권이 맞나</h4><span class="q">목적 → 업종 → (지금 상권) → 순위</span>
+          <a class="node" href="#Q1"><b>Q1</b>무엇을 준비하나요</a><div class="arrow">↓</div>
+          <a class="node" href="#Q2"><b>Q2</b>어떤 가게인가요</a>
+          <a class="node opt" href="#Q2-1"><b>Q2-1</b>업종 직접 적기 · 기타</a>
+          <a class="node opt" href="#Q3"><b>Q3</b>지금 가게 상권 · 바꾸기·옮기기</a><div class="arrow">↓</div>
+          <a class="node r" href="#R1"><b>R1</b>상권 순위 · 창업·옮기기</a>
+          <a class="node r opt" href="#R1-p"><b>R1-p</b>업종 순위 · 바꾸기</a>
+          <a class="node opt" href="#Q-p"><b>Q-p</b>무엇부터 할까 · 바꾸기</a>
+          <a class="node opt" href="#Q4"><b>Q4</b>상권 직접 고르기</a><div class="arrow">↓</div>
+          <a class="node r" href="#R2"><b>R2</b>상권 소개</a></div>
+        <div class="stage" data-st="2"><span class="st">② 빈 자리 · PAGE</span><h4>어느 자리가 비었나</h4><span class="q">월세 상한 → 빈 자리 → 자리 하나</span>
+          <a class="node" href="#Q5"><b>Q5</b>월세는 얼마까지</a><div class="arrow">↓</div>
+          <a class="node r" href="#R3"><b>R3</b>빈 자리 목록</a><div class="arrow">↓</div>
+          <a class="node r" href="#R4"><b>R4</b>자리 상세</a>
+          <div class="arrow">↓ 계산 가능 · ↘ 불가</div></div>
+        <div class="stage" data-st="3"><span class="st">③ 비용 · POSTING</span><h4>얼마면 되나</h4><span class="q">계산 가능: 권리금 → 본전 시점<br>불가: 예산 → 계약 금액 → 준비 비용</span>
+          <a class="node opt" href="#Q6"><b>Q6</b>권리금은 얼마로</a>
+          <a class="node r opt" href="#R5"><b>R5</b>본전 시점 · 세 가격대</a>
+          <a class="node opt" href="#Q7"><b>Q7</b>쓸 수 있는 돈</a>
+          <a class="node opt" href="#Q8"><b>Q8</b>받은 계약 금액</a>
+          <a class="node opt" href="#Q9"><b>Q9</b>인테리어·설비</a>
+          <a class="node r opt" href="#R6"><b>R6</b>예산 점검</a></div>
+        <div class="stage" data-st="4"><span class="st">④ 작게 확인 · PROGRAM</span><h4>통하는지 어떻게 아나</h4><span class="q">방식 → 아이템 → 기간 → 예산 → 계획</span>
+          <a class="node" href="#Q10"><b>Q10</b>어떻게 확인할까</a><div class="arrow">↓</div>
+          <a class="node" href="#Q11"><b>Q11</b>무엇을 팔아 볼까</a><div class="arrow">↓</div>
+          <a class="node" href="#Q12"><b>Q12</b>얼마 동안</a><div class="arrow">↓</div>
+          <a class="node" href="#Q13"><b>Q13</b>얼마로</a><div class="arrow">↓ 로그인</div>
+          <a class="node r" href="#R7"><b>R7</b>검증 계획 · 기각 조건 먼저</a></div>
+      </div>
+      <p class="note">허브 화면: <a href="#H">H 홈</a>(진행 · 저장한 것) · <a href="#M">M 내 정보</a> · <a href="#X">X 지도 탐색</a>(종전 4트랙). 질문 화면은 하단 탭을 숨기고, 허브 화면만 탭을 보인다.</p>
+
+      <h3>2-1. 목적별 경로 — 몇 번 묻고 언제 첫 결과가 나오나</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>목적</th><th>경로</th><th class="c">첫 결과까지 질문</th><th class="c">본전 시점까지 탭</th></tr></thead>
+        <tbody>
+          <tr><th>새로 창업</th><td>Q1 → Q2 → <b>R1 상권 순위</b> → R2 → Q5 → R3 → R4 → Q6 → <b>R5</b> → Q10 …</td><td class="c tnum">2</td><td class="c tnum">8</td></tr>
+          <tr><th>상권 옮기기</th><td>Q1 → Q2 → Q3 → <b>R1</b>(지금 상권 고정 줄) → R2 → … 창업과 같다</td><td class="c tnum">3</td><td class="c tnum">9</td></tr>
+          <tr><th>업종 바꾸기</th><td>Q1 → Q2(지금 업종) → Q3 → <b>R1-p 업종 순위</b> → Q-p → <b>Q10 작게 확인</b> 또는 Q5 빈 자리</td><td class="c tnum">3</td><td class="c">—<span class="src">지금 가게 자리 계산은 미지원(§12)</span></td></tr>
+          <tr><th>모델 밖 업종(술집 등 6종 · 기타)</th><td>Q1 → Q2 → <b>R1 안내</b>「순위를 아직 못 드려요」 → Q4 → R2 → 빈 자리부터 같다</td><td class="c tnum">2</td><td class="c tnum">9</td></tr>
+        </tbody></table></div>
+      <p class="note">비교: 3·4판은 랜딩 → 가입(이메일·비밀번호·조직명 또는 소셜) → 「내 사업」 카드(사업 이름·소개·목적·업종·세부 업종) → 시작 → Platform 패널. 서울시 상권분석서비스 「나도 곧 사장」은 문 3개 → 「업종이 있으세요?」 → 업종 → 지역 순위(로그인 없음, §3-5).</p>
+
+      <h3>2-2. 분기 규칙</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>상황</th><th>판정</th><th>화면이 하는 일</th></tr></thead>
+        <tbody>
+          <tr><th>업종이 모델 밖</th><td><code>GET /ai/industries</code> 의 <code>model_label</code> 없음 또는 <code>fit_unavailable_reason</code> 있음 · 「기타」</td><td>R1 자리에 안내 결론(순위 없음) + 「상권 직접 고르기」. 가까운 업종 점수로 채우지 않는다(3판 규칙 그대로)</td></tr>
+          <tr><th>업종 바꾸기</th><td>목적 = pivot</td><td>R1 대신 R1-p(지금 상권 업종 순위). 고른 업종은 「바꿀 업종」으로 저장(<code>targetIndustryKey</code>). 다음은 Q-p 에서 고른다</td></tr>
+          <tr><th>자리가 계산 대상</th><td>층 자리의 건물에 회수기간 유닛이 있다 — <code>"vu-" + building_id</code> 가 <code>GET /commercial-districts/{id}/postings</code> 에 있음</td><td>R4 주 버튼 「몇 달이면 본전인지 보기」 → Q6 → R5. 결과에 <q>건물 전체 기준 계산이에요</q></td></tr>
+          <tr><th>자리가 계산 대상 아님</th><td>위 유닛 없음(약 91%)</td><td>R4 주 버튼 「후보로 저장하기」, 보조 「현장 금액으로 예산 점검」 → Q7. 층으로 쪼갠 자리로 회수기간을 내지 않는다(feature-posting §0-Q)</td></tr>
+          <tr><th>로그인이 필요한 행동</th><td>후보 저장 · 결과 저장 · 검증 계획 만들기 · 내 정보</td><td>로그인 시트(§4-5). 로그인하면 하려던 일을 이어서 한다. 소셜 로그인은 돌아올 화면을 기억한다</td></tr>
+          <tr><th>결과 0건</th><td>조건에 맞는 빈 자리 0 · 계산 가능한 자리 0</td><td>빈 결과 화면에 <b>원인 한 줄 + 출구 하나</b>(「월세 조건 풀기」 등). 빈 화면을 상태로 두지 않는다</td></tr>
+          <tr><th>서울 밖 · 목록에 없는 상권</th><td>Q3·Q4 검색 결과 0</td><td><q>지금은 서울 {n}개 상권만 있어요. 가까운 상권을 골라 주세요.</q> — n 은 응답에서 센다</td></tr>
+        </tbody></table></div>
+
+      <h3>2-3. 이어하기 · 뒤로가기</h3>
+      <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
+        <li><b>화면마다 주소가 있다</b>(<code>#/start</code> · <code>#/industry</code> · <code>#/districts</code> · <code>#/space/{id}</code> …). 브라우저·휴대폰 뒤로가기는 앞 질문으로 간다. 화면 안 왼쪽 위 「뒤로」도 같은 일을 한다.</li>
+        <li><b>답은 고르는 순간 저장한다</b>(이 브라우저 <code>localStorage</code>, 로그인하면 계정). 중간에 나갔다 와도 마지막 화면에서 이어진다(NN/g Wizards: 상태 저장 · 이미 아는 것은 다시 묻지 않는다).</li>
+        <li><b>답을 바꾸면 그 뒤만 비운다.</b> 업종을 바꾸면 상권·자리·비용·검증 입력을 비우고, 상권을 바꾸면 자리·비용을 비운다. 앞 답은 남긴다.</li>
+        <li><b>필요한 앞 답이 없으면 그 질문으로 돌려보낸다</b>(예: 주소로 <code>#/spaces</code> 를 바로 열었는데 상권이 없으면 Q4).</li>
+      </ul>
+    </section>
+
+<!-- @@STEAL@@ -->
+
+    <!-- ═════════ 4 공통 프레임 ═════════ -->
+    <section id="frame">
+      <div class="sec-head"><span class="num">§4</span><h2>공통 프레임</h2>
+        <p class="lede">모든 질문 화면은 같은 뼈대 위에 선다. 여기 적은 규칙은 화면별 명세에서 반복하지 않는다.</p></div>
+
+      <h3>4-1. 화면 해부 — 위에서 아래로 다섯 칸</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>칸</th><th>내용</th><th>수치 (모바일 · 데스크톱)</th><th>가져온 곳</th></tr></thead>
+        <tbody>
+          <tr><th>① 상단 바</th><td>왼쪽 「뒤로」(아이콘 버튼, <code>aria-label="뒤로"</code>) · 오른쪽 보조 버튼 하나(닫기·저장 ♡ 중 하나). 단계 숫자(「3/6」)는 두지 않는다</td><td class="tnum">높이 56 · 좌우 여백 20 / 24</td><td>GOV.UK 질문 페이지 · 진행 표시는 기본값이 아니다(§3-4)</td></tr>
+          <tr><th>② 맥락 캡션</th><td>지금 단계와 앞에서 고른 것 한 줄 — <q>상권 찾기 · 카페·디저트</q>. 같은 제목을 반복하지 않게 앞 답을 여기 쓴다</td><td class="tnum">13 / 19.5 · 600 · grey600</td><td>GOV.UK caption · TDS t7</td></tr>
+          <tr><th>③ 질문 제목</th><td>질문 하나 또는 결론 하나. 해요체 · 두 줄 안</td><td class="tnum">24 / 33 (모바일) · 28 / 37 (데스크톱) · 700 · grey800</td><td>TDS Top(제목 22 Bold grey800 기본) — 웹이라 한 단 키움</td></tr>
+          <tr><th>④ 보조 한 줄</th><td>왜 묻는지, 또는 이 결론을 어떻게 읽는지 한 문장(Explain Why)</td><td class="tnum">17 / 25.5 · 400 · grey700</td><td>TDS Top 부제(17 · grey700)</td></tr>
+          <tr><th>⑤ 본문</th><td>선택지 목록 · 입력칸 · 결과. <b>선택지를 누르면 바로 다음 화면</b>(버튼을 한 번 더 누르게 하지 않는다)</td><td class="tnum">위 24 · 행 좌우 20/24 · 행 상하 12~16</td><td>TDS Top lowerGap 24 · ListRow 여백</td></tr>
+          <tr><th>⑥ 하단 고정 버튼</th><td>입력이 필요한 화면과 결과 화면에만. 문구는 누르면 일어날 일(「상권 순위 보기」·「본전 시점 계산하기」). 보조 행동이 진짜 대안일 때만 두 개</td><td class="tnum">높이 56 · 모서리 16 · 17/700 · 좌우 20 · 아래 safe-area + 16 · 위 그라데이션 24</td><td>TDS FixedBottomCTA · Montage Action area</td></tr>
+        </tbody></table></div>
+      <p class="note">데스크톱(≥1024px)은 질문 화면을 <b>가운데 한 열(최대 560px)</b>로 둔다. 목록·비교 화면(R1·R3·R5·홈)은 최대 960px 안에서 카드 2~4열로 넓힌다. 양옆을 지도·패널로 채우지 않는다 — 질문에 집중하게 하는 것이 이 판의 목적이다.</p>
+
+      <h3>4-2. 불변 조건 — 3·4판에서 무엇이 바뀌나</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>조건</th><th>3·4판</th><th>5판</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><th>C1 지도</th><td>지도는 모든 화면의 배경이고 하나다</td><td><b>지도는 「어디」를 고르는 자리에만.</b> 질문 화면에는 지도가 없다. 자리 상세(R4)에 작은 지도, 빈 자리(R3)의 「지도로 보기」, 지도 탐색(X)에 남는다. <b>지도 탐색 안에서는 C1 이 그대로 유효</b>하다(인스턴스 하나 · 탭 전환 시 재생성 금지)</td><td>한 화면 한 질문. 지도 위 패널은 질문 4~6개를 한꺼번에 폈다</td></tr>
+          <tr><th>C2 상권 공유</th><td>상권 선택은 화면 전환이 아니다 · 네 트랙이 공유</td><td>흐름에서 고른 상권은 지도 탐색이 이어받는다(같은 저장 값). 지도 탐색 안 규칙은 그대로</td><td>탐색으로 넘어가도 다시 고르지 않게</td></tr>
+          <tr><th>C3 한 화면 한 질문 <span class="tag p">신설</span></th><td>—</td><td>질문 화면은 답할 것이 하나다. 비교가 일인 화면(R1·R3·R5)은 <b>후보를 한 화면에 나란히</b> 둔다 — 그 화면의 질문은 「어느 것?」 하나다</td><td>§3 근거와 반례</td></tr>
+          <tr><th>C4 근거 표기</th><td>3판 §근거 표기 규칙</td><td>그대로. 새 화면은 <b>결론 아래 한 줄 + 「자세히」</b> 두 단으로 싣는다(§8)</td><td>제1원칙 유지</td></tr>
+          <tr><th>C5 로그인 시점 <span class="tag p">신설</span></th><td>앱 전체가 로그인 뒤</td><td>저장 · 검증 계획(AI) · 내 정보에서만. 나머지는 로그인 없이 끝까지</td><td>토스 Value First · NN/g Login Walls · Baymard 지연 가입(§3)</td></tr>
+        </tbody></table></div>
+
+      <h3>4-3. 내비게이션</h3>
+      <div class="cols2">
+        <div class="box"><h4>허브 화면 — 탭 셋</h4><ul>
+          <li><b>홈</b>(<code>#/home</code>) · <b>지도</b>(<code>#/explore</code>) · <b>내 정보</b>(<code>#/me</code>)</li>
+          <li>모바일은 하단 탭바(높이 56 + safe-area), 데스크톱은 상단 바 오른쪽 링크 셋</li>
+          <li>탭은 2~5개(앱인토스 가이드) — 셋으로 시작한다</li>
+        </ul></div>
+        <div class="box"><h4>질문·결과 화면 — 탭 숨김</h4><ul>
+          <li>흐름 안에서는 탭바를 숨기고 「뒤로」와 하단 버튼만 둔다(토스 송금·가입과 같다)</li>
+          <li>흐름에서 나가는 길은 상단 바 오른쪽 「닫기」(홈으로). 다이얼로그의 왼쪽 버튼 문구는 「닫기」로 통일(앱인토스 가이드 — 「취소」는 진행 중인 일이 취소된다고 오해하게 한다)</li>
+        </ul></div>
+      </div>
+
+      <h3>4-4. 말투 — 해요체 · 체감 단위 먼저 · 용어 치환</h3>
+      <div class="cols2">
+        <div class="box"><h4>규칙</h4><ul>
+          <li>모든 문구는 <b>해요체</b>. 능동형(「됐어요」 대신 「했어요」). 부정 대신 할 수 있는 것(「안 돼요」 대신 「~하면 볼 수 있어요」)</li>
+          <li>숫자는 <b>체감 단위 먼저</b>, 정밀 값은 아래 — 「약 1년 2개월이면 본전이에요」 → 그 아래 「14.2개월」</li>
+          <li>버튼은 누르면 일어날 일. 7자 이상이면 강한 버튼(Montage) · 다음 화면을 예상하게(토스 Predictable hint)</li>
+          <li>한 화면의 보조 문장은 하나. 경고·출처는 결론 아래 한 줄로 모으고 나머지는 「자세히」</li>
+          <li>겁주지 않는다 — 기각 조건은 「이 숫자가 안 나오면 접어요」가 아니라 「이만큼 안 나오면 다른 방법을 봐요」</li>
+        </ul></div>
+        <div class="box"><h4>용어 치환표</h4>
+          <div class="table-wrap" style="border:0"><table>
+            <thead><tr><th>3·4판</th><th>5판 화면 문구</th></tr></thead>
+            <tbody>
+              <tr><td>공실(의심)</td><td>빈 자리 · 비어 있는 층</td></tr>
+              <tr><td>입지 적합도</td><td>입지 점수 (자세히: 입지 적합도 · GNN)</td></tr>
+              <tr><td>회수기간 · 손익분기</td><td>본전 시점 · 몇 달이면 본전</td></tr>
+              <tr><td>3-Tier 고급화·가성비·기능중심</td><td>세 가지 가격대 — 비싸게 · 알뜰하게 · 꼭 필요한 것만</td></tr>
+              <tr><td>검증 program</td><td>작게 먼저 확인하기 · 검증 계획</td></tr>
+              <tr><td>기각 조건</td><td>이만큼 안 나오면</td></tr>
+              <tr><td>상권 정체성 · archetype</td><td>이런 상권이에요</td></tr>
+              <tr><td>Platform · Page · Posting · Program</td><td>상권 · 빈 자리 · 비용 · 작게 확인 (영문은 홈 단계 표시 밑에 작게)</td></tr>
+            </tbody></table></div></div>
+      </div>
+
+      <h3>4-5. 상태 공통</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>상태</th><th>보이는 것</th><th>규칙</th></tr></thead>
+        <tbody>
+          <tr><th>불러오는 중</th><td>최종 레이아웃과 같은 높이의 회색 골격(행 5 · 카드 4)</td><td>스피너 대신 골격(Montage · TDS ListRow.Loader). 다음 화면 데이터는 <b>앞 화면에서 미리 받는다</b>(업종을 누르는 순간 상권 순위를 요청) — 토스 No More Loading</td></tr>
+          <tr><th>실패</th><td>결과 화면 형식: 제목 <q>○○을 불러오지 못했어요</q> · 한 줄 원인 · 버튼 「다시 시도」</td><td>원문 오류는 「자세히」 안에만(진단용)</td></tr>
+          <tr><th>빈 결과</th><td>제목으로 무엇이 없는지 · 한 줄 이유 · 출구 버튼 하나</td><td>Montage Fallback view. 빈 화면은 상태가 아니다</td></tr>
+          <tr><th>로그인 필요</th><td>하단 시트: 제목 <q>저장하려면 로그인해요</q> · 얻는 것 세 줄 · 로그인 버튼들 · 「닫기」</td><td>들어오자마자 띄우지 않는다(앱인토스 다크패턴 정책). 사용자가 저장을 누른 뒤에만</td></tr>
+          <tr><th>저장 완료</th><td>하단 토스트 <q>저장했어요</q> + 「보기」(5초, 하단 버튼 위에 뜬다)</td><td>TDS Toast — 버튼이 있으면 5000ms · CTA 를 가리지 않게</td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- ═════════ 5 화면별 명세 ═════════ -->
+    <section id="screens">
+      <div class="sec-head"><span class="num">§5</span><h2>화면별 명세</h2>
+        <p class="lede">왼쪽은 모바일 와이어프레임(375 기준 축소), 오른쪽은 명세다. 와이어프레임의 업종·상권·금액은 배치 설명용 예시이고, 실제 문구의 중괄호 자리는 응답 값이다.</p></div>
+
+      <h3 id="s-stage1" style="margin-top:8px">5-1. ① 상권 찾기 <span class="tag" style="background:#F0F0FB;color:var(--platform)">PLATFORM</span></h3>
+
+      <article class="screen" id="Q1">
+        <div class="phone" role="img" aria-label="Q1 목적 질문 화면: 선택지 세 개">
+          <div class="bar"><span class="sp"></span><span>로그인</span></div>
+          <div class="qt">어떤 준비를 하고<br>계세요?</div>
+          <div class="sub">고른 목적에 맞춰 상권을 보여 드려요.</div>
+          <div class="bd">
+            <div class="opt on"><b>새 가게를 열어요</b><span>업종은 정했고, 동네를 찾고 있어요</span></div>
+            <div class="opt"><b>지금 가게 업종을 바꿔요</b><span>자리는 그대로, 무엇으로 바꿀지</span></div>
+            <div class="opt"><b>하던 장사를 옮겨요</b><span>같은 업종으로 옮길 상권을 찾아요</span></div>
+          </div>
+          <div class="sub" style="position:absolute;bottom:6cqw;left:0;right:0;text-align:center;font-size:3.3cqw">로그인 없이 끝까지 볼 수 있어요</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q1</b> · <code>#/start</code> · 진입: 랜딩 「내 업종으로 시작하기」 · 홈 「처음부터」</div>
+          <h3>어떤 준비를 하고 계세요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>세 줄 중 하나를 누른다 → 바로 Q2. 기본 선택 없음(<code>radiogroup</code>, 키보드 ↑↓ · Enter)</dd>
+            <dt>선택지</dt><dd><ul><li>새 가게를 열어요 — <q>업종은 정했고, 어느 동네가 좋을지 찾고 있어요</q> → <code>goal=start</code></li>
+              <li>지금 가게 업종을 바꿔요 — <q>자리는 그대로, 무엇으로 바꿀지 고민이에요</q> → <code>pivot</code></li>
+              <li>하던 장사를 다른 동네로 옮겨요 — <q>같은 업종으로 옮길 상권을 찾고 있어요</q> → <code>move</code></li></ul></dd>
+            <dt>아래 한 줄</dt><dd><q>로그인 없이 끝까지 볼 수 있어요. 저장할 때만 로그인해요.</q> (Baymard: 처음부터 「나중에 계정을 만들 수 있다」고 알린다)</dd>
+            <dt>저장</dt><dd>목적을 바꾸면 업종 이후 답을 비운다(§2-3)</dd>
+            <dt>왜 이 질문이 먼저</dt><dd>목적이 다음 질문(업종의 뜻 · 지금 상권 필요 여부)과 결과 화면(R1 · R1-p)을 가른다. 토스 보험금 청구 사례처럼 <b>사실로 답할 수 있게</b> 「~해요」 문장으로 바꿨다 — 분류어(「피벗」·「이전」)를 쓰지 않는다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q2">
+        <div class="phone" role="img" aria-label="Q2 업종 질문 화면: 업종 타일 3열">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span></div>
+          <div class="cap">상권 찾기 · 새 가게</div>
+          <div class="qt">어떤 가게를 여시나요?</div>
+          <div class="sub">업종에 맞는 상권부터 보여 드려요.</div>
+          <div class="bd"><div class="tiles">
+            <div class="tile"><i>☕</i>카페·디저트</div><div class="tile"><i>🍚</i>음식점</div><div class="tile"><i>🍺</i>술집<small>상권은 직접</small></div>
+            <div class="tile"><i>💇</i>미용·네일<small>상권은 직접</small></div><div class="tile"><i>🏥</i>병·의원</div><div class="tile"><i>💊</i>약국</div>
+            <div class="tile"><i>🏪</i>편의점·생활</div><div class="tile"><i>👕</i>옷·잡화<small>상권은 직접</small></div><div class="tile"><i>📚</i>학원·교육<small>상권은 직접</small></div>
+            <div class="tile"><i>🏋️</i>운동·여가<small>상권은 직접</small></div><div class="tile"><i>🛏️</i>숙박</div><div class="tile"><i>🎨</i>전시·공연<small>상권은 직접</small></div>
+          </div><div class="opt" style="text-align:center;padding:2.6cqw"><b style="font-size:3.6cqw">기타 · 직접 적기</b></div></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q2</b> · <code>#/industry</code> · 앞: Q1</div>
+          <h3>어떤 가게를 여시나요? <span class="note" style="font-weight:400;font-size:13px">(바꾸기: 지금은 어떤 가게인가요?)</span></h3>
+          <dl>
+            <dt>답하는 법</dt><dd>타일 하나를 누른다 → 바로 다음. 창업 → R1 · 옮기기·바꾸기 → Q3 · 기타 → Q2-1</dd>
+            <dt>목록</dt><dd><code>GET /ai/industries</code> 12종 + 「기타 · 직접 적기」. 순서는 응답 순서. 이모지는 장식(<code>aria-hidden</code>)이고 이름이 읽힌다</dd>
+            <dt>정직한 표시</dt><dd>상권 순위를 못 내는 업종(<code>model_label</code> 없음 · <code>fit_unavailable_reason</code>)은 타일 아래 <q>상권은 직접 골라요</q>. 부정형 「순위 미제공」을 쓰지 않는다(토스 라이팅: 긍정형) — 사실은 같다</dd>
+            <dt>미리 받기</dt><dd>타일을 누르는 순간 <code>GET /ai/industry-fit?industry={key}</code> 와 <code>GET /commercial-districts</code> 를 요청한다(R1 대기 제거)</dd>
+            <dt>뺀 것</dt><dd>세부 업종 선택(IndustryDetailSelect) · 사업 이름 · 사업 소개는 이 흐름에서 묻지 않는다 — 어느 결과도 그 값을 읽지 않는다(4역할 점검 §2-6). 세부 업종은 지도 탐색의 입점 계산에 남는다</dd>
+            <dt>실패</dt><dd><q>업종 목록을 불러오지 못했어요</q> + 「다시 시도」 · 보조 「상권부터 고르기」(→ Q4)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q2-1">
+        <div class="phone" role="img" aria-label="Q2-1 업종 직접 입력 화면">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">상권 찾기 · 새 가게</div>
+          <div class="qt">어떤 가게인지<br>적어 주세요</div>
+          <div class="sub">적은 업종은 순위·본전 계산 없이 빈 자리와 월세까지 볼 수 있어요.</div>
+          <div class="bd"><div class="field">도자기 공방<span></span></div></div>
+          <div class="cta">다음</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q2-1</b> · <code>#/industry/other</code> · 앞: Q2 「기타」</div>
+          <h3>어떤 가게인지 적어 주세요</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>한 줄 입력(1~120자, 앞뒤 공백 제거) → 「다음」. 비면 버튼이 꺼진다</dd>
+            <dt>저장</dt><dd><code>industryKey="other"</code> + <code>customIndustry</code> (3판 계약 그대로)</dd>
+            <dt>다음</dt><dd>창업 → R1(순위 없음 안내) · 옮기기·바꾸기 → Q3</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q3">
+        <div class="phone" role="img" aria-label="Q3 지금 가게 상권 질문 화면: 검색과 목록">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">상권 찾기 · 카페·디저트</div>
+          <div class="qt">지금 가게는 어느<br>상권에 있나요?</div>
+          <div class="bd">
+            <div class="opt" style="color:var(--grey-500)">🔍 동네 이름으로 찾기</div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>신사동 가로수길</b><em>강남구</em></div><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>압구정 로데오</b><em>강남구</em></div><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>성수동 카페거리</b><em>성동구</em></div><span class="rt">›</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q3</b> · <code>#/home-district</code> · 앞: Q2 (옮기기·바꾸기만)</div>
+          <h3>지금 가게는 어느 상권에 있나요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>검색칸(이름·구 부분 일치) → 목록 행을 누른다 → 바로 다음(옮기기 → R1 · 바꾸기 → R1-p)</dd>
+            <dt>목록</dt><dd><code>GET /commercial-districts</code> 중 <code>vacancy_source == "gold"</code>. 예외 거점 표식(▣·▤·▨)은 이름 뒤에 그대로</dd>
+            <dt>없을 때</dt><dd><q>찾는 상권이 없어요. 지금은 서울 {n}개 상권만 있어요 — 가까운 상권을 골라 주세요.</q></dd>
+            <dt>2차</dt><dd>가게 주소를 받아 가까운 상권 3곳을 추천(토스 송금 은행 추천 — 하나로 단정하지 않고 셋을 보여 오차를 흡수). 주소 검색 API(<code>searchTravelAddresses</code>)는 이미 있다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R1">
+        <div class="phone" role="img" aria-label="R1 상권 순위 결과 화면: 순위 목록 다섯 줄">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">상권 찾기 · 카페·디저트</div>
+          <div class="qt">카페 입지 점수가<br>높은 상권이에요</div>
+          <div class="sub" style="font-size:3.4cqw">비슷한 자리에 카페가 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.</div>
+          <div class="bd" style="gap:0;padding-top:3cqw">
+            <div class="row"><span class="rk">1</span><div><b>안암·고려대</b><em>성북구</em></div><div class="rt"><b>빈 1층 12곳</b><br>1층 평당 19만</div></div>
+            <div class="row"><span class="rk">2</span><div><b>녹두거리</b><em>관악구</em></div><div class="rt"><b>빈 1층 9곳</b><br>1층 평당 22만</div></div>
+            <div class="row"><span class="rk">3</span><div><b>경희대</b><em>동대문구</em></div><div class="rt"><b>빈 1층 7곳</b><br>1층 평당 17만</div></div>
+            <div class="row"><span class="rk">4</span><div><b>서울숲 아틀리에길</b><em>성동구</em></div><div class="rt"><b>빈 1층 6곳</b><br>1층 평당 22만</div></div>
+            <div style="padding-top:3cqw" class="link">왜 이 순서인가요? · 다른 상권 직접 고르기</div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R1</b> · <code>#/districts</code> · 앞: Q2(창업) · Q3(옮기기)</div>
+          <h3>{업종} 입지 점수가 높은 상권이에요</h3>
+          <dl>
+            <dt>보조 한 줄</dt><dd><q>비슷한 자리에 {업종}이 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.</q> — 3판의 FIT_NOTE 를 한 문장으로(늘 보인다)</dd>
+            <dt>목록</dt><dd>상위 5곳 ListRow: 왼쪽 순위 숫자 · 가운데 상권명+구 · 오른쪽 <b>빈 1층 {n}곳</b>(굵게) + <q>1층 평당 월 {r}만원</q>. 행을 누르면 R2. 숫자는 응답에서 센다</dd>
+            <dt>우리만의 값</dt><dd>빈 1층 수 = <code>GET /commercial-districts/{id}/floor-vacancies?limit=1</code> 의 <code>by_floor["1"]</code>(상위 5곳만 요청). 공공 서비스가 같은 순위를 무료로 준다 — 순위 옆에 <b>빈 층</b>이 보여야 이 화면이 다르다(§3-5)</dd>
+            <dt>옮기기</dt><dd>맨 위에 회색 고정 줄 <q>지금 내 상권 · {k}위</q> + 점수 차(<q>지금보다 +{d}점</q>). 지금 상권이 5위 안이면 그 줄에 「지금」 배지</dd>
+            <dt>정밀 값</dt><dd>「왜 이 순서인가요?」 하단 시트: 입지 점수 = GNN 상권 평균(×100, 서울 평균 {y}) · Top-3 근사라 절대값은 낮다 · 순위로만 · 같은 업종 표본 {a}/{b}곳 · 출처(카카오 플레이스 표본 · R-ONE {분기} · 건축물대장) · KPI 판정(거점 사전분포 대비 +{x}%p, 95% 구간 — <code>GET /ai/forecast-skill</code> 아님, 업종 추천 산출물 지표)</dd>
+            <dt>출구</dt><dd>하단 텍스트 버튼 「다른 상권 직접 고르기」 → Q4. 하단 고정 버튼은 두지 않는다(행 자체가 행동)</dd>
+            <dt>모델 밖 업종</dt><dd>같은 주소, 다른 결론: 제목 <q>{업종}은 상권 순위를 아직 못 드려요</q> · 보조 <q>추천 모델이 배운 업종이 아니라서요. 상권을 직접 고르면 빈 자리와 월세는 볼 수 있어요.</q> · 하단 버튼 「상권 직접 고르기」</dd>
+            <dt>상태</dt><dd>로딩 골격 5행 · 실패 결과 화면 · 순위 0곳이면 모델 밖과 같은 안내</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R1-p">
+        <div class="phone" role="img" aria-label="R1-p 업종 순위 결과 화면">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">업종 바꾸기 · 신사동 가로수길</div>
+          <div class="qt">가로수길에서 입지<br>점수가 높은 업종이에요</div>
+          <div class="sub" style="font-size:3.4cqw">지금 업종 음식점은 3위예요.</div>
+          <div class="bd" style="gap:0;padding-top:3cqw">
+            <div class="row"><span class="rk">1</span><div><b>카페·디저트</b><em>같은 업종 23%</em></div><div class="rt">›</div></div>
+            <div class="row"><span class="rk">2</span><div><b>병·의원</b><em>같은 업종 9%</em></div><div class="rt">›</div></div>
+            <div class="row pin"><span class="rk">3</span><div><b>음식점 <span class="bdg p">지금</span></b><em>같은 업종 18%</em></div><div class="rt"></div></div>
+            <div class="row"><span class="rk" style="color:var(--grey-400)">–</span><div><b>술집</b><em>순위 없이 비중만 18%</em></div><div class="rt">›</div></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R1-p</b> · <code>#/industries</code> · 앞: Q3(바꾸기)</div>
+          <h3>{지금 상권}에서 입지 점수가 높은 업종이에요</h3>
+          <dl>
+            <dt>보조</dt><dd><q>지금 업종 {업종}은 {k}위예요.</q> · 모델 밖 업종이면 <q>지금 업종은 순위를 내지 않는 업종이에요.</q></dd>
+            <dt>목록</dt><dd><code>GET /ai/district-industries/{id}</code> rows: 모델 업종은 순위 순, 모델 밖은 아래에 순위 없이 같은 업종 비중만. 지금 업종 행은 회색 고정 + 「지금」 배지(누를 수 없다)</dd>
+            <dt>답하는 법</dt><dd>바꿔 볼 업종 행을 누른다 → 「바꿀 업종」으로 저장(<code>targetIndustryKey</code>) → Q-p</dd>
+            <dt>없을 때</dt><dd>404 → <q>이 상권은 업종 순위가 아직 없어요.</q> + 「업종 직접 고르기」(Q2 를 바꿀 업종 질문으로)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q-p">
+        <div class="phone" role="img" aria-label="Q-p 업종 바꾸기 다음 단계 질문">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">업종 바꾸기 · 카페·디저트로</div>
+          <div class="qt">카페로 바꾼다면,<br>무엇부터 해 볼까요?</div>
+          <div class="bd">
+            <div class="opt on"><b>작게 먼저 팔아 볼게요</b><span>팝업·가오픈·사전 예약으로 통하는지 확인해요</span></div>
+            <div class="opt"><b>이 상권 빈 자리도 볼게요</b><span>옮겨서 하는 경우와 견줘 봐요</span></div>
+          </div>
+          <div class="sub" style="position:absolute;bottom:6cqw;font-size:3.2cqw">지금 가게 자리로 본전을 계산하는 기능은 아직 없어요.</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q-p</b> · <code>#/pivot-next</code> · 앞: R1-p</div>
+          <h3>{업종}(으)로 바꾼다면, 무엇부터 해 볼까요?</h3>
+          <dl>
+            <dt>선택지</dt><dd><ul><li>작게 먼저 팔아 볼게요 → Q10(단계 기본값 = 기창업자)</li><li>이 상권 빈 자리도 볼게요 → Q5(상권 = 지금 상권)</li></ul></dd>
+            <dt>정직한 한계</dt><dd>아래 한 줄 <q>지금 가게 자리로 본전을 계산하는 기능은 아직 없어요.</q> — 「내 자리 입력」은 미해결(§12)</dd>
+            <dt>왜</dt><dd>바꾸기 사업자는 자리가 이미 있다. 이 사람의 다음 불확실성은 「새 아이템이 통하나」라서 검증이 먼저다(4판 Program 대상 정의)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q4">
+        <div class="phone" role="img" aria-label="Q4 상권 직접 고르기">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">상권 찾기 · 술집</div>
+          <div class="qt">어느 상권을 볼까요?</div>
+          <div class="bd">
+            <div class="opt" style="color:var(--grey-500)">🔍 동네 이름으로 찾기</div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>홍대</b><em>마포구 · 빈 층 537곳</em></div><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>연남동</b><em>마포구 · 빈 층 300곳</em></div><span class="rt">›</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><div><b>을지로</b><em>중구 · 빈 층 370곳</em></div><span class="rt">›</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q4</b> · <code>#/district-search</code> · 앞: R1(모델 밖 · 「다른 상권 직접 고르기」)</div>
+          <h3>어느 상권을 볼까요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>Q3 와 같은 검색 목록. 행을 누르면 R2</dd>
+            <dt>행</dt><dd>상권명 · 구 · 대표 공실률(<code>vacancy_rate</code>, 미제공이면 그 문구) — 「빈 층 {n}곳」은 요청 비용 때문에 1차에서는 넣지 않는다(81회 요청). 와이어프레임의 빈 층 수는 2차 안</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R2">
+        <div class="phone" role="img" aria-label="R2 상권 소개: 사실 네 줄과 빈 자리 보기 버튼">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
+          <div class="cap">상권 · 성동구</div>
+          <div class="qt">성수동 카페거리는<br>카페·디저트 중심 상권이에요</div>
+          <div class="bd" style="gap:0">
+            <div class="row" style="grid-template-columns:1fr auto"><em>무엇이 모여 있나요</em><span class="rt"><b>카페·디저트 31%</b></span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><em>언제 붐비나요</em><span class="rt"><b>14~17시</b></span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><em>1층 월세는</em><span class="rt"><b>평당 21.5만원</b> 추정</span></div>
+            <div class="row" style="grid-template-columns:1fr auto"><em>빈 자리는</em><span class="rt"><b>빈 층 280곳</b> · 1층 51</span></div>
+            <div class="note" style="font-size:2.9cqw;margin-top:2cqw">카카오 플레이스 · 서울시 상권분석 · R-ONE 26년 2분기 · 건축물대장</div>
+          </div>
+          <div class="cta">빈 자리 보기</div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R2</b> · <code>#/district/{id}</code> · 앞: R1 · Q4 · (옮기기) · 지도 탐색에서도</div>
+          <h3>{상권명}은 {유형} 상권이에요</h3>
+          <dl>
+            <dt>결론</dt><dd><code>identity.archetype</code>(「…형」을 문장으로). 없으면 제목 <q>{상권명}을 한눈에 볼게요</q> — 유형을 지어내지 않는다</dd>
+            <dt>사실 네 줄</dt><dd><ul>
+              <li>무엇이 모여 있나요 — 업종군 상위 1~2개 비중 (<code>identity.categories.groups</code>)</li>
+              <li>언제 붐비나요 — <code>demand.peak_band</code> 라벨 · 한산한 때 <code>gap_band</code></li>
+              <li>1층 월세는 — <code>GET /heatmap/rent</code> 의 <code>base_rent_per_pyeong</code> + 「추정」 · R-ONE 없으면 <q>이 상권은 임대료 통계가 없어요</q>(이웃 값으로 채우지 않는다)</li>
+              <li>빈 자리는 — <code>floor-vacancies</code> <code>counts_all.units</code> · 1층 <code>by_floor["1"]</code></li></ul></dd>
+            <dt>출처 한 줄</dt><dd>결론 아래 접지 않는 한 줄(C4). 예외 거점이면 caveat 전문을 그 위에</dd>
+            <dt>버튼</dt><dd>하단 「빈 자리 보기」 → Q5 · 텍스트 버튼 「지도에서 자세히」 → X(Platform, 같은 상권)</dd>
+            <dt>미리 받기</dt><dd>진입 시 <code>GET /heatmap/rent?district=</code> 를 받아 Q5 선택지 옆 개수와 R3 에 쓴다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <h3 id="s-stage2">5-2. ② 빈 자리 <span class="tag" style="background:#F6F0FB;color:var(--page)">PAGE</span></h3>
+
+      <article class="screen" id="Q5">
+        <div class="phone" role="img" aria-label="Q5 월세 상한 질문: 선택지 네 개와 각 개수">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">빈 자리 · 성수동 카페거리</div>
+          <div class="qt">월세는 얼마까지<br>생각하세요?</div>
+          <div class="sub">보증금·권리금·관리비는 빼고, 추정 월세로 걸러 드려요.</div>
+          <div class="bd">
+            <div class="opt" style="display:flex;justify-content:space-between"><b>300만원까지</b><span>41곳</span></div>
+            <div class="opt on" style="display:flex;justify-content:space-between"><b>500만원까지</b><span>96곳</span></div>
+            <div class="opt" style="display:flex;justify-content:space-between"><b>1,000만원까지</b><span>187곳</span></div>
+            <div class="opt" style="display:flex;justify-content:space-between"><b>아직 몰라요 · 다 볼게요</b><span>280곳</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q5</b> · <code>#/rent-cap</code> · 앞: R2</div>
+          <h3>월세는 얼마까지 생각하세요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>한 줄을 누른다 → 바로 R3. 각 줄 오른쪽에 <b>그 조건의 빈 자리 수</b>를 보여 준다(누르기 전에 결과를 안다 — Easy to Answer)</dd>
+            <dt>개수</dt><dd>R2 에서 받은 <code>heatmap/rent</code> <code>listings[].monthly_rent</code> 로 센다. 임대료 통계가 없는 상권이면 이 질문을 건너뛰고 R3(월세 없이)</dd>
+            <dt>왜 묻나</dt><dd>창업자가 이미 아는 값(예산)이다. 토스 Easy to Answer: 「고급화/가성비」 같은 3초 안에 못 답하는 질문 대신 아는 사실을 묻는다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R3">
+        <div class="phone" role="img" aria-label="R3 빈 자리 목록: 필터 칩과 2열 카드">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>지도</span></div>
+          <div class="cap">빈 자리 · 성수동 카페거리</div>
+          <div class="qt">월 500만원까지인<br>빈 자리가 96곳 있어요</div>
+          <div class="chips" style="margin-top:3cqw"><span class="chip on">500만원까지 ▾</span><span class="chip">1층</span><span class="chip">확정만</span><span class="chip">본전 계산 가능</span></div>
+          <div class="grid2">
+            <div class="card"><div class="thumb"><span class="ov">1층</span><span class="hr">♡</span><div class="fl"><i></i><i></i><i class="v"></i></div></div><b>성수빌딩</b><span class="pr">월 412만원 추정</span><small>19평 · 직전 카페</small><div><span class="bdg real">확정</span><span class="bdg p">본전 계산</span></div></div>
+            <div class="card"><div class="thumb"><span class="ov">2층</span><span class="hr">♡</span><div class="fl"><i></i><i class="p"></i><i></i></div></div><b>뚝섬로 3길 12</b><span class="pr">월 233만원 추정</span><small>21평 · 직전 미상</small><div><span class="bdg est">추정</span></div></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R3</b> · <code>#/spaces</code> · 앞: Q5</div>
+          <h3>{조건}인 빈 자리가 {n}곳 있어요</h3>
+          <dl>
+            <dt>필터 칩</dt><dd>한 줄 가로 스크롤: 월세 상한(누르면 Q5 와 같은 선택 시트) · 「1층」 · 「확정만」 · 「본전 계산 가능」. 켠 칩은 진한 색. 정렬은 오른쪽 「월세 낮은 순 ▾」(낮은 순 · 넓은 순 · 1층 먼저)</dd>
+            <dt>카드</dt><dd>원티드 Card 해부: 썸네일 4:3 = <b>그 건물의 층 그림</b>(빈 층 빨강 · 추정 빈 층 빗금 · 영업 층 회색, 최대 8층) · 왼쪽 위 오버레이 「{층}」 · 오른쪽 위 ♡ · 제목 건물명(2줄) · 캡션 <b>월 {rent}만원 추정</b>(1줄) · 보조 <q>{area}평 · 직전 {was}</q> · 배지 「확정」/「추정」 + 「본전 계산」</dd>
+            <dt>층 그림이 사진을 대신하는 이유</dt><dd>거리뷰는 정지 이미지가 없다(파노라마는 상세에서). 장식 사진 대신 <b>데이터인 그림</b>을 쓴다 — 「어느 층이 비었나」가 이 제품의 질문이다</dd>
+            <dt>목록</dt><dd><code>GET /heatmap/rent</code> listings(층 자리 = <code>vfu-…</code>) ⨝ <code>floor-vacancies</code> units(같은 id: 직전 업종 · 층 근거 · 관측 업종 분포). 「본전 계산」 = <code>"vu-" + building_id</code> 가 postings 에 있음. 24곳씩 「더 보기」</dd>
+            <dt>숫자</dt><dd>제목의 {n} 은 필터를 적용한 수. 필터를 켜고 끌 때 제목이 따라 바뀐다(<code>aria-live</code>)</dd>
+            <dt>빈 결과</dt><dd><q>조건에 맞는 빈 자리가 없어요</q> + 「월세 조건 풀기」</dd>
+            <dt>아래 한 줄</dt><dd><q>건축물대장·상가정보로 센 빈 층이에요. 실제 매물인지는 현장에서 꼭 확인해요.</q></dd>
+            <dt>지도</dt><dd>상단 바 「지도」 → X(Page · 임대시세 레이어 · 같은 상권). 2차: 데스크톱은 목록 옆에 지도를 같이 둔다(비교·탐색 화면 반례 §3-4)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="R4">
+        <div class="phone" role="img" aria-label="R4 자리 상세: 지도, 핵심 세 칸, 층 그림, 하단 버튼">
+          <div class="bar"><span class="bk">‹</span><span class="sp"></span><span style="font-size:5cqw">♡</span></div>
+          <div class="map"></div>
+          <div class="cap">성수동 카페거리 · 1층 · 19평(62.8㎡)</div>
+          <div class="qt" style="font-size:6cqw">성수빌딩 1층</div>
+          <div class="bd" style="gap:2cqw;padding-top:3cqw">
+            <div class="kv"><span>월세 추정</span><b>412만원</b><span>평당</span><b>21.5만원</b><span>빈 자리</span><b>확정</b></div>
+            <div class="warnline" style="margin:0">호가가 아닌 추정이에요. 보증금·권리금·관리비는 빠져 있어요.</div>
+            <div class="note" style="font-size:3.1cqw;margin:0">이 건물 1층에서 영업 중: 카페 41% · 표본 312곳 (관측이에요)</div>
+          </div>
+          <div class="cta two"><span class="w">저장</span><span>본전 시점 보기</span></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>R4</b> · <code>#/space/{id}</code> · 앞: R3 · 저장한 자리(홈)</div>
+          <h3>{건물명} {층}</h3>
+          <dl>
+            <dt>순서</dt><dd>원티드 상세 순서를 따른다: 사진 자리(작은 지도 · 핀 · 「거리뷰」 버튼) → 메타 한 줄 → 제목 → 핵심 세 칸 → 경고 한 줄 → 이 건물의 층 → 이 자리에서 영업 중인 업종 → 내 업종과 맞나 → 「근거 더 보기」(접힘) → 주소 · 카카오맵 링크</dd>
+            <dt>핵심 세 칸</dt><dd>월세 추정 · 평당 · 확정/추정. 경고 한 줄은 <b>늘 보인다</b>(토스 출금이체 안내 — 오해를 미리 푸는 문구가 문의를 줄였다 §3-2)</dd>
+            <dt>지도</dt><dd>네이버 지도 SDK 를 이 화면에서만 띄운다(높이 180 · 핀 하나 · 드래그 가능). SDK 실패 시 회색 칸 + 「카카오맵에서 보기」(<code>kakaoMapUrl</code>) — 길이 끊기지 않게(decision-lightweight-first §5)</dd>
+            <dt>거리뷰 · 층</dt><dd>「거리뷰 · 층별 보기」 → 3판 모달(BuildingViewer) 그대로: 2D 층 스택 + 촬영일</dd>
+            <dt>업종 두 축</dt><dd>① 관측: <code>fit.top</code> <q>이 건물 {층}에서 영업 중: {업종} {share}% · 표본 {n}곳 (관측이에요)</q> ② 추천: <code>POST /ai/recommend-industry {lat, lon}</code> 에서 내 업종 순위 <q>{업종}은 이 자리 추천 {k}위</q> / <q>3위 밖</q>. 두 축을 한 숫자로 합치지 않는다</dd>
+            <dt>버튼 (계산 가능)</dt><dd>주 「몇 달이면 본전인지 보기」 → Q6 · 보조 「저장」(♡ 와 같다)</dd>
+            <dt>버튼 (계산 불가)</dt><dd>주 「후보로 저장하기」 · 보조 텍스트 버튼 「현장 금액으로 예산 점검」 → Q7. 버튼 위 한 줄 <q>본전 시점은 건물 단위 자리만 계산해요.</q></dd>
+            <dt>저장</dt><dd>♡ = 「후보로 저장」 — 로그인 필요(C5). 서버 <code>POST /auth/results</code> <code>kind:"space"</code>(5판 신설) · 상권당 제한 없음 · 사용자당 30건(종전 결과 저장과 같은 한도)</dd>
+          </dl>
+        </div>
+      </article>
+
+<!-- @@STAGE3@@ -->
+  </main>
+</div>
