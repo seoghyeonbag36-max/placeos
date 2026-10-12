@@ -4,24 +4,24 @@
  *   계산할 수 없는 자리: Q7 쓸 수 있는 돈 → Q8 들은 계약 금액 → Q9 인테리어·설비 → R6 예산 점검
  * 계산 못 하는 자리를 계산하는 척하지 않는다. 예산 점검은 **직접 확인한 금액만** 더한다.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { assessFounderCosts, BASIS_LABEL, simulateRevenue, type SimulateResult, type TierScenario } from "@/lib/api";
 import { useFlow, useResume } from "../context";
 import { useLoad } from "../data";
 import { manwon, manwonToWon, months, monthsClause, parseManwon, showManwon, wonToManwon } from "../format";
 import { go } from "../route";
-import { useSaved } from "../saved";
+import { useSaved } from "../context";
 import type { CostAnswers } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, MoneyField, ResultView, SkeletonRows,
   TextButton, WarnLine,
 } from "../ui";
 import { useDistrictName, useNeed, useWorkIndustry } from "./common";
-import { floorText, useSpaces } from "./Space";
+import { floorText, useSpaces } from "../spaces";
 
 /* ── 세 가지 가격대 — 용어 치환(§4-4): 3-Tier 고급화·가성비·기능중심 ──────── */
 
-export const TIERS: { key: string; name: string; desc: string }[] = [
+const TIERS: { key: string; name: string; desc: string }[] = [
   { key: "premium", name: "비싸게", desc: "손님 한 명에게 더 받고, 회전은 낮게" },
   { key: "value", name: "알뜰하게", desc: "값은 낮추고 손님을 많이" },
   { key: "factory", name: "꼭 필요한 것만", desc: "면적·사람을 최소로" },
@@ -29,7 +29,7 @@ export const TIERS: { key: string; name: string; desc: string }[] = [
 const tierName = (k: string | null | undefined) => TIERS.find((t) => t.key === k)?.name ?? "이 가격대";
 
 /** 처음 드는 돈 — ⚠ invest_mn 은 **백만원** 단위다(invest_mn×100 ÷ month_net = roi_months · 2026-10-13 확인) */
-export const investManwon = (s: TierScenario) => s.invest_mn * 100;
+const investManwon = (s: TierScenario) => s.invest_mn * 100;
 
 /** 고른 자리 — 비용 단계의 앞 답 */
 function useChosenSpace() {
@@ -291,9 +291,12 @@ export function BudgetCheck() {
   const { item } = useChosenSpace();
   const name = useDistrictName(state.districtId);
   const c = state.costs;
-  const w = (v: number | null) => (v == null ? null : manwonToWon(v));
-  const body = { deposit: w(c.deposit), premium: w(c.premium), fitout: w(c.fitout), equipment: w(c.equipment), rent: w(c.rent),
-    maintenance: w(c.maintenance), other_monthly: w(c.otherMonthly), budget: w(c.budget), reserve_months: c.reserveMonths };
+  // 서버 계약은 원 단위 정수다 — 흐름은 만원으로 묻는다
+  const body = useMemo(() => {
+    const w = (v: number | null) => (v == null ? null : manwonToWon(v));
+    return { deposit: w(c.deposit), premium: w(c.premium), fitout: w(c.fitout), equipment: w(c.equipment), rent: w(c.rent),
+      maintenance: w(c.maintenance), other_monthly: w(c.otherMonthly), budget: w(c.budget), reserve_months: c.reserveMonths };
+  }, [c]);
   const res = useLoad(`founder:${JSON.stringify(body)}`, () => assessFounderCosts(body));
   const ready = res.status === "ready";
   const save = useCallback(() => {

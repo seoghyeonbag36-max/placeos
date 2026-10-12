@@ -4,7 +4,7 @@
  *
  * 출처 표기는 설계서 §3-3 에 있다(TDS Top·ListRow·FixedBottomCTA·Toast·BottomSheet·Result · Montage Card·Action area).
  */
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { back, go } from "./route";
 
 /* ── 아이콘 — 장식이다(버튼에 aria-label 이 있다) ─────────────────────────── */
@@ -152,9 +152,11 @@ export function RowList({ label, children }: { label: string; children: ReactNod
   return <ul className="fl-rows" aria-label={label}>{children}</ul>;
 }
 
-export function Row({ rank, title, meta, right, onClick, pinned, current }: {
+export function Row({ rank, title, meta, right, onClick, pinned, current, action }: {
   rank?: ReactNode; title: ReactNode; meta?: ReactNode; right?: ReactNode;
   onClick?: () => void; pinned?: boolean; current?: boolean;
+  /** 행 버튼 **바깥**의 별도 버튼(지우기 등) — 버튼 안에 버튼을 넣지 않는다 */
+  action?: ReactNode;
 }) {
   const inner = <>
     {rank !== undefined && <span className="fl-row-rank" aria-hidden={typeof rank !== "string" && typeof rank !== "number"}>{rank}</span>}
@@ -165,6 +167,7 @@ export function Row({ rank, title, meta, right, onClick, pinned, current }: {
   return (
     <li className={"fl-row" + (pinned ? " is-pinned" : "")} aria-current={current ? "true" : undefined}>
       {onClick ? <button type="button" className="fl-row-btn" onClick={onClick}>{inner}</button> : <div className="fl-row-btn">{inner}</div>}
+      {action && <span className="fl-row-action">{action}</span>}
     </li>
   );
 }
@@ -202,7 +205,7 @@ export function MoneyField({ label, value, onChange, suffix = "만원", autoFocu
   const id = useId();
   return (
     <div className="fl-money">
-      <label htmlFor={id} className="fl-money-label">{label}</label>
+      <label htmlFor={id} className="fl-money-label">{label}<span className="sr-only"> (단위 {suffix})</span></label>
       <div className="fl-money-box">
         <input id={id} inputMode="numeric" autoComplete="off" autoFocus={autoFocus} value={value}
           onChange={(e) => {
@@ -338,9 +341,4 @@ export function Toast({ msg, onDone }: { msg: ToastMsg | null; onDone: () => voi
       )}
     </div>
   );
-}
-
-/** 금액 입력 상태 하나 — 문자열(쉼표 포함) ↔ 숫자 */
-export function useMoney(initial: number | null) {
-  return useState(initial == null ? "" : initial.toLocaleString("ko-KR"));
 }

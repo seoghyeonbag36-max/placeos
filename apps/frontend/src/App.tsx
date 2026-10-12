@@ -18,6 +18,10 @@ import { Button } from "@/design/components/Button";
 import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
 import { businessChipText, customWorkIndustry, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
+import FlowApp from "@/flow/FlowApp";
+import { isFlowHash } from "@/flow/route";
+import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
+import { clearPlan } from "@/flow/plan";
 import "./App.css";
 
 // 네 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
@@ -108,7 +112,15 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
   { key: "program", label: "Program", icon: <IconMegaphone />, track: "program" },
 ];
 
-export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string }) {
+/** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면
+ *  로그인한 사용자는 홈(흐름)으로 간다. */
+export const EXPLORE_HASH = "#/explore";
+
+/**
+ * 지도 탐색 — 3·4판의 지도 + 네 트랙 화면(5판 §10). 5판부터 **로그인 없이도** 연다(token = null).
+ * 로그인 전에는 「내 사업」을 흐름의 답에서 받아 쓰고 서버에 저장하지 않는다.
+ */
+export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string | null }) {
   // 첫 화면은 **Platform** 이다(2026-09-26 — 그전 Page 지도, 2026-09-12). 되돌리려면 이 한 줄만 바꾼다.
   // 「내 사업」 카드는 이 위에 펴진다. 「시작」이 가는 곳도 Platform 이라(startBusiness) 이제
   // 같은 화면이고, 「그냥 둘러보기」는 카드만 걷고 Platform 에 남는다(그전에는 Page 지도).
@@ -173,11 +185,13 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const [saving, setSaving] = useState(false);
   const startBusiness = useCallback(async (next: BusinessProfile) => {
     const state: BusinessState = { status: "set", profile: next };
-    setSaving(true);
-    setSaveError("");
-    try { await saveBusinessWorkspace(token, state); }
-    catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
-    finally { setSaving(false); }
+    if (token) {
+      setSaving(true);
+      setSaveError("");
+      try { await saveBusinessWorkspace(token, state); }
+      catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
+      finally { setSaving(false); }
+    }
     setBusiness(state);
     setBizOpen(false);
     if (next.homeDistrictId) setDistrictId(next.homeDistrictId);
@@ -186,11 +200,13 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   }, [industries, bizDistricts, setDistrictId, token]);
   const browse = useCallback(async () => {
     const state: BusinessState = { status: "browsing" };
-    setSaving(true);
-    setSaveError("");
-    try { await saveBusinessWorkspace(token, state); }
-    catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
-    finally { setSaving(false); }
+    if (token) {
+      setSaving(true);
+      setSaveError("");
+      try { await saveBusinessWorkspace(token, state); }
+      catch { setSaveError("사업 정보를 저장하지 못했습니다. 다시 시도해 주세요."); return; }
+      finally { setSaving(false); }
+    }
     setBusiness(state);
     setBizOpen(false);
   }, [token]);
@@ -213,7 +229,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
         && picked.key !== profile.targetIndustryKey) {
       const next: BusinessState = { status: "set", profile: { ...profile, targetIndustryKey: picked.key, targetIndustryDetailKey: null } };
       setBusiness(next);
-      saveBusinessWorkspace(token, next).catch(() => { /* 위 주석 */ });
+      if (token) saveBusinessWorkspace(token, next).catch(() => { /* 위 주석 */ });
     }
   }, [industryList, profile, token]);
   useEffect(() => {
@@ -243,9 +259,11 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // 레일에서 열 때만 기록을 남긴다(휴대폰 뒤로가기가 창을 닫게). 창 안에서 화면을 옮기거나
   // 닫을 때는 기록을 바꿔치기만 한다 — 가입→로그인→키를 오간 만큼 뒤로가기를 누르게 하지 않는다.
   const openAccount = useCallback(() => {
+    // 로그인 전이면 흐름의 「내 정보」로 — 거기서 로그인한다(종전 계정 창은 로그인 뒤 화면이다)
+    if (!token) { window.location.hash = "#/me"; return; }
     window.location.hash = "#account";
     setHash("#account");
-  }, []);
+  }, [token]);
   const relogin = useCallback(() => {
     setSessionExpired(false);
     window.location.hash = "#login";
@@ -256,8 +274,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     setHash(`#${screen}`);
   }, []);
   const closeAccount = useCallback(() => {
-    window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    setHash("");
+    // 해시를 비우면 로그인한 사용자는 홈(흐름)으로 간다 — 보던 지도로 돌아오게 지도 탐색 해시를 둔다
+    window.history.replaceState(null, "", window.location.pathname + window.location.search + EXPLORE_HASH);
+    setHash(EXPLORE_HASH);
   }, []);
 
   if (isAdmin) return <AdminCoverage />;
@@ -275,6 +294,11 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           <span className="rail-logo-mark" aria-hidden>P</span>
           <span className="rail-logo-word">PlaceOS</span>
         </div>
+        {/* 5판(2026-10-13): 지도 탐색에서 질문 흐름으로 돌아가는 길 — 흐름이 이 앱의 첫 화면이다 */}
+        <a className="rail-btn rail-home" href="#/home">
+          <IconHome />
+          <span>홈</span>
+        </a>
         {NAV.map((n) => (
           <button
             key={n.key}
@@ -357,6 +381,17 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
 }
 
 /* 레일 아이콘은 components/TrackIcons.tsx 로 옮겼다(2026-10-08 — 랜딩이 같은 그림을 쓴다). */
+const IconHome = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+  </svg>
+);
+
+/** 로그인 전 지도 탐색의 「내 사업」 — 흐름의 답. 아직 없으면 「둘러보기」(3판 카드를 다시 펴지 않는다 — 흐름이 그 질문을 한다) */
+function anonymousBusiness(): BusinessState {
+  const fromFlow = flowToBusiness(loadFlow());
+  return fromFlow.status === "set" ? fromFlow : { status: "browsing" };
+}
 
 /** 로그아웃 상태에서 가입·로그인 화면(Home)을 내는 해시. 이 밖의 해시(없음 · #how 같은 랜딩 앵커)는 랜딩이다.
  *  #account · #feedback 도 포함하는 이유: 로그아웃·세션 만료 직후 해시가 그대로 남아 있어, 랜딩으로 보내면
@@ -382,12 +417,26 @@ function AppContent() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
   useEffect(() => {
-    const changed = () => { setSocialCallback(false); setWorkspace(null); setError(""); setToken(loadToken()); };
+    const changed = () => {
+      setSocialCallback(false); setWorkspace(null); setError("");
+      const next = loadToken();
+      setToken((prev) => {
+        // 계정이 바뀌거나 로그아웃하면 이 브라우저의 흐름 답을 지운다 — 공용 PC 에서 다음 사람이 앞사람의 금액·아이템을
+        // 보지 않게. 로그인 전 → 로그인은 지우지 않는다(그때까지 고른 것을 계정으로 옮긴다 · 5판 C5)
+        if (prev && prev !== next) { clearFlow(); clearPlan(); }
+        return next;
+      });
+    };
     window.addEventListener(SESSION_CHANGED_EVENT, changed);
     return () => window.removeEventListener(SESSION_CHANGED_EVENT, changed);
   }, []);
+  // 5판(2026-10-13): 「#/」 로 시작하는 해시는 질문 흐름(FlowApp)이다 — 로그인 없이 끝까지 간다. 지도 탐색(#/explore)만 종전 화면이다.
+  // 로그인한 사용자가 해시 없이 오면 홈(흐름)이 첫 화면이다. 그 밖의 해시(#admin · #board · 계정 창)는 종전대로 지도 위에서 연다.
+  const explore = hash === EXPLORE_HASH;
+  const flowView = !socialCallback && ((isFlowHash(hash) && !explore) || (!!token && (hash === "" || hash === "#")));
+  const needWorkspace = !!token && !flowView;
   useEffect(() => {
-    if (!token) return;
+    if (!token || !needWorkspace) return;
     let alive = true;
     getBusinessWorkspace(token).then((data) => { if (alive) setWorkspace(data); }, (err: unknown) => {
       if (!alive) return;
@@ -395,16 +444,20 @@ function AppContent() {
       else setError("내 사업 정보를 불러오지 못했습니다.");
     });
     return () => { alive = false; };
-  }, [token, retry]);
+  }, [token, retry, needWorkspace]);
   if (socialCallback) return <SocialCallback />;
+  if (flowView) return <FlowApp token={token} />;
   if (!token) {
+    if (explore) return <WorkspaceApp key="anonymous" token={null} initialBusiness={anonymousBusiness()} />;
     if (adminHash) return <AdminCoverage />;
     return AUTH_HASHES.has(hash) ? <Home /> : <Landing />;
   }
   if (!workspace) return <main className="acct"><h1>PlaceOS</h1><p role="status">{error || "내 사업 정보 불러오는 중…"}</p>
     {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>다시 시도</Button>}
     <Button variant="ghost" onClick={clearToken}>로그인 화면으로</Button></main>;
-  return <WorkspaceApp key={token} token={token} initialBusiness={workspace} />;
+  // 흐름에서 고른 목적·업종이 있으면 그것이 최신이다(흐름은 로그인하는 순간 계정에도 쓴다)
+  const fromFlow = flowToBusiness(loadFlow());
+  return <WorkspaceApp key={token} token={token} initialBusiness={fromFlow.status === "set" ? fromFlow : workspace} />;
 }
 
 export default function App() {

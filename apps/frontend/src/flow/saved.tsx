@@ -5,31 +5,11 @@
  * 입구이고, 로그인하면 누르려던 저장을 이어서 한다. 정본은 백엔드 `/auth/results`(사용자당 30건 · 64KB)다.
  * 자리 저장은 5판에서 `kind: "space"` 로 새로 생겼다.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { deleteSavedResult, listSavedResults, saveResult, type SavedResult, type SavedResultKind } from "@/lib/api";
-import { useFlow, type ResumeKind } from "./context";
+import { SavedContext, useFlow, type ResumeKind } from "./context";
 import { go } from "./route";
-import type { SpaceItem } from "./screens/Space";
-
-export interface SavedCtx {
-  /** 저장한 자리 id(vfu-…) */
-  savedSpaces: Set<string>;
-  /** want: true 저장 · false 지우기 · null 뒤집기 */
-  toggleSaveSpace: (item: SpaceItem, want: boolean | null, resume?: ResumeKind | null) => void;
-  /** 결과 저장(본전·예산·계획) */
-  saveOutcome: (kind: Exclude<SavedResultKind, "space">, title: string, payload: Record<string, unknown>, resume: ResumeKind) => void;
-  /** 홈·내 정보의 목록 — 로그인 전이면 null */
-  results: SavedResult[] | null;
-  removeResult: (id: string) => void;
-}
-
-const SavedContext = createContext<SavedCtx | null>(null);
-
-export function useSaved(): SavedCtx {
-  const ctx = useContext(SavedContext);
-  if (!ctx) throw new Error("SavedProvider 밖에서 useSaved 를 불렀다");
-  return ctx;
-}
+import type { SpaceItem } from "./spaces";
 
 const SAVE_FAILED = "저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.";
 

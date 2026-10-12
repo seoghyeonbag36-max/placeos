@@ -56,6 +56,8 @@ export interface FlowState {
   rentCapAnswered: boolean;
   /** 고른 빈 자리(층) — `vfu-…` */
   spaceId: string | null;
+  /** 홈에 보일 그 자리 이름(「성수빌딩 1층」) */
+  spaceLabel: string | null;
   premium: PremiumAnswer | null;
   /** R5 에서 고른 가격대(premium/value/factory) */
   tier: string | null;
@@ -77,7 +79,7 @@ export const emptyCosts = (): CostAnswers => ({
 
 export const emptyFlow = (): FlowState => ({
   v: 1, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
-  districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, premium: null, tier: null,
+  districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, premium: null, tier: null,
   costs: emptyCosts(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
 });
 
@@ -89,7 +91,7 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
 
 /** 저장된 값을 읽는다. 모양이 깨진 칸은 버리고 나머지는 살린다 — 한 칸 때문에 전부 잃지 않게. */
 export function loadFlow(): FlowState {
-  let raw: string | null = null;
+  let raw: string | null;
   try { raw = window.localStorage.getItem(FLOW_KEY); } catch { return memory ?? emptyFlow(); }
   if (!raw) return memory ?? emptyFlow();
   try {
@@ -108,6 +110,7 @@ export function loadFlow(): FlowState {
       rentCap: num(v?.rentCap),
       rentCapAnswered: v?.rentCapAnswered === true,
       spaceId: str(v?.spaceId),
+      spaceLabel: str(v?.spaceLabel),
       premium: premium?.kind === "none" || premium?.kind === "unknown" ? { kind: premium.kind }
         : premium?.kind === "amount" && num(premium.manwon) != null ? { kind: "amount", manwon: premium.manwon } : null,
       tier: str(v?.tier),
@@ -140,7 +143,7 @@ export function clearFlow(): void {
 /* ── 답 바꾸기 — 그 뒤만 비운다(§2-3) ─────────────────────────────────────── */
 
 const clearSpaceOn = (s: FlowState): FlowState => ({
-  ...s, spaceId: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
+  ...s, spaceId: null, spaceLabel: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
 });
 const clearDistrictOn = (s: FlowState): FlowState => ({ ...clearSpaceOn(s), districtId: null, rentCap: null, rentCapAnswered: false });
 const clearValidateOn = (s: FlowState): FlowState => ({ ...s, mode: null, item: null, runDays: null, testBudget: null });
@@ -168,9 +171,9 @@ export function setDistrict(s: FlowState, id: string): FlowState {
   return { ...clearDistrictOn(s), districtId: id };
 }
 
-export function setSpace(s: FlowState, spaceId: string): FlowState {
-  if (s.spaceId === spaceId) return s;
-  return { ...clearSpaceOn(s), spaceId };
+export function setSpace(s: FlowState, spaceId: string, label: string | null = null): FlowState {
+  if (s.spaceId === spaceId) return label && s.spaceLabel !== label ? { ...s, spaceLabel: label } : s;
+  return { ...clearSpaceOn(s), spaceId, spaceLabel: label };
 }
 
 /** 검증 계획이 쓸 업종 — 바꾸기는 바꿀 업종, 그 밖은 할 업종(lib/businessProfile.workIndustryKey 와 같은 규칙) */

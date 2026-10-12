@@ -40,6 +40,7 @@
   color: var(--text-tertiary);
 }
 .appshell .rail-btn svg { width: 21px; height: 21px; }
+.appshell a.rail-btn { text-decoration: none; }  /* 5판 「홈」은 링크다(#/home) — 버튼과 같은 모양 */
 .appshell .rail-btn:hover { background: var(--bg); color: var(--text-secondary); }
 .appshell .rail-btn.active { background: var(--rail-accent, var(--ui-navy)); color: var(--surface); }
 
