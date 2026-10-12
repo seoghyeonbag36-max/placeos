@@ -1327,7 +1327,7 @@ export const logoutSession = (token: string) => authRequest<{ ok: boolean }>("PO
  * Posting 계산·Program 생성 결과를 사용자가 「결과 저장」으로 남긴다. 정본은 백엔드
  * app/api/v1/auth.py(/auth/results) · app/schemas/auth.py(SavedResultIn/Out). 서버는 payload 를 해석하지
  * 않는다 — 화면이 다시 그릴 입력·결과를 그대로 보관만 한다(사용자당 최대 30건 · 한 건 64KB). */
-export type SavedResultKind = "posting" | "program";
+export type SavedResultKind = "posting" | "program" | "space";
 export interface SavedResultInput {
   kind: SavedResultKind;
   title: string;

@@ -1,0 +1,82 @@
+/**
+ * 흐름 화면들이 함께 쓰는 것 — 답(FlowState) · 로그인 토큰 · 로그인 요구 · 토스트.
+ *
+ * 로그인은 **저장·AI 생성에서만** 묻는다(화면설계서 5판 C5). 화면은 `requireLogin(이유, 할 일)` 을
+ * 부르고, 로그인돼 있으면 바로 할 일을 하고, 아니면 로그인 시트를 띄운 뒤 로그인하는 순간 이어서 한다.
+ * 네이버·카카오는 페이지를 떠났다 돌아오므로 할 일의 이름을 탭 저장소에 남겨 두고(`rememberResume`),
+ * 돌아온 화면이 `useResume` 로 이어받는다.
+ */
+import { createContext, useContext, useEffect, useRef } from "react";
+import type { FlowState } from "./state";
+
+/** 로그인 시트 문구를 가르는 이유 */
+export type LoginReason = "save" | "plan" | "login";
+
+/** 페이지를 떠났다 돌아와도 이어서 할 일 */
+export type ResumeKind = "save-space" | "save-payback" | "save-budget" | "save-plan" | "make-plan";
+
+export interface FlowCtx {
+  state: FlowState;
+  update: (fn: (s: FlowState) => FlowState) => void;
+  token: string | null;
+  /** 로그인돼 있으면 바로 `run(token)`, 아니면 시트를 띄우고 로그인하면 `run` */
+  requireLogin: (reason: LoginReason, kind: ResumeKind | null, run: (token: string) => void) => void;
+  toast: (text: string, action?: { label: string; onClick: () => void }) => void;
+  /** 종전 계정 창(이메일 로그인 · API 키 · 의견) */
+  openAccount: (screen: "login" | "signup" | "account" | "feedback") => void;
+  /** 로그인 시트를 그냥 연다(홈·내 정보의 로그인 버튼) */
+  openLogin: () => void;
+}
+
+export const FlowContext = createContext<FlowCtx | null>(null);
+
+export function useFlow(): FlowCtx {
+  const ctx = useContext(FlowContext);
+  if (!ctx) throw new Error("FlowContext 밖에서 useFlow 를 불렀다");
+  return ctx;
+}
+
+/* ── 페이지를 떠났다 돌아오는 로그인(네이버·카카오) ───────────────────────── */
+
+const RESUME_KEY = "placeos.flow.resume.v1";
+/** 이보다 오래된 할 일은 버린다 — 어제 누른 저장이 오늘 저절로 실행되면 안 된다 */
+const RESUME_TTL_MS = 15 * 60 * 1000;
+
+export function rememberResume(kind: ResumeKind | null): void {
+  try {
+    window.sessionStorage.setItem(RESUME_KEY, JSON.stringify({ kind, hash: window.location.hash, at: Date.now() }));
+  } catch { /* 탭 저장소가 막혀 있으면 돌아와서 한 번 더 누르면 된다 */ }
+}
+
+export function forgetResume(): void {
+  try { window.sessionStorage.removeItem(RESUME_KEY); } catch { /* 지울 것이 없다 */ }
+}
+
+function readResume(): { kind: ResumeKind | null; hash: string; at: number } | null {
+  try {
+    const raw = window.sessionStorage.getItem(RESUME_KEY);
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v.hash !== "string" || typeof v.at !== "number" || Date.now() - v.at > RESUME_TTL_MS) return null;
+    return v;
+  } catch { return null; }
+}
+
+/** 소셜 로그인에서 돌아왔을 때 돌아갈 흐름 주소(SocialCallback 이 읽는다). 없으면 null */
+export function resumeHash(): string | null {
+  const v = readResume();
+  return v && v.hash.startsWith("#/") ? v.hash : null;
+}
+
+/** 이 화면이 그 할 일의 주인이면 한 번 실행한다 — 로그인돼 있고, 같은 주소에서, 같은 할 일을 남겼을 때만 */
+export function useResume(kind: ResumeKind, ready: boolean, run: (token: string) => void): void {
+  const { token } = useFlow();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current || !token || !ready) return;
+    const v = readResume();
+    if (!v || v.kind !== kind || v.hash !== window.location.hash) return;
+    done.current = true;
+    forgetResume();
+    run(token);
+  }, [token, ready, kind, run]);
+}
