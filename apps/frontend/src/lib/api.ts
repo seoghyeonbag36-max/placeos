@@ -41,28 +41,44 @@ export async function getBenchmarkPlaces(district: string, industry: string): Pr
 }
 
 export interface TravelPoint { lat: number; lng: number }
-export interface TravelResult {
-  mode: "driving" | "transit";
-  provider: "kakao_mobility" | "odsay";
-  source: "provider_estimate";
-  time_basis: "current_departure" | "standard_route";
-  status: "ok" | "not_configured" | "no_route" | "unsupported_route" | "upstream_error" | "quota_exceeded";
+/** 한 장소에서 공실까지의 TMAP 보행 경로 값. `ok` 가 아니면 수치는 null 이다. */
+export interface WalkTime {
+  status: "ok" | "not_configured" | "no_route" | "upstream_error" | "quota_exceeded";
+  source: "tmap_pedestrian";
   duration_seconds: number | null;
   distance_meters: number | null;
-  fare_won: number | null;
-  transfers: number | null;
-  walk_seconds: number | null;
 }
-export interface TravelTimes {
-  origin: TravelPoint; destination: TravelPoint; queried_at: string; results: TravelResult[];
+export interface AccessPlace {
+  kind: "subway" | "bus_stop" | "parking";
+  name: string;
+  detail: string | null;
+  point: TravelPoint;
+  /** 공실과의 직선거리(m) — 좌표에서 계산한 값이며 걷는 거리가 아니다. */
+  straight_meters: number;
+  walk: WalkTime | null;
+  /** 버스만: 정류소 일평균 승차+하차(교통카드 · 지나는 모든 노선 합) */
+  daily_riders: number | null;
+  route_count: number | null;
+  source: "kakao_local" | "seoul_open_data";
+  place_url: string | null;
+}
+export interface AccessGroup {
+  status: "ok" | "no_results" | "not_configured" | "upstream_error" | "quota_exceeded" | "unavailable";
+  radius_meters: number;
+  items: AccessPlace[];
+}
+export interface TransitAccess {
+  destination: TravelPoint; queried_at: string;
+  subway: AccessGroup; bus_stops: AccessGroup; parking: AccessGroup;
+  bus_window: { start: string; end: string; days: number } | null;
 }
 
-export async function getTravelTimes(origin: TravelPoint, destination: TravelPoint, signal?: AbortSignal): Promise<TravelTimes> {
-  const res = await analysisFetch("/travel/times", {
+export async function getTransitAccess(destination: TravelPoint, signal?: AbortSignal): Promise<TransitAccess> {
+  const res = await analysisFetch("/travel/access", {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ origin, destination }), signal,
+    body: JSON.stringify({ destination }), signal,
   });
-  if (!res.ok) throw new Error(`교통 조회 실패: ${res.status}`);
+  if (!res.ok) throw new Error(`교통 접근성 조회 실패: ${res.status}`);
   return res.json();
 }
 
@@ -1344,20 +1360,6 @@ export const saveResult = (token: string, body: SavedResultInput) =>
 export const deleteSavedResult = (token: string, id: string) =>
   authRequest<{ ok: boolean }>("DELETE", `/results/${encodeURIComponent(id)}`, { token });
 
-
-export interface AddressCandidate { address: string; point: TravelPoint; source: "kakao_local" }
-export interface AddressSearchResponse {
-  status: "ok" | "no_results" | "not_configured" | "upstream_error" | "quota_exceeded";
-  candidates: AddressCandidate[];
-}
-export async function searchTravelAddresses(query: string, signal?: AbortSignal): Promise<AddressSearchResponse> {
-  const res = await analysisFetch("/travel/addresses", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }), signal,
-  });
-  if (!res.ok) throw new Error("주소 검색 실패");
-  return res.json();
-}
 
 /** 방문자 직접 제출 의견. 익명 접수이며 파일럿 NPS와 별도다. */
 export interface VisitorFeedbackInput { category: "review" | "bug" | "suggestion"; message: string; page: string; contact?: string }

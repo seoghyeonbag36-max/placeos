@@ -15,7 +15,7 @@
 //   이 컴포넌트의 루트는 이제 MapHost 안을 채우는 절대배치 레이어다(MapShell.css 참조).
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import CandidateCompare from "@/components/CandidateCompare";
-import TravelTimePanel from "@/components/TravelTimePanel";
+import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import { useMapHost, DEFAULT_ZOOM } from "@/components/MapHost";
@@ -842,7 +842,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <div className="row"><span>상태</span><span>{STATUS[selected.status].label}</span></div>
             <div className="row"><span>상가 수용 / 영업</span><span>{selected.capacity}호 / {selected.active}호</span></div>
             <div className="row"><span>대표 업종</span><span>{selected.industry || "미상"}</span></div>
-            {src === "api" && <TravelTimePanel key={`${districtId}:${selected.id}:${selected.center.lat}:${selected.center.lng}`}
+            {src === "api" && <TransitAccessPanel key={`${districtId}:${selected.id}:${selected.center.lat}:${selected.center.lng}`}
               destination={selected.center} destinationName={selected.name} />}
 
             {/* 이 건물의 빈 층이 **각각 월 얼마인가** — 임대시세 레이어의 답이 건물 단위로 내려온 자리.

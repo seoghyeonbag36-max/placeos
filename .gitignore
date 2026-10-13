@@ -91,6 +91,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # **영영 6구간으로만** 뜨는데, 응답이 `time_source:"trdar_band"` 로 정상 폴백을
 # 밝히기 때문에 고장으로 안 보인다 — 로컬에서만 24시간이 되는 상태가 된다.
 !data/gold/page_footfall_hourly.json
+# 예외: Page 버스정류소 일평균 승하차(~0.8MB, 서울 1.07만 정류소) — services/bus_stops 가
+# 정적 서빙한다. 원천는 서울열린데이터 API 라 배포에 없다. 빠지면 「많이 이용하는 버스정류장」
+# 칸이 "정보 없음(unavailable)"으로 빠진다 — 상태가 밝혀지므로 조용하지는 않지만 로컬에서만 보인다.
+!data/gold/page_bus_stops.json
 
 # 유닛 단위 foot (집계구 생활인구 × SGIS 2016 4Q 경계 PIP) — **서빙이 읽는다**
 # (posting_inputs._unit_jipgyegu_flpop). 빠지면 새 클론에서 조용히 상권 폴백으로

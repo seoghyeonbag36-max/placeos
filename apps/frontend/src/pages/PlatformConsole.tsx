@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import DistrictPicker, { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import PlatformComparison from "@/components/PlatformComparison";
-import TravelTimePanel from "@/components/TravelTimePanel";
+import TransitAccessPanel from "@/components/TransitAccessPanel";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import {
   getPlatformProfile, getSentiment, getVacancyHeatmap, listDistricts, predictVacancy, recommendIndustry,
@@ -232,7 +232,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         )}
       </div>
 
-      {hub && <TravelTimePanel key={`${districtId}:${hub.center.join(":")}`}
+      {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
       <BenchmarkExplorer key={`${districtId}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
         districtId={districtId}
