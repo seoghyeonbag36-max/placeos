@@ -21,13 +21,16 @@ beforeEach(() => {
   vi.mocked(listDistricts).mockResolvedValue([]);
 });
 
-it("해시 없는 소셜 callback도 랜딩 대신 로그인 교환을 처리하고 내 사업 화면을 연다", async () => {
+// 5판(2026-10-13): 로그인한 사용자의 첫 화면은 흐름의 홈이다. 계정에 「내 사업」이 없으면 홈이 첫 질문을 묻는다.
+const FLOW_FIRST_QUESTION = { level: 1, name: "어떤 준비를 하고 계세요?" } as const;
+
+it("해시 없는 소셜 callback도 랜딩 대신 로그인 교환을 처리하고 홈(흐름)을 연다", async () => {
   vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
   sessionStorage.setItem("placeos.social-login.v1", JSON.stringify({ provider: "naver", state: "mock-state", verifier: "v".repeat(43) }));
   window.history.replaceState(null, "", "/?social=naver&code=mock-code&state=mock-state");
   const api = installFetchStub([{ match: /\/social\/naver\/callback$/, body: { access_token: "social-user", token_type: "bearer" } }]);
   render(<App />);
-  expect(await screen.findByLabelText("사업 이름 (선택)")).toBeTruthy();
+  expect(await screen.findByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
   expect(loadToken()).toBe("social-user");
   expect(getBusinessWorkspace).toHaveBeenCalledWith("social-user");
   expect(api.count(/\/social\/naver\/callback$/)).toBe(1);
@@ -43,7 +46,8 @@ it("기존 세션의 사업 정보가 도착해도 소셜 callback을 중단하�
   render(<App />);
   await waitFor(() => expect(loadToken()).toBe("next-user"));
   expect(getBusinessWorkspace).toHaveBeenCalledWith("previous-user");
-  expect(getBusinessWorkspace).toHaveBeenCalledWith("next-user");
+  // 5판: 새 계정의 「내 사업」은 흐름(FlowApp)이 마운트된 뒤 이펙트에서 받는다 — 비동기라 기다린다(CI 에서 순서가 갈렸다)
+  await waitFor(() => expect(getBusinessWorkspace).toHaveBeenCalledWith("next-user"));
 });
 afterEach(() => { clearToken(); window.location.hash = ""; });
 
@@ -68,16 +72,33 @@ it("계정 전환 후 도착한 이전 계정의 응답은 화면에 남지 않�
   let resolveA!: (state: BusinessState) => void;
   vi.mocked(getBusinessWorkspace).mockImplementation((token) => token === "user-a"
     ? new Promise((resolve) => { resolveA = resolve; }) : Promise.resolve({ status: "unset" }));
+  installFetchStub([]);
   saveToken("user-a");
   render(<App />);
   await waitFor(() => expect(getBusinessWorkspace).toHaveBeenCalledWith("user-a"));
   act(() => saveToken("user-b"));
-  await screen.findByLabelText("사업 이름 (선택)");
-  await act(async () => resolveA({ status: "set", profile: { goal: "start", industryKey: "coffee", homeDistrictId: null, businessName: "이전 사용자 사업" } }));
-  expect((screen.getByLabelText("사업 이름 (선택)") as HTMLInputElement).value).toBe("");
+  await screen.findByRole("heading", FLOW_FIRST_QUESTION);
+  await act(async () => resolveA({ status: "set", profile: { goal: "start", industryKey: "cafe", homeDistrictId: null, businessName: "이전 사용자 사업" } }));
+  // 늦게 온 이전 계정의 「내 사업」이 홈을 채우지 않는다 — 여전히 첫 질문이다
+  expect(screen.getByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
+  expect(window.localStorage.getItem("placeos.flow.v1") ?? "").not.toContain("cafe");
   act(clearToken);
-  expect(screen.getByRole("heading", LANDING)).toBeTruthy();       // 로그아웃하면 랜딩으로 돌아온다
-  expect(screen.queryByLabelText("사업 이름 (선택)")).toBeNull();
+  // 5판: 흐름은 로그인 없이 도는 본 화면이다 — 로그아웃하면 (비워진) 홈의 첫 질문으로 돌아온다
+  expect(screen.getByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
+  expect(window.localStorage.getItem("placeos.flow.v1")).toBeNull();
+});
+
+it("계정이 바뀌면 앞사람이 흐름에 남긴 답(금액·아이템)을 지운다 — 공용 PC", async () => {
+  vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
+  installFetchStub([]);
+  window.localStorage.setItem("placeos.flow.v1", JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", item: "앞사람 아이템",
+    costs: { budget: 8000 } }));
+  saveToken("user-a");
+  render(<App />);
+  await waitFor(() => expect(window.location.hash).toBe("#/home"));
+  act(() => saveToken("user-b"));
+  expect(window.localStorage.getItem("placeos.flow.v1") ?? "").not.toContain("앞사람 아이템");
+  expect(await screen.findByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
 });
 
 it("#admin 은 로그인 전에도 관리자 화면을 연다 — 관리자 API 는 계정이 아니라 X-Admin-Token 만 본다", async () => {
@@ -104,12 +125,17 @@ it("#admin 이 아니고 해시도 없으면 로그인 전 첫 화면은 랜딩�
   expect(screen.queryByRole("heading", { name: "PlaceOS 관리자" })).toBeNull();
 });
 
-it("랜딩의 「시작하기」 · 「로그인」 은 해시로 가입·로그인 화면을 열고, 소개로 돌아올 수 있다", async () => {
+it("랜딩의 「시작하기」는 가입 없이 첫 질문을, 「로그인」은 로그인 화면을 열고, 소개로 돌아올 수 있다", async () => {
   window.location.hash = "";
+  installFetchStub([]);
   render(<App />);
   const start = screen.getAllByRole("link", { name: "시작하기" })[0];
-  expect(start.getAttribute("href")).toBe("#signup");
+  // 5판(2026-10-13): 결과까지 가입 0번 — 「시작하기」는 질문 흐름의 첫 질문이다
+  expect(start.getAttribute("href")).toBe("#/start");
   // 브라우저가 하는 일: 해시를 바꾸고 hashchange 를 낸다
+  act(() => { window.location.hash = "#/start"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
+  expect(await screen.findByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
+  expect(screen.queryByRole("heading", LANDING)).toBeNull();
   act(() => { window.location.hash = "#signup"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
   expect(await screen.findByRole("heading", HOME)).toBeTruthy();
   expect(screen.getByRole("heading", { name: "회원가입" })).toBeTruthy();
@@ -135,9 +161,11 @@ it("랜딩의 같은 쪽 앵커(#how)는 랜딩에 머문다", () => {
   expect(screen.getByRole("heading", LANDING)).toBeTruthy();
 });
 
-it("개인 정보 로드가 실패하면 빈 작업 공간으로 진행하지 않는다", async () => {
+it("지도 탐색에서 개인 정보 로드가 실패하면 빈 작업 공간으로 진행하지 않는다", async () => {
+  // 5판: 흐름(홈)은 계정 값 없이도 선다 — 「내 사업」을 서버에서 받아야 서는 것은 지도 탐색(#/explore)이다
   vi.mocked(getBusinessWorkspace).mockRejectedValue(new Error("offline"));
   saveToken("user-a");
+  window.location.hash = "#/explore";
   render(<App />);
   expect(await screen.findByText("내 사업 정보를 불러오지 못했습니다.")).toBeTruthy();
   expect(screen.queryByRole("navigation", { name: "주요 화면" })).toBeNull();

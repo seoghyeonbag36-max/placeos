@@ -13,7 +13,8 @@ function response(input: Input): SimulateResult {
   const result = simulateResult(input.district_id, input.unit_id);
   if (input.prem !== undefined) {
     result.inputs_source!.prem = "contract";
-    for (const tier of Object.values(result.scenarios)) { tier.invest_mn = 8200; tier.roi_months = 16; }
+    // 권리금 200만원 = 2백만원 — invest_mn 은 백만원 단위다(백엔드 inv = prem/100 + …)
+    for (const tier of Object.values(result.scenarios)) { tier.invest_mn = 82; tier.roi_months = 16; }
   }
   return result;
 }
@@ -28,6 +29,15 @@ async function mount(simulate: (input: Input) => SimulateResult | Promise<Simula
   await act(async () => { view = render(<PostingConsole />); });
   return { api, view };
 }
+
+describe("Posting — 초기 투자 단위(2026-10-13 · 화면설계서 5판 §12 U8)", () => {
+  it("invest_mn 은 백만원이다 — 80 이면 「8,000만원」으로 찍는다(종전에는 「80만원」으로 100배 작게 보였다)", async () => {
+    await mount();
+    await screen.findByText("전제(0)");
+    expect(screen.getAllByText("8,000만원")).toHaveLength(3);
+    expect(screen.queryByText("80만원")).toBeNull();
+  });
+});
 
 describe("Posting — 입력과 결과의 대응", () => {
   it("동일 자리의 권리금 수정 전후 서버 결과만 비교한다", async () => {

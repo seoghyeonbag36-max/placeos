@@ -23,7 +23,8 @@ describe("랜딩 — 말하는 것", () => {
   it("첫 화면에서 무엇을 하는 서비스인지와 시작하는 길을 말한다", () => {
     render(<Landing />);
     expect(screen.getByRole("heading", { level: 1, name: /어느 건물 몇 층이 비었는지/ })).toBeTruthy();
-    for (const a of screen.getAllByRole("link", { name: "시작하기" })) expect(a.getAttribute("href")).toBe("#signup");
+    // 5판(2026-10-13): 「시작하기」는 가입이 아니라 질문 흐름의 첫 질문이다 — 결과까지 가입 0번(화면설계서 5판 C5)
+    for (const a of screen.getAllByRole("link", { name: "시작하기" })) expect(a.getAttribute("href")).toBe("#/start");
     expect(screen.getByRole("link", { name: "로그인" }).getAttribute("href")).toBe("#login");
     expect(screen.getByRole("link", { name: "이미 계정이 있어요" }).getAttribute("href")).toBe("#login");
   });

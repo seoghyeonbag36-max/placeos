@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/design/components/Button";
 import { finishSocialLogin, socialLoginError } from "@/lib/socialLogin";
 import { saveToken } from "@/lib/session";
+import { resumeHash } from "@/flow/context";
 import "./Account.css";
 
 export default function SocialCallback() {
@@ -14,7 +15,8 @@ export default function SocialCallback() {
     window.history.replaceState(null, "", window.location.pathname + "#login");
     request.current ??= finishSocialLogin(query);
     request.current.then((token) => { if (alive) {
-      window.history.replaceState(null, "", window.location.pathname);
+      // 흐름(5판)에서 저장·계획 만들기를 누르고 떠났으면 그 화면으로 돌아간다 — 할 일은 그 화면이 잇는다
+      window.history.replaceState(null, "", window.location.pathname + (resumeHash() ?? ""));
       saveToken(token);
     } },
       (err: unknown) => { if (alive) setError(socialLoginError(err)); });

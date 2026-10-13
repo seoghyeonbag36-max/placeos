@@ -81,6 +81,18 @@ def test_save_list_delete_round_trip():
     assert client.delete(f"{V1}/auth/results/{first.json()['id']}", headers=h).status_code == 404
 
 
+def test_space_kind_saves_a_candidate_seat():
+    """화면설계서 5판(2026-10-13) — 빈 자리 ♡ 는 `kind: "space"` 로 남는다. 모르는 종류는 여전히 422."""
+    h = _auth("space@example.com")
+    seat = {"kind": "space", "title": "성수빌딩 1층", "districtId": "seongsu",
+            "payload": {"spaceId": "vfu-1-1", "floor": 1, "monthlyRent": 412}}
+    saved = client.post(f"{V1}/auth/results", json=seat, headers=h)
+    assert saved.status_code == 201, saved.text
+    assert saved.json()["kind"] == "space" and saved.json()["payload"]["spaceId"] == "vfu-1-1"
+    bad = client.post(f"{V1}/auth/results", json={**seat, "kind": "seat"}, headers=h)
+    assert bad.status_code == 422
+
+
 def test_results_are_private_per_user():
     a, b = _auth("a@example.com"), _auth("b@example.com")
     saved = client.post(f"{V1}/auth/results", json=POSTING, headers=a).json()

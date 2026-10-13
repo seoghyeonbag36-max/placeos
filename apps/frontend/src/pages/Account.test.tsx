@@ -279,7 +279,7 @@ describe("App — 레일 「계정」과 #account", { timeout: 60000 }, () => {
     { match: /commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
   ];
 
-  it("레일의 「계정」이 지도 위에 API 키 창을 열고, 닫으면 해시를 지운다", async () => {
+  it("레일의 「계정」이 지도 위에 API 키 창을 열고, 닫으면 지도 탐색 해시로 돌아온다", async () => {
     installFetchStub(routes);
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "계정" }));
@@ -292,7 +292,8 @@ describe("App — 레일 「계정」과 #account", { timeout: 60000 }, () => {
 
     fireEvent.click(screen.getByRole("button", { name: "계정 창 닫기" }));
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(window.location.hash).toBe("");
+    // 5판: 해시를 비우면 로그인한 사용자는 홈(흐름)으로 간다 — 보던 지도로 돌아오게 #/explore 를 둔다
+    expect(window.location.hash).toBe("#/explore");
   });
 
   it("로그인해 있으면 분석 요청에도 토큰을 싣는다 — 파일럿 사용량이 조직으로 잡힌다(P1)", async () => {

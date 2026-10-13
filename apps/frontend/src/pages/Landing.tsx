@@ -13,7 +13,8 @@
  *   3. 「못 하는 것」 절을 빼지 않는다. 시범 운영 단계에서 가장 믿을 만한 문장이 거기에 있다.
  *   4. 금지 표현: AI 기반 · 혁신적인 · 원스톱 · 올인원 · 차세대 · 최적의 · 완벽한 (tests/Landing.test.tsx 가 잠근다).
  *
- * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). CTA 는 `#signup` · `#login`, App 이 그 해시를 보고 Home(가입·로그인)을 낸다.
+ * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). 「시작하기」는 질문 흐름의 첫 질문(`#/start`, 화면설계서 5판 —
+ * 로그인 없이 끝까지 간다), 「로그인」은 `#login`(App 이 Home 을 낸다).
  */
 import illustration from "@/design/assets/iso-commercial-building.svg";
 import { IconKey, IconMegaphone, IconPin, IconSpark } from "@/components/TrackIcons";
@@ -102,7 +103,7 @@ export default function Landing() {
           </a>
           <nav className="lp-bar-actions" aria-label="계정">
             <a className="lp-textlink" href="#login">로그인</a>
-            <a className="lp-btn lp-btn-primary lp-btn-sm" href="#signup">시작하기</a>
+            <a className="lp-btn lp-btn-primary lp-btn-sm" href="#/start">시작하기</a>
           </nav>
         </div>
       </header>
@@ -118,10 +119,10 @@ export default function Landing() {
                 건물·층 단위로 보여 주고, 그 자리의 비용과 회수 기간, 그리고 장사가 통하는지 확인하는 방법까지 이어서 알려 줍니다.
               </p>
               <div className="lp-cta-row">
-                <a className="lp-btn lp-btn-primary" href="#signup">시작하기</a>
+                <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
                 <a className="lp-btn lp-btn-ghost" href="#login">이미 계정이 있어요</a>
               </div>
-              <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용 · 이메일 하나로 가입</p>
+              <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용 · 로그인 없이 끝까지, 저장할 때만 가입</p>
             </div>
             <figure className="lp-hero-art">
               <img src={illustration} width={800} height={800}
@@ -206,7 +207,7 @@ export default function Landing() {
           <div className="lp-wrap">
             <h2 id="lp-final-h">내 업종으로 상권을 먼저 읽어 보세요.</h2>
             <div className="lp-cta-row lp-cta-center">
-              <a className="lp-btn lp-btn-primary" href="#signup">시작하기</a>
+              <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
             </div>
             <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용</p>
           </div>

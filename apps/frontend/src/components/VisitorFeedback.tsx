@@ -3,6 +3,9 @@ import { ApiError, submitVisitorFeedback, type VisitorFeedbackInput } from "@/li
 import "./VisitorFeedback.css";
 
 const INSTAGRAM = "https://www.instagram.com/placeos1/";
+/** 떠 있는 버튼 말고 다른 자리(흐름의 홈·내 정보)에서 이 창을 여는 신호 — 2026-10-13 화면설계서 5판.
+ *  모바일 흐름 화면은 하단 버튼·탭이 있어 떠 있는 버튼을 숨긴다(flow.css). */
+export const OPEN_VISITOR_FEEDBACK = "placeos:open-visitor-feedback";
 
 /** 실제 의견 저장 성공 후 인스타그램 방문을 안내한다. */
 export default function VisitorFeedback() {
@@ -16,6 +19,11 @@ export default function VisitorFeedback() {
   const [error, setError] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const openPanel = () => setOpen(true);
+    window.addEventListener(OPEN_VISITOR_FEEDBACK, openPanel);
+    return () => window.removeEventListener(OPEN_VISITOR_FEEDBACK, openPanel);
+  }, []);
   useEffect(() => {
     if (!open) return;
     panel.current?.focus();

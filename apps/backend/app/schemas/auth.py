@@ -151,7 +151,7 @@ SAVED_RESULT_MAX_BYTES = 64 * 1024     # 한 건 상한. Program 결과 한 벌�
 
 class SavedResultIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    kind: Literal["posting", "program"]
+    kind: Literal["posting", "program", "space"]   # space = 후보 자리(♡) — 화면설계서 5판(2026-10-13)
     title: str = Field(min_length=1, max_length=200)
     districtId: str | None = Field(default=None, max_length=200)
     payload: dict[str, object]
