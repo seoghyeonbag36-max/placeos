@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import AreaBepPlanner from "@/components/AreaBepPlanner";
-import TravelTimePanel from "@/components/TravelTimePanel";
+import TransitAccessPanel from "@/components/TransitAccessPanel";
 import {
   BASIS_LABEL, getPostings, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
@@ -299,7 +299,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </div>
       )}
 
-      {unit && <TravelTimePanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
+      {unit && <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
         destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} />}
 
       <div className="cols">

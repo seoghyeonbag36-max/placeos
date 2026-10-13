@@ -64,12 +64,16 @@ class Settings(BaseSettings):
     visitor_feedback_hourly_cap: int = Field(default=100, ge=1)
     # Redis (캐싱 / Celery 브로커)
     redis_url: str = "redis://localhost:6379/0"
-    # 길찾기 전용 서버 키. 미설정 수단은 수치를 반환하지 않는다.
+    # 카카오 REST 키 두 이름 — 같은 앱 키를 두 용도로 따로 받았다. 공실 인근 지하철역·주차장
+    # (services/travel.py)은 KAKAO_REST_API_KEY 를 먼저 보고 없으면 이 키를 쓴다.
     kakao_mobility_api_key: str = ""
     # Platform 벤치마킹 점포 검색 전용(Local API). 브라우저로 보내지 않는다.
     kakao_rest_api_key: str = ""
-    odsay_api_key: str = ""
+    # 공실까지의 도보시간(TMAP 보행자 경로). 비우면 도보시간만 "준비 중"으로 빠지고
+    # 역·정류장·주차장 위치와 직선거리는 그대로 나온다. 브라우저로 보내지 않는다.
+    tmap_app_key: str = ""
     # 프로세스별 외부 호출 상한(24시간). 인스턴스 수만큼 늘고 재시작 시 초기화된다.
+    # 한 번의 교통 접근성 조회는 최대 8회(카카오 2 + TMAP 6)를 쓴다.
     travel_daily_cap_per_instance: int = Field(default=1000, ge=0)
     # dev | prod. 미지정 시 _detect_env() 가 플랫폼 표식(K_SERVICE)으로 판정한다.
     app_env: str = ""

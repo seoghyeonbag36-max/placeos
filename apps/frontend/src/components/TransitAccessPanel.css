@@ -1,0 +1,18 @@
+/* 공용 교통 접근성 패널 — 디자인 토큰 간격과 색을 재사용한다. */
+.transit-access-panel {
+  margin-block: var(--sp-3); padding: var(--sp-3);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--ink); font-size: var(--fs-caption);
+}
+.transit-access-panel summary { cursor: pointer; font-weight: var(--fw-bold); }
+.transit-access-panel p { margin-block: var(--sp-2); }
+.transit-access-panel .ds-btn { margin-block: var(--sp-1); padding: var(--sp-2) var(--sp-3); font-size: inherit; }
+.transit-results { display: grid; gap: var(--sp-3); margin-top: var(--sp-3); }
+.transit-group h4 { margin: 0 0 var(--sp-2); font-size: inherit; }
+.transit-group ul { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.transit-place {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-2);
+  padding: var(--sp-2); background: var(--bg); border-radius: var(--radius-md);
+}
+.transit-place span, .transit-access-panel small, .transit-access-panel .transit-note { color: var(--muted); font-size: inherit; }
+.transit-access-panel [role="alert"] { color: var(--danger-text); }
