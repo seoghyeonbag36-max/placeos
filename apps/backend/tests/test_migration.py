@@ -86,6 +86,29 @@ def test_migration_matches_the_models(migrated_url):
             f"새 리비전을 만들 것.\n{exc}")
 
 
+def test_migrated_schema_persists_campaign(migrated_url):
+    """실제 마이그레이션 표에서 캠페인을 저장하고 다른 세션으로 복원한다."""
+    from app.schemas.campaign import Conditions
+    from app.services.campaigns import create, list_campaigns
+
+    engine = create_engine(migrated_url)
+    with Session(engine) as db:
+        user = User(email="campaign-test@example.org", hashed_password="test-only")
+        db.add(user)
+        db.commit()
+        user_id = user.id
+        result = create(db, user_id, Conditions(
+            store_name="테스트 매장", address="테스트 주소", category="카페", goal="quiet_hours",
+            target_customer="지역 주민", time_window="평일 오후", capacity=5, budget_krw=0,
+            offer="기존 좌석 활용", constraints="테스트 전용 합성 입력"))
+    with Session(engine) as db:
+        restored = list_campaigns(db, user_id)
+        assert restored[0]["id"] == result["id"]
+        assert restored[0]["conditions_source"] == "user_input"
+        assert restored[0]["summary"]["both_returned_and_repaid"] is False
+    engine.dispose()
+
+
 def test_migrated_schema_serves_the_real_write_path(migrated_url):
     """마이그레이션이 만든 표 위에서 실제 ORM 쓰기·집계가 돈다.
 

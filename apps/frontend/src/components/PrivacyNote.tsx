@@ -17,7 +17,7 @@ import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 export default function PrivacyNote() {
   return (
     <p className="acct-privacy acct-muted">
-      가입하면 <strong>이메일</strong>(로그인용)과 직접 적은 사업 정보·피드백, 직접 저장한 후보 자리·계산·검증 결과,
+      가입하면 <strong>이메일</strong>(로그인용)과 직접 적은 사업 정보·오프라인 캠페인 기록·피드백, 직접 저장한 후보 자리·계산·검증 결과,
       이용 기록(어떤 분석을 불렀는지)을 보관합니다. 비밀번호는 되돌릴 수 없는 형태로만 저장하고, 구글로 시작하면 구글이 확인한 이메일 말고는
       (이름·사진) 저장하지 않습니다. 네이버·카카오로 시작하면 제공자와 고유 사용자 ID, 제공된 이메일을 저장하며,
       이름·사진·제공자의 로그인 토큰은 저장하지 않습니다. 계정 화면에서 언제든 탈퇴할 수 있고, 탈퇴하면 바로 지웁니다.{" "}

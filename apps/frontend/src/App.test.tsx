@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { WorkspaceApp } from "@/App";
+import { saveToken, clearToken } from "@/lib/session";
 const App = () => <WorkspaceApp token="jwt.test.token" initialBusiness={{ status: "browsing" }} />;
 import { installNaverStub, removeNaverStub, type NaverStub } from "@/test/naverStub";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
@@ -9,12 +10,13 @@ import { buildings, district, postings, rentHeatmap, simulateResult } from "@/te
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => Promise.resolve(), describeNaverMapError: String }));
 
 let naver: NaverStub;
-beforeEach(() => { naver = installNaverStub(); });
-afterEach(() => { cleanup(); removeNaverStub(); });
+beforeEach(() => { naver = installNaverStub(); saveToken("jwt.test.token"); });
+afterEach(() => { cleanup(); removeNaverStub(); clearToken(); });
 
 function mount(matched: boolean) {
   const units = postings("garosugil", 2).map((u, i) => ({ ...u, id: matched && i === 1 ? "vu-g1" : `other-${i}` }));
   const api = installFetchStub([
+    { match: /program\/campaigns$/, body: [] },
     { match: /commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
     { match: /heatmap\/buildings\?/, body: buildings([{ id: "g1", name: "검토 건물", status: "empty" }]) },
     { match: /heatmap\/rent\?/, body: rentHeatmap("garosugil") },
@@ -65,7 +67,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     await screen.findByRole("button", { name: "검토 건물 후보 저장" }, TAB_LOAD);
     const map = naver.map();
     expect(map).not.toBeNull();
-    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Posting", "입점 계산"], ["Program", "검증 program"]] as const) {
+    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Posting", "입점 계산"], ["Program", "오프라인 캠페인"]] as const) {
       fireEvent.click(screen.getByRole("button", { name: tab }));
       const aside = await screen.findByRole("complementary", { name: panel }, TAB_LOAD);
       // 패널은 지도 호스트 **안에** 뜬다 — 지도 없는 대시보드로 되돌아가면 여기가 운다.
@@ -122,32 +124,18 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     expect(document.querySelector(".b-detail .b-name")!.textContent).toBe("검토 건물");
   });
 
-  it("PS-06 · PR-07 「이 자리로 검증 program 만들기 →」가 Program 의 거점·업종·주소와 검증할 자리를 채우고, 비우기로 걷힌다", async () => {
+  it("Posting 인계는 캠페인 업종을 채우되 공실 이름을 실제 영업 주소로 쓰지 않는다", async () => {
     const api = mount(true);
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
-    const title = await screen.findByText("검증할 자리", { selector: "b" }, TAB_LOAD);
-    const banner = title.closest(".arrival")!;
-    expect(banner.textContent).toContain("garosugil 1번 자리");
-    expect(banner.textContent).toContain("Posting 가성비 전략");
-    expect((screen.getByPlaceholderText("예: 카페") as HTMLInputElement).value).toBe("카페");
-    expect((screen.getByPlaceholderText("예: 서울 강남구 신사동 …") as HTMLInputElement).value).toBe("garosugil 1번 자리");
-    const hub = document.querySelector(".progstudio form select") as HTMLSelectElement;
-    await waitFor(() => expect(hub.value).toBe("garosugil"));
-    // 지도에 검증할 자리 핀이 선다.
-    await waitFor(() => expect(naver.live().some((o) => String((o.options.icon as { content?: string })?.content ?? "").includes("검증할 자리"))).toBe(true));
-
-    fireEvent.click(screen.getByRole("button", { name: "비우기" }));
-    expect(screen.queryByText("검증할 자리", { selector: "b" })).toBeNull();
-    // 탭을 다녀와도 걷은 안내가 되살아나지 않는다.
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
-    await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
-    fireEvent.click(screen.getByRole("button", { name: "Program" }));
-    await screen.findByRole("complementary", { name: "검증 program" }, TAB_LOAD);
-    expect(screen.queryByText("검증할 자리", { selector: "b" })).toBeNull();
+    await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);
+    expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("카페");
+    expect((screen.getByRole("textbox", { name: "실제 영업 주소 *" }) as HTMLInputElement).value).toBe("");
+    expect(screen.getByText(/실제 영업 매장의 주소를 입력해야/)).toBeTruthy();
+    expect(api.count(/program\/campaigns$/)).toBe(1);
   });
 });
 

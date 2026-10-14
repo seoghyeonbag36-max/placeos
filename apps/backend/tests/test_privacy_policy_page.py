@@ -44,6 +44,7 @@ TABLE_TO_POLICY_WORD = {
     "pilot_feedback": "피드백",
     "visitor_feedback": "방문자 의견",
     "social_identities": "고유 사용자 ID",
+    "program_campaigns": "오프라인 캠페인 기록",
 }
 
 

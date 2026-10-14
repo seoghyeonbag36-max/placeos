@@ -1078,6 +1078,16 @@ async function accountRequest<T>(
 const authRequest = <T>(method: "GET" | "POST" | "DELETE", path: string, opt: { body?: unknown; token?: string } = {}) =>
   accountRequest<T>(method, `/auth${path}`, opt);
 
+/** 캠페인 원장 — 사용자 JWT 필수, 분석 응답/임시 예시와 분리. */
+export const listCampaigns = (token: string) =>
+  accountRequest<import("./campaign").Campaign[]>("GET", "/program/campaigns", { token });
+export const createCampaign = (token: string, body: import("./campaign").CampaignConditions) =>
+  accountRequest<import("./campaign").Campaign>("POST", "/program/campaigns", { token, body });
+export const commandCampaign = (token: string, id: string, version: number,
+  action: import("./campaign").CampaignAction, payload: unknown) =>
+  accountRequest<import("./campaign").Campaign>("POST", `/program/campaigns/${encodeURIComponent(id)}/commands`,
+    { token, body: { version, action, payload } });
+
 /** 조직 가입 — 201 · 409(이미 가입된 이메일) · 422(검증: 비밀번호 8~200자 · 조직명 1~200자) */
 export const signup = (req: { org_name: string; email: string; password: string }) =>
   authRequest<AuthToken>("POST", "/signup", { body: req });
