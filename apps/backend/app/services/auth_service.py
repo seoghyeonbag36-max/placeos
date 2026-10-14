@@ -198,6 +198,8 @@ def delete_account(db: Session, user: User) -> None:
             if db.execute(select(func.count()).select_from(Membership)
                           .where(Membership.org_id == oid)).scalar_one() == 1]
 
+    from app.models.campaign import Campaign
+    db.execute(delete(Campaign).where(Campaign.user_id == uid))
     db.execute(delete(BusinessWorkspace).where(BusinessWorkspace.user_id == uid))
     db.execute(delete(PilotFeedback).where(PilotFeedback.user_id == uid))
     if solo:

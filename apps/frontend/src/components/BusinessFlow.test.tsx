@@ -15,14 +15,18 @@ import { installFetchStub, type ApiCall, type Route } from "@/test/fetchStub";
 import { buildings, district } from "@/test/fixtures";
 import type { IndustryOption } from "@/lib/api";
 import type { BusinessState } from "@/lib/businessProfile";
+import { clearToken, saveToken } from "@/lib/session";
 let savedBusiness: BusinessState = { status: "unset" };
 
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => Promise.resolve(), describeNaverMapError: String }));
 
 beforeEach(() => { installNaverStub(); savedBusiness = { status: "unset" }; });
-afterEach(() => { cleanup(); removeNaverStub(); });
+afterEach(() => { cleanup(); removeNaverStub(); clearToken(); });
 
 const TAB_LOAD = { timeout: 20000 };
+
+/** Program 탭(CampaignStudio, 2026-10-14)은 로그인해야 폼을 연다. 업종 칸은 placeholder 가 없어 라벨로 찾는다. */
+const programCategory = async () => await screen.findByLabelText(/^업종/, undefined, TAB_LOAD) as HTMLInputElement;
 
 const INDUSTRIES: IndustryOption[] = [
   { key: "cafe", label: "카페·디저트", input: "카페", model_label: "카페" },
@@ -46,6 +50,7 @@ function mount(extra: Route[] = []) {
     { match: /commercial-districts$/, body: [district("garosugil", { name: "가로수길" }), district("yeonnam", { name: "연남동" })] },
     { match: /heatmap\/buildings\?/, body: buildings([{ id: "g1", name: "검토 건물", status: "empty" }]) },
     { match: /postings$/, body: [] },
+    { match: /program\/campaigns$/, body: [] },
   ]);
   render(<WorkspaceApp token="test-user" initialBusiness={savedBusiness} />);
 }
@@ -68,9 +73,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(screen.getByRole("button", { name: /도자기 공방 창업/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     expect(await screen.findByText(/매출·순익·회수기간 자동 계산은 미지원/, {}, TAB_LOAD)).toBeTruthy();
+    saveToken("test-token");
     fireEvent.click(screen.getByRole("button", { name: "Program" }));
-    const category = await screen.findByPlaceholderText("예: 카페", {}, TAB_LOAD);
-    expect((category as HTMLInputElement).value).toBe("도자기 공방");
+    expect((await programCategory()).value).toBe("도자기 공방");
   });
   it("C-08 · C-09 · C-10 처음 방문에 카드가 뜨고, 채워야 시작되며, 시작하면 Platform 이 내 업종 기준 상권 순위를 먼저 답한다", async () => {
     mount([{
@@ -159,9 +164,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(posting.value, "버릴 업종(음식점)이 기본값으로 채워졌다").toBe("");
     expect(screen.queryByText(/내 사업 기준으로 채웠습니다/)).toBeNull();
 
+    saveToken("test-token");
     fireEvent.click(screen.getByRole("button", { name: "Program" }));
-    const category = await screen.findByPlaceholderText("예: 카페", undefined, TAB_LOAD) as HTMLInputElement;
-    expect(category.value).toBe("");
+    expect((await programCategory()).value).toBe("");
   });
 
   it("(2026-10-06) 바꿀 업종을 정했으면 Posting·Program 이 그 업종으로 시작하고, 칩이 바꿀 업종을 말한다", async () => {
@@ -174,8 +179,9 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect((await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement).value).toBe("음식점");
     expect(screen.getByText(/내 사업 기준으로 채웠습니다/)).toBeTruthy();
 
+    saveToken("test-token");
     fireEvent.click(screen.getByRole("button", { name: "Program" }));
-    expect((await screen.findByPlaceholderText("예: 카페", undefined, TAB_LOAD) as HTMLInputElement).value).toBe("음식점");
+    expect((await programCategory()).value).toBe("음식점");
   });
 
   it("(2026-10-06) 카드에서 업종 바꾸기를 고르면 「바꿀 업종(선택)」 칸이 뜨고, 고른 값이 저장된다", async () => {

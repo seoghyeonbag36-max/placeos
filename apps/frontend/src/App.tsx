@@ -29,7 +29,7 @@ import "./App.css";
 const loadMapShell = () => import("@/pages/MapShell");
 const loadPlatform = () => import("@/pages/PlatformConsole");
 const loadPosting = () => import("@/pages/PostingConsole");
-const loadProgram = () => import("@/pages/ProgramStudio");
+const loadProgram = () => import("@/pages/CampaignStudio");
 const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
@@ -58,7 +58,7 @@ const PRELOAD_DELAY_MS = 1500;
  *   Platform → PlatformConsole  (상권 정체성 + 자리별 업종)
  *   Page     → MapShell         (공실 히트맵 4레이어 + 2D 층 스택·거리뷰)
  *   Posting  → PostingConsole   (3-Tier 비용-효용 + 권리금 입력 계약)
- *   Program  → ProgramStudio    (검증 program 생성 — 팝업·가오픈·MVP)
+ *   Program  → CampaignStudio   (오프라인 캠페인 실행·재참여·재결제 기록)
  *
  * 2026-08-29: 상단 네비바를 **좌측 아이콘 레일**로 옮겼다(네이버지도식).
  *
@@ -345,7 +345,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             </TrackMapFrame>
           )}
           {view === "program" && (
-            <TrackMapFrame track="program" label="검증 program">
+            <TrackMapFrame track="program" label="오프라인 캠페인">
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
                 defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
