@@ -1,0 +1,499 @@
+{
+  "source": "localdata",
+  "rows": [
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "19850108",
+        "end_date": null,
+        "industry_type": "일반미용업",
+        "business_name": "마돈나",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-204-1985-01737",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "19910413",
+        "end_date": null,
+        "industry_type": "일반미용업",
+        "business_name": "가로수 헤어",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-204-1991-01498",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "19980902",
+        "end_date": null,
+        "industry_type": "즉석판매제조가공업",
+        "business_name": "강남상회",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-107-1998-00820",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "19991019",
+        "end_date": null,
+        "industry_type": "한식",
+        "business_name": "한사발포차 신사가로수길점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-1999-14813",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20131126",
+        "end_date": "20261007",
+        "industry_type": "한식",
+        "business_name": "천비인",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2013-00980",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20170621",
+        "end_date": null,
+        "industry_type": "네일아트업",
+        "business_name": "네일랩",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-215-2017-00034",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20201231",
+        "end_date": "20221205",
+        "industry_type": "외국음식전문점(인도,태국등)",
+        "business_name": "마이프렌드 쎄르지오 신사점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2020-01568",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20220321",
+        "end_date": "20220825",
+        "industry_type": "커피숍",
+        "business_name": "뮤지드아트",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-104-2022-00126",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20220328",
+        "end_date": null,
+        "industry_type": "기타 휴게음식점",
+        "business_name": "컴포즈커피 강남시장점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-104-2022-00144",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20220408",
+        "end_date": "20230215",
+        "industry_type": "패스트푸드",
+        "business_name": "송사부 신사점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-104-2022-00165",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20220530",
+        "end_date": null,
+        "industry_type": "호프/통닭",
+        "business_name": "비비큐치킨",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2022-00630",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20220825",
+        "end_date": null,
+        "industry_type": "기타",
+        "business_name": "뮤지드 아트",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2022-01002",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20221206",
+        "end_date": null,
+        "industry_type": "즉석판매제조가공업",
+        "business_name": "켘켘(KAK KAK)",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-107-2022-00928",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20230220",
+        "end_date": null,
+        "industry_type": "한식",
+        "business_name": "압꾸정닭강정",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2023-00224",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20230426",
+        "end_date": null,
+        "industry_type": "한식",
+        "business_name": "누이네",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2023-00576",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20231222",
+        "end_date": null,
+        "industry_type": "즉석판매제조가공업",
+        "business_name": "강동수산직판장 신사점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-107-2023-00867",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20240508",
+        "end_date": "20241021",
+        "industry_type": "일식",
+        "business_name": "시오",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2024-00581",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20240719",
+        "end_date": null,
+        "industry_type": "한식",
+        "business_name": "육회관블랙 신사점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2024-00921",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20241226",
+        "end_date": null,
+        "industry_type": "외국음식전문점(인도,태국등)",
+        "business_name": "시와 신사점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2024-01587",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20250212",
+        "end_date": "20260203",
+        "industry_type": "한식",
+        "business_name": "누이네",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2025-00134",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20250522",
+        "end_date": null,
+        "industry_type": "기타",
+        "business_name": "메종 블라인드(Maison Blind)",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2025-00581",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20260209",
+        "end_date": null,
+        "industry_type": "커피숍",
+        "business_name": "메가엠지씨커피 신사강남시장점",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-104-2026-00077",
+      "site_address": "서울특별시 강남구 신사동 510-11 --------- ",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "garosugil",
+      "pnu": "1168010700105100011",
+      "record": {
+        "start_date": "20261007",
+        "end_date": null,
+        "industry_type": "횟집",
+        "business_name": "강동수산 초장집",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3220000-101-2026-01060",
+      "site_address": "서울특별시 강남구 신사동 510-11 ---------",
+      "licensing_file": "data\\bronze\\garosugil\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e2b14a35e1b015068a8a9f9e8d0530b39186b30b6e33dd8a11353761770fa03e",
+      "stores_file": "data\\bronze\\garosugil\\2026-10-09\\stores_raw.json",
+      "stores_sha256": "4b3527ba52e4182e752c59b9a96b8db370cfc444ad28ca48aca20f26c8849198",
+      "evidence": "ledger_road_confirmed"
+    },
+    {
+      "hub": "miasageori",
+      "pnu": "1130510100100440015",
+      "record": {
+        "start_date": "20070511",
+        "end_date": "20070730",
+        "industry_type": "",
+        "business_name": "콩나물해장국",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "2007308009205600038",
+      "site_address": "서울특별시 강북구 미아동 호 대지길 39(미아동 44-15)",
+      "licensing_file": "data\\bronze\\miasageori\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "4a89a4b326387add2c2b4134a83d0d6413c91dff41e534c4596576b75dd4ef05",
+      "stores_file": "data\\bronze\\miasageori\\2026-08-30\\stores_raw.json",
+      "stores_sha256": "b897c92223964679dd7d73cbe3792b4b4e4fb70f190974f8194277fb249e8ed9",
+      "evidence": "complete_lot_only"
+    },
+    {
+      "hub": "miasageori",
+      "pnu": "1130510100104500064",
+      "record": {
+        "start_date": "20070626",
+        "end_date": "20080422",
+        "industry_type": "",
+        "business_name": "꼼닭불꼼닭",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "2007308009205600289",
+      "site_address": "서울특별시 강북구 미아동 호 송천길 38(미아동 450-64)",
+      "licensing_file": "data\\bronze\\miasageori\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "4a89a4b326387add2c2b4134a83d0d6413c91dff41e534c4596576b75dd4ef05",
+      "stores_file": "data\\bronze\\miasageori\\2026-08-30\\stores_raw.json",
+      "stores_sha256": "b897c92223964679dd7d73cbe3792b4b4e4fb70f190974f8194277fb249e8ed9",
+      "evidence": "complete_lot_only"
+    },
+    {
+      "hub": "suyu",
+      "pnu": "1130510300101910030",
+      "record": {
+        "start_date": "19930921",
+        "end_date": "20000919",
+        "industry_type": "단란주점",
+        "business_name": "다래",
+        "source": "localdata",
+        "closure_reason_summary": null
+      },
+      "mgtno": "3080000-103-1993-02238",
+      "site_address": "서울특별시 강북구 수유동 191-30 ----호",
+      "licensing_file": "data\\bronze\\suyu\\2026-10-11\\licensing_biz.json",
+      "licensing_sha256": "e3cf8d73641492072576610bcfe5b48348fc4fd4b1065ca1b752f74ac666671d",
+      "stores_file": "data\\bronze\\suyu\\2026-08-30\\stores_raw.json",
+      "stores_sha256": "e8c89d7eebe1d908fcc0cf0ac0cff867630859b146684b768be4fe83a7475de0",
+      "evidence": "complete_lot_only"
+    }
+  ]
+}

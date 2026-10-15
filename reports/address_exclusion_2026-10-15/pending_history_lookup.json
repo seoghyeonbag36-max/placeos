@@ -1,0 +1,343 @@
+{
+  "files_examined": 30,
+  "unique_mgtno": 20,
+  "records": {
+    "3210000-101-1994-04140": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 서초구 잠원동 69-5 -10 쇼핑5동 지하 ",
+          "x": "200395.885          ",
+          "y": "444930.22           "
+        },
+        "files": [
+          "data\\bronze\\banpo\\2026-08-08\\licensing_biz.json",
+          "data\\bronze\\banpo\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\banpo\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\banpo\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119873180034041100023": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 대림동   717-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\daerim\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119883180034084000034": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 대림동   809-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\daerim\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119883180034084000050": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 대림동   738-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\daerim\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\daerim\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119633180034041100002": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동6가   233-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\dangsan\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\dangsan\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\dangsan\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119973180034084000007": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동6가   302-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\dangsan\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\dangsan\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\dangsan\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119683180034041100001": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 문래동3가   54-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119943180034041100043": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동2가   6-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119943180034041100068": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동2가   6-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119903180034041100001": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동2가   6-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119953180034041100011": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동2가   6-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119913180034084000015": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동2가   53-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119963180034084000022": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 양평동1가   20-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD120013180034084000026": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동1가   82-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119783180034084000002": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 당산동1가   85-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\mullae\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\mullae\\2026-10-11\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-09-24\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\ydp-gucheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "3000000-101-2026-00252": [
+      {
+        "address": {
+          "road": "서울특별시 종로구 북촌로 31-22, 1~3층 (화동)",
+          "site": "서울특별시 종로구 화동 116-외1",
+          "x": "198503.069430882    ",
+          "y": "453035.395322895    "
+        },
+        "files": [
+          "data\\bronze\\samcheong\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\samcheong\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "3120000-101-2008-00256": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 서대문구 창천동 5-23 -24호, -25호(지상1층)",
+          "x": "194601.986089276    ",
+          "y": "450739.794588653    "
+        },
+        "files": [
+          "data\\bronze\\sinchon\\2026-08-08\\licensing_biz.json",
+          "data\\bronze\\sinchon\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\sinchon\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\sinchon\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119853180034041100002": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 여의도동   37-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\yeouido\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMA119873180034041100003": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 여의도동   37-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\yeouido\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ],
+    "PHMD119803180034084000001": [
+      {
+        "address": {
+          "road": "",
+          "site": "서울특별시 영등포구 여의도동   36-",
+          "x": "                    ",
+          "y": "                    "
+        },
+        "files": [
+          "data\\bronze\\yeouido\\2026-08-23\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-09\\licensing_biz.json",
+          "data\\bronze\\yeouido\\2026-10-11\\licensing_biz.json"
+        ]
+      }
+    ]
+  }
+}

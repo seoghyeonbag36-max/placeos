@@ -1,0 +1,5678 @@
+{
+  "generated_at": "2026-10-15T21:17:16+09:00",
+  "scope_source": "data/config/page_hubs.py:ACTIVE_HUBS",
+  "hub_count": 81,
+  "reference": "garosugil",
+  "global_errors": [],
+  "limitations": [
+    "Page 게이트 100%는 개별 데이터 품질 100%가 아니다.",
+    "이력 연결률은 인허가 업종·지번 주소 범위의 관측값이다. 100%를 목표로 결측을 채우지 않는다.",
+    "가로수길 HTML의 보행망 도보 거리는 시안 계산이다. 운영 Gold에 동일 산출물이 없어 81거점 동등성 미확인.",
+    "행정동 hourly가 없어도 완전한 집계구 24시간 자료가 있으면 해당 레이어의 결측이 아니다.",
+    "검토용 candidate는 운영 Gold에 반영하지 않았다."
+  ],
+  "hubs": [
+    {
+      "slug": "garosugil",
+      "name": "신사동 가로수길",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:05",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 11,
+      "errors": [],
+      "history": {
+        "buildings": 841,
+        "linked": 732,
+        "linked_pct": 87.04,
+        "lots": 710,
+        "records": 5454,
+        "gu_codes": {
+          "11680": 830,
+          "11650": 11
+        }
+      },
+      "floors": {
+        "units": 429,
+        "buildings": 203,
+        "certainty": {
+          "confirmed": 340,
+          "probable": 89
+        }
+      },
+      "candidate_history": {
+        "buildings": 841,
+        "linked": 741,
+        "linked_pct": 88.11,
+        "lots": 719,
+        "records": 5543,
+        "gu_codes": {
+          "11680": 830,
+          "11650": 11
+        }
+      },
+      "history_link_delta": 9,
+      "history_records_added": 112,
+      "history_records_removed": 23,
+      "footfall": {
+        "cells": 72,
+        "oa_count": 25,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 74.64,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "apgujeong-rodeo",
+      "name": "압구정로데오",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:07",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 16,
+      "errors": [],
+      "history": {
+        "buildings": 774,
+        "linked": 740,
+        "linked_pct": 95.61,
+        "lots": 698,
+        "records": 7139,
+        "gu_codes": {
+          "11680": 774
+        }
+      },
+      "floors": {
+        "units": 519,
+        "buildings": 237,
+        "certainty": {
+          "confirmed": 424,
+          "probable": 95
+        }
+      },
+      "candidate_history": {
+        "buildings": 774,
+        "linked": 740,
+        "linked_pct": 95.61,
+        "lots": 698,
+        "records": 7139,
+        "gu_codes": {
+          "11680": 774
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 1,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 69,
+        "oa_count": 12,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 61.93,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "hongdae",
+      "name": "홍대",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:11",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 27,
+      "errors": [],
+      "history": {
+        "buildings": 1324,
+        "linked": 1167,
+        "linked_pct": 88.14,
+        "lots": 1090,
+        "records": 8223,
+        "gu_codes": {
+          "11440": 1296,
+          "11410": 28
+        }
+      },
+      "floors": {
+        "units": 537,
+        "buildings": 300,
+        "certainty": {
+          "confirmed": 453,
+          "probable": 84
+        }
+      },
+      "candidate_history": {
+        "buildings": 1324,
+        "linked": 1191,
+        "linked_pct": 89.95,
+        "lots": 1110,
+        "records": 8384,
+        "gu_codes": {
+          "11440": 1296,
+          "11410": 28
+        }
+      },
+      "history_link_delta": 24,
+      "history_records_added": 161,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 106,
+        "oa_count": 30,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 63.61,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yeonnam",
+      "name": "연남동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:16",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 17,
+      "errors": [],
+      "history": {
+        "buildings": 1134,
+        "linked": 868,
+        "linked_pct": 76.54,
+        "lots": 824,
+        "records": 4409,
+        "gu_codes": {
+          "11440": 976,
+          "11410": 158
+        }
+      },
+      "floors": {
+        "units": 300,
+        "buildings": 186,
+        "certainty": {
+          "confirmed": 266,
+          "probable": 34
+        }
+      },
+      "candidate_history": {
+        "buildings": 1134,
+        "linked": 979,
+        "linked_pct": 86.33,
+        "lots": 907,
+        "records": 4968,
+        "gu_codes": {
+          "11440": 976,
+          "11410": 158
+        }
+      },
+      "history_link_delta": 111,
+      "history_records_added": 559,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 108,
+        "oa_count": 54,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 56.58,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "ikseon",
+      "name": "익선동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:18",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 30,
+      "errors": [],
+      "history": {
+        "buildings": 1755,
+        "linked": 1409,
+        "linked_pct": 80.28,
+        "lots": 1121,
+        "records": 4861,
+        "gu_codes": {
+          "11110": 1755
+        }
+      },
+      "floors": {
+        "units": 443,
+        "buildings": 185,
+        "certainty": {
+          "confirmed": 315,
+          "probable": 128
+        }
+      },
+      "candidate_history": {
+        "buildings": 1755,
+        "linked": 1409,
+        "linked_pct": 80.28,
+        "lots": 1121,
+        "records": 4861,
+        "gu_codes": {
+          "11110": 1755
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 82,
+        "oa_count": 17,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 71.75,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "seochon",
+      "name": "서촌",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:19",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 23,
+      "errors": [],
+      "history": {
+        "buildings": 846,
+        "linked": 638,
+        "linked_pct": 75.41,
+        "lots": 524,
+        "records": 2145,
+        "gu_codes": {
+          "11110": 846
+        }
+      },
+      "floors": {
+        "units": 145,
+        "buildings": 88,
+        "certainty": {
+          "confirmed": 117,
+          "probable": 28
+        }
+      },
+      "candidate_history": {
+        "buildings": 846,
+        "linked": 638,
+        "linked_pct": 75.41,
+        "lots": 524,
+        "records": 2145,
+        "gu_codes": {
+          "11110": 846
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 61,
+        "oa_count": 25,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 92.44,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "myeongdong",
+      "name": "명동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:20",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 66,
+      "errors": [],
+      "history": {
+        "buildings": 1081,
+        "linked": 897,
+        "linked_pct": 82.98,
+        "lots": 745,
+        "records": 12138,
+        "gu_codes": {
+          "11140": 1081
+        }
+      },
+      "floors": {
+        "units": 450,
+        "buildings": 164,
+        "certainty": {
+          "confirmed": 322,
+          "probable": 128
+        }
+      },
+      "candidate_history": {
+        "buildings": 1081,
+        "linked": 949,
+        "linked_pct": 87.79,
+        "lots": 793,
+        "records": 12327,
+        "gu_codes": {
+          "11140": 1081
+        }
+      },
+      "history_link_delta": 52,
+      "history_records_added": 189,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 93,
+        "oa_count": 17,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 152.19,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "euljiro",
+      "name": "을지로(힙지로)",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:24",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 65,
+      "errors": [],
+      "history": {
+        "buildings": 1961,
+        "linked": 719,
+        "linked_pct": 36.66,
+        "lots": 606,
+        "records": 3313,
+        "gu_codes": {
+          "11140": 1387,
+          "11110": 574
+        }
+      },
+      "floors": {
+        "units": 370,
+        "buildings": 153,
+        "certainty": {
+          "confirmed": 276,
+          "probable": 94
+        }
+      },
+      "candidate_history": {
+        "buildings": 1961,
+        "linked": 1298,
+        "linked_pct": 66.19,
+        "lots": 1115,
+        "records": 5905,
+        "gu_codes": {
+          "11140": 1387,
+          "11110": 574
+        }
+      },
+      "history_link_delta": 579,
+      "history_records_added": 2718,
+      "history_records_removed": 126,
+      "footfall": {
+        "cells": 94,
+        "oa_count": 14,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 68.76,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "seongsu",
+      "name": "성수동 카페거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:25",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 13,
+      "errors": [],
+      "history": {
+        "buildings": 832,
+        "linked": 675,
+        "linked_pct": 81.13,
+        "lots": 416,
+        "records": 2790,
+        "gu_codes": {
+          "11200": 832
+        }
+      },
+      "floors": {
+        "units": 165,
+        "buildings": 86,
+        "certainty": {
+          "confirmed": 121,
+          "probable": 44
+        }
+      },
+      "candidate_history": {
+        "buildings": 832,
+        "linked": 675,
+        "linked_pct": 81.13,
+        "lots": 416,
+        "records": 2790,
+        "gu_codes": {
+          "11200": 832
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 81,
+        "oa_count": 26,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 64.98,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "seoulsup",
+      "name": "서울숲 아틀리에길",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:26",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 56,
+      "errors": [],
+      "history": {
+        "buildings": 695,
+        "linked": 599,
+        "linked_pct": 86.19,
+        "lots": 393,
+        "records": 2101,
+        "gu_codes": {
+          "11200": 695
+        }
+      },
+      "floors": {
+        "units": 125,
+        "buildings": 69,
+        "certainty": {
+          "confirmed": 107,
+          "probable": 18
+        }
+      },
+      "candidate_history": {
+        "buildings": 695,
+        "linked": 599,
+        "linked_pct": 86.19,
+        "lots": 393,
+        "records": 2101,
+        "gu_codes": {
+          "11200": 695
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 53,
+        "oa_count": 26,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 64.98,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "itaewon",
+      "name": "이태원",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:29",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 61,
+      "errors": [],
+      "history": {
+        "buildings": 845,
+        "linked": 631,
+        "linked_pct": 74.67,
+        "lots": 508,
+        "records": 2840,
+        "gu_codes": {
+          "11170": 845
+        }
+      },
+      "floors": {
+        "units": 181,
+        "buildings": 102,
+        "certainty": {
+          "confirmed": 152,
+          "probable": 29
+        }
+      },
+      "candidate_history": {
+        "buildings": 845,
+        "linked": 632,
+        "linked_pct": 74.79,
+        "lots": 509,
+        "records": 2842,
+        "gu_codes": {
+          "11170": 845
+        }
+      },
+      "history_link_delta": 1,
+      "history_records_added": 2,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 68,
+        "oa_count": 26,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 69.17,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "hannam",
+      "name": "한남동·용리단길",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:31",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 26,
+      "errors": [],
+      "history": {
+        "buildings": 713,
+        "linked": 547,
+        "linked_pct": 76.72,
+        "lots": 455,
+        "records": 2705,
+        "gu_codes": {
+          "11170": 713
+        }
+      },
+      "floors": {
+        "units": 183,
+        "buildings": 95,
+        "certainty": {
+          "confirmed": 148,
+          "probable": 35
+        }
+      },
+      "candidate_history": {
+        "buildings": 713,
+        "linked": 549,
+        "linked_pct": 77.0,
+        "lots": 456,
+        "records": 2707,
+        "gu_codes": {
+          "11170": 713
+        }
+      },
+      "history_link_delta": 2,
+      "history_records_added": 2,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 68,
+        "oa_count": 27,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 69.17,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "songridan",
+      "name": "송리단길",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:33",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 17,
+      "errors": [],
+      "history": {
+        "buildings": 448,
+        "linked": 408,
+        "linked_pct": 91.07,
+        "lots": 378,
+        "records": 3224,
+        "gu_codes": {
+          "11710": 448
+        }
+      },
+      "floors": {
+        "units": 100,
+        "buildings": 57,
+        "certainty": {
+          "confirmed": 78,
+          "probable": 22
+        }
+      },
+      "candidate_history": {
+        "buildings": 448,
+        "linked": 408,
+        "linked_pct": 91.07,
+        "lots": 378,
+        "records": 3224,
+        "gu_codes": {
+          "11710": 448
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 73,
+        "oa_count": 46,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 35.99,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gangnam",
+      "name": "강남역·강남대로",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:39",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 28,
+      "errors": [],
+      "history": {
+        "buildings": 987,
+        "linked": 542,
+        "linked_pct": 54.91,
+        "lots": 492,
+        "records": 5432,
+        "gu_codes": {
+          "11650": 275,
+          "11680": 712
+        }
+      },
+      "floors": {
+        "units": 314,
+        "buildings": 146,
+        "certainty": {
+          "confirmed": 260,
+          "probable": 54
+        }
+      },
+      "candidate_history": {
+        "buildings": 987,
+        "linked": 833,
+        "linked_pct": 84.4,
+        "lots": 742,
+        "records": 10245,
+        "gu_codes": {
+          "11650": 275,
+          "11680": 712
+        }
+      },
+      "history_link_delta": 291,
+      "history_records_added": 4813,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 115,
+        "oa_count": 35,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 85.53,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "hapjeong",
+      "name": "합정",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:40",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 5,
+      "errors": [],
+      "history": {
+        "buildings": 290,
+        "linked": 249,
+        "linked_pct": 85.86,
+        "lots": 202,
+        "records": 1980,
+        "gu_codes": {
+          "11440": 290
+        }
+      },
+      "floors": {
+        "units": 53,
+        "buildings": 29,
+        "certainty": {
+          "confirmed": 48,
+          "probable": 5
+        }
+      },
+      "candidate_history": {
+        "buildings": 290,
+        "linked": 249,
+        "linked_pct": 85.86,
+        "lots": 202,
+        "records": 1980,
+        "gu_codes": {
+          "11440": 290
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 33,
+        "oa_count": 21,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 63.61,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "mangwon",
+      "name": "망원동·망리단길",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:44",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 10,
+      "errors": [],
+      "history": {
+        "buildings": 960,
+        "linked": 786,
+        "linked_pct": 81.88,
+        "lots": 701,
+        "records": 3794,
+        "gu_codes": {
+          "11440": 960
+        }
+      },
+      "floors": {
+        "units": 222,
+        "buildings": 135,
+        "certainty": {
+          "confirmed": 196,
+          "probable": 26
+        }
+      },
+      "candidate_history": {
+        "buildings": 960,
+        "linked": 786,
+        "linked_pct": 81.88,
+        "lots": 701,
+        "records": 3794,
+        "gu_codes": {
+          "11440": 960
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 96,
+        "oa_count": 66,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 41.31,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "samcheong",
+      "name": "삼청동·북촌",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:44",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 614,
+        "linked": 363,
+        "linked_pct": 59.12,
+        "lots": 332,
+        "records": 910,
+        "gu_codes": {
+          "11110": 614
+        }
+      },
+      "floors": {
+        "units": 107,
+        "buildings": 59,
+        "certainty": {
+          "confirmed": 69,
+          "probable": 38
+        }
+      },
+      "candidate_history": {
+        "buildings": 614,
+        "linked": 363,
+        "linked_pct": 59.12,
+        "lots": 332,
+        "records": 909,
+        "gu_codes": {
+          "11110": 614
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 50,
+        "oa_count": 13,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 92.44,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gwangjang",
+      "name": "광장시장·종로4가",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:46",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 27,
+      "errors": [],
+      "history": {
+        "buildings": 1743,
+        "linked": 721,
+        "linked_pct": 41.37,
+        "lots": 636,
+        "records": 2160,
+        "gu_codes": {
+          "11140": 399,
+          "11110": 1344
+        }
+      },
+      "floors": {
+        "units": 431,
+        "buildings": 201,
+        "certainty": {
+          "confirmed": 343,
+          "probable": 88
+        }
+      },
+      "candidate_history": {
+        "buildings": 1743,
+        "linked": 978,
+        "linked_pct": 56.11,
+        "lots": 855,
+        "records": 3020,
+        "gu_codes": {
+          "11140": 399,
+          "11110": 1344
+        }
+      },
+      "history_link_delta": 257,
+      "history_records_added": 869,
+      "history_records_removed": 9,
+      "footfall": {
+        "cells": 82,
+        "oa_count": 14,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 71.75,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "dongdaemun",
+      "name": "동대문·DDP",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:53",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 90,
+      "errors": [],
+      "history": {
+        "buildings": 2809,
+        "linked": 569,
+        "linked_pct": 20.26,
+        "lots": 476,
+        "records": 3964,
+        "gu_codes": {
+          "11140": 1716,
+          "11110": 1093
+        }
+      },
+      "floors": {
+        "units": 641,
+        "buildings": 317,
+        "certainty": {
+          "confirmed": 496,
+          "probable": 145
+        }
+      },
+      "candidate_history": {
+        "buildings": 2809,
+        "linked": 1848,
+        "linked_pct": 65.79,
+        "lots": 1534,
+        "records": 9013,
+        "gu_codes": {
+          "11140": 1716,
+          "11110": 1093
+        }
+      },
+      "history_link_delta": 1279,
+      "history_records_added": 5109,
+      "history_records_removed": 60,
+      "footfall": {
+        "cells": 169,
+        "oa_count": 52,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 52.83,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "jamsil",
+      "name": "잠실·롯데월드타워",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:56",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 44,
+      "errors": [],
+      "history": {
+        "buildings": 576,
+        "linked": 547,
+        "linked_pct": 94.97,
+        "lots": 363,
+        "records": 7750,
+        "gu_codes": {
+          "11710": 576
+        }
+      },
+      "floors": {
+        "units": 109,
+        "buildings": 52,
+        "certainty": {
+          "confirmed": 88,
+          "probable": 21
+        }
+      },
+      "candidate_history": {
+        "buildings": 576,
+        "linked": 547,
+        "linked_pct": 94.97,
+        "lots": 363,
+        "records": 7750,
+        "gu_codes": {
+          "11710": 576
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 59,
+        "oa_count": 30,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 35.99,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "konkuk",
+      "name": "건대입구·화양동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:58",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 14,
+      "errors": [],
+      "history": {
+        "buildings": 585,
+        "linked": 518,
+        "linked_pct": 88.55,
+        "lots": 480,
+        "records": 4800,
+        "gu_codes": {
+          "11215": 573,
+          "11200": 12
+        }
+      },
+      "floors": {
+        "units": 98,
+        "buildings": 57,
+        "certainty": {
+          "confirmed": 81,
+          "probable": 17
+        }
+      },
+      "candidate_history": {
+        "buildings": 585,
+        "linked": 527,
+        "linked_pct": 90.09,
+        "lots": 488,
+        "records": 4833,
+        "gu_codes": {
+          "11215": 573,
+          "11200": 12
+        }
+      },
+      "history_link_delta": 9,
+      "history_records_added": 33,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 57,
+        "oa_count": 31,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 51.45,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yeouido",
+      "name": "여의도",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:47:58",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 51,
+      "errors": [],
+      "history": {
+        "buildings": 250,
+        "linked": 246,
+        "linked_pct": 98.4,
+        "lots": 151,
+        "records": 8098,
+        "gu_codes": {
+          "11560": 250
+        }
+      },
+      "floors": {
+        "units": 27,
+        "buildings": 9,
+        "certainty": {
+          "confirmed": 22,
+          "probable": 5
+        }
+      },
+      "candidate_history": {
+        "buildings": 250,
+        "linked": 246,
+        "linked_pct": 98.4,
+        "lots": 151,
+        "records": 8095,
+        "gu_codes": {
+          "11560": 250
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 3,
+      "footfall": {
+        "cells": 50,
+        "oa_count": 5,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 38.52,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "mullae",
+      "name": "문래동 창작촌",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:01",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 26,
+      "errors": [],
+      "history": {
+        "buildings": 1253,
+        "linked": 807,
+        "linked_pct": 64.41,
+        "lots": 536,
+        "records": 5979,
+        "gu_codes": {
+          "11530": 17,
+          "11560": 1236
+        }
+      },
+      "floors": {
+        "units": 102,
+        "buildings": 56,
+        "certainty": {
+          "confirmed": 79,
+          "probable": 23
+        }
+      },
+      "candidate_history": {
+        "buildings": 1253,
+        "linked": 820,
+        "linked_pct": 65.44,
+        "lots": 546,
+        "records": 9220,
+        "gu_codes": {
+          "11530": 17,
+          "11560": 1236
+        }
+      },
+      "history_link_delta": 13,
+      "history_records_added": 3248,
+      "history_records_removed": 7,
+      "footfall": {
+        "cells": 96,
+        "oa_count": 38,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 38.52,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "banpo",
+      "name": "고속터미널·반포",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:01",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 9,
+      "errors": [],
+      "history": {
+        "buildings": 134,
+        "linked": 128,
+        "linked_pct": 95.52,
+        "lots": 83,
+        "records": 9151,
+        "gu_codes": {
+          "11650": 134
+        }
+      },
+      "floors": {
+        "units": 23,
+        "buildings": 10,
+        "certainty": {
+          "confirmed": 20,
+          "probable": 3
+        }
+      },
+      "candidate_history": {
+        "buildings": 134,
+        "linked": 128,
+        "linked_pct": 95.52,
+        "lots": 83,
+        "records": 9150,
+        "gu_codes": {
+          "11650": 134
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 18,
+        "oa_count": 10,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 46.44,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sinchon",
+      "name": "신촌·이대",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:06",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 18,
+      "errors": [],
+      "history": {
+        "buildings": 1450,
+        "linked": 914,
+        "linked_pct": 63.03,
+        "lots": 685,
+        "records": 9327,
+        "gu_codes": {
+          "11440": 448,
+          "11410": 1002
+        }
+      },
+      "floors": {
+        "units": 391,
+        "buildings": 203,
+        "certainty": {
+          "confirmed": 318,
+          "probable": 73
+        }
+      },
+      "candidate_history": {
+        "buildings": 1450,
+        "linked": 1266,
+        "linked_pct": 87.31,
+        "lots": 951,
+        "records": 11457,
+        "gu_codes": {
+          "11440": 448,
+          "11410": 1002
+        }
+      },
+      "history_link_delta": 352,
+      "history_records_added": 2132,
+      "history_records_removed": 2,
+      "footfall": {
+        "cells": 93,
+        "oa_count": 35,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 40.8,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yeonhui",
+      "name": "연희동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:08",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 473,
+        "linked": 304,
+        "linked_pct": 64.27,
+        "lots": 281,
+        "records": 1602,
+        "gu_codes": {
+          "11440": 28,
+          "11410": 445
+        }
+      },
+      "floors": {
+        "units": 118,
+        "buildings": 60,
+        "certainty": {
+          "confirmed": 87,
+          "probable": 31
+        }
+      },
+      "candidate_history": {
+        "buildings": 473,
+        "linked": 329,
+        "linked_pct": 69.56,
+        "lots": 305,
+        "records": 1775,
+        "gu_codes": {
+          "11440": 28,
+          "11410": 445
+        }
+      },
+      "history_link_delta": 25,
+      "history_records_added": 173,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 58,
+        "oa_count": 28,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 56.58,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "cheongnyangni",
+      "name": "청량리·경동시장",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:13",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 104,
+      "errors": [],
+      "history": {
+        "buildings": 2114,
+        "linked": 1498,
+        "linked_pct": 70.86,
+        "lots": 965,
+        "records": 6289,
+        "gu_codes": {
+          "11230": 2114
+        }
+      },
+      "floors": {
+        "units": 279,
+        "buildings": 150,
+        "certainty": {
+          "confirmed": 227,
+          "probable": 52
+        }
+      },
+      "candidate_history": {
+        "buildings": 2114,
+        "linked": 1498,
+        "linked_pct": 70.86,
+        "lots": 965,
+        "records": 6289,
+        "gu_codes": {
+          "11230": 2114
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 119,
+        "oa_count": 51,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 40.62,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sharosugil",
+      "name": "샤로수길·서울대입구",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:15",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 37,
+      "errors": [],
+      "history": {
+        "buildings": 565,
+        "linked": 454,
+        "linked_pct": 80.35,
+        "lots": 383,
+        "records": 3248,
+        "gu_codes": {
+          "11620": 565
+        }
+      },
+      "floors": {
+        "units": 93,
+        "buildings": 47,
+        "certainty": {
+          "confirmed": 79,
+          "probable": 14
+        }
+      },
+      "candidate_history": {
+        "buildings": 565,
+        "linked": 454,
+        "linked_pct": 80.35,
+        "lots": 383,
+        "records": 3248,
+        "gu_codes": {
+          "11620": 565
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 59,
+        "oa_count": 41,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 68.81,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "nokdu",
+      "name": "녹두거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:16",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 281,
+        "linked": 227,
+        "linked_pct": 80.78,
+        "lots": 182,
+        "records": 1819,
+        "gu_codes": {
+          "11620": 281
+        }
+      },
+      "floors": {
+        "units": 101,
+        "buildings": 44,
+        "certainty": {
+          "confirmed": 76,
+          "probable": 25
+        }
+      },
+      "candidate_history": {
+        "buildings": 281,
+        "linked": 227,
+        "linked_pct": 80.78,
+        "lots": 182,
+        "records": 1819,
+        "gu_codes": {
+          "11620": 281
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 24,
+        "oa_count": 15,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 67.9,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sillim",
+      "name": "신림역·별빛거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:21",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 9,
+      "errors": [],
+      "history": {
+        "buildings": 1175,
+        "linked": 768,
+        "linked_pct": 65.36,
+        "lots": 685,
+        "records": 7058,
+        "gu_codes": {
+          "11620": 1174,
+          "11590": 1
+        }
+      },
+      "floors": {
+        "units": 176,
+        "buildings": 96,
+        "certainty": {
+          "confirmed": 136,
+          "probable": 40
+        }
+      },
+      "candidate_history": {
+        "buildings": 1175,
+        "linked": 768,
+        "linked_pct": 65.36,
+        "lots": 685,
+        "records": 7058,
+        "gu_codes": {
+          "11620": 1174,
+          "11590": 1
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 91,
+        "oa_count": 58,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 67.9,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "noryangjin",
+      "name": "노량진",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:23",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 57,
+      "errors": [],
+      "history": {
+        "buildings": 495,
+        "linked": 390,
+        "linked_pct": 78.79,
+        "lots": 295,
+        "records": 2242,
+        "gu_codes": {
+          "11590": 495
+        }
+      },
+      "floors": {
+        "units": 109,
+        "buildings": 52,
+        "certainty": {
+          "confirmed": 86,
+          "probable": 23
+        }
+      },
+      "candidate_history": {
+        "buildings": 495,
+        "linked": 390,
+        "linked_pct": 78.79,
+        "lots": 295,
+        "records": 2242,
+        "gu_codes": {
+          "11590": 495
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 53,
+        "oa_count": 26,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 30.47,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sungshin",
+      "name": "성신여대·돈암",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:24",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 6,
+      "errors": [],
+      "history": {
+        "buildings": 714,
+        "linked": 583,
+        "linked_pct": 81.65,
+        "lots": 404,
+        "records": 3042,
+        "gu_codes": {
+          "11290": 714
+        }
+      },
+      "floors": {
+        "units": 128,
+        "buildings": 72,
+        "certainty": {
+          "confirmed": 93,
+          "probable": 35
+        }
+      },
+      "candidate_history": {
+        "buildings": 714,
+        "linked": 583,
+        "linked_pct": 81.65,
+        "lots": 404,
+        "records": 3042,
+        "gu_codes": {
+          "11290": 714
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 39,
+        "oa_count": 24,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 58.44,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "anam",
+      "name": "안암·고려대",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:26",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 13,
+      "errors": [],
+      "history": {
+        "buildings": 715,
+        "linked": 474,
+        "linked_pct": 66.29,
+        "lots": 384,
+        "records": 2113,
+        "gu_codes": {
+          "11290": 665,
+          "11230": 50
+        }
+      },
+      "floors": {
+        "units": 111,
+        "buildings": 64,
+        "certainty": {
+          "confirmed": 94,
+          "probable": 17
+        }
+      },
+      "candidate_history": {
+        "buildings": 715,
+        "linked": 511,
+        "linked_pct": 71.47,
+        "lots": 414,
+        "records": 2240,
+        "gu_codes": {
+          "11290": 665,
+          "11230": 50
+        }
+      },
+      "history_link_delta": 37,
+      "history_records_added": 127,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 34,
+        "oa_count": 22,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 58.44,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "cheongdam",
+      "name": "청담동 명품거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:27",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 15,
+      "errors": [],
+      "history": {
+        "buildings": 641,
+        "linked": 558,
+        "linked_pct": 87.05,
+        "lots": 500,
+        "records": 3495,
+        "gu_codes": {
+          "11680": 641
+        }
+      },
+      "floors": {
+        "units": 372,
+        "buildings": 164,
+        "certainty": {
+          "confirmed": 301,
+          "probable": 71
+        }
+      },
+      "candidate_history": {
+        "buildings": 641,
+        "linked": 558,
+        "linked_pct": 87.05,
+        "lots": 500,
+        "records": 3495,
+        "gu_codes": {
+          "11680": 641
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 77,
+        "oa_count": 31,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 68.87,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "dosan",
+      "name": "도산공원",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:30",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 13,
+      "errors": [],
+      "history": {
+        "buildings": 1096,
+        "linked": 967,
+        "linked_pct": 88.23,
+        "lots": 902,
+        "records": 7487,
+        "gu_codes": {
+          "11680": 1096
+        }
+      },
+      "floors": {
+        "units": 587,
+        "buildings": 280,
+        "certainty": {
+          "confirmed": 472,
+          "probable": 115
+        }
+      },
+      "candidate_history": {
+        "buildings": 1096,
+        "linked": 967,
+        "linked_pct": 88.23,
+        "lots": 902,
+        "records": 7487,
+        "gu_codes": {
+          "11680": 1096
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 1,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 108,
+        "oa_count": 25,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 55.86,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "nonhyeon",
+      "name": "논현동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:33",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 17,
+      "errors": [],
+      "history": {
+        "buildings": 842,
+        "linked": 337,
+        "linked_pct": 40.02,
+        "lots": 323,
+        "records": 3030,
+        "gu_codes": {
+          "11650": 452,
+          "11680": 390
+        }
+      },
+      "floors": {
+        "units": 278,
+        "buildings": 125,
+        "certainty": {
+          "confirmed": 223,
+          "probable": 55
+        }
+      },
+      "candidate_history": {
+        "buildings": 842,
+        "linked": 728,
+        "linked_pct": 86.46,
+        "lots": 700,
+        "records": 5870,
+        "gu_codes": {
+          "11650": 452,
+          "11680": 390
+        }
+      },
+      "history_link_delta": 391,
+      "history_records_added": 2840,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 85,
+        "oa_count": 37,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 70.4,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "teheran",
+      "name": "역삼·테헤란로",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:36",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 24,
+      "errors": [],
+      "history": {
+        "buildings": 876,
+        "linked": 707,
+        "linked_pct": 80.71,
+        "lots": 672,
+        "records": 5956,
+        "gu_codes": {
+          "11680": 876
+        }
+      },
+      "floors": {
+        "units": 285,
+        "buildings": 147,
+        "certainty": {
+          "confirmed": 242,
+          "probable": 43
+        }
+      },
+      "candidate_history": {
+        "buildings": 876,
+        "linked": 707,
+        "linked_pct": 80.71,
+        "lots": 672,
+        "records": 5956,
+        "gu_codes": {
+          "11680": 876
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 105,
+        "oa_count": 31,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 72.97,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "seolleung",
+      "name": "선릉",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:40",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 7,
+      "errors": [],
+      "history": {
+        "buildings": 847,
+        "linked": 757,
+        "linked_pct": 89.37,
+        "lots": 712,
+        "records": 8528,
+        "gu_codes": {
+          "11680": 847
+        }
+      },
+      "floors": {
+        "units": 309,
+        "buildings": 148,
+        "certainty": {
+          "confirmed": 269,
+          "probable": 40
+        }
+      },
+      "candidate_history": {
+        "buildings": 847,
+        "linked": 757,
+        "linked_pct": 89.37,
+        "lots": 712,
+        "records": 8528,
+        "gu_codes": {
+          "11680": 847
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 3,
+      "history_records_removed": 3,
+      "footfall": {
+        "cells": 108,
+        "oa_count": 42,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 72.97,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yongsan",
+      "name": "용산역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:41",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 29,
+      "errors": [],
+      "history": {
+        "buildings": 409,
+        "linked": 331,
+        "linked_pct": 80.93,
+        "lots": 222,
+        "records": 4133,
+        "gu_codes": {
+          "11170": 409
+        }
+      },
+      "floors": {
+        "units": 40,
+        "buildings": 21,
+        "certainty": {
+          "confirmed": 31,
+          "probable": 9
+        }
+      },
+      "candidate_history": {
+        "buildings": 409,
+        "linked": 331,
+        "linked_pct": 80.93,
+        "lots": 222,
+        "records": 4133,
+        "gu_codes": {
+          "11170": 409
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 33,
+        "oa_count": 9,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 40.32,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "namdaemun",
+      "name": "남대문시장",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:41",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 22,
+      "errors": [],
+      "history": {
+        "buildings": 386,
+        "linked": 264,
+        "linked_pct": 68.39,
+        "lots": 222,
+        "records": 5392,
+        "gu_codes": {
+          "11140": 386
+        }
+      },
+      "floors": {
+        "units": 109,
+        "buildings": 50,
+        "certainty": {
+          "confirmed": 78,
+          "probable": 31
+        }
+      },
+      "candidate_history": {
+        "buildings": 386,
+        "linked": 264,
+        "linked_pct": 68.39,
+        "lots": 222,
+        "records": 5392,
+        "gu_codes": {
+          "11140": 386
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 36,
+        "oa_count": 13,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 77.42,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "cityhall",
+      "name": "시청역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:42",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 41,
+      "errors": [],
+      "history": {
+        "buildings": 635,
+        "linked": 570,
+        "linked_pct": 89.76,
+        "lots": 415,
+        "records": 10949,
+        "gu_codes": {
+          "11140": 634,
+          "11110": 1
+        }
+      },
+      "floors": {
+        "units": 94,
+        "buildings": 45,
+        "certainty": {
+          "confirmed": 75,
+          "probable": 19
+        }
+      },
+      "candidate_history": {
+        "buildings": 635,
+        "linked": 570,
+        "linked_pct": 89.76,
+        "lots": 415,
+        "records": 10949,
+        "gu_codes": {
+          "11140": 634,
+          "11110": 1
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 77,
+        "oa_count": 9,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 97.1,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "jamsilsaenae",
+      "name": "잠실새내",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:43",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 7,
+      "errors": [],
+      "history": {
+        "buildings": 415,
+        "linked": 402,
+        "linked_pct": 96.87,
+        "lots": 316,
+        "records": 4602,
+        "gu_codes": {
+          "11710": 415
+        }
+      },
+      "floors": {
+        "units": 78,
+        "buildings": 45,
+        "certainty": {
+          "confirmed": 65,
+          "probable": 13
+        }
+      },
+      "candidate_history": {
+        "buildings": 415,
+        "linked": 402,
+        "linked_pct": 96.87,
+        "lots": 316,
+        "records": 4602,
+        "gu_codes": {
+          "11710": 415
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 28,
+        "oa_count": 15,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 34.34,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "garak",
+      "name": "가락시장",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:44",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 0,
+      "errors": [],
+      "history": {
+        "buildings": 284,
+        "linked": 279,
+        "linked_pct": 98.24,
+        "lots": 21,
+        "records": 2317,
+        "gu_codes": {
+          "11710": 284
+        }
+      },
+      "floors": {
+        "units": 18,
+        "buildings": 7,
+        "certainty": {
+          "confirmed": 14,
+          "probable": 4
+        }
+      },
+      "candidate_history": {
+        "buildings": 284,
+        "linked": 279,
+        "linked_pct": 98.24,
+        "lots": 21,
+        "records": 2317,
+        "gu_codes": {
+          "11710": 284
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 8,
+        "oa_count": 4,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 31.65,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "jangan",
+      "name": "장안동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:45",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 5,
+      "errors": [],
+      "history": {
+        "buildings": 313,
+        "linked": 269,
+        "linked_pct": 85.94,
+        "lots": 208,
+        "records": 2662,
+        "gu_codes": {
+          "11230": 313
+        }
+      },
+      "floors": {
+        "units": 65,
+        "buildings": 36,
+        "certainty": {
+          "confirmed": 57,
+          "probable": 8
+        }
+      },
+      "candidate_history": {
+        "buildings": 313,
+        "linked": 269,
+        "linked_pct": 85.94,
+        "lots": 208,
+        "records": 2662,
+        "gu_codes": {
+          "11230": 313
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 36,
+        "oa_count": 22,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 34.47,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gongdeok",
+      "name": "공덕역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:46",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 7,
+      "errors": [],
+      "history": {
+        "buildings": 427,
+        "linked": 385,
+        "linked_pct": 90.16,
+        "lots": 244,
+        "records": 3890,
+        "gu_codes": {
+          "11440": 426,
+          "11170": 1
+        }
+      },
+      "floors": {
+        "units": 60,
+        "buildings": 39,
+        "certainty": {
+          "confirmed": 50,
+          "probable": 10
+        }
+      },
+      "candidate_history": {
+        "buildings": 427,
+        "linked": 385,
+        "linked_pct": 90.16,
+        "lots": 244,
+        "records": 3890,
+        "gu_codes": {
+          "11440": 426,
+          "11170": 1
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 42,
+        "oa_count": 21,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 59.84,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gunja",
+      "name": "군자역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:47",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 4,
+      "errors": [],
+      "history": {
+        "buildings": 435,
+        "linked": 366,
+        "linked_pct": 84.14,
+        "lots": 347,
+        "records": 1830,
+        "gu_codes": {
+          "11215": 435
+        }
+      },
+      "floors": {
+        "units": 118,
+        "buildings": 55,
+        "certainty": {
+          "confirmed": 95,
+          "probable": 23
+        }
+      },
+      "candidate_history": {
+        "buildings": 435,
+        "linked": 366,
+        "linked_pct": 84.14,
+        "lots": 347,
+        "records": 1830,
+        "gu_codes": {
+          "11215": 435
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 53,
+        "oa_count": 33,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 36.59,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "chungmuro",
+      "name": "충무로",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:50",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 44,
+      "errors": [],
+      "history": {
+        "buildings": 2034,
+        "linked": 1293,
+        "linked_pct": 63.57,
+        "lots": 1052,
+        "records": 4652,
+        "gu_codes": {
+          "11140": 2034
+        }
+      },
+      "floors": {
+        "units": 357,
+        "buildings": 171,
+        "certainty": {
+          "confirmed": 275,
+          "probable": 82
+        }
+      },
+      "candidate_history": {
+        "buildings": 2034,
+        "linked": 1293,
+        "linked_pct": 63.57,
+        "lots": 1052,
+        "records": 4652,
+        "gu_codes": {
+          "11140": 2034
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 111,
+        "oa_count": 23,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 51.74,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "nambu",
+      "name": "남부터미널",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:52",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 9,
+      "errors": [],
+      "history": {
+        "buildings": 483,
+        "linked": 347,
+        "linked_pct": 71.84,
+        "lots": 301,
+        "records": 2874,
+        "gu_codes": {
+          "11650": 483
+        }
+      },
+      "floors": {
+        "units": 123,
+        "buildings": 64,
+        "certainty": {
+          "confirmed": 99,
+          "probable": 24
+        }
+      },
+      "candidate_history": {
+        "buildings": 483,
+        "linked": 347,
+        "linked_pct": 71.84,
+        "lots": 301,
+        "records": 2874,
+        "gu_codes": {
+          "11650": 483
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 69,
+        "oa_count": 29,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.29,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "kyunghee",
+      "name": "경희대",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:53",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 510,
+        "linked": 416,
+        "linked_pct": 81.57,
+        "lots": 356,
+        "records": 2603,
+        "gu_codes": {
+          "11230": 510
+        }
+      },
+      "floors": {
+        "units": 78,
+        "buildings": 52,
+        "certainty": {
+          "confirmed": 64,
+          "probable": 14
+        }
+      },
+      "candidate_history": {
+        "buildings": 510,
+        "linked": 416,
+        "linked_pct": 81.57,
+        "lots": 356,
+        "records": 2603,
+        "gu_codes": {
+          "11230": 510
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 46,
+        "oa_count": 28,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 50.36,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "wangsimni",
+      "name": "왕십리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:54",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 50,
+      "errors": [],
+      "history": {
+        "buildings": 987,
+        "linked": 838,
+        "linked_pct": 84.9,
+        "lots": 585,
+        "records": 4576,
+        "gu_codes": {
+          "11200": 987
+        }
+      },
+      "floors": {
+        "units": 175,
+        "buildings": 100,
+        "certainty": {
+          "confirmed": 137,
+          "probable": 38
+        }
+      },
+      "candidate_history": {
+        "buildings": 987,
+        "linked": 838,
+        "linked_pct": 84.9,
+        "lots": 585,
+        "records": 4576,
+        "gu_codes": {
+          "11200": 987
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 88,
+        "oa_count": 52,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 43.91,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sadang",
+      "name": "사당역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:56",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 5,
+      "errors": [],
+      "history": {
+        "buildings": 346,
+        "linked": 159,
+        "linked_pct": 45.95,
+        "lots": 147,
+        "records": 956,
+        "gu_codes": {
+          "11590": 124,
+          "11650": 181,
+          "11620": 41
+        }
+      },
+      "floors": {
+        "units": 69,
+        "buildings": 37,
+        "certainty": {
+          "confirmed": 53,
+          "probable": 16
+        }
+      },
+      "candidate_history": {
+        "buildings": 346,
+        "linked": 314,
+        "linked_pct": 90.75,
+        "lots": 280,
+        "records": 1993,
+        "gu_codes": {
+          "11590": 124,
+          "11650": 181,
+          "11620": 41
+        }
+      },
+      "history_link_delta": 155,
+      "history_records_added": 1037,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 31,
+        "oa_count": 17,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 48.07,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sukmyung",
+      "name": "숙대입구",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:57",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 21,
+      "errors": [],
+      "history": {
+        "buildings": 600,
+        "linked": 443,
+        "linked_pct": 73.83,
+        "lots": 382,
+        "records": 1929,
+        "gu_codes": {
+          "11170": 600
+        }
+      },
+      "floors": {
+        "units": 129,
+        "buildings": 76,
+        "certainty": {
+          "confirmed": 108,
+          "probable": 21
+        }
+      },
+      "candidate_history": {
+        "buildings": 600,
+        "linked": 444,
+        "linked_pct": 74.0,
+        "lots": 383,
+        "records": 1930,
+        "gu_codes": {
+          "11170": 600
+        }
+      },
+      "history_link_delta": 1,
+      "history_records_added": 1,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 50,
+        "oa_count": 22,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 45.0,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "hyehwa",
+      "name": "혜화·대학로",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:58",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 13,
+      "errors": [],
+      "history": {
+        "buildings": 866,
+        "linked": 725,
+        "linked_pct": 83.72,
+        "lots": 581,
+        "records": 3387,
+        "gu_codes": {
+          "11110": 844,
+          "11290": 22
+        }
+      },
+      "floors": {
+        "units": 209,
+        "buildings": 105,
+        "certainty": {
+          "confirmed": 163,
+          "probable": 46
+        }
+      },
+      "candidate_history": {
+        "buildings": 866,
+        "linked": 739,
+        "linked_pct": 85.33,
+        "lots": 595,
+        "records": 3439,
+        "gu_codes": {
+          "11110": 844,
+          "11290": 22
+        }
+      },
+      "history_link_delta": 14,
+      "history_records_added": 52,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 62,
+        "oa_count": 27,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 60.03,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "dangsan",
+      "name": "당산",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:48:58",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 244,
+        "linked": 203,
+        "linked_pct": 83.2,
+        "lots": 152,
+        "records": 1493,
+        "gu_codes": {
+          "11560": 244
+        }
+      },
+      "floors": {
+        "units": 49,
+        "buildings": 22,
+        "certainty": {
+          "confirmed": 42,
+          "probable": 7
+        }
+      },
+      "candidate_history": {
+        "buildings": 244,
+        "linked": 203,
+        "linked_pct": 83.2,
+        "lots": 152,
+        "records": 1491,
+        "gu_codes": {
+          "11560": 244
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 2,
+      "footfall": {
+        "cells": 23,
+        "oa_count": 11,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 41.82,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "miasageori",
+      "name": "미아사거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:01",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 15,
+      "errors": [],
+      "history": {
+        "buildings": 779,
+        "linked": 508,
+        "linked_pct": 65.21,
+        "lots": 398,
+        "records": 3895,
+        "gu_codes": {
+          "11290": 155,
+          "11305": 624
+        }
+      },
+      "floors": {
+        "units": 113,
+        "buildings": 71,
+        "certainty": {
+          "confirmed": 92,
+          "probable": 21
+        }
+      },
+      "candidate_history": {
+        "buildings": 779,
+        "linked": 640,
+        "linked_pct": 82.16,
+        "lots": 492,
+        "records": 7853,
+        "gu_codes": {
+          "11290": 155,
+          "11305": 624
+        }
+      },
+      "history_link_delta": 132,
+      "history_records_added": 3960,
+      "history_records_removed": 2,
+      "footfall": {
+        "cells": 75,
+        "oa_count": 40,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 40.49,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "suyu",
+      "name": "수유",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:05",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 44,
+      "errors": [],
+      "history": {
+        "buildings": 1137,
+        "linked": 992,
+        "linked_pct": 87.25,
+        "lots": 751,
+        "records": 6430,
+        "gu_codes": {
+          "11305": 1137
+        }
+      },
+      "floors": {
+        "units": 150,
+        "buildings": 79,
+        "certainty": {
+          "confirmed": 120,
+          "probable": 30
+        }
+      },
+      "candidate_history": {
+        "buildings": 1137,
+        "linked": 992,
+        "linked_pct": 87.25,
+        "lots": 751,
+        "records": 6429,
+        "gu_codes": {
+          "11305": 1137
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 101,
+        "oa_count": 60,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 39.62,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "bulgwang",
+      "name": "불광",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:07",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 2,
+      "errors": [],
+      "history": {
+        "buildings": 576,
+        "linked": 442,
+        "linked_pct": 76.74,
+        "lots": 341,
+        "records": 3293,
+        "gu_codes": {
+          "11380": 576
+        }
+      },
+      "floors": {
+        "units": 109,
+        "buildings": 58,
+        "certainty": {
+          "confirmed": 83,
+          "probable": 26
+        }
+      },
+      "candidate_history": {
+        "buildings": 576,
+        "linked": 442,
+        "linked_pct": 76.74,
+        "lots": 341,
+        "records": 3293,
+        "gu_codes": {
+          "11380": 576
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 54,
+        "oa_count": 33,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 37.99,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yeonsinnae",
+      "name": "연신내",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:09",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 9,
+      "errors": [],
+      "history": {
+        "buildings": 846,
+        "linked": 745,
+        "linked_pct": 88.06,
+        "lots": 650,
+        "records": 4727,
+        "gu_codes": {
+          "11380": 846
+        }
+      },
+      "floors": {
+        "units": 167,
+        "buildings": 110,
+        "certainty": {
+          "confirmed": 143,
+          "probable": 24
+        }
+      },
+      "candidate_history": {
+        "buildings": 846,
+        "linked": 745,
+        "linked_pct": 88.06,
+        "lots": 650,
+        "records": 4727,
+        "gu_codes": {
+          "11380": 846
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 79,
+        "oa_count": 51,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.84,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "hwagok",
+      "name": "화곡",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:13",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 588,
+        "linked": 475,
+        "linked_pct": 80.78,
+        "lots": 433,
+        "records": 3185,
+        "gu_codes": {
+          "11500": 587,
+          "11470": 1
+        }
+      },
+      "floors": {
+        "units": 108,
+        "buildings": 66,
+        "certainty": {
+          "confirmed": 89,
+          "probable": 19
+        }
+      },
+      "candidate_history": {
+        "buildings": 588,
+        "linked": 476,
+        "linked_pct": 80.95,
+        "lots": 434,
+        "records": 3194,
+        "gu_codes": {
+          "11500": 587,
+          "11470": 1
+        }
+      },
+      "history_link_delta": 1,
+      "history_records_added": 9,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 76,
+        "oa_count": 50,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 30.15,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "kkachisan",
+      "name": "까치산",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:17",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 0,
+      "errors": [],
+      "history": {
+        "buildings": 576,
+        "linked": 462,
+        "linked_pct": 80.21,
+        "lots": 391,
+        "records": 2788,
+        "gu_codes": {
+          "11500": 569,
+          "11470": 7
+        }
+      },
+      "floors": {
+        "units": 115,
+        "buildings": 58,
+        "certainty": {
+          "confirmed": 94,
+          "probable": 21
+        }
+      },
+      "candidate_history": {
+        "buildings": 576,
+        "linked": 467,
+        "linked_pct": 81.08,
+        "lots": 392,
+        "records": 2789,
+        "gu_codes": {
+          "11500": 569,
+          "11470": 7
+        }
+      },
+      "history_link_delta": 5,
+      "history_records_added": 1,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 68,
+        "oa_count": 53,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 31.84,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "mokdong-yc",
+      "name": "목동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:19",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 4,
+      "errors": [],
+      "history": {
+        "buildings": 482,
+        "linked": 388,
+        "linked_pct": 80.5,
+        "lots": 309,
+        "records": 3861,
+        "gu_codes": {
+          "11470": 445,
+          "11500": 37
+        }
+      },
+      "floors": {
+        "units": 104,
+        "buildings": 65,
+        "certainty": {
+          "confirmed": 87,
+          "probable": 17
+        }
+      },
+      "candidate_history": {
+        "buildings": 482,
+        "linked": 407,
+        "linked_pct": 84.44,
+        "lots": 326,
+        "records": 3930,
+        "gu_codes": {
+          "11470": 445,
+          "11500": 37
+        }
+      },
+      "history_link_delta": 19,
+      "history_records_added": 69,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 57,
+        "oa_count": 34,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 41.85,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sanggye",
+      "name": "상계",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:22",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 21,
+      "errors": [],
+      "history": {
+        "buildings": 690,
+        "linked": 591,
+        "linked_pct": 85.65,
+        "lots": 414,
+        "records": 3505,
+        "gu_codes": {
+          "11350": 690
+        }
+      },
+      "floors": {
+        "units": 102,
+        "buildings": 58,
+        "certainty": {
+          "confirmed": 86,
+          "probable": 16
+        }
+      },
+      "candidate_history": {
+        "buildings": 690,
+        "linked": 592,
+        "linked_pct": 85.8,
+        "lots": 415,
+        "records": 3507,
+        "gu_codes": {
+          "11350": 690
+        }
+      },
+      "history_link_delta": 1,
+      "history_records_added": 2,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 64,
+        "oa_count": 53,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 24.41,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "sangbong",
+      "name": "상봉",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:25",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 10,
+      "errors": [],
+      "history": {
+        "buildings": 611,
+        "linked": 507,
+        "linked_pct": 82.98,
+        "lots": 412,
+        "records": 2573,
+        "gu_codes": {
+          "11260": 611
+        }
+      },
+      "floors": {
+        "units": 88,
+        "buildings": 40,
+        "certainty": {
+          "confirmed": 69,
+          "probable": 19
+        }
+      },
+      "candidate_history": {
+        "buildings": 611,
+        "linked": 507,
+        "linked_pct": 82.98,
+        "lots": 412,
+        "records": 2573,
+        "gu_codes": {
+          "11260": 611
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 76,
+        "oa_count": 51,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 45.86,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "oryudong",
+      "name": "오류동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:26",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 6,
+      "errors": [],
+      "history": {
+        "buildings": 352,
+        "linked": 273,
+        "linked_pct": 77.56,
+        "lots": 231,
+        "records": 1917,
+        "gu_codes": {
+          "11530": 352
+        }
+      },
+      "floors": {
+        "units": 49,
+        "buildings": 24,
+        "certainty": {
+          "confirmed": 37,
+          "probable": 12
+        }
+      },
+      "candidate_history": {
+        "buildings": 352,
+        "linked": 273,
+        "linked_pct": 77.56,
+        "lots": 231,
+        "records": 1917,
+        "gu_codes": {
+          "11530": 352
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 48,
+        "oa_count": 32,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 55.7,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "doksan",
+      "name": "독산",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:27",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 2,
+      "errors": [],
+      "history": {
+        "buildings": 244,
+        "linked": 176,
+        "linked_pct": 72.13,
+        "lots": 79,
+        "records": 1214,
+        "gu_codes": {
+          "11545": 244
+        }
+      },
+      "floors": {
+        "units": 27,
+        "buildings": 14,
+        "certainty": {
+          "confirmed": 20,
+          "probable": 7
+        }
+      },
+      "candidate_history": {
+        "buildings": 244,
+        "linked": 176,
+        "linked_pct": 72.13,
+        "lots": 79,
+        "records": 1214,
+        "gu_codes": {
+          "11545": 244
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 22,
+        "oa_count": 12,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 31.76,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "cheonho",
+      "name": "천호",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:30",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 20,
+      "errors": [],
+      "history": {
+        "buildings": 672,
+        "linked": 458,
+        "linked_pct": 68.15,
+        "lots": 413,
+        "records": 4785,
+        "gu_codes": {
+          "11710": 104,
+          "11740": 568
+        }
+      },
+      "floors": {
+        "units": 113,
+        "buildings": 61,
+        "certainty": {
+          "confirmed": 91,
+          "probable": 22
+        }
+      },
+      "candidate_history": {
+        "buildings": 672,
+        "linked": 549,
+        "linked_pct": 81.7,
+        "lots": 497,
+        "records": 5245,
+        "gu_codes": {
+          "11710": 104,
+          "11740": 568
+        }
+      },
+      "history_link_delta": 91,
+      "history_records_added": 460,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 82,
+        "oa_count": 50,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": true
+      },
+      "rent": {
+        "per_m2_krw_thousand": 57.58,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "bangbang",
+      "name": "뱅뱅사거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:33",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 3,
+      "errors": [],
+      "history": {
+        "buildings": 729,
+        "linked": 277,
+        "linked_pct": 38.0,
+        "lots": 198,
+        "records": 2709,
+        "gu_codes": {
+          "11650": 306,
+          "11680": 423
+        }
+      },
+      "floors": {
+        "units": 166,
+        "buildings": 88,
+        "certainty": {
+          "confirmed": 129,
+          "probable": 37
+        }
+      },
+      "candidate_history": {
+        "buildings": 729,
+        "linked": 628,
+        "linked_pct": 86.15,
+        "lots": 508,
+        "records": 5482,
+        "gu_codes": {
+          "11650": 306,
+          "11680": 423
+        }
+      },
+      "history_link_delta": 351,
+      "history_records_added": 2773,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 83,
+        "oa_count": 39,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.29,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gildong",
+      "name": "길동역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:36",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 8,
+      "errors": [],
+      "history": {
+        "buildings": 590,
+        "linked": 515,
+        "linked_pct": 87.29,
+        "lots": 438,
+        "records": 4610,
+        "gu_codes": {
+          "11740": 590
+        }
+      },
+      "floors": {
+        "units": 91,
+        "buildings": 48,
+        "certainty": {
+          "confirmed": 73,
+          "probable": 18
+        }
+      },
+      "candidate_history": {
+        "buildings": 590,
+        "linked": 515,
+        "linked_pct": 87.29,
+        "lots": 438,
+        "records": 4610,
+        "gu_codes": {
+          "11740": 590
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 84,
+        "oa_count": 52,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 57.58,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "nowon",
+      "name": "노원역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:37",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 27,
+      "errors": [],
+      "history": {
+        "buildings": 409,
+        "linked": 381,
+        "linked_pct": 93.15,
+        "lots": 283,
+        "records": 6727,
+        "gu_codes": {
+          "11350": 409
+        }
+      },
+      "floors": {
+        "units": 41,
+        "buildings": 25,
+        "certainty": {
+          "confirmed": 35,
+          "probable": 6
+        }
+      },
+      "candidate_history": {
+        "buildings": 409,
+        "linked": 381,
+        "linked_pct": 93.15,
+        "lots": 283,
+        "records": 6727,
+        "gu_codes": {
+          "11350": 409
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 48,
+        "oa_count": 21,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 24.41,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gurodigital",
+      "name": "구로디지털단지",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:42",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 6,
+      "errors": [],
+      "history": {
+        "buildings": 534,
+        "linked": 254,
+        "linked_pct": 47.57,
+        "lots": 170,
+        "records": 3305,
+        "gu_codes": {
+          "11530": 343,
+          "11545": 10,
+          "11620": 134,
+          "11560": 47
+        }
+      },
+      "floors": {
+        "units": 107,
+        "buildings": 34,
+        "certainty": {
+          "confirmed": 75,
+          "probable": 32
+        }
+      },
+      "candidate_history": {
+        "buildings": 534,
+        "linked": 391,
+        "linked_pct": 73.22,
+        "lots": 259,
+        "records": 4615,
+        "gu_codes": {
+          "11530": 343,
+          "11545": 10,
+          "11620": 134,
+          "11560": 47
+        }
+      },
+      "history_link_delta": 137,
+      "history_records_added": 1310,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 43,
+        "oa_count": 25,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 31.76,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "ydp-gucheong",
+      "name": "영등포구청역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:43",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 29,
+      "errors": [],
+      "history": {
+        "buildings": 669,
+        "linked": 493,
+        "linked_pct": 73.69,
+        "lots": 372,
+        "records": 2854,
+        "gu_codes": {
+          "11560": 669
+        }
+      },
+      "floors": {
+        "units": 99,
+        "buildings": 49,
+        "certainty": {
+          "confirmed": 74,
+          "probable": 25
+        }
+      },
+      "candidate_history": {
+        "buildings": 669,
+        "linked": 493,
+        "linked_pct": 73.69,
+        "lots": 372,
+        "records": 2848,
+        "gu_codes": {
+          "11560": 669
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 6,
+      "footfall": {
+        "cells": 68,
+        "oa_count": 32,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 41.82,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "seochoyeok",
+      "name": "서초역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:45",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 32,
+      "errors": [],
+      "history": {
+        "buildings": 623,
+        "linked": 533,
+        "linked_pct": 85.55,
+        "lots": 477,
+        "records": 3461,
+        "gu_codes": {
+          "11650": 623
+        }
+      },
+      "floors": {
+        "units": 125,
+        "buildings": 72,
+        "certainty": {
+          "confirmed": 106,
+          "probable": 19
+        }
+      },
+      "candidate_history": {
+        "buildings": 623,
+        "linked": 533,
+        "linked_pct": 85.55,
+        "lots": 477,
+        "records": 3461,
+        "gu_codes": {
+          "11650": 623
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 69,
+        "oa_count": 20,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.29,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "poi",
+      "name": "포이사거리",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:46",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 1,
+      "errors": [],
+      "history": {
+        "buildings": 880,
+        "linked": 506,
+        "linked_pct": 57.5,
+        "lots": 482,
+        "records": 2866,
+        "gu_codes": {
+          "11650": 646,
+          "11680": 234
+        }
+      },
+      "floors": {
+        "units": 312,
+        "buildings": 165,
+        "certainty": {
+          "confirmed": 264,
+          "probable": 48
+        }
+      },
+      "candidate_history": {
+        "buildings": 880,
+        "linked": 696,
+        "linked_pct": 79.09,
+        "lots": 668,
+        "records": 3817,
+        "gu_codes": {
+          "11650": 646,
+          "11680": 234
+        }
+      },
+      "history_link_delta": 190,
+      "history_records_added": 951,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 98,
+        "oa_count": 41,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.29,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "dogok",
+      "name": "도곡동",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:48",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 6,
+      "errors": [],
+      "history": {
+        "buildings": 642,
+        "linked": 517,
+        "linked_pct": 80.53,
+        "lots": 432,
+        "records": 3140,
+        "gu_codes": {
+          "11680": 642
+        }
+      },
+      "floors": {
+        "units": 128,
+        "buildings": 76,
+        "certainty": {
+          "confirmed": 102,
+          "probable": 26
+        }
+      },
+      "candidate_history": {
+        "buildings": 642,
+        "linked": 517,
+        "linked_pct": 80.53,
+        "lots": 432,
+        "records": 3140,
+        "gu_codes": {
+          "11680": 642
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 75,
+        "oa_count": 39,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 72.97,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "yangjae",
+      "name": "양재역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:52",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 9,
+      "errors": [],
+      "history": {
+        "buildings": 549,
+        "linked": 352,
+        "linked_pct": 64.12,
+        "lots": 310,
+        "records": 2214,
+        "gu_codes": {
+          "11650": 392,
+          "11680": 157
+        }
+      },
+      "floors": {
+        "units": 157,
+        "buildings": 77,
+        "certainty": {
+          "confirmed": 129,
+          "probable": 28
+        }
+      },
+      "candidate_history": {
+        "buildings": 549,
+        "linked": 486,
+        "linked_pct": 88.52,
+        "lots": 419,
+        "records": 3143,
+        "gu_codes": {
+          "11650": 392,
+          "11680": 157
+        }
+      },
+      "history_link_delta": 134,
+      "history_records_added": 930,
+      "history_records_removed": 1,
+      "footfall": {
+        "cells": 63,
+        "oa_count": 25,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 44.29,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "jamsil-tour",
+      "name": "잠실 관광특구",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:52",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 22,
+      "errors": [],
+      "history": {
+        "buildings": 377,
+        "linked": 350,
+        "linked_pct": 92.84,
+        "lots": 304,
+        "records": 3223,
+        "gu_codes": {
+          "11710": 377
+        }
+      },
+      "floors": {
+        "units": 95,
+        "buildings": 49,
+        "certainty": {
+          "confirmed": 79,
+          "probable": 16
+        }
+      },
+      "candidate_history": {
+        "buildings": 377,
+        "linked": 350,
+        "linked_pct": 92.84,
+        "lots": 304,
+        "records": 3223,
+        "gu_codes": {
+          "11710": 377
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 49,
+        "oa_count": 35,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 35.99,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "daerim",
+      "name": "대림역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:58",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 11,
+      "errors": [],
+      "history": {
+        "buildings": 642,
+        "linked": 464,
+        "linked_pct": 72.27,
+        "lots": 393,
+        "records": 2783,
+        "gu_codes": {
+          "11530": 93,
+          "11560": 549
+        }
+      },
+      "floors": {
+        "units": 123,
+        "buildings": 70,
+        "certainty": {
+          "confirmed": 100,
+          "probable": 23
+        }
+      },
+      "candidate_history": {
+        "buildings": 642,
+        "linked": 548,
+        "linked_pct": 85.36,
+        "lots": 456,
+        "records": 3505,
+        "gu_codes": {
+          "11530": 93,
+          "11560": 549
+        }
+      },
+      "history_link_delta": 84,
+      "history_records_added": 725,
+      "history_records_removed": 3,
+      "footfall": {
+        "cells": 88,
+        "oa_count": 49,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 67.9,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "guui",
+      "name": "구의역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:49:59",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 16,
+      "errors": [],
+      "history": {
+        "buildings": 590,
+        "linked": 511,
+        "linked_pct": 86.61,
+        "lots": 436,
+        "records": 2966,
+        "gu_codes": {
+          "11215": 590
+        }
+      },
+      "floors": {
+        "units": 69,
+        "buildings": 37,
+        "certainty": {
+          "confirmed": 57,
+          "probable": 12
+        }
+      },
+      "candidate_history": {
+        "buildings": 590,
+        "linked": 511,
+        "linked_pct": 86.61,
+        "lots": 436,
+        "records": 2966,
+        "gu_codes": {
+          "11215": 590
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 69,
+        "oa_count": 48,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 51.45,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "maebong",
+      "name": "매봉역",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:50:02",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 6,
+      "errors": [],
+      "history": {
+        "buildings": 580,
+        "linked": 312,
+        "linked_pct": 53.79,
+        "lots": 258,
+        "records": 1489,
+        "gu_codes": {
+          "11680": 377,
+          "11650": 203
+        }
+      },
+      "floors": {
+        "units": 189,
+        "buildings": 93,
+        "certainty": {
+          "confirmed": 156,
+          "probable": 33
+        }
+      },
+      "candidate_history": {
+        "buildings": 580,
+        "linked": 475,
+        "linked_pct": 81.9,
+        "lots": 408,
+        "records": 2320,
+        "gu_codes": {
+          "11680": 377,
+          "11650": 203
+        }
+      },
+      "history_link_delta": 163,
+      "history_records_added": 831,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 66,
+        "oa_count": 29,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 72.97,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "gurojeonhwa",
+      "name": "구로전화국",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:50:08",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 1,
+      "errors": [],
+      "history": {
+        "buildings": 729,
+        "linked": 21,
+        "linked_pct": 2.88,
+        "lots": 10,
+        "records": 76,
+        "gu_codes": {
+          "11620": 385,
+          "11545": 256,
+          "11530": 88
+        }
+      },
+      "floors": {
+        "units": 217,
+        "buildings": 99,
+        "certainty": {
+          "confirmed": 163,
+          "probable": 54
+        }
+      },
+      "candidate_history": {
+        "buildings": 729,
+        "linked": 544,
+        "linked_pct": 74.62,
+        "lots": 405,
+        "records": 3676,
+        "gu_codes": {
+          "11620": 385,
+          "11545": 256,
+          "11530": 88
+        }
+      },
+      "history_link_delta": 523,
+      "history_records_added": 3676,
+      "history_records_removed": 76,
+      "footfall": {
+        "cells": 78,
+        "oa_count": 47,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 31.76,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    },
+    {
+      "slug": "bonseobu",
+      "name": "본서부병원",
+      "tier": "Tier1(대장)",
+      "built_at": "2026-10-11T13:50:11",
+      "reference_coverage_pct": 100.0,
+      "excluded_unknown": 8,
+      "errors": [],
+      "history": {
+        "buildings": 597,
+        "linked": 433,
+        "linked_pct": 72.53,
+        "lots": 392,
+        "records": 3230,
+        "gu_codes": {
+          "11380": 597
+        }
+      },
+      "floors": {
+        "units": 171,
+        "buildings": 88,
+        "certainty": {
+          "confirmed": 147,
+          "probable": 24
+        }
+      },
+      "candidate_history": {
+        "buildings": 597,
+        "linked": 433,
+        "linked_pct": 72.53,
+        "lots": 392,
+        "records": 3230,
+        "gu_codes": {
+          "11380": 597
+        }
+      },
+      "history_link_delta": 0,
+      "history_records_added": 0,
+      "history_records_removed": 0,
+      "footfall": {
+        "cells": 77,
+        "oa_count": 57,
+        "invalid_profiles": [],
+        "sample_days": [
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "adong_hourly_available": false
+      },
+      "rent": {
+        "per_m2_krw_thousand": 37.99,
+        "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
+        "quarter": "20262",
+        "floor_factor": {
+          "B2": 0.6,
+          "B1": 0.75,
+          "1F": 1.0,
+          "2F": 0.45,
+          "3F": 0.4,
+          "4F+": 0.3
+        },
+        "note": "거점 대표 임대료와 층 계수 추정. 개별 매물 실측 월세가 아니다."
+      }
+    }
+  ],
+  "deployment": {
+    "untracked": [],
+    "ignored_by_rules": [],
+    "ignore_exit_code": 1
+  }
+}
