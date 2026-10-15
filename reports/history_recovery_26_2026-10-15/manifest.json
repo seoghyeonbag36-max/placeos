@@ -1,0 +1,44 @@
+{
+  "scope": "26 approved licensing records only",
+  "source": "localdata",
+  "production_gold_already_present": 26,
+  "production_gold_added": 0,
+  "candidate_restored": 26,
+  "files": [
+    {
+      "slug": "garosugil",
+      "verified_in_production_gold": 23,
+      "restored_in_candidate": 23,
+      "production_gold_sha256": "e112453c5e42cd496561a90f20aec8a104dce4f778a594cbf9aa6af2d38221b1",
+      "candidate_before_sha256": "f40ee08df57373117bbc9db12edd95ba2efbdf626f6b9119f5517c4f25d47e2f",
+      "candidate_after_sha256": "38188018293e958c8f7c08924e593f101d946e7e2db3c9a9a2e3b1f891945a5c"
+    },
+    {
+      "slug": "miasageori",
+      "verified_in_production_gold": 2,
+      "restored_in_candidate": 2,
+      "production_gold_sha256": "d3211cb0091cf5ea4ac843efa9e93d43007393f224491350332971c53624f152",
+      "candidate_before_sha256": "3e14976fab4ec5f9583c0bd82390335c531e2cf257642c0a38900590189d7db2",
+      "candidate_after_sha256": "03b8c1ba96a5fa84469cde93b3f7b721a7dc52eb05149ea6b28603264ee49d5a"
+    },
+    {
+      "slug": "suyu",
+      "verified_in_production_gold": 1,
+      "restored_in_candidate": 1,
+      "production_gold_sha256": "2a66313a3ff506b2e88a4d8677da1604e8a1dcd19bc1d8ae65aae103aaaaa4bc",
+      "candidate_before_sha256": "dc63d5f2c2d36a2fd4147c14d45443e9b070314ef0afd1d6c54fed8fbfd4d7df",
+      "candidate_after_sha256": "9f48675fd9a974c8965487d1a26a10567062adf17c6b0f518faa121c7eed50fe"
+    }
+  ],
+  "validation": {
+    "targeted_data_tests": 26,
+    "production_backend_tests": 7,
+    "candidate_backend_tests": 7,
+    "production_service_record_checks": 26,
+    "candidate_service_record_checks": 26,
+    "pending_records_still_rejected": 24,
+    "all_81_hub_audit_errors": 0
+  },
+  "approved_26_gold_status": "promoted",
+  "gold_promotion_receipt": "reports/history_gold_promotion_26_2026-10-15.json"
+}

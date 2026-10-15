@@ -1,0 +1,43 @@
+{
+  "status": "promoted_to_gold",
+  "promoted_at": "2026-10-15T22:07:52+09:00",
+  "source": "localdata",
+  "approved_records": 26,
+  "records_added": 0,
+  "already_present": 26,
+  "files": [
+    {
+      "hub": "garosugil",
+      "path": "data/gold/garosugil/building_history.json",
+      "gold_status": "promoted",
+      "records": 23,
+      "added": 0,
+      "before_sha256": "e112453c5e42cd496561a90f20aec8a104dce4f778a594cbf9aa6af2d38221b1",
+      "after_sha256": "e112453c5e42cd496561a90f20aec8a104dce4f778a594cbf9aa6af2d38221b1"
+    },
+    {
+      "hub": "miasageori",
+      "path": "data/gold/miasageori/building_history.json",
+      "gold_status": "promoted",
+      "records": 2,
+      "added": 0,
+      "before_sha256": "d3211cb0091cf5ea4ac843efa9e93d43007393f224491350332971c53624f152",
+      "after_sha256": "d3211cb0091cf5ea4ac843efa9e93d43007393f224491350332971c53624f152"
+    },
+    {
+      "hub": "suyu",
+      "path": "data/gold/suyu/building_history.json",
+      "gold_status": "promoted",
+      "records": 1,
+      "added": 0,
+      "before_sha256": "2a66313a3ff506b2e88a4d8677da1604e8a1dcd19bc1d8ae65aae103aaaaa4bc",
+      "after_sha256": "2a66313a3ff506b2e88a4d8677da1604e8a1dcd19bc1d8ae65aae103aaaaa4bc"
+    }
+  ],
+  "validation": {
+    "gold_service_records": 26,
+    "backend_history_tests_passed": 7,
+    "tracked_files": 3,
+    "ignored_files": 0
+  }
+}

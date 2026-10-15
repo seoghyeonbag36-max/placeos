@@ -1,0 +1,850 @@
+{
+  "[\"강남구\", \"압구정로2길\", false, 46, 0]": {
+    "1168010700105100011": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\garosugil\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"강남대로101길\", false, 31, 0]": {
+    "1165010600100110003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\garosugil\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"양화로\", false, 166, 0]": {
+    "1144012100101650001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hongdae\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeonnam\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"양화로\", false, 140, 0]": {
+    "1144012100101620015": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hongdae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"어울마당로\", false, 74, 0]": {
+    "1144012000103640017": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hongdae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"연희로\", false, 5, 0]": {
+    "1144012100101470003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hongdae\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeonnam\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"연남로\", false, 44, 0]": {
+    "1144012400105730000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeonnam\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"종로\", false, 51, 0]": {
+    "1111013800100060000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\ikseon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"사직로8길\", false, 24, 0]": {
+    "1111011800100710000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\seochon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"자하문로\", false, 65, 0]": {
+    "1111011100100190030": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\seochon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"을지로\", false, 100, 0]": {
+    "1114010500102030000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\chungmuro\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\euljiro\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\myeongdong\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"퇴계로\", false, 188, 0]": {
+    "1114013700100360002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\chungmuro\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\euljiro\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\myeongdong\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"삼일대로17길\", false, 52, 0]": {
+    "1111013500100190020": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\euljiro\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"강남대로\", false, 435, 0]": {
+    "1165010800113050005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gangnam\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"강남대로83길\", false, 22, 0]": {
+    "1165010700107350033": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gangnam\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nonhyeon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"양화로8길\", false, 5, 0]": {
+    "1144012000103950046": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hapjeong\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"독막로\", false, 22, 0]": {
+    "1144012200103640008": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hapjeong\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"포은로\", false, 90, 0]": {
+    "1144012300104030005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mangwon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"월드컵로14길\", false, 5, 0]": {
+    "1144012000104410017": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mangwon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"동호로\", false, 408, 0]": {
+    "1111016300101820004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dongdaemun\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gwangjang\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"을지로\", false, 251, 0]": {
+    "1114014800100180131": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dongdaemun\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"다산로\", false, 240, 0]": {
+    "1114016200101010007": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dongdaemun\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"종로44길\", false, 94, 0]": {
+    "1111017400104030003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dongdaemun\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"오금로\", false, 58, 0]": {
+    "1171010200100110010": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jamsil\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"능동로\", false, 123, 0]": {
+    "1121510700100050005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\konkuk\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"능동로5길\", false, 41, 0]": {
+    "1121510500105530320": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\konkuk\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"국제금융로\", false, 70, 0]": {
+    "1156011000100430000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"국제금융로6길\", false, 30, 0]": {
+    "1156011000100350002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"의사당대로\", false, 108, 0]": {
+    "1156011000100370000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"국제금융로8길\", false, 19, 0]": {
+    "1156011000100440021": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"여의대로\", false, 128, 0]": {
+    "1156011000100200000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"여의대방로69길\", false, 28, 0]": {
+    "1156011000100430001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"여의공원로\", false, 101, 0]": {
+    "1156011000100120000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeouido\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"경인로\", false, 661, 0]": {
+    "1153010100103370000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mullae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"선유로\", false, 59, 0]": {
+    "1156012400100050002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mullae\\2026-10-10\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\ydp-gucheong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"도신로29길\", false, 28, 0]": {
+    "1156010100106470000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mullae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"신반포로\", false, 165, 0]": {
+    "1165010600100750013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\banpo\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"고무래로\", false, 10, 6]": {
+    "1165010700100580006": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\banpo\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"고무래로\", false, 12, 0]": {
+    "1165010700100580009": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\banpo\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"백범로\", false, 13, 0]": {
+    "1144011000100310090": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 174, 0]": {
+    "1144010800100120023": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 92, 0]": {
+    "1144011000100570004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"서강로\", false, 144, 0]": {
+    "1144011000101070001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"신촌로\", false, 99, 0]": {
+    "1141011600100180050": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"서강로\", false, 138, 0]": {
+    "1144011000101060082": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 102, 1]": {
+    "1144011000100310135": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"서강로\", false, 106, 0]": {
+    "1144011100100660002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"연세로\", false, 36, 0]": {
+    "1141011600100310004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"연세로4길\", false, 1, 0]": {
+    "1141011600100180010": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 84, 0]": {
+    "1144011000100490001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"신촌역로\", false, 10, 0]": {
+    "1141011200101010007": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"이화여대길\", false, 33, 0]": {
+    "1141011200100560074": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 102, 0]": {
+    "1144011000100310016": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"신촌로\", false, 62, 0]": {
+    "1144012100101850001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"숭문길\", false, 220, 0]": {
+    "1144010900100090130": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"대흥로\", false, 186, 2]": {
+    "1144010800100020039": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"숭문길\", false, 221, 0]": {
+    "1144010800100020007": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sinchon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서대문구\", \"연희로27길\", false, 106, 0]": {
+    "1141011700100920015": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yeonhui\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"관악구\", \"관악로\", false, 144, 0]": {
+    "1162010100115970001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sharosugil\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"관악구\", \"신림로64길\", false, 29, 0]": {
+    "1162010200114210022": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sillim\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"동작구\", \"장승배기로\", false, 146, 0]": {
+    "1159010100102360013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\noryangjin\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"성북구\", \"보문로30가길\", false, 12, 0]": {
+    "1129012100100470002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\anam\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"신반포로47길\", false, 77, 0]": {
+    "1165010600100260014": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nonhyeon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"주흥길\", false, 64, 27]": {
+    "1165010700107180007": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nonhyeon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"강남대로85길\", false, 17, 0]": {
+    "1165010700107350011": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nonhyeon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"사평대로55길\", false, 140, 0]": {
+    "1165010700107080003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nonhyeon\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강남구\", \"선릉로90길\", false, 46, 0]": {
+    "1168010600108900028": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\seolleung\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강남구\", \"역삼로69길\", false, 28, 0]": {
+    "1168010600109010000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\seolleung\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"세종대로21길\", false, 55, 0]": {
+    "1114010300100760001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cityhall\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"올림픽로\", false, 145, 0]": {
+    "1171010100100220006": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jamsilsaenae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"백제고분로\", false, 75, 0]": {
+    "1171010100101960000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jamsilsaenae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"석촌호수로\", false, 68, 0]": {
+    "1171010100102080013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jamsilsaenae\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"중대로\", false, 97, 0]": {
+    "1171010700100990005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\garak\\2026-08-08\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"동대문구\", \"답십리로\", false, 288, 0]": {
+    "1123010600103680001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jangan\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"만리재로\", false, 15, 0]": {
+    "1144010200102560013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"마포대로\", false, 68, 0]": {
+    "1144010400105630000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"큰우물로\", false, 53, 0]": {
+    "1144010900101740014": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"도화길\", false, 32, 0]": {
+    "1144010400105500000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"마포대로\", false, 44, 0]": {
+    "1144010400100370000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"마포구\", \"도화길\", false, 10, 0]": {
+    "1144010400102500001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gongdeok\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"능동로36길\", false, 25, 0]": {
+    "1121510200102220009": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gunja\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"능동로32길\", false, 90, 0]": {
+    "1121510200102410002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gunja\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중구\", \"필동로1길\", false, 10, 0]": {
+    "1114013900100390019": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\chungmuro\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"동대문구\", \"회기로21길\", false, 13, 0]": {
+    "1123010800100160020": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\kyunghee\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"성동구\", \"무학로2길\", false, 7, 0]": {
+    "1120010400103430008": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\wangsimni\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"과천대로\", false, 946, 0]": {
+    "1165010100125250000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sadang\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"방배천로\", false, 5, 3]": {
+    "1165010100104450005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sadang\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"종로구\", \"성균관로\", false, 1, 0]": {
+    "1111017100102300000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hyehwa\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"양평로\", false, 53, 0]": {
+    "1156011500100320002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dangsan\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"영신로\", false, 259, 0]": {
+    "1156011500100110047": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\dangsan\\2026-10-10\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강북구\", \"월계로7나길\", false, 4, 0]": {
+    "1130510100100520001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\miasageori\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강북구\", \"덕릉로28길\", false, 45, 0]": {
+    "1130510100101870040": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\suyu\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강북구\", \"한천로\", false, 1013, 0]": {
+    "1130510200104170106": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\suyu\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"은평구\", \"진흥로\", false, 156, 0]": {
+    "1138010200101310158": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\bulgwang\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"은평구\", \"통일로\", false, 723, 0]": {
+    "1138010600100140018": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\bulgwang\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"양천구\", \"화곡로\", false, 105, 0]": {
+    "1147010300100230014": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\hwagok\\2026-08-31\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강서구\", \"가로공원로76길\", false, 94, 0]": {
+    "1150010300103590024": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\kkachisan\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강서구\", \"가로공원로76가길\", false, 2, 0]": {
+    "1150010300103540065": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\kkachisan\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"양천구\", \"신정중앙로\", false, 95, 0]": {
+    "1147010100108870008": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mokdong-yc\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"양천구\", \"오목로\", false, 207, 0]": {
+    "1147010100109030027": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\mokdong-yc\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"망우로\", false, 346, 0]": {
+    "1126010200100810005": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"상봉로\", false, 131, 0]": {
+    "1126010200105010000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"봉우재로33길\", false, 72, 0]": {
+    "1126010200100880093": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"면목로\", false, 476, 0]": {
+    "1126010200101070026": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"망우로50길\", false, 16, 0]": {
+    "1126010200100900000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"망우로42길\", false, 22, 0]": {
+    "1126010200101190047": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"동일로129길\", false, 16, 0]": {
+    "1126010300103040034": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"봉우재로33길\", false, 92, 0]": {
+    "1126010200100880025": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"상봉중앙로8나길\", false, 35, 0]": {
+    "1126010200102790015": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"봉우재로19길\", false, 7, 0]": {
+    "1126010200101260022": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"봉화산로24길\", false, 28, 0]": {
+    "1126010300101510003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"봉화산로30길\", false, 31, 0]": {
+    "1126010300101330000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"중랑구\", \"상봉중앙로8가길\", false, 43, 0]": {
+    "1126010200102760088": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\sangbong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"경인로\", false, 176, 0]": {
+    "1153010800100440010": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\oryudong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"오류로8길\", false, 16, 0]": {
+    "1153010800101560000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\oryudong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"서해안로\", false, 2296, 0]": {
+    "1153010800101590000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\oryudong\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"금천구\", \"가산디지털2로\", false, 18, 0]": {
+    "1154510100103270024": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\doksan\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로157길\", false, 14, 0]": {
+    "1174010900104530019": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1006, 0]": {
+    "1174010800100640013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"구천면로\", false, 192, 0]": {
+    "1174010900104250003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"올림픽로\", false, 651, 0]": {
+    "1174010900104310004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"올림픽로\", false, 665, 0]": {
+    "1174010900104320002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"구천면로\", false, 232, 0]": {
+    "1174010900105300000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1012, 0]": {
+    "1174010800100620004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"올림픽로\", false, 622, 0]": {
+    "1174010800100780010": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로157길\", false, 49, 0]": {
+    "1174010900104120003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"풍성로37길\", false, 41, 0]": {
+    "1174010800101390004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"구천면로\", false, 155, 0]": {
+    "1174010900103390045": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천중로12길\", false, 23, 0]": {
+    "1174010900103610002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로159길\", false, 3, 0]": {
+    "1174010900104530012": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"올림픽로\", false, 602, 0]": {
+    "1174010800101120069": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\cheonho\\2026-09-01\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강남구\", \"강남대로\", false, 338, 0]": {
+    "1168010100108310011": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\bangbang\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1200, 0]": {
+    "1174010600100510000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"명일로\", false, 176, 0]": {
+    "1174010600106300000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로\", false, 1471, 0]": {
+    "1174010500103890002": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로\", false, 1481, 0]": {
+    "1174010500103780006": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1107, 0]": {
+    "1174010500104450001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1123, 0]": {
+    "1174010500104550000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로\", false, 1500, 0]": {
+    "1174010500103660013": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1195, 0]": {
+    "1174010500101500001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로\", false, 1131, 0]": {
+    "1174010500104570004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"천호대로168길\", false, 35, 0]": {
+    "1174010800101960008": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로112길\", false, 5, 0]": {
+    "1174010500103900020": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로112길\", false, 9, 0]": {
+    "1174010500103900027": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"진황도로\", false, 87, 0]": {
+    "1174010500104150016": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"양재대로110길\", false, 8, 0]": {
+    "1174010500104320000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"진황도로\", false, 107, 0]": {
+    "1174010500104130054": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"진황도로29길\", false, 19, 0]": {
+    "1174010900101670177": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"강동구\", \"풍성로63길\", false, 47, 0]": {
+    "1174010600104900012": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gildong\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"노원구\", \"노해로\", false, 494, 0]": {
+    "1135010500107240003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nowon\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"노원구\", \"상계로\", false, 97, 0]": {
+    "1135010500103660003": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\nowon\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"디지털로32길\", false, 79, 0]": {
+    "1153010200111240072": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gurodigital\\2026-09-22\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gurojeonhwa\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"서초대로\", false, 307, 0]": {
+    "1165010800116920004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\seochoyeok\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"남부순환로356길\", false, 33, 0]": {
+    "1165010200100080071": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\maebong\\2026-09-22\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\yangjae\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"마방로10길\", false, 53, 0]": {
+    "1165010200102790009": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"논현로17길\", false, 3, 0]": {
+    "1165010200102770000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"마방로10길\", false, 34, 5]": {
+    "1165010200102730011": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"논현로31길\", false, 30, 0]": {
+    "1165010200100060025": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\maebong\\2026-09-22\\bldg_ledger_raw.json",
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"서초구\", \"마방로10길\", false, 48, 0]": {
+    "1165010200102730004": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\poi\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"송파구\", \"백제고분로\", false, 490, 0]": {
+    "1171011100101490009": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\jamsil-tour\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"대림로\", false, 157, 0]": {
+    "1156013300107100010": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\daerim\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"영등포구\", \"대림로29길\", false, 19, 0]": {
+    "1156013300107140001": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\daerim\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"구로구\", \"구로중앙로\", false, 16, 0]": {
+    "1153010200101380015": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\daerim\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"아차산로\", false, 355, 0]": {
+    "1121510500107790000": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\guui\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"자양로18길\", false, 67, 0]": {
+    "1121510300102420080": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\guui\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"광진구\", \"구의로\", false, 32, 0]": {
+    "1121510300102230053": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\guui\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  },
+  "[\"금천구\", \"독산로\", false, 318, 0]": {
+    "1154510200109740021": [
+      "C:\\Users\\USER\\Documents\\Claude\\Projects\\SpaceOS\\spaceos\\data\\bronze\\gurojeonhwa\\2026-09-22\\bldg_ledger_raw.json"
+    ]
+  }
+}
