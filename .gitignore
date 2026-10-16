@@ -264,3 +264,6 @@ docs/papers/library/private/
 .claude/skills/swarm-*/
 .claude/skills/v3-*/
 .claude/skills/verification-quality/
+
+# 방문자 의견 내보내기 — 연락처(개인정보)가 들어 있다. 공개 저장소라 커밋 금지
+exports/
