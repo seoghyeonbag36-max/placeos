@@ -1,0 +1,554 @@
+{
+  "source": "기존 소상공인 상가정보 Gold 그래프 · GNN 서빙 산출물 · 저장된 학습 실험(합성값 없음)",
+  "inputs": {
+    "nodes": {
+      "path": "data\\gold\\platform13\\platform_store_graph_nodes.parquet",
+      "sha256": "55d7334b090d703f0bda7dad3f998ffee252eb9f7b0fd68a780821edcc069392"
+    },
+    "edges": {
+      "path": "data\\gold\\platform13\\platform_store_graph_edges.parquet",
+      "sha256": "75a368158cc4272d99fa96f6f570cf46deabbf33e7dba00a9b74d50d373ca005"
+    },
+    "serving": {
+      "path": "data\\gold\\platform_industry_recommend.json",
+      "sha256": "cb182152a13f07aa63ccf4e525134d2a0d61d69d0698023f8df48e5e998aa58b"
+    },
+    "experiment": {
+      "path": "ml\\reports\\industry_detail_experiment_2026-10-16.json",
+      "sha256": "f8ed0cb08bab582fc95b82958beceb2173575c3cb1c6212c28fdc2c8cdac3bb9"
+    },
+    "industry_contract": {
+      "path": "apps\\backend\\app\\services\\business_fit.py",
+      "sha256": "d982f538f42c52fcbc3fb228155a71164b8bca9bcd5ca3bd457fe9ab36fa6f8f"
+    },
+    "detail_contract": {
+      "path": "data\\config\\industry_details.py",
+      "sha256": "caf099889449bb4196ab88f2dc38e7c165fc2a9defeea8e00dce16069e1dbd4e"
+    }
+  },
+  "active_hubs_n": 81,
+  "served_labels": [
+    "병원",
+    "숙박",
+    "약국",
+    "음식점",
+    "카페",
+    "편의점"
+  ],
+  "graph_nodes_n": 219542,
+  "experiment_created_at": "2026-10-16T08:38:17.395291+00:00",
+  "experiment_inputs_match": true,
+  "experiment_serving_status": "review_required",
+  "unsupported": [
+    {
+      "key": "bar",
+      "label": "술집",
+      "reason": "no_model_mapping",
+      "model_label": null,
+      "details": [
+        {
+          "key": "bar_cooking",
+          "label": "요리 주점",
+          "source_names": [
+            "요리 주점"
+          ],
+          "gold_graph_nodes": 7065,
+          "experiment": {
+            "key": "bar_cooking",
+            "train_n": 3441,
+            "test_n": 1147,
+            "status": "evaluation_only",
+            "precision": 0.2123352165725047,
+            "recall": 0.3931996512641674,
+            "top3": 0.8029642545771578,
+            "baseline_top3": 0.6826503923278117
+          }
+        },
+        {
+          "key": "bar_beer",
+          "label": "생맥주 전문점",
+          "source_names": [
+            "생맥주 전문"
+          ],
+          "gold_graph_nodes": 1769,
+          "experiment": {
+            "key": "bar_beer",
+            "train_n": 853,
+            "test_n": 285,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.07368421052631578,
+            "baseline_top3": 0.08771929824561403
+          }
+        },
+        {
+          "key": "bar_entertainment",
+          "label": "유흥 주점",
+          "source_names": [
+            "일반 유흥 주점",
+            "무도 유흥 주점"
+          ],
+          "gold_graph_nodes": 2112,
+          "experiment": {
+            "key": "bar_entertainment",
+            "train_n": 986,
+            "test_n": 329,
+            "status": "evaluation_only",
+            "precision": 0.3793103448275862,
+            "recall": 0.03343465045592705,
+            "top3": 0.19756838905775076,
+            "baseline_top3": 0.14893617021276595
+          }
+        }
+      ]
+    },
+    {
+      "key": "beauty",
+      "label": "미용·네일",
+      "reason": "no_model_mapping",
+      "model_label": null,
+      "details": [
+        {
+          "key": "beauty_hair",
+          "label": "미용실",
+          "source_names": [
+            "미용실"
+          ],
+          "gold_graph_nodes": 8663,
+          "experiment": {
+            "key": "beauty_hair",
+            "train_n": 4486,
+            "test_n": 1496,
+            "status": "evaluation_only",
+            "precision": 0.2111388196176226,
+            "recall": 0.5093582887700535,
+            "top3": 0.9251336898395722,
+            "baseline_top3": 0.9050802139037433
+          }
+        },
+        {
+          "key": "beauty_nail",
+          "label": "네일숍",
+          "source_names": [
+            "네일숍"
+          ],
+          "gold_graph_nodes": 2554,
+          "experiment": {
+            "key": "beauty_nail",
+            "train_n": 1314,
+            "test_n": 438,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.0136986301369863,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "beauty_skin",
+          "label": "피부 관리실",
+          "source_names": [
+            "피부 관리실"
+          ],
+          "gold_graph_nodes": 3976,
+          "experiment": {
+            "key": "beauty_skin",
+            "train_n": 1983,
+            "test_n": 662,
+            "status": "evaluation_only",
+            "precision": 0.15151515151515152,
+            "recall": 0.0755287009063444,
+            "top3": 0.3580060422960725,
+            "baseline_top3": 0.23716012084592145
+          }
+        }
+      ]
+    },
+    {
+      "key": "fashion",
+      "label": "옷·잡화",
+      "reason": "no_model_mapping",
+      "model_label": null,
+      "details": [
+        {
+          "key": "fashion_clothes",
+          "label": "의류",
+          "source_names": [
+            "기타 의류 소매업",
+            "여성 의류 소매업",
+            "남성 의류 소매업",
+            "유아용 의류 소매업",
+            "한복 소매업"
+          ],
+          "gold_graph_nodes": 13610,
+          "experiment": {
+            "key": "fashion_clothes",
+            "train_n": 6401,
+            "test_n": 2134,
+            "status": "evaluation_only",
+            "precision": 0.46533416614615863,
+            "recall": 0.6982193064667291,
+            "top3": 0.8626991565135895,
+            "baseline_top3": 0.8865979381443299
+          }
+        },
+        {
+          "key": "fashion_shoes",
+          "label": "신발",
+          "source_names": [
+            "신발 소매업"
+          ],
+          "gold_graph_nodes": 1288,
+          "experiment": {
+            "key": "fashion_shoes",
+            "train_n": 592,
+            "test_n": 198,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.51010101010101,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "fashion_bags",
+          "label": "가방",
+          "source_names": [
+            "가방 소매업"
+          ],
+          "gold_graph_nodes": 1015,
+          "experiment": {
+            "key": "fashion_bags",
+            "train_n": 427,
+            "test_n": 143,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.13986013986013987,
+            "baseline_top3": 0.09090909090909091
+          }
+        },
+        {
+          "key": "fashion_accessories",
+          "label": "액세서리·잡화",
+          "source_names": [
+            "액세서리/잡화 소매업",
+            "시계/귀금속 소매업"
+          ],
+          "gold_graph_nodes": 3785,
+          "experiment": {
+            "key": "fashion_accessories",
+            "train_n": 1531,
+            "test_n": 511,
+            "status": "evaluation_only",
+            "precision": 0.5656565656565656,
+            "recall": 0.2191780821917808,
+            "top3": 0.46966731898238745,
+            "baseline_top3": 0.3913894324853229
+          }
+        }
+      ]
+    },
+    {
+      "key": "education",
+      "label": "학원·교육",
+      "reason": "no_model_mapping",
+      "model_label": null,
+      "details": [
+        {
+          "key": "education_subject",
+          "label": "입시·교과학원",
+          "source_names": [
+            "입시·교과학원"
+          ],
+          "gold_graph_nodes": 4228,
+          "experiment": {
+            "key": "education_subject",
+            "train_n": 2301,
+            "test_n": 768,
+            "status": "evaluation_only",
+            "precision": 0.2982635342185904,
+            "recall": 0.3802083333333333,
+            "top3": 0.6653645833333334,
+            "baseline_top3": 0.46875
+          }
+        },
+        {
+          "key": "education_language",
+          "label": "외국어학원",
+          "source_names": [
+            "외국어학원"
+          ],
+          "gold_graph_nodes": 670,
+          "experiment": {
+            "key": "education_language",
+            "train_n": 310,
+            "test_n": 104,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.038461538461538464,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "education_art",
+          "label": "미술학원",
+          "source_names": [
+            "미술학원"
+          ],
+          "gold_graph_nodes": 934,
+          "experiment": {
+            "key": "education_art",
+            "train_n": 491,
+            "test_n": 164,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.10975609756097561,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "education_music",
+          "label": "음악학원",
+          "source_names": [
+            "음악학원"
+          ],
+          "gold_graph_nodes": 1289,
+          "experiment": {
+            "key": "education_music",
+            "train_n": 678,
+            "test_n": 227,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.022026431718061675,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "education_vocational",
+          "label": "직업·자격 교육",
+          "source_names": [
+            "기타 기술/직업 훈련학원",
+            "컴퓨터 학원",
+            "전문자격/고시학원"
+          ],
+          "gold_graph_nodes": 2126,
+          "experiment": {
+            "key": "education_vocational",
+            "train_n": 1039,
+            "test_n": 347,
+            "status": "evaluation_only",
+            "precision": 0.15384615384615385,
+            "recall": 0.011527377521613832,
+            "top3": 0.05475504322766571,
+            "baseline_top3": 0.011527377521613832
+          }
+        },
+        {
+          "key": "education_study",
+          "label": "독서실·스터디 카페",
+          "source_names": [
+            "독서실/스터디 카페"
+          ],
+          "gold_graph_nodes": 1112,
+          "experiment": {
+            "key": "education_study",
+            "train_n": 593,
+            "test_n": 198,
+            "status": "evaluation_only",
+            "precision": 0.0,
+            "recall": 0.0,
+            "top3": 0.12626262626262627,
+            "baseline_top3": 0.14646464646464646
+          }
+        }
+      ]
+    },
+    {
+      "key": "fitness",
+      "label": "운동·여가",
+      "reason": "no_model_mapping",
+      "model_label": null,
+      "details": [
+        {
+          "key": "fitness_gym",
+          "label": "헬스장",
+          "source_names": [
+            "헬스장"
+          ],
+          "gold_graph_nodes": 1774,
+          "experiment": {
+            "key": "fitness_gym",
+            "train_n": 898,
+            "test_n": 300,
+            "status": "evaluation_only",
+            "precision": 0.1,
+            "recall": 0.0033333333333333335,
+            "top3": 0.02,
+            "baseline_top3": 0.016666666666666666
+          }
+        },
+        {
+          "key": "fitness_studio",
+          "label": "요가·필라테스",
+          "source_names": [
+            "요가/필라테스 학원"
+          ],
+          "gold_graph_nodes": 2497,
+          "experiment": {
+            "key": "fitness_studio",
+            "train_n": 1272,
+            "test_n": 425,
+            "status": "evaluation_only",
+            "precision": 0.030303030303030304,
+            "recall": 0.002352941176470588,
+            "top3": 0.08941176470588236,
+            "baseline_top3": 0.007058823529411765
+          }
+        },
+        {
+          "key": "fitness_golf",
+          "label": "골프 연습장",
+          "source_names": [
+            "골프 연습장"
+          ],
+          "gold_graph_nodes": 660,
+          "experiment": {
+            "key": "fitness_golf",
+            "train_n": 326,
+            "test_n": 109,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.0,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "fitness_sports",
+          "label": "라켓·구기 시설",
+          "source_names": [
+            "테니스장",
+            "당구장",
+            "볼링장",
+            "탁구장",
+            "스쿼시/라켓볼장"
+          ],
+          "gold_graph_nodes": 1523,
+          "experiment": {
+            "key": "fitness_sports",
+            "train_n": 768,
+            "test_n": 256,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.00390625,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "leisure_pc",
+          "label": "PC방",
+          "source_names": [
+            "PC방"
+          ],
+          "gold_graph_nodes": 539,
+          "experiment": {
+            "key": "leisure_pc",
+            "train_n": 285,
+            "test_n": 96,
+            "status": "evaluation_only",
+            "precision": null,
+            "recall": 0.0,
+            "top3": 0.0,
+            "baseline_top3": 0.0
+          }
+        },
+        {
+          "key": "leisure_karaoke",
+          "label": "노래방",
+          "source_names": [
+            "노래방"
+          ],
+          "gold_graph_nodes": 2549,
+          "experiment": {
+            "key": "leisure_karaoke",
+            "train_n": 1330,
+            "test_n": 444,
+            "status": "evaluation_only",
+            "precision": 0.2511013215859031,
+            "recall": 0.12837837837837837,
+            "top3": 0.49774774774774777,
+            "baseline_top3": 0.17117117117117117
+          }
+        }
+      ]
+    },
+    {
+      "key": "culture",
+      "label": "전시·공연",
+      "reason": "absent_from_served_vocabulary",
+      "model_label": "문화시설",
+      "details": [
+        {
+          "key": "culture_performance",
+          "label": "공연장",
+          "source_names": [],
+          "gold_graph_nodes": null,
+          "experiment": {
+            "key": "culture_performance",
+            "train_n": 0,
+            "test_n": 0,
+            "status": "no_training_class",
+            "precision": null,
+            "recall": null,
+            "top3": null,
+            "baseline_top3": null
+          }
+        },
+        {
+          "key": "culture_exhibition",
+          "label": "전시장·팝업 대관",
+          "source_names": [],
+          "gold_graph_nodes": null,
+          "experiment": {
+            "key": "culture_exhibition",
+            "train_n": 0,
+            "test_n": 0,
+            "status": "no_training_class",
+            "precision": null,
+            "recall": null,
+            "top3": null,
+            "baseline_top3": null
+          }
+        },
+        {
+          "key": "culture_gallery",
+          "label": "갤러리·작품 판매",
+          "source_names": [],
+          "gold_graph_nodes": null,
+          "experiment": {
+            "key": "culture_gallery",
+            "train_n": 0,
+            "test_n": 0,
+            "status": "no_training_class",
+            "precision": null,
+            "recall": null,
+            "top3": null,
+            "baseline_top3": null
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "그래프 노드 수는 고유 점포 전수나 학습 분할 표본 수가 아니다.",
+    "전시·공연의 null은 분류 대응이 없다는 뜻이며 실제 시설 0개라는 뜻이 아니다.",
+    "저장된 실험의 성능이며 이번 실행에서 재학습한 값이 아니다.",
+    "현존 업종 분류 성능은 상권 순위·매출·생존의 검증을 대신하지 않는다."
+  ]
+}

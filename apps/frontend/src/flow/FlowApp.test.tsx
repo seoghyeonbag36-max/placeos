@@ -148,6 +148,38 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "술집은 상권 순위를 아직 못 드려요" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "상권 직접 고르기" })).toBeTruthy();
+    expect(screen.getByText("추천 모델이 다루지 않는 업종")).toBeTruthy();
+  });
+
+  it("미지원 업종을 선택하면 추천 요청 없이 실제 미지원 사유를 보여 준다", async () => {
+    const api = stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start" }));
+    open("/industry");
+    render(<FlowApp token={null} />);
+    fireEvent.click(await screen.findByRole("radio", { name: /술집/ }));
+    expect(await screen.findByText("추천 모델이 다루지 않는 업종")).toBeTruthy();
+    expect(api.count(/\/ai\/industry-fit/)).toBe(0);
+  });
+
+  it("전시·공연은 모델 어휘 누락 사유를 보여 준다", async () => {
+    const reason = "현재 추천 모델 어휘에 없음('문화시설')";
+    stub([{ match: /\/ai\/industries$/, body: { industries: [
+      { key: "culture", label: "전시·공연", input: "문화시설", model_label: "문화시설", fit_unavailable_reason: reason },
+    ] } }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "culture" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByText(reason)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "상권 직접 고르기" })).toBeTruthy();
+  });
+
+  it("업종 목록 통신 실패를 모델 미지원으로 표시하지 않는다", async () => {
+    stub([{ match: /\/ai\/industries$/, status: 503, body: { detail: "일시 오류" } }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { name: "업종 정보를 불러오지 못했어요" })).toBeTruthy();
+    expect(screen.queryByText(/상권 순위를 아직 못 드려요/)).toBeNull();
   });
 
   it("R2 → Q5 → R3: 상권 소개의 사실 네 줄, 월세 상한 옆 개수, 필터가 제목 개수를 바꾼다", async () => {

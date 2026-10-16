@@ -58,7 +58,10 @@ export function Industry() {
     update((s) => setIndustry(s, key));
     if (goal === "start") {
       // 미리 받기 — R1 이 열릴 때 이미 와 있게(No More Loading)
-      data.prefetch(() => data.industryFit(key), data.districts);
+      if (list.status === "ready" && hasRanking(list.data.find((o) => o.key === key))) {
+        data.prefetch(() => data.industryFit(key));
+      }
+      data.prefetch(data.districts);
       go("/districts");
     } else {
       data.prefetch(data.districts);
@@ -155,7 +158,7 @@ export function HomeDistrict() {
           data.prefetch(() => data.districtIndustries(d.id));
           go("/industries");
         } else {
-          if (state.industryKey && state.industryKey !== "other") data.prefetch(() => data.industryFit(state.industryKey!));
+          if (hasRanking(ind)) data.prefetch(() => data.industryFit(state.industryKey!));
           go("/districts");
         }
       }} />
@@ -201,13 +204,21 @@ export function Districts() {
     return <FlowScreen back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
       title="상권 순위를 세고 있어요"><SkeletonRows n={5} label="상권 순위를 불러오는 중" /></FlowScreen>;
   }
+  if (list.status === "error") {
+    return <FlowScreen back="/industry" caption={caption} title="업종 정보를 불러오지 못했어요">
+      <LoadError what="업종 목록" error={list.error} onRetry={list.retry} />
+    </FlowScreen>;
+  }
   // 모델 밖 업종 — 같은 주소, 다른 결론(가까운 업종 점수로 채우지 않는다)
   if (!ranked || (fit.status === "ready" && (!fit.data.model_covered || fit.data.ranked_n === 0))) {
     return (
       <FlowScreen back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
         title={ind ? `${eun(ind.label)} 상권 순위를 아직 못 드려요` : "상권 순위를 아직 못 드려요"}
-        sub="추천 모델이 배운 업종이 아니라서요. 상권을 직접 고르면 빈 자리와 월세는 볼 수 있어요."
-        cta={<BottomCTA primary={{ label: "상권 직접 고르기", onClick: () => go("/district-search") }} />} />
+        sub="상권을 직접 고르면 빈 자리와 월세는 볼 수 있어요."
+        cta={<BottomCTA primary={{ label: "상권 직접 고르기", onClick: () => go("/district-search") }} />}>
+        <p className="fl-note">{(fit.status === "ready" ? fit.data.fit_unavailable_reason : null)
+          ?? ind?.fit_unavailable_reason ?? "이 업종의 상권 순위를 계산할 자료가 아직 없어요."}</p>
+      </FlowScreen>
     );
   }
   if (fit.status === "error") {
