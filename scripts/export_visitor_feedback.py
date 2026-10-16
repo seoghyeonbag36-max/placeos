@@ -1,7 +1,9 @@
-"""'의견 보내기'(방문자 의견)를 운영 서버에서 받아 CSV(엑셀)로 저장한다.
+"""'의견 보내기'(방문자 의견)를 운영 서버에서 받아 CSV·엑셀(.xlsx)로 저장한다.
 
-python scripts/export_visitor_feedback.py                 # exports/visitor_feedback/visitor_feedback.csv
-python scripts/export_visitor_feedback.py --xlsx          # openpyxl 이 있으면 .xlsx 도 함께
+python scripts/export_visitor_feedback.py                 # exports/visitor_feedback/visitor_feedback.{csv,xlsx}
+python scripts/export_visitor_feedback.py --no-xlsx       # CSV 만
+
+.xlsx 는 openpyxl 이 있어야 만든다(`pip install openpyxl` — 서버 requirements 에는 넣지 않는다).
 
 토큰: 환경변수 ADMIN_TOKEN, 없으면 secrets/admin_token.txt 한 줄(gitignore). 인자로는 받지
 않는다 — 셸 기록에 남는다. 서버는 `GET /api/v1/visitor-feedback`(X-Admin-Token) 이다.
@@ -99,6 +101,7 @@ def write_csv(path: Path, lines: list[list[str]]) -> None:
 def write_xlsx(path: Path, lines: list[list[str]]) -> bool:
     try:
         from openpyxl import Workbook
+        from openpyxl.styles import Alignment
     except ImportError:
         return False
     wb = Workbook()
@@ -109,7 +112,11 @@ def write_xlsx(path: Path, lines: list[list[str]]) -> bool:
         ws.append([guard_cell(c) for c in line])
     for col, width in zip("ABCDEFGH", (20, 10, 60, 24, 24, 10, 10, 34)):
         ws.column_dimensions[col].width = width
+    for row in ws.iter_rows(min_row=2):  # 긴 의견이 한 줄로 잘리지 않게 줄바꿈
+        for cell in row:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
     ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
     wb.save(path)
     return True
 
@@ -118,7 +125,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--base", default=DEFAULT_BASE, help=f"API 주소 (기본 {DEFAULT_BASE})")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT, help="CSV 경로")
-    ap.add_argument("--xlsx", action="store_true", help="같은 이름의 .xlsx 도 만든다(openpyxl 필요)")
+    ap.add_argument("--no-xlsx", action="store_true", help=".xlsx 는 만들지 않는다(CSV 만)")
     args = ap.parse_args()
 
     rows = fetch_all(args.base.rstrip("/"), read_token())
@@ -126,9 +133,9 @@ def main() -> None:
     lines = [to_line(r) for r in rows]
     write_csv(args.out, lines)
     print(f"{len(lines)}건 → {args.out}")
-    if args.xlsx:
+    if not args.no_xlsx:
         xlsx = args.out.with_suffix(".xlsx")
-        print(f"xlsx → {xlsx}" if write_xlsx(xlsx, lines) else "openpyxl 이 없어 xlsx 는 건너뜀 (pip install openpyxl)")
+        print(f"{len(lines)}건 → {xlsx}" if write_xlsx(xlsx, lines) else "openpyxl 이 없어 xlsx 는 건너뜀 (pip install openpyxl)")
 
 
 if __name__ == "__main__":
