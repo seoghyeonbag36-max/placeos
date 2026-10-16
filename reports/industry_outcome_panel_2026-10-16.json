@@ -1,0 +1,296 @@
+{
+  "source_path": "data\\bronze\\platform13\\2026-09-24\\seoul_trdar_selng.json",
+  "source_sha256": "74e907cd6a640c769c202fb71061fe737695104f842d97cd91d84a0c280abd05",
+  "gold_path": "data\\gold\\features\\industry_outcome_panel_2026-10-16.parquet",
+  "gold_sha256": "7496aa370ba3ee7968d96d37477602d501e107637001555d7861c37b6daf0366",
+  "raw_rows": 142984,
+  "rows": 142984,
+  "districts": 81,
+  "quarters": [
+    "20211",
+    "20212",
+    "20213",
+    "20214",
+    "20221",
+    "20222",
+    "20223",
+    "20224",
+    "20231",
+    "20232",
+    "20233",
+    "20234",
+    "20241",
+    "20242",
+    "20243",
+    "20244",
+    "20251",
+    "20252",
+    "20253",
+    "20254",
+    "20261",
+    "20262"
+  ],
+  "missing_sales": 0,
+  "missing_transactions": 0,
+  "industries": [
+    {
+      "industry_code": "CS100001",
+      "industry_name": "한식음식점"
+    },
+    {
+      "industry_code": "CS100002",
+      "industry_name": "중식음식점"
+    },
+    {
+      "industry_code": "CS100010",
+      "industry_name": "커피-음료"
+    },
+    {
+      "industry_code": "CS200007",
+      "industry_name": "치과의원"
+    },
+    {
+      "industry_code": "CS200025",
+      "industry_name": "자동차수리"
+    },
+    {
+      "industry_code": "CS200028",
+      "industry_name": "미용실"
+    },
+    {
+      "industry_code": "CS200031",
+      "industry_name": "세탁소"
+    },
+    {
+      "industry_code": "CS300002",
+      "industry_name": "편의점"
+    },
+    {
+      "industry_code": "CS300003",
+      "industry_name": "컴퓨터및주변장치판매"
+    },
+    {
+      "industry_code": "CS300011",
+      "industry_name": "일반의류"
+    },
+    {
+      "industry_code": "CS100007",
+      "industry_name": "치킨전문점"
+    },
+    {
+      "industry_code": "CS100009",
+      "industry_name": "호프-간이주점"
+    },
+    {
+      "industry_code": "CS200001",
+      "industry_name": "일반교습학원"
+    },
+    {
+      "industry_code": "CS300001",
+      "industry_name": "슈퍼마켓"
+    },
+    {
+      "industry_code": "CS300010",
+      "industry_name": "반찬가게"
+    },
+    {
+      "industry_code": "CS300027",
+      "industry_name": "섬유제품"
+    },
+    {
+      "industry_code": "CS100004",
+      "industry_name": "양식음식점"
+    },
+    {
+      "industry_code": "CS100008",
+      "industry_name": "분식전문점"
+    },
+    {
+      "industry_code": "CS200019",
+      "industry_name": "PC방"
+    },
+    {
+      "industry_code": "CS100003",
+      "industry_name": "일식음식점"
+    },
+    {
+      "industry_code": "CS100006",
+      "industry_name": "패스트푸드점"
+    },
+    {
+      "industry_code": "CS200005",
+      "industry_name": "스포츠 강습"
+    },
+    {
+      "industry_code": "CS200016",
+      "industry_name": "당구장"
+    },
+    {
+      "industry_code": "CS200024",
+      "industry_name": "스포츠클럽"
+    },
+    {
+      "industry_code": "CS200037",
+      "industry_name": "노래방"
+    },
+    {
+      "industry_code": "CS300016",
+      "industry_name": "안경"
+    },
+    {
+      "industry_code": "CS300018",
+      "industry_name": "의약품"
+    },
+    {
+      "industry_code": "CS300022",
+      "industry_name": "화장품"
+    },
+    {
+      "industry_code": "CS300028",
+      "industry_name": "화초"
+    },
+    {
+      "industry_code": "CS100005",
+      "industry_name": "제과점"
+    },
+    {
+      "industry_code": "CS200006",
+      "industry_name": "일반의원"
+    },
+    {
+      "industry_code": "CS200003",
+      "industry_name": "예술학원"
+    },
+    {
+      "industry_code": "CS200002",
+      "industry_name": "외국어학원"
+    },
+    {
+      "industry_code": "CS200008",
+      "industry_name": "한의원"
+    },
+    {
+      "industry_code": "CS200029",
+      "industry_name": "네일숍"
+    },
+    {
+      "industry_code": "CS200030",
+      "industry_name": "피부관리실"
+    },
+    {
+      "industry_code": "CS200033",
+      "industry_name": "부동산중개업"
+    },
+    {
+      "industry_code": "CS300004",
+      "industry_name": "핸드폰"
+    },
+    {
+      "industry_code": "CS300015",
+      "industry_name": "가방"
+    },
+    {
+      "industry_code": "CS300017",
+      "industry_name": "시계및귀금속"
+    },
+    {
+      "industry_code": "CS300021",
+      "industry_name": "문구"
+    },
+    {
+      "industry_code": "CS300033",
+      "industry_name": "철물점"
+    },
+    {
+      "industry_code": "CS200017",
+      "industry_name": "골프연습장"
+    },
+    {
+      "industry_code": "CS300006",
+      "industry_name": "미곡판매"
+    },
+    {
+      "industry_code": "CS300014",
+      "industry_name": "신발"
+    },
+    {
+      "industry_code": "CS300020",
+      "industry_name": "서적"
+    },
+    {
+      "industry_code": "CS300029",
+      "industry_name": "애완동물"
+    },
+    {
+      "industry_code": "CS300043",
+      "industry_name": "전자상거래업"
+    },
+    {
+      "industry_code": "CS300032",
+      "industry_name": "가전제품"
+    },
+    {
+      "industry_code": "CS300007",
+      "industry_name": "육류판매"
+    },
+    {
+      "industry_code": "CS300024",
+      "industry_name": "운동/경기용품"
+    },
+    {
+      "industry_code": "CS300019",
+      "industry_name": "의료기기"
+    },
+    {
+      "industry_code": "CS300009",
+      "industry_name": "청과상"
+    },
+    {
+      "industry_code": "CS200034",
+      "industry_name": "여관"
+    },
+    {
+      "industry_code": "CS300035",
+      "industry_name": "인테리어"
+    },
+    {
+      "industry_code": "CS300036",
+      "industry_name": "조명용품"
+    },
+    {
+      "industry_code": "CS200032",
+      "industry_name": "가전제품수리"
+    },
+    {
+      "industry_code": "CS300031",
+      "industry_name": "가구"
+    },
+    {
+      "industry_code": "CS200026",
+      "industry_name": "자동차미용"
+    },
+    {
+      "industry_code": "CS300008",
+      "industry_name": "수산물판매"
+    },
+    {
+      "industry_code": "CS300026",
+      "industry_name": "완구"
+    },
+    {
+      "industry_code": "CS300025",
+      "industry_name": "자전거 및 기타운송장비"
+    },
+    {
+      "industry_code": "CS200036",
+      "industry_name": "고시원"
+    }
+  ],
+  "usage": "검증용 로컬 패널. 모델 입력·서빙 미연결. 추정매출이며 POS 실측값이 아님.",
+  "limitations": [
+    "여러 거점에 겹친 TRDAR를 거점 간 합산하지 않는다.",
+    "큰 업종·세부 업종 대응은 자동 추정하지 않는다.",
+    "누락된 상권·업종·분기는 0으로 보간하지 않는다.",
+    "정정된 과거 값일 수 있어 당시 이용 가능했던 데이터라는 보장은 없다."
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "status": "experiment_only",
+  "split_sha256": "8955103e017ea643648654d06b25e3ef2ba7680e0f91caf91172cd4e158dcc00",
+  "rows": [
+    {
+      "key": "bar_cooking",
+      "parent": "bar",
+      "label": "요리 주점",
+      "test_n": 1147,
+      "control_top3": 0.8029642545771578,
+      "candidate_top3": 0.7724498692240628,
+      "baseline_top3": 0.6826503923278117,
+      "delta_pp": -3.051,
+      "candidate_recall": 0.4176111595466434
+    },
+    {
+      "key": "bar_beer",
+      "parent": "bar",
+      "label": "생맥주 전문점",
+      "test_n": 285,
+      "control_top3": 0.05964912280701754,
+      "candidate_top3": 0.07719298245614035,
+      "baseline_top3": 0.08771929824561403,
+      "delta_pp": 1.754,
+      "candidate_recall": 0.014035087719298246
+    },
+    {
+      "key": "bar_entertainment",
+      "parent": "bar",
+      "label": "유흥 주점",
+      "test_n": 329,
+      "control_top3": 0.22188449848024316,
+      "candidate_top3": 0.23100303951367782,
+      "baseline_top3": 0.14893617021276595,
+      "delta_pp": 0.912,
+      "candidate_recall": 0.0851063829787234
+    },
+    {
+      "key": "beauty_hair",
+      "parent": "beauty",
+      "label": "미용실",
+      "test_n": 1496,
+      "control_top3": 0.9311497326203209,
+      "candidate_top3": 0.8783422459893048,
+      "baseline_top3": 0.9050802139037433,
+      "delta_pp": -5.281,
+      "candidate_recall": 0.43315508021390375
+    },
+    {
+      "key": "beauty_nail",
+      "parent": "beauty",
+      "label": "네일숍",
+      "test_n": 438,
+      "control_top3": 0.0,
+      "candidate_top3": 0.0684931506849315,
+      "baseline_top3": 0.0,
+      "delta_pp": 6.849,
+      "candidate_recall": 0.0091324200913242
+    },
+    {
+      "key": "beauty_skin",
+      "parent": "beauty",
+      "label": "피부 관리실",
+      "test_n": 662,
+      "control_top3": 0.31268882175226587,
+      "candidate_top3": 0.459214501510574,
+      "baseline_top3": 0.23716012084592145,
+      "delta_pp": 14.653,
+      "candidate_recall": 0.13746223564954682
+    },
+    {
+      "key": "fashion_clothes",
+      "parent": "fashion",
+      "label": "의류",
+      "test_n": 2134,
+      "control_top3": 0.8561387066541706,
+      "candidate_top3": 0.8641049671977507,
+      "baseline_top3": 0.8865979381443299,
+      "delta_pp": 0.797,
+      "candidate_recall": 0.6968134957825679
+    },
+    {
+      "key": "fashion_shoes",
+      "parent": "fashion",
+      "label": "신발",
+      "test_n": 198,
+      "control_top3": 0.4797979797979798,
+      "candidate_top3": 0.4898989898989899,
+      "baseline_top3": 0.0,
+      "delta_pp": 1.01,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "fashion_bags",
+      "parent": "fashion",
+      "label": "가방",
+      "test_n": 143,
+      "control_top3": 0.1048951048951049,
+      "candidate_top3": 0.1958041958041958,
+      "baseline_top3": 0.09090909090909091,
+      "delta_pp": 9.091,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "fashion_accessories",
+      "parent": "fashion",
+      "label": "액세서리·잡화",
+      "test_n": 511,
+      "control_top3": 0.48140900195694714,
+      "candidate_top3": 0.4911937377690802,
+      "baseline_top3": 0.3913894324853229,
+      "delta_pp": 0.978,
+      "candidate_recall": 0.23483365949119372
+    },
+    {
+      "key": "education_subject",
+      "parent": "education",
+      "label": "입시·교과학원",
+      "test_n": 768,
+      "control_top3": 0.6510416666666666,
+      "candidate_top3": 0.61328125,
+      "baseline_top3": 0.46875,
+      "delta_pp": -3.776,
+      "candidate_recall": 0.3893229166666667
+    },
+    {
+      "key": "education_language",
+      "parent": "education",
+      "label": "외국어학원",
+      "test_n": 104,
+      "control_top3": 0.0,
+      "candidate_top3": 0.009615384615384616,
+      "baseline_top3": 0.0,
+      "delta_pp": 0.962,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "education_art",
+      "parent": "education",
+      "label": "미술학원",
+      "test_n": 164,
+      "control_top3": 0.08536585365853659,
+      "candidate_top3": 0.054878048780487805,
+      "baseline_top3": 0.0,
+      "delta_pp": -3.049,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "education_music",
+      "parent": "education",
+      "label": "음악학원",
+      "test_n": 227,
+      "control_top3": 0.00881057268722467,
+      "candidate_top3": 0.01762114537444934,
+      "baseline_top3": 0.0,
+      "delta_pp": 0.881,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "education_vocational",
+      "parent": "education",
+      "label": "직업·자격 교육",
+      "test_n": 347,
+      "control_top3": 0.037463976945244955,
+      "candidate_top3": 0.04610951008645533,
+      "baseline_top3": 0.011527377521613832,
+      "delta_pp": 0.865,
+      "candidate_recall": 0.01440922190201729
+    },
+    {
+      "key": "education_study",
+      "parent": "education",
+      "label": "독서실·스터디 카페",
+      "test_n": 198,
+      "control_top3": 0.10606060606060606,
+      "candidate_top3": 0.13636363636363635,
+      "baseline_top3": 0.14646464646464646,
+      "delta_pp": 3.03,
+      "candidate_recall": 0.015151515151515152
+    },
+    {
+      "key": "fitness_gym",
+      "parent": "fitness",
+      "label": "헬스장",
+      "test_n": 300,
+      "control_top3": 0.01,
+      "candidate_top3": 0.02666666666666667,
+      "baseline_top3": 0.016666666666666666,
+      "delta_pp": 1.667,
+      "candidate_recall": 0.006666666666666667
+    },
+    {
+      "key": "fitness_studio",
+      "parent": "fitness",
+      "label": "요가·필라테스",
+      "test_n": 425,
+      "control_top3": 0.08705882352941176,
+      "candidate_top3": 0.14588235294117646,
+      "baseline_top3": 0.007058823529411765,
+      "delta_pp": 5.882,
+      "candidate_recall": 0.01647058823529412
+    },
+    {
+      "key": "fitness_golf",
+      "parent": "fitness",
+      "label": "골프 연습장",
+      "test_n": 109,
+      "control_top3": 0.0,
+      "candidate_top3": 0.0,
+      "baseline_top3": 0.0,
+      "delta_pp": 0.0,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "fitness_sports",
+      "parent": "fitness",
+      "label": "라켓·구기 시설",
+      "test_n": 256,
+      "control_top3": 0.0,
+      "candidate_top3": 0.03125,
+      "baseline_top3": 0.0,
+      "delta_pp": 3.125,
+      "candidate_recall": 0.0078125
+    },
+    {
+      "key": "leisure_pc",
+      "parent": "fitness",
+      "label": "PC방",
+      "test_n": 96,
+      "control_top3": 0.0,
+      "candidate_top3": 0.0,
+      "baseline_top3": 0.0,
+      "delta_pp": 0.0,
+      "candidate_recall": 0.0
+    },
+    {
+      "key": "leisure_karaoke",
+      "parent": "fitness",
+      "label": "노래방",
+      "test_n": 444,
+      "control_top3": 0.33783783783783783,
+      "candidate_top3": 0.3063063063063063,
+      "baseline_top3": 0.17117117117117117,
+      "delta_pp": -3.153,
+      "candidate_recall": 0.04954954954954955
+    }
+  ],
+  "overall": {
+    "test_top1": {
+      "control": 0.2994,
+      "candidate": 0.3061
+    },
+    "test_top3": {
+      "control": 0.5176,
+      "candidate": 0.5172
+    },
+    "test_macro_f1": {
+      "control": 0.1078,
+      "candidate": 0.1162
+    },
+    "baseline_district_prior_top3": {
+      "control": 0.4541,
+      "candidate": 0.4541
+    }
+  },
+  "limitations": [
+    "단일 고정 분할의 관측 차이이며 통계적 유의성·상권 순위 정확도가 아니다.",
+    "큰 업종의 추천 점수로 임의 합산하지 않는다. 서빙은 자동 활성화하지 않는다."
+  ],
+  "reports": {
+    "control": "ml\\reports\\industry_detail_spatial_control_2026-10-16.json",
+    "candidate": "ml\\reports\\industry_detail_spatial_neighbor_2026-10-16.json"
+  }
+}
