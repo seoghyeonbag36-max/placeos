@@ -94,6 +94,7 @@ macro-F1 0.21 의 원인 — '편중'이 아니라 '피처 부족'이다 (2026-0
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import Counter
@@ -1102,7 +1103,8 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
                   f"val {select_by} {v:.4f}")
 
     # 여기 왔으면 완주(또는 조기 종료)다 — 재개 파일은 다음 학습을 오염시키므로 지운다
-    _RESUME.unlink(missing_ok=True)
+    if resume or ckpt_every:
+        _RESUME.unlink(missing_ok=True)
     if best_state:
         model.load_state_dict(best_state)
     model.eval()
@@ -1137,6 +1139,10 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
     if label_level == "business_detail":
         from ml.training.industry_detail_metrics import per_class_metrics
         metrics["per_class"] = per_class_metrics(classes, y_np, pred, tr, te, m_hit, p_hit)
+        # 비교 실험이 같은 점포·정답·분할인지 표본 수가 아니라 해시로 확인한다.
+        split_rows = zip(nodes['node_id'].astype(str), y_np.tolist(), tr.tolist(), va.tolist(), te.tolist())
+        metrics['split_sha256'] = hashlib.sha256(
+            json.dumps(list(split_rows), ensure_ascii=False).encode('utf-8')).hexdigest()
     by_d: dict[str, list[int]] = {}
     for d in np.unique(did[te]):
         s = te & (did == d)
