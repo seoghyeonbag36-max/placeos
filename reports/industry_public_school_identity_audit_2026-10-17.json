@@ -1,0 +1,49 @@
+{
+  "audit_date": "2026-10-17",
+  "status": "blocked_pending_source_identity_or_explicit_scope_decision",
+  "source": "NEIS schoolInfo; local Bronze collected 2026-10-17; no live refetch",
+  "source_rows": 1416,
+  "blank_identity_rows": 1,
+  "nonblank_duplicate_identities": {},
+  "issues": [
+    {
+      "source_path": "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\001.json",
+      "source_row_1based": 1,
+      "school_name": "(가칭)서울산빛초등학교",
+      "address": "서울특별시 송파구 위례서이로 10",
+      "identity_field": "SD_SCHUL_CODE",
+      "identity_value": "       ",
+      "source_founded_date": "20270301",
+      "source_loaded_date": "20261004",
+      "founded_date_after_audit_date": true,
+      "location_candidates_name_or_full_address": [],
+      "student_candidates_exact_name": []
+    }
+  ],
+  "source_files_sha256": {
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\001.json": "0e5d771ef7ba4d1196f43101e651df005a4a355ac4b5513e86ef800405a24969",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\002.json": "5dc05fe4ab1fa48928dc5d0f84d9384b6b9e72d4e1bd70f985e1073af167208f"
+  },
+  "cross_source_reference_files_sha256": {
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_locations_file\\001.json": "b670a0333b72e19e8e6087daf95f4e0d80e6284855956363b660709b94b50283",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_locations_file\\002.json": "f459de7ddfdab1fefa3890c37516f655f3f8ceed89b85087125a2b1365171b40",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2024_02.json": "0337ea39c9ae1754950917da621d76ad611f5f0b738b9bcf05cc0ffcd0056116",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2024_03.json": "45e002d245ef5ddc61d3a206c8d108d771c23a7b7da7634a11410de8f045c124",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2024_04.json": "0eb617b32e414d5b4478d1b0d3b40dbbc10689a74a50d5f1f8050f03076c6728",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2025_02.json": "eb590ff0e416e582fb19848ba634a144a192b103a5e0700eea9753d54a84056b",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2025_03.json": "b2d60cf6a3e5a7376dfe2085e270a5ffb3ce6f49a704bfdc07d1dbe98c9c8cb4",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2025_04.json": "a0cc509cf4e5f9f38af1547d0985ef8bfa7ae6a4572fdee4642ebaf5fc9f3cbc",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2026_02.json": "0cd9944c62f71775897a0ccf1721091df7a657c83144fdc78a4082f37c1c5e81",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2026_03.json": "ffe392d30aa78fa64f492377596a4d00f70a085e9b7902319e805b7b5407e1ac",
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\school_students\\2026_04.json": "eb69ddaf55c9b833b67615d008c14989874fc0477026b366919b6ce0feef756d"
+  },
+  "limitations": [
+    "Name/address matches are diagnostic candidates only; school code systems are not interchangeable.",
+    "Source foundation date is preserved; future date alone does not authorize exclusion.",
+    "No keys inferred, no source rows dropped, no Silver promoted."
+  ],
+  "resume_conditions": [
+    "Obtain a nonblank SD_SCHUL_CODE for this record from the authoritative source, or explicitly define handling of unidentified records.",
+    "Rerun the full validation after resolution; the remaining sources have not passed Silver validation."
+  ]
+}
