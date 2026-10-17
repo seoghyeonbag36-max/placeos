@@ -1,0 +1,130 @@
+{
+  "status": "blocked_no_verified_recovery",
+  "results": [
+    {
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "same_identity_count": 1,
+      "replacement_applied": false,
+      "fields": {
+        "BPLCNM": {
+          "baseline": "때\\230족觀읔돝�",
+          "observed": "때\\230족觀읔돝�",
+          "state": "replacement_character"
+        }
+      },
+      "status": "unresolved",
+      "service": "LOCALDATA_072404",
+      "encoding": null,
+      "baseline_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180243\\LOCALDATA_072404.json",
+      "observation_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180439\\LOCALDATA_072404.xml",
+      "baseline_sha256": "2ddf51876f8aa41c34512b5961db869431e025622d66cc8e66692cc9eac3be98",
+      "observation_sha256": "1a3f01d993fa4034b8577c6cb6f6cb3ce764a3c408f308abbdffca8472a3010f",
+      "observed_format": "xml"
+    },
+    {
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "same_identity_count": 1,
+      "replacement_applied": false,
+      "fields": {
+        "BPLCNM": {
+          "baseline": "때\\230족觀읔돝�",
+          "observed": "때\\230족觀읔돝?",
+          "state": "question_mark_unresolved"
+        }
+      },
+      "status": "unresolved",
+      "service": "LOCALDATA_072404",
+      "encoding": "cp949",
+      "baseline_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180243\\LOCALDATA_072404.json",
+      "observation_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072404.xls",
+      "baseline_sha256": "2ddf51876f8aa41c34512b5961db869431e025622d66cc8e66692cc9eac3be98",
+      "observation_sha256": "766389865d0b6953d080e89e0e33b7c1da0a59abbf39858f1baf2b415afcf76e",
+      "observed_format": "xls"
+    },
+    {
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "same_identity_count": 1,
+      "replacement_applied": false,
+      "fields": {
+        "BPLCNM": {
+          "baseline": "커피�엘리제",
+          "observed": "커피�엘리제",
+          "state": "replacement_character"
+        }
+      },
+      "status": "unresolved",
+      "service": "LOCALDATA_072302",
+      "encoding": null,
+      "baseline_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180146\\LOCALDATA_072302.json",
+      "observation_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072302.xml",
+      "baseline_sha256": "cbd086dcf7cb29ecee80871f99bca93494cb853c5408068c4c8eb5ca3b4bfcd6",
+      "observation_sha256": "25215186263e986be8a3bb1e174a7394aa5087da45a5495fde2cf151fd3e3904",
+      "observed_format": "xml"
+    },
+    {
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "same_identity_count": 1,
+      "replacement_applied": false,
+      "fields": {
+        "BPLCNM": {
+          "baseline": "커피�엘리제",
+          "observed": "커피?엘리제",
+          "state": "question_mark_unresolved"
+        }
+      },
+      "status": "unresolved",
+      "service": "LOCALDATA_072302",
+      "encoding": "cp949",
+      "baseline_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180146\\LOCALDATA_072302.json",
+      "observation_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072302.xls",
+      "baseline_sha256": "cbd086dcf7cb29ecee80871f99bca93494cb853c5408068c4c8eb5ca3b4bfcd6",
+      "observation_sha256": "f9ddce236139d28f83404de390aabed7639016e54eee045b748d46a4978f3b98",
+      "observed_format": "xls"
+    },
+    {
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "same_identity_count": 1,
+      "replacement_applied": false,
+      "fields": {
+        "BPLCNM": {
+          "baseline": "때\\230족觀읔돝�",
+          "observed": "때\\230족觀읔돝�",
+          "state": "replacement_character"
+        }
+      },
+      "status": "unresolved",
+      "source": "MOIS general_restaurants/info",
+      "source_field_mapping": {
+        "OPNSFTEAMCODE": "OPN_ATMY_GRP_CD",
+        "MGTNO": "MNG_NO",
+        "BPLCNM": "BPLC_NM",
+        "RDNWHLADDR": "ROAD_NM_ADDR"
+      },
+      "observation_path": "data\\bronze\\industry_public_upstream_probe\\2026-10-17\\180615\\response.bin",
+      "observation_sha256": "08437763bd335ff2157dbb70ba16447891eefc0443febd7fd2e5a85804270954",
+      "baseline_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180243\\LOCALDATA_072404.json",
+      "baseline_sha256": "2ddf51876f8aa41c34512b5961db869431e025622d66cc8e66692cc9eac3be98"
+    }
+  ],
+  "limitations": [
+    "Two damaged identities only; no extrapolation to every damaged row.",
+    "Excel export is CP949 tab-separated text despite UTF-8 content-type; decoded strictly with explicit encoding.",
+    "Question marks in the alternate damaged field are unresolved, not recovery.",
+    "All existing sources and Silver preserved; no partial promotion."
+  ]
+}

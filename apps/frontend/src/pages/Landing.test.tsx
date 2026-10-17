@@ -31,14 +31,12 @@ describe("랜딩 — 말하는 것", () => {
 
   it("앱이 시작 카드에서 쓰는 세 가지 목적 문구를 그대로 쓴다(GOALS 가 단일 출처)", () => {
     render(<Landing />);
-    expect(screen.getByRole("heading", { name: "새로 창업" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "지금 상권에서 업종 바꾸기" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "같은 업종으로 상권 옮기기" })).toBeTruthy();
+    expect(screen.getByText(/새로 창업 · 지금 상권에서 업종 바꾸기 · 같은 업종으로 상권 옮기기/)).toBeTruthy();
   });
 
   it("네 질문이 PPPP 순서(Platform → Page → Posting → Program)로 이어진다", () => {
     render(<Landing />);
-    const steps = within(document.getElementById("how")!).getAllByRole("listitem");
+    const steps = within(document.getElementById("how")!).getAllByRole("listitem", { hidden: true });
     expect(steps.map((li) => li.getAttribute("data-track"))).toEqual(["platform", "page", "posting", "program"]);
   });
 

@@ -1,0 +1,14 @@
+{
+  "status": "verified",
+  "raw_rows": 1077457,
+  "accepted_rows": 1077224,
+  "quarantined_rows": 233,
+  "source_groups": 95,
+  "matching_rows": 740919,
+  "quarantined_identities_absent_from_datasets_and_links": true,
+  "quarantine_raw_fields_and_source_hashes_verified": true,
+  "datasets_file": "data\\silver\\industry_public_partial_2026-10-17.json",
+  "quarantine_file": "data\\silver\\industry_public_quarantine_2026-10-17.json",
+  "datasets_sha256": "411ba510b97d3b2cc91e463f5d7f4d7d654776f78d5797476aac9058e9de0a78",
+  "quarantine_sha256": "bfa047ca4da562ab9a4d2dc3300bd96d9874a740a3b8e0744a434cd56110edf1"
+}

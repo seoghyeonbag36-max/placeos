@@ -1,0 +1,189 @@
+{
+  "status": "blocked",
+  "errors": [
+    "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\001.json: row=1: missing_identity ('ATPT_OFCDC_SC_CODE', 'SD_SCHUL_CODE')"
+  ],
+  "sources": [
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\001.json",
+      "sha256": "ac53f0064c113b3139bd9d734c7dd5c5818177eca8c0a645124b5cf5bf59710e",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\002.json",
+      "sha256": "0b5eb7a1adad14c1311976e8e3668396973434e4f59520e59015f3f051713eac",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\003.json",
+      "sha256": "57b47956207f51ef37d7b7e0cf0a8a24f57c47cbefd4b80ce5de054d698820b2",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\004.json",
+      "sha256": "5b89ed0625e16c5601842429632d91a94d11b0799205c7a169048be5559c0e93",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\005.json",
+      "sha256": "781f32a47da5f32d4a7be82870407ed9ae6337de77bdac4fa3688b29a8170366",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\006.json",
+      "sha256": "eca53d6ce06f4362d8c5887603a59dab5bd5155e0e272ec001ce5a9636469917",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\007.json",
+      "sha256": "ec26cb4275f2136e1793e06eb7ff4a5f345e2809617424bf076f56c0525f03b7",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\008.json",
+      "sha256": "5c73cd5b58ad2078a556bfddf643cd91386be77411092dd1fccd7d3854e4ad90",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\009.json",
+      "sha256": "dad55de3d533d2d6fd6db474dbd472bef9e796af8ea96aed41f505b7a9ceab18",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\010.json",
+      "sha256": "1ed029681cc9ac8d42621cc2eee1bc8413978107faf2f331c5ee9244a35c7960",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\011.json",
+      "sha256": "9a62b3f8a4349b3985ceb2aeeb72abff338e2a27950da6290d61c8547224816a",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\012.json",
+      "sha256": "145dd2cc0b648f4639ac263ec9cf9885bdd838262ff962b8223f1c2aab461e27",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\013.json",
+      "sha256": "cf4627edcdb701fc8e3564f97613cf964f8137afb3ccf294d97d803d431421fe",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\014.json",
+      "sha256": "0ecbc05d2d0f43fda6b6bcd96690f17c480f032c614cdc98df7ce333a5756c3f",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\015.json",
+      "sha256": "11c0b12d28ca8bb0321abbbd0e88ab55ba135fdbfd0806fa2fd2c597ef8b9d6f",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\016.json",
+      "sha256": "69ed106ae63428d1c3ac54fe74eab082bcc277b594ce02cad5fe705f6c3b4236",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\017.json",
+      "sha256": "7e98adf6f03821d8eb882c10666e010b5f67811ab186ed8fd4a815a4b86b141a",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\018.json",
+      "sha256": "4e60c38660ae0b22393cabbf0a3b125e0372c0b7b4a35d114fe9b0acea10383a",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\019.json",
+      "sha256": "4a6094b2ae156afedd0c3e797476564e50a1429cf7ace65651c19f86bc7bee3e",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\020.json",
+      "sha256": "32c88901cecf3a2503f9270db301449bcebbe47954ef60a4a5ff33ce9efad156",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\021.json",
+      "sha256": "6fd05fff4786820f7bdbd50eaed6886a7cdde4f340f892a63e395ef0e4a21ee7",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\022.json",
+      "sha256": "5b6797675df45b2abe91bb0d821f670162b2c8dc4e7dfe9b66f0f121477d9af9",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\023.json",
+      "sha256": "f61c9d774fce17e6fd766017c244111a094e8ba22f524649f71cc09697834d8c",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\024.json",
+      "sha256": "343faea070a72ca18890e800a36b4a7f25eea7f8c0cbf29daebd213ce16b78ac",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\025.json",
+      "sha256": "21ee32182d722c54f87db554fb26a8fd8d02b62b065a18607610d0ff2881f85d",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\acaInsTiInfo\\026.json",
+      "sha256": "9eecb76cd7c1b4fc77403772a4608e409a673643a1a282a7f03be0698c8202a8",
+      "raw_rows": 507,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\001.json",
+      "sha256": "0e5d771ef7ba4d1196f43101e651df005a4a355ac4b5513e86ef800405a24969",
+      "raw_rows": 1000,
+      "collected_on": "2026-10-17"
+    },
+    {
+      "path": "data\\bronze\\industry_public\\2026-10-17\\054247\\schoolInfo\\002.json",
+      "sha256": "5dc05fe4ab1fa48928dc5d0f84d9384b6b9e72d4e1bd70f985e1073af167208f",
+      "raw_rows": 416,
+      "collected_on": "2026-10-17"
+    }
+  ],
+  "rows": {
+    "acaInsTiInfo": 25507,
+    "schoolInfo": 416
+  },
+  "silver_written": false,
+  "not_processed": [
+    "school_locations",
+    "school_students",
+    "licenses",
+    "stores",
+    "matching"
+  ],
+  "note": "Identity validation failed; no partial Silver was promoted."
+}

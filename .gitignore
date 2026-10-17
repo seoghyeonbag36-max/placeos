@@ -7,6 +7,8 @@ venv/
 .pytest_cache/
 .env
 .mlruns/
+# 세부 업종 입지 피처 실험의 팔×시드 노드별 예측 덤프(재생성 가능, 대용량)
+ml/artifacts/_detail_features_runs/
 mlruns/
 
 # Node
@@ -264,3 +266,9 @@ docs/papers/library/private/
 .claude/skills/swarm-*/
 .claude/skills/v3-*/
 .claude/skills/verification-quality/
+
+# 방문자 의견 내보내기 — 연락처(개인정보)가 들어 있다. 공개 저장소라 커밋 금지
+exports/
+
+# 독립 작업용 로컬 git worktree는 중첩 저장소로 커밋하지 않는다.
+.codex-worktrees/

@@ -1,0 +1,45 @@
+{
+  "probe_at": "2026-10-17T18:01:00.641070+09:00",
+  "results": [
+    {
+      "service": "LOCALDATA_072404",
+      "old_path": "data\\bronze\\api_acquisition\\2026-10-09\\215933\\seoul\\LOCALDATA_072404\\all\\053.json",
+      "old_sha256": "03dda53be603fd6ba44c7e5f4cb15b07d7f6519ff6ec9a0091054ba486cf2671",
+      "old_row_1based": 678,
+      "requested_index": 52678,
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "http_status": 200,
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180058\\LOCALDATA_072404.json",
+      "sha256": "6a492503a3571c906b84c7248691b6734bfcdb3bcfe9dfd9f54b62dadb293dbc",
+      "content_type": "application/json;charset=UTF-8",
+      "same_identity_count": 0,
+      "status": "identity_shifted_no_replacement",
+      "strict_utf8_valid": true
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "old_path": "data\\bronze\\api_acquisition\\2026-10-09\\215933\\seoul\\LOCALDATA_072302\\all\\004.json",
+      "old_sha256": "1a588eeda4cd6da1e180f973404c9188aea28f54cd29d8754cb057075a42863e",
+      "old_row_1based": 21,
+      "requested_index": 3021,
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "http_status": 200,
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180058\\LOCALDATA_072302.json",
+      "sha256": "ccd05581731c3491a2dec36b6248d3afeace3f3d4b3dd641e78289dafa5cd5e8",
+      "content_type": "application/json;charset=UTF-8",
+      "same_identity_count": 0,
+      "status": "identity_shifted_no_replacement",
+      "strict_utf8_valid": true
+    }
+  ],
+  "limitations": [
+    "Two diagnostic rows only; old raw bytes preserved; no automatic row replacement.",
+    "Index positions can shift; only identical OPNSFTEAMCODE/MGTNO can be compared."
+  ]
+}

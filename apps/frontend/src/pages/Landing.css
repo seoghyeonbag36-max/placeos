@@ -42,10 +42,10 @@
 .lp-hero-grid { display: grid; gap: var(--sp-6); align-items: center; }
 .lp-eyebrow { margin-bottom: var(--sp-3) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-bold); }
 .lp-hero h1 { font-size: clamp(var(--fs-display), 7vw, 44px); line-height: var(--lh-display); font-weight: var(--fw-bold); }
-.lp-lede { margin-top: var(--sp-4) !important; max-width: 34em; font-size: var(--fs-body); line-height: 1.7; color: var(--ink); }
-.lp-cta-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-5); }
+.lp-lede { margin-top: var(--sp-5) !important; max-width: 34em; font-size: var(--fs-body); line-height: 1.7; color: var(--ink); }
+.lp-cta-row { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-6); }
 .lp-cta-center { justify-content: center; }
-.lp-fine { margin-top: var(--sp-3) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.lp-fine { margin-top: var(--sp-4) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
 .lp-hero-art { display: grid; justify-items: center; gap: var(--sp-2); }
 .lp-hero-art img { width: min(100%, 420px); height: auto; }
 .lp-hero-art figcaption { color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); }
@@ -59,7 +59,7 @@
 .lp-card { padding: var(--sp-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
 .lp-section-alt .lp-card { background: var(--bg); box-shadow: none; }
 .lp h3 { font-size: var(--fs-heading); line-height: var(--lh-heading); font-weight: var(--fw-bold); }
-.lp-card h3 { margin-bottom: var(--sp-2); }
+.lp-card h3 { margin-bottom: var(--sp-3); }
 .lp-card p { line-height: 1.7; }
 
 /* ── 네 질문 ── */
@@ -102,4 +102,21 @@
   .lp-cards-3 { grid-template-columns: repeat(3, 1fr); }
   .lp-steps { grid-template-columns: 1fr 1fr; }
   .lp-section, .lp-final { padding-block: var(--sp-8); }
+}
+
+/* 짧은 이용 안내와 기본적으로 접힌 상세 설명 — 방문자 의견 반영. */
+.lp-quick { margin-top: var(--sp-5); }
+.lp-quick h2, .lp-quick h3 { font-size: var(--fs-body); line-height: var(--lh-heading); }
+.lp-quick-steps { display: grid; gap: var(--sp-4); margin-top: var(--sp-3) !important; }
+.lp-quick-steps p { margin-top: var(--sp-2); color: var(--text-secondary); line-height: 1.7; }
+.lp-results { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-5); margin-top: var(--sp-4) !important; font-weight: var(--fw-semibold); }
+.lp-audience { margin-top: var(--sp-4) !important; color: var(--text-secondary); line-height: 1.7; }
+.lp .lp-detail-section { padding-block: var(--sp-4); }
+.lp-details > summary { padding-block: var(--sp-3); font-weight: var(--fw-semibold); cursor: pointer; }
+.lp-details[open] { padding-bottom: var(--sp-4); }
+@media (max-width: 479px) {
+  .lp-cta-row { flex-direction: column; align-items: stretch; }
+}
+@media (min-width: 880px) {
+  .lp-quick-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

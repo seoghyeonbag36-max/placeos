@@ -1,0 +1,44 @@
+{
+  "collected_at": "2026-10-17T18:04:59.669489+09:00",
+  "results": [
+    {
+      "service": "LOCALDATA_072404",
+      "format": "xls",
+      "start": 1,
+      "end": 1000,
+      "raw_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072404.xls",
+      "sha256": "766389865d0b6953d080e89e0e33b7c1da0a59abbf39858f1baf2b415afcf76e",
+      "http_status": 200,
+      "content_type": "application/octet-stream;charset=UTF-8",
+      "bytes": 11353,
+      "signature": "4f504e53465445414d434f44",
+      "status": "saved_for_validation"
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "format": "xml",
+      "start": 2521,
+      "end": 3520,
+      "raw_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072302.xml",
+      "sha256": "25215186263e986be8a3bb1e174a7394aa5087da45a5495fde2cf151fd3e3904",
+      "http_status": 200,
+      "content_type": "application/xml;charset=UTF-8",
+      "bytes": 1134924,
+      "signature": "3c3f786d6c2076657273696f",
+      "status": "saved_for_validation"
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "format": "xls",
+      "start": 2521,
+      "end": 3520,
+      "raw_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180458\\LOCALDATA_072302.xls",
+      "sha256": "f9ddce236139d28f83404de390aabed7639016e54eee045b748d46a4978f3b98",
+      "http_status": 200,
+      "content_type": "application/octet-stream;charset=UTF-8",
+      "bytes": 315065,
+      "signature": "4f504e53465445414d434f44",
+      "status": "saved_for_validation"
+    }
+  ]
+}
