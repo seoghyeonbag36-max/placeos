@@ -12,7 +12,8 @@
  */
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import MapShell, { byVacancyFirst, PIN_MAX_ZOOM } from "@/pages/MapShell";
+import MapShell, { PIN_MAX_ZOOM } from "@/pages/MapShell";
+import { byVacancyFirst } from "@/lib/buildingOrder";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
 import { installFetchStub, type FetchStub, type Route } from "@/test/fetchStub";
 import { installNaverStub, removeNaverStub, type NaverStub } from "@/test/naverStub";

@@ -11,13 +11,13 @@ import type {
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
-import { mapLabelHTML } from "@/design/components/MapMarkerPin";
+import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import IndustryFitCard from "@/components/IndustryFitCard";
 import BenchmarkExplorer from "@/components/BenchmarkExplorer";
 import { findIndustry, type BusinessProfile } from "@/lib/businessProfile";
 import { lstmPromoted } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
-import { useMapHost } from "@/components/MapHost";
+import { useMapHost } from "@/components/mapHostContext";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import { boundaryBadge, computeHubBoundary, EMPTY_BOUNDARY, type HubBoundary } from "@/lib/hubBoundary";
 import type { BuildingSelection } from "@/lib/workspaceState";
@@ -89,7 +89,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 자리 비교 후보 — 지도 칩과 목록 체크박스가 **같은 상태**를 본다(그래서 여기로 올렸다).
   // 상권이 바뀌면 비운다: 다른 상권의 자리를 비교 후보로 남기지 않는다.
   const [selectedSiteIds, setSelectedSiteIds] = useState<string[]>([]);
-  useEffect(() => { setSelectedSiteIds([]); }, [districtId]);
   const toggleSite = (id: string) => setSelectedSiteIds((ids) => ids.includes(id)
     ? ids.filter((selected) => selected !== id)
     : ids.length < 3 ? [...ids, id] : ids);
@@ -103,6 +102,18 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   const [rec, setRec] = useState<IndustryRecommend | null>(null);
   const [recErr, setRecErr] = useState<string | null>(null);
   const [zones, setZones] = useState<Zone[] | null>(null);
+  // 새 상권을 그리기 전에 이전 상권의 응답·비교 후보를 함께 비운다.
+  const [previousDistrict, setPreviousDistrict] = useState(districtId);
+  if (previousDistrict !== districtId) {
+    setPreviousDistrict(districtId);
+    setSelectedSiteIds([]);
+    setProf(null); setProfErr(null); setRec(null); setRecErr(null); setZones(null);
+  }
+  const [forecastScope, setForecastScope] = useState({ districtId, quarters });
+  if (forecastScope.districtId !== districtId || forecastScope.quarters !== quarters) {
+    setForecastScope({ districtId, quarters });
+    setFc(null); setFcErr(null);
+  }
 
   const hub = useMemo(
     () => districts.find((d) => d.id === districtId),
@@ -126,7 +137,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 정체성 + 자리 제안 — 이 화면의 본론
   useEffect(() => {
     let live = true;
-    setProf(null); setProfErr(null);
     getPlatformProfile(districtId)
       .then((p) => { if (live) setProf(p); })
       .catch((e) => { if (live) setProfErr(String(e)); });
@@ -136,7 +146,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 예측: 분기 선택이 실제 질의를 바꾼다(백엔드가 개월→분기로 환산한다).
   useEffect(() => {
     let live = true;
-    setFc(null); setFcErr(null);
     predictVacancy(districtId, quarters * 3)
       .then((r) => { if (live) setFc(r); })
       .catch((e) => { if (live) setFcErr(String(e)); });
@@ -146,7 +155,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 거점 단위 추천(좌표 없이) — 자리 단위는 위 openings 가 자리마다 따로 물어 온다.
   useEffect(() => {
     let live = true;
-    setRec(null); setRecErr(null);
     recommendIndustry({ district_id: districtId })
       .then((r) => { if (live) setRec(r); })
       .catch((e) => { if (live) setRecErr(String(e)); });
@@ -155,7 +163,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
   useEffect(() => {
     let live = true;
-    setZones(null);
     getSentiment(districtId)
       .then((z) => { if (live) setZones(z); })
       .catch(() => { if (live) setZones([]); });
@@ -313,7 +320,7 @@ function usePlatformMap({ districtId, sites, selectedIds, onToggle, mySite }: {
   // 선 그리기 + 카메라. 카메라는 거점 center 가 아니라 경계 bbox 에 맞춘다 — center 는
   // 수집 원점이라 실측 범위와 어긋날 수 있다(HubExplorer 에서 옮겨 온 규칙).
   useEffect(() => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     if (!ready || !map || !naver?.maps || !current) return;
     const polys = current.pieces.map((piece) => {
       const toPath = (ring: Array<[number, number]>) => ring.map(([lat, lng]) => new naver.maps.LatLng(lat, lng));
@@ -334,18 +341,20 @@ function usePlatformMap({ districtId, sites, selectedIds, onToggle, mySite }: {
     return () => { polys.forEach((p) => p.setMap?.(null)); };
   }, [ready, map, current]);
 
+  const siteLabel = mySite?.label;
+  const siteInput = mySite?.input;
   const markers = useMemo<MapMarkerItem[]>(() => (sites ?? [])
     .filter((s) => s.lat != null && s.lng != null)
     .map((s) => {
       const on = selectedIds.includes(s.unit_id);
       const sub = s.area_py != null ? `${s.area_py}평` : undefined;
-      if (mySite) {
+      if (siteLabel) {
         // 3판 — 내 업종 점수. 그 자리 상위 3에 없으면 점선 "3위 밖"(0% 로 그리지 않는다).
-        const mine = s.recommendations.find((r) => r.industry === mySite.label);
+        const mine = s.recommendations.find((r) => r.industry === siteLabel);
         return {
           id: s.unit_id, lat: s.lat as number, lng: s.lng as number, zIndex: on ? 200 : mine ? 90 : 70,
           html: mapLabelHTML({
-            text: mine ? `${mySite.input} ${Math.round(mine.score * 100)}%` : `${mySite.input} 3위 밖`,
+            text: mine ? `${siteInput} ${Math.round(mine.score * 100)}%` : `${siteInput} 3위 밖`,
             sub, color: colors.track.platform.base, active: on, dashed: !mine,
           }),
         };
@@ -358,7 +367,7 @@ function usePlatformMap({ districtId, sites, selectedIds, onToggle, mySite }: {
           sub, color: colors.track.platform.base, active: on, dashed: top == null,
         }),
       };
-    }), [sites, selectedIds, mySite?.label, mySite?.input]);
+    }), [sites, selectedIds, siteLabel, siteInput]);
   useMapMarkers(markers, onToggle);
 
   return ready && map ? current : null;
@@ -738,7 +747,7 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
   const canCompare = selectedSites.length >= 2;
   // 한 번 고르면 펼친 채로 둔다 — 마지막 후보를 해제했다고 사용자 손 밑에서 접히면 안 된다.
   const [pinnedOpen, setPinnedOpen] = useState(false);
-  useEffect(() => { if (selectedIds.length > 0) setPinnedOpen(true); }, [selectedIds.length]);
+  if (selectedIds.length > 0 && !pinnedOpen) setPinnedOpen(true);
   // 한 지번에 자리가 여럿이면 이름이 똑같이 찍힌다(신사동 552-19 가 3곳). 좌표가 다른
   // 별개의 자리인데 화면에서는 중복 버그처럼 보이므로, 겹칠 때만 유닛 번호를 붙인다.
   const dupNames = useMemo(() => {

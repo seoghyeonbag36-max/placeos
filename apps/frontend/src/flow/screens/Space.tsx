@@ -206,7 +206,7 @@ function MiniMap({ lat, lng, name }: { lat: number; lng: number; name: string })
   useEffect(() => {
     let alive = true;
     loadNaverMaps().then(() => {
-      const naver = (window as unknown as { naver?: { maps?: any } }).naver; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const naver = window.naver;
       if (!alive || !el.current || !naver?.maps) return;
       const at = new naver.maps.LatLng(lat, lng);
       const map = new naver.maps.Map(el.current, { center: at, zoom: 17, scaleControl: false, mapDataControl: false });

@@ -1,5 +1,7 @@
+import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { caveatKind, CaveatNote } from "@/components/DistrictPicker";
+import { CaveatNote } from "@/components/DistrictPicker";
+import { caveatKind } from "@/lib/districtCaveat";
 import LoginHint from "@/components/LoginHint";
 import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
@@ -10,9 +12,9 @@ import type {
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
-import { mapLabelHTML } from "@/design/components/MapMarkerPin";
+import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
-import { useMapHost } from "@/components/MapHost";
+import { useMapHost } from "@/components/mapHostContext";
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import { useSignedIn } from "@/hooks/useSignedIn";
 import type { ProgramHandoff } from "@/lib/workspaceState";
@@ -155,7 +157,11 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
   const hub = (districts ?? []).find((d) => d.id === form.districtId);
   const eventsDistrict = form.districtId || mapDistrictId || null;
-  useEffect(() => { setEventId(null); }, [eventsDistrict]);
+  const [previousEventsDistrict, setPreviousEventsDistrict] = useState(eventsDistrict);
+  if (previousEventsDistrict !== eventsDistrict) {
+    setPreviousEventsDistrict(eventsDistrict);
+    setEventId(null);
+  }
   const mapEvents = useProgramMap({
     districtId: eventsDistrict, districts: districts ?? [], arrival, eventId, onPickEvent: setEventId,
   });
@@ -424,28 +430,6 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
 /* ───────────── 지도 ───────────── */
 
-/** 행사 기간 문자열("YYYY-MM-DD~YYYY-MM-DD")을 가른다. 모양이 다르면 null — 그 행사는 거르지 않는다
- *  (날짜를 모르는 것을 종료로 단정하면 있는 행사를 지운다). */
-export function eventRange(when: string | null | undefined): { start: string; end: string } | null {
-  const m = /^(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})/.exec(when ?? "");
-  if (m) return { start: m[1], end: m[2] };
-  const one = /^(\d{4}-\d{2}-\d{2})/.exec(when ?? "");
-  return one ? { start: one[1], end: one[1] } : null;
-}
-
-/** 종료일이 오늘보다 앞선 행사를 뺀다(화면설계서 PR-01). 끝난 행사를 "연계할 곳"으로 보여주면 거짓 안내가 된다.
- *  `today` 는 로컬 날짜 "YYYY-MM-DD". 남은 것은 시작일 순. */
-export function splitEvents(events: MarketingEvent[], today: string): { upcoming: MarketingEvent[]; ended: number } {
-  const upcoming: MarketingEvent[] = [];
-  let ended = 0;
-  for (const e of events) {
-    const r = eventRange(e.when);
-    if (r && r.end < today) ended += 1; else upcoming.push(e);
-  }
-  upcoming.sort((a, b) => (eventRange(a.when)?.start ?? "9999").localeCompare(eventRange(b.when)?.start ?? "9999"));
-  return { upcoming, ended };
-}
-
 const localToday = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -531,7 +515,7 @@ function useProgramMap({ districtId, districts, arrival, eventId, onPickEvent }:
   return {
     events: split.upcoming, ended: split.ended, source: current.source,
     panTo: (lat, lng) => {
-      const naver = (window as any).naver;
+      const naver = window.naver;
       if (naver?.maps) map.panTo?.(new naver.maps.LatLng(lat, lng));
     },
   };

@@ -56,10 +56,10 @@ function EntryForm({ title, fields, submit, busy, save }: {
 }
 
 function Opportunities({ districtId, address }: { districtId?: string | null; address: string }) {
-  const [data, setData] = useState<{ events: MarketingEvent[]; message: string }>({ events: [], message: "" });
+  const [data, setData] = useState<{ events: MarketingEvent[]; message: string }>(() => ({ events: [],
+    message: districtId ? "공개 행사 확인 중…" : "연결된 거점이 없습니다. 공식 자료를 확인해 후보를 등록하세요." }));
   useEffect(() => {
     let active = true;
-    setData({ events: [], message: districtId ? "공개 행사 확인 중…" : "연결된 거점이 없습니다. 공식 자료를 확인해 후보를 등록하세요." });
     if (districtId) getDistrictEvents(districtId).then(r => {
       if (active) setData({ events: r.events_source === "seoul-open-data" ? r.events : [],
         message: r.events_source === "seoul-open-data" ? "서울 공개 문화행사 자료. 일정과 참여 조건은 원문에서 다시 확인하세요." : "확인된 공개 행사 자료가 없습니다." });
@@ -77,50 +77,57 @@ function Opportunities({ districtId, address }: { districtId?: string | null; ad
   </details>;
 }
 
-export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory }: {
+type CampaignStudioProps = {
   handoff?: ProgramHandoff; mapDistrictId?: string | null; defaultCategory?: string;
   onArrivalDismiss?: () => void; businessGoal?: BusinessGoal;
-} = {}) {
+};
+
+export default function CampaignStudio(props: CampaignStudioProps = {}) {
   const [token, setToken] = useState(loadToken);
-  const [items, setItems] = useState<Campaign[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const inFlight = useRef(false);
-  const epoch = useRef(0);
-  const selected = items.find(c => c.id === selectedId);
   useEffect(() => {
     const changed = () => setToken(loadToken());
     window.addEventListener(SESSION_CHANGED_EVENT, changed);
     return () => window.removeEventListener(SESSION_CHANGED_EVENT, changed);
   }, []);
+  // 계정별 폼·목록·저장 요청 수명을 분리해 이전 계정 결과를 남기지 않는다.
+  return <CampaignWorkspace key={token ?? ""} {...props} token={token} />;
+}
+
+function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: CampaignStudioProps & { token: string | null }) {
+  const [items, setItems] = useState<Campaign[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(Boolean(token));
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const inFlight = useRef(false);
+  const requestScope = useRef<{ active: boolean } | null>(null);
+  const selected = items.find(c => c.id === selectedId);
   useEffect(() => {
-    const version = ++epoch.current;
-    setItems([]); setSelectedId(null); setError(""); setNotice(""); setLoading(true);
-    if (!token) { setLoading(false); return; }
+    const scope = { active: true };
+    requestScope.current = scope;
+    if (!token) return;
     listCampaigns(token).then(result => {
-      if (epoch.current === version) { setItems(result); setSelectedId(result[0]?.id ?? null); }
-    }).catch(() => { if (epoch.current === version) setError("캠페인 목록을 불러오지 못했습니다. 로그인 상태와 서버를 확인하고 새로고침하세요."); })
-      .finally(() => { if (epoch.current === version) setLoading(false); });
-    return () => { epoch.current++; };
+      if (scope.active) { setItems(result); setSelectedId(result[0]?.id ?? null); }
+    }).catch(() => { if (scope.active) setError("캠페인 목록을 불러오지 못했습니다. 로그인 상태와 서버를 확인하고 새로고침하세요."); })
+      .finally(() => { if (scope.active) setLoading(false); });
+    return () => { scope.active = false; };
   }, [token]);
 
   async function save(request: () => Promise<Campaign>): Promise<boolean> {
     if (inFlight.current) return false;
     inFlight.current = true; setBusy(true); setError(""); setNotice("");
-    const version = epoch.current;
+    const scope = requestScope.current;
     try {
       const result = await request();
-      if (epoch.current !== version) return false;
+      if (!scope?.active) return false;
       setItems(old => [result, ...old.filter(c => c.id !== result.id)]); setSelectedId(result.id);
       setNotice("저장했습니다. 제출한 증빙은 독립 검증 전 기록입니다.");
       return true;
     } catch (err) {
-      if (epoch.current === version) setError(err instanceof ApiError ? (err.detail ?? "저장하지 못했습니다. 입력과 로그인 상태를 확인하세요.") : "저장하지 못했습니다.");
+      if (scope?.active) setError(err instanceof ApiError ? (err.detail ?? "저장하지 못했습니다. 입력과 로그인 상태를 확인하세요.") : "저장하지 못했습니다.");
       return false;
-    } finally { inFlight.current = false; setBusy(false); }
+    } finally { inFlight.current = false; if (scope?.active) setBusy(false); }
   }
   const command = (action: CampaignAction, payload: unknown) => selected && token
     ? save(() => commandCampaign(token, selected.id, selected.version, action, payload)) : Promise.resolve(false);
@@ -178,7 +185,7 @@ function CampaignDetail({ campaign: c, busy, command }: {
       <p>이용료 순결제 기록 합계: {money(s.program_fee_net_krw)} · 매장 매출이나 마케팅 효과와 다릅니다.</p>
     </Card>
     <Card><h2>2. 근거 있는 후보·실행안</h2>
-      <Opportunities districtId={c.conditions.district_id} address={c.conditions.address} />
+      <Opportunities key={c.conditions.district_id ?? ""} districtId={c.conditions.district_id} address={c.conditions.address} />
       <details><summary>출처를 확인한 후보 등록</summary>
         <p>공식 원문도 사용자가 제출한 참고 자료로 표시합니다. 상대가 참여에 동의했다고 간주하지 않습니다.</p>
         <EntryForm title="협업 후보 등록" busy={busy} submit="후보 저장" fields={[

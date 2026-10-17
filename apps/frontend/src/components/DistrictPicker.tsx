@@ -1,3 +1,4 @@
+import { caveatKind, MARK, type CaveatKind } from "@/lib/districtCaveat";
 /** 거점 선택 — 도시로 묶고, 예외 거점을 표식으로 밝힌다.
  *
  * ## 왜 공용인가
@@ -18,33 +19,8 @@
  * 3. **실측 없음**(`measured_only` + `sentiment === null`) — 0 이 아니라 **재지 않은 것**이다.
  *    옵션 라벨에서 공실률만 보여주고 감성은 아예 적지 않는다.
  */
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { DistrictSummary } from "@/lib/api";
-
-/** 예외의 종류 — 셋이다.
- *
- *  `withheld` 는 문구가 아니라 **`vacancy_withheld` 플래그**로 가른다. 앞머리 문자열로
- *  판정하면 백엔드 문구를 다듬는 순간 조용히 `planned` 로 떨어지는데, 그러면 값이 없는
- *  거점이 값이 있는 거점의 표식을 달게 된다. 나머지 둘은 종전대로 문구로 가른다.
- */
-export type CaveatKind = "mall" | "planned" | "withheld" | null;
-
-export function caveatKind(
-  d: Pick<DistrictSummary, "caveat" | "vacancy_withheld">,
-): CaveatKind {
-  if (d.vacancy_withheld) return "withheld";
-  const t = d.caveat ?? "";
-  if (!t) return null;
-  if (t.startsWith("단일시설")) return "mall";
-  return "planned";                    // 계획상가 밀집 · 대표값 한계 등
-}
-
-/** 예외 표식 — 목록·패널이 같은 기호를 쓰도록 여기가 단일 출처다. */
-export const MARK: Record<Exclude<CaveatKind, null>, string> = {
-  mall: "▣",        // 시설 한 채
-  planned: "▤",     // 계획상가 밀집
-  withheld: "▨",    // 대표값을 내렸다 — 표식만으로도 다른 둘과 구분돼야 한다
-};
 
 /** 목록의 표식이 무엇을 뜻하는지 알려주는 짧은 꼬리표.
  *  `caveat` 문구 자체가 이미 "예외 서빙 —" · "단일시설 상권 —" 처럼 자기 종류를 밝히므로
@@ -91,13 +67,12 @@ export default function DistrictPicker({
   // **처음 그릴 때는 말하지 않는다**(바뀐 것이 없다). role 은 두지 않는다 — 화면마다 이미
   // role="status" 가 하나씩 있어(비교 후보 수 등) 둘이 되면 그 자리를 찾는 도구가 헷갈린다.
   const [announce, setAnnounce] = useState("");
-  const prevValue = useRef(value);
-  useEffect(() => {
-    if (prevValue.current === value) return;
-    prevValue.current = value;
+  const [prevValue, setPrevValue] = useState(value);
+  if (prevValue !== value) {
+    setPrevValue(value);
     const d = districts.find((x) => x.id === value);
     if (d) setAnnounce(`상권 ${d.name} 선택됨`);
-  }, [value, districts]);
+  }
 
   const tail = suffix ?? ((d: DistrictSummary) => d.gu);
 

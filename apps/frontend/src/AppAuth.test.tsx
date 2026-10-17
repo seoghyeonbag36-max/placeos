@@ -61,7 +61,7 @@ it("홈페이지에서 로그인하면 서버의 개인 사업 정보를 불러�
   window.location.hash = "#login";
   render(<App />);
   expect(screen.getByRole("heading", HOME)).toBeTruthy();
-  fireEvent.change(screen.getByLabelText("이메일"), { target: { value: "owner@example.com" } });
+  fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "owner@example.com" } });
   fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "password123" } });
   fireEvent.click(screen.getByRole("button", { name: "로그인" }));
   expect(await screen.findByLabelText("사업 이름 (선택)")).toBeTruthy();
@@ -138,7 +138,7 @@ it("랜딩의 「시작하기」는 가입 없이 첫 질문을, 「로그인」
   expect(screen.queryByRole("heading", LANDING)).toBeNull();
   act(() => { window.location.hash = "#signup"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
   expect(await screen.findByRole("heading", HOME)).toBeTruthy();
-  expect(screen.getByRole("heading", { name: "회원가입" })).toBeTruthy();
+  expect(await screen.findByRole("heading", { name: "회원가입" })).toBeTruthy();
   expect(screen.queryByRole("heading", LANDING)).toBeNull();
   act(() => { window.location.hash = "#login"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
   expect(await screen.findByRole("heading", { name: "로그인" })).toBeTruthy();

@@ -1,3 +1,5 @@
+import { sentHex, vacHex } from "@/lib/vacancyColors";
+import type { NaverMap, NaverOverlay, NaverListener, NaverInfoWindow } from "@/lib/naverTypes";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import {
@@ -14,6 +16,8 @@ import LoginHint from "@/components/LoginHint";
 import { useSignedIn } from "@/hooks/useSignedIn";
 import { colors } from "@/design/tokens/colors";
 import "./PageDashboard.css";
+
+const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 
 // 층 근거·공실 이력을 끌고 들어오므로 눌렀을 때만 받는다.
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
@@ -44,28 +48,6 @@ interface TwinSel {
  * 반드시 화면에 드러낸다(SourceBadge). 합성값이 실측처럼 읽히면 안 된다.
  * TODO: 감성 zones·입점 units 는 아직 시드 — 각각 리뷰 감성분석·R-ONE 조인으로 교체 예정.
  */
-
-// 공실률 색·막대 상한(%). 거점 값과 지도 셀은 분포가 달라 상한을 나눈다(2026-08-01 실측 기준).
-//   거점 54곳: 9.2~30.1%          → 막대는 35 로 재야 거점 간 차이가 보인다
-//   실측 셀 1,066개: p50 13 · p90 42 · max 100 → 색은 50. 한 셀이 건물 몇 동이라
-//     80% 든 100% 든 "거의 비었다"로 같이 읽혀도 되고, 50 을 넘기면 상한을 올릴수록
-//     중간대(10~30%)의 색차가 죽는다.
-// 범례 눈금은 색 상한(VAC_SCALE_MAX)을 따라간다 — 범례와 셀 색이 어긋나면 안 된다.
-export const VAC_SCALE_MAX = 50;
-
-// 감성(높을수록 좋음): 낮음 #E03E36 → 높음 #22B07D
-export function sentHex(s: number): string {
-  return lerpHex([224, 62, 54], [34, 176, 125], clamp01((s - 30) / 55));
-}
-// 공실률(높을수록 나쁨): 낮음 #22B07D → 높음 #E03E36 (디자인 토큰 vacancy 축과 동일 방향)
-export function vacHex(v: number): string {
-  return lerpHex([34, 176, 125], [224, 62, 54], clamp01(v / VAC_SCALE_MAX));
-}
-const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
-function lerpHex(a: number[], b: number[], t: number): string {
-  const h = (i: number) => Math.round(a[i] + (b[i] - a[i]) * t).toString(16).padStart(2, "0");
-  return `#${h(0)}${h(1)}${h(2)}`;
-}
 
 const TIER_LABEL: Record<string, string> = { premium: "고급화", value: "가성비", factory: "공장제" };
 const TIER_COLOR: Record<string, string> = { premium: "#8B5CF6", value: "#2E6FB7", factory: "#6b7280" };
@@ -247,15 +229,15 @@ function Bar({ k, v, max, color, text }: { k: string; v: number; max: number; co
 /** 100m 공실 히트맵 — 네이버 지도 위에 그리드 셀(Rectangle)을 공실률 색으로 렌더 */
 function VacancyMap({ detail }: { detail: DistrictDetail }) {
   const elRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const overlaysRef = useRef<any[]>([]);   // 레이어 전환마다 지우는 오버레이(그리드/건물)
+  const mapRef = useRef<NaverMap | null>(null);
+  const overlaysRef = useRef<NaverOverlay[]>([]);   // 레이어 전환마다 지우는 오버레이(그리드/건물)
   // 오버레이에 붙인 이벤트 핸들 — 오버레이와 같은 수명이라 clearOverlays 에서 같이 걷는다.
   // `setMap(null)` 은 지도에서 떼기만 하고 등록은 남기므로 핸들을 받아 둬야 뗄 수 있다.
-  const listenersRef = useRef<any[]>([]);
+  const listenersRef = useRef<NaverListener[]>([]);
   // 지도 자체에 붙인 핸들 — 지도와 같은 수명이라 지도를 destroy 하는 자리에서 걷는다.
-  const mapListenersRef = useRef<any[]>([]);
-  const poiRef = useRef<any[]>([]);        // 거점 전환까지 유지되는 POI 마커
-  const infoRef = useRef<any>(null);
+  const mapListenersRef = useRef<NaverListener[]>([]);
+  const poiRef = useRef<NaverOverlay[]>([]);        // 거점 전환까지 유지되는 POI 마커
+  const infoRef = useRef<NaverInfoWindow | null>(null);
   const [hm, setHm] = useState<VacancyHeatmap | null>(null);
   const [bld, setBld] = useState<GeoJSONFC | null>(null);
   const [layer, setLayer] = useState<"buildings" | "grid">("buildings");
@@ -265,7 +247,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
   const [twinOpen, setTwinOpen] = useState(false);
 
   const clearOverlays = () => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     // 리스너를 먼저 뗀다 — 오버레이 참조를 버린 뒤에는 짝을 찾을 자리가 없다.
     listenersRef.current.forEach((h) => naver?.maps?.Event?.removeListener(h));
     listenersRef.current = [];
@@ -276,7 +258,6 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
   // 거점 전환: 지도 재생성 + 그리드/건물 데이터 로드 + POI 그리기
   useEffect(() => {
     let live = true;
-    setMapReady(false); setSel(null);
 
     Promise.all([
       loadNaverMaps(),
@@ -288,7 +269,8 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
         setHm(heat); setBld(buildings);
         // 거점 전환마다 기본 레이어를 정한다: 건물 gold 가 있으면 건물, 없으면 그리드.
         setLayer(buildings && buildings.features.length ? "buildings" : "grid");
-        const naver = (window as any).naver;
+        const naver = window.naver;
+        if (!naver?.maps) throw new Error("네이버 지도 SDK가 비어 있습니다");
 
         mapRef.current?.destroy?.();
         const map = new naver.maps.Map(elRef.current, {
@@ -319,7 +301,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
     return () => {
       live = false;
       clearOverlays();
-      const naver = (window as any).naver;
+      const naver = window.naver;
       mapListenersRef.current.forEach((h) => naver?.maps?.Event?.removeListener(h));
       mapListenersRef.current = [];
       poiRef.current.forEach((o) => o.setMap?.(null)); poiRef.current = [];
@@ -332,9 +314,10 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
   // 레이어 전환/데이터 변경 → 오버레이 다시 그림
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
-    const naver = (window as any).naver;
+    const naver = window.naver;
     const map = mapRef.current;
     const info = infoRef.current;
+    if (!naver?.maps || !info) return;
     clearOverlays();
 
     if (layer === "buildings" && bld) {
@@ -688,7 +671,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           <h2 className="sec">공실 히트맵 <small>{summary.vacancy_source === "gold"
             ? `Page · 100m 그리드 — 건축물대장 호실 대비 영업 점포 실측(건물 ${summary.building_count?.toLocaleString()}동)`
             : "Page · 100m 그리드 합성 — 건물 데이터 수집 시 실측으로 교체"}</small></h2>
-          <VacancyMap detail={detail} />
+          <VacancyMap key={detail.id} detail={detail} />
 
           {/* 2026-09-05: 손으로 적은 감성 구역을 **행정동 실측 구역**으로 갈았다.
               공실률·점포·건물은 실측이고, 감성만 여전히 없다(좌표를 가진 점포 리뷰
