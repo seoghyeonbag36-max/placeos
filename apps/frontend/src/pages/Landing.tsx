@@ -65,11 +65,15 @@ const METHOD: { title: string; body: string }[] = [
 ];
 
 const LIMITS: string[] = [
-  "지금은 서울만 열려 있습니다. 경기와 지방의 상권은 아직 볼 수 없습니다.",
-  "공실 「예측」은 아직 검증을 마치지 못했습니다. Platform 소개의 비율은 예측이 아니라 센 값이고, 앞날을 맞힌다는 약속은 하지 않습니다.",
-  "임대 시세는 공식 통계 기준이라 실제 매물 호가와 다를 수 있습니다.",
-  "중개와 계약, 건물주 연결은 하지 않습니다. 자리를 찾고 따져 보는 데까지입니다.",
-  "시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
+  "서울만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
+  "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
+  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 중개·계약·건물주 연결은 하지 않습니다.",
+];
+
+const QUICK_STEPS = [
+  { title: "업종 고르기", body: "하려는 업종을 선택해 살펴볼 상권을 찾습니다." },
+  { title: "상권 고르기", body: "관심 있는 상권을 선택해 지역 정보를 확인합니다." },
+  { title: "빈 층 보기", body: "건물을 선택해 층별 공실과 확인 상태를 살펴봅니다." },
 ];
 
 const FAQ: { q: string; a: JSX.Element | string }[] = [
@@ -115,14 +119,22 @@ export default function Landing() {
               <p className="lp-eyebrow">창업자 전용 부동산 앱</p>
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다.</h1>
               <p className="lp-lede">
-                업종은 정했는데 어느 상권, 어느 자리가 맞는지 모르겠다면. PlaceOS 는 서울 {LANDING_HUBS}개 상권의 공실을
-                건물·층 단위로 보여 주고, 그 자리의 비용과 회수 기간, 그리고 장사가 통하는지 확인하는 방법까지 이어서 알려 줍니다.
+                서울 {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
+                고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
               </p>
               <div className="lp-cta-row">
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
                 <a className="lp-btn lp-btn-ghost" href="#login">이미 계정이 있어요</a>
               </div>
               <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용 · 로그인 없이 끝까지, 저장할 때만 가입</p>
+              <div className="lp-quick" aria-labelledby="lp-quick-title">
+                <h2 id="lp-quick-title">주요 이용 순서</h2>
+                <ol className="lp-quick-steps">
+                  {QUICK_STEPS.map((step) => <li key={step.title}>
+                    <h3>{step.title}</h3><p>{step.body}</p>
+                  </li>)}
+                </ol>
+              </div>
             </div>
             <figure className="lp-hero-art">
               <img src={illustration} width={800} height={800}
@@ -132,50 +144,49 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-who">
+        <section className="lp-section" aria-labelledby="lp-results">
           <div className="lp-wrap">
-            <h2 id="lp-who">이런 고민이라면</h2>
-            <ul className="lp-cards lp-cards-3">
-              {GOALS.map((g) => (
-                <li key={g.key} className="lp-card">
-                  <h3>{g.label}</h3>
-                  <p>{g.hint}</p>
-                </li>
-              ))}
+            <h2 id="lp-results">살펴보고 얻는 것</h2>
+            <ul className="lp-results">
+              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
             </ul>
+            <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분을 위한 서비스입니다.</p>
           </div>
         </section>
 
-        <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
+        <section className="lp-section lp-section-alt lp-detail-section" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
-            <h2 id="lp-how">네 가지 질문이 한 줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다.</p>
-            <ol className="lp-steps">
-              {STEPS.map((s, i) => (
-                <li key={s.track} className="lp-step" data-track={s.track}>
-                  <span className="lp-step-badge" aria-hidden>{s.icon}</span>
-                  <div>
-                    <p className="lp-step-name">{i + 1}. {s.name}</p>
-                    <h3>{s.question}</h3>
-                    <p>{s.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <details className="lp-details">
+              <summary id="lp-how">기능 자세히 보기</summary>
+              <ol className="lp-steps">
+                {STEPS.map((s, i) => (
+                  <li key={s.track} className="lp-step" data-track={s.track}>
+                    <span className="lp-step-badge" aria-hidden>{s.icon}</span>
+                    <div>
+                      <p className="lp-step-name">{i + 1}. {s.name}</p>
+                      <h3>{s.question}</h3>
+                      <p>{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </details>
           </div>
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-method">
+        <section className="lp-section lp-detail-section" aria-labelledby="lp-method">
           <div className="lp-wrap">
-            <h2 id="lp-method">숫자는 이렇게 만듭니다</h2>
-            <ul className="lp-cards lp-cards-3">
-              {METHOD.map((m) => (
-                <li key={m.title} className="lp-card">
-                  <h3>{m.title}</h3>
-                  <p>{m.body}</p>
-                </li>
-              ))}
-            </ul>
+            <details className="lp-details">
+              <summary id="lp-method">데이터 출처·산출 방법 보기</summary>
+              <ul className="lp-cards lp-cards-3">
+                {METHOD.map((m) => (
+                  <li key={m.title} className="lp-card">
+                    <h3>{m.title}</h3>
+                    <p>{m.body}</p>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
         </section>
 
