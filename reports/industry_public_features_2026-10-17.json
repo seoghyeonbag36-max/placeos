@@ -1,0 +1,82 @@
+{
+  "status": "partial_quarantined",
+  "usage": "원천 식별키별 로컬 연구 피처. 점포·모델·API 미연결.",
+  "input_silver": "data\\silver\\industry_public_partial_2026-10-17.json",
+  "input_silver_sha256": "411ba510b97d3b2cc91e463f5d7f4d7d654776f78d5797476aac9058e9de0a78",
+  "quarantine_path": "data\\silver\\industry_public_quarantine_2026-10-17.json",
+  "quarantine_sha256": "bfa047ca4da562ab9a4d2dc3300bd96d9874a740a3b8e0744a434cd56110edf1",
+  "verification_path": "reports\\industry_public_partial_verified_2026-10-17.json",
+  "verification_sha256": "869269062eb2c48ae793c4b109f3779a980956696b13a6756145003b9867b5e6",
+  "accepted_silver_rows": 1077224,
+  "feature_rows": 740919,
+  "rows_by_source": {
+    "acaInsTiInfo": 25507,
+    "general_restaurants": 538458,
+    "beauty": 99955,
+    "fitness": 7336,
+    "golf": 3619,
+    "billiards": 14039,
+    "pc_rooms": 16869,
+    "karaoke": 12805,
+    "bars_entertainment": 4990,
+    "bars_danran": 11616,
+    "sports_dojang": 5725
+  },
+  "missing_by_field": {
+    "general_restaurants.SITEAREA": 12255,
+    "beauty.SITEAREA": 27,
+    "fitness.SITEAREA": 2127,
+    "golf.SITEAREA": 3619,
+    "billiards.SITEAREA": 14039,
+    "pc_rooms.SITEAREA": 16869,
+    "karaoke.SITEAREA": 12805,
+    "bars_entertainment.SITEAREA": 32,
+    "bars_danran.SITEAREA": 370,
+    "sports_dojang.SITEAREA": 5725
+  },
+  "feature_fields": {
+    "acaInsTiInfo": [
+      "TOFOR_SMTOT",
+      "DTM_RCPTN_ABLTY_NMPR_SMTOT"
+    ],
+    "general_restaurants": [
+      "SITEAREA"
+    ],
+    "beauty": [
+      "SITEAREA"
+    ],
+    "fitness": [
+      "SITEAREA"
+    ],
+    "golf": [
+      "SITEAREA"
+    ],
+    "billiards": [
+      "SITEAREA"
+    ],
+    "pc_rooms": [
+      "SITEAREA"
+    ],
+    "karaoke": [
+      "SITEAREA"
+    ],
+    "bars_entertainment": [
+      "SITEAREA"
+    ],
+    "bars_danran": [
+      "SITEAREA"
+    ],
+    "sports_dojang": [
+      "SITEAREA"
+    ]
+  },
+  "output": "data\\gold\\features\\industry_public_observations_2026-10-17.jsonl",
+  "output_sha256": "e2f5d0262fe41543b3ca9bf23fa7666c7e79ab2c88b1b4246c96a048804bd8b1",
+  "limitations": [
+    "정원·일시수용능력은 재원생 실측이 아니다.",
+    "SITEAREA는 원천 소재지면적 필드이며 공실 가용면적이 아니다. 단위 환산 없음.",
+    "원천 휴폐업·등록 상태를 보존한다. 현재 영업 전수 또는 예측시점 가용 피처가 아니다.",
+    "학교·학생 원천은 코드 자동 연결 없이 이번 피처 대상에서 제외했다.",
+    "상호·주소 후보로 점포를 확정하지 않는다. 라벨·매출·권리금·성공 확률 생성 없음."
+  ]
+}

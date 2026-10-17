@@ -1,0 +1,46 @@
+{
+  "collected_at": "2026-10-17T18:04:39.919065+09:00",
+  "results": [
+    {
+      "service": "LOCALDATA_072404",
+      "permit_date": "1989-11-10",
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "format": "xml",
+      "raw_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180439\\LOCALDATA_072404.xml",
+      "sha256": "1a3f01d993fa4034b8577c6cb6f6cb3ce764a3c408f308abbdffca8472a3010f",
+      "content_type": "application/xml;charset=UTF-8",
+      "http_status": 200,
+      "result_code": "INFO-000",
+      "reported_total": "34",
+      "returned_rows": 34,
+      "same_identity_count": 1,
+      "damaged_fields": [
+        "BPLCNM"
+      ],
+      "status": "source_still_corrupted"
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "permit_date": "1998-12-20",
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "format": "xml",
+      "raw_path": "data\\bronze\\industry_public_format_probe\\2026-10-17\\180439\\LOCALDATA_072302.xml",
+      "sha256": "3e011637645cefd7c12f2345a793e4ba325cc3efc04ccfd8567c8489bae653b1",
+      "content_type": "application/xml;charset=UTF-8",
+      "http_status": 200,
+      "result_code": "INFO-000",
+      "reported_total": "4993",
+      "returned_rows": 1000,
+      "same_identity_count": 0,
+      "damaged_fields": [],
+      "status": "identity_not_found"
+    }
+  ],
+  "scope": "two same-identity XML observations; no source replacement or partial promotion"
+}

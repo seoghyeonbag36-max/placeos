@@ -3,6 +3,30 @@
 **이 파일에 없는 숫자는 논문에 쓰지 않는다.** 새 수치가 필요하면 먼저 여기에
 출처·재현 경로와 함께 등재한 뒤 본문에 쓴다. → [README.md](README.md) 작성 규칙
 
+<a id="pppp-update-20261011"></a>
+
+## 네 원고 갱신의 근거와 범위 — 2026-10-11
+
+연구 동기의 출처는 이번 집필 요청에서 연구자가 제공한 현장 관찰이다. ‘공실은 창업·재창업 순환의 동맥경화’는 문제를 설명하는 은유다. 유동인구가 많은 곳의 폐업과 적은 곳의 배달 기반 유지라는 관찰에는 표집·관측 기간·성과 대조 자료가 제공되지 않았다. 디지털 접근성·IT/SNS/AI 검색의 상대적 영향은 미검증 연구 가설로만 사용한다. 이 관찰을 인과 추정치나 기존 실험의 결과로 바꾸지 않는다.
+
+| ID | 확인한 근거 | 출처·재검증 경로·허용 범위 |
+|---|---|---|
+| COMMON-U01 | PPPP 대응: Place→Platform, Product→Page, Price→Posting, Promotion→Program | 루트 `AGENTS.md`. 현행 기능 대응이며 전통 마케팅 이론의 실증 검증 결과가 아님 |
+| COMMON-U02 | 서빙 81거점. Page·Posting·Program 구현 게이트 충족과 Platform 잔여 게이트를 구분 | `data/config/page_hubs.py::ACTIVE_HUBS`; `python scripts/pppp_status.py`; `python scripts/chain_status.py --all`. 구현 진행률을 정확도·사업 성과로 해석하지 않음 |
+| PLATFORM-U01 | 조건 F: 81거점, 노드 90,419·엣지 279,468·피처 132열·클래스 6·test 18,087. `group_mapped`, val 선택 `top1` | `data/gold/platform_industry_recommend.json::metrics`; `docs/finding-page-oct-refresh-2026-10-10.md` §7. 조건 E 및 A/B/C와 모집단·판본이 다르므로 개선 전후 비교 금지 |
+| PLATFORM-U02 | 조건 F Top-3 92.03% 대 거점 사전분포 88.40%, 차이 +3.63%p; 거점 군집 부트스트랩 95% 구간 [+3.00, +4.25]%p; b=920·c=264, 쌍대 판정 `실력` | `python scripts/kpi_baseline.py --json`의 `gnn`; 원값 구간 [2.998887427935673, 4.246551822812339]. 본문은 위 기록과 같은 반올림. McNemar 자리 독립 가정과 새 거점 일반화의 한계를 유지 |
+| PLATFORM-U03 | 조건 F off-prior Top-3 43.85%, 2,098자리; macro-F1 0.2504 | 같은 Gold의 `metrics`. 관측 전용. 창업 적합성·디지털 접근성 효과 아님 |
+| PLATFORM-U04 | LSTM 방향·오차 게이트 `확인대기`, 확인 기준 이후 신규 표본 0건 | `kpi_baseline.py --json::lstm.confirmation` 및 `direction/error.gate_verdict`. 스크립트 종료코드 1은 이 게이트 미충족을 나타냄. 이번 갱신에서 재학습하지 않음 |
+| PLATFORM-U05 | 검색 제목·링크·작성일·검색어·수집일과 행정동 소비의 조회 연결. 검색 본문·요약 재배포 없음, 소비를 점포 매출·소득으로 환산하지 않음 | `docs/finding-pppp-collected-context-2026-10-11.md`; `collected_context.py::for_district`; `platform_profile.py::identity`; `apps/backend/tests/test_collected_context.py`. 검색 표본의 지역 귀속·광고성은 미검증이며 감성 피처 경로를 되살린 결과가 아님 |
+| PAGE-U01 | 조건 G: 81거점 보존 스냅샷. 정렬 격차 중앙 +9.6%p→+7.6%p, 절대 격차 >10%p 거점 39→31, 양의 격차 70→70, 앵커가 층 밴드 안인 거점 8→8 | `reports/page_accuracy_baseline_2026-10-10.json` 및 `reports/page_accuracy_after-licensing.json::summary`; `python scripts/page_accuracy_snapshot.py --compare reports/page_accuracy_baseline_2026-10-10.json`. 앵커 통계와의 대조이지 독립 현실 공실 정답 검증이 아님. 조건 D와 합산 금지 |
+| PAGE-U02 | 현장 라벨 설계: 81거점의 고유 지번·층 78,511층, 8계층에서 458층·76거점 표본 | `data/validation/floor_sample_20261011/design.json`; `docs/finding-page-oct-refresh-2026-10-10.md` §8. 표본 설계·입력 페이지·채점기 구축은 라벨 수집 또는 정확도 평가 완료가 아님. `python -m data.validation.score_floor_labels --tag 20261011 --json reports/floor_labels_20261011.json`은 별도 라벨 입력 후 실행 |
+| POSTING-U01 | 2026-10-04 매출 산출물: 분기 20262, 서빙 81거점 중 세 tier 완비 79거점. garak·bulgwang의 premium 재료 부족 | `data/gold/platform_posting_revenue.json::quarter/coverage`; `docs/feature-posting.md` §0-X. `python -m data.pipelines.build_posting_revenue --quarter 20262`는 재생성 경로이며 이번 집필에서는 실행하지 않음 |
+| POSTING-U02 | `seoul` 기준점은 매핑된 352상권 풀이며 서울 전체가 아님. 서빙 모집단의 모델 커버리지와 임대료 수준별 부담 서열을 검사 | `docs/feature-posting.md` §0-X; `apps/backend/tests/test_posting_revenue.py::test_revenue_artifact_covers_served_hubs`, `test_premium_tracks_hub_rent_level`. 과거 §0-N의 ‘서울 전체’ 표현을 현행 사실로 전용하지 않음. 유닛 수는 후속 Page 재빌드로 바뀌므로 당시 수치를 현재 인벤토리로 옮기지 않음 |
+| PROGRAM-U01 | 로그인/JWT·조직 키가 확인된 호출만 LLM 허용. 익명 Program은 `rule-stub`, 상권 콘텐츠는 `seed`. 잘못된 자격증명은 거부. 상권 콘텐츠 실패 캐시는 300초 | `apps/backend/app/api/v1/marketing.py`; `marketing.py`; `tests/test_program_llm_gate.py`; `docs/feature-program.md` §0-V 「LLM 문」. 300초는 선택한 운영 상수이지 효과 평가 결과가 아님. 로그인은 호출 허용이며 LLM 성공 보장 아님 |
+| PROGRAM-U02 | 문화행사 Gold 갱신: 기준일 2026-10-11, 종료되지 않은 배정 749건(거점 간 중복 포함). TourAPI 응답 0건은 문화행사 부재로 치환하지 않음 | `data/gold/platform_events.json::as_of/districts`; `platform_collected_context.json::tourapi.rows`; `docs/finding-pppp-collected-context-2026-10-11.md`. 행사 배정 수는 고유 행사 수·참여 성과 아님. `python -m data.pipelines.promote_collected_context`는 해당 문서의 로컬 Bronze 경로와 인자를 필요로 함 |
+
+현재 코드·Gold 읽기 대조와 보존 보고서 검산을 수행했다. 새 학습, 외부 API 재수집, 유료 LLM 실호출 및 독립 현장 성과 실험은 수행하지 않았다. 문헌은 기존 원고와 확인 기록의 범위에서 유지하며 새 인용을 추가하지 않는다.
+
 **2026-09-20 가설 명시:** 네 원고의 RQ·H 식별자는 사후 분석 구조이며 새로운 실험 수치를 뜻하지 않는다. Platform H1/H2는 P1 및 PLATFORM-E01–E06, Page H1–H4는 PAGE-D03–D09, Posting H1–H4는 POSTING-E01–E05, Program H1–H3은 PROGRAM-E02–E05에 연결했다. 미검증 가설은 성과 자료가 없는 상태를 그대로 유지한다.
 
 ⚠ **모집단이 다른 값을 섞지 말 것.** 아래 표는 세 종류의 실험 조건을 담고 있고
@@ -404,3 +428,68 @@ K3·K4·K6·K1 은 노드별 덤프 `reports/gnn_test_preds_group-mapped_2026-09
 
 - Min 등, 2023, *FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation*. EMNLP, 12076–12100. DOI `10.18653/v1/2023.emnlp-main.741`. ACL 서지·PDF 초록·서론과 평가 정의를 확인. 원문 성능 수치를 본 원고로 옮기지 않는다.
 - Gao, Yen, Yu, Chen, 2023, *Enabling Large Language Models to Generate Text with Citations*. EMNLP, 6465–6488. DOI `10.18653/v1/2023.emnlp-main.398`. ACL 서지·PDF 초록·평가 차원 설명을 확인. 전체 부록 정독·벤치마크 실행 완료를 뜻하지 않는다.
+
+<a id="literature-q1-20261011"></a>
+
+## 문헌 근거 — AI/MIS Q1 저널 탐색 반영 (2026-10-11)
+
+네 원고(`논문 초안/paper-*.md`)의 서론·관련 연구·논의를 다시 쓰면서 추가한 인용의 확인 범위다. 위 2026-10-11 갱신 절의 ‘새 인용을 추가하지 않는다’는 그 갱신 당시의 범위이며, 이 절이 이후에 추가한 문헌 근거다. PlaceOS의 실험 수치와 가설 판정은 이 절에서 바꾸지 않았다. 아래 수치는 **문헌이 초록에서 보고한 값**이며 PlaceOS의 결과가 아니다.
+
+**확인 방법.** (1) 서지: Crossref DOI 레코드의 제목·저자·권호·쪽을 대조했다. (2) 초록: OpenAlex·Semantic Scholar 또는 출판사·기관 페이지의 초록을 읽었다. 초록을 읽지 못한 문헌은 아래 표에 ‘초록 미확인’으로 적었고 원고에서도 서지 수준으로만 인용했다. (3) 저널 분류: SCImago Journal Rank 최신판(2026-10-11 조회, 자료 연도 2025)의 최고 사분위와 분야다. Clarivate JCR의 분야별 사분위는 확인하지 않았다. 학회·워크숍 문헌은 Q1 근거로 세지 않는다. **전문은 정독하지 않았다** — 원고는 초록이 말하는 범위 안에서만 각 문헌을 서술한다.
+
+| ID | 서지 | 원고에서 쓴 내용(초록 범위) | 확인 범위 · 저널 분류 |
+|---|---|---|---|
+| LIT-01 | Baroudi & Orlikowski (1989). *MIS Quarterly* 13(1), 87–106. DOI 10.2307/248704 | MIS 연구는 통계적 검정력이 낮아 현상을 놓치기 쉽고, 표본 확대 외에도 검정력을 높일 방법이 있다 (P1) | 서지·초록 · Q1 정보시스템 |
+| LIT-02 | de Reuver, Sørensen & Basole (2018). *Journal of Information Technology* 33(2), 124–135. DOI 10.1057/s41265-016-0033-3 | 디지털 플랫폼 연구는 분석 단위·디지털화 정도·사회기술적 성격을 명시해야 한다 (P1) | 서지·초록 · Q1 정보시스템 |
+| LIT-03 | Dietterich (1998). *Neural Computation* 10(7), 1895–1923. DOI 10.1162/089976698300017197 | 한 번만 실행할 수 있는 알고리즘의 비교에서 McNemar 검정만이 허용 가능한 제1종 오류를 가진다 (P1) | 서지·초록 · 방법론 인용, AI/MIS Q1 근거로 세지 않음 |
+| LIT-04 | Ferrari Dacrema, Boglio, Cremonesi & Jannach (2021). *ACM Transactions on Information Systems* 39(2), 1–49. DOI 10.1145/3434185 | 재현 가능한 신경망 추천 방법 12개 중 11개가 개념적으로 단순한 방법에 뒤질 수 있다; 기준선의 선택과 최적화가 문제 (P1) | 서지·초록 · Q1 정보시스템 |
+| LIT-05 | Forman, Ghose & Goldfarb (2009). *Management Science* 55(1), 47–57. DOI 10.1287/mnsc.1080.0932 | 지역에 매장이 문을 열면 소비자가 온라인 구매에서 이탈한다 (P1–P4) | 서지·초록 · Q1 경영과학 |
+| LIT-06 | Ghose, Goldfarb & Han (2013). *Information Systems Research* 24(3), 613–631. DOI 10.1287/isre.1120.0453 | 모바일 인터넷에서 사용자 집 가까이의 매장이 더 자주 클릭된다 (P1–P3) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-07 | Guo, Li, Zheng, Wang & Yu (2018). *Proceedings of the ACM on IMWUT* 1(4), 1–23. DOI 10.1145/3161411 | 데이터가 부족한 새 도시의 체인점 입지 추천을 위해 다른 도시·유사 기업의 지식을 전이; 네 도시의 체인 호텔 자료로 검증 (P1) | 서지·초록 · 저널 분류 미확인 |
+| LIT-08 | Kaufman, Rosset, Perlich & Stitelman (2012). *ACM TKDD* 6(4), 1–21. DOI 10.1145/2382577.2382579 | 누수(leakage)의 정의, 학습·예측 분리, i.i.d. 가정이 깨지는 사례 (P1) | 서지·초록 · Q1 컴퓨터과학 일반 |
+| LIT-09 | Kumar, Qiu & Kumar (2018). *Information Systems Research* 29(4), 849–870. DOI 10.1287/isre.2017.0749 | 점주의 온라인 응답이 이웃 업소의 성과에 번지며 직접 경쟁 여부에 따라 다르다 (P1) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-10 | Lan, Cheng, Wang & Wen (2022). *Remote Sensing* 14(15), 3579. DOI 10.3390/rs14153579 | 대중교통망 기반 GCN으로 싱가포르의 점포 입지 매력도를 예측; 지역 지리 특성만 쓰는 방법보다 우수 (P1) | 서지·DOAJ 초록 · Q1 지구과학(AI/MIS 아님) |
+| LIT-11 | Li, Yu, Li & Gao (2023). *Tourism Management* 96, 104707. DOI 10.1016/j.tourman.2022.104707 | 측면 기반 감성이 전체 감성보다 식당 생존 예측을 개선 (P1) | 서지·기관 공개 요약, 초록 직접 대조 미완료 · Q1 관광·경영 |
+| LIT-12 | Lin, Lucas & Shmueli (2013). *Information Systems Research* 24(4), 906–917. DOI 10.1287/isre.2013.0480 | 대표본에서 p값이 0에 가까워져 실용적 의미 없는 결과를 지지하게 되는 문제 (P1) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-13 | Liu, Guo, Zhang, Zeghlache, Chen, Hu, Zhang, Zhou & Yu (2021). *ACM TKDD* 15(3), 1–27. DOI 10.1145/3442203 | 라벨 없는 목표 도시로의 적대적 전이학습과 전이 가능성 가중 (P1) | 서지·초록 · Q1 컴퓨터과학 일반 |
+| LIT-14 | Luca & Zervas (2016). *Management Science* 62(12), 3412–3427. DOI 10.1287/mnsc.2015.2304 | Yelp 식당 리뷰의 상당 부분이 의심 리뷰로 필터링되며 경쟁이 심할수록 불리한 가짜 리뷰를 받을 가능성이 커진다 (P1) | 서지·초록 · Q1 경영과학 |
+| LIT-15 | Martens, Provost, Clark & de Fortuny (2016). *MIS Quarterly* 40(4), 869–888. DOI 10.25300/MISQ/2016/40.4.04 | 전통적 구조화 데이터는 규모를 키워도 뚜렷한 개선이 없었고 세밀한 행동 데이터는 규모의 이득이 지속 (P1) | 서지·초록 · Q1 정보시스템 |
+| LIT-16 | Shmueli & Koppius (2011). *MIS Quarterly* 35(3), 553–572. DOI 10.2307/23042796 | 예측 분석의 여섯 역할(현상의 예측 가능성 평가 포함); 설명력은 예측력을 함의하지 않는다 (P1) | 서지·초록 · Q1 정보시스템 |
+| LIT-17 | Yu, Tian, Wang, Guo & Mei (2016). *ACM TKDD* 11(1), 1–21. DOI 10.1145/2930671 | 주어진 위치의 점포 유형 추천; 서빙 고객 수 극대화; 위치·이웃 점포 관계 피처 (P1) | 서지·초록 · Q1 컴퓨터과학 일반 |
+| LIT-18 | Zhang & Luo (2023). *Management Science* 69(1), 25–50. DOI 10.1287/mnsc.2022.4359 | 소비자 게시 사진이 리뷰·업체 특성·경쟁 환경을 넘어 식당 생존을 예측; 사진은 최대 3년, 리뷰는 1년; 진입·퇴출 시점은 플랫폼 페이지·웹사이트·검색에서 수집 (P1–P3) | 서지·초록 · Q1 경영과학 |
+| LIT-19 | Zheng, Capra, Wolfson & Yang (2014). *ACM TIST* 5(3), 1–55. DOI 10.1145/2629592 | 도시 데이터의 수집·관리·분석·서비스 제공을 잇는 도시 컴퓨팅의 틀과 응용 범주 (P1) | 서지·초록 · Q1 인공지능 |
+| LIT-20 | Ballou, Wang, Pazer & Tayi (1998). *Management Science* 44(4), 462–484. DOI 10.1287/mnsc.44.4.462 | 정보 제조 시스템과 정보 산출물의 적시성·정확도·비용을 데이터 단위와 구성요소에 연결 (P2, P3) | 서지·초록 · Q1 경영과학 |
+| LIT-21 | Burton-Jones & Grange (2013). *Information Systems Research* 24(3), 632–658. DOI 10.1287/isre.1120.0444 | 표상 이론에서 효과적 사용의 성격과 동인을 도출 (P2, P3) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-22 | Du, Wang, Zou & Shi (2018). *Remote Sensing* 10(12), 1920. DOI 10.3390/rs10121920 | Jilin1-03 위성과 지리 자료로 census tract 단위 주택 공실률을 모델링 (P2) | 서지, 기존 후보표의 공개 원문 확인 기록 · Q1 지구과학(AI/MIS 아님) |
+| LIT-23 | Fišar, Greiner, Huber, Katok, Ozkes & the Management Science Reproducibility Collaboration (2024). *Management Science* 70(3), 1343–1356. DOI 10.1287/mnsc.2023.03556 | 데이터 접근 등이 장애가 아닌 논문의 95% 이상이 완전·대부분 재현; 29%는 데이터 일부 접근 불가; 전체 재현 비율 68%; 분야 간 이질성은 주로 데이터 접근성 (P2) | 서지·초록 · Q1 경영과학 |
+| LIT-24 | Hevner, March, Park & Ram (2004). *MIS Quarterly* 28(1), 75–106. DOI 10.2307/25148625 | 설계과학을 이해·수행·평가하는 지침 (P2, P4) | 서지·초록 · Q1 정보시스템 |
+| LIT-25 | Law, Paige & Russell (2019). *ACM TIST* 10(5), 1–19. DOI 10.1145/3342240 | 거리뷰·위성 영상의 시각 피처가 런던 주택가격 추정을 개선하고 보지 못한 자치구에도 일반화 (P2) | 서지·초록 · Q1 인공지능 |
+| LIT-26 | Li & Long (2024). *Computers, Environment and Urban Systems* 108, 102071. DOI 10.1016/j.compenvurbsys.2023.102071 | 이동 센싱 이미지와 컴퓨터 비전으로 점포 공실 추론; 공개 데이터셋 설명(Faster R-CNN, 시닝) (P2) | 서지·데이터셋 설명, 초록 미확인 · Q1 지리·도시(AI/MIS 아님) |
+| LIT-27 | Parssian, Sarkar & Jacob (2004). *Management Science* 50(7), 967–982. DOI 10.1287/mnsc.1040.0237 | 원천 데이터의 정확도·완전성이 선택·투영·카테시안 곱을 거쳐 파생 데이터 품질에 반영되는 방식 (P2, P3) | 서지·초록 · Q1 경영과학 |
+| LIT-28 | Recker, Indulska, Green, Burton-Jones & Weber (2019). *Journal of the Association for Information Systems*, 735–786. DOI 10.17705/1jais.00550 | 정보시스템의 기본 목적은 현실 현상의 충실한 표상; 이 이론이 데이터 품질 연구 등을 뒷받침 (P2, P3) | 서지·초록, 권호는 확인한 기록에 없음 · Q1 정보시스템 |
+| LIT-29 | Venable, Pries-Heje & Baskerville (2016). *European Journal of Information Systems* 25(1), 77–89. DOI 10.1057/ejis.2014.36 | 평가 에피소드를 기능적 목적(형성/총괄)과 환경(인공/자연)으로 구분하는 FEDS (P2, P4) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-30 | Vetrò, Canova, Torchiano, Minotas, Iemma & Morando (2016). *Government Information Quarterly* 33(2), 325–337. DOI 10.1016/j.giq.2016.02.001 | 공공 개방 데이터 품질을 가장 세밀한 수준에서 측정하는 지표 체계; 두 이탈리아 사례 적용 (P2) | 서지·초록 · Q1 문헌정보·법·사회과학(AI/MIS 아님) |
+| LIT-31 | Wang & Strong (1996). *Journal of Management Information Systems* 12(4), 5–33. DOI 10.1080/07421222.1996.11518099 | 데이터 품질의 네 범주: 내재적·맥락적·표현적·접근성 (P2, P3) | 서지·초록 · Q1 경영정보 |
+| LIT-32 | Han, Jia, Chen, Gupta, Kumar & Lin (2022). *Journal of Business Research* 144, 416–427. DOI 10.1016/j.jbusres.2022.01.049 | 기계학습 기반 수익 입지 탐색(제목·서지 수준) (P3) | 서지·검색 요약, 초록 미확인 · Q1 경영·마케팅 |
+| LIT-33 | Kayande, De Bruyn, Lilien, Rangaswamy & van Bruggen (2009). *Information Systems Research* 20(4), 527–546. DOI 10.1287/isre.1080.0198 | 개선 여지와 교정 행동 피드백을 함께 줄 때 사용자의 정신 모형이 정렬되고 시스템 평가가 개선 (P3) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-34 | Lu, Zheng, Nervino, Li, Xu & Xu (2024). *Journal of Retailing and Consumer Services* 77, 103620. DOI 10.1016/j.jretconser.2023.103620 | 기계학습 기반 점포 입지 선별(제목·서지 수준) (P3) | 서지·검색 요약, 초록 미확인 · Q1 마케팅 |
+| LIT-35 | Nambisan (2017). *Entrepreneurship Theory and Practice* 41(6), 1029–1055. DOI 10.1111/etap.12254 | 디지털 기술이 창업 과정의 불확실성의 성격과 대처 방식을 바꾸었다 (P3) | 서지·초록 · Q1 경영·경제 |
+| LIT-36 | Önüt, Efendigil & Soner Kara (2010). *Expert Systems with Applications* 37(3), 1973–1980. DOI 10.1016/j.eswa.2009.06.080 | 퍼지 AHP·TOPSIS로 이스탄불 쇼핑센터 입지 선택 (P3) | 서지, 저자 소속 대학 기록의 초록 · Q1 인공지능 |
+| LIT-37 | Otis, Clarke, Delecourt, Holtz & Koning (2026). *Management Science*, 온라인 선공개. DOI 10.1287/mnsc.2024.06909 | GPT-4 사업 조언의 평균 효과는 영과 구분되지 않음; 기준 성과가 낮던 창업자는 거의 10% 나빠지고 높던 창업자는 15%를 넘게 개선되었을 수 있음; 차이는 실행한 조언에서 비롯 (P3, P4) | 서지·초록 · Q1 경영과학 |
+| LIT-38 | Steininger (2019). *Information Systems Journal* 29(2), 363–407. DOI 10.1111/isj.12206 | 창업 운영에서 IT의 네 역할: 촉진자·매개자·산출물·편재 (P3) | 서지·초록 · Q1 정보시스템 |
+| LIT-39 | Boussioux, Lane, Zhang, Jacimovic & Lakhani (2024). *Organization Science* 35(5), 1589–1607. DOI 10.1287/orsc.2023.18430 | 외부 평가자 300명이 234개 해결안 중 무작위 13개씩 평가(3,900 평가자-해결안 쌍); 사람 집단은 참신성, 사람-AI는 전략적 실행 가능성·재무·환경 가치에서 높음 (P4) | 서지·초록 · Q1 경영·조직 |
+| LIT-40 | Camuffo, Cordova, Gambardella & Spina (2020). *Management Science* 66(2), 564–586. DOI 10.1287/mnsc.2018.3249 | 이탈리아 스타트업 116개, 16개 시점, 약 1년; 과학적 접근을 훈련받은 창업자가 성과가 좋고 피벗이 잦으며 중도 탈락은 늘지 않음 (P4) | 서지·초록 · Q1 경영과학 |
+| LIT-41 | Camuffo, Gambardella, Messinese, Novelli, Paolucci & Spina (2024). *Strategic Management Journal* 45(6), 1209–1237. DOI 10.1002/smj.3580 | 759개 기업, 네 개의 무작위 실험; 아이디어 종료 증가, 피벗 횟수의 비선형 효과 (P4) | 서지·초록 · Q1 경영·전략 |
+| LIT-42 | Feuerriegel, Hartmann, Janiesch & Zschech (2024). *Business & Information Systems Engineering* 66(1), 111–126. DOI 10.1007/s12599-023-00834-7 | 생성형 AI가 사람의 창작과 구별되지 않는 콘텐츠를 만들 수 있다는 도입부 (P4) | 서지·초록 도입부 · Q1 정보시스템 |
+| LIT-43 | Gregor & Hevner (2013). *MIS Quarterly* 37(2), 337–355. DOI 10.25300/MISQ/2013/37.2.01 | 문제·해결 영역의 지식 상태에 따른 기여 틀과 산출물 기술을 결과 절 자리에 두는 소통 도식 (P4) | 서지·초록 · Q1 정보시스템 |
+| LIT-44 | Heo, Son & Park (2025). *Expert Systems with Applications* 272, 126712. DOI 10.1016/j.eswa.2025.126712 | LLM 응답의 환각을 설명 가능·검증 가능하게 자동 탐지(제목·서지 수준) (P4) | 서지, 초록 미확인; 공개본과 출판본의 버전 차이 대조 필요 · Q1 인공지능 |
+| LIT-45 | Huang, Yu, Ma, Zhong, Feng, Wang, Chen, Peng, Feng, Qin & Liu (2025). *ACM TOIS* 43(2), 1–55. DOI 10.1145/3703155 | LLM 환각의 분류, 탐지·완화 방법, 검색 증강 모형의 한계 (P4) | 서지·초록 · Q1 정보시스템 |
+| LIT-46 | Ji, Lee, Frieske, Yu, Su, Xu, Ishii, Bang, Madotto & Fung (2023). *ACM Computing Surveys* 55(12), 1–38. DOI 10.1145/3571730 | 자연어 생성의 환각 측정·완화 연구 개관 (P4) | 서지·초록 · Q1 컴퓨터과학 일반 |
+| LIT-47 | Koning, Hasan & Chatterji (2022). *Management Science* 68(9), 6434–6453. DOI 10.1287/mnsc.2021.4209 | A/B 테스트 도입 스타트업의 성과가 1년 뒤 30%–100% 개선; 부정적 신호에 더 빨리 접음 (P4) | 서지·초록 · Q1 경영과학 |
+| LIT-48 | Leatherbee & Katila (2020). *Strategic Entrepreneurship Journal* 14(4), 570–593. DOI 10.1002/sej.1373 | 린 스타트업 팀 152개에서 가설 수립·탐색적 시험·아이디어 수렴의 구성요소가 예상대로 연결 (P4) | 서지·초록 · Q1 경영·전략 |
+| LIT-49 | Lu, Ba, Huang & Feng (2013). *Information Systems Research* 24(3), 596–612. DOI 10.1287/isre.1120.0454 | 쿠폰은 리뷰 규모와 대체, 키워드 광고는 보완 관계 (P4) | 서지·초록 · Q1 정보시스템·경영정보 |
+| LIT-50 | Reisenbichler, Reutterer, Schweidel & Dan (2022). *Marketing Science* 41(3), 441–452. DOI 10.1287/mksc.2022.1354 | 자연어 생성 검색 최적화 문구가 사람 편집을 거쳐 전문가 원고보다 높은 검색 순위; 사람 편집이 필수 (P4) | 서지·기관 공개 요약, 초록 직접 대조 미완료 · Q1 마케팅·경영 |
+
+기존 근거 절이 이미 등재한 문헌은 다시 적지 않았다: Kipf & Welling(PLATFORM-E07), Shchur 등(PLATFORM-E08), Alsudais·Marsden & Pingry·National Academies·Sandve 등·Timmerman & Bronselaer([Page 문헌 보완의 서지 식별값](#page-condition-d)), Min 등·Gao 등([P4 문헌 서지 식별값](#posting-program-update)).
+
+**해석 한계.** 위 문헌들의 성능 수치·방법은 PlaceOS의 기준이나 결과로 쓰지 않는다. 문헌과의 관계는 개념·범주·평가 설계의 대응이며, PlaceOS가 해당 문헌의 효과를 재현했다는 뜻이 아니다. 초록에 없는 내용(예: Huang 등의 분류 체계의 세부 범주, Wang & Strong의 차원별 정의)은 원고에서 서술하지 않았다.

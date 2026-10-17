@@ -1,0 +1,13 @@
+{
+  "documentation": "https://www.data.go.kr/data/15154916/openapi.do",
+  "endpoint": "https://apis.data.go.kr/1741000/general_restaurants/info",
+  "scope": "19891110 permit date, district 3200000; diagnostic only",
+  "http_status": 200,
+  "raw_path": "data\\bronze\\industry_public_upstream_probe\\2026-10-17\\180615\\response.bin",
+  "sha256": "08437763bd335ff2157dbb70ba16447891eefc0443febd7fd2e5a85804270954",
+  "bytes": 2157,
+  "response_structure": [
+    "response"
+  ],
+  "status": "response_saved"
+}

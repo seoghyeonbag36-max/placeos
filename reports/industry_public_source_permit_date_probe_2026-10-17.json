@@ -1,0 +1,15 @@
+{
+  "service": "LOCALDATA_072404",
+  "identity": [
+    "3200000",
+    "3200000-101-1989-02013"
+  ],
+  "method": "documented_APVPERMYMD_positional_filter",
+  "requested_permit_date": "1989-11-10",
+  "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180243\\LOCALDATA_072404.json",
+  "sha256": "2ddf51876f8aa41c34512b5961db869431e025622d66cc8e66692cc9eac3be98",
+  "reported_total": 34,
+  "returned_rows": 34,
+  "same_identity_count": 1,
+  "status": "source_still_corrupted"
+}

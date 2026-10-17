@@ -20,6 +20,13 @@ from data.config.page_hubs import ACTIVE_HUBS
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def validate_match_text(fields: dict, name_field: str, address_field: str) -> None:
+    """손실 디코딩된 연결 키는 추정 복원하지 않고 승격을 중단한다."""
+    for field in (name_field, address_field):
+        if '\ufffd' in str(fields.get(field) or ''):
+            raise ValueError(f'corrupted_match_text: {field}')
+
+
 class DiskRows:
     """원본 전체를 메모리에 올리지 않도록 임시 JSONL에 보관한다."""
 
@@ -63,12 +70,23 @@ def clean(value: Any) -> Any:
 
 def normalize(rows: list[dict], keys: tuple[str, ...], source: str,
               source_path: str, sha256: str, collected_on: str,
-              as_of: date | None = None) -> list[dict]:
+              as_of: date | None = None, *, allow_corrupted_text: bool = False,
+              preserve_observations: bool = False) -> list[dict]:
     """식별키 결손과 동일 키의 상충 관측은 실패한다. 테스트 원천은 합성이다."""
     found: dict[tuple, dict] = {}
+    observations = []
     reference_date = as_of or datetime.now(ZoneInfo('Asia/Seoul')).date()
     for index, raw in enumerate(rows):
         row = {k: clean(v) for k, v in raw.items()}
+        if not allow_corrupted_text and (source in LICENSES or source == 'acaInsTiInfo' or source.startswith('stores/')):
+            name_field, address_field = (
+                ('ACA_NM', 'FA_RDNMA') if source == 'acaInsTiInfo' else
+                ('bizesNm', 'rdnmAdr') if source.startswith('stores/') else
+                ('BPLCNM', 'RDNWHLADDR'))
+            try:
+                validate_match_text(row, name_field, address_field)
+            except ValueError as exc:
+                raise ValueError(f'{source_path}: row={index + 1}: {exc}') from exc
         planned = False
         if source == 'schoolInfo' and row.get('FOND_YMD') is not None:
             raw_date = str(row['FOND_YMD'])
@@ -94,7 +112,10 @@ def normalize(rows: list[dict], keys: tuple[str, ...], source: str,
             found[observation_key]['foundation_label'] = '(예정)' if planned else None
             found[observation_key]['status_as_of'] = reference_date.isoformat()
             found[observation_key]['source_row_1based'] = index + 1
-    return list(found.values())
+        if preserve_observations:
+            found[observation_key]['source_row_1based'] = index + 1
+            observations.append(found[observation_key])
+    return observations if preserve_observations else list(found.values())
 
 
 def match(rows: list[dict], stores: list[dict], name_field: str,
@@ -104,12 +125,14 @@ def match(rows: list[dict], stores: list[dict], name_field: str,
         return re.sub(r"\s+", " ", str(value or "").strip())
     index: dict[tuple[str, str], set[str]] = defaultdict(set)
     for store in stores:
+        validate_match_text(store, 'bizesNm', 'rdnmAdr')
         name, address = token(store.get("bizesNm")), token(store.get("rdnmAdr"))
         if name and address:
             index[name, address].add(str(store["bizesId"]))
     results = []
     for row in rows:
         fields = row["fields"]
+        validate_match_text(fields, name_field, address_field)
         name, address = token(fields.get(name_field)), token(fields.get(address_field))
         candidates = sorted(index.get((name, address), set())) if name and address else []
         status = "matched" if len(candidates) == 1 else "ambiguous" if candidates else "unmatched"
@@ -121,25 +144,48 @@ def match(rows: list[dict], stores: list[dict], name_field: str,
     return results
 
 
-def build(run: Path, previous: Path, output: Path, report_path: Path) -> dict:
+def build(run: Path, previous: Path, output: Path, report_path: Path,
+          quarantine_path: Path | None = None) -> dict:
     """임시 디스크를 정리하며 빌더를 실행한다."""
     with tempfile.TemporaryDirectory(prefix='industry-silver-') as folder:
-        return _build(run, previous, output, report_path, Path(folder))
+        return _build(run, previous, output, report_path, Path(folder), quarantine_path)
 
 
-def _build(run: Path, previous: Path, output: Path, report_path: Path, scratch: Path) -> dict:
+def _build(run: Path, previous: Path, output: Path, report_path: Path, scratch: Path,
+           quarantine_path: Path | None = None) -> dict:
     """전체 원본 검증 후 출력한다. 기존 산출물은 덮어쓰지 않는다."""
-    if output.exists() or report_path.exists():
+    targets = [output, report_path] + ([quarantine_path] if quarantine_path else [])
+    if len({path.resolve() for path in targets}) != len(targets):
+        raise ValueError('output_paths_must_be_distinct')
+    if any(path.exists() for path in targets):
         raise FileExistsError("기존 산출물은 덮어쓰지 않습니다")
     datasets: dict[str, DiskRows] = defaultdict(lambda: DiskRows(scratch))
+    quarantined: dict[str, DiskRows] = defaultdict(lambda: DiskRows(scratch))
+    raw_counts: Counter[str] = Counter()
     manifests = []
     errors = []
 
     def ingest(path: Path, source: str, rows: list[dict], keys: tuple[str, ...], date: str) -> None:
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         manifests.append({"path": str(path), "sha256": digest, "raw_rows": len(rows), "collected_on": date})
+        raw_counts[source] += len(rows)
         try:
-            datasets[source].extend(normalize(rows, keys, source, str(path), digest, date))
+            records = normalize(rows, keys, source, str(path), digest, date,
+                                allow_corrupted_text=quarantine_path is not None and source in LICENSES,
+                                preserve_observations=quarantine_path is not None)
+            accepted = []
+            rejected = []
+            for record in records:
+                damaged = [field for field in ('BPLCNM', 'RDNWHLADDR')
+                           if source in LICENSES and '\ufffd' in str(record['fields'].get(field) or '')]
+                if quarantine_path is not None and damaged:
+                    rejected.append({**record, 'raw_fields': rows[record['source_row_1based'] - 1],
+                                     'quarantine_reason': 'corrupted_match_text', 'damaged_fields': damaged})
+                else:
+                    accepted.append(record)
+            datasets[source].extend(accepted)
+            if rejected:
+                quarantined[source].extend(rejected)
         except ValueError as exc:
             errors.append(str(exc))
 
@@ -186,20 +232,35 @@ def _build(run: Path, previous: Path, output: Path, report_path: Path, scratch: 
         if not datasets[source]:
             errors.append(f"missing_source: {source}")
     # 페이지를 가로지르는 중복도 같은 계약으로 검증한다.
-    for source, records in datasets.items():
+    for source in datasets.keys() | quarantined.keys():
         seen = {}
-        for row in records:
-            key = tuple(row["identity"]) if row['identity'] else ('source_row', row['provenance']['source_path'], row['source_row_1based'])
-            digest = hashlib.sha256(json.dumps(row['fields'], sort_keys=True).encode()).hexdigest()
-            if key in seen and seen[key] != digest:
-                errors.append(f"{source}: conflicting_identity_across_pages: {key}")
-            seen[key] = digest
-    result = {"status": "blocked" if errors else "validated", "errors": errors,
+        # 격리 행도 식별키 충돌 검증에 포함한다. 격리는 잘못된 키를 우회하는 수단이 아니다.
+        for records in (datasets.get(source, ()), quarantined.get(source, ())):
+            for row in records:
+                key = tuple(row["identity"]) if row['identity'] else ('source_row', row['provenance']['source_path'], row['source_row_1based'])
+                digest = hashlib.sha256(json.dumps(row['fields'], sort_keys=True).encode()).hexdigest()
+                if key in seen and seen[key] != digest:
+                    errors.append(f"{source}: conflicting_identity_across_pages: {key}")
+                seen[key] = digest
+    accounting = {source: {'raw_rows': count, 'accepted_rows': len(datasets.get(source, ())),
+                           'quarantined_rows': len(quarantined.get(source, ()))}
+                  for source, count in raw_counts.items()}
+    if quarantine_path is not None:
+        for source, counts in accounting.items():
+            if counts['accepted_rows'] + counts['quarantined_rows'] != counts['raw_rows']:
+                errors.append(f'{source}: row_accounting_mismatch')
+    status = 'partial_quarantined' if quarantine_path is not None and quarantined else 'validated'
+    result = {"status": "blocked" if errors else status, "errors": errors,
               "sources": manifests, "rows": {k: len(v) for k, v in datasets.items()},
               "limitations": ["실제 영업 시작·종료와 행정 등록일은 다르다.",
                               "이름과 전체 주소가 같은 연결 후보이며 실제 동일 점포 확정이 아니다.",
                               "학교 원천 간 코드 체계가 달라 자동 연결하지 않는다.",
                               "Gold·모델·API에는 연결하지 않는다. 결측 보간 없음."]}
+    result['silver_written'] = False
+    if quarantine_path is not None:
+        result.update(row_accounting=accounting, quarantine_path=str(quarantine_path),
+                      quarantined_rows=sum(len(records) for records in quarantined.values()),
+                      quarantine_written=False)
     if not errors:
         links = {}
         # 점포 인덱스도 디스크에 두고 반경 간 중복을 점포 ID로 구분한다.
@@ -234,7 +295,7 @@ def _build(run: Path, previous: Path, output: Path, report_path: Path, scratch: 
         result['silver_written'] = True
         output.parent.mkdir(parents=True, exist_ok=True)
         with output.open("x", encoding="utf-8") as stream:
-            stream.write('{"datasets":{')
+            stream.write('{"status":' + json.dumps(status) + ',"datasets":{')
             for index, (source, records) in enumerate(datasets.items()):
                 if index:
                     stream.write(',')
@@ -247,6 +308,17 @@ def _build(run: Path, previous: Path, output: Path, report_path: Path, scratch: 
                 stream.write(json.dumps(source) + ':')
                 write_rows(stream, records)
             stream.write('}}')
+        if quarantine_path is not None:
+            quarantine_path.parent.mkdir(parents=True, exist_ok=True)
+            with quarantine_path.open('x', encoding='utf-8') as stream:
+                stream.write('{"status":' + json.dumps(status) + ',"quarantined":{')
+                for index, (source, records) in enumerate(quarantined.items()):
+                    if index:
+                        stream.write(',')
+                    stream.write(json.dumps(source) + ':')
+                    write_rows(stream, records)
+                stream.write('}}')
+            result['quarantine_written'] = True
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("x", encoding="utf-8") as stream:
         json.dump(result, stream, ensure_ascii=False, indent=2)
@@ -259,7 +331,9 @@ if __name__ == "__main__":
     parser.add_argument("previous", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument('--quarantine', type=Path,
+                        help='승인된 부분 승격 모드: 인허가 연결 필드 손상 행을 별도 파일로 보존')
     args = parser.parse_args()
-    result = build(args.run, args.previous, args.output, args.report)
+    result = build(args.run, args.previous, args.output, args.report, args.quarantine)
     print(json.dumps({"status": result["status"], "errors": result["errors"]}, ensure_ascii=False))
     raise SystemExit(1 if result["errors"] else 0)

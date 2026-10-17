@@ -47,6 +47,29 @@ def test_missing_identity_fails():
             norm([row])
 
 
+@pytest.mark.parametrize('field', ['BPLCNM', 'RDNWHLADDR'])
+def test_corrupted_license_match_text_blocks_normalization(field):
+    # 합성 원천: 손상 문자열을 정상적인 미매칭으로 승격하지 않는다.
+    row = {'id': 'synthetic-1', 'BPLCNM': '상호', 'RDNWHLADDR': '서울 도로 1'}
+    row[field] += '\ufffd'
+    with pytest.raises(ValueError, match=f'fixture.json: row=1: corrupted_match_text: {field}'):
+        normalize([row], ('id',), 'beauty', 'fixture.json', 'abc', '2026-10-17')
+
+
+def test_corrupted_match_text_cannot_form_a_false_exact_match():
+    rows = norm([{'id': '1', 'name': '상호\ufffd', 'address': '도로 1'}])
+    stores = [{'bizesId': 's1', 'bizesNm': '상호\ufffd', 'rdnmAdr': '도로 1'}]
+    with pytest.raises(ValueError, match='corrupted_match_text'):
+        match(rows, stores, 'name', 'address')
+
+
+def test_missing_license_address_is_preserved():
+    row = {'id': 'synthetic-1', 'BPLCNM': '상호', 'RDNWHLADDR': ' '}
+    result = normalize([row], ('id',), 'beauty', 'fixture.json', 'abc', '2026-10-17')
+    assert result[0]['fields']['RDNWHLADDR'] is None
+    assert match(result, [], 'BPLCNM', 'RDNWHLADDR')[0]['reason'] == 'missing_name_or_address'
+
+
 def test_conflicting_duplicates_fail():
     with pytest.raises(ValueError, match="conflicting_identity"):
         norm([{"id": "1", "value": 1}, {"id": "1", "value": 2}])
@@ -106,7 +129,8 @@ def test_blank_school_identity_blocks_promotion(tmp_path):
     assert not output.exists()
 
 
-def test_planned_school_build_preserves_record_and_skips_metadata(tmp_path, monkeypatch):
+@pytest.mark.parametrize('corrupted_license', [False, True])
+def test_planned_school_build_preserves_record_and_skips_metadata(tmp_path, monkeypatch, corrupted_license):
     import data.pipelines.build_industry_public_silver as module
     monkeypatch.setattr(module, 'LICENSES', {})
     monkeypatch.setattr(module, 'ACTIVE_HUBS', {})
@@ -124,10 +148,125 @@ def test_planned_school_build_preserves_record_and_skips_metadata(tmp_path, monk
     folder = tmp_path / 'school_students'
     folder.mkdir()
     (folder / '2026_02.json').write_text(json.dumps({'list': [{'SCHUL_CODE': 'synthetic-student'}]}))
+    if corrupted_license:
+        monkeypatch.setattr(module, 'LICENSES', {'beauty': 'synthetic_license'})
+        folder = tmp_path / 'seoul' / 'synthetic_license' / 'all'
+        folder.mkdir(parents=True)
+        (folder / '001.json').write_text(json.dumps({'synthetic_license': {'row': [{
+            'OPNSFTEAMCODE': 'synthetic-team', 'MGTNO': 'synthetic-id',
+            'BPLCNM': '손상\ufffd', 'RDNWHLADDR': '서울 도로 1',
+        }]}}))
     output = tmp_path / 'silver.json'
     result = build(tmp_path, tmp_path, output, tmp_path / 'report.json')
+    if corrupted_license:
+        assert result['status'] == 'blocked'
+        assert result['silver_written'] is False
+        assert any('corrupted_match_text: BPLCNM' in error for error in result['errors'])
+        assert not output.exists()
+        return
     assert result['status'] == 'validated'
     assert result['planned_schools_without_identity'] == 1
     row = json.loads(output.read_text(encoding='utf-8'))['datasets']['schoolInfo'][0]
     assert row['foundation_label'] == '(예정)' and row['identity'] is None
     assert row['fields']['SD_SCHUL_CODE'] is None
+
+
+@pytest.fixture
+def partial_inputs(tmp_path, monkeypatch):
+    """상충 키·문자 손상을 분리해서 검증하는 합성 전체 입력."""
+    import data.pipelines.build_industry_public_silver as module
+    monkeypatch.setattr(module, 'LICENSES', {'beauty': 'synthetic_license'})
+    monkeypatch.setattr(module, 'ACTIVE_HUBS', {})
+    def write(relative, payload):
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload), encoding='utf-8')
+        return path
+    for source, row in [
+        ('acaInsTiInfo', {'ATPT_OFCDC_SC_CODE': 'B10', 'ACA_ASNUM': 'synthetic-academy'}),
+        ('schoolInfo', {'ATPT_OFCDC_SC_CODE': 'B10', 'SD_SCHUL_CODE': 'synthetic-school'}),
+    ]:
+        write(f'{source}/001.json', {source: [{'row': [row]}]})
+    write('school_locations_file/001.json', [{'SCHOOL_ID': 'synthetic-location'}])
+    write('school_students/2026_02.json', {'list': [{'SCHUL_CODE': 'synthetic-student'}]})
+    clean_row = {'OPNSFTEAMCODE': 'synthetic-team', 'MGTNO': 'clean', 'BPLCNM': '정상', 'RDNWHLADDR': ''}
+    damaged_row = dict(clean_row, MGTNO='damaged', BPLCNM='  손상\ufffd  ')
+    write('seoul/synthetic_license/all/001.json', {'synthetic_license': {'row': [clean_row, damaged_row]}})
+    return tmp_path, write, clean_row, damaged_row
+
+
+def partial_build(inputs):
+    root = inputs[0]
+    report = build(root, root, root / 'silver.json', root / 'report.json', root / 'quarantine.json')
+    return report, root
+
+
+def test_partial_counts_reconcile(partial_inputs):
+    root, write, clean_row, damaged = partial_inputs
+    # 동일 원천의 같은 행이 반복돼도 관측 행수 항등식은 보존한다.
+    write('seoul/synthetic_license/all/001.json', {'synthetic_license': {'row': [clean_row, clean_row, damaged]}})
+    report, _ = partial_build(partial_inputs)
+    assert report['status'] == 'partial_quarantined'
+    assert report['row_accounting']['beauty'] == {'raw_rows': 3, 'accepted_rows': 2, 'quarantined_rows': 1}
+    for counts in report['row_accounting'].values():
+        assert counts['accepted_rows'] + counts['quarantined_rows'] == counts['raw_rows']
+
+
+def test_quarantined_rows_never_enter_accepted(partial_inputs):
+    report, root = partial_build(partial_inputs)
+    accepted = json.loads((root / 'silver.json').read_text(encoding='utf-8'))
+    quarantine = json.loads((root / 'quarantine.json').read_text(encoding='utf-8'))
+    assert accepted['status'] == quarantine['status'] == 'partial_quarantined'
+    assert [row['identity'][1] for row in accepted['datasets']['beauty']] == ['clean']
+    assert [row['identity'][1] for row in accepted['links']['beauty']] == ['clean']
+    assert quarantine['quarantined']['beauty'][0]['identity'][1] == 'damaged'
+    assert report['quarantine_written'] and report['silver_written']
+
+
+@pytest.mark.parametrize('across_pages', [False, True])
+def test_identity_conflicts_still_block_partial(partial_inputs, across_pages):
+    root, write, clean_row, damaged = partial_inputs
+    conflicting = dict(damaged, MGTNO='clean')
+    write('seoul/synthetic_license/all/001.json', {'synthetic_license': {'row': [clean_row] if across_pages else [clean_row, conflicting]}})
+    if across_pages:
+        write('seoul/synthetic_license/all/002.json', {'synthetic_license': {'row': [conflicting]}})
+    report, _ = partial_build(partial_inputs)
+    assert report['status'] == 'blocked'
+    assert any('conflicting_identity' in error for error in report['errors'])
+    assert not (root / 'silver.json').exists() and not (root / 'quarantine.json').exists()
+
+
+def test_missing_identity_still_blocks_partial(partial_inputs):
+    root, write, _, damaged = partial_inputs
+    damaged['MGTNO'] = None
+    write('seoul/synthetic_license/all/001.json', {'synthetic_license': {'row': [damaged]}})
+    report, _ = partial_build(partial_inputs)
+    assert report['status'] == 'blocked' and not (root / 'silver.json').exists()
+    assert any('missing_identity' in error for error in report['errors'])
+
+
+def test_partial_preserves_source_provenance(partial_inputs):
+    import hashlib
+    root, _, _, damaged = partial_inputs
+    partial_build(partial_inputs)
+    quarantine = json.loads((root / 'quarantine.json').read_text(encoding='utf-8'))['quarantined']['beauty'][0]
+    assert quarantine['raw_fields'] == damaged
+    assert quarantine['source_row_1based'] == 2
+    assert quarantine['quarantine_reason'] == 'corrupted_match_text'
+    path = root / 'seoul/synthetic_license/all/001.json'
+    assert quarantine['provenance']['source_sha256'] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert quarantine['provenance']['source'] == 'beauty'
+
+
+def test_existing_quarantine_is_not_overwritten(partial_inputs):
+    root = partial_inputs[0]
+    path = root / 'quarantine.json'
+    path.write_text('existing')
+    with pytest.raises(FileExistsError):
+        partial_build(partial_inputs)
+    assert path.read_text() == 'existing' and not (root / 'silver.json').exists()
+
+
+def test_partial_output_paths_must_be_distinct(tmp_path):
+    with pytest.raises(ValueError, match='output_paths_must_be_distinct'):
+        build(tmp_path, tmp_path, tmp_path / 'same.json', tmp_path / 'report.json', tmp_path / 'same.json')

@@ -1,0 +1,38 @@
+{
+  "collected_at": "2026-10-17T18:01:28.449849+09:00",
+  "results": [
+    {
+      "service": "LOCALDATA_072404",
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "method": "unsupported_MGTNO_query_probe",
+      "documentation": "https://data.seoul.go.kr/dataList/OA-16094/S/1/datasetView.do?tab=A",
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180127\\LOCALDATA_072404.json",
+      "sha256": "01f860e8182bcdd61c584ecd021460bdeca7760e5be6c7155192b0bf8d26ad8f",
+      "returned_rows": 5,
+      "reported_total": 539119,
+      "same_identity_count": 0,
+      "status": "filter_not_applied_comparison_inconclusive",
+      "note": "MGTNO is an output field, not a documented request filter; full dataset total returned. No conclusion about identity absence."
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "method": "unsupported_MGTNO_query_probe",
+      "documentation": "https://data.seoul.go.kr/dataList/OA-16094/S/1/datasetView.do?tab=A",
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180127\\LOCALDATA_072302.json",
+      "sha256": "1f1e8cedba00db97cce02dc0035a2435b823aaec4b03b9a6bdc5de1783bd57b6",
+      "returned_rows": 5,
+      "reported_total": 4993,
+      "same_identity_count": 0,
+      "status": "filter_not_applied_comparison_inconclusive",
+      "note": "MGTNO is an output field, not a documented request filter; full dataset total returned. No conclusion about identity absence."
+    }
+  ],
+  "scope": "two identity probes; no old observations replaced"
+}

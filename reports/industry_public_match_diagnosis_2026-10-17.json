@@ -1,0 +1,100 @@
+{
+  "source": "local Bronze 2026-10-09; no live refetch",
+  "status": "diagnostic_only",
+  "matching": {
+    "general_restaurants": {
+      "rows": 538690,
+      "missing_address": 250182,
+      "corrupted_name": 178,
+      "corrupted_address": 54,
+      "same_name": 155633,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 24311
+    },
+    "beauty": {
+      "rows": 99955,
+      "missing_address": 32344,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 26330,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 5694
+    },
+    "fitness": {
+      "rows": 7336,
+      "missing_address": 247,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 526,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 310
+    },
+    "golf": {
+      "rows": 3619,
+      "missing_address": 234,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 262,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 104
+    },
+    "billiards": {
+      "rows": 14039,
+      "missing_address": 1543,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 5242,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 401
+    },
+    "pc_rooms": {
+      "rows": 16869,
+      "missing_address": 726,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 1367,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 93
+    },
+    "karaoke": {
+      "rows": 12805,
+      "missing_address": 766,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 5539,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 858
+    },
+    "bars_entertainment": {
+      "rows": 4991,
+      "missing_address": 2099,
+      "corrupted_name": 1,
+      "corrupted_address": 0,
+      "same_name": 2519,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 789
+    },
+    "bars_danran": {
+      "rows": 11616,
+      "missing_address": 8210,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 5749,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 680
+    },
+    "sports_dojang": {
+      "rows": 5725,
+      "missing_address": 311,
+      "corrupted_name": 0,
+      "corrupted_address": 0,
+      "same_name": 453,
+      "exact_name_full_address": 0,
+      "same_name_address_before_comma_or_parenthesis": 177
+    }
+  },
+  "limitations": [
+    "Comma/parenthesis removal is diagnostic only; floor and unit identity are lost. No links or source rows changed.",
+    "Counts cover all historical license rows, not only active businesses."
+  ]
+}

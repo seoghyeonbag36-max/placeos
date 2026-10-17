@@ -1,0 +1,38 @@
+{
+  "collected_at": "2026-10-17T18:01:48.896692+09:00",
+  "results": [
+    {
+      "service": "LOCALDATA_072404",
+      "identity": [
+        "3200000",
+        "3200000-101-1989-02013"
+      ],
+      "method": "bounded_1000_row_window_identity_comparison",
+      "start": 52178,
+      "end": 53177,
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180146\\LOCALDATA_072404.json",
+      "sha256": "6589daa87d9ebe1b5a0a0d9148daf4c77bf7979411d43e719957157c3c7d9423",
+      "strict_utf8_valid": true,
+      "returned_rows": 1000,
+      "same_identity_count": 0,
+      "status": "identity_not_in_window"
+    },
+    {
+      "service": "LOCALDATA_072302",
+      "identity": [
+        "3220000",
+        "3220000-102-1998-04375"
+      ],
+      "method": "bounded_1000_row_window_identity_comparison",
+      "start": 2521,
+      "end": 3520,
+      "raw_path": "data\\bronze\\industry_public_text_probe\\2026-10-17\\180146\\LOCALDATA_072302.json",
+      "sha256": "cbd086dcf7cb29ecee80871f99bca93494cb853c5408068c4c8eb5ca3b4bfcd6",
+      "strict_utf8_valid": true,
+      "returned_rows": 1000,
+      "same_identity_count": 1,
+      "status": "source_still_corrupted"
+    }
+  ],
+  "scope": "two bounded windows; compare identities, not row positions; no old observations replaced"
+}
