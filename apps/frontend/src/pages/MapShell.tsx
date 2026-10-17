@@ -1,3 +1,5 @@
+import { byVacancyFirst } from "@/lib/buildingOrder";
+import type { NaverOverlay, NaverListener, NaverBounds } from "@/lib/naverTypes";
 // MapShell — 거지맵/직방식 "지도-우선" 풀스크린 Page 레이아웃.
 // 네이버 지도를 화면 전체 배경으로 깔고, 검색·레이어토글·범례·리스트를 오버레이로 띄운다.
 // 회의 「Page 방향성」 1번(지도 크게) + 3번(4데이터 표현) 구현의 프론트 골격.
@@ -18,14 +20,15 @@ import CandidateCompare from "@/components/CandidateCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
-import { useMapHost, DEFAULT_ZOOM } from "@/components/MapHost";
+import { useMapHost } from "@/components/mapHostContext";
+import { DEFAULT_ZOOM } from "@/components/MapHost";
 import { isEditableTarget } from "@/lib/keyboard";
 import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
   type DensityHeatmap, type DistrictSummary, type FootfallHeatmap, type GeoJSONFC, type IndustryRecommend,
   type IndustryOption, type RentHeatmap, type RentListing } from "@/lib/api";
 import { colors } from "@/design/tokens/colors";
 import { topic } from "@/lib/businessProfile";
-import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/MapMarkerPin";
+import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/mapMarkerHtml";
 import "@/styles/tokens.css";
 import "./MapShell.css";
 
@@ -87,18 +90,6 @@ interface Building {
 }
 
 const vacRate = (b: Building) => Math.round((1 - b.active / b.capacity) * 100);
-
-/** 목록 순서 — 상태(공실의심 → 고공실 → 부분공실 → 만실) → 공실률 높은 순 → 빈 호 수 많은 순 → 이름. */
-const STATUS_RANK: Record<VacStatus, number> = { empty: 0, high: 1, partial: 2, full: 3 };
-type Rankable = Pick<Building, "status" | "capacity" | "active" | "name">;
-// 수용 0호(분모 없음)는 공실률을 0 으로 본다 — NaN 이 비교에 섞이면 정렬 전체가 흔들린다.
-const emptyShare = (b: Rankable) => (b.capacity > 0 ? (b.capacity - b.active) / b.capacity : 0);
-export function byVacancyFirst(a: Rankable, b: Rankable): number {
-  return STATUS_RANK[a.status] - STATUS_RANK[b.status]
-    || emptyShare(b) - emptyShare(a)
-    || (b.capacity - b.active) - (a.capacity - a.active)
-    || a.name.localeCompare(b.name, "ko");
-}
 
 // ── 로컬 폴백 샘플(백엔드 미기동 시). 백엔드 building_vacancy.py 와 동일 건물. ──
 const RAW: Array<{ id: string; name: string; lat: number; lng: number; status: VacStatus; capacity: number; active: number; industry: string }> = [
@@ -198,13 +189,13 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   };
   // 지도는 MapHost 소유다 — 여기서는 빌려 쓰기만 한다.
   const { map, ready } = useMapHost();
-  const overlaysRef = useRef<any[]>([]);
+  const overlaysRef = useRef<NaverOverlay[]>([]);
   // 오버레이에 붙인 이벤트 핸들. **오버레이와 같은 수명**이라 같은 자리에서 걷는다.
   // `setMap(null)` 은 지도에서 떼기만 하고 리스너 등록은 건드리지 않으므로, 핸들을
   // 받아 두지 않으면 뗄 방법 자체가 없다 — 거점을 바꿀 때마다 등록이 그대로 남는다
   // (2026-09-08 계측: 10회 전환에 addListener 1,710 / removeListener 0).
   // 짝의 본보기는 아래 zoom_changed 리스너다.
-  const listenersRef = useRef<any[]>([]);
+  const listenersRef = useRef<NaverListener[]>([]);
   const [layer, setLayer] = useState<Layer>("vacancy");
   // 좌측 목록 패널을 접었는가(2026-09-12 「지도 전체화면」).
   // 패널은 360px 불투명 카드라 1440px 화면에서 지도의 4분의 1을 덮는다. 지우지는
@@ -255,15 +246,31 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   //   폴리곤 1,443개를 부수고 다시 만든다.** 그래서 오버레이는 건드리지 않고, id→도형
   //   지도를 따로 들고 있다가 **바뀐 둘만** setOptions 로 제자리에서 고친다.
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // 이전 거점 데이터와 걷힌 도형의 호버를 새 화면에 남기지 않는다.
+  const [heatmapDistrict, setHeatmapDistrict] = useState(districtId);
+  if (heatmapDistrict !== districtId) {
+    setHeatmapDistrict(districtId);
+    setRentHm(null); setRentMissingFor(null); setFootHm(null); setDensHm(null);
+  }
+  const [recommendationScope, setRecommendationScope] = useState({ selected, districtId, src });
+  if (recommendationScope.selected !== selected || recommendationScope.districtId !== districtId || recommendationScope.src !== src) {
+    setRecommendationScope({ selected, districtId, src });
+    setRec(null);
+  }
+  const [hoverScope, setHoverScope] = useState({ districtId, layer, pinMode });
+  if (hoverScope.districtId !== districtId || hoverScope.layer !== layer || hoverScope.pinMode !== pinMode) {
+    setHoverScope({ districtId, layer, pinMode });
+    setHoveredId(null);
+  }
   // id → { 도형, 평상시 옵션, 강조 옵션 }. 렌더 useEffect 가 채우고 호버 useEffect 가 읽는다.
-  const shapesRef = useRef<Map<string, { ov: any; base: Record<string, unknown>; hot: Record<string, unknown> }>>(new Map());
+  const shapesRef = useRef<Map<string, { ov: NaverOverlay; base: Record<string, unknown>; hot: Record<string, unknown> }>>(new Map());
 
   // ── R2 뷰포트 동기화 (2026-09-13) ──────────────────────────────────────────
   // 화면 밖 매물은 사용자에게 존재하지 않는다. 목록과 지도가 서로 다른 걸 보고 있으면
   // 둘 다 못 믿게 된다 → design/references/INDEX.md §1-1(호갱노노) · §2-3(Zillow).
   // bounds 가 null 이면 **거르지 않는다** — SDK 는 지도가 붙기 전 null 을 주는데,
   // 범위를 모르는 채 거르면 목록이 통째로 빈다.
-  const [bounds, setBounds] = useState<any>(null);
+  const [bounds, setBounds] = useState<NaverBounds | null>(null);
   const [viewportOnly, setViewportOnly] = useState(true);
   // 건물 폴리곤이 있는 거점만 고른다 — vacancy_source === "gold" 가 곧 "Gold 마스터 보유"다.
   // 합성 거점을 열면 /heatmap/buildings 가 404 라 빈 지도가 된다.
@@ -283,7 +290,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 목록 맨 위는 만실이라, 둘이 서로 다른 답을 말했다. 화면설계서 2판 Page 와이어프레임의
   // 순서(공실의심 100% → 고공실 67% → 만실 0%)를 따른다. 정렬은 목록에만 — 오버레이 순서는 그대로.
   const listed = useMemo(() => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     const inView = !viewportOnly || !bounds?.hasLatLng || !naver ? filtered
       : filtered.filter((b) => bounds.hasLatLng(new naver.maps.LatLng(b.center.lat, b.center.lng)));
     return [...inView].sort(byVacancyFirst);
@@ -321,7 +328,6 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
 
   useEffect(() => {
     let alive = true;
-    setRentHm(null);
     getRentHeatmap(districtId)
       .then((hm) => { if (alive) setRentHm(hm); })
       .catch(() => { if (alive) { setRentHm(null); setRentMissingFor(districtId); } });
@@ -348,18 +354,13 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     return () => { alive = false; };
   }, [districtId, layer]);
 
-  // 거점이 바뀌면 이전 거점의 값을 그대로 두지 않는다 — 남으면 다른 상권의 수치가
-  // 새 지도 위에 잠깐 겹쳐 보인다.
-  useEffect(() => { setFootHm(null); setDensHm(null); }, [districtId]);
-
   // 선택 건물의 GNN 업종 추천 (Platform 5-2)
   // 그래프 노드는 카카오 점포 자리라 건물 대장 키와 join 되지 않는다 → **좌표**로 묻는다.
   // src === "local" 은 백엔드 미기동 폴백이라 샘플 좌표다. 그걸로 추천을 물으면
   // 실제와 무관한 답이 붙으므로 아예 건너뛴다.
   useEffect(() => {
-    if (!selected || src !== "api") { setRec(null); return; }
+    if (!selected || src !== "api") return;
     let alive = true;
-    setRec(null);
     recommendIndustry({
       district_id: districtId,
       lat: selected.center.lat,
@@ -376,19 +377,23 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 「Page에서 이 건물 보기」) 거점 목록이 건물보다 늦게 오면 거점 중심이 건물 이동을 덮어쓴다.
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
+  const centerLat = center.lat;
+  const centerLng = center.lng;
   useEffect(() => {
     if (!ready || !hub || !map) return;
-    const naver = (window as any).naver;
-    const target = selectedRef.current?.center ?? center;
+    const naver = window.naver;
+    if (!naver?.maps) return;
+    const target = selectedRef.current?.center ?? { lat: centerLat, lng: centerLng };
     map.setCenter(new naver.maps.LatLng(target.lat, target.lng));
-  }, [ready, map, hub, center.lat, center.lng]);
+  }, [ready, map, hub, centerLat, centerLng]);
 
   // 고른 건물이 바뀌면 카메라를 그 건물로(화면설계서 2판 PG-07). 목록 클릭은 focus() 가 이미
   // 옮기지만, 인계로 들어온 선택은 클릭이 없다. 해제(null)될 때는 움직이지 않는다.
   const selectedKey = selected?.id ?? null;
   useEffect(() => {
     if (!ready || !map || !selectedRef.current) return;
-    const naver = (window as any).naver;
+    const naver = window.naver;
+    if (!naver?.maps) return;
     const c = selectedRef.current.center;
     map.panTo?.(new naver.maps.LatLng(c.lat, c.lng));
   }, [ready, map, selectedKey]);
@@ -397,7 +402,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 초기값을 한 번 읽어 두지 않으면 사용자가 줌을 건드리기 전까지 모드가 틀린 채로 그려진다.
   useEffect(() => {
     if (!ready || !map) return;
-    const naver = (window as any).naver;
+    const naver = window.naver;
+    if (!naver?.maps) return;
     const sync = () => setPinMode(map.getZoom() <= PIN_MAX_ZOOM);
     // 카메라가 멈출 때마다 현재 화면 범위를 받는다(R2). `idle` 은 이동·줌이 **끝난 뒤**
     // 한 번 오므로, 드래그 중 매 프레임 목록을 다시 거르지 않는다.
@@ -410,7 +416,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   }, [ready, map]);
 
   const clearOverlays = () => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     // 리스너를 **먼저** 뗀다 — 오버레이 참조를 버린 뒤에는 짝을 찾을 자리가 없다.
     listenersRef.current.forEach((h) => naver?.maps?.Event?.removeListener(h));
     listenersRef.current = [];
@@ -427,14 +433,15 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
 
   const focus = (b: Building) => {
     setWorkspace((w) => ({ ...w, selectedId: b.id }));
-    const naver = (window as any).naver;
+    const naver = window.naver;
     if (map && naver) map.panTo(new naver.maps.LatLng(b.center.lat, b.center.lng));
   };
 
   // 레이어 전환/데이터 변경 → 오버레이 다시 그림 (form follows data)
   useEffect(() => {
     if (!ready || !map) return;
-    const naver = (window as any).naver;
+    const naver = window.naver;
+    if (!naver?.maps) return;
     clearOverlays();
 
     if (layer === "vacancy" && pinMode) {
@@ -540,9 +547,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   }, [layer, pinMode, ready, map, filtered, footHm, densHm, center.lat, center.lng]);
 
   // ── 임대시세 칩 ──────────────────────────────────────────────────────────────
-  const rentOverlaysRef = useRef<{ ov: any[]; ls: any[] }>({ ov: [], ls: [] });
+  const rentOverlaysRef = useRef<{ ov: NaverOverlay[]; ls: NaverListener[] }>({ ov: [], ls: [] });
   useEffect(() => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     const clear = () => {
       rentOverlaysRef.current.ls.forEach((h) => naver?.maps?.Event?.removeListener(h));
       rentOverlaysRef.current.ov.forEach((o) => o.setMap?.(null));
@@ -628,12 +635,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   }
   useEffect(() => {
     applyHot(hotIds());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hoveredId, workspace.selectedId]);
-
-  // 거점·레이어가 바뀌면 호버를 놓는다. 안 놓으면 걷힌 도형의 id 가 남아, 새 거점에
-  // 우연히 같은 id 의 건물이 있으면 아무도 안 올렸는데 강조된 채로 뜬다.
-  useEffect(() => { setHoveredId(null); }, [districtId, layer, pinMode]);
 
   // ── Esc 로 한 겹씩 되돌아간다 (R5) ──────────────────────────────────────────
   // 이 화면은 층이 넷이다(층스택 모달 → 후보 비교 → 건물 상세 → 목록 패널). 그전에는

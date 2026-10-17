@@ -1,3 +1,4 @@
+import type { NaverMap, NaverSDK, NaverLatLng, NaverBounds, NaverOverlay, NaverListener } from "@/lib/naverTypes";
 /**
  * useMapMarkers — 공유 지도(MapHost) 위에 **HTML 마커 묶음**을 그렸다 걷는 훅.
  *
@@ -19,7 +20,7 @@
  * 렌더하면(단위 테스트) 이 훅은 아무것도 하지 않는다 — 화면 로직은 지도 없이도 돈다.
  */
 import { useEffect, useRef } from "react";
-import { useMapHost } from "@/components/MapHost";
+import { useMapHost } from "@/components/mapHostContext";
 
 export interface MapMarkerItem {
   id: string;
@@ -36,10 +37,10 @@ export function useMapMarkers(items: MapMarkerItem[], onClick?: (id: string) => 
   useEffect(() => { clickRef.current = onClick; }, [onClick]);
 
   useEffect(() => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     if (!ready || !map || !naver?.maps) return;
-    const overlays: any[] = [];
-    const listeners: any[] = [];
+    const overlays: NaverOverlay[] = [];
+    const listeners: NaverListener[] = [];
     for (const it of items) {
       if (!Number.isFinite(it.lat) || !Number.isFinite(it.lng)) continue;
       const marker = new naver.maps.Marker({
@@ -95,7 +96,7 @@ export function mapFitPadding(): FitPadding {
  *     그래서 **지도 중심의 오프셋과의 차**로 뷰포트 좌표를 구한다.
  * 투영이 없으면(단위 테스트 스텁) 아무것도 하지 않는다.
  */
-function shiftIntoView(map: any, naver: any, target: any, pad: FitPadding): void {
+function shiftIntoView(map: NaverMap, naver: NaverSDK, target: NaverLatLng, pad: FitPadding): void {
   const proj = map.getProjection?.();
   const size = map.getSize?.();
   const center = map.getCenter?.();
@@ -108,7 +109,7 @@ function shiftIntoView(map: any, naver: any, target: any, pad: FitPadding): void
 }
 
 /** 점 하나 — `setCenter` 만 하면 점이 뷰포트 한가운데(1440px 에서 x=720)라 패널 끝(x≈638) 바로 옆에 붙는다. */
-function centerInView(map: any, naver: any, lat: number, lng: number): void {
+function centerInView(map: NaverMap, naver: NaverSDK, lat: number, lng: number): void {
   const at = new naver.maps.LatLng(lat, lng);
   map.setCenter?.(at);
   shiftIntoView(map, naver, at, mapFitPadding());
@@ -122,7 +123,7 @@ function centerInView(map: any, naver: any, lat: number, lng: number): void {
  * right 72 를 줬는데 자리들의 중심이 화면 가운데에서 +160px(기대 319px)에 그쳐 가장 왼쪽 칩이 패널
  * 끝에 걸렸다. 줌은 네이버가 고른 대로 두고, 범위 중심만 가려지지 않은 영역 가운데로 다시 민다.
  */
-export function fitInView(map: any, naver: any, bounds: any, pad: FitPadding = mapFitPadding()): void {
+export function fitInView(map: NaverMap, naver: NaverSDK, bounds: NaverBounds, pad: FitPadding = mapFitPadding()): void {
   map.fitBounds?.(bounds, pad);
   const center = bounds.getCenter?.();
   if (center) shiftIntoView(map, naver, center, pad);
@@ -139,7 +140,7 @@ export function useFitMap(key: string | null, points: Array<{ lat: number; lng: 
   const { map, ready } = useMapHost();
   const doneRef = useRef<string | null>(null);
   useEffect(() => {
-    const naver = (window as any).naver;
+    const naver = window.naver;
     if (!ready || !map || !naver?.maps || key == null) return;
     const pts = points.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
     // 점이 아직 안 왔으면 중심만 옮기고, 점이 오면 한 번 더 맞춘다(같은 key 에서 최대 2번).

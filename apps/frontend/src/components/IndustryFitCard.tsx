@@ -55,7 +55,7 @@ export default function IndustryFitCard(props: IndustryFitCardProps) {
     {business.industryDetailKey && <p className="fit-note">아래 적합도는 상위 업종({ind.label}) 참고 비교입니다. 선택한 세부 업종의 추천 점수가 아닙니다.</p>}
     {business.goal === "pivot"
     ? <PivotCard {...props} business={business} ind={ind} />
-    : <DistrictRankCard {...props} business={business} ind={ind} />}
+    : <DistrictRankCard key={ind.key} {...props} business={business} ind={ind} />}
   </>;
 }
 
@@ -91,7 +91,6 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
-    setErr(null);
     getIndustryFit(ind.key)
       .then((fit) => live && setData({ key: ind.key, fit }))
       .catch((e) => live && setErr(String(e)));

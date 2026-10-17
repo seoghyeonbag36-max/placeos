@@ -6,7 +6,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import ProgramStudio, { eventRange, splitEvents } from "@/pages/ProgramStudio";
+import ProgramStudio from "@/pages/ProgramStudio";
+import { eventRange, splitEvents } from "@/lib/programEvents";
 import type { MarketingEvent } from "@/lib/api";
 import { installFetchStub, type FetchStub } from "@/test/fetchStub";
 import { installNaverStub, removeNaverStub, type NaverStub } from "@/test/naverStub";

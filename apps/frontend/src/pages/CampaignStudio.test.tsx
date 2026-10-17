@@ -93,4 +93,18 @@ describe("CampaignStudio — 실행과 투자 증거", () => {
     expect(screen.queryByText("테스트 주소 · 카페")).toBeNull();
     expect(screen.getByText("캠페인을 저장하려면 로그인하세요.")).toBeTruthy();
   });
+  it("계정 전환 후 늦게 온 이전 계정 목록은 새 계정 기록을 덮지 않는다", async () => {
+    let finish!: (value: Campaign[]) => void;
+    const previous = new Promise<Campaign[]>(resolve => { finish = resolve; });
+    const next = campaign(); next.conditions.store_name = "새 계정 매장";
+    const api = installFetchStub([{ match: /campaigns$/, body: (_m: RegExpExecArray, call: ApiCall) =>
+      call.headers.Authorization === "Bearer test-token" ? previous : [next] }]);
+    render(<CampaignStudio />);
+    await waitFor(() => expect(api.count(/campaigns$/)).toBe(1));
+    act(() => saveToken("next-token"));
+    await screen.findByRole("button", { name: /새 계정 매장/ });
+    await act(async () => { finish([campaign()]); await previous; });
+    expect(screen.queryByRole("button", { name: /테스트 카페/ })).toBeNull();
+    expect(screen.getByRole("button", { name: /새 계정 매장/ })).toBeTruthy();
+  });
 });

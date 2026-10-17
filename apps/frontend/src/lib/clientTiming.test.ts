@@ -22,13 +22,13 @@ describe("clientTiming", () => {
     startTiming("map_ready");
     endTiming("map_ready");
     expect(fetch).toHaveBeenCalledTimes(1);
-    const [url, init] = (fetch as any).mock.calls[0];
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
     expect(url).toBe("/api/v1/metrics/client");
-    const body = JSON.parse(init.body);
+    const body = JSON.parse(String(init?.body));
     expect(body.metric).toBe("map_ready");
     expect(body.ms).toBeGreaterThanOrEqual(0);
     // keepalive 가 없으면 탭을 닫는 순간 비콘이 날아간다.
-    expect(init.keepalive).toBe(true);
+    expect(init?.keepalive).toBe(true);
   });
 
   it("같은 이름은 한 번만 보낸다 — 리렌더마다 쌓이면 표본이 오염된다", () => {

@@ -97,11 +97,14 @@ export function IndustryEconomicsResult({ result }: { result: IndustryEconomics 
 }
 
 export function IndustryCompetitionPanel({ districtId, detailKey }: { districtId: string; detailKey: string }) {
+  return <IndustryCompetitionSession key={JSON.stringify([districtId, detailKey])} districtId={districtId} detailKey={detailKey} />;
+}
+
+function IndustryCompetitionSession({ districtId, detailKey }: { districtId: string; detailKey: string }) {
   const [data, setData] = useState<IndustryCompetition | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let live = true;
-    setData(null); setFailed(false);
     getIndustryCompetition(districtId, detailKey).then((r) => { if (live) setData(r); }).catch(() => { if (live) setFailed(true); });
     return () => { live = false; };
   }, [districtId, detailKey]);

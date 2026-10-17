@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getBenchmarkPlaces, listBenchmarkIndustries, type BenchmarkIndustry, type BenchmarkPlaces } from "@/lib/api";
 import { useFitMap, useMapMarkers } from "@/components/useMapMarkers";
-import { mapLabelHTML } from "@/design/components/MapMarkerPin";
+import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
 import { space } from "@/design/tokens/layout";
 import "./BenchmarkExplorer.css";
