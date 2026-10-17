@@ -1,3 +1,5 @@
+import { MapHostCtx } from "./mapHostContext";
+import type { NaverMap } from "@/lib/naverTypes";
 /**
  * MapHost — 앱 전체가 공유하는 **단 하나의** 네이버 지도.
  *
@@ -23,7 +25,7 @@
  * relative 로 덮어써서 inset 이 오프셋으로 해석되고 높이가 0 으로 접힌다
  * (2026-08-01 실측). `width/height:100%` 를 같이 준다.
  */
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { endTiming, startTiming } from "@/lib/clientTiming";
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
@@ -46,21 +48,6 @@ const GAROSU = { lat: 37.5205, lng: 127.023 };
  */
 export const DEFAULT_ZOOM = 16;
 
-export interface MapHostValue {
-  /** 준비되기 전에는 null. 소비하는 쪽은 `ready` 로 가른다. */
-  map: any | null;
-  ready: boolean;
-  /** 지도 자체를 못 띄운 이유(도메인 미등록 등). 원인과 조치가 한 줄에 같이 온다. */
-  error: string | null;
-}
-
-const MapHostCtx = createContext<MapHostValue>({ map: null, ready: false, error: null });
-
-/** 오버레이 컴포넌트가 공유 지도를 받는 창구. */
-export function useMapHost(): MapHostValue {
-  return useContext(MapHostCtx);
-}
-
 export default function MapHost({ active, children }: { active: boolean; children: ReactNode }) {
   const elRef = useRef<HTMLDivElement>(null);
   // ⚠ 지도 인스턴스를 **두 곳**에 둔다. 하나로 줄이지 말 것.
@@ -69,13 +56,13 @@ export default function MapHost({ active, children }: { active: boolean; childre
   //   map     — 렌더가 읽는 값. ref 를 렌더에서 읽으면(종전 코드) 컨텍스트가
   //             ref 변화에 반응하지 않는다. setReady 가 뒤따라서 우연히
   //             맞았을 뿐이다(react-hooks/refs 가 이걸 잡았다).
-  const mapRef = useRef<any>(null);
-  const [map, setMap] = useState<any>(null);
+  const mapRef = useRef<NaverMap | null>(null);
+  const [map, setMap] = useState<NaverMap | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // 지도 탭을 **한 번이라도** 열었는가. 한 번 켜지면 다시 꺼지지 않는다.
   const [everActive, setEverActive] = useState(active);
-  useEffect(() => { if (active) setEverActive(true); }, [active]);
+  if (active && !everActive) setEverActive(true);
 
   // 지도 1회 초기화.
   //
@@ -91,7 +78,8 @@ export default function MapHost({ active, children }: { active: boolean; childre
     loadNaverMaps()
       .then(() => {
         if (!alive || !elRef.current || mapRef.current) return;
-        const naver = (window as any).naver;
+        const naver = window.naver;
+        if (!naver?.maps) throw new Error("네이버 지도 SDK가 비어 있습니다");
         mapRef.current = new naver.maps.Map(elRef.current, {
           center: new naver.maps.LatLng(GAROSU.lat, GAROSU.lng),
           zoom: DEFAULT_ZOOM, scaleControl: false, mapDataControl: false,

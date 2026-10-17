@@ -13,7 +13,12 @@
  */
 
 declare global {
-  interface Window { google?: any }
+  interface Window {
+    google?: { accounts?: { id?: {
+      initialize(options: { client_id: string; callback: (response: { credential?: string }) => void; ux_mode: string; auto_select: boolean; cancel_on_tap_outside: boolean }): void;
+      renderButton(element: HTMLElement, options: Record<string, unknown>): void;
+    } } };
+  }
 }
 
 const GIS_SRC = "https://accounts.google.com/gsi/client";
@@ -48,7 +53,8 @@ export async function renderGoogleButton(
   onCredential: (credential: string) => void,
 ): Promise<void> {
   await loadGoogleIdentity();
-  const id = window.google.accounts.id;
+  const id = window.google?.accounts?.id;
+  if (!id) throw new Error("구글 로그인 스크립트가 비어 있습니다");
   _onCredential = onCredential;
   // initialize 를 다시 부르면 GIS 가 경고를 남기고 설정을 통째로 덮는다 — 클라이언트가 같으면 한 번만.
   if (_initializedFor !== clientId) {

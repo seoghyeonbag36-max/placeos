@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
-import Login from "./Login";
-import Signup from "./Signup";
+import { lazy, Suspense, useEffect, useState } from "react";
 import type { AccountScreen } from "@/components/AccountDialog";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import { getAuthProviders } from "@/lib/api";
 import type { AuthProviders } from "@/lib/api";
 import "./Account.css";
+
+const Login = lazy(() => import("./Login"));
+const Signup = lazy(() => import("./Signup"));
 
 export default function Home() {
   const [screen, setScreen] = useState<AccountScreen>(() => window.location.hash === "#signup" ? "signup" : "login");
@@ -50,8 +51,8 @@ export default function Home() {
         <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침 (새 창)</a>
       </p>
     </header>
-    <section aria-label="계정 시작">{screen === "signup"
+    <section aria-label="계정 시작"><Suspense fallback={<p className="acct-lede">불러오는 중…</p>}>{screen === "signup"
       ? <Signup go={go} googleClientId={google} socialProviders={social} />
-      : <Login go={go} googleClientId={google} socialProviders={social} />}</section>
+      : <Login go={go} googleClientId={google} socialProviders={social} />}</Suspense></section>
   </main>;
 }

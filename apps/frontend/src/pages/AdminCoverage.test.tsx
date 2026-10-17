@@ -62,6 +62,16 @@ describe("getAdminCoverage — api.ts", () => {
 });
 
 describe("AdminCoverage — #admin 화면 문구", () => {
+  it("저장 토큰만 최초 자동 조회하고 입력 수정 중에는 재조회하지 않는다", async () => {
+    sessionStorage.setItem(TOKEN_KEY, "saved-token");
+    const api = installFetchStub([{ match: /\/admin\/coverage$/, body: PAYLOAD }]);
+    render(<AdminCoverage />);
+    await screen.findByText("신사동 가로수길");
+    expect(api.count(/\/admin\/coverage$/)).toBe(1);
+    fireEvent.change(screen.getByPlaceholderText("ADMIN_TOKEN"), { target: { value: "editing" } });
+    expect(api.count(/\/admin\/coverage$/)).toBe(1);
+    expect(api.matching(/\/admin\/coverage$/)[0].headers["X-Admin-Token"]).toBe("saved-token");
+  });
   it("403 → 토큰·ADMIN_TOKEN 안내 · 토큰을 저장하지 않는다", async () => {
     installFetchStub([{ match: /\/admin\/coverage$/, status: 403, body: { detail: "forbidden" } }]);
     render(<AdminCoverage />);

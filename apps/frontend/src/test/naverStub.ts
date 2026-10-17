@@ -100,11 +100,13 @@ export function installNaverStub(): NaverStub {
    * 경도 180도 경계(dateline)는 다루지 않는다 — 우리 거점은 전부 한국이다.
    */
   class LatLngBounds {
-    constructor(public sw: any, public ne: any) {}
-    hasLatLng(ll: any) {
+    constructor(public sw: LatLng, public ne: LatLng) {}
+    hasLatLng(ll: unknown) {
+      if (!ll || typeof ll !== "object" || !("lat" in ll) || !("lng" in ll)) return false;
       const lat = typeof ll?.lat === "function" ? ll.lat() : ll?.lat;
       const lng = typeof ll?.lng === "function" ? ll.lng() : ll?.lng;
-      return lat >= this.sw.lat() && lat <= this.ne.lat()
+      return typeof lat === "number" && typeof lng === "number"
+        && lat >= this.sw.lat() && lat <= this.ne.lat()
         && lng >= this.sw.lng() && lng <= this.ne.lng();
     }
   }

@@ -23,7 +23,8 @@
  */
 import React from "react";
 import ReactDOM from "react-dom/client";
-import BuildingViewer, { placeFloors, type ViewerBuilding } from "@/components/BuildingViewer";
+import BuildingViewer from "@/components/BuildingViewer";
+import { placeFloors, type ViewerBuilding } from "@/components/buildingFloors";
 import { getBuildingVacancy, type BuildingProps } from "@/lib/api";
 import { colors } from "@/design/tokens/colors";
 import "@/styles/tokens.css";

@@ -11,7 +11,7 @@ import type {
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
-import { mapLabelHTML, shortManwon } from "@/design/components/MapMarkerPin";
+import { mapLabelHTML, shortManwon } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
 import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { type Ground } from "@/components/Verdict";
@@ -110,6 +110,17 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [err, setErr] = useState<string | null>(null);
 
   const unit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+  const [inventoryScope, setInventoryScope] = useState({ districtId, selection });
+  if (inventoryScope.districtId !== districtId || inventoryScope.selection !== selection) {
+    setInventoryScope({ districtId, selection });
+    setUnits([]); setUnitsFor(null); setUnitId(""); setRecs(null); setErr(null);
+    setOperating({}); setCalculation(null); setPrevious(null); setBusy(false);
+  }
+  const [recommendedUnit, setRecommendedUnit] = useState(unit);
+  if (recommendedUnit !== unit) {
+    setRecommendedUnit(unit);
+    setRecs(null);
+  }
 
   // 화면 머리(결론 1줄 + 근거 3줄). 계산 결과가 바뀔 때만 다시 짠다.
   const head = useMemo(() => postingHeadline({
@@ -156,8 +167,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리 목록 — 실측 공실 인벤토리(services/vacant_inventory)에서 온다
   useEffect(() => {
     let live = true;
-    setUnits([]); setUnitId(""); setRecs(null); setErr(null);
-    setOperating({}); setCalculation(null); setPrevious(null); setBusy(false);
     lastCalculation.current = null; requestSerial.current += 1;
     getPostings(districtId)
       .then((p) => {
@@ -180,9 +189,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리를 고르면 그 좌표로 GNN 업종 추천을 물어 온다 — 업종 입력의 출발점이다.
   // (Platform 이 자리마다 답하는 것과 같은 질의다. 여기서는 그 답을 비용 계산에 넘긴다.)
   useEffect(() => {
-    if (!unit) { setRecs(null); return; }
+    if (!unit) return;
     let live = true;
-    setRecs(null);
     recommendIndustry({ district_id: districtId, lat: unit.lat, lon: unit.lng })
       .then((r) => { if (live && r.model !== "gnn-stub") setRecs(r.recommendations); })
       .catch(() => { if (live) setRecs(null); });   // 404 = 400m 안에 노드 없음

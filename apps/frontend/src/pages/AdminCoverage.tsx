@@ -1,5 +1,5 @@
 import AdminVisitorFeedback from "./AdminVisitorFeedback";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ApiError, getAdminCoverage, type AdminCoverage as Payload } from "@/lib/api";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
@@ -37,7 +37,8 @@ function jumpTo(id: string) {
 
 export default function AdminCoverage() {
   // 토큰은 세션 스토리지에만 둔다 — 새 탭·재시작이면 다시 입력한다.
-  const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) ?? "");
+  const [initialToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) ?? "");
+  const [token, setToken] = useState(initialToken);
   const [data, setData] = useState<Payload | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -49,7 +50,7 @@ export default function AdminCoverage() {
   // 마지막으로 보낸 조회의 응답만 화면에 반영한다.
   const latest = useRef(0);
 
-  async function load(t: string) {
+  const load = useCallback(async (t: string) => {
     if (!t) return;
     const seq = ++latest.current;
     setPanels({ token: t, seq });
@@ -73,9 +74,9 @@ export default function AdminCoverage() {
     } finally {
       if (seq === latest.current) setLoading(false);
     }
-  }
+  }, []);
 
-  useEffect(() => { if (token) load(token); }, []);   // 저장된 토큰이 있으면 자동 조회
+  useEffect(() => { if (initialToken) void load(initialToken); }, [initialToken, load]);
 
   const t = data?.totals;
   return (

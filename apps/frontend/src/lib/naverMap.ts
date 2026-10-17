@@ -7,8 +7,10 @@
 //   브라우저 없이 확인하는 법 — result 면 통과, errorCode 200 이면 그 origin 이 미등록이다:
 //     curl "https://oapi.map.naver.com/v3/auth?ncpKeyId=<KEY>&url=<encoded origin>&time=<ms>&callback=cb"
 
+import type { NaverSDK } from "./naverTypes";
+
 declare global {
-  interface Window { naver?: any; navermap_authFailure?: () => void }
+  interface Window { naver?: NaverSDK; navermap_authFailure?: () => void }
 }
 
 let _loading: Promise<void> | null = null;
@@ -31,7 +33,8 @@ export function describeNaverMapError(e: unknown): string {
   if (_authFailed || (typeof window !== 'undefined' && window.naver && !window.naver.maps)) {
     return authFailMessage();
   }
-  return (e as any)?.message ?? String(e);
+  if (e && typeof e === "object" && "message" in e && typeof e.message === "string") return e.message;
+  return String(e);
 }
 
 /** 네이버 지도 JS SDK 동적 로드 (중복 로드 방지) */
@@ -124,10 +127,11 @@ export async function renderStreetView(
     // "이 건물엔 거리뷰가 없다"로 오독되므로 원인을 그대로 올린다.
     throw new Error('네이버 거리뷰 모듈 미로드 — SDK submodules 에 panorama 가 빠졌다');
   }
+  const Panorama = naver.maps.Panorama;
 
   return new Promise((resolve) => {
     let done = false;
-    const pano = new naver.maps.Panorama(el, {
+    const pano = new Panorama(el, {
       position: new naver.maps.LatLng(target.lat, target.lng),
       pov: { pan: 0, tilt: 0, fov: 100 },
       flightSpot: false,
