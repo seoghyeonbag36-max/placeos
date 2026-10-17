@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import re
+import posixpath
 from lxml import etree
 
 BASE=Path(__file__).resolve().parent
@@ -52,9 +53,28 @@ for track in ('Platform','Page','Posting','Program'):
         for number in range(1,expected+1):
             assert f'RQ{number}.' in text and f'H{number}:' in text,(track,number,'Word 누락')
         assert '�' not in text
-        assert len([n for n in z.namelist() if n.endswith('.odttf')])==2
+        # Word에서 다시 저장하면 추가 글꼴이 임베딩된다. 개수 대신 연결 무결성을 검사한다.
+        font_table=etree.fromstring(z.read('word/fontTable.xml'))
+        font_rels=etree.fromstring(z.read('word/_rels/fontTable.xml.rels'))
+        rels={rel.get('Id'):rel for rel in font_rels}
+        embedded=font_table.xpath('//w:embedRegular | //w:embedBold | //w:embedItalic | //w:embedBoldItalic',namespaces=NS)
+        assert len(embedded)>=2,(track,'임베딩 글꼴 부족')
+        assert font_table.xpath('//w:embedRegular',namespaces=NS) and font_table.xpath('//w:embedBold',namespaces=NS)
+        for entry in embedded:
+            rel=rels[entry.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id')]
+            assert rel.get('Type','').endswith('/font') and rel.get('TargetMode')!='External'
+            target=posixpath.normpath(posixpath.join('word',rel.get('Target','')))
+            assert target.startswith('word/fonts/') and target.endswith('.odttf')
+            assert z.getinfo(target).file_size>32,(track,'빈 임베딩 글꼴')
+            assert entry.get('{'+NS['w']+'}fontKey'),(track,'글꼴 복호화 키 누락')
         assert not root.xpath('//w:trHeight[@w:hRule="exact"]',namespaces=NS)
-        headings=root.xpath('//w:p[w:pPr/w:pStyle[@w:val="Heading1" or @w:val="Heading2"]]',namespaces=NS)
+        styles=etree.fromstring(z.read('word/styles.xml'))
+        heading_ids={style.get('{'+NS['w']+'}styleId') for style in styles.findall('w:style',NS)
+            if style.find('w:name',NS) is not None and
+            re.sub(r'\s+','',style.find('w:name',NS).get('{'+NS['w']+'}val','')).lower() in {'heading1','heading2'}}
+        headings=[paragraph for paragraph in root.findall('.//w:p',NS)
+            if paragraph.find('w:pPr/w:pStyle',NS) is not None and
+            paragraph.find('w:pPr/w:pStyle',NS).get('{'+NS['w']+'}val') in heading_ids]
         assert len(headings)>6
         for n in z.namelist():
             if n.endswith('.xml'): etree.fromstring(z.read(n))
