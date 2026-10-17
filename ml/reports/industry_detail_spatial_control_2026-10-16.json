@@ -1,0 +1,769 @@
+{
+  "created_at": "2026-10-16T13:33:39.866964+00:00",
+  "inputs_sha256": {
+    "platform_store_graph_nodes.parquet": "55d7334b090d703f0bda7dad3f998ffee252eb9f7b0fd68a780821edcc069392",
+    "platform_store_graph_edges.parquet": "75a368158cc4272d99fa96f6f570cf46deabbf33e7dba00a9b74d50d373ca005",
+    "trdar_demand.parquet": "8ce0cd61850a125f281bd8a478f38ce805ceac6dd7238a084a0934dc181ff19a",
+    "page_building.parquet": "b5fafd09dedf8c35ea15d272998c2b54c1678e1f9311bd45b4d0626ec2eeec98"
+  },
+  "parameters": {
+    "epochs": 80,
+    "patience": 15,
+    "hidden": 64,
+    "use_neighbor": false,
+    "spatial_only": true
+  },
+  "code_sha256": {
+    "ml\\training\\train_gnn.py": "954c844dcf8e627d170d224d720fc8d442008b701d737f8833ee73978a00e2b5",
+    "data\\config\\industry_details.py": "caf099889449bb4196ab88f2dc38e7c165fc2a9defeea8e00dce16069e1dbd4e",
+    "ml\\training\\industry_detail_metrics.py": "924b301fe3bf4bb8ffa0b134d4c28f2c5c50287c0da5e4e30bcda44d2acfa3c1"
+  },
+  "serving_status": "review_required",
+  "metrics": {
+    "test_top1": 0.2994,
+    "test_top3": 0.5176,
+    "test_macro_f1": 0.1078,
+    "val_select_by": "top1",
+    "val_best": 0.3012,
+    "baseline_major_top1": 0.1743,
+    "baseline_district_prior_top1": 0.237,
+    "baseline_district_prior_top3": 0.4541,
+    "test_offprior_top3": 0.2102,
+    "offprior_nodes": 6683,
+    "per_class": [
+      {
+        "key": "bar_cooking",
+        "train_n": 3441,
+        "test_n": 1147,
+        "status": "evaluation_only",
+        "precision": 0.2061711079943899,
+        "recall": 0.38448125544899736,
+        "top3": 0.8029642545771578,
+        "baseline_top3": 0.6826503923278117
+      },
+      {
+        "key": "bar_beer",
+        "train_n": 853,
+        "test_n": 285,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.05964912280701754,
+        "baseline_top3": 0.08771929824561403
+      },
+      {
+        "key": "bar_entertainment",
+        "train_n": 986,
+        "test_n": 329,
+        "status": "evaluation_only",
+        "precision": 0.375,
+        "recall": 0.0364741641337386,
+        "top3": 0.22188449848024316,
+        "baseline_top3": 0.14893617021276595
+      },
+      {
+        "key": "beauty_hair",
+        "train_n": 4486,
+        "test_n": 1496,
+        "status": "evaluation_only",
+        "precision": 0.19239311493614658,
+        "recall": 0.4632352941176471,
+        "top3": 0.9311497326203209,
+        "baseline_top3": 0.9050802139037433
+      },
+      {
+        "key": "beauty_nail",
+        "train_n": 1314,
+        "test_n": 438,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "beauty_skin",
+        "train_n": 1983,
+        "test_n": 662,
+        "status": "evaluation_only",
+        "precision": 0.1423487544483986,
+        "recall": 0.06042296072507553,
+        "top3": 0.31268882175226587,
+        "baseline_top3": 0.23716012084592145
+      },
+      {
+        "key": "fashion_clothes",
+        "train_n": 6401,
+        "test_n": 2134,
+        "status": "evaluation_only",
+        "precision": 0.4499845153298235,
+        "recall": 0.6808809746954076,
+        "top3": 0.8561387066541706,
+        "baseline_top3": 0.8865979381443299
+      },
+      {
+        "key": "fashion_shoes",
+        "train_n": 592,
+        "test_n": 198,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.4797979797979798,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "fashion_bags",
+        "train_n": 427,
+        "test_n": 143,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.1048951048951049,
+        "baseline_top3": 0.09090909090909091
+      },
+      {
+        "key": "fashion_accessories",
+        "train_n": 1531,
+        "test_n": 511,
+        "status": "evaluation_only",
+        "precision": 0.5402843601895735,
+        "recall": 0.22309197651663404,
+        "top3": 0.48140900195694714,
+        "baseline_top3": 0.3913894324853229
+      },
+      {
+        "key": "education_subject",
+        "train_n": 2301,
+        "test_n": 768,
+        "status": "evaluation_only",
+        "precision": 0.28815261044176704,
+        "recall": 0.3736979166666667,
+        "top3": 0.6510416666666666,
+        "baseline_top3": 0.46875
+      },
+      {
+        "key": "education_language",
+        "train_n": 310,
+        "test_n": 104,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "education_art",
+        "train_n": 491,
+        "test_n": 164,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.08536585365853659,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "education_music",
+        "train_n": 678,
+        "test_n": 227,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.00881057268722467,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "education_vocational",
+        "train_n": 1039,
+        "test_n": 347,
+        "status": "evaluation_only",
+        "precision": 0.14285714285714285,
+        "recall": 0.005763688760806916,
+        "top3": 0.037463976945244955,
+        "baseline_top3": 0.011527377521613832
+      },
+      {
+        "key": "education_study",
+        "train_n": 593,
+        "test_n": 198,
+        "status": "evaluation_only",
+        "precision": 0.0,
+        "recall": 0.0,
+        "top3": 0.10606060606060606,
+        "baseline_top3": 0.14646464646464646
+      },
+      {
+        "key": "fitness_gym",
+        "train_n": 898,
+        "test_n": 300,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.01,
+        "baseline_top3": 0.016666666666666666
+      },
+      {
+        "key": "fitness_studio",
+        "train_n": 1272,
+        "test_n": 425,
+        "status": "evaluation_only",
+        "precision": 0.07142857142857142,
+        "recall": 0.004705882352941176,
+        "top3": 0.08705882352941176,
+        "baseline_top3": 0.007058823529411765
+      },
+      {
+        "key": "fitness_golf",
+        "train_n": 326,
+        "test_n": 109,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "fitness_sports",
+        "train_n": 768,
+        "test_n": 256,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "leisure_pc",
+        "train_n": 285,
+        "test_n": 96,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "leisure_karaoke",
+        "train_n": 1330,
+        "test_n": 444,
+        "status": "evaluation_only",
+        "precision": 0.2391304347826087,
+        "recall": 0.07432432432432433,
+        "top3": 0.33783783783783783,
+        "baseline_top3": 0.17117117117117117
+      },
+      {
+        "key": "lodging_hotel",
+        "train_n": 179,
+        "test_n": 60,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.016666666666666666,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "lodging_motel",
+        "train_n": 737,
+        "test_n": 246,
+        "status": "evaluation_only",
+        "precision": 0.39473684210526316,
+        "recall": 0.12195121951219512,
+        "top3": 0.32113821138211385,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "lodging_pension",
+        "train_n": 2402,
+        "test_n": 801,
+        "status": "evaluation_only",
+        "precision": 0.39371980676328505,
+        "recall": 0.6104868913857678,
+        "top3": 0.7727840199750312,
+        "baseline_top3": 0.6779026217228464
+      },
+      {
+        "key": "lodging_monthly",
+        "train_n": 1011,
+        "test_n": 337,
+        "status": "evaluation_only",
+        "precision": 0.2755905511811024,
+        "recall": 0.20771513353115728,
+        "top3": 0.3086053412462908,
+        "baseline_top3": 0.19881305637982197
+      },
+      {
+        "key": "lodging_other",
+        "train_n": 54,
+        "test_n": 18,
+        "status": "evaluation_only",
+        "precision": null,
+        "recall": 0.0,
+        "top3": 0.0,
+        "baseline_top3": 0.0
+      },
+      {
+        "key": "culture_performance",
+        "train_n": 0,
+        "test_n": 0,
+        "status": "no_training_class",
+        "precision": null,
+        "recall": null,
+        "top3": null,
+        "baseline_top3": null
+      },
+      {
+        "key": "culture_exhibition",
+        "train_n": 0,
+        "test_n": 0,
+        "status": "no_training_class",
+        "precision": null,
+        "recall": null,
+        "top3": null,
+        "baseline_top3": null
+      },
+      {
+        "key": "culture_gallery",
+        "train_n": 0,
+        "test_n": 0,
+        "status": "no_training_class",
+        "precision": null,
+        "recall": null,
+        "top3": null,
+        "baseline_top3": null
+      }
+    ],
+    "split_sha256": "8955103e017ea643648654d06b25e3ef2ba7680e0f91caf91172cd4e158dcc00",
+    "test_top3_paired": {
+      "b_model_only": 1405,
+      "c_prior_only": 628,
+      "n": 12243,
+      "by_district": {
+        "anam": [
+          16,
+          10,
+          78
+        ],
+        "apgujeong-rodeo": [
+          16,
+          3,
+          197
+        ],
+        "bangbang": [
+          29,
+          7,
+          169
+        ],
+        "banpo": [
+          34,
+          4,
+          318
+        ],
+        "bonseobu": [
+          14,
+          16,
+          158
+        ],
+        "bulgwang": [
+          10,
+          6,
+          122
+        ],
+        "cheongdam": [
+          8,
+          11,
+          140
+        ],
+        "cheongnyangni": [
+          22,
+          10,
+          198
+        ],
+        "cheonho": [
+          23,
+          10,
+          226
+        ],
+        "chungmuro": [
+          11,
+          4,
+          103
+        ],
+        "cityhall": [
+          11,
+          0,
+          68
+        ],
+        "daerim": [
+          19,
+          13,
+          126
+        ],
+        "dangsan": [
+          5,
+          2,
+          56
+        ],
+        "dogok": [
+          9,
+          7,
+          85
+        ],
+        "doksan": [
+          3,
+          7,
+          44
+        ],
+        "dongdaemun": [
+          51,
+          18,
+          469
+        ],
+        "dosan": [
+          19,
+          3,
+          151
+        ],
+        "euljiro": [
+          15,
+          9,
+          107
+        ],
+        "gangnam": [
+          21,
+          16,
+          225
+        ],
+        "garak": [
+          7,
+          2,
+          40
+        ],
+        "garosugil": [
+          22,
+          22,
+          229
+        ],
+        "gildong": [
+          22,
+          11,
+          196
+        ],
+        "gongdeok": [
+          14,
+          4,
+          117
+        ],
+        "gunja": [
+          14,
+          7,
+          136
+        ],
+        "gurodigital": [
+          13,
+          8,
+          113
+        ],
+        "gurojeonhwa": [
+          7,
+          6,
+          97
+        ],
+        "guui": [
+          18,
+          9,
+          144
+        ],
+        "gwangjang": [
+          19,
+          16,
+          182
+        ],
+        "hannam": [
+          0,
+          1,
+          65
+        ],
+        "hapjeong": [
+          6,
+          3,
+          115
+        ],
+        "hongdae": [
+          46,
+          29,
+          416
+        ],
+        "hwagok": [
+          18,
+          5,
+          164
+        ],
+        "hyehwa": [
+          10,
+          4,
+          88
+        ],
+        "ikseon": [
+          15,
+          6,
+          227
+        ],
+        "itaewon": [
+          9,
+          7,
+          151
+        ],
+        "jamsil": [
+          16,
+          6,
+          149
+        ],
+        "jamsil-tour": [
+          21,
+          5,
+          107
+        ],
+        "jamsilsaenae": [
+          37,
+          6,
+          164
+        ],
+        "jangan": [
+          3,
+          2,
+          114
+        ],
+        "kkachisan": [
+          15,
+          7,
+          134
+        ],
+        "konkuk": [
+          31,
+          20,
+          219
+        ],
+        "kyunghee": [
+          19,
+          4,
+          102
+        ],
+        "maebong": [
+          4,
+          3,
+          47
+        ],
+        "mangwon": [
+          17,
+          4,
+          161
+        ],
+        "miasageori": [
+          21,
+          10,
+          185
+        ],
+        "mokdong-yc": [
+          11,
+          6,
+          160
+        ],
+        "mullae": [
+          15,
+          4,
+          110
+        ],
+        "myeongdong": [
+          18,
+          7,
+          191
+        ],
+        "nambu": [
+          19,
+          4,
+          100
+        ],
+        "namdaemun": [
+          17,
+          7,
+          274
+        ],
+        "nokdu": [
+          11,
+          16,
+          106
+        ],
+        "nonhyeon": [
+          9,
+          7,
+          178
+        ],
+        "noryangjin": [
+          15,
+          2,
+          106
+        ],
+        "nowon": [
+          39,
+          12,
+          195
+        ],
+        "oryudong": [
+          4,
+          7,
+          69
+        ],
+        "poi": [
+          11,
+          9,
+          75
+        ],
+        "sadang": [
+          11,
+          3,
+          125
+        ],
+        "samcheong": [
+          1,
+          2,
+          64
+        ],
+        "sangbong": [
+          20,
+          6,
+          158
+        ],
+        "sanggye": [
+          16,
+          8,
+          112
+        ],
+        "seochon": [
+          7,
+          8,
+          103
+        ],
+        "seochoyeok": [
+          14,
+          6,
+          80
+        ],
+        "seolleung": [
+          38,
+          16,
+          311
+        ],
+        "seongsu": [
+          14,
+          6,
+          146
+        ],
+        "seoulsup": [
+          5,
+          2,
+          86
+        ],
+        "sharosugil": [
+          21,
+          5,
+          184
+        ],
+        "sillim": [
+          53,
+          18,
+          277
+        ],
+        "sinchon": [
+          55,
+          12,
+          290
+        ],
+        "songridan": [
+          9,
+          3,
+          106
+        ],
+        "sukmyung": [
+          6,
+          4,
+          76
+        ],
+        "sungshin": [
+          29,
+          5,
+          150
+        ],
+        "suyu": [
+          30,
+          13,
+          254
+        ],
+        "teheran": [
+          11,
+          15,
+          138
+        ],
+        "wangsimni": [
+          31,
+          10,
+          181
+        ],
+        "yangjae": [
+          5,
+          4,
+          71
+        ],
+        "ydp-gucheong": [
+          13,
+          3,
+          127
+        ],
+        "yeonhui": [
+          11,
+          7,
+          66
+        ],
+        "yeonnam": [
+          8,
+          4,
+          256
+        ],
+        "yeonsinnae": [
+          27,
+          13,
+          198
+        ],
+        "yeouido": [
+          30,
+          10,
+          140
+        ],
+        "yongsan": [
+          11,
+          1,
+          78
+        ]
+      }
+    },
+    "lift_vs_district_prior_pct": 26.3,
+    "nodes": 61165,
+    "edges_used": 111895,
+    "test_nodes": 12243,
+    "classes": 27,
+    "features": 132,
+    "label_level": "business_detail",
+    "unmapped_nodes_dropped": 119292,
+    "class_weight": 0,
+    "demand_features": 1,
+    "building_features": 1,
+    "neighbor_label_features": 0,
+    "adong_hour_features": 0,
+    "jipgyegu_features": 0,
+    "edge_types": "spatial_knn"
+  },
+  "limitations": [
+    "현존 점포 업종 분류 실험이며 매출·생존 예측이 아님",
+    "기존 노드 분할 검증: 미관측 상권·미래 시점 일반화 검증은 별도 필요",
+    "같은 학습/테스트 분할의 거점 사전분포와 비교. 공개 여부 미판정"
+  ]
+}
