@@ -112,7 +112,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     await screen.findByRole("button", { name: "자리 상세 보기" });
     expect(window.location.hash).toBe("#/space/vfu-B2-2/map");
     expect(screen.getByRole("heading", { name: "B2 건물 2층" })).toBeTruthy();
-    expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceId).toBe("vfu-B2-2");
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceId).toBe("vfu-B2-2"));
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
     await screen.findByRole("button", { name: "이 자리 지도에서 보기" });
   });
