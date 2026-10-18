@@ -43,7 +43,9 @@ function Screen({ route }: { route: Route }) {
     case "district": return <District id={route.param!} />;
     case "rent-cap": return <RentCap />;
     case "spaces": return <Spaces />;
+    case "spaces-map": return <Spaces mapView />;
     case "space": return <SpaceDetail id={route.param!} />;
+    case "space-map": return <SpaceDetail id={route.param!} mapView />;
     case "premium": return <Premium />;
     case "payback": return <Payback />;
     case "budget": return <Budget />;

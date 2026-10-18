@@ -11,7 +11,7 @@ export type RouteName =
   | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
-  | "home" | "me" | "explore";
+  | "home" | "me" | "explore" | "spaces-map" | "space-map";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
@@ -21,6 +21,7 @@ const SIMPLE: Record<string, RouteName> = {
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
   "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check", "/validate": "validate", "/item": "item",
   "/period": "period", "/test-budget": "test-budget", "/plan": "plan", "/home": "home", "/me": "me", "/explore": "explore",
+  "/spaces/map": "spaces-map",
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다) */
@@ -28,6 +29,8 @@ export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
+  const map = /^\/space\/([^/]+)\/map$/.exec(path);
+  if (map) return { name: "space-map", param: decodeURIComponent(map[1]), path };
   const m = /^\/(district|space)\/([^/]+)$/.exec(path);
   if (m) return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path };
   return null;
@@ -42,6 +45,8 @@ const url = (path: string) => `${window.location.pathname}${window.location.sear
 /** 다음 화면으로 — 기록을 남긴다(브라우저 뒤로가기가 여기로 돌아온다) */
 export function go(path: string): void {
   if (window.location.hash === `#${path}`) return;
+  window.history.replaceState({ ...window.history.state, flowScroll: document.documentElement.scrollTop,
+    flowPanelScroll: document.querySelector(".trackmap-scroll")?.scrollTop ?? 0 }, "");
   window.history.pushState({ flowDepth: depth() + 1 }, "", url(path));
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }

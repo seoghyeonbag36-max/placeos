@@ -390,7 +390,7 @@ export function District({ id }: { id: string }) {
   const loading = platform.status === "loading" || rent.status === "loading" || floors.status === "loading" || ds.status === "loading";
   const next = () => {
     data.prefetch(() => data.rent(id), () => data.floorUnits(id), () => data.postings(id));
-    go("/rent-cap");
+    go("/spaces");
   };
   return (
     <FlowScreen back="/districts" right={<CloseButton />} caption={`상권${d ? ` · ${d.gu}` : ""}`} title={loading ? `${name}을 살펴보고 있어요` : title}
@@ -410,7 +410,7 @@ export function District({ id }: { id: string }) {
       )}
       <p className="fl-source">카카오 플레이스 · 서울시 상권분석{rent.status === "ready" && rent.data.quarter ? ` · R-ONE ${rent.data.quarter}` : " · R-ONE"} · 건축물대장</p>
       {identity?.archetype_rule && <Details><p className="fl-note">상권 유형은 이렇게 정했어요: {identity.archetype_rule}</p></Details>}
-      <div className="fl-actions"><TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton></div>
+      <div className="fl-actions"><TextButton onClick={() => go("/spaces/map")}>지도에서 자리 보기</TextButton></div>
     </FlowScreen>
   );
 }

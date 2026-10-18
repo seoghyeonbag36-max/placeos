@@ -2,6 +2,11 @@
    글자 크기는 rem — 브라우저 글꼴 크기를 따른다(§9). 큰 숫자만 clamp 로 상한을 둔다. */
 
 .flow { min-height: 100dvh; background: var(--surface); color: var(--ink); }
+.fl-map-view { --rail-w: 0px; }
+.fl-map-view .fl-screen { min-height: auto; }
+.fl-map-view .fl-cards { grid-template-columns: minmax(0, 1fr); }
+.fl-map-view .fl-cta { position: sticky; width: 100%; left: auto; transform: none; bottom: 0; }
+.fl-map-pin { transform: translate(-50%, -100%); border: 2px solid var(--primary); border-radius: var(--radius-md); padding: var(--sp-2); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; white-space: nowrap; }
 /* 입력칸 width:100% 에 안쪽 여백이 더해져 375 폭에서 가로로 넘쳤다(2026-10-13 실화면 9~14px) — 흐름 전체를 border-box 로 */
 .flow *, .flow *::before, .flow *::after, .fl-sheet, .fl-sheet * { box-sizing: border-box; }
 
