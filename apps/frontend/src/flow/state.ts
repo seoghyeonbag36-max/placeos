@@ -38,6 +38,17 @@ export interface CostAnswers {
 /** 검증 예산 구간 — Q13 */
 export type TestBudget = "under100" | "100to300" | "300to1000" | "unknown";
 
+/** 목록과 지도는 같은 검색 조건을 쓴다. 상권을 바꾸면 초기화한다. */
+export interface SpaceBrowse {
+  first: boolean;
+  confirmed: boolean;
+  calcOnly: boolean;
+  savedOnly: boolean;
+  sort: "rent" | "area" | "floor";
+  shown: number;
+}
+export const emptySpaceBrowse = (): SpaceBrowse => ({ first: false, confirmed: false, calcOnly: false, savedOnly: false, sort: "rent", shown: 24 });
+
 export interface FlowState {
   v: 1;
   goal: BusinessGoal | null;
@@ -54,6 +65,7 @@ export interface FlowState {
   /** 월세 상한(만원) — null = 다 보기 */
   rentCap: number | null;
   rentCapAnswered: boolean;
+  spaceBrowse: SpaceBrowse;
   /** 고른 빈 자리(층) — `vfu-…` */
   spaceId: string | null;
   /** 홈에 보일 그 자리 이름(「성수빌딩 1층」) */
@@ -80,7 +92,7 @@ export const emptyCosts = (): CostAnswers => ({
 export const emptyFlow = (): FlowState => ({
   v: 1, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
   districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, premium: null, tier: null,
-  costs: emptyCosts(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
+  costs: emptyCosts(), spaceBrowse: emptySpaceBrowse(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
 });
 
 let memory: FlowState | null = null;
@@ -109,6 +121,12 @@ export function loadFlow(): FlowState {
       districtId: str(v?.districtId),
       rentCap: num(v?.rentCap),
       rentCapAnswered: v?.rentCapAnswered === true,
+      spaceBrowse: {
+        first: v?.spaceBrowse?.first === true, confirmed: v?.spaceBrowse?.confirmed === true,
+        calcOnly: v?.spaceBrowse?.calcOnly === true, savedOnly: v?.spaceBrowse?.savedOnly === true,
+        sort: ["area", "floor"].includes(v?.spaceBrowse?.sort) ? v.spaceBrowse.sort : "rent",
+        shown: Math.max(24, Math.min(2000, Math.floor(num(v?.spaceBrowse?.shown) ?? 24))),
+      },
       spaceId: str(v?.spaceId),
       spaceLabel: str(v?.spaceLabel),
       premium: premium?.kind === "none" || premium?.kind === "unknown" ? { kind: premium.kind }
@@ -145,7 +163,7 @@ export function clearFlow(): void {
 const clearSpaceOn = (s: FlowState): FlowState => ({
   ...s, spaceId: null, spaceLabel: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
 });
-const clearDistrictOn = (s: FlowState): FlowState => ({ ...clearSpaceOn(s), districtId: null, rentCap: null, rentCapAnswered: false });
+const clearDistrictOn = (s: FlowState): FlowState => ({ ...clearSpaceOn(s), districtId: null, rentCap: null, rentCapAnswered: false, spaceBrowse: emptySpaceBrowse() });
 const clearValidateOn = (s: FlowState): FlowState => ({ ...s, mode: null, item: null, runDays: null, testBudget: null });
 
 export function setGoal(s: FlowState, goal: BusinessGoal): FlowState {

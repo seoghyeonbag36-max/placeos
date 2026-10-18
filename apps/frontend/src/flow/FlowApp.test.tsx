@@ -85,6 +85,38 @@ beforeEach(() => {
 afterEach(() => { clearToken(); window.sessionStorage.clear(); });
 
 describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
+  it("목록·지도 필터 유지 — 같은 층 결과와 정렬로 돌아온다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/spaces");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { name: "빈 자리가 2곳 있어요" });
+    fireEvent.click(screen.getByRole("button", { name: "확정만" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "정렬" }), { target: { value: "area" } });
+    fireEvent.click(screen.getByRole("button", { name: "지도" }));
+    await screen.findByRole("button", { name: "목록" });
+    expect(window.location.hash).toBe("#/spaces/map");
+    expect(screen.getByRole("heading", { name: "빈 자리가 1곳 있어요" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "확정만" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "목록" }));
+    await screen.findByRole("button", { name: "지도" });
+    expect((screen.getByRole("combobox", { name: "정렬" }) as HTMLSelectElement).value).toBe("area");
+  });
+
+  it("선택 층 지도 진입 — 상권 순위로 돌아가지 않는다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/space/vfu-B2-2");
+    render(<FlowApp token={null} />);
+    fireEvent.click(await screen.findByRole("button", { name: "이 자리 지도에서 보기" }));
+    await screen.findByRole("button", { name: "자리 상세 보기" });
+    expect(window.location.hash).toBe("#/space/vfu-B2-2/map");
+    expect(screen.getByRole("heading", { name: "B2 건물 2층" })).toBeTruthy();
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceId).toBe("vfu-B2-2"));
+    fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
+    await screen.findByRole("button", { name: "이 자리 지도에서 보기" });
+  });
+
   it("F-01·F-03 로그인 없이 두 번 눌러 상권 순위를 본다 — 선택지를 누르면 바로 다음 화면", async () => {
     const api = stub();
     open("/start");
@@ -182,7 +214,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.queryByText(/상권 순위를 아직 못 드려요/)).toBeNull();
   });
 
-  it("R2 → Q5 → R3: 상권 소개의 사실 네 줄, 월세 상한 옆 개수, 필터가 제목 개수를 바꾼다", async () => {
+  it("상권에서 목록으로 바로 진입하고 월세는 목록에서 조정한다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
     open("/district/seongsu");
@@ -190,7 +222,9 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(await screen.findByRole("heading", { level: 1, name: "성수동 카페거리는 카페 중심 상권이에요" })).toBeTruthy();
     expect(screen.getByText("14~17시")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "빈 자리 보기" }));
-    await screen.findByRole("heading", { level: 1, name: "월세는 얼마까지 생각하세요?" });
+    await screen.findByRole("heading", { level: 1, name: "빈 자리가 2곳 있어요" });
+    fireEvent.click(screen.getByRole("button", { name: /월세 전체/ }));
+    await screen.findByRole("heading", { name: "월세는 얼마까지 생각하세요?" });
     expect(within(screen.getByRole("radio", { name: /500만원까지/ })).getByText("1곳")).toBeTruthy();
     pick(/아직 몰라요/);
     expect(await screen.findByRole("heading", { level: 1, name: "빈 자리가 2곳 있어요" })).toBeTruthy();

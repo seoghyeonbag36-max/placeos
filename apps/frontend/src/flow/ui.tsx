@@ -6,6 +6,7 @@
  */
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { back, go } from "./route";
+import { useFlow } from "./context";
 
 /* ── 아이콘 — 장식이다(버튼에 aria-label 이 있다) ─────────────────────────── */
 export const IconBack = () => (
@@ -53,6 +54,26 @@ export function FlowScreen({ back: backTo, right, caption, banner, title, titleL
     document.documentElement.scrollTop = 0;
     h1.current?.focus({ preventScroll: true });
   }, []);
+  // 비동기 목록이 다시 그려진 뒤 복원한다. 로딩 중 높이가 부족하면 다음 렌더에서 잇는다.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return;
+    const top = window.history.state?.flowScroll;
+    if (typeof top !== "number" || top <= 0) { restored.current = true; return; }
+    if (document.documentElement.scrollHeight - window.innerHeight < top) return;
+    document.documentElement.scrollTop = top;
+    restored.current = true;
+  });
+  const panelRestored = useRef(false);
+  useEffect(() => {
+    if (panelRestored.current) return;
+    const panel = h1.current?.closest(".trackmap-scroll");
+    if (!panel) return;
+    const top = window.history.state?.flowPanelScroll ?? 0;
+    if (panel.scrollHeight - panel.clientHeight < top) return;
+    panel.scrollTop = top;
+    panelRestored.current = true;
+  });
   return (
     <div className={"fl-screen" + (wide ? " is-wide" : "") + (cta ? " has-cta" : "") + (tab ? " has-tab" : "")}>
       {hub ? (
@@ -311,10 +332,11 @@ const TABS = [
 ] as const;
 
 export function TabBar({ current, desktop }: { current: "home" | "explore" | "me"; desktop?: boolean }) {
+  const { state } = useFlow();
   return (
     <nav className={desktop ? "fl-tabs-top" : "fl-tabbar"} aria-label="주요 화면">
       {TABS.map((t) => (
-        <a key={t.key} href={`#${t.path}`} className={"fl-tab" + (t.key === current ? " is-on" : "")}
+        <a key={t.key} href={`#${t.key === "explore" ? (state.districtId ? "/spaces/map" : "/district-search") : t.path}`} className={"fl-tab" + (t.key === current ? " is-on" : "")}
           aria-current={t.key === current ? "page" : undefined}>{t.label}</a>
       ))}
     </nav>
