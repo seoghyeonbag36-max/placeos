@@ -3,8 +3,24 @@
 **이 파일에 없는 숫자는 논문에 쓰지 않는다.** 새 수치가 필요하면 먼저 여기에
 출처·재현 경로와 함께 등재한 뒤 본문에 쓴다. → [README.md](README.md) 작성 규칙
 
-<a id="pppp-update-20261011"></a>
+<a id="update-20261018"></a>
+## 후속 실험·자료 품질 갱신 근거 — 2026-10-18
 
+현재 네 Markdown 원고를 점검하고 Platform·Page·Posting에 후속 절을 추가한다. Program은 새 생성 품질·사업 성과 평가 근거가 확인되지 않아 기존 미검증 판정을 유지한다. 아래 수치는 보존 JSON에서 대조한 값이며 이번 집필에서 재학습·재수집하지 않았다. 10월의 세부 업종 실험은 조건 A/B/C/E/F와 별도인 **조건 H**로 표기한다. 조건 H 안에서도 전체 엣지 피처 실험과 공간 이웃 전용 비교는 별도 팔이며, 서로 다른 팔의 차이를 피처 효과로 계산하지 않는다.
+
+| ID | 등재 값·계약 | 원천·재현 경로와 해석 제한 |
+|---|---|---|
+| PLATFORM-V01 | 조건 H: 81거점, 61,165노드·27클래스·test 12,243노드. 대조군 132열, 층 137열, 교통 136열, 시간대 142열, 전체 151열. 분할 시드 42, 초기화 시드 42·43·44, 최대 80에포크·patience 15·hidden 64, val Top-1 선택. 거점 군집 부트스트랩 2,000회·95% 구간 | `ml/reports/industry_detail_features_experiment_2026-10-16.json::parameters/overall/bundles`; 노드 수·클래스는 `ml/reports/industry_detail_experiment_2026-10-16.json`. 재현: `python -m ml.training.industry_detail_features run-all` 후 `report --output <새 경로>`. 같은 거점·건물의 점포가 분할에 섞이는 전이적 평가. 시드 평균 적중을 거점별 재표본하며 구간은 학습 시드 변동을 포함하지 않음 |
+| PLATFORM-V02 | 시드 평균 Top-3: 대조 52.8%, 층 55.9%, 교통 53.2%, 시간대 53.2%, 전체 56.1%. 동일 표본 기준선 45.4%. 대조 대비 차이·95% 구간: 층 +3.1 [+2.5, +3.7]%p, 교통 +0.4 [+0.1, +0.7]%p, 시간대 +0.4 [+0.1, +0.7]%p, 전체 +3.3 [+2.6, +3.9]%p | 같은 JSON `overall::<arm>::model_top3/baseline_top3/vs_control`. 원값에 100을 곱해 소수 첫째 자리로 반올림. 교통·시간대의 구간은 양수지만 학습 변동 대비 견고한 효과는 미입증. 전체와 층의 직접 차이 검정 없음. `reproduces_prior_report.match=true`: 시드 42 대조 53.01%, 기준선 45.41%는 앞선 보고서와 일치 |
+| PLATFORM-V03 | 층−대조: 요가·필라테스 +11.4 [+8.3, +14.2]%p, 미용실 −2.9 [−4.3, −1.6]%p. 네일숍 층 Top-3 8.1%. 의류 +0.9 [−0.3, +2.2]%p. 골프·PC방·기타 숙박은 층 팔에서도 Top-3 0%. 공연장·전시장·갤러리는 test 0·산출 불가 | 같은 JSON `per_class`; 업종별 다중비교 미보정. 기준선 대비 양의 차이는 서비스 효용 기준 충족이 아님. `docs/finding-industry-features-2026-10-16.md`의 표 A·한계도 대조 |
+| PLATFORM-V04 | 공간 이웃 전용 비교: Top-1 29.94%→30.61%, Top-3 51.76%→51.72%, macro-F1 0.1078→0.1162, 기준선 Top-3 45.41% | `reports/industry_detail_spatial_comparison_2026-10-16.json::overall`; 두 원본 `ml/reports/industry_detail_spatial_{control,neighbor}_2026-10-16.json`. 재현: `python -m ml.training.industry_detail_compare <control> <neighbor> --output <새 경로>`. 같은 입력·분할 해시를 검사. 단일 분할·초기화, 유의성 검정 없음. 주변 업종은 학습 라벨만 사용. 추천 활성화 근거 아님 |
+| PAGE-V01 | 부분 격리 검증: 원본 1,077,457행, 수용 1,077,224행, 격리 233행, `status=verified`. 원천 식별키별 연구 피처 740,919행·`status=partial_quarantined` | `reports/industry_public_partial_verified_2026-10-17.json`; `reports/industry_public_features_2026-10-17.json`. 검증 해시→부분 Silver·격리 파일→연구 Gold 연결을 대조. 재현 경로: `data/pipelines/build_industry_public_silver.py`의 부분 격리 CLI와 `data/pipelines/build_industry_public_features.py`의 검증 해시 게이트. 검증 JSON은 보존 대조 기록이며 독립 검증 스크립트가 아님. 점포·모델·API 미연결이며 공실 판정 성능 실험이 아님 |
+| PAGE-V02 | 학교 식별자 공란으로 전체 Silver 승격은 `blocked`·`silver_written=false`. 부분 격리 승격과 전체 승격 실패를 구분. 학교 코드 임의 복원·손상 원문 추측 복원 없음 | `reports/industry_public_silver_2026-10-17.json`; `reports/industry_public_school_identity_audit_2026-10-17.json`; 부분 검증 `quarantined_identities_absent_from_datasets_and_links=true`. 상호·주소 후보는 확정 링크 아님. `SITEAREA`는 소재지면적이지 공실 가용면적이 아니며 학원 정원은 재원생 실측이 아님 |
+| POSTING-V01 | 검증용 추정매출 분기 패널 142,984행·81거점, 2021Q1~2026Q2. 모델 입력·서빙 미연결, POS 실측 아님 | `reports/industry_outcome_panel_2026-10-16.json`; `data/gold/features/industry_outcome_panel_2026-10-16.parquet`. 재현: `python -m data.pipelines.build_industry_outcome_panel data/bronze/platform13/2026-09-24/seoul_trdar_selng.json --tag <새 태그>`. 같은 TRDAR의 거점 간 중복 합산 금지·누락 보간 금지·업종 자동 대응 금지. 과거 정정값의 당시 이용 가능성 미확인 |
+
+이번 갱신은 보존 보고서·로컬 산출물과 코드 계약의 대조다. 기존 가설 판정·역사적 결과·문헌 확인 범위를 유지한다. Word 및 제출처별 파생 원고는 이 Markdown 갱신에 자동 동기화되지 않는다.
+
+<a id="pppp-update-20261011"></a>
 ## 네 원고 갱신의 근거와 범위 — 2026-10-11
 
 연구 동기의 출처는 이번 집필 요청에서 연구자가 제공한 현장 관찰이다. ‘공실은 창업·재창업 순환의 동맥경화’는 문제를 설명하는 은유다. 유동인구가 많은 곳의 폐업과 적은 곳의 배달 기반 유지라는 관찰에는 표집·관측 기간·성과 대조 자료가 제공되지 않았다. 디지털 접근성·IT/SNS/AI 검색의 상대적 영향은 미검증 연구 가설로만 사용한다. 이 관찰을 인과 추정치나 기존 실험의 결과로 바꾸지 않는다.
