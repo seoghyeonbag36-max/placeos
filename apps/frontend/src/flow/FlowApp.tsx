@@ -16,7 +16,7 @@ import { FlowContext, forgetResume, loginTitle, rememberResume, type FlowCtx, ty
 import { FlowData, FlowDataContext } from "./data";
 import { parseRoute, replace, useHash, type Route } from "./route";
 import { SavedProvider } from "./saved";
-import { businessToFlow, emptyFlow, flowToBusiness, loadFlow, saveFlow, type FlowState } from "./state";
+import { businessToFlow, clearFlow, emptyFlow, flowToBusiness, loadFlow, saveFlow, type FlowState } from "./state";
 import { Sheet, Toast, type ToastMsg } from "./ui";
 import { BudgetCheck, Budget, Contract, Fitout, Payback, Premium } from "./screens/Cost";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start } from "./screens/Find";
@@ -69,8 +69,14 @@ export default function FlowApp({ token }: { token: string | null }) {
   const [data] = useState(() => new FlowData());
   const [state, setState] = useState<FlowState>(loadFlow);
   const update = useCallback((fn: (s: FlowState) => FlowState) => {
-    setState((s) => { const next = fn(s); if (next !== s) saveFlow(next); return next; });
+    setState(fn);
   }, [setState]);
+  // 렌더 중 재평가될 수 있는 updater에서 저장하면 이전 답이 최신 선택을 덮는다.
+  // 화면에 반영된 최종 상태만 저장한다.
+  useEffect(() => {
+    if (JSON.stringify({ ...state, lastPath: null }) === JSON.stringify(emptyFlow())) clearFlow();
+    else saveFlow(state);
+  }, [state]);
 
   // 모르는 흐름 주소(지도 탐색은 App 이 가른다) → 홈
   const unknown = !route || route.name === "explore";
