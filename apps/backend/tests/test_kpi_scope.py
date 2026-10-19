@@ -61,7 +61,11 @@ def _org(email: str, org_name: str) -> tuple[dict, str]:
 
 
 def _use_and_answer(h: dict, score: int = 10, pay: str = "yes") -> None:
-    """분석 1회 + 피드백 1건. 피드백 POST 도 추적 라우터라 접근은 조직당 2건이 쌓인다."""
+    """분석 1회 + 피드백 1건. 접근은 조직당 **1건**이다 — 피드백 제출은 분석 사용이 아니다.
+
+    2026-10-19 전에는 피드백 POST 도 추적 라우터라 2건이 쌓였고, 그 탓에 4주차 설문 제출이
+    W4 「활성 주」로 세졌다(services/usage.NON_ANALYSIS_PREFIXES).
+    """
     assert client.get(_ANALYSIS_PATH, headers=h).status_code == 200
     assert client.post(f"{V1}/feedback", json={"nps_score": score, "would_pay": pay},
                        headers=h).status_code == 201
@@ -78,7 +82,7 @@ def test_name_prefixed_org_leaves_usage_and_pmf_and_is_reported(admin) -> None:
     u = client.get(f"{V1}/admin/usage", headers=admin).json()
     assert u["active_orgs"] == 1, "내부 조직이 파일럿 수에 섞였다"
     assert internal_id not in u["by_org"]
-    assert u["total_accesses"] == 2 and u["excluded_accesses"] == 2
+    assert u["total_accesses"] == 1 and u["excluded_accesses"] == 1
     assert u["excluded_orgs"] == 1
     assert u["excluded"] == [{"id_prefix": internal_id[:8], "name": "[내부] 창업자 시험",
                               "reasons": ["name_prefix"]}]
@@ -174,6 +178,6 @@ def test_usage_rows_for_screen_carry_name_and_id_prefix_only(admin) -> None:
     pilot, pilot_id = _org("secret-person@acme.com", "Acme")
     _use_and_answer(pilot)
     u = client.get(f"{V1}/admin/usage", headers=admin).json()
-    assert u["orgs"] == [{"id_prefix": pilot_id[:8], "name": "Acme", "accesses": 2}]
+    assert u["orgs"] == [{"id_prefix": pilot_id[:8], "name": "Acme", "accesses": 1}]
     assert "secret-person" not in str(u) and "secret-person" not in str(
         client.get(f"{V1}/admin/pmf", headers=admin).json()), "이메일이 관리자 응답에 실렸다"

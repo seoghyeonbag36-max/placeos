@@ -26,7 +26,7 @@ model: opus
 2. 승인 작업을 책임 워커에 위임(독립=병렬, 의존=순차). 경로 화이트리스트·완료기준·`# TODO` 규칙 명시.
 3. api.ts 계약·디자인 토큰 단일출처 일관성 점검·조정.
 4. `/verify`(pytest + npm run build + ML import) 통과 확인.
-5. KPI 보고: ① 기술 완성도(데모/정확도 70%+/지도·건물 상세 로딩<3초) ② PMF(B2B 5~10건).
+5. KPI 보고: CLAUDE.md §KPI Priorities 의 세 축 — ① 답의 실력(빈 층 판정 · 업종 모델 · 공실 예측 보호 게이트) ② 표면 성능 ③ 고객 검증(창업자 파일럿 — W4). 숫자는 `scripts/pppp_status.py` · `scripts/kpi_baseline.py` 출력으로만(「정확도 70%+」·「B2B」는 기준이 아니다 — 2026-10-19).
 
 ## 원칙
 데이터 기반·추측 최소화. 핵심가설 "Place ▶ Platform"·Humanistic Authority(균형·공생·공감)를 기준으로 유지. 더미엔 `TODO`.

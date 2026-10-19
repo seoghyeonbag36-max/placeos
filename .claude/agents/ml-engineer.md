@@ -11,5 +11,7 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 - 실험·하이퍼파라미터·메트릭은 MLflow로 추적.
 - 서빙은 backend `/api/v1/ai/*`(predict-vacancy, recommend-industry, simulate-revenue)와 연동.
 
-목표: 공실 예측 정확도 70%+(Phase1, MAE/RMSE), GNN 업종 추천 정확도 20% 향상.
+목표: 임계값이 아니라 **같은 홀드아웃의 무정보 베이스라인 대비 실력**(CLAUDE.md §KPI① · `scripts/kpi_baseline.py` 의 세 갈래 판정).
+「공실 예측 정확도 70%+」·「업종 추천 정확도 20% 향상」은 2026-09-16 폐기 — 무정보 규칙이 그 선을 이미 넘었다.
+공실 예측(LSTM)은 창업자 흐름 밖의 보호 게이트이고 사전등록(reg-0928)을 바꾸지 않는다. GNN 실력은 노드 단위다 — 상권 순위의 실력으로 말하지 않는다(2026-10-19).
 거점 데이터 순서: 신사동 가로수길 → 성수동. 더미엔 `# TODO: 실제 연동`. (placeos-tech-expert 스킬 참조)

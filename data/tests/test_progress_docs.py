@@ -38,7 +38,10 @@ def test_canonical_progress_names_current_state_and_remaining_work() -> None:
         "Platform 이 왜 내려갔는지 근거로 갈 수 있어야 한다")
     # 2026-09-17 Program 대상 재정의 — 상용 온보딩은 삭제됐다. 정본이 지금 계약을 말해야 한다.
     assert "검증 브리프" in doc
-    assert "B2B 파일럿" in doc
+    # 2026-10-19: 파일럿 대상은 「B2B」가 아니라 창업자다(09-13 주요 고객 재정의 · KPI 정체성 정합 검증).
+    # 성질은 그대로 — 정본이 남은 고객 검증 과제를 이름으로 들고 있어야 한다. 문자열만 옮겼다.
+    assert "창업자 파일럿" in doc
+    assert "B2B 파일럿" not in doc, "정본이 09-13 이전 고객 세그먼트로 파일럿을 부른다"
     assert "다음 작업 (2026-08-20 기준)" not in doc
 
 
@@ -69,7 +72,8 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     assert "공식 공개 소스를 다시 탐색했지만 적격 후보는 0건" in status
     assert "검증 브리프·지표 계약" in status
     assert "finding-posting-unit-area-sources-2026-08-29.md" in index
-    assert "기술 계약 통과와 KPI②" in index
+    # 2026-10-19: PMF 는 09-16 재정의로 KPI③ 이다(② = 표면 성능). 번호만 옮겼다.
+    assert "기술 계약 통과와 KPI③" in index
 
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts/pppp_status.py"), "--json"],
@@ -80,6 +84,15 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
         encoding="utf-8",
     )
     scores = {track["name"]: track["pct"] for track in json.loads(result.stdout)["tracks"]}
+
+    # 2026-10-19: KPI 블록은 트랙 평균 밖에 산다. 창업자 답의 첫 축(빈 층 판정)은 라벨 전에
+    # 사전등록한 판정을 그대로 싣는다 — 판정 이름이 네 갈래 밖이면 다른 것을 재고 있는 것이다.
+    status = json.loads(result.stdout)
+    assert status["kpi3_pmf"]["in_progress_pct"] is False
+    floor = status["kpi1_floor_vacancy"]
+    assert floor["in_progress_pct"] is False
+    assert floor["available"] is True, floor.get("reason")
+    assert floor["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
     # 2026-09-04 Page 99.7 → 100.0. 수집으로 올린 것이 **아니다** — 그날 오전까지
     # 미달이던 doksan 83.5% 의 정체가 결손이 아니라 **분류 오류**였다: 잔여 13동은
     # 층별개요를 이미 받았고 지상 상업층이 0 으로 확정된 건물인데(재호출해도 안 바뀐다)

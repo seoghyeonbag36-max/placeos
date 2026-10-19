@@ -121,7 +121,7 @@ $env:PLACEOS_LIVE_LLM=1; py -3.11 -m pytest tests/test_llm_live.py -v
 - **Backend**: 타입 힌트 필수. 엔드포인트는 `/api/v1/...` 규약
 - **Frontend**: 함수형 컴포넌트 + 훅
 - **Data**: Bronze→Silver→Gold 흐름을 지킨다. 계층을 건너뛰지 않는다
-- 성능 목표: 지도·건물 상세 로딩 <3초, API p95 <200ms
+- 성능 목표: 지도 로딩 <3초(지도 탐색 화면) · API p95 <200ms — 「건물 상세」는 계측 0 이라 목표가 아니다. KPI 정의는 CLAUDE.md §KPI Priorities(2026-10-19 정체성 정합 — 창업자를 위한 부동산 앱)
 
 ### 알려진 함정
 - **Gold 산출물 배포 누락**: 런타임에 읽는 Gold 파일은 `.gitignore` 예외에 넣어야 한다.

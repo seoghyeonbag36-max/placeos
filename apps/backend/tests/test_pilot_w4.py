@@ -87,6 +87,22 @@ def test_one_week_or_late_access_is_not_active(db) -> None:
     assert {o["name"]: o["active_weeks"] for o in r["orgs"]}["two-weeks"] == [1, 2]
 
 
+def test_feedback_submission_is_not_an_active_week(db) -> None:
+    """W4 규칙 ②는 「분석 요청」이 있는 주를 센다 — 4주차 설문 제출은 활성 주가 아니다.
+
+    2026-10-19 계측 정정: /feedback 에 사용량 계측이 걸려 있어 「1주차 데모 + 4주차 설문」 조직이
+    활성 2주로 세졌다. 이미 쌓인 행도 읽을 때 거른다(services/usage.analysis_access_clauses).
+    """
+    org = _org(db, "demo-then-survey", access_days=(0,))
+    db.add(AuditLog(org_id=org.id, action="access:jwt", detail="/api/v1/feedback",
+                    created_at=T0 + timedelta(days=26)))
+    db.commit()
+    r = pilot_w4.w4_summary(db, now=AFTER_W4)
+    o = {x["name"]: x for x in r["orgs"]}["demo-then-survey"]
+    assert o["status"] == "비활성"
+    assert o["active_weeks"] == [1]
+
+
 def test_low_response_rate_holds_verdict(db) -> None:
     """활성 5곳 중 2곳만 답하면(40%) 두 곳이 모두 10점이어도 판정하지 않는다."""
     for i in range(5):

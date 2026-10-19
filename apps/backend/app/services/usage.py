@@ -1,8 +1,11 @@
-"""분석 API 사용량 기록 — KPI② (PMF) 를 재는 원천 데이터.
+"""분석 API 사용량 기록 — KPI③ 고객 검증(창업자 파일럿)을 재는 원천 데이터.
+
+번호: 2026-09-16 KPI 재정의 전에는 PMF 가 KPI② 였다. 지금은 ② = 표면 성능 · ③ = 고객 검증이다
+(CLAUDE.md §KPI Priorities · 2026-10-19 번호 정리).
 
 ## 왜 필요한가
 
-`docs/README.md` §진행률 이 적어 둔 대로 **KPI② PMF 를 재는 게이트가 0개**다. PPPP
+`docs/README.md` §진행률 이 적어 둔 대로 **PMF 를 재는 게이트가 0개**였다(2026-08-27). PPPP
 진행률 22게이트는 전부 분석 파이프라인(KPI①)만 센다. 파일럿을 5~10건 받기로 해 놓고
 "그 파일럿이 실제로 무엇을 얼마나 썼나"를 셀 자리가 없으면, 유료 전환 의향 30%·NPS 30
 같은 목표는 **관측 없이 선언만 남는다** — 이 저장소가 반복해 잡아 온 실패 양식이다.
@@ -34,6 +37,21 @@ logger = logging.getLogger(__name__)
 # AuditLog.action 접두사 — 계정 이벤트(signup/login)와 한 표에 살지만 구분은 된다.
 ACCESS_PREFIX = "access:"
 
+# 분석 사용이 아닌 경로 — 이용 기록에 남아 있어도 사용량·W4 활성에서 뺀다(2026-10-19).
+# 피드백 제출은 분석 요청이 아니다. W4 규칙 ②는 「분석 요청이 1건 이상 있는 주」를 세고
+# (docs/pilot-outreach-founders-2026-10.md §W4), 처리방침의 이용 기록도 「분석 경로」다.
+# 그런데 /feedback 라우터에 사용량 계측이 걸려 있어, 1주차에 한 번 쓰고 4주차에 설문만 낸
+# 조직이 「서로 다른 2주 활성」으로 세졌다(규칙 변경이 아니라 계측 정정 — 그날 파일럿 0건).
+# 기록은 api/v1/router.py 에서 끊었고, 이미 쌓인 행은 읽을 때 여기서 거른다 —
+# 10-04 이후 관측 전체에 같은 정의가 걸리게.
+NON_ANALYSIS_PREFIXES = ("/api/v1/feedback",)
+
+
+def analysis_access_clauses() -> list:
+    """「분석 접근」 행만 고르는 조건. `usage_summary` 와 `pilot_w4` 가 같은 정의를 쓴다."""
+    return [AuditLog.action.like(f"{ACCESS_PREFIX}%"),
+            *(~AuditLog.detail.like(f"{p}%") for p in NON_ANALYSIS_PREFIXES)]
+
 
 def record_access(db: Session, principal: Principal | None, path: str) -> bool:
     """접근 1건 기록. 익명이면 아무것도 안 하고 False.
@@ -62,13 +80,15 @@ def record_access(db: Session, principal: Principal | None, path: str) -> bool:
 def usage_summary(db: Session, days: int = 30) -> dict:
     """조직별 접근 요약 — 파일럿 활성도를 보는 최소 지표.
 
-    `active_orgs` 가 곧 "살아 있는 파일럿 수"의 하한이다(KPI② 목표 5~10건).
+    `active_orgs` 는 "지금 살아 있나"를 보는 창이다(최근 N일 안에 분석 접근 1건이라도).
+    KPI③ 의 창업자 파일럿 **건수**는 이것이 아니라 W4 활성(`services/pilot_w4` — 서로 다른
+    2주 이상)으로 센다 — 이 창은 데모 날 한 번 쓴 조직도 센다.
     내부·테스트 조직(`services/kpi_scope`)은 빼고 세며, 뺀 수는 `excluded_orgs` 에 싣는다.
     """
     since = datetime.now(timezone.utc) - timedelta(days=days)
     rows = db.execute(
         select(AuditLog.org_id, func.count(AuditLog.id))
-        .where(AuditLog.action.like(f"{ACCESS_PREFIX}%"))
+        .where(*analysis_access_clauses())
         .where(AuditLog.created_at >= since)
         .group_by(AuditLog.org_id)
     ).all()

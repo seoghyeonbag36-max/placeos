@@ -8,7 +8,7 @@
 | | `usage_summary` / `pmf_summary` | 여기 |
 |---|---|---|
 | 시계 | "오늘부터 N일 전" 고정 창 / 기간 없음 | **조직마다 가입일부터 28일** |
-| 활성 | 창 안에 접근 1건이라도 | 가입일 기준 **서로 다른 2주 이상** 접근 |
+| 활성 | 창 안에 접근 1건이라도 | 가입일 기준 **서로 다른 2주 이상** 분석 접근(피드백 제출은 세지 않는다 — 2026-10-19 계측 정정, `usage.analysis_access_clauses`) |
 | 분모 | 답한 조직 전부 | **W4 가 끝난 활성 조직**만. 무응답은 빼되 응답률로 드러낸다 |
 
 두 계측기는 그대로 둔다 — "지금 살아 있나"를 보는 창으로는 여전히 맞다.
@@ -41,7 +41,7 @@ from app.services import kpi_scope
 from app.services.pmf import (
     DETRACTOR_MAX, MIN_RESPONSES, NPS_TARGET, PAY_TARGET_PCT, PROMOTER_MIN,
 )
-from app.services.usage import ACCESS_PREFIX
+from app.services.usage import analysis_access_clauses
 
 # 무료 기간. 파일럿 제안(4주 무료)과 같이 바꾼다.
 PILOT_DAYS = 28
@@ -78,7 +78,7 @@ def w4_summary(db: Session, now: datetime | None = None) -> dict:
     weeks: dict[str, set[int]] = {oid: set() for oid in signup}
     for org_id, at in db.execute(
         select(AuditLog.org_id, AuditLog.created_at)
-        .where(AuditLog.action.like(f"{ACCESS_PREFIX}%"))
+        .where(*analysis_access_clauses())
     ).all():
         if org_id in signup:
             w = _week_index(signup[org_id], at)
