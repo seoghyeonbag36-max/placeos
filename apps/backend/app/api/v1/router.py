@@ -32,8 +32,9 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 # 사용량 계측(_tracked)은 걸지 않는다 — 비콘은 분석 API 사용이 아니다.
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 # 파일럿 피드백 — KPI③ 입력. 인증 필수라 익명 데모 트래픽이 PMF 로 새지 않는다.
-api_router.include_router(feedback.router, prefix="/feedback", tags=["feedback"],
-                          dependencies=_tracked)
+# 사용량 계측(_tracked)은 걸지 않는다(2026-10-19) — 피드백 제출은 분석 사용이 아니다. 걸려 있던
+# 동안에는 4주차 설문 제출이 W4 「활성 주」로 세졌다(services/usage.NON_ANALYSIS_PREFIXES).
+api_router.include_router(feedback.router, prefix="/feedback", tags=["feedback"])
 
 # 방문자 의견은 분석 사용량과 별도로 접수한다.
 api_router.include_router(visitor_feedback.router, prefix="/visitor-feedback", tags=["visitor-feedback"])

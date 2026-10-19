@@ -18,6 +18,19 @@
   · `label_method` 별(현장·로드뷰 …) 응답 수와 엄격 정밀도를 따로 낸다. 거리뷰는 촬영 시점이
     오래됐을 수 있어 현장 라벨과 섞어 읽지 않는다.
 
+판정 — KPI① 「빈 층 판정 실력」(사전등록 2026-10-19 · 라벨 0/458 인 상태에서 고정)
+  창업자 앱의 첫 약속(「계약하기 전에 어느 건물 몇 층이 비었는지」)을 재는 축이다. 정밀도가 높다는
+  사실만으로는 정보가 없다 — 빈 층이 흔한 틀이면 아무 층이나 골라도 정밀도가 높다(KPI 규칙 1).
+  그래서 **정밀도 − 무정보 기준**의 95% 구간으로 판정한다.
+    무정보 기준  두 규칙 중 **강한 쪽**: ① 틀의 모든 층을 빈 층이라 내민다 → 층 공실률
+                 ② 층 띠 하나(1층 또는 2층↑)의 모든 층을 내민다 → 그 띠의 층 공실률.
+                 층 번호만 보는 규칙이라 공실 판정 모델의 정보를 쓰지 않는다(LSTM 09-30 개정과 같은 원칙).
+    게이트       엄격 정밀도 실력(`precision_lift_strict`) — 구간 하한 > 0 이면 실력 · 0 을 품으면
+                 구분불가 · 상한 < 0 이면 열위 · 라벨없음·표본부족이면 검정불가.
+    관측(판정 없음)  관대 정밀도 실력 · 재현율 − 목록 비율(같은 크기의 무작위 목록이 잡는 몫) · 방법별 응답.
+  70%·95% 같은 절대선은 게이트로 쓰지 않는다. 라벨을 본 뒤 기준을 바꾸려면 새 사전등록이 필요하다
+  → docs/finding-kpi-identity-alignment-2026-10-19.md §4
+
 실행:
   python -m data.validation.score_floor_labels --tag 20261011
   python -m data.validation.score_floor_labels --tag 20261011 --json reports/floor_labels_20261011.json
@@ -39,6 +52,9 @@ _OUT = Path(__file__).resolve().parent
 LISTED = ("vacant_confirmed", "vacant_probable")     # 화면의 빈 층 목록
 VALID = ("공실", "부분공실", "영업")                    # 채점 대상 라벨 — 불명·빈칸은 미응답
 _MIN_PER_STRATUM = 10                                  # 이보다 적으면 그 계층 추정은 표본부족
+KPI_SAMPLE_TAG = "20261011"                            # 사전등록한 표본 — 458층 · 8계층(2026-10-11 추출)
+# 판정 이름은 KPI① 의 다른 축과 같다(apps/backend/app/services/forecast_skill.py).
+SKILL, UNRESOLVED, WORSE, UNTESTABLE = "실력", "구분불가", "열위", "검정불가"
 
 
 def _read_csv(p: Path) -> list[dict]:
@@ -69,6 +85,7 @@ def _estimate(rows: list[dict], strata_N: dict[str, int]) -> dict:
         by_h[r["stratum"]].append(r)
     tot = {"strict": 0.0, "broad": 0.0, "N": 0.0}
     listed = {"strict": 0.0, "broad": 0.0, "N": 0.0}
+    by_band: dict[str, dict[str, float]] = defaultdict(lambda: {"strict": 0.0, "broad": 0.0, "N": 0.0})
     for h, rs in by_h.items():
         n_pop = strata_N.get(h, 0)
         if not rs or not n_pop:
@@ -79,6 +96,10 @@ def _estimate(rows: list[dict], strata_N: dict[str, int]) -> dict:
         tot["strict"] += n_pop * strict
         tot["broad"] += n_pop * broad
         tot["N"] += n_pop
+        band = by_band[h.split("|")[1] if "|" in h else h]
+        band["strict"] += n_pop * strict
+        band["broad"] += n_pop * broad
+        band["N"] += n_pop
         if h.split("|")[0] in LISTED:
             listed["strict"] += n_pop * strict
             listed["broad"] += n_pop * broad
@@ -87,7 +108,27 @@ def _estimate(rows: list[dict], strata_N: dict[str, int]) -> dict:
     def ratio(a: float, b: float) -> float | None:
         return round(a / b, 4) if b else None
 
+    def raw(a: float, b: float) -> float | None:
+        return a / b if b else None
+
+    def strongest(kind: str) -> float | None:
+        """무정보 기준 — 「틀 전체」·「층 띠 하나」의 모든 층을 빈 층이라 내미는 규칙 중 정밀도가 높은 쪽."""
+        cands = [raw(tot[kind], tot["N"])] + [raw(b[kind], b["N"]) for b in by_band.values()]
+        cands = [c for c in cands if c is not None]
+        return max(cands) if cands else None
+
+    def lift(a: float | None, b: float | None) -> float | None:
+        return round(a - b, 4) if a is not None and b is not None else None
+
+    share = raw(listed["N"], tot["N"])        # 같은 크기 무작위 목록의 기대 재현율
+    base_s, base_b = strongest("strict"), strongest("broad")
     return {
+        "baseline_strict": round(base_s, 4) if base_s is not None else None,
+        "baseline_broad": round(base_b, 4) if base_b is not None else None,
+        "precision_lift_strict": lift(raw(listed["strict"], listed["N"]), base_s),
+        "precision_lift_broad": lift(raw(listed["broad"], listed["N"]), base_b),
+        "recall_lift_strict": lift(raw(listed["strict"], tot["strict"]), share),
+        "recall_lift_broad": lift(raw(listed["broad"], tot["broad"]), share),
         "precision_strict": ratio(listed["strict"], listed["N"]),
         "precision_broad": ratio(listed["broad"], listed["N"]),
         "floor_vacancy_strict": ratio(tot["strict"], tot["N"]),
@@ -122,6 +163,28 @@ def _bootstrap(rows: list[dict], strata_N: dict[str, int], reps: int, seed: int)
     return out
 
 
+def judge(res: dict) -> dict:
+    """사전등록(2026-10-19) 게이트 — 엄격 정밀도 실력(정밀도 − 강한 무정보 기준)의 군집 부트스트랩 95% 구간."""
+    if res["verdict"] != "추정가능":
+        why = ("라벨이 아직 없다" if res["verdict"] == "라벨없음"
+               else f"응답 없는 계층 {len(res['missing_strata'])} · 응답 {_MIN_PER_STRATUM} 미만 계층 "
+                    f"{len(res['thin_strata'])}")
+        return {"verdict": UNTESTABLE, "basis": "precision_lift_strict",
+                "reason": f"표본 {res['verdict']} — 응답 {res['answered']}/{res['drawn']} · {why}"}
+    point = res["estimates"].get("precision_lift_strict")
+    ci = res["ci95_cluster_bootstrap"].get("precision_lift_strict")
+    if point is None or not ci:
+        return {"verdict": UNTESTABLE, "basis": "precision_lift_strict",
+                "reason": "화면 빈 층 계층에 응답이 없어 정밀도 실력을 못 낸다"}
+    lo, hi = ci
+    verdict = SKILL if lo > 0 else WORSE if hi < 0 else UNRESOLVED
+    return {"verdict": verdict, "basis": "precision_lift_strict",
+            "lift_pp": round(point * 100, 1), "ci95_pp": [round(lo * 100, 1), round(hi * 100, 1)],
+            "precision_strict": res["estimates"].get("precision_strict"),
+            "baseline_strict": res["estimates"].get("baseline_strict"),
+            "reason": "엄격 정밀도 − 강한 무정보 기준(틀 전체·층 띠 하나의 층 공실률 중 높은 쪽)"}
+
+
 def score(sample_dir: Path, reps: int = 1000, seed: int = 20261011) -> dict:
     rows, design = load(sample_dir)
     strata_N = {h: int(s.get("N") or 0) for h, s in design.get("strata", {}).items()}
@@ -146,7 +209,7 @@ def score(sample_dir: Path, reps: int = 1000, seed: int = 20261011) -> dict:
     point = _estimate(answered, strata_N) if answered else {}
     verdict = ("라벨없음" if not answered else
                "표본부족" if missing or thin else "추정가능")
-    return {
+    res = {
         "sample": sample_dir.name, "verdict": verdict,
         "drawn": len(rows), "answered": len(answered),
         "unknown": sum(r["actual"] == "불명" for r in rows),
@@ -159,11 +222,17 @@ def score(sample_dir: Path, reps: int = 1000, seed: int = 20261011) -> dict:
                  "구간은 지번 단위 군집 부트스트랩. 표본부족이면 해당 계층의 응답을 더 받기 전에 "
                  "수치를 인용하지 않는다."),
     }
+    res["gate"] = judge(res)
+    return res
 
 
 def _print(res: dict) -> None:
     print(f"[floor-score] {res['sample']} · 판정 {res['verdict']} · 응답 {res['answered']}/{res['drawn']}"
           f" (불명 {res['unknown']} · 빈칸 {res['blank']})")
+    g = res["gate"]
+    detail = (f"실력 {g['lift_pp']:+.1f}%p [{g['ci95_pp'][0]:+.1f}, {g['ci95_pp'][1]:+.1f}]"
+              if "lift_pp" in g else g["reason"])
+    print(f"  KPI① 빈 층 판정 실력(사전등록 2026-10-19) → {g['verdict']} — {detail}")
     ci = res["ci95_cluster_bootstrap"]
     for k, v in res["estimates"].items():
         print(f"  {k:24s} {v}  95% {ci.get(k)}")

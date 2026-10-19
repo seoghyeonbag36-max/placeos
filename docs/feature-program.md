@@ -643,7 +643,7 @@ int 에는 넣을 수 없다. `test_budget_share_cannot_hold_absolute_amount` �
 사라져 경계가 지킬 것이 없어졌다 — 검증 브리프는 창업자가 직접 쓴 계획이지 제3자 저작물이
 아니다. 서비스(`program_onboarding`)·스키마(`CommercialStoreProfile`·`ProgramCommercialConsent`·
 영수증)·화면(API 키·동의 체크박스)·테스트 6건을 지웠다. 조직 인증(`core/security`)과
-`AuditLog` 는 다른 경로가 쓰므로 남겼다. B2B 파일럿 실적은 여전히 `active_orgs` 로만 센다. → §0-V
+`AuditLog` 는 다른 경로가 쓰므로 남겼다. 파일럿 실적은 KPI③ 창업자 파일럿 W4(`/admin/pilot-w4`)로 센다(2026-10-19 — 종전 「B2B 파일럿 · `active_orgs`」). → §0-V
 
 ## 1. 담당 코드 영역
 
@@ -680,8 +680,8 @@ echo "LLM_API_KEY=sk-ant-..." >> .env        # .gitignore 로 보호됨
 6. **검증 결과를 되받는 경로(후속)** — 지금은 판정선을 **정해 주는** 데서 끝난다. 팝업이 끝난 뒤
    실측값을 넣어 기각/채택을 판정하는 표면은 없다.
 
-기술 트랙 다음 검증은 **실제 B2B 파일럿**이다. API 가 200 을 반환하는 것과 고객이 반복 사용해
-가치를 확인하는 것은 다른 지표이며, 후자는 `active_orgs` 로만 센다.
+기술 트랙 다음 검증은 **실제 창업자 파일럿**이다(KPI③). API 가 200 을 반환하는 것과 고객이 반복 사용해
+가치를 확인하는 것은 다른 지표이며, 후자는 W4 활성(`/admin/pilot-w4` — 서로 다른 2주 이상 분석 접근)으로만 센다.
 
 ## 4. Claude Code 작업 예시
 

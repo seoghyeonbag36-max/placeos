@@ -1,4 +1,4 @@
-"""분석 API 사용량 계측 — KPI② (PMF) 의 원천 데이터가 실제로 쌓이는지.
+"""분석 API 사용량 계측 — KPI③ 고객 검증(창업자 파일럿)의 원천 데이터가 실제로 쌓이는지.
 
 여기서 고정하는 계약 둘:
   ① **익명 요청은 DB 를 건드리지 않는다.** 분석 API 는 Gold 파일 직독이라 DB 없이
@@ -135,6 +135,30 @@ def test_revoked_api_key_is_rejected():
 
     assert client.get(_ANALYSIS_PATH,
                        headers={"X-API-Key": created["key"]}).status_code == 401
+
+
+def test_feedback_submission_is_not_analysis_usage():
+    """피드백 제출은 분석 사용이 아니다 — 기록도 안 하고, 이미 쌓인 행도 집계에서 뺀다(2026-10-19).
+
+    걸려 있던 동안에는 4주차 설문이 W4 「활성 주」로 세졌다(tests/test_pilot_w4.py 가 W4 쪽을 잠근다).
+    """
+    from app.services import usage
+
+    token = _signup("survey@a.com", org_name="설문만")["access_token"]
+    resp = client.post("/api/v1/feedback", json={"nps_score": 9, "would_pay": "yes"},
+                       headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 201
+    assert _accesses() == [], "피드백 제출이 분석 접근으로 기록됐다"
+
+    db = _TestSession()
+    try:  # 정정 전에 쌓인 행 — 읽을 때 걸러져야 한다
+        org_id = resp.json()["org_id"]
+        db.add(AuditLog(org_id=org_id, action=f"{ACCESS_PREFIX}jwt", detail="/api/v1/feedback"))
+        db.commit()
+        summary = usage.usage_summary(db, days=30)
+    finally:
+        db.close()
+    assert summary["active_orgs"] == 0 and summary["total_accesses"] == 0
 
 
 def test_usage_summary_counts_orgs_not_requests(monkeypatch):

@@ -1,7 +1,7 @@
 """파일럿 피드백 수집 — KPI③ (PMF) 의 유일한 입력 창구.
 
 인증 필수다. NPS 는 **누가 답했는지가 지표의 일부**라, 익명 응답을 받으면 공개 데모
-트래픽의 만족도가 B2B 파일럿의 PMF 로 둔갑한다(`services/usage` 가 익명을 안 세는
+트래픽의 만족도가 창업자 파일럿의 PMF 로 둔갑한다(`services/usage` 가 익명을 안 세는
 것과 같은 판단). 그래서 여기만 `get_current_principal` 을 쓴다.
 """
 from __future__ import annotations

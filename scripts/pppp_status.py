@@ -1413,13 +1413,15 @@ def _bar(pct: float, width: int = 20) -> str:
     return "█" * fill + "·" * (width - fill)
 
 
-# ─────────────────────────── KPI② (PMF) ───────────────────────────
-# 위 4트랙은 전부 KPI①(기술 완성도)이다. KPI②(B2B 파일럿 5~10건)는 **여기서 셀 수 없다** —
-# 파일럿 사용량은 산출물이 아니라 계정 DB 에 살고, 이 스크립트는 네트워크를 타지 않는다.
+# ─────────────────────── KPI③ 고객 검증 (PMF) ───────────────────────
+# 위 4트랙은 KPI①(실력)·배선 게이트다. KPI③ 고객 검증(창업자 파일럿 5~10곳 · 1인 조직)은
+# **여기서 셀 수 없다** — 파일럿 사용량은 산출물이 아니라 계정 DB 에 살고, 이 스크립트는 네트워크를 타지 않는다.
+# 번호: 2026-09-16 재정의 전에는 PMF 가 KPI② 였다. 지금은 ② = 표면 성능 · ③ = 고객 검증이고(CLAUDE.md),
+# 대상은 2026-09-13 주요 고객 재정의대로 「B2B」가 아니라 창업자·피벗/이전 사업자다(2026-10-19 정리).
 #
 # 그래서 퍼센트를 만들지 않는다. 대신 둘을 갈라 적는다:
 #   ① 계측이 **배선됐나** — 이건 소스에서 셀 수 있다(아래)
-#   ② 파일럿이 **실제로 몇인가** — 이건 `GET /api/v1/admin/usage` 로만 알 수 있다
+#   ② 파일럿이 **실제로 몇인가** — 이건 `GET /api/v1/admin/pilot-w4` 로만 알 수 있다
 # 이 구분을 안 하면 "게이트 100%" 를 보고 KPI 절반이 미착수라는 사실이 묻힌다
 # (docs/README.md §진행률 이 지적한 사각지대다).
 
@@ -1443,7 +1445,12 @@ def _pmf_instrumentation() -> list[tuple[bool, str]]:
         (_has(router, "track_access"),
          "분석 라우터에 계측 배선 (api/v1/router.py — 한 곳에 걸어 새 엔드포인트가 안 빠진다)"),
         (_has(admin, "/usage"),
-         "관측 창구 GET /api/v1/admin/usage (조직별 접근·active_orgs)"),
+         "관측 창구 GET /api/v1/admin/usage (조직별 접근·active_orgs — 30일 생존 창)"),
+        (_has(admin, "/pilot-w4") and _has(admin, "/pmf"),
+         "판정 창구 GET /api/v1/admin/pilot-w4 · /pmf (W4 사전등록 규칙 · NPS · 돈을 낼 의향)"),
+        # 2026-10-19: 피드백 제출이 분석 접근으로 세져 4주차 설문이 W4 「활성 주」가 됐다.
+        (_has(usage, "NON_ANALYSIS_PREFIXES"),
+         "피드백 제출은 분석 접근에서 뺀다 (services/usage.NON_ANALYSIS_PREFIXES — W4 규칙 ② 「분석 요청」)"),
         # 위 셋이 다 서 있어도 계정 DB 의 표가 안 생기면 파일럿은 가입조차 못 한다.
         # 스위트는 create_all 로 마이그레이션을 건너뛰므로 그 고장이 배포까지 안 보인다.
         (_has(migr_test, "command.check") and _has(migr_test, "command.upgrade"),
@@ -1451,22 +1458,57 @@ def _pmf_instrumentation() -> list[tuple[bool, str]]:
     ]
 
 
-def print_kpi2() -> None:
+def print_kpi3() -> None:
     checks = _pmf_instrumentation()
     done = sum(1 for ok, _ in checks if ok)
     print("\n" + "=" * 78)
-    print(f"KPI② PMF (B2B 파일럿 5~10건) — 위 진행률에 **포함되지 않는다**")
+    print("KPI③ 고객 검증 (창업자 파일럿 5~10곳 · 1인 조직) — 위 진행률에 **포함되지 않는다**")
     print(f"  계측 배선 {done}/{len(checks)}")
     for ok, label in checks:
         print(f"    {'✅' if ok else '⛔'} {label}")
     if done == len(checks):
         print("  ▶ 배선은 섰다. 다만 **배선 100% 는 파일럿 0 건과 양립한다** —")
-        print("    실제 파일럿 수·활성도는 이 스크립트가 아니라 다음으로 본다:")
-        print("      curl -H \"X-Admin-Token: $ADMIN_TOKEN\" .../api/v1/admin/usage")
-        print("    active_orgs 가 KPI② 목표(5~10)에 대응한다. 0 이면 둘 중 하나다:")
-        print("    ① 파일럿이 익명으로 쓰고 있다  ② 기록이 실패하고 있다(usage 경고 로그).")
+        print("    실제 파일럿 수·판정은 이 스크립트가 아니라 다음으로 본다:")
+        print("      curl -H \"X-Admin-Token: $ADMIN_TOKEN\" .../api/v1/admin/pilot-w4")
+        print("    파일럿 **건수**는 W4 활성(가입일부터 28일 중 서로 다른 2주 이상 분석 접근)으로 센다.")
+        print("    /admin/usage 의 active_orgs(30일 안 1건)는 생존 창이라 더 느슨하다. 0 이면 둘 중 하나다:")
+        print("    ① 파일럿이 로그인 없이 쓰고 있다(5판 흐름은 저장할 때만 로그인)  ② 기록이 실패하고 있다.")
     else:
         print("  ▶ 계측이 덜 섰다 — 파일럿을 받아도 무엇을 얼마나 썼는지 셀 수 없다.")
+
+
+# ─────────────────── KPI① 창업자 답 — 빈 층 판정 실력 ───────────────────
+# 창업자 앱의 첫 약속(「계약하기 전에 어느 건물 몇 층이 비었는지」)이 맞는가를 재는 축이다(2026-10-19 추가).
+# 판정 규칙은 라벨이 0/458 인 상태에서 사전등록했다 → data/validation/score_floor_labels.py §판정 ·
+# docs/finding-kpi-identity-alignment-2026-10-19.md §4. 트랙 진행률에는 섞지 않는다 — Page 100% 는
+# 「게이트 배선이 끝났다」는 뜻이지 「빈 층 목록이 맞다」는 뜻이 아니고, 그 차이를 이 블록이 따로 말한다.
+
+def _floor_kpi() -> dict:
+    """사전등록 표본의 빈 층 판정 — 채점기를 그대로 부른다. 못 부르면 그 사실을 적는다(없음과 구분)."""
+    try:
+        sys.path.insert(0, str(ROOT))
+        from data.validation.score_floor_labels import _OUT, KPI_SAMPLE_TAG, score
+        res = score(_OUT / f"floor_sample_{KPI_SAMPLE_TAG}")
+    except Exception as exc:
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"}
+    return {"available": True, "sample": res["sample"], "answered": res["answered"],
+            "drawn": res["drawn"], "sample_verdict": res["verdict"], "gate": res["gate"],
+            "measured_by": f"python -m data.validation.score_floor_labels --tag {KPI_SAMPLE_TAG}"}
+
+
+def print_floor_kpi(fk: dict) -> None:
+    print("\n" + "=" * 78)
+    print("KPI① 창업자 답 — 빈 층 판정 실력 (사전등록 2026-10-19) — 위 진행률에 **포함되지 않는다**")
+    if not fk["available"]:
+        print(f"  ⚠ 판정 실패 — {fk['reason']} (표본이 없다는 뜻이 아니다)")
+        return
+    g = fk["gate"]
+    detail = (f"실력 {g['lift_pp']:+.1f}%p [{g['ci95_pp'][0]:+.1f}, {g['ci95_pp'][1]:+.1f}]"
+              if "lift_pp" in g else g["reason"])
+    print(f"  {fk['sample']} · 응답 {fk['answered']}/{fk['drawn']} → {g['verdict']} — {detail}")
+    print("  기준: 화면 빈 층의 엄격 정밀도 − 강한 무정보 기준(틀 전체·층 띠 하나의 층 공실률 중 높은 쪽)")
+    if fk["answered"] == 0:
+        print("  ▶ 라벨은 사람 몫이다(labels.csv · GUIDE.md). 판정 규칙은 라벨 전에 고정했다.")
 
 
 def main() -> int:
@@ -1483,13 +1525,17 @@ def main() -> int:
                            "observe": g.observe,
                            "detail": g.detail, "evidence": g.evidence} for g in t.gates],
             } for t in tracks],
-            # KPI② 는 트랙이 아니다 — 퍼센트를 만들면 KPI① 평균에 섞여 사각지대가 묻힌다.
-            "kpi2_pmf": {
+            # KPI③ 는 트랙이 아니다 — 퍼센트를 만들면 트랙 평균에 섞여 사각지대가 묻힌다.
+            # 키 이름은 2026-10-19 에 kpi2_pmf → kpi3_pmf (09-16 번호 재정의를 따라감). 저장된 옛 스냅샷
+            # (career_docs/…/status_pppp.json)은 기록이라 그대로 둔다.
+            "kpi3_pmf": {
                 "in_progress_pct": False,
                 "instrumentation": [{"ok": ok, "what": what}
                                     for ok, what in _pmf_instrumentation()],
-                "measured_by": "GET /api/v1/admin/usage (active_orgs)",
+                "measured_by": "GET /api/v1/admin/pilot-w4 (건수·판정) · /admin/pmf · /admin/usage (생존 창)",
             },
+            # 창업자 답의 첫 축 — 진행률에 섞지 않는다(위 §KPI① 창업자 답).
+            "kpi1_floor_vacancy": {"in_progress_pct": False, **_floor_kpi()},
         }, ensure_ascii=False, indent=1))
         return 0
 
@@ -1533,7 +1579,7 @@ def main() -> int:
         obs = [(t.name, g) for t in tracks for g in t.gates if g.observe]
         print("⚠ 네 트랙 모두 100% — **게이트 배선이 끝났다는 뜻이지 제품이 끝났다는 "
               "뜻이 아니다.** 이 숫자 밖에 있는 것:")
-        print("   · KPI② PMF(B2B 파일럿) — 아래 블록. 진행률에 포함되지 않는다")
+        print("   · KPI③ 고객 검증(창업자 파일럿) · KPI① 빈 층 판정 — 아래 블록. 진행률에 포함되지 않는다")
         for name, g in obs:
             print(f"   · [{name}] {g.name} — 현재 {g.value:.1%} (상한 판정, 평균에서 제외)")
         print("   · 서빙 보류 도시 — measured_pages.SERVED_CITIES 밖의 거점은 "
@@ -1547,7 +1593,8 @@ def main() -> int:
     tot = sum(len(t.gates) for t in tracks)
     print(f"게이트 {tot}개 중 선언 {dec}개 — 선언이 많을수록 이 숫자를 믿을 이유가 줄어든다.")
     print("가중치는 두지 않았다(전부 동일 가중). 평균이 아니라 게이트를 보고 판단할 것.")
-    print_kpi2()
+    print_floor_kpi(_floor_kpi())
+    print_kpi3()
     return 0
 
 
