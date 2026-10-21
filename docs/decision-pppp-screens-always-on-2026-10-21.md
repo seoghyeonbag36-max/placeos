@@ -16,7 +16,7 @@
 | 근본 원인 | 설계서 5판 §10 **C2**(「흐름에서 고른 상권을 이어받는다」)가 구현되지 않아 `#/explore` 가 늘 가로수길·Platform 으로 열렸다. PR #141 은 그 불편을 PPPP 화면이 아니라 **진입로를 돌려서** 풀었다 |
 | 잠복 결함 | 복구 중 실화면에서 발견 — 흐름을 주소로 바로 열면(새로고침 · 로그인 사용자의 첫 화면) 허브 탭 「지도」가 `#/explore` → `#/home` 으로 **튕겼다**(5판부터). 흐름 앱이 `#/explore` 를 「모르는 주소」로 보고 되감았다 → §2 |
 | 복구 | 진입로 셋을 `#/explore` 로 되돌리고, 흐름 안 지도를 걷고, 랜딩 절을 펼쳤다. C2 를 구현해 우회할 이유를 없앴고, 튕김을 고쳤다 |
-| 고정 | CLAUDE.md · AGENTS.md(루트·프론트) · 스킬 6개 · 설계서 5판 §10 · 코드 주석 + **가드 테스트**(빨개지면 CI 가 배포를 막는다) + **실화면 검사** `scripts/pppp_screens_check.py`(jsdom 이 못 보는 것) |
+| 고정 | CLAUDE.md · AGENTS.md(루트·프론트) · 스킬 7개 · 설계서 5판 §10 · 코드 주석 + **가드 테스트**(빨개지면 CI 가 배포를 막는다) + **실화면 검사** `scripts/pppp_screens_check.py`(jsdom 이 못 보는 것) |
 
 ## 1. 무엇이 언제 사라졌나
 
@@ -108,7 +108,7 @@ R2·R3 버튼은 `go()` 가 JS 안에서 이벤트를 쏘아 두 갱신이 한 �
 | 가드 테스트(CI) | `apps/frontend/src/ppppScreens.test.tsx` · 8건 | ① 로그인 없이 레일 네 트랙·PPPP 순서 ② 네 버튼이 각자 **자기 구현 모듈**을 그림(네 모듈을 표식으로 대신 그려 배선을 본다 — 같은 이름표의 빈 대체 화면이 걸린다) ③ 허브 탭(홈·내 정보 × 상권 고름/안 고름) href ④ R2 클릭 → 레일·Platform ⑤ R3 클릭 → 레일·Platform ⑥ 흐름 앱이 `#/explore` 를 되감지 않음 ⑦ C2 상권 이어받기(Platform·Page 가 받은 상권) ⑧ 랜딩 네 질문이 접힌 `<details>` 밖 |
 | 배포 차단 | `.github/workflows/deploy.yml`(`workflow_run`) | CI 가 전부 초록일 때만 Cloud Run 으로 나간다 — 가드가 빨개지면 그 커밋은 프로덕션에 못 나간다 |
 | 실화면 검사(/verify) | `scripts/pppp_screens_check.py` | jsdom 이 원리상 못 보는 **CSS 숨김**과 **브라우저가 낸 이벤트 순서**를 실제 브라우저로 잰다 — P1 레일이 보임 · P2 네 화면이 보임 · P3 진입로 넷을 **새 페이지로 주소를 바로 연 뒤** 눌러 2.5초 뒤에도 `#/explore` · P4 C2 · P5 랜딩. 흐름 · App · 랜딩 · 레일을 건드린 변경은 /verify 에서 돌린다 |
-| 지침 | 루트 `CLAUDE.md` 「PPPP 화면 보존 규칙」 · `AGENTS.md`(머리말 · §4 Codex 담당 밖) · `apps/frontend/AGENTS.md` · 스킬 `design`·`frontend-dev`·`platform`·`page`·`posting`·`program` · 설계서 5판 §10 | 사람과 에이전트(Claude Code · Codex)가 읽는 규칙 |
+| 지침 | 루트 `CLAUDE.md` 「PPPP 화면 보존 규칙」 · `AGENTS.md`(머리말 · §4 Codex 담당 밖) · `apps/frontend/AGENTS.md` · 스킬 `design`·`frontend-dev`·`platform`·`page`·`posting`·`program`·`verify`(실화면 검사 절차) · 설계서 5판 §10 | 사람과 에이전트(Claude Code · Codex)가 읽는 규칙 |
 | 코드 주석 | `App.tsx`(NAV · EXPLORE_HASH · 상권 이어받기) · `flow/ui.tsx`(TABS) · `flow/route.ts` · `flow/FlowApp.tsx` · R2·R3 버튼 · `Landing.tsx`(머리말 규칙 5 · `#how`) | 고치려는 자리에서 바로 보이게 |
 | 메모리 | Claude Code 프로젝트 메모리(feedback) | 다음 세션이 같은 실수를 하지 않게 |
 
