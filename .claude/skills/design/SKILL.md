@@ -23,6 +23,9 @@ description: PPPP 네 트랙 산출물을 하나의 앱으로 묶는 디자인�
 - 소비: `apps/frontend/src/lib/api.ts` 전체 (`listDistricts` / `getDistrict` 등)
 
 ## 통합 규칙
+- ⛔ **PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙)**: Platform·Page·Posting·Program 의 구현 화면은 절대 화면에서
+  제외하지 않는다. 간소화·재설계·디자이너 피드백 반영 때도 레일의 네 트랙 · 흐름의 「지도」 → `#/explore` · 랜딩의 네 질문은
+  남긴다(접힌 `<details>` 로 감추는 것도 제외다). 새 화면은 **더하지, 대신하지 않는다.** 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
 - 대시보드 1화면에서 4트랙을 본다: 감성(Platform)·히트맵(Page)·입점(Posting)·마케팅(Program).
 - 색상은 **토큰만** 사용(하드코딩 금지). 네이버 green은 네이버 연동 맥락만, brand teal은 PlaceOS 고유 기능.
 

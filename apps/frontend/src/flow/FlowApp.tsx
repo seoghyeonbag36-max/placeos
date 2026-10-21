@@ -5,6 +5,8 @@
  * 4~6개 겹쳐 있었다. 5판은 PPPP 순서 그대로 **한 화면에 한 질문씩** 묻는다:
  *   ① 상권(어떤 플랫폼인가) → ② 빈 자리(어떤 page) → ③ 비용(어느 가격대로 posting) → ④ 작게 확인(어떤 program)
  * 종전 지도 화면은 지우지 않고 「지도」 탭(#/explore)으로 남는다(App.tsx).
+ * ⛔ 그 지도 탐색이 PPPP 네 구현 화면이다 — 흐름의 어떤 「지도」도 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙 ·
+ *   CLAUDE.md). 10-18 에 흐름 안 지도로 갈아끼웠다가 네 화면으로 가는 길이 UI 에서 사라졌다.
  *
  * 이 컴포넌트가 하는 일: 주소 → 화면 · 답 저장 · 로그인 시트(저장·AI 생성에서만) · 종전 계정 창 · 토스트 ·
  * 로그인하는 순간 흐름 답을 계정의 「내 사업」으로 옮기기.
@@ -14,7 +16,7 @@ import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { getAuthProviders, getBusinessWorkspace, saveBusinessWorkspace, type AuthProviders } from "@/lib/api";
 import { FlowContext, forgetResume, loginTitle, rememberResume, type FlowCtx, type LoginReason, type ResumeKind } from "./context";
 import { FlowData, FlowDataContext } from "./data";
-import { parseRoute, replace, useHash, type Route } from "./route";
+import { isFlowHash, parseRoute, replace, useHash, type Route } from "./route";
 import { SavedProvider } from "./saved";
 import { businessToFlow, clearFlow, emptyFlow, flowToBusiness, loadFlow, saveFlow, type FlowState } from "./state";
 import { Sheet, Toast, type ToastMsg } from "./ui";
@@ -43,9 +45,7 @@ function Screen({ route }: { route: Route }) {
     case "district": return <District id={route.param!} />;
     case "rent-cap": return <RentCap />;
     case "spaces": return <Spaces />;
-    case "spaces-map": return <Spaces mapView />;
     case "space": return <SpaceDetail id={route.param!} />;
-    case "space-map": return <SpaceDetail id={route.param!} mapView />;
     case "premium": return <Premium />;
     case "payback": return <Payback />;
     case "budget": return <Budget />;
@@ -78,8 +78,13 @@ export default function FlowApp({ token }: { token: string | null }) {
     else saveFlow(state);
   }, [state]);
 
-  // 모르는 흐름 주소(지도 탐색은 App 이 가른다) → 홈
-  const unknown = !route || route.name === "explore";
+  // 모르는 흐름 주소 → 홈. 단 이 앱이 맡지 않는 주소는 되감지 않는다 — 지도 탐색(#/explore)과 흐름 밖 해시(#login · #admin …),
+  // 그리고 로그인 전의 빈 해시(랜딩)는 App 이 가른다(App 이 흐름을 내는 빈 해시는 로그인했을 때뿐이다).
+  // 왜: 브라우저가 낸 hashchange(탭의 <a href> · 주소창 · 뒤로가기)는 리스너 사이마다 렌더가 끼어(React 는 hashchange 를
+  //   동기로 처리한다), 흐름을 주소로 바로 열어 이 앱의 리스너가 App 보다 먼저 등록돼 있으면 이 앱이 새 주소를 먼저 본다.
+  //   그때 홈으로 되감으면 App 은 #/home 만 보게 된다 — 10-21 실측: 허브 탭 「지도」가 #/explore → #/home 으로 튕겨
+  //   PPPP 네 화면이 열리지 않았다(PPPP 화면 보존 규칙 · src/ppppScreens.test.tsx).
+  const unknown = !route && (isFlowHash(hash) || (!!token && (hash === "" || hash === "#")));
   useEffect(() => { if (unknown) replace("/home"); }, [unknown]);
 
   // 「이어서」가 갈 마지막 화면 — 허브는 빼고 기록한다(렌더 중 파생 상태 갱신: 이펙트 안 setState 를 피한다)

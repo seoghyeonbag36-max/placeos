@@ -36,7 +36,8 @@ describe("랜딩 — 말하는 것", () => {
 
   it("네 질문이 PPPP 순서(Platform → Page → Posting → Program)로 이어진다", () => {
     render(<Landing />);
-    const steps = within(document.getElementById("how")!).getAllByRole("listitem", { hidden: true });
+    // 숨김을 허용하는 { hidden: true } 는 붙이지 않는다(10-17 절을 접으며 붙었고 10-21 에 걷었다). 접힘 자체는 src/ppppScreens.test.tsx 가 본다
+    const steps = within(document.getElementById("how")!).getAllByRole("listitem");
     expect(steps.map((li) => li.getAttribute("data-track"))).toEqual(["platform", "page", "posting", "program"]);
   });
 

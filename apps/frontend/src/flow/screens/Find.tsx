@@ -410,7 +410,8 @@ export function District({ id }: { id: string }) {
       )}
       <p className="fl-source">카카오 플레이스 · 서울시 상권분석{rent.status === "ready" && rent.data.quarter ? ` · R-ONE ${rent.data.quarter}` : " · R-ONE"} · 건축물대장</p>
       {identity?.archetype_rule && <Details><p className="fl-note">상권 유형은 이렇게 정했어요: {identity.archetype_rule}</p></Details>}
-      <div className="fl-actions"><TextButton onClick={() => go("/spaces/map")}>지도에서 자리 보기</TextButton></div>
+      {/* PPPP 지도 탐색으로 — 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙) */}
+      <div className="fl-actions"><TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton></div>
     </FlowScreen>
   );
 }

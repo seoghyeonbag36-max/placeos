@@ -11,6 +11,13 @@ Promotion 을 나눠 가졌다):
 - **Price ▶ Posting** — 어느 가격대의 page 를 posting 할까 (입점 솔루션·3-Tier·회수기간)
 - **Promotion ▶ Program** — 어떤 홍보 program 을 돌릴까 (마케팅 자동화)
 
+> ⛔ **PPPP 화면 보존 규칙 (2026-10-21 사용자 확정 — 절대 규칙)** — Platform · Page · Posting · Program 의 구현 화면은
+> 절대 화면에서 제외하지 않는다. 구현 화면 = `#/explore` 레일의 네 트랙(PlatformConsole · MapShell · PostingConsole ·
+> CampaignStudio). 화면·레일 버튼·진입로(흐름의 허브 탭 「지도」 · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」 →
+> 늘 `#/explore`)·랜딩의 네 질문(`#how`)을 지우거나 · 숨기거나(접힌 `<details>` 포함) · 다른 화면으로 돌리거나 갈아끼우지 않는다.
+> 가드 `apps/frontend/src/ppppScreens.test.tsx` 를 지우거나 고쳐서 통과시키지 않는다. 흐름·App·랜딩·레일을 건드렸으면
+> 실화면 검사 `scripts/pppp_screens_check.py` 결과(종료코드 0)도 함께 낸다. 상세는 [CLAUDE.md](CLAUDE.md) 같은 이름의 절.
+
 > 이 문서는 Codex 등 외부 에이전트용 요약이다. 설계 배경·판단 이력은
 > [CLAUDE.md](CLAUDE.md) 와 [docs/placeos-vibe-build-sequence.md](docs/placeos-vibe-build-sequence.md) 에 있다.
 
@@ -151,6 +158,10 @@ Claude Code와 병행 작업 중이다. 아래는 **설계·판단 영역이라 
   (`floor_approx` · `expos_units`(집합건물) · `polygon_only`)
 - 브랜치 머지 판단
 - 상위 디렉터리(`../`)의 무엇이든 — 특히 `../archive/`
+- **PPPP 네 구현 화면과 그 진입로**(`App.tsx` 레일 · 흐름의 「지도」 진입로 셋 · 랜딩 `#how`)를 빼거나 · 숨기거나 ·
+  다른 화면으로 돌리는 변경, 그리고 `apps/frontend/src/ppppScreens.test.tsx` 의 수정·삭제 — 2026-10-21 사용자 확정
+  규칙이다. 「지도를 누르면 보던 것이 이어지지 않는다」 같은 작업을 받아도 **진입로를 돌리지 말고 보고한다** —
+  10-18 PR #141(`fix/*`)이 정확히 그렇게 해서 네 화면이 UI 에서 사라졌다
 
 ## 5. 작업 규약
 

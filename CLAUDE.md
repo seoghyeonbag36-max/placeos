@@ -22,6 +22,26 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 
 한 줄로: **어떤 플랫폼인가 → 어떤 page 를 놓을까 → 어느 가격대로 posting 할까 → 어떤 program 으로 통하는지 확인할까.**
 
+### ⛔ PPPP 화면 보존 규칙 (2026-10-21 사용자 확정 — 절대 규칙)
+**Platform · Page · Posting · Program 의 구현 화면은 절대 화면에서 제외하지 않는다.**
+
+- **구현 화면** = 지도 탐색(`#/explore` · `App.tsx` 의 `WorkspaceApp`)의 네 트랙 — Platform `PlatformConsole` ·
+  Page `MapShell` · Posting `PostingConsole` · Program `CampaignStudio`. 좌측 레일에 PPPP 순서로 늘 넷이 있고, 로그인 없이도 열린다.
+- **「제외」로 보는 것 — 전부 금지**: ① 화면이나 레일 버튼을 지우거나 숨김(조건부 렌더 · `hidden` · 접힌 `<details>` 포함)
+  ② 진입로를 다른 곳으로 돌림 — 흐름(5판)의 허브 탭 「지도」 · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」는 늘 `#/explore`
+  ③ 다른 화면(흐름 안 지도 등)으로 갈아끼움 ④ 랜딩의 PPPP 네 질문(`#how`)을 빼거나 접음 ⑤ 로그인을 요구해 막음
+- 새 화면이 같은 질문에 더 잘 답하더라도 **더하지, 대신하지 않는다.** 진입로가 불편하면(예: 상권이 안 이어짐) 진입로를
+  돌리지 말고 PPPP 화면 쪽을 고친다 — 10-21 에 `#/explore` 가 흐름에서 고른 상권으로 열리게 한 것(설계서 5판 §10 C2)이 그 예다.
+- **가드**: `apps/frontend/src/ppppScreens.test.tsx` — 빨개지면 CI 가 배포를 막는다(Deploy 는 CI 전부 통과 뒤). 가드를 지우거나 ·
+  `skip` 하거나 · `{ hidden: true }` 로 숨김을 통과시키거나 · 기대값을 새 화면에 맞춰 바꾸는 것도 위반이다.
+  jsdom 이 못 보는 CSS 숨김 · 브라우저 이벤트 순서는 **실화면 검사** `py -3.11 scripts/pppp_screens_check.py`(백엔드+Vite 를
+  띄운 뒤)가 본다 — 흐름 · App.tsx · 랜딩 · 레일을 건드린 변경은 /verify 에서 돌린다. 10-21 의 「탭 「지도」가 홈으로 튕김」은
+  테스트 341건이 초록인 채 이 검사에서만 잡혔다.
+- 바꿔야 할 때: 사용자의 **명시 승인**을 받고 이 절 · 가드 · 결정 문서를 **같은 PR** 에서 고친다. Codex 는 손대지 않고 보고한다(AGENTS.md §4).
+- 경위: 10-17 랜딩 간소화(691c7fd)가 네 질문을 접힌 `<details>` 에 넣고, 10-18 PR #141 이 「지도」 진입로 셋을 흐름 안 지도
+  (`#/spaces/map`)로 돌려 네 화면으로 가는 UI 길이 0 이 됐다(주소창에 `#/explore` 를 쳐야만 열렸다) → 10-21 복구
+  → [docs/decision-pppp-screens-always-on-2026-10-21.md](docs/decision-pppp-screens-always-on-2026-10-21.md)
+
 ## Active Projects
 | 이름 | 내용 |
 |------|------|
@@ -296,6 +316,8 @@ python scripts/check_application.py --doc <원고> --require-complete   # 제출
 - **언어**: 응답·주석·문서는 한국어, 기술 용어는 영문 병기.
 - **Backend**: FastAPI 라우터는 `app/api/v1/`에 도메인별로 분리. 스키마는 `app/schemas/`, DB 모델은 `app/models/`, 비즈니스 로직은 `app/services/`. 타입 힌트 필수.
 - **Frontend**: 함수형 컴포넌트 + 훅. API 호출은 `src/lib/api.ts`로 일원화. `@/` 경로 별칭 사용.
+  ⛔ PPPP 네 구현 화면·레일·진입로(흐름의 「지도」 셋 → `#/explore`)·랜딩 네 질문은 빼거나 숨기거나 돌리지 않는다
+  (위 §PPPP 화면 보존 규칙 · 가드 `src/ppppScreens.test.tsx`).
 - **ML**: 모델은 `ml/models/`, 학습은 `ml/training/`, 서빙 래퍼는 `ml/inference/`. 실험은 MLflow로 추적.
 - **Data**: 모든 파이프라인은 Bronze→Silver→Gold 3계층 흐름을 지킨다. 크롤러는 `data/crawlers/`.
 - **API 설계**: 엔드포인트는 `/api/v1/...` 규약 (buildings, commercial-districts, ai, heatmap, marketing).

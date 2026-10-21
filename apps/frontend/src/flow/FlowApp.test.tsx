@@ -85,7 +85,7 @@ beforeEach(() => {
 afterEach(() => { clearToken(); window.sessionStorage.clear(); });
 
 describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
-  it("목록·지도 필터 유지 — 같은 층 결과와 정렬로 돌아온다", async () => {
+  it("목록 필터 유지 — 자리 상세에 다녀와도 같은 층 결과와 정렬로 돌아온다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
     open("/spaces");
@@ -93,28 +93,13 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     await screen.findByRole("heading", { name: "빈 자리가 2곳 있어요" });
     fireEvent.click(screen.getByRole("button", { name: "확정만" }));
     fireEvent.change(screen.getByRole("combobox", { name: "정렬" }), { target: { value: "area" } });
-    fireEvent.click(screen.getByRole("button", { name: "지도" }));
-    await screen.findByRole("button", { name: "목록" });
-    expect(window.location.hash).toBe("#/spaces/map");
-    expect(screen.getByRole("heading", { name: "빈 자리가 1곳 있어요" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "확정만" }).getAttribute("aria-pressed")).toBe("true");
-    fireEvent.click(screen.getByRole("button", { name: "목록" }));
-    await screen.findByRole("button", { name: "지도" });
-    expect((screen.getByRole("combobox", { name: "정렬" }) as HTMLSelectElement).value).toBe("area");
-  });
-
-  it("선택 층 지도 진입 — 상권 순위로 돌아가지 않는다", async () => {
-    stub();
-    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
-    open("/space/vfu-B2-2");
-    render(<FlowApp token={null} />);
-    fireEvent.click(await screen.findByRole("button", { name: "이 자리 지도에서 보기" }));
-    await screen.findByRole("button", { name: "자리 상세 보기" });
-    expect(window.location.hash).toBe("#/space/vfu-B2-2/map");
-    expect(screen.getByRole("heading", { name: "B2 건물 2층" })).toBeTruthy();
-    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceId).toBe("vfu-B2-2"));
+    await screen.findByRole("heading", { name: "빈 자리가 1곳 있어요" });
+    fireEvent.click(screen.getByText("B1 건물").closest("button")!);
+    await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" });
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
-    await screen.findByRole("button", { name: "이 자리 지도에서 보기" });
+    expect(await screen.findByRole("heading", { name: "빈 자리가 1곳 있어요" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "확정만" }).getAttribute("aria-pressed")).toBe("true");
+    expect((screen.getByRole("combobox", { name: "정렬" }) as HTMLSelectElement).value).toBe("area");
   });
 
   it("F-01·F-03 로그인 없이 두 번 눌러 상권 순위를 본다 — 선택지를 누르면 바로 다음 화면", async () => {
@@ -318,6 +303,32 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     const decision = screen.getByText("25명 아래면 다른 상권도 봐요");
     const online = screen.getByText("손님 모으기 1");
     expect(decision.compareDocumentPosition(online) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("주소 다툼 — 모르는 흐름 주소만 홈으로 되감고, 흐름 밖 해시와 로그인 전 빈 해시(랜딩)는 App 에 맡긴다", async () => {
+    // 브라우저가 낸 hashchange 는 리스너 사이마다 렌더가 끼어 흐름 앱이 App 보다 먼저 새 주소를 볼 수 있다(10-21 실측).
+    // 흐름 앱만 그려 그 상황을 만든다. 되감으면 App 은 새 주소를 영영 못 본다.
+    stub();
+    const navigate = (hash: string) => act(() => {
+      window.history.pushState(null, "", `/${hash}`);
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    open("/home");
+    const view = render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { level: 1 });
+    for (const hash of ["#/explore", "#login", "#admin", ""]) {
+      navigate(hash);
+      await new Promise((r) => setTimeout(r, 30));
+      expect(window.location.hash, hash || "(빈 해시)").toBe(hash);
+    }
+    // 10-18 의 흐름 안 지도 주소는 이제 모르는 흐름 주소다
+    navigate("#/spaces/map");
+    await waitFor(() => expect(window.location.hash).toBe("#/home"));
+    view.unmount();
+    // 로그인했으면 빈 해시는 홈이다 — App 이 그때만 흐름을 낸다
+    window.history.replaceState(null, "", "/");
+    render(<FlowApp token="tok" />);
+    await waitFor(() => expect(window.location.hash).toBe("#/home"));
   });
 
   it("홈은 네 단계 진행을 보이고, 로그인 전에는 저장 대신 로그인 버튼을 둔다", async () => {

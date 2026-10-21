@@ -12,6 +12,7 @@
  *   2. 적지 않는 것: 공실 예측 정확도(LSTM 두 축은 확인 대기) · 업종 추천 적중률 · 고객 수·파일럿 실적 · 요금.
  *   3. 「못 하는 것」 절을 빼지 않는다. 시범 운영 단계에서 가장 믿을 만한 문장이 거기에 있다.
  *   4. 금지 표현: AI 기반 · 혁신적인 · 원스톱 · 올인원 · 차세대 · 최적의 · 완벽한 (tests/Landing.test.tsx 가 잠근다).
+ *   5. PPPP 네 질문(#how) 절을 빼거나 접지 않는다 — 2026-10-21 PPPP 화면 보존 규칙(src/ppppScreens.test.tsx 가 잠근다).
  *
  * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). 「시작하기」는 질문 흐름의 첫 질문(`#/start`, 화면설계서 5판 —
  * 로그인 없이 끝까지 간다), 「로그인」은 `#login`(App 이 Home 을 낸다).
@@ -154,23 +155,24 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-section lp-section-alt lp-detail-section" id="how" aria-labelledby="lp-how">
+        {/* ⛔ PPPP 네 질문은 접지 않는다(2026-10-21 PPPP 화면 보존 규칙). 10-17 간소화가 이 절을 「기능 자세히 보기」
+            <details> 안에 넣어 첫 화면에서 Platform·Page·Posting·Program 이 사라졌고, 10-21 에 되돌렸다. */}
+        <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
-            <details className="lp-details">
-              <summary id="lp-how">기능 자세히 보기</summary>
-              <ol className="lp-steps">
-                {STEPS.map((s, i) => (
-                  <li key={s.track} className="lp-step" data-track={s.track}>
-                    <span className="lp-step-badge" aria-hidden>{s.icon}</span>
-                    <div>
-                      <p className="lp-step-name">{i + 1}. {s.name}</p>
-                      <h3>{s.question}</h3>
-                      <p>{s.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </details>
+            <h2 id="lp-how">네 가지 질문이 한 줄로 이어집니다</h2>
+            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다.</p>
+            <ol className="lp-steps">
+              {STEPS.map((s, i) => (
+                <li key={s.track} className="lp-step" data-track={s.track}>
+                  <span className="lp-step-badge" aria-hidden>{s.icon}</span>
+                  <div>
+                    <p className="lp-step-name">{i + 1}. {s.name}</p>
+                    <h3>{s.question}</h3>
+                    <p>{s.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 

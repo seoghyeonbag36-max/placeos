@@ -14,3 +14,6 @@ PlaceOS 프론트엔드에 UI를 추가한다. 대상: 호출 인수(추가할 U
    Mapbox 를 새로 끌어오지 말 것 — 2026-08-25 에 의존성에서 뺐다.
    **Three.js/@react-three/fiber 도 마찬가지다** — 2026-09-05 에 뺐다(feature-posting.md §0-V).
 4. 경로 별칭 `@/` 사용. 작업 후 `npm run build`로 타입체크.
+5. ⛔ **PPPP 네 구현 화면은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정). `App.tsx` 레일의 Platform·Page·Posting·Program,
+   흐름의 「지도」 진입로 셋(→ `#/explore`), 랜딩의 네 질문(`#how`)을 지우거나 · 숨기거나 · 다른 화면으로 돌리지 않는다.
+   UI 를 붙여 더 나은 길을 내더라도 **더하지, 대신하지 않는다.** 가드 `src/ppppScreens.test.tsx` → `CLAUDE.md` 「PPPP 화면 보존 규칙」.

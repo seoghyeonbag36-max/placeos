@@ -17,7 +17,7 @@ describe("탐색 상태 연속성", () => {
   it("뒤로 가기 위치 복원 — 이동 전 위치를 저장하고 원래 기록에서 복원한다", async () => {
     window.history.replaceState(null, "", "/#/spaces");
     document.documentElement.scrollTop = 360;
-    go("/spaces/map");
+    go("/space/vfu-B1-1");
     window.history.back();
     await waitFor(() => expect(window.location.hash).toBe("#/spaces"));
     expect(window.history.state.flowScroll).toBe(360);

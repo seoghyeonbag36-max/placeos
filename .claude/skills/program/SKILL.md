@@ -21,6 +21,8 @@ description: PPPP 트랙 — Program(예비창업자·검증하려는 기창업�
 - 산출물 세 벌: **online(모객, 창업자 단독)** · **offline(자리·상권 연계, 건물주·상인회와 함께)** ·
   **signals(검증 지표 = 지표·측정 방법·목표선·기각 조건)**. 지표가 결론이다.
 - 윤리 기준(필수): **Humanistic Authority** — 균형(Balance)·공생(Symbiosis)·공감(Empathy).
+- ⛔ **이 트랙의 구현 화면(`CampaignStudio` · `#/explore` 레일 「Program」)은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정
+  PPPP 화면 보존 규칙). 흐름(5판)의 「작게 확인」 화면이 있어도 대신하지 않는다. 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
 
 ## 입력 계약 — 세 층, 따로 싣는다
 | 층 | 출처 | 등급 |

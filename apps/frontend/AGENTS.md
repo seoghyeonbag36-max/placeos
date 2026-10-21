@@ -5,13 +5,21 @@
 ## 구조
 
 ```
-src/pages/       화면 (MapShell · PlatformConsole · PostingConsole · ProgramStudio · PageDashboard(#board) · AdminCoverage(#admin))
+src/pages/       화면 (PPPP 네 구현 화면: PlatformConsole · MapShell(Page) · PostingConsole · CampaignStudio(Program) — #/explore 레일 ·
+                 Landing · PageDashboard(#board) · AdminCoverage(#admin))
+src/flow/        질문 흐름(화면설계서 5판 · `#/…`) — 「지도」 진입로는 늘 PPPP 지도 탐색(#/explore)으로 간다
 src/components/  공용 컴포넌트 (MapHost · TrackMapFrame · useMapMarkers · BuildingViewer · DistrictPicker)
 src/lib/         api.ts(백엔드 호출) · naverMap.ts(지도·거리뷰) · hubBoundary.ts
 src/design/      디자인 토큰 + 토큰 기반 컴포넌트
 ```
 
 ## 규칙
+
+- ⛔ **PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙)** — Platform·Page·Posting·Program 의 구현 화면은 절대 화면에서
+  빼지 않는다. `App.tsx` 의 `NAV`(레일 네 트랙)에서 빼거나 숨기지 않고, 흐름의 「지도」 진입로 셋(`flow/ui.tsx` 허브 탭 ·
+  `flow/screens/Find.tsx` 상권 소개 「지도에서 자세히」 · `flow/screens/Space.tsx` 빈 자리 목록 「지도」)은 늘 `#/explore` 로 보낸다.
+  흐름 안에 지도를 따로 두어 그 자리를 대신하지 않고, 랜딩의 네 질문(`#how`)을 접지 않는다. 가드 `src/ppppScreens.test.tsx` 를
+  지우거나 · `skip` 하거나 · `{ hidden: true }`·기대값 수정으로 통과시키지 않는다 → 루트 CLAUDE.md 같은 이름의 절
 
 - **네 트랙 화면은 전부 지도(MapHost) 위 오버레이다**(2026-09-13). Platform·Posting·Program 은 `TrackMapFrame` 패널 안에 뜨고,
   지도 표식은 `useMapMarkers`/`useFitMap` 으로만 그린다 — 리스너·오버레이를 같은 수명으로 걷는 규칙이 거기 있다
@@ -48,3 +56,10 @@ cd apps/frontend; npm run test     # vitest — 지도 SDK·fetch 는 전역 목
 테스트는 대상 옆에 `*.test.tsx` 로 둔다. 실제 지도·실제 백엔드 검증은 `/verify` 몫이다.
 
 `npm run dev` 는 Vite 프록시로 백엔드를 부른다 — 화면이 비면 백엔드가 떠 있는지부터 본다.
+
+흐름(`src/flow/`) · `App.tsx` · 랜딩 · 레일을 건드렸으면 백엔드+Vite 를 띄운 채 실화면 검사도 돌린다(PPPP 화면 보존 규칙 —
+jsdom 이 못 보는 CSS 숨김·브라우저 이벤트 순서):
+
+```powershell
+$env:PYTHONIOENCODING="utf-8"; py -3.11 ..\..\scripts\pppp_screens_check.py   # 종료코드 0 이어야 한다
+```
