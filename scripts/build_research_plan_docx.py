@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """PlaceOS 2개년 연구계획서(석사과정) .docx 생성기.
 
-원고는 career_docs/placeos/10_research_plan_2y.md 하나다. 이 스크립트는 그 Markdown 을 읽어
-Word 로 옮기고 그림 셋(실력 · 연구 틀 · 일정)을 그린다. 문장이나 수치를 고치려면 원고를 고친다.
+원고는 Markdown 이다 — 전체본 career_docs/placeos/10_research_plan_2y.md(표지 · 목차 · 그림 3) 와
+축약본 11_research_plan_2y_short.md(3쪽). 원고 첫 줄이 `<!-- layout: compact -->` 면 표지·목차 없이
+작은 판형으로 짠다. 문장이나 수치를 고치려면 원고를 고친다.
 
 규칙
 - 한글 폰트는 임베딩한다 — scripts/build_business_plan_docx.py 의 subset → odttf 경로를 그대로 쓴다.
@@ -11,16 +12,24 @@ Word 로 옮기고 그림 셋(실력 · 연구 틀 · 일정)을 그린다. 문�
 - 글꼴에 없는 라틴 확장 글자(예: Fišar 의 š)는 그 글자만 Arial 런으로 쓴다. 그 밖의 글자가 없으면 멈춘다.
 
 실행:
-    python scripts/build_research_plan_docx.py [-o 출력경로] [--fonts 폰트캐시디렉터리]
-의존: python-docx · fontTools · matplotlib
+    python scripts/build_research_plan_docx.py                       # 전체본 Word
+    python scripts/build_research_plan_docx.py --pdf career_docs/placeos/pdf
+    python scripts/build_research_plan_docx.py --src career_docs/placeos/11_research_plan_2y_short.md \
+        -o "career_docs/placeos/PlaceOS_석사_연구계획서_축약본_3쪽.docx" --pdf career_docs/placeos/pdf --max-pages 3
+    옵션: [--fonts 폰트캐시디렉터리]
+의존: python-docx · fontTools · matplotlib · (PDF) LibreOffice
 """
 from __future__ import annotations
 
 import argparse
 import math
+import os
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 from docx import Document
@@ -36,8 +45,37 @@ import build_business_plan_docx as bp  # noqa: E402  — 서식·임베딩 헬�
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "career_docs" / "placeos" / "10_research_plan_2y.md"
 OUT = ROOT / "career_docs" / "placeos" / "PlaceOS_석사_연구계획서_2개년.docx"
-TEXT_W = 16.6           # A4 21cm − 좌우 여백 2.2cm × 2
 J, C, L = WD_ALIGN_PARAGRAPH.JUSTIFY, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT
+
+
+@dataclass(frozen=True)
+class Layout:
+    """판형 — 전체본(표지·목차·그림)과 축약본(3쪽)이 여기서만 갈린다."""
+    name: str
+    lr: float            # 좌우 여백(cm)
+    top: float
+    bottom: float
+    body: float          # 본문 글자 크기(pt)
+    line: float          # 본문 줄 간격
+    after: float         # 문단 뒤 간격(pt)
+    table: float         # 표 글자 크기(4열 이하)
+    table_wide: float    # 표 글자 크기(5열 이상)
+    cell_v: int          # 표 칸 위·아래 여백(dxa)
+    cell_h: int          # 표 칸 좌·우 여백(dxa)
+    remark: float
+    ref: float
+    footer: str
+
+    @property
+    def text_w(self) -> float:
+        return 21.0 - 2 * self.lr
+
+
+FULL = Layout("full", 2.2, 2.2, 2.0, 10.2, 1.55, 6, 8.9, 8.4, 55, 90, 8.4, 8.8,
+              "PlaceOS 2개년 연구계획서 · 석사과정")
+COMPACT = Layout("compact", 1.8, 1.5, 1.4, 9.3, 1.36, 3, 7.9, 7.6, 30, 70, 7.5, 7.6,
+                 "PlaceOS 2개년 연구계획서(축약본) · 석사과정")
+LAY = FULL                # build() 가 원고 첫 줄을 보고 바꾼다
 
 # ── 그림 색(dataviz 기준 팔레트 — 앞 세 칸은 전 쌍 검증 통과) ─────────────────
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
@@ -409,7 +447,6 @@ def fig_gantt(plt, path: Path) -> None:
 
 
 FIGS = {"skill": fig_skill, "framework": fig_framework, "gantt": fig_gantt}
-FIG_W = {"skill": TEXT_W, "framework": TEXT_W, "gantt": TEXT_W}
 BREAK_BEFORE = {"1", "5", "8", "12"}   # 이 번호의 장은 새 쪽에서 시작한다(요약·방법·사업화·참고문헌)
 KEEP_CM = 9.0                          # 추정 높이가 이보다 낮은 표는 쪽을 넘기지 않게 묶는다
 
@@ -434,9 +471,9 @@ def _est_height_cm(rows, widths, size) -> float:
 def table(doc, rows, widths):
     n = len(rows[0])
     if widths is None or len(widths) != n:
-        widths = [TEXT_W / n] * n
-    assert abs(sum(widths) - TEXT_W) < 0.05, f"표 너비 합 {sum(widths)} ≠ {TEXT_W}"
-    size = 8.4 if n >= 5 else 8.9
+        widths = [1.0] * n
+    widths = [w * LAY.text_w / sum(widths) for w in widths]   # 원고의 비율을 판형 너비에 맞춘다
+    size = LAY.table_wide if n >= 5 else LAY.table
     num = re.compile(r"^[\d,.\s%~+−\-—]+$")
     aligns = []
     for j in range(n):
@@ -467,20 +504,23 @@ def table(doc, rows, widths):
             val = row[ci] if ci < len(row) else ""
             cell = t.cell(ri, ci)
             cell.width = Cm(widths[ci])
-            bp.cell_margins(cell, top=55, bottom=55, left=90, right=90)
+            bp.cell_margins(cell, top=LAY.cell_v, bottom=LAY.cell_v, left=LAY.cell_h, right=LAY.cell_h)
             if head:
                 bp.cell_shade(cell, bp.HEADFILL)
             elif ri % 2 == 0:
                 bp.cell_shade(cell, bp.ZEBRA)
             cell.paragraphs[0]._p.getparent().remove(cell.paragraphs[0]._p)
-            p = bp.para(cell, line=1.28, align=(C if head else aligns[ci]))
+            p = bp.para(cell, line=1.28 if LAY is FULL else 1.18, align=(C if head else aligns[ci]))
             if keep:
                 bp.keep_with_next(p)
             if head:
                 rich(p, val, size=size, color=bp.NAVY, bold=True)
             else:
                 rich(p, val, size=size, color=bp.INK, bold=(ci == 0))
-    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+    gap = doc.add_paragraph()
+    gap.paragraph_format.space_after = Pt(2 if LAY is FULL else 0)
+    if LAY is COMPACT:
+        gap.paragraph_format.line_spacing = Pt(4)
     return t
 
 
@@ -541,53 +581,89 @@ def page_break(doc):
     bp.run(p, "").add_break(WD_BREAK.PAGE)
 
 
+def header_block(doc, blocks):
+    """축약본 머리 — 표지·목차 대신 첫 쪽 위에 제목 · 부제 · 정보 표를 둔다."""
+    title, sub_ko = blocks[0][1], blocks[1][1]
+    p = bp.para(doc, before=0, after=0, line=1.15)
+    bp.run(p, "석사과정 연구계획서(축약본) · 2027–2029", size=8.5, bold=True, color=bp.ACCENT)
+    p = bp.para(doc, before=1, after=0, line=1.1)
+    bp.run(p, glyph_safe(title), size=16, bold=True, color=bp.NAVY)
+    p = bp.para(doc, before=5, after=5, line=1.3)
+    bp.para_border(p, ("top",), color=bp.ACCENT, sz=12, space=6)
+    bp.run(p, glyph_safe(sub_ko), size=10.2, bold=True, color=bp.INK)
+    for b in blocks[2:]:
+        if b[0] == "table":
+            table(doc, b[1], b[2])
+
+
+def h1_compact(doc, num, title):
+    p = bp.para(doc, before=6, after=2, line=1.1)
+    if num:
+        bp.run(p, f"{num}  ", size=11, bold=True, color=bp.ACCENT)
+    bp.run(p, glyph_safe(title), size=11, bold=True, color=bp.NAVY)
+    bp.para_border(p, ("bottom",), color=bp.RULE, sz=6, space=2)
+    bp.keep_with_next(p)
+    return p
+
+
 def render(doc, blocks, fig_paths):
     head = [b for b in blocks if b[0] != "pagebreak"]
     k = next(i for i, b in enumerate(head) if b[0] == "h1")
-    cover(doc, head[:k])
-    page_break(doc)
-    body_blocks = head[k:]
-    toc(doc, body_blocks)
-    page_break(doc)
+    if LAY is COMPACT:
+        header_block(doc, head[:k])
+    else:
+        cover(doc, head[:k])
+        page_break(doc)
+        toc(doc, head[k:])
+        page_break(doc)
 
-    in_refs = False
-    for b in body_blocks:
+    size, in_refs = LAY.body, False
+    for b in head[k:]:
         kind = b[0]
         if kind == "h1":
-            if b[1] in BREAK_BEFORE:
+            if LAY is FULL and b[1] in BREAK_BEFORE:
                 page_break(doc)
             in_refs = b[2].startswith("참고문헌")
-            p = bp.h1(doc, b[1], glyph_safe(b[2])) if b[1] else _h1_plain(doc, b[2])
+            if LAY is COMPACT:
+                p = h1_compact(doc, b[1], b[2])
+            else:
+                p = bp.h1(doc, b[1], glyph_safe(b[2])) if b[1] else _h1_plain(doc, b[2])
             outline(p, 0)
         elif kind == "h2":
             p = bp.h2(doc, b[1], glyph_safe(b[2]))
             outline(p, 1)
         elif kind == "p":
-            p = bp.para(doc, after=6, line=1.55, align=J)
-            rich(p, b[1], size=10.2)
+            p = bp.para(doc, after=LAY.after, line=LAY.line, align=J)
+            rich(p, b[1], size=size)
         elif kind == "bullet" and in_refs:
             # 참고문헌 — 양쪽 정렬하면 DOI·영문 제목에서 낱말 사이가 벌어진다. 왼쪽 정렬 + 내어쓰기.
-            p = bp.para(doc, after=3, line=1.3, indent=0.75, align=L)
+            p = bp.para(doc, after=3 if LAY is FULL else 1, line=1.3 if LAY is FULL else 1.15,
+                        indent=0.75, align=L)
             p.paragraph_format.first_line_indent = Cm(-0.75)
-            rich(p, b[1], size=8.8)
+            rich(p, b[1], size=LAY.ref)
         elif kind == "bullet":
-            p = bp.para(doc, after=4, line=1.5, indent=0.55, align=J)
+            p = bp.para(doc, after=4 if LAY is FULL else 2, line=LAY.line - 0.05, indent=0.55, align=J)
             p.paragraph_format.first_line_indent = Cm(-0.4)
-            bp.run(p, "·  ", size=10.2, bold=True, color=bp.ACCENT)
-            rich(p, b[1], size=10.2)
+            bp.run(p, "·  ", size=size, bold=True, color=bp.ACCENT)
+            rich(p, b[1], size=size)
         elif kind == "note":
             note(doc, b[1])
         elif kind == "table_title":
-            bp.table_title(doc, glyph_safe(b[1].replace("`", "")))
+            if LAY is COMPACT:
+                p = bp.para(doc, before=3, after=2, line=1.1)
+                bp.run(p, glyph_safe(b[1].replace("`", "")), size=8.6, bold=True, color=bp.NAVY)
+                bp.keep_with_next(p)
+            else:
+                bp.table_title(doc, glyph_safe(b[1].replace("`", "")))
         elif kind == "table":
             table(doc, b[1], b[2])
         elif kind == "remark":
-            p = bp.para(doc, before=0, after=8, line=1.4)
-            rich(p, b[1], size=8.4, color=bp.MUTED)
+            p = bp.para(doc, before=0, after=8 if LAY is FULL else 0, line=1.4 if LAY is FULL else 1.2)
+            rich(p, b[1], size=LAY.remark, color=bp.MUTED)
         elif kind == "fig":
             p = bp.para(doc, before=6, after=2, line=1.0, align=C)
             bp.keep_with_next(p)
-            p.add_run().add_picture(str(fig_paths[b[1]]), width=Cm(FIG_W[b[1]]))
+            p.add_run().add_picture(str(fig_paths[b[1]]), width=Cm(LAY.text_w))
             bp.caption(doc, glyph_safe(b[2]))
 
 
@@ -599,39 +675,71 @@ def _h1_plain(doc, title):
     return p
 
 
-def build(out: Path, fonts: dict[str, Path], work: Path) -> None:
+def build(src: Path, out: Path, fonts: dict[str, Path], work: Path) -> None:
+    global LAY
     from fontTools.ttLib import TTFont
     _CMAP.update(TTFont(str(fonts["regular"])).getBestCmap())
-    md = SRC.read_text(encoding="utf-8")
-    for *_, needle in SKILL:
-        if needle not in md:
-            raise SystemExit(f"[plan] 그림 1 의 값 {needle} 이 원고에 없다 — SKILL 과 원고를 맞출 것")
-    if FLOOR_NOTE[2] not in md:
-        raise SystemExit("[plan] 빈 층 판정 상태가 원고와 다르다")
-    plt = _mpl(fonts["regular"].parent)
+    md = src.read_text(encoding="utf-8")
+    LAY = COMPACT if md.lstrip().startswith("<!-- layout: compact -->") else FULL
+    used = set(re.findall(r"\(fig:(\w+)\)", md))
+    if "skill" in used:
+        for *_, needle in SKILL:
+            if needle not in md:
+                raise SystemExit(f"[plan] 그림 1 의 값 {needle} 이 원고에 없다 — SKILL 과 원고를 맞출 것")
+        if FLOOR_NOTE[2] not in md:
+            raise SystemExit("[plan] 빈 층 판정 상태가 원고와 다르다")
     fig_paths = {}
-    for name, fn in FIGS.items():
-        fig_paths[name] = work / f"fig_{name}.png"
-        fn(plt, fig_paths[name])
+    if used:
+        plt = _mpl(fonts["regular"].parent)
+        for name in sorted(used):
+            fig_paths[name] = work / f"fig_{name}.png"
+            FIGS[name](plt, fig_paths[name])
     blocks = parse(md)
 
     doc = Document()
     bp.setup(doc)
     sec = doc.sections[0]
-    sec.left_margin = sec.right_margin = Cm(2.2)
-    sec.top_margin, sec.bottom_margin = Cm(2.2), Cm(2.0)
-    bp.add_footer(sec, "PlaceOS 2개년 연구계획서 · 석사과정")
+    sec.left_margin = sec.right_margin = Cm(LAY.lr)
+    sec.top_margin, sec.bottom_margin = Cm(LAY.top), Cm(LAY.bottom)
+    sec.footer_distance = Cm(1.2 if LAY is FULL else 0.7)
+    bp.add_footer(sec, LAY.footer)
     cp = doc.core_properties
-    cp.title, cp.author, cp.subject = "PlaceOS 2개년 연구계획서", "PlaceOS", "석사과정 연구계획서"
+    cp.title = "PlaceOS 2개년 연구계획서" + ("(축약본)" if LAY is COMPACT else "")
+    cp.author, cp.subject = "PlaceOS", "석사과정 연구계획서"
     render(doc, blocks, fig_paths)
     doc.save(out)
 
 
+def to_pdf(docx: Path, outdir: Path) -> Path:
+    """LibreOffice 로 PDF 를 만든다 — 문서에 임베딩한 한글 글꼴을 그대로 쓴다(시스템 글꼴 설치 불필요)."""
+    exe = shutil.which("soffice") or shutil.which("libreoffice")
+    if not exe:
+        raise SystemExit("[plan] LibreOffice(soffice)가 없다 — Word 의 'PDF로 저장'으로 만들 것")
+    outdir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="lo_profile_") as prof:   # 사용자 프로필 잠금을 피한다
+        r = subprocess.run([exe, f"-env:UserInstallation={Path(prof).as_uri()}", "--headless",
+                            "--convert-to", "pdf", "--outdir", str(outdir), str(docx)],
+                           env=dict(os.environ, SAL_USE_VCLPLUGIN="svp"),
+                           capture_output=True, text=True, timeout=300)
+    pdf = outdir / f"{docx.stem}.pdf"
+    if r.returncode != 0 or not pdf.exists():
+        raise SystemExit(f"[plan] PDF 변환 실패: {(r.stderr or r.stdout)[-400:]}")
+    return pdf
+
+
+def pdf_pages(pdf: Path) -> int:
+    return len(re.findall(rb"/Type\s*/Page(?![s\w])", pdf.read_bytes()))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--src", default=str(SRC), help="원고 Markdown(기본: 전체본)")
     ap.add_argument("-o", "--out", default=str(OUT))
     ap.add_argument("--fonts", default=None, help="폰트 캐시 디렉터리(기본: 임시 디렉터리)")
+    ap.add_argument("--pdf", default=None, help="PDF 를 만들 디렉터리(LibreOffice 필요)")
+    ap.add_argument("--max-pages", type=int, default=None, help="PDF 쪽수 상한 — 넘으면 실패")
     args = ap.parse_args()
+    src = Path(args.src).resolve()
     out = Path(args.out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as td:
@@ -639,13 +747,19 @@ def main() -> int:
         cache = Path(args.fonts).resolve() if args.fonts else work / "fonts"
         fonts = bp.fetch_fonts(cache)
         print("1) 문서 생성")
-        build(out, fonts, work)
+        build(src, out, fonts, work)
         print(f"   → {out.name} ({out.stat().st_size:,}B)")
         print("2) 한글 폰트 임베딩")
         bp.embed_fonts(out, fonts, work)
         print(f"   → {out.name} ({out.stat().st_size:,}B)")
         print("3) 검증")
         bp.verify_embedding(out)
+    if args.pdf:
+        pdf = to_pdf(out, Path(args.pdf).resolve())
+        pages = pdf_pages(pdf)
+        print(f"4) PDF → {pdf.name} ({pages}쪽)")
+        if args.max_pages and pages > args.max_pages:
+            raise SystemExit(f"[plan] {pages}쪽 — 목표 {args.max_pages}쪽을 넘는다. 원고를 줄일 것")
     print(f"\n완료: {out}")
     return 0
 
