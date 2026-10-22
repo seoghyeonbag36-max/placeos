@@ -19,6 +19,8 @@ description: PPPP 트랙 — Posting(외부 AI 창업 코파일럿 어댑터 + 3
 - 구조: `services/posting.py` **어댑터** — 외부 코파일럿(`POSTING_COPILOT_URL`) 호출 → 실패/미설정 시 내부 **3-Tier(고급화/가성비/기능중심)** 비용-효용 계산으로 폴백.
 - 핵심 기술: 외부 코파일럿 API + LSTM 매출/공실 시계열 예측(폴백·검증용), ROI(회수 개월) 산출.
 - ⚠️ 외부 코파일럿의 연동 형태(REST/패키지/별도 앱)는 미확정 — 어댑터 경계 밖으로 가정을 퍼뜨리지 말 것.
+- ⛔ **이 트랙의 구현 화면(`PostingConsole` · `#/explore` 레일 「Posting」)은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정
+  PPPP 화면 보존 규칙). 흐름(5판)의 비용 화면이 있어도 대신하지 않는다. 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
 
 ## 화이트리스트 경로
 - BE: `apps/backend/app/services/posting.py`, `app/schemas/posting.py`, `app/api/v1/ai.py`

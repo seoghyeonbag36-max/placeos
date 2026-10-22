@@ -105,6 +105,20 @@ with sync_playwright() as p:
   를 같이 준다. 스크린샷만 보면 "지도 키 문제"로 오진하기 쉬우니 DOM 으로 재라:
   `document.querySelector('.map-canvas').getBoundingClientRect()`
 
+## PPPP 화면 보존 — 실화면 검사 (2026-10-21)
+
+흐름(`apps/frontend/src/flow/`) · `App.tsx` · 랜딩 · 레일을 건드렸으면 띄운 채로 돌린다. 규칙은 루트 CLAUDE.md
+「PPPP 화면 보존 규칙」(Platform/Page/Posting/Program 구현 화면은 절대 화면에서 제외하지 않는다).
+
+```powershell
+$env:PYTHONIOENCODING="utf-8"; py -3.11 scripts/pppp_screens_check.py --district bulgwang --screens
+```
+
+종료코드 0 = 통과. 레일 네 트랙이 **보이는지**(CSS 숨김), 흐름의 「지도」 진입로 넷을 **새 페이지로 주소를 바로 연 뒤** 눌러
+2.5초 뒤에도 `#/explore` 인지(브라우저 이벤트 순서), C2 상권 이어받기, 랜딩 네 질문을 잰다 — jsdom 가드
+(`src/ppppScreens.test.tsx`)가 원리상 못 보는 자리다. ⚠ 같은 페이지에서 해시만 바꿔 옮겨 다니며 손으로 확인하면 10-21 의
+「탭 「지도」가 홈으로 튕김」이 가려진다(그날 그렇게 한 번 놓쳤다).
+
 ## 공실 레이어(`/api/v1/heatmap/buildings`) 검증
 
 ```powershell

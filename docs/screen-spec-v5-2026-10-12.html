@@ -1315,8 +1315,9 @@ q { quotes:"“" "”"; }
       <div class="sec-head"><span class="num">§10</span><h2>지도 탐색 — 종전 4트랙 화면</h2>
         <p class="lede">3·4판의 지도 + 네 트랙 패널은 지우지 않는다. 반복 사용자(본사·운용사)와 「자세히」의 끝에 남는다. 주소는 <code>#/explore</code>, 허브 탭 「지도」.</p></div>
       <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
+        <li><b>⛔ PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙).</b> 이 네 트랙(Platform·Page·Posting·Program)의 구현 화면은 절대 화면에서 빼지 않는다. 허브 탭 「지도」 · R2 「지도에서 자세히」 · R3 「지도」는 늘 <code>#/explore</code> 로 오고, 흐름 안에 지도를 따로 두어 이 자리를 대신하지 않는다(10-18 에 그렇게 해서 네 화면이 UI 에서 사라졌다 → 10-21 복구). 정본 CLAUDE.md · 가드 <code>apps/frontend/src/ppppScreens.test.tsx</code> · <code>docs/decision-pppp-screens-always-on-2026-10-21.md</code></li>
         <li><b>로그인 없이 연다.</b> 비로그인이면 「내 사업」을 흐름의 답에서 만들어 넘기고, 저장(<code>/auth/workspace</code>)은 건너뛴다. 로그인했으면 종전처럼 계정 값을 쓴다</li>
-        <li>흐름에서 고른 상권을 이어받는다(C2). 흐름의 R2 「지도에서 자세히」 · R3 「지도」가 같은 상권으로 연다</li>
+        <li>흐름에서 고른 상권을 이어받는다(C2). 흐름의 R2 「지도에서 자세히」 · R3 「지도」가 같은 상권으로 연다 — <i>10-21 에야 구현했다. 그전에는 늘 가로수길로 열렸고, 그 불편을 고치려던 10-18 변경이 진입로를 돌려 네 화면을 지웠다</i></li>
         <li>레일 맨 위에 「홈」(<code>#/home</code>)을 더한다 — 지도 탐색에서 흐름으로 돌아가는 길</li>
         <li>안의 규칙(C1 지도 하나 · 탭 전환 시 재생성 금지 · 4레이어 · 거리뷰 모달)은 3·4판 그대로</li>
         <li>안의 문구·패널 구성은 이번 판에서 바꾸지 않는다 — 토큰(회색·글자색)만 5판 값을 따른다. 다음 판 과제(§12)</li>

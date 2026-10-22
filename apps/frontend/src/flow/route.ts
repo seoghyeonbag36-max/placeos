@@ -11,17 +11,18 @@ export type RouteName =
   | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
-  | "home" | "me" | "explore" | "spaces-map" | "space-map";
+  | "home" | "me" | "explore";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
+/* 「/explore」는 흐름 화면이 아니라 PPPP 지도 탐색이다(App.tsx 가 먼저 가른다). 흐름 안에 지도를 따로 두어 그 자리를
+   대신하지 않는다 — 10-18 의 /spaces/map · /space/…/map 은 그래서 10-21 에 걷었다(PPPP 화면 보존 규칙). */
 const SIMPLE: Record<string, RouteName> = {
   "/start": "start", "/industry": "industry", "/industry/other": "industry-other", "/home-district": "home-district",
   "/districts": "districts", "/industries": "industries", "/pivot-next": "pivot-next", "/district-search": "district-search",
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
   "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check", "/validate": "validate", "/item": "item",
   "/period": "period", "/test-budget": "test-budget", "/plan": "plan", "/home": "home", "/me": "me", "/explore": "explore",
-  "/spaces/map": "spaces-map",
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다) */
@@ -29,8 +30,6 @@ export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
-  const map = /^\/space\/([^/]+)\/map$/.exec(path);
-  if (map) return { name: "space-map", param: decodeURIComponent(map[1]), path };
   const m = /^\/(district|space)\/([^/]+)$/.exec(path);
   if (m) return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path };
   return null;
@@ -45,8 +44,8 @@ const url = (path: string) => `${window.location.pathname}${window.location.sear
 /** 다음 화면으로 — 기록을 남긴다(브라우저 뒤로가기가 여기로 돌아온다) */
 export function go(path: string): void {
   if (window.location.hash === `#${path}`) return;
-  window.history.replaceState({ ...window.history.state, flowScroll: document.documentElement.scrollTop,
-    flowPanelScroll: document.querySelector(".trackmap-scroll")?.scrollTop ?? 0 }, "");
+  // 떠나는 화면의 스크롤을 지금 기록에 남긴다 — 뒤로 오면 FlowScreen 이 복원한다(목록 → 상세 → 목록)
+  window.history.replaceState({ ...window.history.state, flowScroll: document.documentElement.scrollTop }, "");
   window.history.pushState({ flowDepth: depth() + 1 }, "", url(path));
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }

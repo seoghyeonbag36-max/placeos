@@ -16,6 +16,8 @@ description: PPPP 트랙 — Platform(상권 AI 추천 엔진 · GNN·감성·�
 - 의미: 각 상권을 데이터·거버넌스가 작동하는 **디지털 트윈 운영체계(플랫폼)** 로 전환.
 - ⚠ 4P 대응은 **2026-09-05 에 1:1 로 재정의**됐다(Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program). 정본 `CLAUDE.md` §PPPP Framework.
 - 핵심 기술: **GNN**(업종 시너지/잠식), **PostGIS** 공간쿼리, 상권 감성지수(Sentiment).
+- ⛔ **이 트랙의 구현 화면(`PlatformConsole` · `#/explore` 레일 「Platform」)은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정
+  PPPP 화면 보존 규칙 — 숨기거나 · 진입로를 돌리거나 · 다른 화면으로 갈아끼우는 것 포함). 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
 
 ## 이 트랙에서만 건드리는 경로 (화이트리스트)
 - ML: `ml/models/gnn/`, `ml/training/`, `ml/inference/`

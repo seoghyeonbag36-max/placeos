@@ -16,7 +16,6 @@ import { floorText, useSpaces, type SpaceItem } from "../spaces";
 import { eun } from "../format";
 import { go, replace } from "../route";
 import { setSpace, type SpaceBrowse } from "../state";
-import SpaceMap from "../SpaceMap";
 import {
   Badge, BottomCTA, ChoiceList, Details, FlowScreen, LoadError, ResultView, SaveHeart, Sheet,
   SkeletonRows, TextButton, WarnLine,
@@ -114,7 +113,7 @@ export function RentCap() {
 type SortKey = "rent" | "area" | "floor";
 const PAGE = 24;
 
-export function Spaces({ mapView = false }: { mapView?: boolean }) {
+export function Spaces() {
   const { state, update, savedSpaces, toggleSaveSpace } = useFlowSaved();
   const id = state.districtId;
   const ok = useNeed(!!id, "/district-search");
@@ -143,10 +142,11 @@ export function Spaces({ mapView = false }: { mapView?: boolean }) {
       : (a.monthlyRent ?? 1e9) - (b.monthlyRent ?? 1e9));
   const title = all.length === 0 ? "이 상권은 층 단위 빈 자리 자료가 아직 없어요"
     : `${cap != null ? `월 ${cap.toLocaleString("ko-KR")}만원까지인 ` : ""}빈 자리가 ${filtered.length.toLocaleString("ko-KR")}곳 있어요`;
-  const open = (s: SpaceItem) => { update((st) => setSpace(st, s.id, `${s.name} ${floorText(s.floor)}`)); go(`/space/${encodeURIComponent(s.id)}${mapView ? "/map" : ""}`); };
-  const content = (
+  const open = (s: SpaceItem) => { update((st) => setSpace(st, s.id, `${s.name} ${floorText(s.floor)}`)); go(`/space/${encodeURIComponent(s.id)}`); };
+  return (
+    // 「지도」 = PPPP 지도 탐색(#/explore). 흐름 안 지도로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙)
     <FlowScreen wide back={back} caption={caption} titleLive title={title}
-      right={<button type="button" className="fl-textbtn" onClick={() => go(mapView ? "/spaces" : "/spaces/map")}>{mapView ? "목록" : "지도"}</button>}>
+      right={<button type="button" className="fl-textbtn" onClick={() => go("/explore")}>지도</button>}>
       {all.length > 0 && <>
         <div className="fl-chips" role="group" aria-label="걸러 보기">
           {spaces.data.hasRent && (
@@ -199,7 +199,6 @@ export function Spaces({ mapView = false }: { mapView?: boolean }) {
       </Sheet>
     </FlowScreen>
   );
-  return mapView && all.length > 0 ? <SpaceMap items={sorted} fallback={all[0]} onSelect={open}>{content}</SpaceMap> : content;
 }
 
 /* ── R4 자리 상세 ────────────────────────────────────────────────────────── */
@@ -227,7 +226,7 @@ function MiniMap({ lat, lng, name }: { lat: number; lng: number; name: string })
   );
 }
 
-export function SpaceDetail({ id, mapView = false }: { id: string; mapView?: boolean }) {
+export function SpaceDetail({ id }: { id: string }) {
   const { state, update, token, savedSpaces, toggleSaveSpace } = useFlowSaved();
   const did = state.districtId;
   const ok = useNeed(!!did, "/district-search");
@@ -257,16 +256,15 @@ export function SpaceDetail({ id, mapView = false }: { id: string; mapView?: boo
   const recRank = rec.status === "ready" && work?.model_label
     ? rec.data.recommendations.findIndex((r) => r.industry === work.model_label) : -1;
   const fit = item.unit?.fit;
-  const content = (
-    <FlowScreen back={mapView ? "/spaces/map" : "/spaces"} caption={caption} title={`${item.name} ${floorText(item.floor)}`}
+  return (
+    <FlowScreen back="/spaces" caption={caption} title={`${item.name} ${floorText(item.floor)}`}
       right={<SaveHeart saved={saved} onClick={() => toggleSaveSpace(item, !saved, "save-space")} />}
       cta={calculable
         ? <BottomCTA primary={{ label: "몇 달이면 본전인지 보기", onClick: () => go("/premium") }}
             secondary={{ label: saved ? "저장됨" : "저장", onClick: () => toggleSaveSpace(item, !saved, "save-space") }} />
         : <BottomCTA note={custom ? "직접 적은 업종은 본전 시점을 계산하지 않아요." : "본전 시점은 건물 단위 자리만 계산해요."}
             primary={{ label: saved ? "후보에 저장했어요" : "후보로 저장하기", onClick: () => toggleSaveSpace(item, true, "save-space"), disabled: saved }} />}>
-      <div className="fl-actions"><TextButton onClick={() => go(`/space/${encodeURIComponent(item.id)}${mapView ? "" : "/map"}`)}>{mapView ? "자리 상세 보기" : "이 자리 지도에서 보기"}</TextButton></div>
-      {!mapView && <MiniMap lat={item.lat} lng={item.lng} name={item.name} />}
+      <MiniMap lat={item.lat} lng={item.lng} name={item.name} />
       <dl className="fl-keys">
         <div><dt>월세 추정</dt><dd>{item.monthlyRent != null ? `${item.monthlyRent.toLocaleString("ko-KR")}만원` : "통계 없음"}</dd></div>
         <div><dt>평당</dt><dd>{item.rentPerPyeong != null ? `${item.rentPerPyeong}만원` : "—"}</dd></div>
@@ -274,7 +272,7 @@ export function SpaceDetail({ id, mapView = false }: { id: string; mapView?: boo
       </dl>
       <WarnLine>호가가 아닌 추정이에요. 보증금·권리금·관리비는 빠져 있어요.</WarnLine>
       {saved && <div className="fl-actions" role="status">후보에 저장했어요.
-        <TextButton onClick={() => go(mapView ? "/spaces/map" : "/spaces")}>다른 자리 보기</TextButton>
+        <TextButton onClick={() => go("/spaces")}>다른 자리 보기</TextButton>
         <TextButton onClick={() => go(calculable ? "/premium" : "/budget")}>이 자리 비용 검토</TextButton>
       </div>}
       {!calculable && <div className="fl-actions"><TextButton onClick={() => go("/budget")}>현장 금액으로 예산 점검</TextButton></div>}
@@ -318,7 +316,6 @@ export function SpaceDetail({ id, mapView = false }: { id: string; mapView?: boo
       </Sheet>
     </FlowScreen>
   );
-  return mapView ? <SpaceMap items={[item]}>{content}</SpaceMap> : content;
 }
 
 /* ── 저장 상태를 읽는 훅 — FlowApp 이 들고 있다 ─────────────────────────── */

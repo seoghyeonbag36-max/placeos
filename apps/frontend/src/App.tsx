@@ -101,6 +101,8 @@ type View = "platform" | "map" | "posting" | "program";
 const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = [
   // PPPP 네 트랙. 전통 4P 와 1:1 대응한다(2026-09-05 재정의): Place▶Platform · Product▶Page ·
   // Price▶Posting · Promotion▶Program. 라벨을 되돌리지 말 것.
+  // ⛔ 2026-10-21 PPPP 화면 보존 규칙(사용자 확정 · CLAUDE.md): 네 트랙의 구현 화면은 절대 화면에서 빼지 않는다 —
+  //   이 배열에서 빼거나 · 숨기거나 · 다른 화면으로 갈아끼우지 않는다. 가드는 src/ppppScreens.test.tsx.
   // 2026-09-26: 레일 순서를 **Platform → Page → Posting → Program** 으로 되돌렸다 —
   //   PPPP 프레임워크 순서 그대로다. 그전(2026-09-15)에는 사용자가 밟는 순서를 따라
   //   Page 를 맨 위에 뒀는데, 레일이 프레임워크를 말하지 않는 쪽이 더 헷갈렸다.
@@ -113,7 +115,9 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
 ];
 
 /** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면
- *  로그인한 사용자는 홈(흐름)으로 간다. */
+ *  로그인한 사용자는 홈(흐름)으로 간다.
+ *  ⛔ PPPP 네 구현 화면의 입구다. 흐름의 「지도」 진입로(허브 탭 · 상권 소개 · 빈 자리 목록)는 늘 여기로 온다
+ *  (2026-10-21 PPPP 화면 보존 규칙). */
 export const EXPLORE_HASH = "#/explore";
 
 /**
@@ -125,7 +129,15 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // 「내 사업」 카드는 이 위에 펴진다. 「시작」이 가는 곳도 Platform 이라(startBusiness) 이제
   // 같은 화면이고, 「그냥 둘러보기」는 카드만 걷고 Platform 에 남는다(그전에는 Page 지도).
   const [view, setView] = useState<View>("platform");
-  const [pageWorkspace, setPageWorkspace] = useState(createPageWorkspace);
+  // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
+  // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
+  // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
+  // 흐름의 상권 목록도 이 화면과 같은 gold 거점이고, 목록에 없으면 MapShell·PlatformConsole 이 첫 거점으로 물러난다.
+  const [pageWorkspace, setPageWorkspace] = useState(() => {
+    const workspace = createPageWorkspace();
+    const fromFlow = loadFlow().districtId;
+    return fromFlow ? { ...workspace, districtId: fromFlow } : workspace;
+  });
   const [postingSelection, setPostingSelection] = useState<(BuildingSelection & { requestId: number })>();
   const reviewBuilding = (selection: BuildingSelection) => {
     setPostingSelection((previous) => ({ ...selection, requestId: (previous?.requestId ?? 0) + 1 }));
