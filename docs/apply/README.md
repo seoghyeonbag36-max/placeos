@@ -61,7 +61,7 @@ python scripts/check_application.py --doc docs/apply/01-spatial-info/draft.md --
 당시 수치가 새 forbid 에 걸린다. 제출본은 고칠 수 없고 대장을 되돌리면 새 원고의 가드가
 풀리므로, `claims.json` 의 `archived` 에 **경로 · 제출일 · 당시 대장 커밋(`claims_ref`)** 을
 적어 검사에서 뺀다. 검사기는 그 원고를 `[과거본] … 검사 제외` 로 출력한다 — 조용히 건너뛰지
-않는다. 지금 01 · 02 가 과거본이다. **과거본의 숫자를 새 원고로 옮겨 오지 말 것** — 당시 대장은
+않는다. 지금 01 · 02 · 10(DIC2026 원고와 `_submit` 제출본)이 과거본이다. **과거본의 숫자를 새 원고로 옮겨 오지 말 것** — 당시 대장은
 `git show <claims_ref>:docs/apply/claims.json` 으로만 본다.
 
 마감순 진행표와 사람이 남은 일은 [submission-pack-2026-10-06.md](submission-pack-2026-10-06.md). 핀테크 제출본은 [_submit/](_submit/).
