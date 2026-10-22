@@ -1,0 +1,11 @@
+{
+  "test": "verify_research_plan_pdf",
+  "result": "passed",
+  "pages": 3,
+  "checks": [
+    "필수 내용",
+    "문자 추출",
+    "페이지 경계",
+    "페이지 이미지 생성"
+  ]
+}
