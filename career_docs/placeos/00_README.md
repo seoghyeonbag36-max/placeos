@@ -24,7 +24,11 @@
 | 07_interview_preparation.md | 개인 역할·한계·직무·Codex 확인 |
 | 08_graduate_research_plan.md | 채용과 분리한 석사 연구 준비·근무 충돌 검토 |
 | 09_final_review.md | 내용·개인정보·분량·패키지 검토 |
-| pdf/ | 03·04·05·05a·05b·05c·08 PDF |
+| 10_research_plan_2y.md | 2개년 석사 연구계획서 원고(2026-10-22) — 과정 수료 후 학위논문 + 졸업대학 산학협력 기술사업화(창업) |
+| PlaceOS_석사_연구계획서_2개년.docx | 위 원고의 Word 판(표·그림 3·한글 글꼴 포함). 재생성은 `python scripts/build_research_plan_docx.py` |
+| 11_research_plan_2y_short.md | 위 연구계획서의 3쪽 축약본 원고(첫 줄 `<!-- layout: compact -->` 가 작은 판형을 고른다) |
+| PlaceOS_석사_연구계획서_축약본_3쪽.docx | 축약본 Word 판(표 5·그림 1). 재생성은 `--src career_docs/placeos/11_research_plan_2y_short.md -o <이 파일> --pdf career_docs/placeos/pdf --max-pages 3` |
+| pdf/ | 03·04·05·05a·05b·05c·08 PDF · 연구계획서 전체본(24쪽)·축약본(3쪽) PDF — LibreOffice 변환(`--pdf`) |
 | release/placeos_career_review.zip | 전체 채용 개인 검토 자료 |
 | release/placeos_korea_career_review.zip | 고려대 검토용 03·04·05a |
 | release/placeos_yonsei_anchor_review.zip | 앵커사업단 개인 작성표만 |
