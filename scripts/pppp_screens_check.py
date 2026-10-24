@@ -38,6 +38,10 @@
     set PYTHONIOENCODING=utf-8
     py -3.11 scripts/pppp_screens_check.py                         # 첫 gold 상권으로
     py -3.11 scripts/pppp_screens_check.py --district bulgwang --screens
+    py -3.11 scripts/pppp_screens_check.py --headed --slowmo 300   # 브라우저 창을 띄워 눈으로 따라 본다(2026-10-24)
+
+⚠ 프론트는 **localhost:5173** 으로 띄운다 — 네이버 지도 키에 등록된 로컬 주소가 그것뿐이라, 다른 포트에서는 지도 인증(401)이
+  깨져 SDK 가 스스로 무너지고 화면이 하얗게 될 수 있다(규칙과 무관한 헛실패).
 
 종료코드 0 = 전부 통과, 1 = 하나라도 실패. 결과는 `reports/pppp_screens/result.json`(+ `--screens` 면 PNG) — git 밖이다.
 흐름 · App.tsx · 랜딩 · 레일을 건드린 변경은 /verify 에서 이 검사를 돌린다.
@@ -129,6 +133,8 @@ def main() -> int:
     ap.add_argument("--district", default=None, help="흐름에서 고른 상권 id(기본: 첫 gold 상권)")
     ap.add_argument("--out", default=str(ROOT / "reports" / "pppp_screens"))
     ap.add_argument("--screens", action="store_true", help="화면마다 PNG 를 남긴다")
+    ap.add_argument("--headed", action="store_true", help="브라우저 창을 띄운다 — 사람이 눈으로 따라 볼 때")
+    ap.add_argument("--slowmo", type=int, default=0, help="동작마다 멈출 ms(--headed 와 같이 — 눈으로 따라갈 수 있게)")
     args = ap.parse_args()
 
     try:
@@ -180,7 +186,7 @@ def main() -> int:
             page.screenshot(path=str(out / f"{name}.png"))
 
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=not args.headed, slow_mo=args.slowmo)
         desk = dict(viewport={"width": 1440, "height": 900}, locale="ko-KR")
         clean = browser.new_context(**desk)                      # 흐름 답 없음 — 랜딩 · 로그인 없이 바로 연 지도 탐색
         flowctx = browser.new_context(**desk)                    # 흐름 답(상권·업종)을 심은 데스크톱
