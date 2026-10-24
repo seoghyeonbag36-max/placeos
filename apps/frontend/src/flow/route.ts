@@ -11,7 +11,7 @@ export type RouteName =
   | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
-  | "home" | "me" | "explore";
+  | "home" | "me" | "explore" | "compare";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
@@ -25,17 +25,57 @@ const SIMPLE: Record<string, RouteName> = {
   "/period": "period", "/test-budget": "test-budget", "/plan": "plan", "/home": "home", "/me": "me", "/explore": "explore",
 };
 
-/** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다) */
+/** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다).
+ *  `#/compare/a,b` 는 상권 나란히 보기(2026-10-24) — 상권 id 를 쉼표로 잇는다(`comparePath`). */
 export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
-  const m = /^\/(district|space)\/([^/]+)$/.exec(path);
-  if (m) return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path };
+  const m = /^\/(district|space|compare)\/([^/]+)$/.exec(path);
+  if (m) {
+    try { return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path }; } catch { return null; }
+  }
   return null;
 }
 
+/** 상권 나란히 보기 주소 — 상권 id 마다 인코딩하고 쉼표로 잇는다 */
+export const comparePath = (ids: string[]) => `/compare/${ids.map(encodeURIComponent).join(",")}`;
+
 export const isFlowHash = (hash: string) => hash.startsWith("#/");
+
+/* ── 지도 탐색으로 가는 주소 ──────────────────────────────────────────────
+ * 2026-10-24: 흐름이 지도 탐색을 **어느 트랙 · 어느 상권 · 어느 건물**로 열지 쿼리로 싣는다(홈의 「지도에서 내 자리 보기」 ·
+ * 지도 미리보기). 그전에는 늘 Platform 첫 화면에 아무것도 고르지 않은 채 열려, 네 단계를 다 마친 사람이 고른 자리를 지도에서
+ * 다시 찾아야 했다. 쿼리가 붙어도 지도 탐색이다(`isExploreHash`) — App 이 해시를 `===` 로 비교하면 지도 탐색이 흐름으로 샌다.
+ * ⛔ 기존 진입로 셋(허브 탭 · R2 「지도에서 자세히」 · R3 「지도」)은 쿼리 없이 `#/explore` 그대로 간다(PPPP 화면 보존 규칙). */
+
+/** 지도 탐색 레일의 트랙 — 흐름 홈의 네 단계(PLATFORM·PAGE·POSTING·PROGRAM)와 1:1 */
+export type ExploreTrack = "platform" | "page" | "posting" | "program";
+export const EXPLORE_TRACKS: readonly ExploreTrack[] = ["platform", "page", "posting", "program"];
+
+export interface ExploreTarget { track: ExploreTrack | null; district: string | null; building: string | null }
+
+/** 흐름 주소(`go` 에 넘긴다). 대상이 없으면 `/explore` 그대로 */
+export function explorePath(target: Partial<ExploreTarget> = {}): string {
+  const q = new URLSearchParams();
+  if (target.track) q.set("track", target.track);
+  if (target.district) q.set("district", target.district);
+  if (target.building) q.set("building", target.building);
+  const query = q.toString();
+  return query ? `/explore?${query}` : "/explore";
+}
+
+/** 지도 탐색 해시면 실어 온 대상을, 아니면 null. 모르는 트랙 이름은 버린다(첫 화면 규칙에 맡긴다) */
+export function parseExplore(hash: string): ExploreTarget | null {
+  if (!hash.startsWith("#/")) return null;
+  const [path, query = ""] = hash.slice(1).split("?");
+  if (path.replace(/\/+$/, "") !== "/explore") return null;
+  const q = new URLSearchParams(query);
+  const track = EXPLORE_TRACKS.find((t) => t === q.get("track")) ?? null;
+  return { track, district: q.get("district") || null, building: q.get("building") || null };
+}
+
+export const isExploreHash = (hash: string) => parseExplore(hash) !== null;
 
 /** 흐름 안에서 몇 화면째인가 — 기록(history.state)에 싣는다. 주소로 바로 열었거나 랜딩 링크로 들어왔으면 0 */
 const depth = (): number => (window.history.state as { flowDepth?: number } | null)?.flowDepth ?? 0;

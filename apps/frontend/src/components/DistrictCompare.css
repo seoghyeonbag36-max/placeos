@@ -1,0 +1,61 @@
+/* 상권 나란히 보기 — 흐름(5판)과 지도 탐색 대화상자가 같이 쓴다. 값은 tokens.css 토큰만(숫자는 4배수).
+   열 둘은 폰 폭(335)에 들어가고, 열 셋은 표 안에서만 옆으로 넘긴다 — 첫 열(줄 이름)은 고정이다. */
+.dcmp-scroll { overflow-x: auto; border: 1px solid var(--grey-200); border-radius: var(--radius-lg); background: var(--surface); }
+.dcmp-scroll:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.dcmp { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .9375rem; line-height: 1.45; color: var(--grey-900); }
+.dcmp.is-2 { min-width: 320px; }
+.dcmp.is-3 { min-width: 432px; }
+.dcmp th, .dcmp td { padding: var(--sp-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--grey-100); }
+.dcmp tbody tr:last-child > * { border-bottom: 0; }
+
+.dcmp-corner, .dcmp-label { position: sticky; left: 0; z-index: 1; width: 96px; background: var(--surface); }
+.dcmp thead > tr > * { background: var(--grey-50); }
+.dcmp-name { display: block; font-size: 1rem; font-weight: var(--fw-bold); color: var(--grey-900); }
+.dcmp-gu { display: block; font-size: .8125rem; font-weight: var(--fw-regular); color: var(--grey-600); }
+.dcmp-caveat { display: inline-block; margin-top: var(--sp-1); font-size: .75rem; font-weight: var(--fw-semibold); color: var(--caution-ink); cursor: help; }
+
+.dcmp-label { font-size: .8125rem; font-weight: var(--fw-semibold); color: var(--grey-700); }
+.dcmp-label > span:first-child { display: block; }
+.dcmp-src { display: inline-flex; align-items: center; height: 22px; margin-top: var(--sp-1); padding: 0 var(--sp-2); border-radius: 6px;
+  font-size: .6875rem; font-weight: var(--fw-bold); white-space: nowrap; }
+.dcmp-src.is-model { background: var(--primary-soft); color: var(--primary-pressed); }
+.dcmp-src.is-obs { background: var(--grey-100); color: var(--grey-700); }
+.dcmp-src.is-real { background: var(--source-real-soft); color: var(--source-real); }
+.dcmp-src.is-est { background: var(--caution-soft); color: var(--caution-ink); }
+
+.dcmp-value { display: block; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+.dcmp-sub { display: block; margin-top: 2px; font-size: .8125rem; color: var(--grey-600); }
+.dcmp-none { color: var(--grey-600); }
+.dcmp-none.is-error { color: var(--danger-text); }
+.dcmp-skel { display: block; height: 40px; }
+.dcmp-actions > td { padding-top: var(--sp-2); }
+
+@media (min-width: 768px) {
+  .dcmp-corner, .dcmp-label { width: 160px; }
+}
+
+/* ── 지도 탐색 Platform — 담기 줄 + 대화상자(Page 「후보 비교」와 같은 틀 · 트랙 색만 Platform) ── */
+.dcmp-tray { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); }
+.dcmp-tray-names { font-size: var(--fs-caption); color: var(--muted); }
+.dcmp-btn { min-height: 44px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.dcmp-btn:hover { background: var(--track-platform-soft); }
+.dcmp-btn:focus-visible { outline: 2px solid var(--track-platform); outline-offset: 2px; }
+.dcmp-btn[aria-pressed="true"] { border-color: var(--track-platform); color: var(--track-platform); font-weight: var(--fw-semibold); }
+.dcmp-btn:disabled { cursor: not-allowed; opacity: .55; }
+.dcmp-btn.is-strong { background: var(--track-platform); border-color: var(--track-platform); color: var(--on-accent); font-weight: var(--fw-bold); }
+.dcmp-btn.is-strong:hover { background: var(--track-platform-pressed); }
+.dcmp-open { width: 100%; }
+
+.dcmp-dialog { width: min(1000px, calc(100vw - var(--sp-6))); max-height: 85dvh; box-sizing: border-box; padding: var(--sp-5);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); font: inherit; }
+.dcmp-dialog::backdrop { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.dcmp-dialog header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-4); }
+.dcmp-dialog h2 { margin: var(--sp-1) 0 0; font-size: var(--fs-title); line-height: var(--lh-title); }
+.dcmp-eyebrow { color: var(--track-platform); font-size: var(--fs-caption); font-weight: var(--fw-bold); }
+.dcmp-dialog .dcmp-scroll { margin-block: var(--sp-4); }
+.dcmp-note { margin: var(--sp-2) 0 0; color: var(--muted); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.dcmp-note.is-caveat { color: var(--caution-ink); }
+@media (max-width: 768px) {
+  .dcmp-dialog { padding: var(--sp-4); width: calc(100vw - var(--sp-4)); max-height: 90dvh; }
+}

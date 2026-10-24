@@ -1,14 +1,16 @@
 /**
  * ① 상권 찾기(PLATFORM) — 화면설계서 5판 §5-1: Q1 목적 · Q2 업종 · Q2-1 직접 적기 · Q3 지금 상권 ·
- * R1 상권 순위 · R1-p 업종 순위(바꾸기) · Q-p 무엇부터 · Q4 상권 직접 고르기 · R2 상권 소개.
+ * R1 상권 순위(+ 비교 모드 → R1-c 상권 나란히 보기 · screens/Compare) · R1-p 업종 순위(바꾸기) · Q-p 무엇부터 ·
+ * Q4 상권 직접 고르기 · R2 상권 소개.
  */
 import { useEffect, useState } from "react";
 import type { BusinessGoal } from "@/lib/businessProfile";
 import type { DistrictSummary, IndustryFitRow } from "@/lib/api";
+import { COMPARE_MAX } from "@/lib/districtCompare";
 import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
-import { go } from "../route";
+import { comparePath, go } from "../route";
 import { setDistrict, setGoal, setHomeDistrict, setIndustry } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet,
@@ -183,6 +185,21 @@ function RankLine({ row, onPick, pinned, rankLabel }: { row: IndustryFitRow; onP
   );
 }
 
+/** 나란히 볼 상권 고르기 한 줄(R1 비교 모드) — 누르면 담고 뺀다. 순위는 그대로 읽어 준다 */
+function PickLine({ row, on, disabled, pinned, onToggle }: { row: IndustryFitRow; on: boolean; disabled: boolean; pinned?: boolean; onToggle: () => void }) {
+  return (
+    <li className={"fl-row" + (pinned ? " is-pinned" : "")}>
+      <button type="button" className="fl-row-btn" role="checkbox" aria-checked={on} disabled={disabled} onClick={onToggle}>
+        <span className={"fl-pick" + (on ? " is-on" : "")} aria-hidden="true">{on ? "✓" : ""}</span>
+        <span className="fl-row-main">
+          <span className="fl-row-title">{row.name ?? row.district_id}</span>
+          <span className="fl-row-meta">{[pinned ? "지금 내 상권" : null, row.fit_rank != null ? `${row.fit_rank}위` : null, row.gu].filter(Boolean).join(" · ")}</span>
+        </span>
+      </button>
+    </li>
+  );
+}
+
 export function Districts() {
   const { state, update } = useFlow();
   const data = useFlowData();
@@ -193,6 +210,8 @@ export function Districts() {
   const ranked = hasRanking(ind);
   const fit = useLoad(ok && ranked && ind ? `fit:${ind.key}` : null, () => data.industryFit(ind!.key));
   const [why, setWhy] = useState(false);
+  // 비교 모드(2026-10-24 · R1-c) — 행을 누르면 R2 로 가는 대신 나란히 볼 상권에 담는다. 「그만두기」로 원래 목록에 돌아온다
+  const [picked, setPicked] = useState<string[] | null>(null);
   if (!ok) return null;
   const caption = `상권 찾기 · ${ind?.label ?? "…"}`;
   const pick = (id: string) => {
@@ -232,6 +251,29 @@ export function Districts() {
   const home = state.goal === "move" ? rows.find((r) => r.district_id === state.homeDistrictId) : undefined;
   const homeInTop = !!home && top.some((r) => r.district_id === home.district_id);
   const diff = home && top[0] && home.fit != null && top[0].fit != null ? Math.round((top[0].fit - home.fit) * 100) : null;
+  if (picked) {
+    const toggle = (id: string) => setPicked((p) => (!p ? p : p.includes(id) ? p.filter((x) => x !== id)
+      : p.length < COMPARE_MAX ? [...p, id] : p));
+    const full = picked.length >= COMPARE_MAX;
+    const line = (r: IndustryFitRow, pinned?: boolean) => (
+      <PickLine key={r.district_id} row={r} pinned={pinned} on={picked.includes(r.district_id)}
+        disabled={full && !picked.includes(r.district_id)} onToggle={() => toggle(r.district_id)} />
+    );
+    return (
+      <FlowScreen wide back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
+        title="나란히 볼 상권을 골라 주세요" sub={`${COMPARE_MAX}곳까지 고르면 입지 점수·빈 층·월세를 같은 줄로 놓아 드려요.`}
+        cta={<BottomCTA
+          primary={{ label: picked.length >= 2 ? `${picked.length}곳 나란히 보기` : `${2 - picked.length}곳 더 골라 주세요`,
+            disabled: picked.length < 2, onClick: () => go(comparePath(picked)) }}
+          secondary={{ label: "그만두기", onClick: () => setPicked(null) }} />}>
+        <RowList label="나란히 볼 상권">
+          {home && !homeInTop && line(home, true)}
+          {top.map((r) => line(r, r.district_id === home?.district_id))}
+        </RowList>
+        {full && <p className="fl-note" role="status">{COMPARE_MAX}곳까지 나란히 볼 수 있어요. 다른 상권을 담으려면 하나를 빼 주세요.</p>}
+      </FlowScreen>
+    );
+  }
   return (
     <FlowScreen wide back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
       title={`${ind.label} 입지 점수가 높은 상권이에요`}
@@ -248,6 +290,8 @@ export function Districts() {
       )}
       {rows.some((r) => r.rent_shared) && <p className="fl-note">* 가까운 상권의 임대료 통계를 빌려 쓴 값이에요.</p>}
       <div className="fl-actions">
+        {/* 옮기기는 지금 상권을 먼저 담아 둔다 — 견줄 기준이 지금 상권이다 */}
+        <TextButton onClick={() => setPicked(home ? [home.district_id] : [])}>상권 나란히 비교하기</TextButton>
         <TextButton onClick={() => setWhy(true)}>왜 이 순서인가요?</TextButton>
         <TextButton onClick={() => go("/district-search")}>다른 상권 직접 고르기</TextButton>
       </div>
@@ -385,7 +429,9 @@ export function District({ id }: { id: string }) {
   const groups = identity?.categories.groups ?? [];
   const demand = identity?.demand;
   const peak = demand?.bands?.find((b) => b.band === demand.peak_band)?.label;
-  const quiet = demand?.bands?.find((b) => b.band === demand.gap_band)?.label;
+  // gap_band 는 「한산한 때」가 아니라 유동 대비 매출이 가장 빈 시간대다(services/marketing._gap_band) — 2026-10-24 까지
+  // 「한산한 때」로 적어, 붐비는 때와 같은 시간대가 「한산한 때」로도 찍혔다(안암·고려대 6~11시 실측)
+  const gap = demand?.bands?.find((b) => b.band === demand.gap_band)?.label;
   const title = identity?.archetype ? `${eun(name)} ${archetypePhrase(identity.archetype)} 상권이에요` : `${name}을 한눈에 볼게요`;
   const loading = platform.status === "loading" || rent.status === "loading" || floors.status === "loading" || ds.status === "loading";
   const next = () => {
@@ -399,7 +445,7 @@ export function District({ id }: { id: string }) {
       {loading ? <SkeletonRows n={4} label="상권 소개를 불러오는 중" /> : (
         <dl className="fl-facts-list">
           <div><dt>무엇이 모여 있나요</dt><dd>{groups.length ? groups.slice(0, 2).map((g) => `${g.group} ${Math.round(g.share * 100)}%`).join(" · ") : "업종 구성 자료가 없어요"}</dd></div>
-          <div><dt>언제 붐비나요</dt><dd>{peak ? `${peak}${quiet ? ` · 한산한 때 ${quiet}` : ""}` : "시간대 자료가 없어요"}</dd></div>
+          <div><dt>언제 붐비나요</dt><dd>{peak ? <>{peak}{gap && <span className="fl-dd-sub">사람에 비해 매출이 적은 때 {gap}</span>}</> : "시간대 자료가 없어요"}</dd></div>
           <div><dt>1층 월세는</dt><dd>{rent.status === "ready"
             ? <>평당 {rent.data.base_rent_per_pyeong}만원 <Badge tone="est">추정</Badge>{rent.data.rent_source === "rone-shared" && <span className="fl-dd-sub">가까운 상권 통계를 빌렸어요</span>}</>
             : "이 상권은 임대료 통계가 없어요"}</dd></div>

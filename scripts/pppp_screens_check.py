@@ -25,6 +25,9 @@
       — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 넷이 보인다
   P4  지도 탐색이 흐름에서 고른 상권으로 열린다(설계서 5판 §10 C2) — Platform · Page 의 상권 선택 값
   P5  랜딩의 PPPP 네 질문(#how)이 접히지 않고 보인다
+  P6  (2026-10-24) 홈의 새 입구 — 네 단계를 다 마친 홈의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
+      보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 넷이 보이고, 그 트랙 화면이
+      서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 네 화면으로 간다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
   그건 이 규칙과 무관하다(지도 SDK 는 레일·패널을 가리지 않는다).
 
@@ -50,6 +53,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FLOW_KEY = "placeos.flow.v1"
+PLAN_KEY = "placeos.flow.plan.v1"
 TRACKS = ["Platform", "Page", "Posting", "Program"]
 # 레일 버튼 → 그 화면이 섰다는 표지(역할 · 접근성 이름). Page(MapShell)만 TrackMapFrame 패널이 아니라 레이어 묶음이다
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
@@ -73,6 +77,21 @@ def wait_http(url: str, timeout: int = 180) -> None:
 def get_json(url: str):
     with urllib.request.urlopen(url, timeout=60) as r:
         return json.loads(r.read().decode("utf-8"))
+
+
+def first_space(base: str, district_id: str) -> dict | None:
+    """그 상권의 빈 자리 하나(건물 id · 좌표가 있는 것) — 흐름의 빈 자리 목록(R3)과 같은 출처: 임대시세 매물, 없으면 층 목록"""
+    for path, key in ((f"/api/v1/heatmap/rent?district={district_id}", "listings"),
+                      (f"/api/v1/commercial-districts/{district_id}/floor-vacancies?limit=50", "units")):
+        try:
+            rows = get_json(base + path).get(key, [])
+        except Exception:
+            continue
+        for r in rows:
+            if r.get("building_id") and r.get("lat") is not None and r.get("lng") is not None:
+                return {"id": r["id"], "building_id": r["building_id"], "name": r.get("name") or r.get("n") or r["building_id"],
+                        "floor": r.get("floor"), "lat": r["lat"], "lng": r["lng"]}
+    return None
 
 
 class Report:
@@ -133,6 +152,18 @@ def main() -> int:
     industry = next((i for i in industries if i.get("model_label")), industries[0] if industries else None)
     flow = {"v": 1, "goal": "start", "industryKey": industry["key"] if industry else None, "districtId": target["id"]}
     seed = f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(flow))})"
+    # P6 — 네 단계를 다 마친 흐름 답. 자리는 그 상권의 실제 빈 자리(건물 id 가 있는 것) 하나다 — 지어낸 건물 id 로는
+    # Page 가 「선택한 건물을 찾지 못했습니다」를 띄워 「고른 건물이 골라진다」를 잴 수 없다
+    space = first_space(base, target["id"])
+    done_seed = None
+    if space:
+        floor = space.get("floor")
+        done = {**flow, "spaceId": space["id"], "spaceLabel": f"{space['name']} {floor}층" if floor and floor >= 1 else space["name"],
+                "spaceAt": {"buildingId": space["building_id"], "name": space["name"], "lat": space["lat"], "lng": space["lng"]},
+                "premium": {"kind": "none"}}
+        plan = {"brief": {}, "plan": {"mode": "popup"}, "at": "2026-10-24"}   # 홈의 네 번째 단계(작게 확인)를 마친 표시만
+        done_seed = (f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(done))});"
+                     f"sessionStorage.setItem('{PLAN_KEY}', {json.dumps(json.dumps(plan))})")
 
     rep = Report()
     errors: list[str] = []
@@ -245,6 +276,58 @@ def main() -> int:
         if args.screens:
             pg.locator("#how").screenshot(path=str(out / "p5-landing-how.png"))
         pg.close()
+
+        # P6 — 홈의 새 입구(2026-10-24). 진입로 검사와 같이 매번 새 페이지로 #/home 을 바로 연 뒤 누른다
+        if not done_seed:
+            rep.add("P6 홈의 새 입구", False, {"error": f"{target['id']} 에 건물 id 가 있는 빈 자리가 없다 — 다른 --district 로"})
+        else:
+            for ctx_name, opts in (("desktop", desk), ("mobile", dict(viewport={"width": 390, "height": 844}, locale="ko-KR", is_mobile=True, has_touch=True))):
+                donectx = browser.new_context(**opts)
+                donectx.add_init_script(done_seed)
+
+                def opened(page, cid: str, track: str, panel: tuple[str, str, str], building: bool) -> None:
+                    st = settled(page)
+                    want = f"#/explore?track={track}"
+                    try:
+                        page.get_by_role(panel[1], name=panel[2]).first.wait_for(state="visible", timeout=60000)
+                        shown = True
+                    except Exception:
+                        shown = False
+                    current = page.get_by_role("button", name=panel[0], exact=True).get_attribute("aria-current")
+                    chosen = None
+                    if building:
+                        try:
+                            page.get_by_role("button", name="← 건물 목록").wait_for(state="visible", timeout=30000)
+                            chosen = True
+                        except Exception:
+                            chosen = False
+                    detail = {**st, "panel": shown, "aria-current": current, **({"building_selected": chosen} if building else {})}
+                    rep.add(cid, st["hash"].startswith(want) and rail_ok(st["rail"]) and shown and current == "page"
+                            and (chosen is not False), detail)
+
+                def click_or_tap(page, loc) -> None:
+                    loc.wait_for(state="visible", timeout=60000)
+                    page.wait_for_timeout(800)
+                    loc.tap() if ctx_name == "mobile" else loc.click()
+
+                for cid, press, track, panel, building in (
+                    (f"P6a 홈 주 버튼 「지도에서 내 자리 보기」({ctx_name})",
+                     lambda p: click_or_tap(p, p.get_by_role("button", name="지도에서 내 자리 보기", exact=True)), "page", PANELS[1], True),
+                    (f"P6b 지도 미리보기 「지도에서 이어 보기」({ctx_name})",
+                     lambda p: click_or_tap(p, p.get_by_role("link", name="지도에서 이어 보기", exact=True)), "page", PANELS[1], True),
+                    (f"P6c 지도 미리보기 칩 「상권 Platform」({ctx_name})",
+                     lambda p: click_or_tap(p, p.get_by_role("navigation", name="지도에서 단계별로 보기").get_by_role("link").first), "platform", PANELS[0], False),
+                ):
+                    page = watch(donectx.new_page(), cid)
+                    page.goto(base + "/#/home")
+                    try:
+                        press(page)
+                        opened(page, cid, track, panel, building)
+                    except Exception as e:
+                        rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
+                    shot(page, cid.split()[0].lower() + f"-{ctx_name}")
+                    page.close()
+                donectx.close()
         browser.close()
 
     result = {

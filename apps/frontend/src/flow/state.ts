@@ -49,6 +49,10 @@ export interface SpaceBrowse {
 }
 export const emptySpaceBrowse = (): SpaceBrowse => ({ first: false, confirmed: false, calcOnly: false, savedOnly: false, sort: "rent", shown: 24 });
 
+/** 고른 자리의 건물·좌표(2026-10-24). 홈이 지도 탐색을 그 건물로 열고(Page 의 선택 건물), 지도 미리보기에 핀을 꽂는다.
+ *  자리 id(`vfu-{지번}-{층}`)에는 건물 id 가 없다 — 한 지번에 건물이 여럿일 수 있어서다. 그래서 고르는 순간 같이 적는다. */
+export interface SpaceAt { buildingId: string | null; name: string; lat: number; lng: number }
+
 export interface FlowState {
   v: 1;
   goal: BusinessGoal | null;
@@ -70,6 +74,8 @@ export interface FlowState {
   spaceId: string | null;
   /** 홈에 보일 그 자리 이름(「성수빌딩 1층」) */
   spaceLabel: string | null;
+  /** 그 자리의 건물·좌표 — 이 칸 없이 저장된 옛 답이면 null(자리 상세를 다시 열면 채워진다) */
+  spaceAt: SpaceAt | null;
   premium: PremiumAnswer | null;
   /** R5 에서 고른 가격대(premium/value/factory) */
   tier: string | null;
@@ -91,7 +97,7 @@ export const emptyCosts = (): CostAnswers => ({
 
 export const emptyFlow = (): FlowState => ({
   v: 1, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
-  districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, premium: null, tier: null,
+  districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, spaceAt: null, premium: null, tier: null,
   costs: emptyCosts(), spaceBrowse: emptySpaceBrowse(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
 });
 
@@ -100,6 +106,11 @@ let memory: FlowState | null = null;
 const isGoal = (v: unknown): v is BusinessGoal => v === "start" || v === "pivot" || v === "move";
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v : null);
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null);
+const coord = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const parseAt = (v: unknown): SpaceAt | null => {
+  const at = v as Partial<SpaceAt> | null | undefined;
+  return at && coord(at.lat) && coord(at.lng) ? { buildingId: str(at.buildingId), name: str(at.name) ?? "", lat: at.lat, lng: at.lng } : null;
+};
 
 /** 저장된 값을 읽는다. 모양이 깨진 칸은 버리고 나머지는 살린다 — 한 칸 때문에 전부 잃지 않게. */
 export function loadFlow(): FlowState {
@@ -129,6 +140,7 @@ export function loadFlow(): FlowState {
       },
       spaceId: str(v?.spaceId),
       spaceLabel: str(v?.spaceLabel),
+      spaceAt: str(v?.spaceId) ? parseAt(v?.spaceAt) : null,
       premium: premium?.kind === "none" || premium?.kind === "unknown" ? { kind: premium.kind }
         : premium?.kind === "amount" && num(premium.manwon) != null ? { kind: "amount", manwon: premium.manwon } : null,
       tier: str(v?.tier),
@@ -161,7 +173,7 @@ export function clearFlow(): void {
 /* ── 답 바꾸기 — 그 뒤만 비운다(§2-3) ─────────────────────────────────────── */
 
 const clearSpaceOn = (s: FlowState): FlowState => ({
-  ...s, spaceId: null, spaceLabel: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
+  ...s, spaceId: null, spaceLabel: null, spaceAt: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
 });
 const clearDistrictOn = (s: FlowState): FlowState => ({ ...clearSpaceOn(s), districtId: null, rentCap: null, rentCapAnswered: false, spaceBrowse: emptySpaceBrowse() });
 const clearValidateOn = (s: FlowState): FlowState => ({ ...s, mode: null, item: null, runDays: null, testBudget: null });
@@ -189,9 +201,17 @@ export function setDistrict(s: FlowState, id: string): FlowState {
   return { ...clearDistrictOn(s), districtId: id };
 }
 
-export function setSpace(s: FlowState, spaceId: string, label: string | null = null): FlowState {
-  if (s.spaceId === spaceId) return label && s.spaceLabel !== label ? { ...s, spaceLabel: label } : s;
-  return { ...clearSpaceOn(s), spaceId, spaceLabel: label };
+const sameAt = (a: SpaceAt | null, b: SpaceAt | null) =>
+  a === b || (!!a && !!b && a.buildingId === b.buildingId && a.name === b.name && a.lat === b.lat && a.lng === b.lng);
+
+export function setSpace(s: FlowState, spaceId: string, label: string | null = null, at: SpaceAt | null = null): FlowState {
+  if (s.spaceId === spaceId) {
+    // 같은 자리 — 이름표·위치만 채운다(옛 답에 없던 위치를 자리 상세가 채운다). 바뀐 것이 없으면 같은 객체(다시 그리지 않게)
+    const nextLabel = label && s.spaceLabel !== label ? label : s.spaceLabel;
+    const nextAt = at && !sameAt(s.spaceAt, at) ? at : s.spaceAt;
+    return nextLabel === s.spaceLabel && nextAt === s.spaceAt ? s : { ...s, spaceLabel: nextLabel, spaceAt: nextAt };
+  }
+  return { ...clearSpaceOn(s), spaceId, spaceLabel: label, spaceAt: at };
 }
 
 /** 검증 계획이 쓸 업종 — 바꾸기는 바꿀 업종, 그 밖은 할 업종(lib/businessProfile.workIndustryKey 와 같은 규칙) */
