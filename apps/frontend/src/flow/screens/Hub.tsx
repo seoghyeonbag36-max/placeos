@@ -1,8 +1,10 @@
 /**
  * 허브 — 화면설계서 5판 §5-5: H 홈(네 단계 진행 · 저장한 것) · M 내 정보 · 로그인 패널(시트와 내 정보가 같이 쓴다).
  * 허브 화면만 탭(홈 · 지도 · 내 정보)을 보인다. 질문·결과 화면은 탭을 숨긴다(§4-3).
+ * 2026-10-24: 홈에서 지도로 바로 — 네 단계를 다 봤으면 주 버튼이 지도 탐색(PPPP 네 화면)을 고른 건물로 연다 ·
+ *   지도 미리보기 · 「상권 나란히 보기」(R1-c). 탭 「지도」는 그대로 `#/explore` 다(PPPP 화면 보존 규칙).
  */
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { getAuthProviders, getMe, logoutSession, type AuthMe, type AuthProviders, type SavedResult } from "@/lib/api";
 import GoogleSignIn from "@/components/GoogleSignIn";
 import PrivacyNote from "@/components/PrivacyNote";
@@ -11,12 +13,14 @@ import { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import { clearToken } from "@/lib/session";
 import { LOGIN_BENEFITS, useFlow, type LoginReason } from "../context";
+import { compareIds } from "@/lib/districtCompare";
 import { ro } from "../format";
-import { go } from "../route";
+import { comparePath, explorePath, go, type ExploreTrack } from "../route";
 import { useSaved } from "../context";
-import { clearFlow, emptyFlow, setDistrict, setGoal } from "../state";
-import { Badge, ChoiceList, FlowScreen, Row, RowList, Sheet, TextButton } from "../ui";
-import { GOAL_LABEL, industryOf, useDistrictName, useIndustries } from "./common";
+import { MiniMap, type MiniMapPin } from "../MiniMap";
+import { clearFlow, emptyFlow, setDistrict, setGoal, type SpaceAt } from "../state";
+import { Badge, BottomCTA, ChoiceList, FlowScreen, Row, RowList, Sheet, TextButton } from "../ui";
+import { GOAL_LABEL, industryOf, useDistrictName, useDistricts, useIndustries } from "./common";
 import { clearPlan, loadPlan, modeTitle } from "../plan";
 
 /* ── 로그인 패널 — 얻는 것 세 줄 + 수단(§5-5 L) ─────────────────────────── */
@@ -68,6 +72,88 @@ function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: n
   );
 }
 
+/* ── 홈의 지도 미리보기(2026-10-24 · §5-5) ────────────────────────────────── */
+
+/** 홈의 네 단계 ↔ 지도 탐색 레일의 네 트랙(1:1) — 칩 하나가 그 트랙을 같은 상권으로 연다 */
+const TRACK_CHIPS: { track: ExploreTrack; name: string; en: string }[] = [
+  { track: "platform", name: "상권", en: "Platform" },
+  { track: "page", name: "빈 자리", en: "Page" },
+  { track: "posting", name: "비용", en: "Posting" },
+  { track: "program", name: "작게 확인", en: "Program" },
+];
+
+/**
+ * 지도를 찾게 하지 말고 보이게 — 빈 자리를 고른 뒤에만 선다. 고른 자리는 기본 핀, 같은 상권에 저장한 후보는 작은 점이다.
+ * ⛔ 카드 전체가 지도 탐색(PPPP 네 화면)으로 가는 **입구**다. 끌 수도 확대할 수도 없는 정지 그림이라 흐름 안 지도로
+ *   지도 탐색을 대신하지 않는다(10-18 의 `#/spaces/map` 과 다른 점 — PPPP 화면 보존 규칙). 탭 「지도」도 그대로다.
+ * 지도 위를 덮는 링크는 마우스·터치용이라 읽어 주지 않고(aria-hidden), 같은 곳으로 가는 「지도에서 이어 보기」가 읽힌다.
+ */
+function MapPreview({ districtId, spaceId, spaceLabel, at, results }: {
+  districtId: string; spaceId: string; spaceLabel: string | null; at: SpaceAt | null; results: SavedResult[] | null;
+}) {
+  const ds = useDistricts();
+  const titleId = useId();
+  const d = ds.status === "ready" ? ds.data.find((x) => x.id === districtId) : undefined;
+  // 위치 없이 저장된 옛 답이면 상권 중심으로 연다(핀 없이)
+  const center = at ? { lat: at.lat, lng: at.lng } : d ? { lat: d.center[0], lng: d.center[1] } : null;
+  if (!center) return null;
+  const savedHere: MiniMapPin[] = (results ?? []).flatMap((r) => {
+    const p = r.payload ?? {};
+    return r.kind === "space" && r.districtId === districtId && p.spaceId !== spaceId
+      && typeof p.lat === "number" && typeof p.lng === "number" ? [{ lat: p.lat, lng: p.lng }] : [];
+  });
+  const pins: MiniMapPin[] = [...(at ? [{ lat: at.lat, lng: at.lng, mine: true }] : []), ...savedHere];
+  const building = at?.buildingId ?? null;
+  const href = (track: ExploreTrack) =>
+    `#${explorePath({ track, district: districtId, building: track === "page" || track === "posting" ? building : null })}`;
+  return (
+    <section className="fl-mapcard" aria-labelledby={titleId}>
+      <MiniMap center={center} pins={pins} zoom={16} still lazy
+        label={`${d?.name ?? "상권"} 지도 — ${at ? `고른 자리 ${spaceLabel ?? ""}` : "상권 중심"}${savedHere.length ? ` · 저장한 후보 ${savedHere.length}곳` : ""}`}>
+        <a className="fl-mapcard-cover" href={href("page")} aria-hidden="true" tabIndex={-1} />
+      </MiniMap>
+      <div className="fl-mapcard-foot">
+        <a id={titleId} className="fl-mapcard-title" href={href("page")}>
+          지도에서 이어 보기
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </a>
+        <nav className="fl-mapcard-tracks" aria-label="지도에서 단계별로 보기">
+          {TRACK_CHIPS.map((t) => (
+            <a key={t.track} className="fl-mapcard-track" href={href(t.track)}><b>{t.name}</b>{" "}<small>{t.en}</small></a>
+          ))}
+        </nav>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * 홈의 「상권 나란히 보기」(2026-10-24 · R1-c) — 보는 상권과 저장한 자리의 상권이 두 곳 이상이면 한 번에 견준다.
+ * 저장한 자리가 여러 상권에 흩어져 있어도 그전에는 상권을 하나씩 열어 머리로 견줘야 했다. 상권 수 상한(3)을 넘으면
+ * 최근 것부터 셋만 담고, 그 사실을 줄에 적는다(조용히 자르지 않는다).
+ */
+function CompareEntry({ districtId, results }: { districtId: string | null; results: SavedResult[] }) {
+  const ds = useDistricts();
+  if (ds.status !== "ready") return null;
+  const nameOf = (id: string) => ds.data.find((d) => d.id === id)?.name;
+  // 보는 상권 먼저, 그다음 저장한 자리의 상권(서버가 최근 저장 순으로 준다) — 지금 서비스하는 상권만
+  const candidates = compareIds([districtId ?? "", ...results.filter((r) => r.kind === "space").map((r) => r.districtId ?? "")]
+    .filter((id) => !!nameOf(id)));
+  const total = new Set([districtId, ...results.filter((r) => r.kind === "space").map((r) => r.districtId)]
+    .filter((id): id is string => !!id && !!nameOf(id))).size;
+  if (candidates.length < 2) return null;
+  const cut = total - candidates.length;
+  return (
+    <button type="button" className="fl-entry" onClick={() => go(comparePath(candidates))}>
+      <span className="fl-entry-main">
+        <b>상권 {candidates.length}곳 나란히 보기</b>
+        <span>{candidates.map(nameOf).join(" · ")}{cut > 0 ? ` — 최근 ${candidates.length}곳만(${cut}곳 더 있어요)` : ""}</span>
+      </span>
+      <span className="fl-entry-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+    </button>
+  );
+}
+
 export function Home() {
   const { state, update, token, openLogin } = useFlow();
   const { results } = useSaved();
@@ -110,8 +196,17 @@ export function Home() {
     // 마지막으로 연 화면이 이 단계 안이면 거기로(§5-5 「이어서」), 아니면 그 단계의 첫 화면
     go(state.lastPath && stageOf(state.lastPath) === s.key ? state.lastPath : s.path);
   };
+  // 네 단계를 다 봤으면 다음 할 일은 「이어서」가 아니라 지도다(2026-10-24 · §5-5) — 다 마친 사람은 탭 「지도」를 찾아 누르지
+  // 않았다. 하단 주 버튼이 지도 탐색(PPPP 네 화면)을 Page 트랙 · 고른 건물로 연다. 탭 「지도」는 그대로 `#/explore` 다.
+  const allDone = nextIdx === -1;
+  const mapDistrict = state.districtId ?? state.homeDistrictId;
+  const myBuilding = state.spaceAt?.buildingId ?? null;
+  const openMap = () => go(explorePath({ track: "page", district: mapDistrict, building: myBuilding }));
   return (
-    <FlowScreen hub tab="home" caption={GOAL_LABEL[state.goal]} title={title}>
+    <FlowScreen hub tab="home" caption={allDone ? title : GOAL_LABEL[state.goal]}
+      title={allDone ? "네 단계를 다 봤어요" : title}
+      sub={allDone ? "고른 자리를 지도에서 주변 빈 자리와 함께 볼 수 있어요." : undefined}
+      cta={allDone ? <BottomCTA primary={{ label: myBuilding ? "지도에서 내 자리 보기" : "지도에서 이 상권 보기", onClick: openMap }} /> : undefined}>
       <ol className="fl-steps" aria-label="네 단계">
         {stages.map((s, i) => (
           <li key={s.key} className={"fl-step" + (s.done ? " is-done" : "") + (i === nextIdx ? " is-next" : "")}>
@@ -123,9 +218,13 @@ export function Home() {
           </li>
         ))}
       </ol>
+      {state.spaceId && mapDistrict && (
+        <MapPreview districtId={mapDistrict} spaceId={state.spaceId} spaceLabel={state.spaceLabel} at={state.spaceAt} results={token ? results : null} />
+      )}
       <h2 className="fl-h2">저장한 것</h2>
       {token ? (results ? <SavedList items={results} limit={5} /> : <p className="fl-note">불러오는 중…</p>)
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}
+      {token && results && <CompareEntry districtId={mapDistrict} results={results} />}
       <div className="fl-actions">
         <TextButton onClick={() => setReset(true)}>처음부터</TextButton>
         <TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton>
@@ -145,7 +244,7 @@ const openVisitorFeedback = () => window.dispatchEvent(new Event(OPEN_VISITOR_FE
 
 /** 흐름 주소 → 단계 */
 function stageOf(path: string): string | null {
-  if (/^\/(start|industry|home-district|districts|industries|pivot-next|district-search|district\/)/.test(path)) return "platform";
+  if (/^\/(start|industry|home-district|districts|industries|pivot-next|district-search|district\/|compare\/)/.test(path)) return "platform";
   if (/^\/(rent-cap|spaces|space\/)/.test(path)) return "page";
   if (/^\/(premium|payback|budget|contract|fitout|budget-check)/.test(path)) return "posting";
   if (/^\/(validate|item|period|test-budget|plan)/.test(path)) return "program";

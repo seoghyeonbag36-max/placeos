@@ -1,6 +1,8 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import DistrictPicker, { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import PlatformComparison from "@/components/PlatformComparison";
+import DistrictCompareDialog from "@/components/DistrictCompareDialog";
+import { COMPARE_MAX } from "@/lib/districtCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import {
@@ -14,7 +16,7 @@ import { Card } from "@/design/components/Card";
 import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import IndustryFitCard from "@/components/IndustryFitCard";
 import BenchmarkExplorer from "@/components/BenchmarkExplorer";
-import { findIndustry, type BusinessProfile } from "@/lib/businessProfile";
+import { findIndustry, workIndustryKey, type BusinessProfile } from "@/lib/businessProfile";
 import { lstmPromoted } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
 import { useMapHost } from "@/components/mapHostContext";
@@ -92,6 +94,10 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   const toggleSite = (id: string) => setSelectedSiteIds((ids) => ids.includes(id)
     ? ids.filter((selected) => selected !== id)
     : ids.length < 3 ? [...ids, id] : ids);
+  // 상권 비교(2026-10-24) — 상권을 바꿔 가며 2~3곳을 담고 나란히 본다(흐름 R1-c 와 같은 줄). 위 자리 비교와 달리
+  // 상권을 바꿔도 남는다 — 상권을 바꾸는 것이 곧 담는 방법이다. 새로고침하면 비워진다(Page 후보 비교와 같다).
+  const [districtPicks, setDistrictPicks] = useState<string[]>([]);
+  const [comparingDistricts, setComparingDistricts] = useState(false);
   const [quarters, setQuarters] = useState(1);
   const [listErr, setListErr] = useState<string | null>(null);
 
@@ -193,6 +199,13 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   }, [prof, districtId, mySite?.label]);
   const sitesHere = openingsHere?.sites ?? null;
   const boundary = usePlatformMap({ districtId, sites: sitesHere, selectedIds: selectedSiteIds, onToggle: toggleSite, mySite });
+  // 상권 비교의 업종 — 해 볼 업종(바꾸기면 바꿀 업종). 추천 모델 밖이면 입지 점수 줄을 빼고 그렇다고 적는다
+  const workInd = findIndustry(industries, workIndustryKey(business));
+  const compareIndustry = workInd?.model_label && !workInd.fit_unavailable_reason ? { key: workInd.key, label: workInd.label } : null;
+  const pickedHere = districtPicks.includes(districtId);
+  const togglePick = () => setDistrictPicks((ids) => (ids.includes(districtId) ? ids.filter((x) => x !== districtId)
+    : ids.length < COMPARE_MAX ? [...ids, districtId] : ids));
+  const pickNames = districtPicks.map((id) => districts.find((d) => d.id === id)?.name ?? id);
 
   return (
     <div className="platconsole"><div className="wrap">
@@ -237,7 +250,26 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
             </span>}
           </div>
         )}
+        <div className="dcmp-tray" role="group" aria-label="상권 비교">
+          <button type="button" className="dcmp-btn" aria-pressed={pickedHere}
+            disabled={!pickedHere && districtPicks.length >= COMPARE_MAX} onClick={togglePick}>
+            {pickedHere ? "✓ 상권 비교에 담음" : "+ 상권 비교에 담기"}
+          </button>
+          {districtPicks.length > 0 && <>
+            <span className="dcmp-tray-names">{pickNames.join(" · ")} ({districtPicks.length}/{COMPARE_MAX})
+              {districtPicks.length < 2 ? " — 상권을 바꿔 한 곳 더 담아 주세요" : ""}</span>
+            <button type="button" className="dcmp-btn is-strong" disabled={districtPicks.length < 2}
+              onClick={() => setComparingDistricts(true)}>상권 비교</button>
+            <button type="button" className="dcmp-btn" onClick={() => setDistrictPicks([])}>비우기</button>
+          </>}
+        </div>
       </div>
+      {comparingDistricts && (
+        <DistrictCompareDialog ids={districtPicks} districts={districts} industry={compareIndustry}
+          unrankedIndustry={workInd && !compareIndustry ? workInd.label : null}
+          onOpenDistrict={(id) => { setComparingDistricts(false); setDistrictId(id); }}
+          onClose={() => setComparingDistricts(false)} />
+      )}
 
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}

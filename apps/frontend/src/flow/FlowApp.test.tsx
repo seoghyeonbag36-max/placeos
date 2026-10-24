@@ -7,11 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FloorVacancyUnit, TierScenario } from "@/lib/api";
 import { clearToken, saveToken } from "@/lib/session";
 import { installFetchStub, type ApiCall, type FetchStub } from "@/test/fetchStub";
+import { installNaverStub, removeNaverStub } from "@/test/naverStub";
 import { district, rentHeatmap, rentListing } from "@/test/fixtures";
 import FlowApp from "./FlowApp";
 import { FLOW_KEY } from "./state";
 
-const loadNaverMaps = vi.fn(() => Promise.reject(new Error("테스트에는 지도가 없다")));
+const loadNaverMaps = vi.fn((): Promise<void> => Promise.reject(new Error("테스트에는 지도가 없다")));
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => loadNaverMaps(), describeNaverMapError: String }));
 
 const INDUSTRIES = [
@@ -329,6 +330,178 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     window.history.replaceState(null, "", "/");
     render(<FlowApp token="tok" />);
     await waitFor(() => expect(window.location.hash).toBe("#/home"));
+  });
+
+  it("빈 자리를 고르면 그 자리의 건물·좌표를 같이 적는다 — 홈이 지도 탐색을 그 건물로 연다(10-24)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/spaces");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { name: "빈 자리가 2곳 있어요" });
+    fireEvent.click(screen.getByText("B1 건물").closest("button")!);
+    await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" });
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceAt)
+      .toEqual({ buildingId: "B1", name: "B1 건물", lat: 37.52, lng: 127.02 }));
+  });
+
+  it("옛 답(위치 없이 저장된 자리)은 자리 상세를 열면 위치가 채워진다 · 자리를 바꾸면 위치도 바뀐다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+      spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층" }));
+    open("/space/vfu-B1-1");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" });
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceAt?.buildingId).toBe("B1"));
+    act(() => { window.history.pushState(null, "", "/#/space/vfu-B2-2"); window.dispatchEvent(new HashChangeEvent("hashchange")); });
+    await screen.findByRole("heading", { level: 1, name: "B2 건물 2층" });
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceAt?.buildingId).toBe("B2"));
+  });
+
+  it("홈 — 네 단계를 다 봤으면 주 버튼이 지도 탐색을 Page 트랙 · 고른 건물로 연다(10-24)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+      spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", spaceAt: { buildingId: "B1", name: "B1 건물", lat: 37.52, lng: 127.02 },
+      premium: { kind: "none" } }));
+    window.sessionStorage.setItem("placeos.flow.plan.v1", JSON.stringify({ brief: {}, plan: { mode: "popup" }, at: "2026-10-24" }));
+    open("/home");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "네 단계를 다 봤어요" })).toBeTruthy();
+    expect(screen.getByText("카페·디저트 창업 준비")).toBeTruthy();   // 목적은 캡션으로 내려간다
+    fireEvent.click(screen.getByRole("button", { name: "지도에서 내 자리 보기" }));
+    expect(window.location.hash).toBe("#/explore?track=page&district=seongsu&building=B1");
+  });
+
+  it("홈 — 위치가 없는 옛 답이면 상권으로 연다 · 아직 덜 했으면 지도 버튼 대신 「이어서」가 주인공이다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+      spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", premium: { kind: "none" } }));
+    window.sessionStorage.setItem("placeos.flow.plan.v1", JSON.stringify({ brief: {}, plan: { mode: "popup" }, at: "2026-10-24" }));
+    open("/home");
+    const view = render(<FlowApp token={null} />);
+    fireEvent.click(await screen.findByRole("button", { name: "지도에서 이 상권 보기" }));
+    expect(window.location.hash).toBe("#/explore?track=page&district=seongsu");
+    view.unmount();
+    window.sessionStorage.clear();
+    open("/home");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "카페·디저트 창업 준비" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^지도에서/ })).toBeNull();
+    expect(within(screen.getByRole("list", { name: "네 단계" })).getByText("이어서")).toBeTruthy();
+  });
+
+  it("R1-c 상권 순위에서 두 곳을 담아 나란히 본다 — 입지 점수·빈 층·월세가 같은 줄에, 없는 값은 없다고(10-24)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { level: 1, name: "카페·디저트 입지 점수가 높은 상권이에요" });
+    fireEvent.click(screen.getByRole("button", { name: "상권 나란히 비교하기" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "나란히 볼 상권을 골라 주세요" })).toBeTruthy();
+    const go = screen.getByRole("button", { name: "2곳 더 골라 주세요" }) as HTMLButtonElement;
+    expect(go.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("checkbox", { name: /성수동 카페거리/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /가로수길/ }));
+    expect(screen.getByRole("checkbox", { name: /가로수길/ }).getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "2곳 나란히 보기" }));
+    expect(window.location.hash).toBe("#/compare/seongsu,garosugil");
+    expect(await screen.findByRole("heading", { level: 1, name: "상권 2곳을 나란히 놓았어요" })).toBeTruthy();
+    const table = screen.getByRole("table", { name: "상권 2곳 나란히 보기" });
+    const row = async (label: string) => {
+      const th = await within(table).findByRole("rowheader", { name: new RegExp(`^${label}`) });
+      await waitFor(() => expect(th.closest("tr")!.querySelector('[role="status"]')).toBeNull());   // 골격이 걷힐 때까지
+      return Array.from(th.closest("tr")!.querySelectorAll("td")).map((td) => td.textContent);
+    };
+    expect(within(table).getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["성수동 카페거리성동구", "가로수길강남구"]);
+    expect(await row("카페·디저트 입지 점수")).toEqual(["35점 · 1위비슷한 자리 100곳 중 같은 업종 10곳", "30점 · 2위비슷한 자리 100곳 중 같은 업종 10곳"]);
+    expect(await row("상권 유형")).toEqual(["카페 중심형", "자료 없음"]);           // 가로수길 정체성 404 = 산출물 없음
+    expect(await row("언제 붐비나")).toEqual(["14~17시", "자료 없음"]);
+    expect(await row("빈 층")).toEqual(["280곳1층 12곳", "90곳1층 9곳"]);
+    expect(await row("1층 월세")).toEqual(["평당 24.7만원", "통계 없음"]);           // 이웃 값으로 채우지 않는다
+    expect(await row("본전 계산 가능한 빈 자리")).toEqual(["1곳", "자료 없음"]);    // 성수 B1 만 vu- 유닛이 있다
+    // 공실 예측 · 감성 · 종합 점수 줄은 없다
+    expect(within(table).queryByRole("rowheader", { name: /예측|감성|종합/ })).toBeNull();
+  });
+
+  it("R1-c 열의 「빈 자리 보기」 — 고른 자리가 지워지는 상권 바꾸기는 먼저 묻고, 같은 상권이면 바로 간다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+      spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", premium: { kind: "none" } }));
+    open("/compare/seongsu,garosugil");
+    render(<FlowApp token={null} />);
+    fireEvent.click(await screen.findByRole("button", { name: "가로수길 빈 자리 보기" }));
+    const sheet = await screen.findByRole("dialog", { name: "가로수길로 바꿀까요?" });
+    expect(within(sheet).getByText(/고른 자리\(B1 건물 1층\)와 입력한 금액이 지워져요/)).toBeTruthy();
+    fireEvent.click(within(sheet).getByRole("button", { name: "닫기" }));
+    expect(window.location.hash).toBe("#/compare/seongsu,garosugil");
+    fireEvent.click(screen.getByRole("button", { name: "성수동 카페거리 빈 자리 보기" }));
+    expect(window.location.hash).toBe("#/spaces");
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceId).toBe("vfu-B1-1"));   // 같은 상권 — 답이 남는다
+  });
+
+  it("R1-c 상권이 두 곳이 안 되면 고르러 보낸다 · 주소의 겹친 상권과 모르는 상권은 버린다", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/compare/seongsu,seongsu,nowhere");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "비교할 상권이 두 곳 이상 필요해요" })).toBeTruthy();
+    expect(screen.getByText("성수동 카페거리 말고 한 곳을 더 골라야 나란히 볼 수 있어요.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "상권 고르기" }));
+    expect(window.location.hash).toBe("#/districts");
+  });
+
+  it("홈 — 보는 상권과 저장한 자리의 상권이 두 곳 이상이면 「상권 나란히 보기」로 한 번에 견준다(10-24)", async () => {
+    stub([{ match: /\/auth\/results$/, body: [
+      { id: "r1", kind: "space", title: "G1 건물 1층", districtId: "garosugil", payload: { spaceId: "vfu-G1-1" }, createdAt: "2026-10-21T00:00:00Z" },
+      { id: "r2", kind: "space", title: "B2 건물 2층", districtId: "seongsu", payload: { spaceId: "vfu-B2-2" }, createdAt: "2026-10-20T00:00:00Z" },
+    ] }]);
+    saveToken("tok");
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/home");
+    render(<FlowApp token="tok" />);
+    const entry = await screen.findByRole("button", { name: /상권 2곳 나란히 보기/ });
+    expect(entry.textContent).toContain("성수동 카페거리 · 가로수길");
+    fireEvent.click(entry);
+    expect(window.location.hash).toBe("#/compare/seongsu,garosugil");
+  });
+
+  it("홈 지도 미리보기 — 빈 자리를 고른 뒤에만 서고, 카드와 칩 넷이 지도 탐색(같은 상권 · 그 트랙)으로 가는 입구다(10-24)", async () => {
+    stub([{ match: /\/auth\/results$/, body: [
+      { id: "r1", kind: "space", title: "B2 건물 2층", districtId: "seongsu", payload: { spaceId: "vfu-B2-2", lat: 37.5202, lng: 127.0202 }, createdAt: "2026-10-21T00:00:00Z" },
+      { id: "r2", kind: "space", title: "G1 건물 1층", districtId: "garosugil", payload: { spaceId: "vfu-G1-1", lat: 37.51, lng: 127.02 }, createdAt: "2026-10-20T00:00:00Z" },
+    ] }]);
+    // 고르기 전 — 미리보기가 없고 SDK 도 부르지 않는다(F-13)
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/home");
+    const before = render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { level: 1, name: "카페·디저트 창업 준비" });
+    expect(screen.queryByRole("link", { name: "지도에서 이어 보기" })).toBeNull();
+    expect(loadNaverMaps).not.toHaveBeenCalled();
+    before.unmount();
+    // 고른 뒤 — 고른 자리 핀 + 같은 상권에 저장한 후보 점(다른 상권 후보는 빼고), 끌 수 없는 정지 지도
+    const naver = installNaverStub();
+    loadNaverMaps.mockImplementation(() => Promise.resolve());
+    try {
+      saveToken("tok");
+      window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+        spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", spaceAt: { buildingId: "B1", name: "B1 건물", lat: 37.52, lng: 127.02 } }));
+      render(<FlowApp token="tok" />);
+      const title = await screen.findByRole("link", { name: "지도에서 이어 보기" });
+      expect(title.getAttribute("href")).toBe("#/explore?track=page&district=seongsu&building=B1");
+      const tracks = screen.getByRole("navigation", { name: "지도에서 단계별로 보기" });
+      expect(within(tracks).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual([
+        "#/explore?track=platform&district=seongsu",
+        "#/explore?track=page&district=seongsu&building=B1",
+        "#/explore?track=posting&district=seongsu&building=B1",
+        "#/explore?track=program&district=seongsu",
+      ]);
+      await waitFor(() => expect(naver.live().filter((o) => o.kind === "Marker" && o.map === naver.map())).toHaveLength(2));
+      expect(naver.map()!.options.draggable).toBe(false);
+      // 탭 「지도」는 그대로 #/explore 다
+      for (const tab of screen.getAllByRole("link", { name: "지도" })) expect(tab.getAttribute("href")).toBe("#/explore");
+    } finally {
+      loadNaverMaps.mockImplementation(() => Promise.reject(new Error("테스트에는 지도가 없다")));
+      removeNaverStub();
+    }
   });
 
   it("홈은 네 단계 진행을 보이고, 로그인 전에는 저장 대신 로그인 버튼을 둔다", async () => {

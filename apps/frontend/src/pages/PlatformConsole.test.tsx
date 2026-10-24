@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import PlatformConsole from "./PlatformConsole";
 import type { OpeningSite, PlatformProfile } from "@/lib/api";
 import { district } from "@/test/fixtures";
@@ -240,5 +240,45 @@ describe("PlatformConsole — 동일 상권 후보 비교", () => {
     expect(screen.getByText("이 상권에는 실측 공실 자리가 없다.")).toBeTruthy();
     expect(screen.queryByRole("checkbox")).toBeNull();
     expect(screen.queryByRole("region", { name: "현재 비교 후보" })).toBeNull();
+  });
+});
+
+describe("PlatformConsole — 상권 ↔ 상권 비교(2026-10-24)", () => {
+  it("상권을 바꿔 가며 2곳을 담으면 나란히 본다 — 없는 값은 없다고, 열의 「이 상권 보기」는 그 상권으로 옮긴다", async () => {
+    HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+    HTMLDialogElement.prototype.close = function () { this.open = false; };
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" }), district("yeonnam", { name: "연남동", gu: "마포구" })] },
+      { match: /\/commercial-districts\/garosugil\/platform$/, body: profile("garosugil", [site(1)]) },
+      { match: /\/commercial-districts\/yeonnam\/platform$/, body: profile("yeonnam", [site(2)]) },
+      { match: /\/commercial-districts\/garosugil\/floor-vacancies\?limit=1$/, body: { district_id: "garosugil", total: 90, counts: { confirmed: 90, probable: 0 }, counts_all: { units: 90 }, by_floor: { "1": 9 }, units: [] } },
+      { match: /\/commercial-districts\/[^/]+\/sentiment$/, body: [] },
+    ]);
+    render(<PlatformConsole />);
+    const tray = await screen.findByRole("group", { name: "상권 비교" });
+    fireEvent.click(within(tray).getByRole("button", { name: "+ 상권 비교에 담기" }));
+    expect(within(tray).getByRole("button", { name: "✓ 상권 비교에 담음" }).getAttribute("aria-pressed")).toBe("true");
+    expect((within(tray).getByRole("button", { name: "상권 비교" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(tray.textContent).toContain("상권을 바꿔 한 곳 더 담아 주세요");
+    // 상권을 바꿔도 담은 것은 남는다(자리 비교와 다르다)
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "yeonnam" } });
+    fireEvent.click(await within(tray).findByRole("button", { name: "+ 상권 비교에 담기" }));
+    fireEvent.click(within(tray).getByRole("button", { name: "상권 비교" }));
+    const dialog = await screen.findByRole("dialog", { name: "상권 2곳 나란히" });
+    const table = within(dialog).getByRole("table", { name: "상권 2곳 나란히 보기" });
+    expect(within(table).getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["가로수길강남구", "연남동마포구"]);
+    const cells = async (label: string) => {
+      const th = within(table).getByRole("rowheader", { name: new RegExp(`^${label}`) });
+      await waitFor(() => expect(th.closest("tr")!.querySelector('[role="status"]')).toBeNull());
+      return Array.from(th.closest("tr")!.querySelectorAll("td")).map((td) => td.textContent);
+    };
+    expect(await cells("상권 유형")).toEqual(["유형 미정", "유형 미정"]);      // archetype null — 지어내지 않는다
+    expect(await cells("빈 층")).toEqual(["90곳1층 9곳", "층 자료 없음"]);
+    expect(await cells("1층 월세")).toEqual(["통계 없음", "통계 없음"]);
+    // 내 업종이 없으면 입지 점수 줄이 없다
+    expect(within(table).queryByRole("rowheader", { name: /입지 점수/ })).toBeNull();
+    fireEvent.click(within(dialog).getByRole("button", { name: "가로수길 상권 보기" }));
+    expect(screen.queryByRole("dialog", { name: "상권 2곳 나란히" })).toBeNull();
+    expect((screen.getByRole("combobox") as HTMLSelectElement).value).toBe("garosugil");
   });
 });

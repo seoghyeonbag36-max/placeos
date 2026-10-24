@@ -6,16 +6,16 @@
  *   본전 계산 가능 = 그 건물의 회수기간 유닛(`"vu-" + building_id`)이 postings 에 있다.
  * 층으로 쪼갠 자리로 회수기간을 내지 않는다(feature-posting §0-Q) — 계산은 건물 단위 유닛으로만.
  */
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { recommendIndustry } from "@/lib/api";
 import { kakaoMapUrl } from "@/lib/externalMap";
-import { loadNaverMaps } from "@/lib/naverMap";
 import { useFlow, useResume, useSaved } from "../context";
+import { MiniMap } from "../MiniMap";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { floorText, useSpaces, type SpaceItem } from "../spaces";
 import { eun } from "../format";
 import { go, replace } from "../route";
-import { setSpace, type SpaceBrowse } from "../state";
+import { setSpace, type SpaceAt, type SpaceBrowse } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, Details, FlowScreen, LoadError, ResultView, SaveHeart, Sheet,
   SkeletonRows, TextButton, WarnLine,
@@ -23,6 +23,9 @@ import {
 import { hasRanking, useDistrictName, useNeed, useWorkIndustry } from "./common";
 
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
+
+/** 고른 자리의 건물·좌표 — 홈이 지도 탐색을 그 건물로 연다(state.SpaceAt) */
+const spaceAt = (s: SpaceItem): SpaceAt => ({ buildingId: s.buildingId, name: s.name, lat: s.lat, lng: s.lng });
 
 /* ── 층 그림 — 썸네일 자리에 데이터인 그림(§5-2 R3) ──────────────────────── */
 
@@ -142,7 +145,7 @@ export function Spaces() {
       : (a.monthlyRent ?? 1e9) - (b.monthlyRent ?? 1e9));
   const title = all.length === 0 ? "이 상권은 층 단위 빈 자리 자료가 아직 없어요"
     : `${cap != null ? `월 ${cap.toLocaleString("ko-KR")}만원까지인 ` : ""}빈 자리가 ${filtered.length.toLocaleString("ko-KR")}곳 있어요`;
-  const open = (s: SpaceItem) => { update((st) => setSpace(st, s.id, `${s.name} ${floorText(s.floor)}`)); go(`/space/${encodeURIComponent(s.id)}`); };
+  const open = (s: SpaceItem) => { update((st) => setSpace(st, s.id, `${s.name} ${floorText(s.floor)}`, spaceAt(s))); go(`/space/${encodeURIComponent(s.id)}`); };
   return (
     // 「지도」 = PPPP 지도 탐색(#/explore). 흐름 안 지도로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙)
     <FlowScreen wide back={back} caption={caption} titleLive title={title}
@@ -203,26 +206,12 @@ export function Spaces() {
 
 /* ── R4 자리 상세 ────────────────────────────────────────────────────────── */
 
-/** 네이버 지도 — 이 화면에서만 SDK 를 부른다(F-13). 실패하면 회색 칸 + 카카오맵 링크(길이 끊기지 않게) */
-function MiniMap({ lat, lng, name }: { lat: number; lng: number; name: string }) {
-  const el = useRef<HTMLDivElement>(null);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    loadNaverMaps().then(() => {
-      const naver = window.naver;
-      if (!alive || !el.current || !naver?.maps) return;
-      const at = new naver.maps.LatLng(lat, lng);
-      const map = new naver.maps.Map(el.current, { center: at, zoom: 17, scaleControl: false, mapDataControl: false });
-      new naver.maps.Marker({ position: at, map });
-    }).catch(() => { if (alive) setFailed(true); });
-    return () => { alive = false; };
-  }, [lat, lng]);
+/** 네이버 지도 — 질문 화면에는 깔지 않는다(F-13). 실패하면 회색 칸 + 카카오맵 링크(길이 끊기지 않게) */
+function SpaceMap({ lat, lng, name }: { lat: number; lng: number; name: string }) {
   return (
-    <div className="fl-minimap">
-      {failed ? <div className="fl-minimap-fallback"><span>지도를 불러오지 못했어요</span></div> : <div ref={el} className="fl-minimap-canvas" aria-label={`${name} 위치 지도`} role="img" />}
+    <MiniMap center={{ lat, lng }} pins={[{ lat, lng, mine: true }]} label={`${name} 위치 지도`}>
       <a className="fl-link fl-minimap-link" href={kakaoMapUrl({ lat, lng }, name)} target="_blank" rel="noopener noreferrer">카카오맵에서 보기</a>
-    </div>
+    </MiniMap>
   );
 }
 
@@ -239,7 +228,7 @@ export function SpaceDetail({ id }: { id: string }) {
   const rec = useLoad(canRank && item && did ? `rec:${item.id}` : null,
     () => recommendIndustry({ district_id: did!, lat: item!.lat, lon: item!.lng }));
   const label = item ? `${item.name} ${floorText(item.floor)}` : null;
-  useEffect(() => { if (item && label) update((s) => setSpace(s, item.id, label)); }, [item, label, update]);
+  useEffect(() => { if (item && label) update((s) => setSpace(s, item.id, label, spaceAt(item))); }, [item, label, update]);
   useResumeSave(item, () => item && toggleSaveSpace(item, true, null));
   if (!ok) return null;
   const caption = `${name ?? "상권"}${item ? ` · ${floorText(item.floor)} · ${item.areaPy}평(${item.areaM2}㎡)` : ""}`;
@@ -264,7 +253,7 @@ export function SpaceDetail({ id }: { id: string }) {
             secondary={{ label: saved ? "저장됨" : "저장", onClick: () => toggleSaveSpace(item, !saved, "save-space") }} />
         : <BottomCTA note={custom ? "직접 적은 업종은 본전 시점을 계산하지 않아요." : "본전 시점은 건물 단위 자리만 계산해요."}
             primary={{ label: saved ? "후보에 저장했어요" : "후보로 저장하기", onClick: () => toggleSaveSpace(item, true, "save-space"), disabled: saved }} />}>
-      <MiniMap lat={item.lat} lng={item.lng} name={item.name} />
+      <SpaceMap lat={item.lat} lng={item.lng} name={item.name} />
       <dl className="fl-keys">
         <div><dt>월세 추정</dt><dd>{item.monthlyRent != null ? `${item.monthlyRent.toLocaleString("ko-KR")}만원` : "통계 없음"}</dd></div>
         <div><dt>평당</dt><dd>{item.rentPerPyeong != null ? `${item.rentPerPyeong}만원` : "—"}</dd></div>

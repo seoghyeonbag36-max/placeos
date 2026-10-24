@@ -19,7 +19,7 @@ import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustr
 import { businessChipText, customWorkIndustry, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
 import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import FlowApp from "@/flow/FlowApp";
-import { isFlowHash } from "@/flow/route";
+import { isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
 import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
 import { clearPlan } from "@/flow/plan";
 import "./App.css";
@@ -117,28 +117,50 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
 /** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면
  *  로그인한 사용자는 홈(흐름)으로 간다.
  *  ⛔ PPPP 네 구현 화면의 입구다. 흐름의 「지도」 진입로(허브 탭 · 상권 소개 · 빈 자리 목록)는 늘 여기로 온다
- *  (2026-10-21 PPPP 화면 보존 규칙). */
+ *  (2026-10-21 PPPP 화면 보존 규칙).
+ *  2026-10-24: 홈이 트랙·상권·건물을 쿼리로 실어 올 수 있다(`#/explore?track=page&…` — flow/route.explorePath).
+ *  그래서 지도 탐색인지는 `===` 가 아니라 `isExploreHash` 로 가른다. */
 export const EXPLORE_HASH = "#/explore";
+
+/** 쿼리의 트랙 → 레일 화면 key(Page 트랙의 화면 key 만 "map" 이다 — 위 NAV 주석) */
+const TRACK_VIEW: Record<ExploreTrack, View> = { platform: "platform", page: "map", posting: "posting", program: "program" };
 
 /**
  * 지도 탐색 — 3·4판의 지도 + 네 트랙 화면(5판 §10). 5판부터 **로그인 없이도** 연다(token = null).
  * 로그인 전에는 「내 사업」을 흐름의 답에서 받아 쓰고 서버에 저장하지 않는다.
  */
 export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string | null }) {
+  // 흐름이 실어 보낸 대상(2026-10-24) — 홈의 「지도에서 내 자리 보기」·지도 미리보기가 트랙·상권·건물을 쿼리로 싣는다.
+  // 열리는 순간 한 번만 읽는다. 쿼리 없는 진입(허브 탭 · R2 · R3 · 주소창)은 아래 기본 규칙 그대로다.
+  const [target] = useState(() => parseExplore(window.location.hash));
+  const [openedFlow] = useState(loadFlow);
   // 첫 화면은 **Platform** 이다(2026-09-26 — 그전 Page 지도, 2026-09-12). 되돌리려면 이 한 줄만 바꾼다.
   // 「내 사업」 카드는 이 위에 펴진다. 「시작」이 가는 곳도 Platform 이라(startBusiness) 이제
   // 같은 화면이고, 「그냥 둘러보기」는 카드만 걷고 Platform 에 남는다(그전에는 Page 지도).
-  const [view, setView] = useState<View>("platform");
+  // 흐름이 트랙을 실어 왔으면 그 트랙으로 연다 — 레일 넷은 그대로이고 첫 화면만 다르다.
+  const [view, setView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
   // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
   // 흐름의 상권 목록도 이 화면과 같은 gold 거점이고, 목록에 없으면 MapShell·PlatformConsole 이 첫 거점으로 물러난다.
+  // 쿼리의 상권·건물이 흐름의 상권보다 앞선다(그 주소를 연 화면이 고른 것이다). 건물은 Page 의 선택 건물로 들어가고,
+  // MapShell 이 건물 목록을 받은 뒤 카메라를 그 건물로 옮긴다(PG-07 — Platform 「Page에서 이 건물 보기」와 같은 길).
   const [pageWorkspace, setPageWorkspace] = useState(() => {
     const workspace = createPageWorkspace();
-    const fromFlow = loadFlow().districtId;
-    return fromFlow ? { ...workspace, districtId: fromFlow } : workspace;
+    const districtId = target?.district ?? openedFlow.districtId;
+    return {
+      ...workspace, ...(districtId ? { districtId } : {}),
+      selectedId: target?.building && districtId ? target.building : null,
+    };
   });
-  const [postingSelection, setPostingSelection] = useState<(BuildingSelection & { requestId: number })>();
+  // Posting 트랙으로 건물까지 실어 왔으면 그 건물의 입점 계산으로 연다(Page 「입점 검토」와 같은 인계 — 유닛이 없으면 화면이 말한다)
+  const [postingSelection, setPostingSelection] = useState<(BuildingSelection & { requestId: number }) | undefined>(() => {
+    const districtId = target?.district ?? openedFlow.districtId;
+    if (target?.track !== "posting" || !target.building || !districtId) return undefined;
+    const at = openedFlow.spaceAt;
+    const name = at && at.buildingId === target.building && at.name ? at.name : "고른 건물";
+    return { districtId, buildingId: target.building, buildingName: name, requestId: 1 };
+  });
   const reviewBuilding = (selection: BuildingSelection) => {
     setPostingSelection((previous) => ({ ...selection, requestId: (previous?.requestId ?? 0) + 1 }));
     setView("posting");
@@ -444,7 +466,7 @@ function AppContent() {
   }, []);
   // 5판(2026-10-13): 「#/」 로 시작하는 해시는 질문 흐름(FlowApp)이다 — 로그인 없이 끝까지 간다. 지도 탐색(#/explore)만 종전 화면이다.
   // 로그인한 사용자가 해시 없이 오면 홈(흐름)이 첫 화면이다. 그 밖의 해시(#admin · #board · 계정 창)는 종전대로 지도 위에서 연다.
-  const explore = hash === EXPLORE_HASH;
+  const explore = isExploreHash(hash);
   const flowView = !socialCallback && ((isFlowHash(hash) && !explore) || (!!token && (hash === "" || hash === "#")));
   const needWorkspace = !!token && !flowView;
   useEffect(() => {
