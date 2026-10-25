@@ -1371,14 +1371,19 @@ export const deleteSavedResult = (token: string, id: string) =>
   authRequest<{ ok: boolean }>("DELETE", `/results/${encodeURIComponent(id)}`, { token });
 
 
-/** 방문자 직접 제출 의견. 익명 접수이며 파일럿 NPS와 별도다. */
-export interface VisitorFeedbackInput { category: "review" | "bug" | "suggestion"; message: string; page: string; contact?: string }
+/** 방문자 직접 제출 의견. 익명 접수이며 파일럿 NPS와 별도다.
+ *  입장(role)과 선택 응답(answers)은 스스로 고른 값이라 확인되지 않는다 — 창업자 수로 세지 않는다(2026-10-25). */
+export type VisitorFeedbackCategory = "review" | "bug" | "suggestion";
+export type VisitorFeedbackRole = "start" | "owner" | "dev" | "design" | "other";
+export interface VisitorFeedbackInput { role: VisitorFeedbackRole; category: VisitorFeedbackCategory; message: string; page: string; answers?: Record<string, string>; contact?: string }
 export const submitVisitorFeedback = (body: VisitorFeedbackInput) =>
   accountRequest<{ id: string; created_at: string }>("POST", "/visitor-feedback", { body });
 
-export interface VisitorFeedbackRecord { id: string; category: string; message: string; page: string; contact: string | null; status: string; notification_status: string; created_at: string }
-export async function visitorFeedbackAdmin(token: string, id?: string, status?: string, offset = 0): Promise<VisitorFeedbackRecord[]> {
-  const res = await fetch(`${BASE}/visitor-feedback${id ? `/${id}` : `?offset=${offset}`}`, {
+/** role·answers 는 2026-10-25 이전 의견에서 null 이다. */
+export interface VisitorFeedbackRecord { id: string; role: string | null; category: string; message: string; answers: Record<string, string> | null; page: string; contact: string | null; status: string; notification_status: string; created_at: string }
+export async function visitorFeedbackAdmin(token: string, id?: string, status?: string, offset = 0, role?: VisitorFeedbackRole): Promise<VisitorFeedbackRecord[]> {
+  const query = new URLSearchParams({ offset: String(offset), ...(role ? { role } : {}) });
+  const res = await fetch(`${BASE}/visitor-feedback${id ? `/${id}` : `?${query}`}`, {
     method: id ? "PATCH" : "GET",
     headers: { "X-Admin-Token": token, ...(id ? { "Content-Type": "application/json" } : {}) },
     ...(id ? { body: JSON.stringify({ status }) } : {}),

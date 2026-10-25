@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.db import SessionLocal
 from app.models.visitor_feedback import VisitorFeedback
-from app.schemas.visitor_feedback import VisitorFeedbackIn
+from app.schemas.visitor_feedback import CATEGORY_LABELS, VISITOR_ROLES, VisitorFeedbackIn, answer_lines
 
 logger = logging.getLogger(__name__)
 _lock = Lock()
@@ -39,11 +39,14 @@ def send_notification(row: VisitorFeedback) -> str:
     """SMTP 미설정은 disabled, 발송 실패는 failed로 반환한다."""
     if not (settings.feedback_smtp_host and settings.feedback_mail_from):
         return "disabled"
+    role = VISITOR_ROLES.get(row.role or "", {}).get("label", row.role or "입장 미선택")
+    category = CATEGORY_LABELS.get(row.category, row.category)
     msg = EmailMessage()
-    msg["Subject"] = f"[PlaceOS 의견] {row.category} · {row.id}"
+    msg["Subject"] = f"[PlaceOS 의견] {role} · {category} · {row.id}"
     msg["From"] = settings.feedback_mail_from
     msg["To"] = settings.feedback_mail_to
-    msg.set_content(f"유형: {row.category}\n페이지: {row.page}\n연락처: {row.contact or chr(45)}\n\n{row.message}")
+    answers = "".join(f"\n  - {line}" for line in answer_lines(row.role, row.answers)) or " -"
+    msg.set_content(f"입장: {role}\n유형: {category}\n선택 응답:{answers}\n페이지: {row.page}\n연락처: {row.contact or chr(45)}\n\n{row.message}")
     try:
         with smtplib.SMTP(settings.feedback_smtp_host, settings.feedback_smtp_port, timeout=10) as smtp:
             smtp.starttls(context=ssl.create_default_context())

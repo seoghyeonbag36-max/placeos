@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
@@ -30,10 +31,13 @@ DEFAULT_OUT = ROOT / "exports" / "visitor_feedback" / "visitor_feedback.csv"
 TOKEN_FILE = ROOT / "secrets" / "admin_token.txt"
 PAGE = 100  # 서버 상한(le=100)
 
-CATEGORY = {"review": "후기", "bug": "오류 제보", "suggestion": "제안"}
+# 유형·입장·선택 응답의 라벨은 의견 창과 같은 원본에서 읽는다(2026-10-25 — 종전 「제안」은 화면의 「개선 요청」과 달랐다).
+FORM = json.loads((ROOT / "apps" / "frontend" / "src" / "components" / "visitorFeedbackForm.json").read_text(encoding="utf-8"))
+CATEGORY = {c["key"]: c["label"] for c in FORM["categories"]}
+ROLES = {r["key"]: r for r in FORM["roles"]}
 STATUS = {"received": "접수", "reviewing": "검토 중", "completed": "처리 완료"}
 NOTIFY = {"sent": "발송", "failed": "실패", "disabled": "미설정", "pending": "대기"}
-HEADER = ["접수일시(KST)", "유형", "내용", "페이지", "연락처", "처리상태", "메일알림", "ID"]
+HEADER = ["접수일시(KST)", "유형", "입장", "선택 응답", "내용", "페이지", "연락처", "처리상태", "메일알림", "ID"]
 
 
 def read_token() -> str:
@@ -71,10 +75,24 @@ def kst(iso: str) -> str:
     return dt.astimezone(KST).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def answers_text(role: str | None, answers: dict | None) -> str:
+    """선택 응답을 「질문 답」 줄로 푼다. 입장(role)은 방문자가 스스로 고른 값이다 — 창업자 수로 세지 않는다."""
+    questions = {q["key"]: q for q in ROLES.get(role or "", {}).get("questions", [])}
+    lines = []
+    for key, value in (answers or {}).items():
+        q = questions.get(key, {})
+        label = next((o["label"] for o in q.get("options", []) if o["key"] == value), value)
+        lines.append(f"{q.get('label', key)} {label}")
+    return "\n".join(lines)
+
+
 def to_line(r: dict) -> list[str]:
+    role = r.get("role")  # 2026-10-25 이전 의견과 옛 서버 응답에는 없다
     return [
         kst(r["created_at"]),
         CATEGORY.get(r["category"], r["category"]),
+        ROLES.get(role, {}).get("label", role or ""),
+        answers_text(role, r.get("answers")),
         r["message"],
         r["page"],
         r.get("contact") or "",
@@ -110,7 +128,7 @@ def write_xlsx(path: Path, lines: list[list[str]]) -> bool:
     ws.append(HEADER)
     for line in lines:
         ws.append([guard_cell(c) for c in line])
-    for col, width in zip("ABCDEFGH", (20, 10, 60, 24, 24, 10, 10, 34)):
+    for col, width in zip("ABCDEFGHIJ", (20, 10, 14, 30, 60, 24, 24, 10, 10, 34)):
         ws.column_dimensions[col].width = width
     for row in ws.iter_rows(min_row=2):  # 긴 의견이 한 줄로 잘리지 않게 줄바꿈
         for cell in row:
