@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.admin import require_admin
 from app.core.db import get_db
 from app.models.visitor_feedback import VisitorFeedback
-from app.schemas.visitor_feedback import VisitorFeedbackIn, VisitorFeedbackSaved, VisitorFeedbackOut, VisitorFeedbackStatus
+from app.schemas.visitor_feedback import VisitorFeedbackIn, VisitorFeedbackSaved, VisitorFeedbackOut, VisitorFeedbackStatus, VisitorRole
 from app.services import visitor_feedback as service
 
 router = APIRouter()
@@ -20,8 +20,13 @@ def submit(body: VisitorFeedbackIn, tasks: BackgroundTasks, db: Session = Depend
     return result
 
 @router.get("", response_model=list[VisitorFeedbackOut], dependencies=[Depends(require_admin)])
-def listing(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), db: Session = Depends(get_db)) -> list[VisitorFeedback]:
-    return list(db.scalars(select(VisitorFeedback).order_by(VisitorFeedback.created_at.desc(), VisitorFeedback.id).offset(offset).limit(limit)))
+def listing(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), role: VisitorRole | None = None,
+            db: Session = Depends(get_db)) -> list[VisitorFeedback]:
+    """role 을 주면 그 입장의 의견만 — 쪽 나눔 전에 거른다(화면에서 한 쪽만 거르면 다른 쪽의 의견이 빠진다)."""
+    query = select(VisitorFeedback)
+    if role is not None:
+        query = query.where(VisitorFeedback.role == role)
+    return list(db.scalars(query.order_by(VisitorFeedback.created_at.desc(), VisitorFeedback.id).offset(offset).limit(limit)))
 
 @router.patch("/{feedback_id}", response_model=VisitorFeedbackOut, dependencies=[Depends(require_admin)])
 def update(feedback_id: str, body: VisitorFeedbackStatus, db: Session = Depends(get_db)) -> VisitorFeedback:

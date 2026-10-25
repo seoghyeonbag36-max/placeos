@@ -1,9 +1,13 @@
 .visitor-feedback { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 900; font-size: 14px; }
-.visitor-feedback-panel { width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 100px); overflow-y: auto; margin-bottom: 12px; padding: 20px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sheet); }
+/* border-box — 폭·높이 상한이 안쪽 여백까지 품는다. 2026-10-25 전에는 빠져 있어 375·390px 폰에서 창 왼쪽 26px 가 화면 밖으로
+   나갔고(실서비스 측정), 내용이 길면 위쪽도 잘렸다. */
+.visitor-feedback-panel { box-sizing: border-box; width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 100px); overflow-y: auto; margin-bottom: 12px; padding: 20px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sheet);
+  /* 아래 고정 막대(보내기 + 안내 한 줄 + 오류 한 줄)만큼 — Tab 으로 간 칸이 막대 밑에 숨지 않게 한다(WCAG 2.4.11) */
+  scroll-padding-bottom: 150px; }
 .visitor-feedback header { display: flex; justify-content: space-between; align-items: center; }
 .visitor-feedback form, .visitor-feedback label { display: grid; gap: 8px; }
 .visitor-feedback form { gap: 12px; }
-.visitor-feedback input:not([type="checkbox"]), .visitor-feedback select, .visitor-feedback textarea { width: 100%; box-sizing: border-box; padding: 10px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.visitor-feedback input:not([type="checkbox"]):not([type="radio"]), .visitor-feedback select, .visitor-feedback textarea { width: 100%; box-sizing: border-box; padding: 10px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
 .visitor-feedback textarea { resize: vertical; }
 .visitor-feedback .visitor-feedback-check { display: flex; align-items: center; }
 .visitor-feedback button { cursor: pointer; font: inherit; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
@@ -13,3 +17,31 @@
 .visitor-feedback a { color: var(--primary-pressed); display: block; margin: 8px 0; }
 .visitor-feedback small { color: var(--text-secondary); line-height: 1.5; }
 .visitor-feedback [role="alert"] { color: var(--ink); }
+
+/* 1단계 — 입장 고르기. 누르면 바로 2단계로 간다(「다음」 버튼 없음). */
+.visitor-feedback-roles { display: grid; gap: 12px; margin-top: 8px; }
+.visitor-feedback-roles p { margin: 0; }
+.visitor-feedback-roles [role="group"] { display: grid; gap: 8px; }
+.visitor-feedback .visitor-feedback-roles button { text-align: left; padding: 12px 14px; }
+.visitor-feedback-roles button span { display: block; margin-top: 2px; color: var(--text-secondary); font-size: 12px; }
+
+/* 2단계 — 그 입장의 자유 칸이 먼저, 선택형은 그 아래. */
+.visitor-feedback .visitor-feedback-back { justify-self: start; margin-top: 4px; padding: 4px 0; border: 0; background: none; color: var(--primary-pressed); }
+.visitor-feedback-box { display: grid; gap: 8px; padding: 12px; background: var(--surface-muted); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.visitor-feedback-box label { font-weight: 700; }
+.visitor-feedback-box p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.visitor-feedback-chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.visitor-feedback-chips legend { margin-bottom: 8px; padding: 0; }
+.visitor-feedback .visitor-feedback-chips label { position: relative; display: inline-flex; }
+/* 라디오는 화면에서만 감춘다 — 키보드(화살표)·스크린리더는 그대로 라디오로 쓴다.
+   칩 전체 크기로 펴 둔다: 1px 이면 Tab 으로 갔을 때 브라우저가 그 1px 만 보이게 스크롤해 칩이 가려진 채 남았다. */
+.visitor-feedback-chips input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.visitor-feedback-chips span { padding: 8px 12px; font-size: 13px; line-height: 1.3; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.visitor-feedback-chips input:checked + span { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-pressed); font-weight: 600; }
+.visitor-feedback-chips input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+.visitor-feedback-chips input:disabled { cursor: wait; }
+.visitor-feedback-chips input:disabled + span { opacity: .6; }
+.visitor-feedback-submit [role="alert"] { margin: 0; font-size: 13px; line-height: 1.5; }
+/* 보내기는 창 아래에 붙여 둔다 — 폰에서는 2단계가 스크롤되지만 버튼은 늘 보인다(-20px = 창 안쪽 여백). */
+.visitor-feedback-submit { position: sticky; bottom: -20px; display: grid; gap: 8px; margin: 0 -20px -20px; padding: 12px 20px 20px; background: var(--surface); border-top: 1px solid var(--line); }
+.visitor-feedback .visitor-feedback-need { justify-self: center; padding: 2px 4px; border: 0; background: none; color: var(--primary-pressed); font-size: 13px; text-decoration: underline; text-underline-offset: 2px; }

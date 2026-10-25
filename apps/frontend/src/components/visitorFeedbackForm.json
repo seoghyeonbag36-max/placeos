@@ -1,0 +1,76 @@
+{
+  "categories": [
+    { "key": "review", "label": "후기" },
+    { "key": "bug", "label": "오류 제보" },
+    { "key": "suggestion", "label": "개선 요청" }
+  ],
+  "roles": [
+    {
+      "key": "start", "label": "창업 준비 중", "sub": "새 가게 자리를 찾고 있어요",
+      "title": "창업을 준비하는 입장에서 자유롭게 적어 주세요",
+      "hint": "찾으려던 것과 실제로 본 것이 어떻게 달랐나요? 믿기 어려웠던 숫자, 빠졌다고 느낀 비용도 좋아요.",
+      "questions": [
+        { "key": "stage", "label": "지금 어느 단계예요?", "options": [
+          { "key": "industry_set", "label": "업종만 정했어요" },
+          { "key": "comparing_areas", "label": "동네 후보를 봐요" },
+          { "key": "touring_listings", "label": "매물 보러 다녀요" },
+          { "key": "about_to_sign", "label": "계약 직전이에요" } ] },
+        { "key": "found", "label": "오늘 찾던 답을 얻었나요?", "options": [
+          { "key": "yes", "label": "얻었어요" },
+          { "key": "partly", "label": "일부만" },
+          { "key": "no", "label": "못 얻었어요" } ] }
+      ]
+    },
+    {
+      "key": "owner", "label": "가게 운영 중", "sub": "업종 변경·이전을 고민해요",
+      "title": "가게를 운영하는 입장에서 자유롭게 적어 주세요",
+      "hint": "지금 가게와 견줘 볼 때 맞지 않았던 숫자나, 더 보고 싶었던 비교가 있었나요?",
+      "questions": [
+        { "key": "plan", "label": "무엇을 고민 중이세요?", "options": [
+          { "key": "change_industry", "label": "업종 변경" },
+          { "key": "relocate", "label": "다른 동네로 이전" },
+          { "key": "undecided", "label": "아직 못 정했어요" } ] },
+        { "key": "found", "label": "오늘 찾던 답을 얻었나요?", "options": [
+          { "key": "yes", "label": "얻었어요" },
+          { "key": "partly", "label": "일부만" },
+          { "key": "no", "label": "못 얻었어요" } ] }
+      ]
+    },
+    {
+      "key": "dev", "label": "개발자", "sub": "오류·속도·데이터를 봤어요",
+      "title": "개발자의 눈으로 자유롭게 적어 주세요",
+      "hint": "무엇을 눌렀을 때, 무엇을 기대했고 실제로 무엇이 일어났나요? 기기·브라우저도 적어 주세요.",
+      "questions": [
+        { "key": "issue", "label": "무엇이 문제였나요?", "options": [
+          { "key": "slow", "label": "느려요" },
+          { "key": "error", "label": "오류·멈춤" },
+          { "key": "map", "label": "지도·거리뷰" },
+          { "key": "data", "label": "숫자가 이상해요" },
+          { "key": "other", "label": "기타" } ] }
+      ]
+    },
+    {
+      "key": "design", "label": "디자이너", "sub": "화면·흐름·글을 봤어요",
+      "title": "디자이너의 눈으로 자유롭게 적어 주세요",
+      "hint": "어느 단어나 요소에서 멈칫했나요? 참고할 만한 다른 서비스 화면이 있으면 알려 주세요.",
+      "questions": [
+        { "key": "first_screen", "label": "첫 화면에서 할 일을 바로 알았나요?", "options": [
+          { "key": "clear", "label": "바로 알았어요" },
+          { "key": "hesitated", "label": "잠깐 헤맸어요" },
+          { "key": "unclear", "label": "몰랐어요" } ] },
+        { "key": "blocker", "label": "가장 걸린 것은?", "options": [
+          { "key": "wording", "label": "어려운 단어" },
+          { "key": "too_much", "label": "정보가 많음" },
+          { "key": "next_button", "label": "다음 버튼" },
+          { "key": "mobile", "label": "모바일" },
+          { "key": "other", "label": "기타" } ] }
+      ]
+    },
+    {
+      "key": "other", "label": "기타", "sub": "",
+      "title": "자유롭게 적어 주세요",
+      "hint": "어떤 점이 좋았거나 불편했나요?",
+      "questions": []
+    }
+  ]
+}
