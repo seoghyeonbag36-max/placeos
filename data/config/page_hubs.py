@@ -314,6 +314,67 @@ GYEONGGI_HUBS: dict[str, PageHub] = {
                           deferred="단일시설"),
 }
 
+# ── 경기 3차 확장 50거점 (2026-10-28 · **등록만**) ────────────────────────────────
+# 사용자 요청(10-27): 「우선 경기 거점을 59곳까지만 늘려줘」 — 59 = 경기 R-ONE 상권 40(중대형·소규모 세 표 합집합) ×
+# 1.47(서울의 앵커당 거점 비). 서빙 경기 9곳에 50곳을 더한다: R-ONE 앵커 자리 35 + 앵커 근처 두 번째 거점 15(공유 매핑).
+# 좌표는 카카오 로컬 실측, 판정은 상가정보 1차 프로브(건축HUB 0콜 · hub-chain §0 두 단계)
+# → docs/finding-gyeonggi59-candidates-2026-10-28.md · reports/gyeonggi59_candidates_2026-10-28.json
+# 계획상가 밀집(건물당 점포 >10)인 서현역·범계역·광교중앙역·동탄역·미사역은 신규 확장 규칙대로 **넣지 않았다**
+# (3D 디지털 트윈 대상 후보 — CLAUDE.md §3D 디지털 트윈). 성남 원도심 다섯 곳은 서로 1km 안이라 반경을 줄였다.
+# ⚠ 등록은 노출이 아니다 — 도시는 Gold·앵커 대조가 선 뒤에 ACTIVE_CITIES · SERVED_CITIES 에 넣는다.
+GYEONGGI_BATCH3_HUBS: dict[str, PageHub] = {
+    "suwonst": PageHub("suwonst", "수원역", 127.000095, 37.26579, 500, 700, city="suwon"),  # 주의 — top10 지번 35.8% · 건물당 4.54(대장으로 집합 비중 확인)
+    "ingye": PageHub("ingye", "인계동", 127.030857, 37.261923, 500, 700, city="suwon"),
+    "paldalmun": PageHub("paldalmun", "팔달문", 127.016733, 37.277562, 500, 700, city="suwon"),
+    "pajang": PageHub("pajang", "수원 파장동", 126.997419, 37.310323, 500, 700, city="suwon"),
+    "ajou": PageHub("ajou", "아주대삼거리", 127.044099, 37.274674, 500, 700, city="suwon"),
+    "yeongtong": PageHub("yeongtong", "영통역", 127.071332, 37.251504, 500, 700, city="suwon"),  # 주의 — top10 지번 32.1% · 건물당 7.81(대장으로 집합 비중 확인)
+    "moran": PageHub("moran", "모란", 127.12997, 37.434038, 250, 300, city="seongnam"),  # taepyeong과 669m — 반경을 줄였다
+    "sinheung": PageHub("sinheung", "성남 신흥역", 127.147538, 37.440923, 250, 350, city="seongnam"),  # sujin과 733m — 반경을 줄였다
+    "dandae": PageHub("dandae", "단대오거리", 127.15677, 37.445022, 350, 450, city="seongnam"),  # sinheung과 934m — 반경을 줄였다
+    "bucheonst": PageHub("bucheonst", "부천역", 126.783083, 37.48399, 500, 700, city="bucheon"),
+    "anyangst": PageHub("anyangst", "안양역", 126.922644, 37.401857, 500, 700, city="anyang"),
+    "indeogwon": PageHub("indeogwon", "인덕원", 126.97668, 37.401494, 500, 700, city="anyang"),  # 주의 — top10 지번 43.7% · 건물당 5.78(대장으로 집합 비중 확인)
+    "uijeongbust": PageHub("uijeongbust", "의정부역", 127.04612, 37.73788, 500, 700, city="uijeongbu"),
+    "pyeongtaekst": PageHub("pyeongtaekst", "평택역", 127.08557, 36.990645, 500, 700, city="pyeongtaek"),
+    "pyeongtaekcity": PageHub("pyeongtaekcity", "평택시청", 127.112688, 36.992261, 500, 700, city="pyeongtaek"),
+    "songtan": PageHub("songtan", "송탄(신장·지산·서정)", 127.052927, 37.057043, 500, 700, city="pyeongtaek"),
+    "guri": PageHub("guri", "구리역", 127.143351, 37.603269, 500, 700, city="guri"),  # 주의 — top10 지번 26.2% · 건물당 4.66(대장으로 집합 비중 확인)
+    "giheung": PageHub("giheung", "기흥역", 127.117046, 37.275453, 500, 700, city="yongin"),  # 주의 — top10 지번 47.7% · 건물당 7.02(대장으로 집합 비중 확인)
+    "suji": PageHub("suji", "수지구청", 127.094659, 37.322493, 500, 700, city="yongin"),
+    "gimnyangjang": PageHub("gimnyangjang", "김량장동", 127.206315, 37.237107, 500, 700, city="yongin"),
+    "byeongjeom": PageHub("byeongjeom", "병점역", 127.033202, 37.206755, 500, 700, city="hwaseong"),  # 주의 — top10 지번 35.9% · 건물당 5.36(대장으로 집합 비중 확인)
+    "bongdam": PageHub("bongdam", "화성 봉담읍", 126.949542, 37.220067, 500, 700, city="hwaseong"),  # 주의 — top10 지번 29.3% · 건물당 3.21(대장으로 집합 비중 확인)
+    "osan": PageHub("osan", "오산시청", 127.077524, 37.149877, 500, 700, city="osan"),
+    "icheon": PageHub("icheon", "이천종합터미널", 127.446936, 37.277421, 500, 700, city="icheon"),
+    "yeoju": PageHub("yeoju", "여주시청", 127.637059, 37.298423, 500, 700, city="yeoju"),
+    "pocheon": PageHub("pocheon", "포천터미널", 127.203941, 37.897431, 500, 700, city="pocheon"),
+    "songu": PageHub("songu", "포천 송우리", 127.143992, 37.831614, 500, 700, city="pocheon"),
+    "dongducheon": PageHub("dongducheon", "동두천중앙역", 127.056423, 37.901781, 500, 700, city="dongducheon"),
+    "deokjeong": PageHub("deokjeong", "덕정역", 127.061559, 37.843188, 500, 700, city="yangju"),
+    "hanam": PageHub("hanam", "하남 원도심", 127.20353, 37.54181, 500, 700, city="hanam"),
+    "gyeongan": PageHub("gyeongan", "경기광주 경안동", 127.25703, 37.408858, 500, 700, city="gwangju-gg"),
+    "gwangnam": PageHub("gwangnam", "광주 광남동", 127.228933, 37.39435, 500, 700, city="gwangju-gg"),
+    "cheolsan": PageHub("cheolsan", "철산역", 126.868211, 37.476193, 500, 700, city="gwangmyeong"),
+    "sincheonst": PageHub("sincheonst", "시흥 신천역", 126.786785, 37.439246, 500, 700, city="siheung"),
+    "anseong": PageHub("anseong", "안성 서인사거리", 127.2702, 37.006661, 500, 700, city="anseong"),
+    "songnae": PageHub("songnae", "송내역", 126.753159, 37.487641, 500, 700, city="bucheon"),  # 주의 — top10 지번 28.7% · 건물당 5.9(대장으로 집합 비중 확인)
+    "yeokgok": PageHub("yeokgok", "역곡역", 126.812059, 37.485315, 500, 700, city="bucheon"),
+    "sinjungdong": PageHub("sinjungdong", "신중동역", 126.776898, 37.502952, 500, 700, city="bucheon"),
+    "myeonghak": PageHub("myeonghak", "명학역", 126.935593, 37.38446, 500, 700, city="anyang"),
+    "sujin": PageHub("sujin", "수진역", 127.140535, 37.437378, 250, 350, city="seongnam"),  # sinheung과 733m — 반경을 줄였다
+    "taepyeong": PageHub("taepyeong", "태평역", 127.12775, 37.439789, 250, 300, city="seongnam"),  # moran과 669m — 반경을 줄였다
+    "yatap": PageHub("yatap", "야탑역", 127.128743, 37.411374, 500, 700, city="seongnam"),  # 주의 — top10 지번 34.0% · 건물당 7.35(대장으로 집합 비중 확인)
+    "jeongja": PageHub("jeongja", "정자역", 127.108097, 37.366174, 500, 700, city="seongnam"),  # 주의 — top10 지번 28.7% · 건물당 8.99(대장으로 집합 비중 확인)
+    "skku": PageHub("skku", "성균관대역", 126.971022, 37.300329, 500, 700, city="suwon"),
+    "maetan": PageHub("maetan", "매탄동", 127.040809, 37.252506, 500, 700, city="suwon"),
+    "ganeung": PageHub("ganeung", "가능역", 127.044288, 37.748396, 500, 700, city="uijeongbu"),
+    "osanst": PageHub("osanst", "오산역", 127.066815, 37.145528, 500, 700, city="osan"),
+    "gyomun": PageHub("gyomun", "구리 교문사거리", 127.130595, 37.600781, 500, 700, city="guri"),
+    "gwangmyeongsa": PageHub("gwangmyeongsa", "광명사거리역", 126.854874, 37.479298, 500, 700, city="gwangmyeong"),
+    "jukjeon": PageHub("jukjeon", "죽전역", 127.107505, 37.324377, 500, 700, city="yongin"),  # 주의 — top10 지번 46.5% · 건물당 5.56(대장으로 집합 비중 확인)
+}
+
 # 거점 id 별칭 → 정규 slug (프론트/레거시 경로 호환).
 ALIASES: dict[str, str] = {
     "gangnam-garosugil": "garosugil",
@@ -328,7 +389,7 @@ ALIASES: dict[str, str] = {
 # 거점 수를 세는 곳(coverage tier · Dockerfile 가드 · pppp_status)의 분모가 흔들린다.
 # 그래서 **이름을 대고 부를 때만** 잡히게 한다.
 ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS,
-                                **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS}
+                                **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS}
 
 # ── 기본 순회 집합 (2026-09-03) ──────────────────────────────────────────────
 # 위 주석은 "`HUBS`(서울 54)가 기본 순회 집합"이라고 적었는데, 서울 2차 12거점이
