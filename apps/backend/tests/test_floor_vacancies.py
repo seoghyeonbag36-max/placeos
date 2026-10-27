@@ -128,6 +128,20 @@ def test_unit_ids_are_unique_per_floor() -> None:
     assert all(u["bldgs_on_pnu"] >= 1 for u in d["units"])
 
 
+def test_every_served_hub_has_floor_inventory() -> None:
+    """서빙 거점은 전부 층 단위 매물 목록을 갖는다 — 창업자 흐름 R3(「어느 건물 몇 층이 비었나」)가 이것을 읽는다.
+
+    2026-10-27: 고양·파주 9거점을 서빙에 올렸는데 이 산출물만 빌드되지 않아 R3 가 9곳 모두 「빈 층 목록을
+    만들 자료가 없어요」로 섰다. 진행률·게이트 어디에도 이 파일을 세는 곳이 없어 테스트가 전부 초록이었다.
+    거점을 올리는 날 `python -m data.pipelines.build_vacant_floor_units <slug>` 를 같이 돌린다(hub-chain §4).
+    """
+    _skip_if_missing()
+    from app.services import districts as D
+
+    missing = [p["id"] for p in D.PAGES if not floor_vacancy.path(p["id"]).exists()]
+    assert not missing, f"층 단위 매물 산출물이 없는 서빙 거점: {missing}"
+
+
 def test_missing_inventory_and_bad_slug_are_404() -> None:
     """산출물이 없는 거점은 404 — '거점을 모른다'가 아니라 '층 산출물이 없다'."""
     assert client.get(f"{V1}/commercial-districts/nowhere/floor-vacancies").status_code == 404

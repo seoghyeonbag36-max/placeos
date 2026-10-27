@@ -82,7 +82,10 @@ export function Premium() {
 
 /* ── R5 본전 시점 ────────────────────────────────────────────────────────── */
 
-const SOURCE_TEXT: Record<string, string> = { rone: "R-ONE 실측", "flpop+seed": "유동인구 + 상권 내 서열", seed: "손으로 적은 값", absent: "입력 없음(0원 전제)" };
+const SOURCE_TEXT: Record<string, string> = {
+  rone: "R-ONE 실측", "rone-shared": "가까운 상권 R-ONE", "flpop+seed": "유동인구 + 상권 내 서열", seed: "손으로 적은 값",
+  absent: "입력 없음(0원 전제)", none: "자료 없음(보정 안 함)",
+};
 
 function TierCardBody({ k, s }: { k: string; s: TierScenario }) {
   return (

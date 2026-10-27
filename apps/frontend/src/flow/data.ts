@@ -8,9 +8,9 @@
  */
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
-  getDistrictIndustries, getFloorVacancies, getIndustryFit, getPlatformProfile, getPostings, getRentHeatmap,
+  getCorridor, getDistrictIndustries, getFloorVacancies, getIndustryFit, getPlatformProfile, getPostings, getRentHeatmap,
   listDistricts, listIndustries,
-  type DistrictIndustries, type DistrictSummary, type FloorVacancyList, type IndustryFit, type IndustryOption,
+  type Corridor, type DistrictIndustries, type DistrictSummary, type FloorVacancyList, type IndustryFit, type IndustryOption,
   type PlatformProfile, type Posting, type RentHeatmap,
 } from "@/lib/api";
 
@@ -40,6 +40,9 @@ export class FlowData {
   postings = (id: string) => this.get<Posting[]>(`post:${id}`, () => getPostings(id));
   platform = (id: string) => this.get<PlatformProfile>(`plat:${id}`, () => getPlatformProfile(id));
   districtIndustries = (id: string) => this.get<DistrictIndustries>(`di:${id}`, () => getDistrictIndustries(id));
+  /** 상권 흐름 — 업종을 주면 마디의 거점에 입지 점수 순위가 붙는다 */
+  corridor = (id: string, industry?: string | null) =>
+    this.get<Corridor>(`cor:${id}:${industry ?? ""}`, () => getCorridor(id, industry));
 
   /** 미리 받기 — 결과를 기다리지 않고, 실패해도 조용하다(그 화면이 열릴 때 다시 부른다) */
   prefetch(...loads: Array<() => Promise<unknown>>) {

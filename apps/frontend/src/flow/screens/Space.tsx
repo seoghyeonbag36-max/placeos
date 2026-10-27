@@ -251,7 +251,8 @@ export function SpaceDetail({ id }: { id: string }) {
       cta={calculable
         ? <BottomCTA primary={{ label: "몇 달이면 본전인지 보기", onClick: () => go("/premium") }}
             secondary={{ label: saved ? "저장됨" : "저장", onClick: () => toggleSaveSpace(item, !saved, "save-space") }} />
-        : <BottomCTA note={custom ? "직접 적은 업종은 본전 시점을 계산하지 않아요." : "본전 시점은 건물 단위 자리만 계산해요."}
+        : <BottomCTA note={custom ? "직접 적은 업종은 본전 시점을 계산하지 않아요."
+            : (spaces.status === "ready" ? spaces.data.noCalcReason : null) ?? "본전 시점은 건물 단위 자리만 계산해요."}
             primary={{ label: saved ? "후보에 저장했어요" : "후보로 저장하기", onClick: () => toggleSaveSpace(item, true, "save-space"), disabled: saved }} />}>
       <SpaceMap lat={item.lat} lng={item.lng} name={item.name} />
       <dl className="fl-keys">

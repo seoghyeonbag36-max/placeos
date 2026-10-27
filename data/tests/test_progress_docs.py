@@ -121,9 +121,35 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     # 가드가 옛 값을 고정하면 가드 자신이 드리프트의 원인이 된다. 고정할 것은 숫자가
     # 아니라 **성질**이다: 세 트랙은 게이트 배선이 끝나 100 이고, Platform 은 실력
     # 게이트가 열려 있는 동안 100 미만이어야 한다(닫히면 자연히 오른다).
+    #
+    # 2026-10-26 고양·파주 서빙 — Posting·Program 이 100 아래로 내려왔고, 그것이 맞다. 두 도시엔
+    # 서울 전용 소스(상권분석 유동인구·수요신호)가 없고 경기 대체 소스는 **아직 배선 전**이다
+    # (경기데이터드림 행정동 유동인구·카드매출 — 수집은 가능하다). 「수집 가능한데 안 한 것」을
+    # 100 으로 세면 남은 일이 진행률에서 사라진다. 그래서 고정하는 성질을 바꿨다:
+    #   · 100 미만인 계산 게이트는 **서울 전용 소스에 기대는 두 칸뿐**이고
+    #   · 그 칸의 빈 거점 수는 **그 소스가 없는 도시의 서빙 거점 수와 정확히 같다**.
+    # 서울 거점 하나가 새로 비거나 다른 게이트가 미달하면 여기서 깨진다.
     assert scores["Page"] == 100.0
-    assert scores["Posting"] == 100.0
-    assert scores["Program"] == 100.0
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "apps" / "backend"))
+    from app.data import cities
+    from data.config.page_hubs import ACTIVE_HUBS
+
+    no_seoul_src = sum(1 for h in ACTIVE_HUBS.values() if not cities.by_id(h.city).has_trdar)
+    seoul_only = {"3-Tier 입력 3종 실데이터화 (수집 가능한 것)": r"foot (\d+)/(\d+)",
+                  "상권 수요신호 결합": r"^(\d+)/(\d+)거점"}
+    gates = {t["name"]: t["gates"] for t in status["tracks"]}
+    for track in ("Posting", "Program"):
+        short = [g for g in gates[track] if not g["observe"] and g["value"] < 1.0]
+        for g in short:
+            assert g["name"] in seoul_only, f"{track}: 서울 전용 소스 밖의 게이트가 미달이다 — {g['name']}"
+            m = re.search(seoul_only[g["name"]], g["detail"])
+            assert m, f"{g['name']}: 상세에서 n/N 을 못 읽었다 — {g['detail'][:80]}"
+            have, total = int(m.group(1)), int(m.group(2))
+            assert total - have == no_seoul_src, (
+                f"{g['name']}: 빈 거점 {total - have} ≠ 서울 전용 소스가 없는 도시의 거점 {no_seoul_src}")
+        if not no_seoul_src:
+            assert scores[track] == 100.0
     assert 0.0 < scores["Platform"] < 100.0, (
         "Platform 이 100 이면 실력 게이트가 사라졌거나 베이스라인 대조가 꺼진 것이다")
 

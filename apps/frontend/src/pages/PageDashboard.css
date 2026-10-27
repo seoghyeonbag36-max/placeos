@@ -84,7 +84,7 @@
 /* 건물 공실 범례 칩 */
 .pagedash .ml-chip{display:inline-flex;align-items:center;gap:var(--sp-1);font-size:11px;font-weight:700;color:var(--sub)}
 .pagedash .ml-chip i{width:11px;height:11px;border-radius:3px;display:inline-block}
-/* 3D 디지털 트윈 모달 */
+/* 건물 상세 모달(2D 층 스택 + 거리뷰 — 클래스 이름 twin* 은 옛 컴포넌트에서 이어받았다) */
 .pagedash .twinmodal{position:fixed;inset:0;z-index:2000;background:rgba(17,24,39,.55);display:flex;align-items:center;justify-content:center;padding:20px}
 .pagedash .twinbox{background:var(--surface);border-radius:15px;width:min(560px,94vw);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 .pagedash .twinhead{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line);font-weight:700;font-size:13px}

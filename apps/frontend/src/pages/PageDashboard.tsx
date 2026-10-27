@@ -183,7 +183,8 @@ function Src({ src }: { src?: string }) {
     : src === "flpop+seed" ? "유동인구"
       : src === "flr_ouln" ? "층 실측"
         : src === "assumed_1f" ? "1F 가정"
-          : src === "seed" ? "추정" : src;
+          : src === "none" ? "자료 없음"
+            : src === "seed" ? "추정" : src;
   const title = src === "rone" ? "한국부동산원 R-ONE 소규모상가 임대료 × 면적 × 층 계수"
     : src === "flpop+seed" ? "서울 상권분석 유동인구(거점 수준) + 시드의 거점 내 서열"
       : src === "flr_ouln"
@@ -441,7 +442,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
         )}
       </div>
 
-      {/* 건물 상세 — 2D 층 근거 + 공실 이력 (2026-09-05 에 3D 트윈을 대체했다) */}
+      {/* 건물 상세 — 2D 층 근거 + 공실 이력(일반 건물). 계획상가는 3D 디지털 트윈이 맡는다(2026-10-27 결정 · 구현 전) */}
       {twinOpen && sel && (
         <div className="twinmodal" onClick={() => setTwinOpen(false)}>
           <div className="twinbox" onClick={(e) => e.stopPropagation()}>
@@ -738,6 +739,8 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                       {p.persona ? <>{" · "}{p.persona}</> : null}
                     </div>
                     {p.note ? <div className="unote">{p.note}</div> : null}
+                    {/* 매출 재료가 없는 도시(고양·파주)는 계수 폴백이라 회수기간을 싣지 않고 사유를 싣는다(2026-10-27) */}
+                    {p.payback_unavailable_reason ? <div className="unote">{p.payback_unavailable_reason}</div> : <>
                     <div className="tiers">
                       {Object.values(p.scenarios).map((sc: TierScenario) => (
                         <div key={sc.tier} className={"tier" + (sc.recommended ? " rec" : "")} style={{ borderColor: sc.recommended ? TIER_COLOR[sc.tier] : undefined }}>
@@ -767,6 +770,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                       비용 기준: {BASIS_LABEL[Object.values(p.scenarios)[0]?.basis]
                         ?? Object.values(p.scenarios)[0]?.basis ?? "미상"}
                     </div>
+                    </>}
                   </div>
                 ))}
               </div>

@@ -159,6 +159,30 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(saved).toMatchObject({ industryKey: "bar", districtId: null, spaceId: null, premium: null });
   });
 
+  it("R1 순위는 잣대 묶음마다 따로 세운다 — 서울과 고양·파주를 한 줄에 섞지 않는다(2026-10-27)", async () => {
+    const grouped = (id: string, name: string, rank: number, model: string, group: string, n: number) =>
+      ({ ...fitRow(id, name, rank), fit_model: model, rank_group_name: group, rank_n: n });
+    stub([{ match: /\/ai\/industry-fit\?industry=cafe$/, body: {
+      industry: INDUSTRIES[0], model_covered: true, seoul_fit: 0.3, ranked_n: 3,
+      rank_groups: [{ fit_model: "industry-gnn", name: "서울", ranked_n: 2, mean_fit: 0.3 },
+        { fit_model: "industry-gnn-common", name: "고양·파주", ranked_n: 1, mean_fit: 0.32 }],
+      districts: [grouped("seongsu", "성수동 카페거리", 1, "industry-gnn", "서울", 2), grouped("garosugil", "가로수길", 2, "industry-gnn", "서울", 2),
+        grouped("geumchon", "금촌", 1, "industry-gnn-common", "고양·파주", 1)],
+      source: "출처", note: "매출이 아니다",
+    } }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 2, name: "서울" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "고양·파주" })).toBeTruthy();
+    const seoul = within(screen.getByRole("list", { name: "서울 카페·디저트 상권 순위" }));
+    const gg = within(screen.getByRole("list", { name: "고양·파주 카페·디저트 상권 순위" }));
+    expect(seoul.getByText("성수동 카페거리")).toBeTruthy();
+    expect(seoul.queryByText("금촌")).toBeNull();
+    expect(gg.getByText("금촌")).toBeTruthy();
+    expect(screen.getByText("서울과 고양·파주는 순위를 따로 매겨요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.")).toBeTruthy();
+  });
+
   it("F-06 모델 밖 업종은 순위 대신 「상권 순위를 아직 못 드려요」와 「상권 직접 고르기」", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "bar" }));
@@ -235,6 +259,17 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.getByRole("button", { name: "후보로 저장하기" })).toBeTruthy();
     expect(screen.getByText("본전 시점은 건물 단위 자리만 계산해요.")).toBeTruthy();
     b.unmount();
+    // 매출 재료가 없는 도시(고양·파주 · 2026-10-27)는 회수기간 유닛이 있어도 계수 폴백이라 답하지 않고 사유를 보인다
+    const reason = "파주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요.";
+    stub([{ match: /\/seongsu\/postings$/, body: [{ id: "vu-B1", n: "B1", grp: "A", lat: 0, lng: 0, area: 19, rent: 412, prem: 0, floor: "1F", was: "카페", foot: "",
+      scenarios: { premium: tier("premium", { basis: "rent+fitout", roi_months: 1.1 }), value: tier("value", { basis: "rent+fitout", roi_months: 0.9 }),
+        factory: tier("factory", { basis: "rent+fitout", roi_months: 1.0 }) }, payback_unavailable_reason: reason }] }]);
+    open("/space/vfu-B1-1");
+    const c = render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "몇 달이면 본전인지 보기" })).toBeNull();
+    expect(screen.getByText(reason)).toBeTruthy();
+    c.unmount();
     // 질문 화면에서는 부르지 않는다
     loadNaverMaps.mockClear();
     open("/rent-cap");

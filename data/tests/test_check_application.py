@@ -266,3 +266,16 @@ def test_main_skips_archived_and_says_so(tmp_path, monkeypatch, capsys):
 def test_rules_and_index_are_not_scanned_as_drafts(name):
     """규칙 문서는 금지어를 예시로 담는다 — 원고로 세면 규칙이 스스로를 위반한다."""
     assert name in ca.SKIP_NAMES
+
+
+def test_3d_twin_is_blocked_as_a_feature_but_allowed_as_a_plan():
+    """3D 디지털 트윈은 계획상가 전용으로 들이기로 했지만(2026-10-27) 아직 구현 전이다.
+
+    기능·시연 가능한 것처럼 쓰면 대면심사에서 깨지므로 막고, 같은 줄에 「구현 예정·계획·로드맵」을 붙인 계획 서술은 둔다.
+    """
+    claims = json.loads(ca.CLAIMS.read_text(encoding="utf-8"))
+    pat = re.compile(next(f["pattern"] for f in claims["forbid"] if f["id"] == "F_3D_TWIN"))
+    assert pat.search("3D 디지털 트윈으로 건물 공실을 실시간으로 보여 줍니다")
+    assert pat.search("3D 트윈 화면")
+    assert not pat.search("계획상가는 3D 디지털 트윈(구현 예정)으로 다룬다")
+    assert not pat.search("3D 디지털 트윈 — 도시재생 사업 로드맵")

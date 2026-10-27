@@ -407,14 +407,13 @@ def page_track(total: int) -> Track:
     ))
     t.gates.append(Gate(
         "지도·건물상세 표면 (2D 층 스택 + 거리뷰)", 1.0,
-        "MapShell 지도 + 건물 클릭 패널 + BuildingViewer(2D 층 스택 + 네이버 거리뷰) 동작. "
-        "⚠ **2026-09-05 정정** — 이 게이트는 그날까지 `3D 트윈 표면` 이라는 이름으로 "
-        "삭제된 `BuildingTwin` 을 근거로 100% 를 선언하고 있었다(커밋 8dfeceb 이 "
-        "@react-three/fiber 를 걷어냈는데 게이트만 남았다). 트윈이 그리던 절차적 박스는 "
-        "실측 형상이 아니라 **층 상태를 색으로 말하던 것뿐**이라 2D 로 더 정확하고 싸게 "
-        "그려진다(번들 832KB → 4KB). 3D 를 없앤 것이지 층 표현을 없앤 것이 아니다 — "
-        "층 근거(com_floors·occ_floors)를 가진 건물 31,782동의 실측이 그대로 화면에 "
-        "남는다. ⚠ 거리뷰는 촬영 시점이 몇 년 전일 수 있어 **공실 판정의 근거가 아니다**. "
+        "MapShell 지도 + 건물 클릭 패널 + BuildingViewer(2D 층 스택 + 네이버 거리뷰) 동작 — "
+        "층 근거(com_floors·occ_floors)를 가진 건물 31,782동의 실측이 화면에 선다. "
+        "⚠ 이 게이트는 **일반 건물** 표면만 센다 — 계획상가(집합건물)의 3D 디지털 트윈은 "
+        "2026-10-27 사용자 결정으로 따로 가는 **구현 전** 표면이라 여기 넣지 않는다(실시간 공실 · "
+        "건물별 공실 집계 · 외부→내부 최적 동선 — CLAUDE.md §3D 디지털 트윈). "
+        "⚠ 2026-09-05 정정 — 이 게이트는 그날까지 이미 지워진 컴포넌트(`BuildingTwin`)를 근거로 "
+        "100% 를 선언하고 있었다(선언이 산출물보다 오래 사는 실패 양식이라 경위를 남긴다). ⚠ 거리뷰는 촬영 시점이 몇 년 전일 수 있어 **공실 판정의 근거가 아니다**. "
         "그래서 촬영일을 반드시 같이 그린다. ⚠ 이건 선언 게이트다 — 화면이 실제로 "
         "그려지는지는 `/verify` 로만 확인된다(fd04852 가 거리뷰 미렌더·토글 무반응 둘을 "
         "그렇게 잡았다). 프론트에 단위 테스트가 없으므로 이 자리는 자동화되지 않는다. "
@@ -722,6 +721,21 @@ def platform_track() -> Track:
                 f"{top3:.1%} — 그러나 metrics 에 baseline_district_prior_top3 이 없어 "
                 f"**실력을 못 잰다**. 베이스라인 없는 정확도는 판정 근거가 아니다",
             ))
+        # 2026-10-26 고양·파주 — 공통 피처판(서울 전용 수요 블록 없음)이 맡는 거점의 판정.
+        # 판정은 kpi_baseline 한 곳(gnn_city_skill). 축이 없으면(서울만 서빙) 게이트도 없다.
+        gc = (kb or {}).get("gnn_city") or {}
+        if gc.get("available"):
+            clo, chi = gc["skill_ci95_pp"]
+            cm = gc["mcnemar"]
+            t.gates.append(Gate(
+                "KPI 업종추천 Top-3 실력 — 고양·파주 (공통 피처판)",
+                1.0 if gc["verdict"] == "실력" else 0.0,
+                f"{gc['model']} · {gc['features']}열(서울 전용 TRDAR 수요 블록 없음) · 실력 "
+                f"**{gc['skill_pp_top3']:+.2f}%p** [{clo:+.2f}, {chi:+.2f}] · McNemar b={cm['b_model_only']} "
+                f"c={cm['c_prior_only']} p={cm['p_two_sided']:.3f} → **{gc['verdict']}** "
+                f"(거점 군집 {gc['clusters']}곳 · test {gc['test_nodes']}자리 — 군집이 적어 구간이 낙관적일 수 있다)",
+                evidence="scripts/kpi_baseline.py gnn_city_skill · docs/decision-goyang-paju-corridor-2026-10-26.md",
+            ))
     # off-prior Top-3 회수율 — 거점 사전분포가 **원리적으로 못 맞히는** 자리에서의 회수율.
     # 이걸 게이트로 쓰는 이유(2026-08-17 분석):
     #   피처 95개 중 자리마다 값이 달라지는 것은 5개뿐이고 나머지 90개는 거점 상수라
@@ -884,7 +898,10 @@ def posting_track(total: int) -> Track:
     for d in _gold_glob("*/vacant_units.json"):
         raw = _load(d)
         units = raw.get("units") if isinstance(raw, dict) else raw
-        if units and all(u.get("area") for u in units):
+        # 0유닛 **판정** 파일(`empty_reason` — 조건을 통과한 공실 건물이 없다, 2026-10-26)은 잴
+        # 면적이 없는 상태라 충족으로 센다. 판정 없이 비어 있는 것은 종전대로 세지 않는다.
+        judged_empty = isinstance(raw, dict) and raw.get("empty_reason") and units == []
+        if (units and all(u.get("area") for u in units)) or judged_empty:
             area += 1
     # 최근접 상권으로 거점 내 서열이 갈리는 거점 수 — 손으로 적지 않고 센다.
     # 못 세면(None) 종전 0.5 가중으로 물러난다.

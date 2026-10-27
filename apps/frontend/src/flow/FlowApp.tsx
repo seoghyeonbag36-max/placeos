@@ -22,6 +22,7 @@ import { businessToFlow, clearFlow, emptyFlow, flowToBusiness, loadFlow, saveFlo
 import { Sheet, Toast, type ToastMsg } from "./ui";
 import { BudgetCheck, Budget, Contract, Fitout, Payback, Premium } from "./screens/Cost";
 import { Compare } from "./screens/Compare";
+import { Corridor } from "./screens/Corridor";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
@@ -45,6 +46,7 @@ function Screen({ route }: { route: Route }) {
     case "district-search": return <DistrictSearch />;
     case "district": return <District id={route.param!} />;
     case "compare": return <Compare param={route.param!} />;
+    case "corridor": return <Corridor id={route.param!} />;
     case "rent-cap": return <RentCap />;
     case "spaces": return <Spaces />;
     case "space": return <SpaceDetail id={route.param!} />;

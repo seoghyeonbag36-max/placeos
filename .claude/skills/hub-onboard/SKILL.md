@@ -68,6 +68,8 @@ python -m data.pipelines.build_building_attrs <slug>
 python -m data.pipelines.recalc_floor_ouln <slug>     # bronze 원본에서 분모 재계산(API 콜 0)
 python -m data.pipelines.build_page_master <slug>     # page_building_master.geojson + coverage.json
 python -m data.pipelines.build_vacant_units <slug>
+python -m data.pipelines.build_vacant_floor_units <slug>  # 층 단위 매물(흐름 R3) — 빠뜨리면 빈 자리 목록이 빈다(10-27)
+python -m data.pipelines.build_industry_floor_fit         # 서빙 거점 풀링 관측표 — 거점이 늘면 다시
 python -m data.pipelines.calibrate_vacancy            # 전 거점 α 재산출
 ```
 

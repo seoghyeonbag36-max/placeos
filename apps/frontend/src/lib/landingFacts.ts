@@ -9,4 +9,7 @@
  * 단일 기준은 `python scripts/pppp_status.py` 다. 여기에 **적지 않는** 것 — 정확도·예측 성능·고객 수·가격:
  * 공실 예측(LSTM) 두 축은 아직 확인 대기이고(CLAUDE.md KPI①), 파일럿 실적은 없으며, 요금은 정해지지 않았다.
  */
-export const LANDING_HUBS = 81;
+export const LANDING_HUBS = 90;
+
+/** 서빙 지역 — 2026-10-26 고양·파주를 서빙하며 「서울」에서 늘었다. 거점 수와 같이 움직인다 */
+export const LANDING_REGION = "서울·고양·파주";

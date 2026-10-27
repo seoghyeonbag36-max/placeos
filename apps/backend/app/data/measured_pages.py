@@ -27,7 +27,9 @@
 ## 어느 도시를 서빙하는가 — `SERVED_CITIES`
 
 Gold 가 섰다고 자동으로 화면에 오르지는 않는다. 어느 도시를 **지금** 서빙할지는 제품
-판단이고, 그 판단을 `SERVED_CITIES` 한 곳에 둔다(아래). 2026-09-03 현재 서울만이다.
+판단이고, 그 판단을 `SERVED_CITIES` 한 곳에 둔다(아래). 2026-09-03 ~ 10-25 에는 서울만,
+2026-10-26 부터 고양·파주를 더한다. 그 도시 안에서도 추후 확장 과제로 표기된 거점
+(`page_hubs.PageHub.deferred` — 계획상가·단일시설)은 오르지 않는다.
 
 ## 서울 54거점은 건드리지 않는다
 
@@ -86,7 +88,14 @@ _PAGE_HUBS = _REPO / "data" / "config" / "page_hubs.py"
 # **이 상수는 열린 질문이 아니라 내려진 결정이다.** `/pppp-status` 가 보류를 물어 오면
 # 그건 결정이 없어서가 아니라 요약이 그렇게 읽히기 때문이다 — 되넣기 전에 필요한 것은
 # 판단이 아니라 **경기 상권을 서빙할 사업적 이유**다(있으면 도시 id 한 줄).
-SERVED_CITIES: frozenset[str] = frozenset({"seoul"})
+#
+# 2026-10-26: 그 사업적 이유가 섰다 — 사용자가 고양·파주를 먼저 서빙하고 파주-고양-서울을
+# 하나의 흐름(고객 이동·연결·지역별 시너지)으로 잇기로 정했다. 그래서 두 도시 id 를 되넣었다.
+# 단 **신규 확장에서는 계획상가·단일시설을 뺀다**(같은 결정) — 그 11곳은 도시가 아니라
+# 거점 단위 표기(`page_hubs.PageHub.deferred`)로 빠진다. 아래 `build()` 와 위의 두
+# 스크립트(chain_status · quota_preflight)가 같은 표기를 읽는다.
+# → docs/decision-goyang-paju-corridor-2026-10-26.md
+SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju"})
 
 
 def _load_hubs() -> dict:
@@ -192,6 +201,10 @@ def build() -> list[dict]:
         # 서빙 대상 도시가 아니면 올리지 않는다. 산출물이 없어서가 아니라 **안 올리기로
         # 정해서** 빠지는 것이라, 두 이유를 위 조건과 갈라 둔다(위 SERVED_CITIES 주석).
         if getattr(hub, "city", "seoul") not in SERVED_CITIES:
+            continue
+        # 추후 확장 과제(계획상가·단일시설)는 Gold 가 서 있어도 올리지 않는다 — 도시가 아니라
+        # 거점 단위 판단이다(2026-10-26). 산출물은 남겨 재개 때 다시 받지 않게 한다.
+        if getattr(hub, "deferred", ""):
             continue
         out.append(_entry(hub, _coverage(slug)))
     return out

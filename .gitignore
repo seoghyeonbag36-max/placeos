@@ -21,6 +21,8 @@ dist/
 data/bronze/*
 data/silver/*
 data/gold/*
+# 내려받은 원본 캐시(수도권 생활이동 일별 ZIP 65~78MB 등) — 재내려받기 가능, 추적하지 않는다
+data/raw/
 !data/bronze/.gitkeep
 !data/silver/.gitkeep
 # 집계구 PIP 배정표 3종. 원천 shapefile 은 bronze(전체 gitignore)라 git 으로 복구되지
@@ -97,6 +99,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # 정적 서빙한다. 원천는 서울열린데이터 API 라 배포에 없다. 빠지면 「많이 이용하는 버스정류장」
 # 칸이 "정보 없음(unavailable)"으로 빠진다 — 상태가 밝혀지므로 조용하지는 않지만 로컬에서만 보인다.
 !data/gold/page_bus_stops.json
+# 예외: 파주-고양-서울 흐름(고객 유입 흐름·연결·시너지 후보) — services/corridor 가 정적
+# 서빙한다(2026-10-26). 원천은 서울시×KT 수도권 생활이동 일별 ZIP(data/raw, 추적 안 함)이라
+# 배포에서 다시 만들 수 없다. 빠지면 흐름 화면이 「흐름 데이터 없음」으로 물러난다.
+!data/gold/platform_corridor.json
 
 # 유닛 단위 foot (집계구 생활인구 × SGIS 2016 4Q 경계 PIP) — **서빙이 읽는다**
 # (posting_inputs._unit_jipgyegu_flpop). 빠지면 새 클론에서 조용히 상권 폴백으로

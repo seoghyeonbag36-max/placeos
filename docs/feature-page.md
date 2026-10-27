@@ -11,15 +11,12 @@
 
 ## 0. 구현 현황
 
-⚠ **2026-09-05 — 3D 디지털 트윈은 폐기됐다. 이 문서 아래쪽은 그 전에 쓰였다.**
-`BuildingTwin`(@react-three/fiber)이 그리던 절차적 박스는 실측 형상이 아니라 **층 상태를
-색으로 말하던 것뿐**이라, 2D 층 스택 + 네이버 거리뷰(`components/BuildingViewer.tsx`)로
-갈았다(번들 832KB → 4KB). **3D 를 없앤 것이지 층 표현을 없앤 것이 아니다** — 층
-근거(`com_floors`·`occ_floors`)를 가진 31,782동의 실측은 그대로 화면에 남는다.
-
-경위와 무엇을 잃고 얻었는지는 `docs/feature-posting.md` **§0-V** 에 적혀 있다(같은 커밋이
-Posting 의 업종 관측까지 건드려서 그쪽에 남았다). 아래 §0 이후에서 "트윈"을 읽을 때는
-**2D 층 스택**으로 옮겨 읽고, `BuildingTwin` 이라는 이름이 나오면 이력이다.
+⚠ **건물 상세는 두 표면이다(2026-10-27 사용자 결정).** 일반 건물은 **2D 층 스택 + 네이버 거리뷰**
+(`components/BuildingViewer.tsx`)로 몇 층이 비었나를 그리고 — 층 근거(`com_floors`·`occ_floors`)를 가진 31,782동의 실측 —,
+**계획상가(집합건물)는 3D 디지털 트윈**(구현 전)이 맡는다: ① 공실 건물을 실시간으로(네이버 지도의 최신성으로 표현이 안 되는 부분)
+② 건물별 공실을 집계해 실제 지역 공실률을 조사 ③ 외부→내부 최적 이동 동선으로 도시재생 사업까지. 범위·원칙은
+`docs/feature-posting.md` **§0-V**. 아래 §0 이후의 "트윈"은 2026-08 에 쓰인 것이라 **일반 건물의 층 표현**(지금의 2D 층 스택)을 가리키고,
+`BuildingTwin` 이라는 이름은 그때의 컴포넌트다.
 
 - 지금 표면: `pages/MapShell.tsx` → `components/BuildingViewer.tsx` → `lib/naverMap.ts`
 - ⚠ 거리뷰는 촬영 시점이 몇 년 전일 수 있어 **공실 판정의 근거가 아니다.** 그래서 촬영일을
@@ -285,8 +282,9 @@ TRDAR 과 생활인구는 어느 하나가 낫다기보다 **축이 반대**다:
 실제 베이스맵은 네이버 지도(`lib/naverMap.ts`)이고 `mapbox-gl` 은 2026-08-25 에
 의존성에서 제거됐다(`docs/decision-infra-layer-2026-08-25.md`). §2 의 실행 절차는
 2026-09-04 에 현재 값으로 고쳤다. **§3 의 4번 항목(`BuildingTwin` · @react-three/fiber ·
-GLTFLoader · Mapbox custom layer)은 통째로 무효다** — 2026-09-05 에 폐기하고
-`BuildingViewer`(2D 층 스택 + 거리뷰)로 갈았다(§0 머리말 · feature-posting.md §0-V).
+GLTFLoader · Mapbox custom layer)은 그 원안대로는 서지 않는다** — 일반 건물 상세는 2026-09-05 부터
+`BuildingViewer`(2D 층 스택 + 거리뷰)가 맡고, 계획상가(집합건물)는 2026-10-27 결정으로 **3D 디지털 트윈**을
+실측·실시간 자료로 새로 만든다(§0 머리말 · feature-posting.md §0-V).
 2·3번의 `DistrictMap.tsx`·`VacancyHeatmap.tsx` 도 그 이름으로 만들어지지 않았다 —
 `MapShell.tsx` 한 곳에 들어 있다.
 
@@ -629,8 +627,8 @@ apps/backend/app/api/v1/buildings.py 건물 히스토리/3D 모델 경로
 apps/backend/app/api/v1/districts.py 상권 정보 + /heatmap GeoJSON
 ```
 
-⚠ **2026-09-08 정정 — 이 블록은 3D 트윈 시절의 이름이다.** §0 머리말의 폐기 고지가
-아래 §3·§4 만 무효로 적어 두어 §1·§5 가 그대로 남아 있었다. `src/components/` 에 실제로
+⚠ **2026-09-08 정정 — 이 블록은 옛 3D 컴포넌트 시절의 이름이다.** §0 머리말의 고지가
+아래 §3·§4 만 원안과 다르다고 적어 두어 §1·§5 가 그대로 남아 있었다. `src/components/` 에 실제로
 있는 것은 `BuildingViewer`(2D 층 스택 + 거리뷰) · `MapHost` · `DistrictPicker` · `Verdict`
 넷이고 "3D 맵 / 히스토리 타임라인" 이라는 파일은 없다. 히트맵 레이어도 별도 컴포넌트가
 아니라 `pages/MapShell.tsx` 안에 있다. `buildings.py` 의 `/{building_id}/model` 은 살아
@@ -641,7 +639,7 @@ apps/backend/app/api/v1/districts.py 상권 정보 + /heatmap GeoJSON
 
 ```bash
 cd apps/frontend
-npm install                 # react, @visx/shape (three 계열은 2026-09-05 제거됨)
+npm install                 # react, @visx/shape (three 계열은 지금 없다 — 계획상가 3D 디지털 트윈을 만들 때 지연 로드로 들인다)
 npm run dev                 # http://localhost:5173
 
 # 네이버 지도 키 (.env) — NCP 콘솔 Web 서비스 URL 에 http://localhost:5173 등록 필수
@@ -693,6 +691,6 @@ import 도 0건이다. `node_modules` 에 남아 있는 것은 예전 설치의 
 
 - `cd apps/frontend && npm run build` — 타입체크 통과
 - 브라우저에서 히트맵 색상·~~3D 모델~~ **2D 층 스택 + 거리뷰**(`BuildingViewer`) 렌더 확인,
-  **로딩 3초 이내** (⚠ 2026-09-08 정정 — 3D 트윈은 2026-09-05 폐기됐다. §0 머리말)
+  **로딩 3초 이내** (⚠ 2026-09-08 정정 — 일반 건물 상세는 2D 층 스택이다. 계획상가 3D 디지털 트윈은 구현 전 — §0 머리말)
 - `cd apps/backend && pytest` — heatmap/buildings 응답 스키마(GeoJSON 유효성)
 - 네트워크 탭에서 API p95 <200ms 확인

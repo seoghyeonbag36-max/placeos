@@ -102,6 +102,14 @@ def simulate(district_id: str, unit_id: str | None = None,
     source = "copilot"
     source_note = None
     if scenarios is None:
+        # 매출 재료가 없는 도시(고양·파주)에서는 계수 폴백으로 본전 시점을 답하지 않는다(2026-10-27).
+        # 코파일럿이 답하면 그 답은 쓴다 — 막는 것은 우리 손으로 적은 계수뿐이다.
+        reason = svc.payback_unavailable_reason(district_id)
+        if reason:
+            return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
+                    "scenarios": {}, "source": "unavailable", "source_note": fail,
+                    "inputs_source": unit.get("inputs_source"), "inputs_quarter": posting_inputs.quarter(),
+                    "calculation_status": "unavailable", "unavailable_reason": reason}
         scenarios = svc.tier_scenarios(unit, district_id)
         source = "fallback-3tier"
         source_note = fail

@@ -425,6 +425,11 @@ def resolve_units(district_id: str, units: list[dict]) -> list[dict]:
                 "rone-shared" if district_id in _SHARED_RONE else "rone")
             resolved["inputs_source"]["floor"] = (
                 unit.get("floor_basis") or "flr_ouln") if mixed else "assumed_1f"
+        if not district_grade and not unit.get("foot"):
+            # 이 거점엔 유동 소스가 없고(서울 상권분석·생활인구는 서울 전용) 유닛에도 등급이
+            # 없다 — 3-Tier 는 유동 보정 없이 돈다(districts.tier_scenarios). 「시드」로 남기면
+            # 손으로 적은 값이 있는 것처럼 읽히므로 출처를 따로 밝힌다(2026-10-26).
+            resolved["inputs_source"]["foot"] = "none"
         if district_grade:
             if offsets is not None:
                 resolved["foot"] = _apply_offset(district_grade, offsets[i])

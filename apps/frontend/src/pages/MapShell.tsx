@@ -994,7 +994,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
         )}
       </div>
 
-      {/* 건물 상세 — 2D 층 근거 + 공실 이력 (2026-09-05 에 3D 트윈을 대체했다) */}
+      {/* 건물 상세 — 2D 층 근거 + 공실 이력(일반 건물). 계획상가는 3D 디지털 트윈이 맡는다(2026-10-27 결정 · 구현 전) */}
       {twinOpen && selected && (
         <div className="twin-modal" onClick={() => setTwinOpen(false)}>
           <div className="twin-box" onClick={(e) => e.stopPropagation()}>

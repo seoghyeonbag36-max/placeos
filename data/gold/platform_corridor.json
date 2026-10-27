@@ -1,0 +1,8381 @@
+{
+ "corridors": {
+  "paju-goyang-seoul": {
+   "id": "paju-goyang-seoul",
+   "name": "파주 · 고양 · 서울",
+   "note": "경의중앙선·3호선·GTX-A 가 지나는 서북부 생활권. 구간 경계는 행정구역이다.",
+   "segments": [
+    {
+     "key": "paju",
+     "name": "파주"
+    },
+    {
+     "key": "goyang",
+     "name": "고양"
+    },
+    {
+     "key": "seoul",
+     "name": "서울"
+    }
+   ],
+   "period": {
+    "days": [
+     "20260914",
+     "20260915",
+     "20260916",
+     "20260917",
+     "20260918",
+     "20260919",
+     "20260920"
+    ],
+    "n_days": 7,
+    "weekday": 5,
+    "weekend": 2
+   },
+   "source": "서울시×KT 수도권 생활이동(출발-도착지 기준) · data.seoul.go.kr OA-22300 · 공공누리 1유형",
+   "dataset": "OA-22300",
+   "resolution": {
+    "seoul": "adong",
+    "gyeonggi": "sgg"
+   },
+   "caveats": [
+    "출발 → 도착 집계다. 한 사람의 동선이 아니다.",
+    "인원은 KT 통신 기반 추정치의 일평균이다(기간 합계 ÷ 일수).",
+    "서울은 행정동, 파주·고양은 시군구 단위로만 실린다 — 같은 시군구의 거점은 같은 흐름 값을 쓴다.",
+    "서울 거점 값은 거점이 걸친 행정동 기준이라 거점 손님 수보다 넓다.",
+    "이동목적 「기타」에 비업무 방문 대부분이 들어간다. 쇼핑으로 바꿔 부르지 않는다."
+   ],
+   "links": [
+    {
+     "from": "paju",
+     "to": "paju",
+     "per_day": 884187.0,
+     "avg_min": 30.6,
+     "avg_km": 5.95,
+     "purpose_group_share": {
+      "work": 14.4,
+      "home": 35.5,
+      "visit": 50.1
+     },
+     "arr_hour_share": [
+      0.27,
+      0.92,
+      0.86,
+      0.7,
+      0.77,
+      1.19,
+      2.55,
+      4.7,
+      7.75,
+      5.29,
+      4.93,
+      5.64,
+      6.4,
+      6.37,
+      5.84,
+      5.92,
+      6.42,
+      7.23,
+      7.63,
+      5.86,
+      4.62,
+      3.92,
+      3.21,
+      1.01
+     ],
+     "peak_hours": [
+      8,
+      18,
+      17
+     ]
+    },
+    {
+     "from": "paju",
+     "to": "goyang",
+     "per_day": 189838.5,
+     "avg_min": 45.3,
+     "avg_km": 10.35,
+     "purpose_group_share": {
+      "work": 17.8,
+      "home": 32.5,
+      "visit": 49.8
+     },
+     "arr_hour_share": [
+      0.07,
+      0.4,
+      0.38,
+      0.32,
+      0.41,
+      0.72,
+      2.1,
+      4.5,
+      8.85,
+      6.77,
+      5.72,
+      5.35,
+      5.85,
+      6.35,
+      6.07,
+      5.94,
+      6.55,
+      8.04,
+      8.79,
+      6.62,
+      4.11,
+      3.08,
+      2.44,
+      0.57
+     ],
+     "peak_hours": [
+      8,
+      18,
+      17
+     ]
+    },
+    {
+     "from": "paju",
+     "to": "seoul",
+     "per_day": 110273.7,
+     "avg_min": 91.3,
+     "avg_km": 29.91,
+     "purpose_group_share": {
+      "work": 22.0,
+      "home": 30.8,
+      "visit": 47.2
+     },
+     "arr_hour_share": [
+      0.01,
+      0.15,
+      0.21,
+      0.22,
+      0.29,
+      0.66,
+      2.37,
+      5.15,
+      9.18,
+      7.59,
+      6.47,
+      5.8,
+      5.54,
+      5.82,
+      5.74,
+      6.12,
+      6.52,
+      7.57,
+      7.6,
+      6.71,
+      4.45,
+      3.09,
+      2.18,
+      0.59
+     ],
+     "peak_hours": [
+      8,
+      18,
+      9
+     ]
+    },
+    {
+     "from": "goyang",
+     "to": "paju",
+     "per_day": 187153.2,
+     "avg_min": 45.1,
+     "avg_km": 10.26,
+     "purpose_group_share": {
+      "work": 16.3,
+      "home": 38.4,
+      "visit": 45.3
+     },
+     "arr_hour_share": [
+      0.08,
+      0.49,
+      0.42,
+      0.34,
+      0.42,
+      0.79,
+      2.28,
+      5.06,
+      8.1,
+      5.48,
+      4.97,
+      5.65,
+      6.08,
+      6.3,
+      6.08,
+      6.06,
+      6.5,
+      7.33,
+      8.61,
+      6.44,
+      4.57,
+      3.88,
+      3.38,
+      0.72
+     ],
+     "peak_hours": [
+      18,
+      8,
+      17
+     ]
+    },
+    {
+     "from": "goyang",
+     "to": "goyang",
+     "per_day": 1650759.2,
+     "avg_min": 28.5,
+     "avg_km": 3.42,
+     "purpose_group_share": {
+      "work": 13.4,
+      "home": 37.2,
+      "visit": 49.4
+     },
+     "arr_hour_share": [
+      0.29,
+      1.01,
+      0.98,
+      0.81,
+      0.89,
+      1.24,
+      2.26,
+      3.86,
+      7.18,
+      5.54,
+      5.16,
+      5.54,
+      6.22,
+      6.25,
+      5.89,
+      6.05,
+      6.43,
+      6.93,
+      7.35,
+      5.97,
+      4.91,
+      4.39,
+      3.77,
+      1.07
+     ],
+     "peak_hours": [
+      18,
+      8,
+      17
+     ]
+    },
+    {
+     "from": "goyang",
+     "to": "seoul",
+     "per_day": 398513.4,
+     "avg_min": 69.8,
+     "avg_km": 15.64,
+     "purpose_group_share": {
+      "work": 25.2,
+      "home": 28.6,
+      "visit": 46.2
+     },
+     "arr_hour_share": [
+      0.03,
+      0.27,
+      0.27,
+      0.3,
+      0.4,
+      0.84,
+      2.73,
+      5.91,
+      10.5,
+      8.36,
+      6.68,
+      6.05,
+      5.9,
+      5.99,
+      5.65,
+      5.56,
+      5.49,
+      6.26,
+      6.62,
+      5.74,
+      4.02,
+      3.18,
+      2.59,
+      0.66
+     ],
+     "peak_hours": [
+      8,
+      9,
+      10
+     ]
+    },
+    {
+     "from": "seoul",
+     "to": "paju",
+     "per_day": 107722.8,
+     "avg_min": 88.3,
+     "avg_km": 29.9,
+     "purpose_group_share": {
+      "work": 10.6,
+      "home": 39.8,
+      "visit": 49.6
+     },
+     "arr_hour_share": [
+      0.02,
+      0.3,
+      0.43,
+      0.32,
+      0.38,
+      1.03,
+      2.51,
+      4.27,
+      5.93,
+      5.41,
+      5.95,
+      6.42,
+      5.91,
+      5.2,
+      5.2,
+      5.55,
+      5.72,
+      6.36,
+      7.35,
+      8.46,
+      6.43,
+      5.26,
+      4.27,
+      1.32
+     ],
+     "peak_hours": [
+      19,
+      18,
+      20
+     ]
+    },
+    {
+     "from": "seoul",
+     "to": "goyang",
+     "per_day": 384092.6,
+     "avg_min": 67.7,
+     "avg_km": 15.57,
+     "purpose_group_share": {
+      "work": 11.6,
+      "home": 44.2,
+      "visit": 44.2
+     },
+     "arr_hour_share": [
+      0.04,
+      0.46,
+      0.51,
+      0.38,
+      0.39,
+      0.74,
+      1.92,
+      3.45,
+      5.24,
+      4.59,
+      4.6,
+      5.14,
+      5.26,
+      5.23,
+      5.22,
+      5.58,
+      6.35,
+      7.58,
+      9.13,
+      9.59,
+      6.89,
+      5.67,
+      4.66,
+      1.36
+     ],
+     "peak_hours": [
+      19,
+      18,
+      17
+     ]
+    },
+    {
+     "from": "seoul",
+     "to": "seoul",
+     "per_day": 19562039.8,
+     "avg_min": 37.2,
+     "avg_km": 4.05,
+     "purpose_group_share": {
+      "work": 16.0,
+      "home": 35.3,
+      "visit": 48.7
+     },
+     "arr_hour_share": [
+      0.24,
+      0.9,
+      0.83,
+      0.68,
+      0.71,
+      1.0,
+      2.11,
+      4.06,
+      7.04,
+      5.86,
+      5.04,
+      5.41,
+      5.89,
+      6.01,
+      5.62,
+      5.81,
+      6.16,
+      6.85,
+      7.82,
+      6.77,
+      5.32,
+      4.63,
+      4.05,
+      1.19
+     ],
+     "peak_hours": [
+      18,
+      8,
+      17
+     ]
+    }
+   ],
+   "outer": {
+    "paju": {
+     "in_per_day": {
+      "경기 다른 시군": 84828.4,
+      "인천": 25908.0,
+      "그 밖": 10265.0
+     },
+     "out_per_day": {
+      "경기 다른 시군": 84430.2,
+      "인천": 26521.6,
+      "그 밖": 9748.1
+     }
+    },
+    "goyang": {
+     "in_per_day": {
+      "경기 다른 시군": 160280.5,
+      "인천": 59406.6,
+      "그 밖": 22243.2
+     },
+     "out_per_day": {
+      "경기 다른 시군": 159680.2,
+      "인천": 60768.3,
+      "그 밖": 21082.0
+     }
+    },
+    "seoul": {
+     "in_per_day": {
+      "경기 다른 시군": 2963120.8,
+      "인천": 461564.7,
+      "그 밖": 347482.4
+     },
+     "out_per_day": {
+      "경기 다른 시군": 2870271.6,
+      "인천": 472697.8,
+      "그 밖": 353917.9
+     }
+    }
+   },
+   "nodes": [
+    {
+     "id": "sgg:41480000",
+     "kind": "sgg",
+     "segment": "paju",
+     "name": "파주시",
+     "units": {
+      "41480000": {
+       "name": "파주시",
+       "weight": 1.0
+      }
+     },
+     "hubs": [
+      "geumchon",
+      "munsan",
+      "unjeong",
+      "yadang"
+     ],
+     "arrivals_per_day": 1300064.4,
+     "from_segment_per_day": {
+      "self": 884187.0,
+      "goyang": 187153.2,
+      "seoul": 107722.8,
+      "gyeonggi_other": 84828.4,
+      "incheon": 25908.0,
+      "other": 10265.0
+     },
+     "inflow_share": {
+      "same_dong": 68.0,
+      "same_segment": 0.0,
+      "goyang": 14.4,
+      "seoul": 8.3,
+      "outer": 9.3
+     },
+     "purpose_share": {
+      "기타": 49.1,
+      "귀가": 35.8,
+      "출근": 12.8,
+      "등교": 1.3,
+      "쇼핑": 0.9,
+      "관광": 0.0
+     },
+     "purpose_group_share": {
+      "work": 14.1,
+      "home": 35.8,
+      "visit": 50.1
+     },
+     "arr_hour_share": [
+      0.2,
+      0.74,
+      0.71,
+      0.58,
+      0.66,
+      1.12,
+      2.59,
+      4.79,
+      7.51,
+      5.38,
+      5.15,
+      5.84,
+      6.38,
+      6.26,
+      5.84,
+      5.93,
+      6.36,
+      7.13,
+      7.66,
+      6.17,
+      4.74,
+      3.98,
+      3.28,
+      0.97
+     ],
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "external_share": 32.0,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -3.3,
+       "home": 7.8,
+       "visit": -2.4
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 187153.2,
+     "corridor_rank": null,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41287000",
+       "per_day": 74017.2,
+       "visit_per_day": 34503.5,
+       "work_per_day": 11384.0,
+       "home_per_day": 28129.7,
+       "purpose_group_share": {
+        "work": 15.4,
+        "home": 38.0,
+        "visit": 46.6
+       },
+       "peak_hours": [
+        18,
+        8,
+        17
+       ],
+       "avg_min": 39.2
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41285000",
+       "per_day": 68387.8,
+       "visit_per_day": 35919.9,
+       "work_per_day": 14715.2,
+       "home_per_day": 17752.7,
+       "purpose_group_share": {
+        "work": 21.5,
+        "home": 26.0,
+        "visit": 52.5
+       },
+       "peak_hours": [
+        8,
+        9,
+        18
+       ],
+       "avg_min": 46.7
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41281000",
+       "per_day": 47433.6,
+       "visit_per_day": 24021.3,
+       "work_per_day": 7634.2,
+       "home_per_day": 15778.1,
+       "purpose_group_share": {
+        "work": 16.1,
+        "home": 33.3,
+        "visit": 50.6
+       },
+       "peak_hours": [
+        18,
+        17,
+        8
+       ],
+       "avg_min": 52.8
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "mangwon",
+       "per_day": 4956.8,
+       "visit_per_day": 2972.3,
+       "work_per_day": 1155.4,
+       "home_per_day": 829.0,
+       "purpose_group_share": {
+        "work": 23.3,
+        "home": 16.7,
+        "visit": 60.0
+       },
+       "peak_hours": [
+        9,
+        8,
+        17
+       ],
+       "avg_min": 77.2
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sinchon",
+       "per_day": 4820.5,
+       "visit_per_day": 2993.3,
+       "work_per_day": 1392.4,
+       "home_per_day": 434.7,
+       "purpose_group_share": {
+        "work": 28.9,
+        "home": 9.0,
+        "visit": 62.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 83.0
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41480000",
+       "per_day": 74308.2,
+       "visit_per_day": 34494.2,
+       "work_per_day": 12896.5,
+       "home_per_day": 26917.5,
+       "purpose_group_share": {
+        "work": 17.4,
+        "home": 36.2,
+        "visit": 46.4
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 38.7
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41480000",
+       "per_day": 67355.8,
+       "visit_per_day": 28998.2,
+       "work_per_day": 9146.3,
+       "home_per_day": 29211.2,
+       "purpose_group_share": {
+        "work": 13.6,
+        "home": 43.4,
+        "visit": 43.1
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 46.9
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41480000",
+       "per_day": 45489.2,
+       "visit_per_day": 21199.0,
+       "work_per_day": 8460.2,
+       "home_per_day": 15830.1,
+       "purpose_group_share": {
+        "work": 18.6,
+        "home": 34.8,
+        "visit": 46.6
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 53.1
+      },
+      {
+       "from": "mangwon",
+       "to": "sgg:41480000",
+       "per_day": 4656.1,
+       "visit_per_day": 1780.3,
+       "work_per_day": 378.1,
+       "home_per_day": 2497.7,
+       "purpose_group_share": {
+        "work": 8.1,
+        "home": 53.6,
+        "visit": 38.2
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 69.4
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41480000",
+       "per_day": 4519.6,
+       "visit_per_day": 1615.5,
+       "work_per_day": 89.3,
+       "home_per_day": 2814.8,
+       "purpose_group_share": {
+        "work": 2.0,
+        "home": 62.3,
+        "visit": 35.7
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 103.7
+      }
+     ]
+    },
+    {
+     "id": "sgg:41281000",
+     "kind": "sgg",
+     "segment": "goyang",
+     "name": "고양 덕양구",
+     "units": {
+      "41281000": {
+       "name": "고양 덕양구",
+       "weight": 1.0
+      }
+     },
+     "hubs": [
+      "haengsin",
+      "wondang"
+     ],
+     "arrivals_per_day": 1043792.0,
+     "from_segment_per_day": {
+      "self": 544263.2,
+      "seoul": 232666.2,
+      "goyang": 111113.7,
+      "gyeonggi_other": 72297.6,
+      "paju": 47433.6,
+      "incheon": 25917.2,
+      "other": 10100.6
+     },
+     "inflow_share": {
+      "same_dong": 52.1,
+      "same_segment": 10.6,
+      "seoul": 22.3,
+      "paju": 4.5,
+      "outer": 10.4
+     },
+     "purpose_share": {
+      "기타": 48.9,
+      "귀가": 38.0,
+      "출근": 11.4,
+      "등교": 1.7
+     },
+     "purpose_group_share": {
+      "work": 13.1,
+      "home": 38.0,
+      "visit": 48.9
+     },
+     "arr_hour_share": [
+      0.19,
+      0.77,
+      0.8,
+      0.65,
+      0.73,
+      1.14,
+      2.29,
+      3.85,
+      6.61,
+      5.3,
+      5.2,
+      5.71,
+      6.28,
+      6.14,
+      5.8,
+      5.97,
+      6.49,
+      7.26,
+      7.85,
+      6.74,
+      5.15,
+      4.36,
+      3.66,
+      1.07
+     ],
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "external_share": 37.2,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -4.3,
+       "home": 10.0,
+       "visit": -3.6
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 158547.3,
+     "corridor_rank": null,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41285000",
+       "per_day": 81607.2,
+       "visit_per_day": 41470.1,
+       "work_per_day": 14474.6,
+       "home_per_day": 25662.5,
+       "purpose_group_share": {
+        "work": 17.7,
+        "home": 31.4,
+        "visit": 50.8
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 39.5
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41480000",
+       "per_day": 45489.2,
+       "visit_per_day": 21199.0,
+       "work_per_day": 8460.2,
+       "home_per_day": 15830.1,
+       "purpose_group_share": {
+        "work": 18.6,
+        "home": 34.8,
+        "visit": 46.6
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 53.1
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41287000",
+       "per_day": 29035.5,
+       "visit_per_day": 12982.7,
+       "work_per_day": 4401.0,
+       "home_per_day": 11651.8,
+       "purpose_group_share": {
+        "work": 15.2,
+        "home": 40.1,
+        "visit": 44.7
+       },
+       "peak_hours": [
+        18,
+        8,
+        17
+       ],
+       "avg_min": 49.6
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "yeonsinnae",
+       "per_day": 18779.3,
+       "visit_per_day": 8337.7,
+       "work_per_day": 2441.5,
+       "home_per_day": 8000.1,
+       "purpose_group_share": {
+        "work": 13.0,
+        "home": 42.6,
+        "visit": 44.4
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 42.1
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "bulgwang",
+       "per_day": 13534.1,
+       "visit_per_day": 6087.0,
+       "work_per_day": 2032.3,
+       "home_per_day": 5414.8,
+       "purpose_group_share": {
+        "work": 15.0,
+        "home": 40.0,
+        "visit": 45.0
+       },
+       "peak_hours": [
+        18,
+        17,
+        15
+       ],
+       "avg_min": 43.4
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41281000",
+       "per_day": 81895.4,
+       "visit_per_day": 38409.2,
+       "work_per_day": 11393.0,
+       "home_per_day": 32093.2,
+       "purpose_group_share": {
+        "work": 13.9,
+        "home": 39.2,
+        "visit": 46.9
+       },
+       "peak_hours": [
+        18,
+        17,
+        16
+       ],
+       "avg_min": 39.3
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41281000",
+       "per_day": 47433.6,
+       "visit_per_day": 24021.3,
+       "work_per_day": 7634.2,
+       "home_per_day": 15778.1,
+       "purpose_group_share": {
+        "work": 16.1,
+        "home": 33.3,
+        "visit": 50.6
+       },
+       "peak_hours": [
+        18,
+        17,
+        8
+       ],
+       "avg_min": 52.8
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41281000",
+       "per_day": 29218.3,
+       "visit_per_day": 13484.5,
+       "work_per_day": 6104.7,
+       "home_per_day": 9629.1,
+       "purpose_group_share": {
+        "work": 20.9,
+        "home": 33.0,
+        "visit": 46.2
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 50.5
+      },
+      {
+       "from": "yeonsinnae",
+       "to": "sgg:41281000",
+       "per_day": 18724.7,
+       "visit_per_day": 9564.8,
+       "work_per_day": 2770.8,
+       "home_per_day": 6389.1,
+       "purpose_group_share": {
+        "work": 14.8,
+        "home": 34.1,
+        "visit": 51.1
+       },
+       "peak_hours": [
+        12,
+        17,
+        18
+       ],
+       "avg_min": 41.5
+      },
+      {
+       "from": "bulgwang",
+       "to": "sgg:41281000",
+       "per_day": 13479.0,
+       "visit_per_day": 6757.8,
+       "work_per_day": 1823.5,
+       "home_per_day": 4897.7,
+       "purpose_group_share": {
+        "work": 13.5,
+        "home": 36.3,
+        "visit": 50.1
+       },
+       "peak_hours": [
+        18,
+        17,
+        12
+       ],
+       "avg_min": 42.9
+      }
+     ]
+    },
+    {
+     "id": "sgg:41285000",
+     "kind": "sgg",
+     "segment": "goyang",
+     "name": "고양 일산동구",
+     "units": {
+      "41285000": {
+       "name": "고양 일산동구",
+       "weight": 1.0
+      }
+     },
+     "hubs": [
+      "baekseok",
+      "bamgasi"
+     ],
+     "arrivals_per_day": 821587.7,
+     "from_segment_per_day": {
+      "self": 385100.7,
+      "goyang": 191765.8,
+      "seoul": 94176.3,
+      "paju": 68387.8,
+      "gyeonggi_other": 54035.0,
+      "incheon": 20684.1,
+      "other": 7438.1
+     },
+     "inflow_share": {
+      "same_dong": 46.9,
+      "same_segment": 23.3,
+      "seoul": 11.5,
+      "paju": 8.3,
+      "outer": 10.0
+     },
+     "purpose_share": {
+      "기타": 50.3,
+      "귀가": 34.6,
+      "출근": 13.2,
+      "등교": 1.4,
+      "관광": 0.3,
+      "쇼핑": 0.3
+     },
+     "purpose_group_share": {
+      "work": 14.6,
+      "home": 34.6,
+      "visit": 50.8
+     },
+     "arr_hour_share": [
+      0.2,
+      0.8,
+      0.76,
+      0.64,
+      0.73,
+      1.06,
+      2.35,
+      4.17,
+      7.54,
+      5.94,
+      5.22,
+      5.49,
+      5.95,
+      6.02,
+      5.76,
+      5.86,
+      6.27,
+      7.03,
+      7.61,
+      6.62,
+      5.11,
+      4.32,
+      3.58,
+      0.98
+     ],
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "external_share": 29.8,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -2.8,
+       "home": 6.6,
+       "visit": -1.7
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 260153.6,
+     "corridor_rank": null,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41287000",
+       "per_day": 110397.1,
+       "visit_per_day": 50488.6,
+       "work_per_day": 11753.0,
+       "home_per_day": 48155.5,
+       "purpose_group_share": {
+        "work": 10.6,
+        "home": 43.6,
+        "visit": 45.7
+       },
+       "peak_hours": [
+        18,
+        17,
+        16
+       ],
+       "avg_min": 31.8
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41281000",
+       "per_day": 81895.4,
+       "visit_per_day": 38409.2,
+       "work_per_day": 11393.0,
+       "home_per_day": 32093.2,
+       "purpose_group_share": {
+        "work": 13.9,
+        "home": 39.2,
+        "visit": 46.9
+       },
+       "peak_hours": [
+        18,
+        17,
+        16
+       ],
+       "avg_min": 39.3
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41480000",
+       "per_day": 67355.8,
+       "visit_per_day": 28998.2,
+       "work_per_day": 9146.3,
+       "home_per_day": 29211.2,
+       "purpose_group_share": {
+        "work": 13.6,
+        "home": 43.4,
+        "visit": 43.1
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 46.9
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "euljiro",
+       "per_day": 4512.6,
+       "visit_per_day": 2485.3,
+       "work_per_day": 1928.0,
+       "home_per_day": 99.3,
+       "purpose_group_share": {
+        "work": 42.7,
+        "home": 2.2,
+        "visit": 55.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 88.9
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "sinchon",
+       "per_day": 4417.0,
+       "visit_per_day": 2501.0,
+       "work_per_day": 1550.1,
+       "home_per_day": 365.9,
+       "purpose_group_share": {
+        "work": 35.1,
+        "home": 8.3,
+        "visit": 56.6
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 70.6
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41285000",
+       "per_day": 110158.6,
+       "visit_per_day": 58687.3,
+       "work_per_day": 19116.3,
+       "home_per_day": 32354.9,
+       "purpose_group_share": {
+        "work": 17.4,
+        "home": 29.4,
+        "visit": 53.3
+       },
+       "peak_hours": [
+        8,
+        18,
+        9
+       ],
+       "avg_min": 31.3
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41285000",
+       "per_day": 81607.2,
+       "visit_per_day": 41470.1,
+       "work_per_day": 14474.6,
+       "home_per_day": 25662.5,
+       "purpose_group_share": {
+        "work": 17.7,
+        "home": 31.4,
+        "visit": 50.8
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 39.5
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41285000",
+       "per_day": 68387.8,
+       "visit_per_day": 35919.9,
+       "work_per_day": 14715.2,
+       "home_per_day": 17752.7,
+       "purpose_group_share": {
+        "work": 21.5,
+        "home": 26.0,
+        "visit": 52.5
+       },
+       "peak_hours": [
+        8,
+        9,
+        18
+       ],
+       "avg_min": 46.7
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41285000",
+       "per_day": 4193.7,
+       "visit_per_day": 1094.3,
+       "work_per_day": 102.4,
+       "home_per_day": 2997.0,
+       "purpose_group_share": {
+        "work": 2.4,
+        "home": 71.5,
+        "visit": 26.1
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 87.5
+      },
+      {
+       "from": "sinchon",
+       "to": "sgg:41285000",
+       "per_day": 4155.1,
+       "visit_per_day": 1350.0,
+       "work_per_day": 213.3,
+       "home_per_day": 2591.8,
+       "purpose_group_share": {
+        "work": 5.1,
+        "home": 62.4,
+        "visit": 32.5
+       },
+       "peak_hours": [
+        18,
+        19,
+        20
+       ],
+       "avg_min": 64.6
+      }
+     ]
+    },
+    {
+     "id": "sgg:41287000",
+     "kind": "sgg",
+     "segment": "goyang",
+     "name": "고양 일산서구",
+     "units": {
+      "41287000": {
+       "name": "고양 일산서구",
+       "weight": 1.0
+      }
+     },
+     "hubs": [
+      "daehwa"
+     ],
+     "arrivals_per_day": 601241.0,
+     "from_segment_per_day": {
+      "self": 279083.3,
+      "goyang": 139432.6,
+      "paju": 74017.2,
+      "seoul": 57250.2,
+      "gyeonggi_other": 33947.9,
+      "incheon": 12805.2,
+      "other": 4704.6
+     },
+     "inflow_share": {
+      "same_dong": 46.4,
+      "same_segment": 23.2,
+      "paju": 12.3,
+      "seoul": 9.5,
+      "outer": 8.6
+     },
+     "purpose_share": {
+      "기타": 45.1,
+      "귀가": 41.6,
+      "출근": 10.4,
+      "등교": 1.8,
+      "쇼핑": 0.7,
+      "관광": 0.4
+     },
+     "purpose_group_share": {
+      "work": 12.2,
+      "home": 41.6,
+      "visit": 46.2
+     },
+     "arr_hour_share": [
+      0.24,
+      0.9,
+      0.86,
+      0.7,
+      0.74,
+      1.09,
+      2.0,
+      3.52,
+      6.56,
+      5.36,
+      4.98,
+      5.08,
+      5.6,
+      5.93,
+      5.78,
+      6.11,
+      6.61,
+      7.26,
+      8.0,
+      6.94,
+      5.47,
+      4.91,
+      4.19,
+      1.15
+     ],
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "external_share": 30.4,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -5.2,
+       "home": 13.6,
+       "visit": -6.3
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 213449.8,
+     "corridor_rank": null,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41285000",
+       "per_day": 110158.6,
+       "visit_per_day": 58687.3,
+       "work_per_day": 19116.3,
+       "home_per_day": 32354.9,
+       "purpose_group_share": {
+        "work": 17.4,
+        "home": 29.4,
+        "visit": 53.3
+       },
+       "peak_hours": [
+        8,
+        18,
+        9
+       ],
+       "avg_min": 31.3
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41480000",
+       "per_day": 74308.2,
+       "visit_per_day": 34494.2,
+       "work_per_day": 12896.5,
+       "home_per_day": 26917.5,
+       "purpose_group_share": {
+        "work": 17.4,
+        "home": 36.2,
+        "visit": 46.4
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 38.7
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "sgg:41281000",
+       "per_day": 29218.3,
+       "visit_per_day": 13484.5,
+       "work_per_day": 6104.7,
+       "home_per_day": 9629.1,
+       "purpose_group_share": {
+        "work": 20.9,
+        "home": 33.0,
+        "visit": 46.2
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 50.5
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "euljiro",
+       "per_day": 3364.2,
+       "visit_per_day": 1713.3,
+       "work_per_day": 1607.8,
+       "home_per_day": 43.1,
+       "purpose_group_share": {
+        "work": 47.8,
+        "home": 1.3,
+        "visit": 50.9
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 89.9
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "sinchon",
+       "per_day": 3057.8,
+       "visit_per_day": 1724.7,
+       "work_per_day": 1166.8,
+       "home_per_day": 166.3,
+       "purpose_group_share": {
+        "work": 38.2,
+        "home": 5.4,
+        "visit": 56.4
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 75.7
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41285000",
+       "to": "sgg:41287000",
+       "per_day": 110397.1,
+       "visit_per_day": 50488.6,
+       "work_per_day": 11753.0,
+       "home_per_day": 48155.5,
+       "purpose_group_share": {
+        "work": 10.6,
+        "home": 43.6,
+        "visit": 45.7
+       },
+       "peak_hours": [
+        18,
+        17,
+        16
+       ],
+       "avg_min": 31.8
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sgg:41287000",
+       "per_day": 74017.2,
+       "visit_per_day": 34503.5,
+       "work_per_day": 11384.0,
+       "home_per_day": 28129.7,
+       "purpose_group_share": {
+        "work": 15.4,
+        "home": 38.0,
+        "visit": 46.6
+       },
+       "peak_hours": [
+        18,
+        8,
+        17
+       ],
+       "avg_min": 39.2
+      },
+      {
+       "from": "sgg:41281000",
+       "to": "sgg:41287000",
+       "per_day": 29035.5,
+       "visit_per_day": 12982.7,
+       "work_per_day": 4401.0,
+       "home_per_day": 11651.8,
+       "purpose_group_share": {
+        "work": 15.2,
+        "home": 40.1,
+        "visit": 44.7
+       },
+       "peak_hours": [
+        18,
+        8,
+        17
+       ],
+       "avg_min": 49.6
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41287000",
+       "per_day": 3107.6,
+       "visit_per_day": 638.6,
+       "work_per_day": 55.3,
+       "home_per_day": 2413.7,
+       "purpose_group_share": {
+        "work": 1.8,
+        "home": 77.7,
+        "visit": 20.5
+       },
+       "peak_hours": [
+        19,
+        20,
+        18
+       ],
+       "avg_min": 91.8
+      },
+      {
+       "from": "sinchon",
+       "to": "sgg:41287000",
+       "per_day": 2841.2,
+       "visit_per_day": 737.7,
+       "work_per_day": 88.3,
+       "home_per_day": 2015.1,
+       "purpose_group_share": {
+        "work": 3.1,
+        "home": 70.9,
+        "visit": 26.0
+       },
+       "peak_hours": [
+        19,
+        22,
+        21
+       ],
+       "avg_min": 68.4
+      }
+     ]
+    },
+    {
+     "id": "yeonsinnae",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "연신내",
+     "units": {
+      "11380552": {
+       "name": "갈현2동",
+       "weight": 0.2177
+      },
+      "11380551": {
+       "name": "갈현1동",
+       "weight": 0.2829
+      },
+      "11380570": {
+       "name": "대조동",
+       "weight": 0.2057
+      },
+      "11380530": {
+       "name": "불광2동",
+       "weight": 0.1839
+      },
+      "11380520": {
+       "name": "불광1동",
+       "weight": 0.1098
+      }
+     },
+     "hubs": [
+      "yeonsinnae"
+     ],
+     "arrivals_per_day": 242910.7,
+     "from_segment_per_day": {
+      "seoul": 164566.9,
+      "self": 34454.3,
+      "goyang": 23948.7,
+      "gyeonggi_other": 11662.8,
+      "paju": 3228.5,
+      "incheon": 2950.5,
+      "other": 2099.0
+     },
+     "inflow_share": {
+      "same_dong": 14.3,
+      "same_segment": 67.5,
+      "goyang": 10.1,
+      "paju": 1.4,
+      "outer": 6.7
+     },
+     "purpose_share": {
+      "귀가": 44.3,
+      "기타": 44.1,
+      "출근": 9.2,
+      "등교": 2.4
+     },
+     "purpose_group_share": {
+      "work": 11.6,
+      "home": 44.3,
+      "visit": 44.1
+     },
+     "arr_hour_share": [
+      0.26,
+      1.0,
+      0.9,
+      0.77,
+      0.83,
+      1.06,
+      1.9,
+      3.97,
+      5.29,
+      4.6,
+      4.4,
+      4.52,
+      5.06,
+      5.28,
+      5.34,
+      6.0,
+      6.66,
+      7.51,
+      8.76,
+      8.17,
+      6.29,
+      5.4,
+      4.59,
+      1.45
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 18.2,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -5.8,
+       "home": 16.3,
+       "visit": -8.4
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 27177.2,
+     "corridor_rank": 1,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "yeonsinnae",
+       "to": "sgg:41281000",
+       "per_day": 18724.7,
+       "visit_per_day": 9564.8,
+       "work_per_day": 2770.8,
+       "home_per_day": 6389.1,
+       "purpose_group_share": {
+        "work": 14.8,
+        "home": 34.1,
+        "visit": 51.1
+       },
+       "peak_hours": [
+        12,
+        17,
+        18
+       ],
+       "avg_min": 41.5
+      },
+      {
+       "from": "yeonsinnae",
+       "to": "sgg:41285000",
+       "per_day": 3640.2,
+       "visit_per_day": 1707.2,
+       "work_per_day": 853.4,
+       "home_per_day": 1079.7,
+       "purpose_group_share": {
+        "work": 23.4,
+        "home": 29.7,
+        "visit": 46.9
+       },
+       "peak_hours": [
+        8,
+        9,
+        18
+       ],
+       "avg_min": 57.9
+      },
+      {
+       "from": "yeonsinnae",
+       "to": "sgg:41480000",
+       "per_day": 3307.0,
+       "visit_per_day": 1526.4,
+       "work_per_day": 676.7,
+       "home_per_day": 1103.9,
+       "purpose_group_share": {
+        "work": 20.5,
+        "home": 33.4,
+        "visit": 46.2
+       },
+       "peak_hours": [
+        8,
+        7,
+        9
+       ],
+       "avg_min": 73.4
+      },
+      {
+       "from": "yeonsinnae",
+       "to": "sgg:41287000",
+       "per_day": 1549.3,
+       "visit_per_day": 606.3,
+       "work_per_day": 278.5,
+       "home_per_day": 664.5,
+       "purpose_group_share": {
+        "work": 18.0,
+        "home": 42.9,
+        "visit": 39.1
+       },
+       "peak_hours": [
+        17,
+        8,
+        19
+       ],
+       "avg_min": 64.6
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "yeonsinnae",
+       "per_day": 18779.3,
+       "visit_per_day": 8337.7,
+       "work_per_day": 2441.5,
+       "home_per_day": 8000.1,
+       "purpose_group_share": {
+        "work": 13.0,
+        "home": 42.6,
+        "visit": 44.4
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 42.1
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "yeonsinnae",
+       "per_day": 3600.9,
+       "visit_per_day": 1391.1,
+       "work_per_day": 568.4,
+       "home_per_day": 1641.4,
+       "purpose_group_share": {
+        "work": 15.8,
+        "home": 45.6,
+        "visit": 38.6
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 61.7
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "yeonsinnae",
+       "per_day": 3228.5,
+       "visit_per_day": 1361.6,
+       "work_per_day": 468.2,
+       "home_per_day": 1398.7,
+       "purpose_group_share": {
+        "work": 14.5,
+        "home": 43.3,
+        "visit": 42.2
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 73.3
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "yeonsinnae",
+       "per_day": 1568.5,
+       "visit_per_day": 629.7,
+       "work_per_day": 389.1,
+       "home_per_day": 549.7,
+       "purpose_group_share": {
+        "work": 24.8,
+        "home": 35.0,
+        "visit": 40.1
+       },
+       "peak_hours": [
+        8,
+        18,
+        19
+       ],
+       "avg_min": 64.8
+      }
+     ]
+    },
+    {
+     "id": "euljiro",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "을지로(힙지로)",
+     "units": {
+      "11140550": {
+       "name": "명동",
+       "weight": 0.2037
+      },
+      "11110615": {
+       "name": "종로1.2.3.4가동",
+       "weight": 0.2991
+      },
+      "11140605": {
+       "name": "을지로동",
+       "weight": 0.2761
+      },
+      "11140570": {
+       "name": "필동",
+       "weight": 0.111
+      },
+      "11140590": {
+       "name": "광희동",
+       "weight": 0.1101
+      }
+     },
+     "hubs": [
+      "euljiro"
+     ],
+     "arrivals_per_day": 755600.6,
+     "from_segment_per_day": {
+      "seoul": 517089.4,
+      "self": 102438.2,
+      "gyeonggi_other": 83553.4,
+      "incheon": 19476.4,
+      "goyang": 17455.2,
+      "other": 10823.4,
+      "paju": 4764.6
+     },
+     "inflow_share": {
+      "same_dong": 12.2,
+      "same_segment": 70.2,
+      "goyang": 2.3,
+      "paju": 0.6,
+      "outer": 14.7
+     },
+     "purpose_share": {
+      "기타": 65.6,
+      "출근": 24.6,
+      "귀가": 7.3,
+      "등교": 1.5,
+      "쇼핑": 0.7,
+      "관광": 0.3
+     },
+     "purpose_group_share": {
+      "work": 26.1,
+      "home": 7.3,
+      "visit": 66.6
+     },
+     "arr_hour_share": [
+      0.11,
+      0.43,
+      0.42,
+      0.33,
+      0.34,
+      0.58,
+      2.32,
+      5.01,
+      10.78,
+      7.92,
+      5.97,
+      7.36,
+      7.54,
+      6.82,
+      5.57,
+      5.23,
+      5.32,
+      6.3,
+      7.02,
+      5.13,
+      3.78,
+      2.87,
+      2.18,
+      0.65
+     ],
+     "peak_hours": [
+      8,
+      9,
+      12
+     ],
+     "external_share": 17.7,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": 8.7,
+       "home": -20.7,
+       "visit": 14.1
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 22219.8,
+     "corridor_rank": 2,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "euljiro",
+       "to": "sgg:41281000",
+       "per_day": 9079.7,
+       "visit_per_day": 2307.7,
+       "work_per_day": 182.5,
+       "home_per_day": 6589.5,
+       "purpose_group_share": {
+        "work": 2.0,
+        "home": 72.6,
+        "visit": 25.4
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 77.0
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41480000",
+       "per_day": 4519.6,
+       "visit_per_day": 1615.5,
+       "work_per_day": 89.3,
+       "home_per_day": 2814.8,
+       "purpose_group_share": {
+        "work": 2.0,
+        "home": 62.3,
+        "visit": 35.7
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 103.7
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41285000",
+       "per_day": 4193.7,
+       "visit_per_day": 1094.3,
+       "work_per_day": 102.4,
+       "home_per_day": 2997.0,
+       "purpose_group_share": {
+        "work": 2.4,
+        "home": 71.5,
+        "visit": 26.1
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 87.5
+      },
+      {
+       "from": "euljiro",
+       "to": "sgg:41287000",
+       "per_day": 3107.6,
+       "visit_per_day": 638.6,
+       "work_per_day": 55.3,
+       "home_per_day": 2413.7,
+       "purpose_group_share": {
+        "work": 1.8,
+        "home": 77.7,
+        "visit": 20.5
+       },
+       "peak_hours": [
+        19,
+        20,
+        18
+       ],
+       "avg_min": 91.8
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "euljiro",
+       "per_day": 9578.4,
+       "visit_per_day": 4776.0,
+       "work_per_day": 4595.5,
+       "home_per_day": 206.9,
+       "purpose_group_share": {
+        "work": 48.0,
+        "home": 2.2,
+        "visit": 49.9
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 77.3
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "euljiro",
+       "per_day": 4764.6,
+       "visit_per_day": 2779.4,
+       "work_per_day": 1764.4,
+       "home_per_day": 220.8,
+       "purpose_group_share": {
+        "work": 37.0,
+        "home": 4.6,
+        "visit": 58.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 109.7
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "euljiro",
+       "per_day": 4512.6,
+       "visit_per_day": 2485.3,
+       "work_per_day": 1928.0,
+       "home_per_day": 99.3,
+       "purpose_group_share": {
+        "work": 42.7,
+        "home": 2.2,
+        "visit": 55.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 88.9
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "euljiro",
+       "per_day": 3364.2,
+       "visit_per_day": 1713.3,
+       "work_per_day": 1607.8,
+       "home_per_day": 43.1,
+       "purpose_group_share": {
+        "work": 47.8,
+        "home": 1.3,
+        "visit": 50.9
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 89.9
+      }
+     ]
+    },
+    {
+     "id": "sinchon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "신촌·이대",
+     "units": {
+      "11410585": {
+       "name": "신촌동",
+       "weight": 0.6546
+      },
+      "11440660": {
+       "name": "서교동",
+       "weight": 0.137
+      },
+      "11440600": {
+       "name": "대흥동",
+       "weight": 0.2083
+      }
+     },
+     "hubs": [
+      "sinchon"
+     ],
+     "arrivals_per_day": 517961.9,
+     "from_segment_per_day": {
+      "seoul": 333126.9,
+      "self": 100415.8,
+      "gyeonggi_other": 40049.0,
+      "goyang": 16412.1,
+      "incheon": 16020.0,
+      "other": 7117.8,
+      "paju": 4820.5
+     },
+     "inflow_share": {
+      "same_dong": 24.0,
+      "same_segment": 61.5,
+      "goyang": 2.8,
+      "paju": 0.8,
+      "outer": 10.8
+     },
+     "purpose_share": {
+      "기타": 53.9,
+      "귀가": 18.3,
+      "출근": 12.1,
+      "등교": 9.5,
+      "병원": 4.6,
+      "쇼핑": 1.4,
+      "관광": 0.3
+     },
+     "purpose_group_share": {
+      "work": 21.6,
+      "home": 18.3,
+      "visit": 60.1
+     },
+     "arr_hour_share": [
+      0.16,
+      0.68,
+      0.64,
+      0.54,
+      0.5,
+      0.72,
+      1.65,
+      3.44,
+      6.93,
+      7.31,
+      6.78,
+      6.29,
+      7.32,
+      7.68,
+      6.3,
+      5.9,
+      5.51,
+      6.3,
+      7.33,
+      5.81,
+      4.39,
+      3.71,
+      3.18,
+      0.94
+     ],
+     "peak_hours": [
+      13,
+      18,
+      12
+     ],
+     "external_share": 14.4,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": 4.2,
+       "home": -9.7,
+       "visit": 7.6
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 21232.6,
+     "corridor_rank": 3,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "sinchon",
+       "to": "sgg:41281000",
+       "per_day": 8778.1,
+       "visit_per_day": 3124.5,
+       "work_per_day": 418.5,
+       "home_per_day": 5235.1,
+       "purpose_group_share": {
+        "work": 4.8,
+        "home": 59.6,
+        "visit": 35.6
+       },
+       "peak_hours": [
+        18,
+        19,
+        17
+       ],
+       "avg_min": 56.2
+      },
+      {
+       "from": "sinchon",
+       "to": "sgg:41480000",
+       "per_day": 4475.4,
+       "visit_per_day": 1521.5,
+       "work_per_day": 221.3,
+       "home_per_day": 2732.6,
+       "purpose_group_share": {
+        "work": 4.9,
+        "home": 61.1,
+        "visit": 34.0
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 75.0
+      },
+      {
+       "from": "sinchon",
+       "to": "sgg:41285000",
+       "per_day": 4155.1,
+       "visit_per_day": 1350.0,
+       "work_per_day": 213.3,
+       "home_per_day": 2591.8,
+       "purpose_group_share": {
+        "work": 5.1,
+        "home": 62.4,
+        "visit": 32.5
+       },
+       "peak_hours": [
+        18,
+        19,
+        20
+       ],
+       "avg_min": 64.6
+      },
+      {
+       "from": "sinchon",
+       "to": "sgg:41287000",
+       "per_day": 2841.2,
+       "visit_per_day": 737.7,
+       "work_per_day": 88.3,
+       "home_per_day": 2015.1,
+       "purpose_group_share": {
+        "work": 3.1,
+        "home": 70.9,
+        "visit": 26.0
+       },
+       "peak_hours": [
+        19,
+        22,
+        21
+       ],
+       "avg_min": 68.4
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "sinchon",
+       "per_day": 8937.3,
+       "visit_per_day": 5263.8,
+       "work_per_day": 2818.6,
+       "home_per_day": 854.9,
+       "purpose_group_share": {
+        "work": 31.5,
+        "home": 9.6,
+        "visit": 58.9
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 59.2
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "sinchon",
+       "per_day": 4820.5,
+       "visit_per_day": 2993.3,
+       "work_per_day": 1392.4,
+       "home_per_day": 434.7,
+       "purpose_group_share": {
+        "work": 28.9,
+        "home": 9.0,
+        "visit": 62.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 83.0
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "sinchon",
+       "per_day": 4417.0,
+       "visit_per_day": 2501.0,
+       "work_per_day": 1550.1,
+       "home_per_day": 365.9,
+       "purpose_group_share": {
+        "work": 35.1,
+        "home": 8.3,
+        "visit": 56.6
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 70.6
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "sinchon",
+       "per_day": 3057.8,
+       "visit_per_day": 1724.7,
+       "work_per_day": 1166.8,
+       "home_per_day": 166.3,
+       "purpose_group_share": {
+        "work": 38.2,
+        "home": 5.4,
+        "visit": 56.4
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 75.7
+      }
+     ]
+    },
+    {
+     "id": "mangwon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "망원동·망리단길",
+     "units": {
+      "11440700": {
+       "name": "망원2동",
+       "weight": 0.1557
+      },
+      "11440690": {
+       "name": "망원1동",
+       "weight": 0.3653
+      },
+      "11440680": {
+       "name": "합정동",
+       "weight": 0.1029
+      },
+      "11440720": {
+       "name": "성산1동",
+       "weight": 0.1306
+      },
+      "11440660": {
+       "name": "서교동",
+       "weight": 0.2456
+      }
+     },
+     "hubs": [
+      "mangwon"
+     ],
+     "arrivals_per_day": 413134.8,
+     "from_segment_per_day": {
+      "seoul": 287489.4,
+      "self": 50734.4,
+      "gyeonggi_other": 34221.6,
+      "goyang": 16262.7,
+      "incheon": 14261.1,
+      "other": 5208.8,
+      "paju": 4956.8
+     },
+     "inflow_share": {
+      "same_dong": 12.0,
+      "same_segment": 71.4,
+      "goyang": 4.1,
+      "paju": 1.2,
+      "outer": 11.4
+     },
+     "purpose_share": {
+      "기타": 57.1,
+      "귀가": 30.0,
+      "출근": 11.5,
+      "등교": 0.9,
+      "관광": 0.5,
+      "쇼핑": 0.1
+     },
+     "purpose_group_share": {
+      "work": 12.4,
+      "home": 30.0,
+      "visit": 57.6
+     },
+     "arr_hour_share": [
+      0.24,
+      0.88,
+      0.8,
+      0.64,
+      0.57,
+      0.74,
+      1.47,
+      2.32,
+      4.58,
+      5.34,
+      5.14,
+      5.59,
+      6.21,
+      6.37,
+      6.14,
+      6.29,
+      6.8,
+      7.53,
+      8.68,
+      7.68,
+      5.83,
+      4.9,
+      4.05,
+      1.19
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 16.6,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": -5.0,
+       "home": 2.0,
+       "visit": 5.1
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 21219.5,
+     "corridor_rank": 4,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "mangwon",
+       "to": "sgg:41281000",
+       "per_day": 9016.2,
+       "visit_per_day": 3574.7,
+       "work_per_day": 748.7,
+       "home_per_day": 4692.8,
+       "purpose_group_share": {
+        "work": 8.3,
+        "home": 52.0,
+        "visit": 39.6
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 51.1
+      },
+      {
+       "from": "mangwon",
+       "to": "sgg:41480000",
+       "per_day": 4656.1,
+       "visit_per_day": 1780.3,
+       "work_per_day": 378.1,
+       "home_per_day": 2497.7,
+       "purpose_group_share": {
+        "work": 8.1,
+        "home": 53.6,
+        "visit": 38.2
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 69.4
+      },
+      {
+       "from": "mangwon",
+       "to": "sgg:41285000",
+       "per_day": 3914.7,
+       "visit_per_day": 1403.3,
+       "work_per_day": 329.2,
+       "home_per_day": 2182.2,
+       "purpose_group_share": {
+        "work": 8.4,
+        "home": 55.7,
+        "visit": 35.8
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 60.5
+      },
+      {
+       "from": "mangwon",
+       "to": "sgg:41287000",
+       "per_day": 2545.4,
+       "visit_per_day": 745.3,
+       "work_per_day": 136.2,
+       "home_per_day": 1663.9,
+       "purpose_group_share": {
+        "work": 5.3,
+        "home": 65.4,
+        "visit": 29.3
+       },
+       "peak_hours": [
+        19,
+        20,
+        22
+       ],
+       "avg_min": 62.5
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "mangwon",
+       "per_day": 9532.5,
+       "visit_per_day": 5381.4,
+       "work_per_day": 2312.2,
+       "home_per_day": 1838.9,
+       "purpose_group_share": {
+        "work": 24.3,
+        "home": 19.3,
+        "visit": 56.5
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 55.6
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "mangwon",
+       "per_day": 4956.8,
+       "visit_per_day": 2972.3,
+       "work_per_day": 1155.4,
+       "home_per_day": 829.0,
+       "purpose_group_share": {
+        "work": 23.3,
+        "home": 16.7,
+        "visit": 60.0
+       },
+       "peak_hours": [
+        9,
+        8,
+        17
+       ],
+       "avg_min": 77.2
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "mangwon",
+       "per_day": 4045.0,
+       "visit_per_day": 2286.1,
+       "work_per_day": 1111.2,
+       "home_per_day": 647.7,
+       "purpose_group_share": {
+        "work": 27.5,
+        "home": 16.0,
+        "visit": 56.5
+       },
+       "peak_hours": [
+        9,
+        10,
+        8
+       ],
+       "avg_min": 66.8
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "mangwon",
+       "per_day": 2685.2,
+       "visit_per_day": 1539.3,
+       "work_per_day": 822.7,
+       "home_per_day": 323.2,
+       "purpose_group_share": {
+        "work": 30.6,
+        "home": 12.0,
+        "visit": 57.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 72.1
+      }
+     ]
+    },
+    {
+     "id": "bulgwang",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "불광",
+     "units": {
+      "11380570": {
+       "name": "대조동",
+       "weight": 0.4971
+      },
+      "11380510": {
+       "name": "녹번동",
+       "weight": 0.2385
+      },
+      "11380520": {
+       "name": "불광1동",
+       "weight": 0.2644
+      }
+     },
+     "hubs": [
+      "bulgwang"
+     ],
+     "arrivals_per_day": 193098.2,
+     "from_segment_per_day": {
+      "seoul": 131929.8,
+      "self": 27842.8,
+      "goyang": 17328.5,
+      "gyeonggi_other": 9507.8,
+      "paju": 2407.8,
+      "incheon": 2350.1,
+      "other": 1731.5
+     },
+     "inflow_share": {
+      "same_dong": 14.1,
+      "same_segment": 68.4,
+      "goyang": 9.1,
+      "paju": 1.3,
+      "outer": 7.1
+     },
+     "purpose_share": {
+      "기타": 45.2,
+      "귀가": 42.7,
+      "출근": 10.8,
+      "등교": 1.3
+     },
+     "purpose_group_share": {
+      "work": 12.1,
+      "home": 42.7,
+      "visit": 45.2
+     },
+     "arr_hour_share": [
+      0.22,
+      0.89,
+      0.84,
+      0.69,
+      0.72,
+      1.0,
+      1.95,
+      3.22,
+      5.76,
+      5.16,
+      4.92,
+      5.07,
+      5.7,
+      5.85,
+      5.78,
+      6.25,
+      6.7,
+      7.29,
+      8.28,
+      7.53,
+      5.81,
+      4.9,
+      4.17,
+      1.31
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 17.5,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -5.3,
+       "home": 14.7,
+       "visit": -7.3
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 19736.3,
+     "corridor_rank": 5,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "bulgwang",
+       "to": "sgg:41281000",
+       "per_day": 13479.0,
+       "visit_per_day": 6757.8,
+       "work_per_day": 1823.5,
+       "home_per_day": 4897.7,
+       "purpose_group_share": {
+        "work": 13.5,
+        "home": 36.3,
+        "visit": 50.1
+       },
+       "peak_hours": [
+        18,
+        17,
+        12
+       ],
+       "avg_min": 42.9
+      },
+      {
+       "from": "bulgwang",
+       "to": "sgg:41285000",
+       "per_day": 2542.4,
+       "visit_per_day": 1186.4,
+       "work_per_day": 529.8,
+       "home_per_day": 826.2,
+       "purpose_group_share": {
+        "work": 20.8,
+        "home": 32.5,
+        "visit": 46.7
+       },
+       "peak_hours": [
+        8,
+        18,
+        17
+       ],
+       "avg_min": 60.6
+      },
+      {
+       "from": "bulgwang",
+       "to": "sgg:41480000",
+       "per_day": 2463.9,
+       "visit_per_day": 1125.1,
+       "work_per_day": 486.3,
+       "home_per_day": 852.5,
+       "purpose_group_share": {
+        "work": 19.7,
+        "home": 34.6,
+        "visit": 45.7
+       },
+       "peak_hours": [
+        8,
+        7,
+        14
+       ],
+       "avg_min": 73.2
+      },
+      {
+       "from": "bulgwang",
+       "to": "sgg:41287000",
+       "per_day": 1198.5,
+       "visit_per_day": 467.3,
+       "work_per_day": 206.3,
+       "home_per_day": 524.9,
+       "purpose_group_share": {
+        "work": 17.2,
+        "home": 43.8,
+        "visit": 39.0
+       },
+       "peak_hours": [
+        19,
+        18,
+        8
+       ],
+       "avg_min": 66.9
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "bulgwang",
+       "per_day": 13534.1,
+       "visit_per_day": 6087.0,
+       "work_per_day": 2032.3,
+       "home_per_day": 5414.8,
+       "purpose_group_share": {
+        "work": 15.0,
+        "home": 40.0,
+        "visit": 45.0
+       },
+       "peak_hours": [
+        18,
+        17,
+        15
+       ],
+       "avg_min": 43.4
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "bulgwang",
+       "per_day": 2598.2,
+       "visit_per_day": 1019.1,
+       "work_per_day": 493.0,
+       "home_per_day": 1086.1,
+       "purpose_group_share": {
+        "work": 19.0,
+        "home": 41.8,
+        "visit": 39.2
+       },
+       "peak_hours": [
+        18,
+        8,
+        17
+       ],
+       "avg_min": 61.6
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "bulgwang",
+       "per_day": 2407.8,
+       "visit_per_day": 966.6,
+       "work_per_day": 427.2,
+       "home_per_day": 1014.0,
+       "purpose_group_share": {
+        "work": 17.7,
+        "home": 42.1,
+        "visit": 40.1
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 74.8
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "bulgwang",
+       "per_day": 1196.2,
+       "visit_per_day": 461.6,
+       "work_per_day": 336.7,
+       "home_per_day": 397.8,
+       "purpose_group_share": {
+        "work": 28.2,
+        "home": 33.3,
+        "visit": 38.6
+       },
+       "peak_hours": [
+        8,
+        9,
+        18
+       ],
+       "avg_min": 66.9
+      }
+     ]
+    },
+    {
+     "id": "myeongdong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "명동",
+     "units": {
+      "11140520": {
+       "name": "소공동",
+       "weight": 0.1319
+      },
+      "11140540": {
+       "name": "회현동",
+       "weight": 0.1724
+      },
+      "11140550": {
+       "name": "명동",
+       "weight": 0.5332
+      },
+      "11140605": {
+       "name": "을지로동",
+       "weight": 0.1624
+      }
+     },
+     "hubs": [
+      "myeongdong"
+     ],
+     "arrivals_per_day": 580938.0,
+     "from_segment_per_day": {
+      "seoul": 396667.0,
+      "self": 71045.6,
+      "gyeonggi_other": 67738.8,
+      "incheon": 17195.8,
+      "goyang": 13806.1,
+      "other": 10368.0,
+      "paju": 4116.7
+     },
+     "inflow_share": {
+      "same_dong": 12.4,
+      "same_segment": 68.6,
+      "goyang": 2.3,
+      "paju": 0.7,
+      "outer": 16.0
+     },
+     "purpose_share": {
+      "기타": 62.4,
+      "출근": 28.0,
+      "귀가": 5.4,
+      "쇼핑": 2.8,
+      "등교": 1.2,
+      "관광": 0.3
+     },
+     "purpose_group_share": {
+      "work": 29.1,
+      "home": 5.4,
+      "visit": 65.5
+     },
+     "arr_hour_share": [
+      0.07,
+      0.27,
+      0.27,
+      0.23,
+      0.28,
+      0.55,
+      2.49,
+      5.86,
+      12.38,
+      8.7,
+      6.41,
+      8.04,
+      8.2,
+      7.29,
+      5.9,
+      5.44,
+      5.17,
+      5.61,
+      5.89,
+      4.09,
+      2.9,
+      2.07,
+      1.47,
+      0.41
+     ],
+     "peak_hours": [
+      8,
+      9,
+      12
+     ],
+     "external_share": 19.0,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": 11.7,
+       "home": -22.6,
+       "visit": 13.0
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 17922.8,
+     "corridor_rank": 6,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "myeongdong",
+       "to": "sgg:41281000",
+       "per_day": 6778.5,
+       "visit_per_day": 1746.5,
+       "work_per_day": 168.5,
+       "home_per_day": 4863.5,
+       "purpose_group_share": {
+        "work": 2.5,
+        "home": 71.7,
+        "visit": 25.8
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 76.8
+      },
+      {
+       "from": "myeongdong",
+       "to": "sgg:41480000",
+       "per_day": 3974.0,
+       "visit_per_day": 1351.2,
+       "work_per_day": 100.0,
+       "home_per_day": 2522.8,
+       "purpose_group_share": {
+        "work": 2.5,
+        "home": 63.5,
+        "visit": 34.0
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 97.7
+      },
+      {
+       "from": "myeongdong",
+       "to": "sgg:41285000",
+       "per_day": 3336.4,
+       "visit_per_day": 881.5,
+       "work_per_day": 76.7,
+       "home_per_day": 2378.2,
+       "purpose_group_share": {
+        "work": 2.3,
+        "home": 71.3,
+        "visit": 26.4
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 85.2
+      },
+      {
+       "from": "myeongdong",
+       "to": "sgg:41287000",
+       "per_day": 2630.2,
+       "visit_per_day": 564.0,
+       "work_per_day": 41.8,
+       "home_per_day": 2024.4,
+       "purpose_group_share": {
+        "work": 1.6,
+        "home": 77.0,
+        "visit": 21.4
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 86.4
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "myeongdong",
+       "per_day": 7351.9,
+       "visit_per_day": 3503.4,
+       "work_per_day": 3687.8,
+       "home_per_day": 160.6,
+       "purpose_group_share": {
+        "work": 50.2,
+        "home": 2.2,
+        "visit": 47.7
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 78.3
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "myeongdong",
+       "per_day": 4116.7,
+       "visit_per_day": 2338.7,
+       "work_per_day": 1606.2,
+       "home_per_day": 171.7,
+       "purpose_group_share": {
+        "work": 39.0,
+        "home": 4.2,
+        "visit": 56.8
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 102.5
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "myeongdong",
+       "per_day": 3590.7,
+       "visit_per_day": 1858.0,
+       "work_per_day": 1671.7,
+       "home_per_day": 61.0,
+       "purpose_group_share": {
+        "work": 46.6,
+        "home": 1.7,
+        "visit": 51.7
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 87.3
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "myeongdong",
+       "per_day": 2863.5,
+       "visit_per_day": 1338.4,
+       "work_per_day": 1496.2,
+       "home_per_day": 29.0,
+       "purpose_group_share": {
+        "work": 52.2,
+        "home": 1.0,
+        "visit": 46.7
+       },
+       "peak_hours": [
+        8,
+        7,
+        9
+       ],
+       "avg_min": 85.3
+      }
+     ]
+    },
+    {
+     "id": "cityhall",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "시청역",
+     "units": {
+      "11140520": {
+       "name": "소공동",
+       "weight": 0.3524
+      },
+      "11140540": {
+       "name": "회현동",
+       "weight": 0.3362
+      },
+      "11140550": {
+       "name": "명동",
+       "weight": 0.3114
+      }
+     },
+     "hubs": [
+      "cityhall"
+     ],
+     "arrivals_per_day": 514677.5,
+     "from_segment_per_day": {
+      "seoul": 346863.3,
+      "self": 65833.1,
+      "gyeonggi_other": 60656.6,
+      "incheon": 15747.8,
+      "goyang": 12225.7,
+      "other": 9625.5,
+      "paju": 3725.6
+     },
+     "inflow_share": {
+      "same_dong": 12.4,
+      "same_segment": 67.4,
+      "goyang": 2.5,
+      "paju": 0.7,
+      "outer": 17.1
+     },
+     "purpose_share": {
+      "기타": 60.7,
+      "출근": 29.7,
+      "귀가": 5.0,
+      "쇼핑": 3.1,
+      "등교": 1.3,
+      "관광": 0.3
+     },
+     "purpose_group_share": {
+      "work": 30.9,
+      "home": 5.0,
+      "visit": 64.0
+     },
+     "arr_hour_share": [
+      0.06,
+      0.22,
+      0.23,
+      0.2,
+      0.27,
+      0.54,
+      2.47,
+      6.13,
+      13.59,
+      9.35,
+      6.84,
+      8.63,
+      8.75,
+      7.74,
+      6.13,
+      5.48,
+      4.86,
+      4.92,
+      4.92,
+      3.24,
+      2.25,
+      1.66,
+      1.19,
+      0.33
+     ],
+     "peak_hours": [
+      8,
+      9,
+      12
+     ],
+     "external_share": 20.3,
+     "role": {
+      "kind": "출근형",
+      "deviation_pp": {
+       "work": 13.5,
+       "home": -23.0,
+       "visit": 11.5
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 15951.3,
+     "corridor_rank": 7,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "cityhall",
+       "to": "sgg:41281000",
+       "per_day": 5934.3,
+       "visit_per_day": 1550.7,
+       "work_per_day": 142.4,
+       "home_per_day": 4241.3,
+       "purpose_group_share": {
+        "work": 2.4,
+        "home": 71.5,
+        "visit": 26.1
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 76.5
+      },
+      {
+       "from": "cityhall",
+       "to": "sgg:41480000",
+       "per_day": 3605.5,
+       "visit_per_day": 1221.2,
+       "work_per_day": 93.1,
+       "home_per_day": 2291.2,
+       "purpose_group_share": {
+        "work": 2.6,
+        "home": 63.5,
+        "visit": 33.9
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 96.2
+      },
+      {
+       "from": "cityhall",
+       "to": "sgg:41285000",
+       "per_day": 2973.7,
+       "visit_per_day": 779.9,
+       "work_per_day": 65.3,
+       "home_per_day": 2128.5,
+       "purpose_group_share": {
+        "work": 2.2,
+        "home": 71.6,
+        "visit": 26.2
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 84.5
+      },
+      {
+       "from": "cityhall",
+       "to": "sgg:41287000",
+       "per_day": 2318.5,
+       "visit_per_day": 504.5,
+       "work_per_day": 29.0,
+       "home_per_day": 1784.9,
+       "purpose_group_share": {
+        "work": 1.3,
+        "home": 77.0,
+        "visit": 21.8
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 85.4
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "cityhall",
+       "per_day": 6485.3,
+       "visit_per_day": 3050.5,
+       "work_per_day": 3290.8,
+       "home_per_day": 143.9,
+       "purpose_group_share": {
+        "work": 50.7,
+        "home": 2.2,
+        "visit": 47.0
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 78.3
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "cityhall",
+       "per_day": 3725.6,
+       "visit_per_day": 2117.7,
+       "work_per_day": 1454.7,
+       "home_per_day": 153.2,
+       "purpose_group_share": {
+        "work": 39.0,
+        "home": 4.1,
+        "visit": 56.8
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 101.2
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "cityhall",
+       "per_day": 3193.1,
+       "visit_per_day": 1605.4,
+       "work_per_day": 1537.2,
+       "home_per_day": 50.6,
+       "purpose_group_share": {
+        "work": 48.1,
+        "home": 1.6,
+        "visit": 50.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 86.6
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "cityhall",
+       "per_day": 2547.3,
+       "visit_per_day": 1179.4,
+       "work_per_day": 1342.6,
+       "home_per_day": 25.2,
+       "purpose_group_share": {
+        "work": 52.7,
+        "home": 1.0,
+        "visit": 46.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 84.4
+      }
+     ]
+    },
+    {
+     "id": "hapjeong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "합정",
+     "units": {
+      "11440680": {
+       "name": "합정동",
+       "weight": 0.5874
+      },
+      "11440660": {
+       "name": "서교동",
+       "weight": 0.4126
+      }
+     },
+     "hubs": [
+      "hapjeong"
+     ],
+     "arrivals_per_day": 298462.6,
+     "from_segment_per_day": {
+      "seoul": 203715.5,
+      "self": 37428.9,
+      "gyeonggi_other": 26906.2,
+      "incheon": 11506.5,
+      "goyang": 11331.0,
+      "other": 3952.6,
+      "paju": 3621.9
+     },
+     "inflow_share": {
+      "same_dong": 11.6,
+      "same_segment": 69.6,
+      "goyang": 4.0,
+      "paju": 1.2,
+      "outer": 13.5
+     },
+     "purpose_share": {
+      "기타": 64.8,
+      "귀가": 18.6,
+      "출근": 14.2,
+      "등교": 1.5,
+      "관광": 0.8,
+      "쇼핑": 0.1
+     },
+     "purpose_group_share": {
+      "work": 15.7,
+      "home": 18.6,
+      "visit": 65.7
+     },
+     "arr_hour_share": [
+      0.21,
+      0.78,
+      0.67,
+      0.54,
+      0.49,
+      0.63,
+      1.42,
+      2.59,
+      5.67,
+      6.23,
+      5.71,
+      6.12,
+      6.61,
+      6.69,
+      6.0,
+      5.88,
+      6.33,
+      7.31,
+      8.61,
+      7.42,
+      5.3,
+      4.26,
+      3.44,
+      1.07
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 18.7,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": -1.7,
+       "home": -9.4,
+       "visit": 13.2
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 14952.9,
+     "corridor_rank": 8,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "hapjeong",
+       "to": "sgg:41281000",
+       "per_day": 6001.9,
+       "visit_per_day": 2161.3,
+       "work_per_day": 330.8,
+       "home_per_day": 3509.9,
+       "purpose_group_share": {
+        "work": 5.5,
+        "home": 58.5,
+        "visit": 36.0
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 51.6
+      },
+      {
+       "from": "hapjeong",
+       "to": "sgg:41480000",
+       "per_day": 3371.5,
+       "visit_per_day": 1187.2,
+       "work_per_day": 190.3,
+       "home_per_day": 1994.0,
+       "purpose_group_share": {
+        "work": 5.6,
+        "home": 59.1,
+        "visit": 35.2
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 70.2
+      },
+      {
+       "from": "hapjeong",
+       "to": "sgg:41285000",
+       "per_day": 2818.5,
+       "visit_per_day": 914.3,
+       "work_per_day": 158.5,
+       "home_per_day": 1745.6,
+       "purpose_group_share": {
+        "work": 5.6,
+        "home": 61.9,
+        "visit": 32.4
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 60.6
+      },
+      {
+       "from": "hapjeong",
+       "to": "sgg:41287000",
+       "per_day": 1919.2,
+       "visit_per_day": 498.1,
+       "work_per_day": 67.4,
+       "home_per_day": 1353.8,
+       "purpose_group_share": {
+        "work": 3.5,
+        "home": 70.5,
+        "visit": 26.0
+       },
+       "peak_hours": [
+        19,
+        22,
+        20
+       ],
+       "avg_min": 61.9
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "hapjeong",
+       "per_day": 6330.6,
+       "visit_per_day": 3786.7,
+       "work_per_day": 1801.8,
+       "home_per_day": 742.0,
+       "purpose_group_share": {
+        "work": 28.5,
+        "home": 11.7,
+        "visit": 59.8
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 55.9
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "hapjeong",
+       "per_day": 3621.9,
+       "visit_per_day": 2285.1,
+       "work_per_day": 981.7,
+       "home_per_day": 355.1,
+       "purpose_group_share": {
+        "work": 27.1,
+        "home": 9.8,
+        "visit": 63.1
+       },
+       "peak_hours": [
+        9,
+        8,
+        10
+       ],
+       "avg_min": 78.5
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "hapjeong",
+       "per_day": 2983.1,
+       "visit_per_day": 1751.7,
+       "work_per_day": 931.9,
+       "home_per_day": 299.4,
+       "purpose_group_share": {
+        "work": 31.2,
+        "home": 10.0,
+        "visit": 58.7
+       },
+       "peak_hours": [
+        9,
+        10,
+        8
+       ],
+       "avg_min": 67.3
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "hapjeong",
+       "per_day": 2017.3,
+       "visit_per_day": 1195.8,
+       "work_per_day": 688.9,
+       "home_per_day": 132.6,
+       "purpose_group_share": {
+        "work": 34.1,
+        "home": 6.6,
+        "visit": 59.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 72.2
+      }
+     ]
+    },
+    {
+     "id": "yeonnam",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "연남동",
+     "units": {
+      "11440710": {
+       "name": "연남동",
+       "weight": 0.4495
+      },
+      "11440660": {
+       "name": "서교동",
+       "weight": 0.5505
+      }
+     },
+     "hubs": [
+      "yeonnam"
+     ],
+     "arrivals_per_day": 287768.3,
+     "from_segment_per_day": {
+      "seoul": 197021.7,
+      "self": 36295.1,
+      "gyeonggi_other": 25316.3,
+      "incheon": 11199.1,
+      "goyang": 10656.8,
+      "other": 3870.0,
+      "paju": 3409.3
+     },
+     "inflow_share": {
+      "same_dong": 12.0,
+      "same_segment": 70.1,
+      "goyang": 3.7,
+      "paju": 1.1,
+      "outer": 13.1
+     },
+     "purpose_share": {
+      "기타": 63.6,
+      "귀가": 19.8,
+      "출근": 14.3,
+      "등교": 1.2,
+      "관광": 1.1,
+      "쇼핑": 0.1
+     },
+     "purpose_group_share": {
+      "work": 15.5,
+      "home": 19.8,
+      "visit": 64.7
+     },
+     "arr_hour_share": [
+      0.22,
+      0.9,
+      0.81,
+      0.66,
+      0.57,
+      0.65,
+      1.3,
+      2.68,
+      4.82,
+      5.82,
+      5.35,
+      5.73,
+      6.58,
+      6.67,
+      6.15,
+      6.23,
+      6.5,
+      7.5,
+      8.46,
+      7.52,
+      5.61,
+      4.44,
+      3.72,
+      1.11
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 18.0,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": -1.9,
+       "home": -8.2,
+       "visit": 12.2
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 14066.1,
+     "corridor_rank": 9,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "yeonnam",
+       "to": "sgg:41281000",
+       "per_day": 5693.7,
+       "visit_per_day": 2026.4,
+       "work_per_day": 328.7,
+       "home_per_day": 3338.5,
+       "purpose_group_share": {
+        "work": 5.8,
+        "home": 58.6,
+        "visit": 35.6
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 52.7
+      },
+      {
+       "from": "yeonnam",
+       "to": "sgg:41480000",
+       "per_day": 3153.8,
+       "visit_per_day": 1106.1,
+       "work_per_day": 157.3,
+       "home_per_day": 1890.4,
+       "purpose_group_share": {
+        "work": 5.0,
+        "home": 59.9,
+        "visit": 35.1
+       },
+       "peak_hours": [
+        19,
+        20,
+        18
+       ],
+       "avg_min": 70.5
+      },
+      {
+       "from": "yeonnam",
+       "to": "sgg:41285000",
+       "per_day": 2620.7,
+       "visit_per_day": 831.5,
+       "work_per_day": 155.4,
+       "home_per_day": 1633.8,
+       "purpose_group_share": {
+        "work": 5.9,
+        "home": 62.3,
+        "visit": 31.7
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 60.8
+      },
+      {
+       "from": "yeonnam",
+       "to": "sgg:41287000",
+       "per_day": 1838.3,
+       "visit_per_day": 466.3,
+       "work_per_day": 63.6,
+       "home_per_day": 1308.4,
+       "purpose_group_share": {
+        "work": 3.5,
+        "home": 71.2,
+        "visit": 25.4
+       },
+       "peak_hours": [
+        19,
+        22,
+        20
+       ],
+       "avg_min": 62.7
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "yeonnam",
+       "per_day": 5969.9,
+       "visit_per_day": 3506.1,
+       "work_per_day": 1731.1,
+       "home_per_day": 732.7,
+       "purpose_group_share": {
+        "work": 29.0,
+        "home": 12.3,
+        "visit": 58.7
+       },
+       "peak_hours": [
+        9,
+        10,
+        8
+       ],
+       "avg_min": 56.3
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "yeonnam",
+       "per_day": 3409.3,
+       "visit_per_day": 2152.7,
+       "work_per_day": 921.2,
+       "home_per_day": 335.5,
+       "purpose_group_share": {
+        "work": 27.0,
+        "home": 9.8,
+        "visit": 63.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 80.0
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "yeonnam",
+       "per_day": 2790.4,
+       "visit_per_day": 1637.4,
+       "work_per_day": 895.9,
+       "home_per_day": 257.0,
+       "purpose_group_share": {
+        "work": 32.1,
+        "home": 9.2,
+        "visit": 58.7
+       },
+       "peak_hours": [
+        9,
+        10,
+        8
+       ],
+       "avg_min": 67.0
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "yeonnam",
+       "per_day": 1896.5,
+       "visit_per_day": 1111.6,
+       "work_per_day": 666.3,
+       "home_per_day": 118.6,
+       "purpose_group_share": {
+        "work": 35.1,
+        "home": 6.3,
+        "visit": 58.6
+       },
+       "peak_hours": [
+        8,
+        10,
+        9
+       ],
+       "avg_min": 72.1
+      }
+     ]
+    },
+    {
+     "id": "bonseobu",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "본서부병원",
+     "units": {
+      "11380631": {
+       "name": "신사1동",
+       "weight": 0.183
+      },
+      "11380625": {
+       "name": "역촌동",
+       "weight": 0.3503
+      },
+      "11380580": {
+       "name": "응암1동",
+       "weight": 0.4666
+      }
+     },
+     "hubs": [
+      "bonseobu"
+     ],
+     "arrivals_per_day": 158225.0,
+     "from_segment_per_day": {
+      "seoul": 107068.1,
+      "self": 27954.8,
+      "goyang": 11755.7,
+      "gyeonggi_other": 6520.1,
+      "incheon": 1813.3,
+      "paju": 1740.6,
+      "other": 1372.4
+     },
+     "inflow_share": {
+      "same_dong": 16.8,
+      "same_segment": 68.7,
+      "goyang": 7.3,
+      "paju": 1.1,
+      "outer": 6.1
+     },
+     "purpose_share": {
+      "귀가": 50.3,
+      "기타": 40.2,
+      "출근": 8.3,
+      "등교": 1.2
+     },
+     "purpose_group_share": {
+      "work": 9.4,
+      "home": 50.3,
+      "visit": 40.2
+     },
+     "arr_hour_share": [
+      0.25,
+      1.02,
+      0.92,
+      0.75,
+      0.73,
+      1.01,
+      1.68,
+      2.62,
+      4.75,
+      4.5,
+      4.56,
+      4.67,
+      5.0,
+      5.27,
+      5.38,
+      6.12,
+      7.11,
+      7.59,
+      8.92,
+      8.52,
+      6.73,
+      5.68,
+      4.85,
+      1.38
+     ],
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "external_share": 14.5,
+     "role": {
+      "kind": "주거형",
+      "deviation_pp": {
+       "work": -8.0,
+       "home": 22.3,
+       "visit": -12.3
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 13496.3,
+     "corridor_rank": 10,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "bonseobu",
+       "to": "sgg:41281000",
+       "per_day": 8974.2,
+       "visit_per_day": 5181.9,
+       "work_per_day": 1709.2,
+       "home_per_day": 2083.2,
+       "purpose_group_share": {
+        "work": 19.0,
+        "home": 23.2,
+        "visit": 57.7
+       },
+       "peak_hours": [
+        8,
+        12,
+        11
+       ],
+       "avg_min": 43.3
+      },
+      {
+       "from": "bonseobu",
+       "to": "sgg:41285000",
+       "per_day": 1864.2,
+       "visit_per_day": 981.7,
+       "work_per_day": 527.2,
+       "home_per_day": 355.3,
+       "purpose_group_share": {
+        "work": 28.3,
+        "home": 19.1,
+        "visit": 52.7
+       },
+       "peak_hours": [
+        8,
+        7,
+        9
+       ],
+       "avg_min": 60.8
+      },
+      {
+       "from": "bonseobu",
+       "to": "sgg:41480000",
+       "per_day": 1762.3,
+       "visit_per_day": 945.0,
+       "work_per_day": 412.4,
+       "home_per_day": 404.8,
+       "purpose_group_share": {
+        "work": 23.4,
+        "home": 23.0,
+        "visit": 53.6
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 71.2
+      },
+      {
+       "from": "bonseobu",
+       "to": "sgg:41287000",
+       "per_day": 718.4,
+       "visit_per_day": 339.0,
+       "work_per_day": 152.2,
+       "home_per_day": 227.2,
+       "purpose_group_share": {
+        "work": 21.2,
+        "home": 31.6,
+        "visit": 47.2
+       },
+       "peak_hours": [
+        19,
+        8,
+        7
+       ],
+       "avg_min": 65.3
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "bonseobu",
+       "per_day": 9202.1,
+       "visit_per_day": 3140.4,
+       "work_per_day": 1063.1,
+       "home_per_day": 4998.7,
+       "purpose_group_share": {
+        "work": 11.6,
+        "home": 54.3,
+        "visit": 34.1
+       },
+       "peak_hours": [
+        18,
+        19,
+        17
+       ],
+       "avg_min": 44.5
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "bonseobu",
+       "per_day": 1850.4,
+       "visit_per_day": 606.7,
+       "work_per_day": 212.3,
+       "home_per_day": 1031.4,
+       "purpose_group_share": {
+        "work": 11.5,
+        "home": 55.7,
+        "visit": 32.8
+       },
+       "peak_hours": [
+        18,
+        19,
+        17
+       ],
+       "avg_min": 61.8
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "bonseobu",
+       "per_day": 1740.6,
+       "visit_per_day": 567.8,
+       "work_per_day": 237.6,
+       "home_per_day": 935.2,
+       "purpose_group_share": {
+        "work": 13.7,
+        "home": 53.7,
+        "visit": 32.6
+       },
+       "peak_hours": [
+        18,
+        17,
+        19
+       ],
+       "avg_min": 73.6
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "bonseobu",
+       "per_day": 703.2,
+       "visit_per_day": 269.4,
+       "work_per_day": 103.8,
+       "home_per_day": 330.0,
+       "purpose_group_share": {
+        "work": 14.8,
+        "home": 46.9,
+        "visit": 38.3
+       },
+       "peak_hours": [
+        17,
+        18,
+        19
+       ],
+       "avg_min": 69.2
+      }
+     ]
+    },
+    {
+     "id": "gwangjang",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "광장시장·종로4가",
+     "units": {
+      "11110615": {
+       "name": "종로1.2.3.4가동",
+       "weight": 0.3885
+      },
+      "11140605": {
+       "name": "을지로동",
+       "weight": 0.1936
+      },
+      "11110630": {
+       "name": "종로5.6가동",
+       "weight": 0.4179
+      }
+     },
+     "hubs": [
+      "gwangjang"
+     ],
+     "arrivals_per_day": 426784.3,
+     "from_segment_per_day": {
+      "seoul": 290196.8,
+      "self": 58165.6,
+      "gyeonggi_other": 49172.1,
+      "goyang": 10673.3,
+      "incheon": 10030.6,
+      "other": 5949.3,
+      "paju": 2596.5
+     },
+     "inflow_share": {
+      "same_dong": 11.9,
+      "same_segment": 69.9,
+      "goyang": 2.3,
+      "paju": 0.6,
+      "outer": 15.3
+     },
+     "purpose_share": {
+      "기타": 66.7,
+      "출근": 25.3,
+      "귀가": 7.2,
+      "등교": 0.5,
+      "관광": 0.3
+     },
+     "purpose_group_share": {
+      "work": 25.8,
+      "home": 7.2,
+      "visit": 67.0
+     },
+     "arr_hour_share": [
+      0.12,
+      0.43,
+      0.41,
+      0.33,
+      0.37,
+      0.61,
+      2.36,
+      4.99,
+      10.34,
+      8.29,
+      6.54,
+      7.81,
+      7.85,
+      7.13,
+      5.91,
+      5.35,
+      5.25,
+      5.99,
+      6.61,
+      4.74,
+      3.38,
+      2.58,
+      2.0,
+      0.59
+     ],
+     "peak_hours": [
+      8,
+      9,
+      12
+     ],
+     "external_share": 18.2,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": 8.4,
+       "home": -20.8,
+       "visit": 14.5
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 13269.8,
+     "corridor_rank": 11,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "gwangjang",
+       "to": "sgg:41281000",
+       "per_day": 5786.9,
+       "visit_per_day": 1388.9,
+       "work_per_day": 113.3,
+       "home_per_day": 4284.6,
+       "purpose_group_share": {
+        "work": 2.0,
+        "home": 74.0,
+        "visit": 24.0
+       },
+       "peak_hours": [
+        19,
+        18,
+        17
+       ],
+       "avg_min": 76.7
+      },
+      {
+       "from": "gwangjang",
+       "to": "sgg:41285000",
+       "per_day": 2547.9,
+       "visit_per_day": 652.3,
+       "work_per_day": 58.6,
+       "home_per_day": 1837.0,
+       "purpose_group_share": {
+        "work": 2.3,
+        "home": 72.1,
+        "visit": 25.6
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 89.0
+      },
+      {
+       "from": "gwangjang",
+       "to": "sgg:41480000",
+       "per_day": 2498.2,
+       "visit_per_day": 814.8,
+       "work_per_day": 43.7,
+       "home_per_day": 1639.7,
+       "purpose_group_share": {
+        "work": 1.8,
+        "home": 65.6,
+        "visit": 32.6
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 106.9
+      },
+      {
+       "from": "gwangjang",
+       "to": "sgg:41287000",
+       "per_day": 1956.2,
+       "visit_per_day": 382.2,
+       "work_per_day": 41.3,
+       "home_per_day": 1532.7,
+       "purpose_group_share": {
+        "work": 2.1,
+        "home": 78.4,
+        "visit": 19.5
+       },
+       "peak_hours": [
+        19,
+        20,
+        18
+       ],
+       "avg_min": 91.9
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "gwangjang",
+       "per_day": 5889.4,
+       "visit_per_day": 3066.8,
+       "work_per_day": 2693.7,
+       "home_per_day": 128.9,
+       "purpose_group_share": {
+        "work": 45.7,
+        "home": 2.2,
+        "visit": 52.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 75.9
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "gwangjang",
+       "per_day": 2711.8,
+       "visit_per_day": 1601.9,
+       "work_per_day": 1053.0,
+       "home_per_day": 56.9,
+       "purpose_group_share": {
+        "work": 38.8,
+        "home": 2.1,
+        "visit": 59.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 89.9
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "gwangjang",
+       "per_day": 2596.5,
+       "visit_per_day": 1561.0,
+       "work_per_day": 929.1,
+       "home_per_day": 106.5,
+       "purpose_group_share": {
+        "work": 35.8,
+        "home": 4.1,
+        "visit": 60.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 110.9
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "gwangjang",
+       "per_day": 2072.2,
+       "visit_per_day": 1116.4,
+       "work_per_day": 934.1,
+       "home_per_day": 21.7,
+       "purpose_group_share": {
+        "work": 45.1,
+        "home": 1.0,
+        "visit": 53.9
+       },
+       "peak_hours": [
+        8,
+        9,
+        10
+       ],
+       "avg_min": 91.0
+      }
+     ]
+    },
+    {
+     "id": "chungmuro",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "충무로",
+     "units": {
+      "11140550": {
+       "name": "명동",
+       "weight": 0.1693
+      },
+      "11140570": {
+       "name": "필동",
+       "weight": 0.2734
+      },
+      "11140605": {
+       "name": "을지로동",
+       "weight": 0.3445
+      },
+      "11140590": {
+       "name": "광희동",
+       "weight": 0.2127
+      }
+     },
+     "hubs": [
+      "chungmuro"
+     ],
+     "arrivals_per_day": 458460.9,
+     "from_segment_per_day": {
+      "seoul": 322021.0,
+      "self": 55971.8,
+      "gyeonggi_other": 49284.1,
+      "incheon": 12277.6,
+      "goyang": 9572.7,
+      "other": 6446.2,
+      "paju": 2887.5
+     },
+     "inflow_share": {
+      "same_dong": 10.5,
+      "same_segment": 72.5,
+      "goyang": 2.2,
+      "paju": 0.6,
+      "outer": 14.2
+     },
+     "purpose_share": {
+      "기타": 64.0,
+      "출근": 23.1,
+      "귀가": 9.2,
+      "등교": 2.7,
+      "쇼핑": 0.6,
+      "관광": 0.4
+     },
+     "purpose_group_share": {
+      "work": 25.8,
+      "home": 9.2,
+      "visit": 65.0
+     },
+     "arr_hour_share": [
+      0.14,
+      0.53,
+      0.52,
+      0.42,
+      0.41,
+      0.67,
+      2.46,
+      4.83,
+      10.61,
+      7.72,
+      6.05,
+      7.06,
+      7.18,
+      6.67,
+      5.5,
+      5.16,
+      5.21,
+      6.13,
+      6.82,
+      5.18,
+      4.09,
+      3.26,
+      2.61,
+      0.8
+     ],
+     "peak_hours": [
+      8,
+      9,
+      12
+     ],
+     "external_share": 17.0,
+     "role": {
+      "kind": "방문형",
+      "deviation_pp": {
+       "work": 8.4,
+       "home": -18.8,
+       "visit": 12.5
+      },
+      "median_share": {
+       "work": 17.4,
+       "home": 28.0,
+       "visit": 52.5
+      },
+      "margin_pp": 3.0
+     },
+     "from_gyeonggi_per_day": 12460.2,
+     "corridor_rank": 12,
+     "on_corridor": true,
+     "top_destinations": [
+      {
+       "from": "chungmuro",
+       "to": "sgg:41281000",
+       "per_day": 4815.8,
+       "visit_per_day": 1303.8,
+       "work_per_day": 116.5,
+       "home_per_day": 3395.5,
+       "purpose_group_share": {
+        "work": 2.4,
+        "home": 70.5,
+        "visit": 27.1
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 78.6
+      },
+      {
+       "from": "chungmuro",
+       "to": "sgg:41480000",
+       "per_day": 2706.8,
+       "visit_per_day": 1025.1,
+       "work_per_day": 61.1,
+       "home_per_day": 1620.6,
+       "purpose_group_share": {
+        "work": 2.3,
+        "home": 59.9,
+        "visit": 37.9
+       },
+       "peak_hours": [
+        19,
+        20,
+        18
+       ],
+       "avg_min": 102.7
+      },
+      {
+       "from": "chungmuro",
+       "to": "sgg:41285000",
+       "per_day": 2264.5,
+       "visit_per_day": 607.0,
+       "work_per_day": 65.8,
+       "home_per_day": 1591.8,
+       "purpose_group_share": {
+        "work": 2.9,
+        "home": 70.3,
+        "visit": 26.8
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 87.7
+      },
+      {
+       "from": "chungmuro",
+       "to": "sgg:41287000",
+       "per_day": 1660.9,
+       "visit_per_day": 357.9,
+       "work_per_day": 30.6,
+       "home_per_day": 1272.4,
+       "purpose_group_share": {
+        "work": 1.8,
+        "home": 76.6,
+        "visit": 21.5
+       },
+       "peak_hours": [
+        19,
+        18,
+        20
+       ],
+       "avg_min": 92.5
+      }
+     ],
+     "top_origins": [
+      {
+       "from": "sgg:41281000",
+       "to": "chungmuro",
+       "per_day": 5243.5,
+       "visit_per_day": 2531.1,
+       "work_per_day": 2596.3,
+       "home_per_day": 116.2,
+       "purpose_group_share": {
+        "work": 49.5,
+        "home": 2.2,
+        "visit": 48.3
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 79.7
+      },
+      {
+       "from": "sgg:41480000",
+       "to": "chungmuro",
+       "per_day": 2887.5,
+       "visit_per_day": 1647.3,
+       "work_per_day": 1092.8,
+       "home_per_day": 147.3,
+       "purpose_group_share": {
+        "work": 37.8,
+        "home": 5.1,
+        "visit": 57.1
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 109.2
+      },
+      {
+       "from": "sgg:41285000",
+       "to": "chungmuro",
+       "per_day": 2495.5,
+       "visit_per_day": 1323.3,
+       "work_per_day": 1107.1,
+       "home_per_day": 65.1,
+       "purpose_group_share": {
+        "work": 44.4,
+        "home": 2.6,
+        "visit": 53.0
+       },
+       "peak_hours": [
+        8,
+        9,
+        7
+       ],
+       "avg_min": 89.2
+      },
+      {
+       "from": "sgg:41287000",
+       "to": "chungmuro",
+       "per_day": 1833.6,
+       "visit_per_day": 890.6,
+       "work_per_day": 915.7,
+       "home_per_day": 27.3,
+       "purpose_group_share": {
+        "work": 49.9,
+        "home": 1.5,
+        "visit": 48.6
+       },
+       "peak_hours": [
+        8,
+        7,
+        9
+       ],
+       "avg_min": 90.0
+      }
+     ]
+    },
+    {
+     "id": "yeouido",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "여의도",
+     "hubs": [
+      "yeouido"
+     ],
+     "arrivals_per_day": 378980.1,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 12220.7,
+     "corridor_rank": 13,
+     "on_corridor": false
+    },
+    {
+     "id": "hongdae",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "홍대",
+     "hubs": [
+      "hongdae"
+     ],
+     "arrivals_per_day": 243176.6,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 11974.4,
+     "corridor_rank": 14,
+     "on_corridor": false
+    },
+    {
+     "id": "gangnam",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "강남역·강남대로",
+     "hubs": [
+      "gangnam"
+     ],
+     "arrivals_per_day": 689707.1,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 9797.9,
+     "corridor_rank": 15,
+     "on_corridor": false
+    },
+    {
+     "id": "ikseon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "익선동",
+     "hubs": [
+      "ikseon"
+     ],
+     "arrivals_per_day": 297139.7,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 9759.6,
+     "corridor_rank": 16,
+     "on_corridor": false
+    },
+    {
+     "id": "namdaemun",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "남대문시장",
+     "hubs": [
+      "namdaemun"
+     ],
+     "arrivals_per_day": 269957.8,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 9219.1,
+     "corridor_rank": 17,
+     "on_corridor": false
+    },
+    {
+     "id": "gongdeok",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "공덕역",
+     "hubs": [
+      "gongdeok"
+     ],
+     "arrivals_per_day": 237081.6,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 8656.7,
+     "corridor_rank": 18,
+     "on_corridor": false
+    },
+    {
+     "id": "seolleung",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "선릉",
+     "hubs": [
+      "seolleung"
+     ],
+     "arrivals_per_day": 653439.3,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 8249.3,
+     "corridor_rank": 19,
+     "on_corridor": false
+    },
+    {
+     "id": "bangbang",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "뱅뱅사거리",
+     "hubs": [
+      "bangbang"
+     ],
+     "arrivals_per_day": 540381.0,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 7336.3,
+     "corridor_rank": 20,
+     "on_corridor": false
+    },
+    {
+     "id": "dogok",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "도곡동",
+     "hubs": [
+      "dogok"
+     ],
+     "arrivals_per_day": 548016.0,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 7274.7,
+     "corridor_rank": 21,
+     "on_corridor": false
+    },
+    {
+     "id": "yongsan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "용산역",
+     "hubs": [
+      "yongsan"
+     ],
+     "arrivals_per_day": 203989.4,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 6355.9,
+     "corridor_rank": 22,
+     "on_corridor": false
+    },
+    {
+     "id": "ydp-gucheong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "영등포구청역",
+     "hubs": [
+      "ydp-gucheong"
+     ],
+     "arrivals_per_day": 225640.9,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 6159.6,
+     "corridor_rank": 23,
+     "on_corridor": false
+    },
+    {
+     "id": "dosan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "도산공원",
+     "hubs": [
+      "dosan"
+     ],
+     "arrivals_per_day": 371105.2,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 6143.7,
+     "corridor_rank": 24,
+     "on_corridor": false
+    },
+    {
+     "id": "teheran",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "역삼·테헤란로",
+     "hubs": [
+      "teheran"
+     ],
+     "arrivals_per_day": 452175.2,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 6101.3,
+     "corridor_rank": 25,
+     "on_corridor": false
+    },
+    {
+     "id": "seochoyeok",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "서초역",
+     "hubs": [
+      "seochoyeok"
+     ],
+     "arrivals_per_day": 404841.9,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 5952.6,
+     "corridor_rank": 26,
+     "on_corridor": false
+    },
+    {
+     "id": "seochon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "서촌",
+     "hubs": [
+      "seochon"
+     ],
+     "arrivals_per_day": 157975.7,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 5846.4,
+     "corridor_rank": 27,
+     "on_corridor": false
+    },
+    {
+     "id": "yeonhui",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "연희동",
+     "hubs": [
+      "yeonhui"
+     ],
+     "arrivals_per_day": 130471.9,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 5687.6,
+     "corridor_rank": 28,
+     "on_corridor": false
+    },
+    {
+     "id": "hwagok",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "화곡",
+     "hubs": [
+      "hwagok"
+     ],
+     "arrivals_per_day": 217662.3,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 5655.9,
+     "corridor_rank": 29,
+     "on_corridor": false
+    },
+    {
+     "id": "hyehwa",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "혜화·대학로",
+     "hubs": [
+      "hyehwa"
+     ],
+     "arrivals_per_day": 234191.0,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 5429.0,
+     "corridor_rank": 30,
+     "on_corridor": false
+    },
+    {
+     "id": "doksan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "독산",
+     "hubs": [
+      "doksan"
+     ],
+     "arrivals_per_day": 283164.1,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 5374.8,
+     "corridor_rank": 31,
+     "on_corridor": false
+    },
+    {
+     "id": "mullae",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "문래동 창작촌",
+     "hubs": [
+      "mullae"
+     ],
+     "arrivals_per_day": 170134.8,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 4883.8,
+     "corridor_rank": 32,
+     "on_corridor": false
+    },
+    {
+     "id": "dangsan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "당산",
+     "hubs": [
+      "dangsan"
+     ],
+     "arrivals_per_day": 145291.9,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 4845.6,
+     "corridor_rank": 33,
+     "on_corridor": false
+    },
+    {
+     "id": "dongdaemun",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "동대문·DDP",
+     "hubs": [
+      "dongdaemun"
+     ],
+     "arrivals_per_day": 221241.5,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 4611.3,
+     "corridor_rank": 34,
+     "on_corridor": false
+    },
+    {
+     "id": "nambu",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "남부터미널",
+     "hubs": [
+      "nambu"
+     ],
+     "arrivals_per_day": 281301.7,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 4461.9,
+     "corridor_rank": 35,
+     "on_corridor": false
+    },
+    {
+     "id": "apgujeong-rodeo",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "압구정로데오",
+     "hubs": [
+      "apgujeong-rodeo"
+     ],
+     "arrivals_per_day": 287667.7,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 4197.5,
+     "corridor_rank": 36,
+     "on_corridor": false
+    },
+    {
+     "id": "nonhyeon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "논현동",
+     "hubs": [
+      "nonhyeon"
+     ],
+     "arrivals_per_day": 290696.1,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 4186.5,
+     "corridor_rank": 37,
+     "on_corridor": false
+    },
+    {
+     "id": "garosugil",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "신사동 가로수길",
+     "hubs": [
+      "garosugil"
+     ],
+     "arrivals_per_day": 223431.8,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 3946.1,
+     "corridor_rank": 38,
+     "on_corridor": false
+    },
+    {
+     "id": "yangjae",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "양재역",
+     "hubs": [
+      "yangjae"
+     ],
+     "arrivals_per_day": 340740.9,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 3893.4,
+     "corridor_rank": 39,
+     "on_corridor": false
+    },
+    {
+     "id": "sukmyung",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "숙대입구",
+     "hubs": [
+      "sukmyung"
+     ],
+     "arrivals_per_day": 120345.8,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 3410.4,
+     "corridor_rank": 40,
+     "on_corridor": false
+    },
+    {
+     "id": "mokdong-yc",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "목동",
+     "hubs": [
+      "mokdong-yc"
+     ],
+     "arrivals_per_day": 156731.9,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 3400.5,
+     "corridor_rank": 41,
+     "on_corridor": false
+    },
+    {
+     "id": "maebong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "매봉역",
+     "hubs": [
+      "maebong"
+     ],
+     "arrivals_per_day": 330093.1,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 3206.5,
+     "corridor_rank": 42,
+     "on_corridor": false
+    },
+    {
+     "id": "banpo",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "고속터미널·반포",
+     "hubs": [
+      "banpo"
+     ],
+     "arrivals_per_day": 222008.5,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 3100.7,
+     "corridor_rank": 43,
+     "on_corridor": false
+    },
+    {
+     "id": "jamsil",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "잠실·롯데월드타워",
+     "hubs": [
+      "jamsil"
+     ],
+     "arrivals_per_day": 408992.1,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 3059.4,
+     "corridor_rank": 44,
+     "on_corridor": false
+    },
+    {
+     "id": "gurojeonhwa",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "구로전화국",
+     "hubs": [
+      "gurojeonhwa"
+     ],
+     "arrivals_per_day": 192704.8,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 3034.6,
+     "corridor_rank": 45,
+     "on_corridor": false
+    },
+    {
+     "id": "seongsu",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "성수동 카페거리",
+     "hubs": [
+      "seongsu"
+     ],
+     "arrivals_per_day": 223468.6,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 3026.0,
+     "corridor_rank": 46,
+     "on_corridor": false
+    },
+    {
+     "id": "kkachisan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "까치산",
+     "hubs": [
+      "kkachisan"
+     ],
+     "arrivals_per_day": 134092.5,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 2975.5,
+     "corridor_rank": 47,
+     "on_corridor": false
+    },
+    {
+     "id": "wangsimni",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "왕십리",
+     "hubs": [
+      "wangsimni"
+     ],
+     "arrivals_per_day": 269346.8,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 2960.0,
+     "corridor_rank": 48,
+     "on_corridor": false
+    },
+    {
+     "id": "poi",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "포이사거리",
+     "hubs": [
+      "poi"
+     ],
+     "arrivals_per_day": 296272.5,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 2876.0,
+     "corridor_rank": 49,
+     "on_corridor": false
+    },
+    {
+     "id": "itaewon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "이태원",
+     "hubs": [
+      "itaewon"
+     ],
+     "arrivals_per_day": 162144.7,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 2872.0,
+     "corridor_rank": 50,
+     "on_corridor": false
+    },
+    {
+     "id": "gurodigital",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "구로디지털단지",
+     "hubs": [
+      "gurodigital"
+     ],
+     "arrivals_per_day": 162553.6,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 2793.2,
+     "corridor_rank": 51,
+     "on_corridor": false
+    },
+    {
+     "id": "cheongnyangni",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "청량리·경동시장",
+     "hubs": [
+      "cheongnyangni"
+     ],
+     "arrivals_per_day": 240651.0,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 2510.2,
+     "corridor_rank": 52,
+     "on_corridor": false
+    },
+    {
+     "id": "songridan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "송리단길",
+     "hubs": [
+      "songridan"
+     ],
+     "arrivals_per_day": 356856.3,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 2451.8,
+     "corridor_rank": 53,
+     "on_corridor": false
+    },
+    {
+     "id": "hannam",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "한남동·용리단길",
+     "hubs": [
+      "hannam"
+     ],
+     "arrivals_per_day": 128110.9,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 2308.2,
+     "corridor_rank": 54,
+     "on_corridor": false
+    },
+    {
+     "id": "garak",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "가락시장",
+     "hubs": [
+      "garak"
+     ],
+     "arrivals_per_day": 328988.3,
+     "role": {
+      "kind": "혼합"
+     },
+     "from_gyeonggi_per_day": 2283.6,
+     "corridor_rank": 55,
+     "on_corridor": false
+    },
+    {
+     "id": "daerim",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "대림역",
+     "hubs": [
+      "daerim"
+     ],
+     "arrivals_per_day": 145805.5,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 2112.9,
+     "corridor_rank": 56,
+     "on_corridor": false
+    },
+    {
+     "id": "cheongdam",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "청담동 명품거리",
+     "hubs": [
+      "cheongdam"
+     ],
+     "arrivals_per_day": 144064.8,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 1961.8,
+     "corridor_rank": 57,
+     "on_corridor": false
+    },
+    {
+     "id": "gildong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "길동역",
+     "hubs": [
+      "gildong"
+     ],
+     "arrivals_per_day": 298089.4,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1800.2,
+     "corridor_rank": 58,
+     "on_corridor": false
+    },
+    {
+     "id": "noryangjin",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "노량진",
+     "hubs": [
+      "noryangjin"
+     ],
+     "arrivals_per_day": 91412.5,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1775.0,
+     "corridor_rank": 59,
+     "on_corridor": false
+    },
+    {
+     "id": "sadang",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "사당역",
+     "hubs": [
+      "sadang"
+     ],
+     "arrivals_per_day": 154673.7,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1764.7,
+     "corridor_rank": 60,
+     "on_corridor": false
+    },
+    {
+     "id": "samcheong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "삼청동·북촌",
+     "hubs": [
+      "samcheong"
+     ],
+     "arrivals_per_day": 54386.4,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 1713.6,
+     "corridor_rank": 61,
+     "on_corridor": false
+    },
+    {
+     "id": "guui",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "구의역",
+     "hubs": [
+      "guui"
+     ],
+     "arrivals_per_day": 217806.4,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1680.1,
+     "corridor_rank": 62,
+     "on_corridor": false
+    },
+    {
+     "id": "seoulsup",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "서울숲 아틀리에길",
+     "hubs": [
+      "seoulsup"
+     ],
+     "arrivals_per_day": 120699.7,
+     "role": {
+      "kind": "출근형"
+     },
+     "from_gyeonggi_per_day": 1598.4,
+     "corridor_rank": 63,
+     "on_corridor": false
+    },
+    {
+     "id": "sharosugil",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "샤로수길·서울대입구",
+     "hubs": [
+      "sharosugil"
+     ],
+     "arrivals_per_day": 192402.3,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1568.4,
+     "corridor_rank": 64,
+     "on_corridor": false
+    },
+    {
+     "id": "sungshin",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "성신여대·돈암",
+     "hubs": [
+      "sungshin"
+     ],
+     "arrivals_per_day": 117699.1,
+     "role": {
+      "kind": "혼합"
+     },
+     "from_gyeonggi_per_day": 1481.6,
+     "corridor_rank": 65,
+     "on_corridor": false
+    },
+    {
+     "id": "miasageori",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "미아사거리",
+     "hubs": [
+      "miasageori"
+     ],
+     "arrivals_per_day": 152204.7,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1433.5,
+     "corridor_rank": 66,
+     "on_corridor": false
+    },
+    {
+     "id": "konkuk",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "건대입구·화양동",
+     "hubs": [
+      "konkuk"
+     ],
+     "arrivals_per_day": 174261.3,
+     "role": {
+      "kind": "혼합"
+     },
+     "from_gyeonggi_per_day": 1404.4,
+     "corridor_rank": 67,
+     "on_corridor": false
+    },
+    {
+     "id": "kyunghee",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "경희대",
+     "hubs": [
+      "kyunghee"
+     ],
+     "arrivals_per_day": 159551.3,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1377.2,
+     "corridor_rank": 68,
+     "on_corridor": false
+    },
+    {
+     "id": "nowon",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "노원역",
+     "hubs": [
+      "nowon"
+     ],
+     "arrivals_per_day": 150085.7,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 1318.5,
+     "corridor_rank": 69,
+     "on_corridor": false
+    },
+    {
+     "id": "sillim",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "신림역·별빛거리",
+     "hubs": [
+      "sillim"
+     ],
+     "arrivals_per_day": 143828.0,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1287.4,
+     "corridor_rank": 70,
+     "on_corridor": false
+    },
+    {
+     "id": "gunja",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "군자역",
+     "hubs": [
+      "gunja"
+     ],
+     "arrivals_per_day": 162347.2,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1270.0,
+     "corridor_rank": 71,
+     "on_corridor": false
+    },
+    {
+     "id": "jamsilsaenae",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "잠실새내",
+     "hubs": [
+      "jamsilsaenae"
+     ],
+     "arrivals_per_day": 162581.8,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1256.9,
+     "corridor_rank": 72,
+     "on_corridor": false
+    },
+    {
+     "id": "oryudong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "오류동",
+     "hubs": [
+      "oryudong"
+     ],
+     "arrivals_per_day": 97514.7,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1221.3,
+     "corridor_rank": 73,
+     "on_corridor": false
+    },
+    {
+     "id": "anam",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "안암·고려대",
+     "hubs": [
+      "anam"
+     ],
+     "arrivals_per_day": 110938.7,
+     "role": {
+      "kind": "혼합"
+     },
+     "from_gyeonggi_per_day": 1187.7,
+     "corridor_rank": 74,
+     "on_corridor": false
+    },
+    {
+     "id": "jangan",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "장안동",
+     "hubs": [
+      "jangan"
+     ],
+     "arrivals_per_day": 138746.7,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1187.5,
+     "corridor_rank": 75,
+     "on_corridor": false
+    },
+    {
+     "id": "sanggye",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "상계",
+     "hubs": [
+      "sanggye"
+     ],
+     "arrivals_per_day": 129274.7,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1152.7,
+     "corridor_rank": 76,
+     "on_corridor": false
+    },
+    {
+     "id": "cheonho",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "천호",
+     "hubs": [
+      "cheonho"
+     ],
+     "arrivals_per_day": 201676.1,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 1041.5,
+     "corridor_rank": 77,
+     "on_corridor": false
+    },
+    {
+     "id": "sangbong",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "상봉",
+     "hubs": [
+      "sangbong"
+     ],
+     "arrivals_per_day": 132060.6,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 911.7,
+     "corridor_rank": 78,
+     "on_corridor": false
+    },
+    {
+     "id": "suyu",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "수유",
+     "hubs": [
+      "suyu"
+     ],
+     "arrivals_per_day": 96846.4,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 900.6,
+     "corridor_rank": 79,
+     "on_corridor": false
+    },
+    {
+     "id": "nokdu",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "녹두거리",
+     "hubs": [
+      "nokdu"
+     ],
+     "arrivals_per_day": 112783.5,
+     "role": {
+      "kind": "주거형"
+     },
+     "from_gyeonggi_per_day": 800.9,
+     "corridor_rank": 80,
+     "on_corridor": false
+    },
+    {
+     "id": "jamsil-tour",
+     "kind": "hub",
+     "segment": "seoul",
+     "name": "잠실 관광특구",
+     "hubs": [
+      "jamsil-tour"
+     ],
+     "arrivals_per_day": 87608.9,
+     "role": {
+      "kind": "방문형"
+     },
+     "from_gyeonggi_per_day": 514.7,
+     "corridor_rank": 81,
+     "on_corridor": false
+    }
+   ],
+   "hub_nodes": {
+    "anam": "anam",
+    "apgujeong-rodeo": "apgujeong-rodeo",
+    "baekseok": "sgg:41285000",
+    "bamgasi": "sgg:41285000",
+    "bangbang": "bangbang",
+    "banpo": "banpo",
+    "bonseobu": "bonseobu",
+    "bulgwang": "bulgwang",
+    "cheongdam": "cheongdam",
+    "cheongnyangni": "cheongnyangni",
+    "cheonho": "cheonho",
+    "chungmuro": "chungmuro",
+    "cityhall": "cityhall",
+    "daehwa": "sgg:41287000",
+    "daerim": "daerim",
+    "dangsan": "dangsan",
+    "dogok": "dogok",
+    "doksan": "doksan",
+    "dongdaemun": "dongdaemun",
+    "dosan": "dosan",
+    "euljiro": "euljiro",
+    "gangnam": "gangnam",
+    "garak": "garak",
+    "garosugil": "garosugil",
+    "geumchon": "sgg:41480000",
+    "gildong": "gildong",
+    "gongdeok": "gongdeok",
+    "gunja": "gunja",
+    "gurodigital": "gurodigital",
+    "gurojeonhwa": "gurojeonhwa",
+    "guui": "guui",
+    "gwangjang": "gwangjang",
+    "haengsin": "sgg:41281000",
+    "hannam": "hannam",
+    "hapjeong": "hapjeong",
+    "hongdae": "hongdae",
+    "hwagok": "hwagok",
+    "hyehwa": "hyehwa",
+    "ikseon": "ikseon",
+    "itaewon": "itaewon",
+    "jamsil": "jamsil",
+    "jamsil-tour": "jamsil-tour",
+    "jamsilsaenae": "jamsilsaenae",
+    "jangan": "jangan",
+    "kkachisan": "kkachisan",
+    "konkuk": "konkuk",
+    "kyunghee": "kyunghee",
+    "maebong": "maebong",
+    "mangwon": "mangwon",
+    "miasageori": "miasageori",
+    "mokdong-yc": "mokdong-yc",
+    "mullae": "mullae",
+    "munsan": "sgg:41480000",
+    "myeongdong": "myeongdong",
+    "nambu": "nambu",
+    "namdaemun": "namdaemun",
+    "nokdu": "nokdu",
+    "nonhyeon": "nonhyeon",
+    "noryangjin": "noryangjin",
+    "nowon": "nowon",
+    "oryudong": "oryudong",
+    "poi": "poi",
+    "sadang": "sadang",
+    "samcheong": "samcheong",
+    "sangbong": "sangbong",
+    "sanggye": "sanggye",
+    "seochon": "seochon",
+    "seochoyeok": "seochoyeok",
+    "seolleung": "seolleung",
+    "seongsu": "seongsu",
+    "seoulsup": "seoulsup",
+    "sharosugil": "sharosugil",
+    "sillim": "sillim",
+    "sinchon": "sinchon",
+    "songridan": "songridan",
+    "sukmyung": "sukmyung",
+    "sungshin": "sungshin",
+    "suyu": "suyu",
+    "teheran": "teheran",
+    "unjeong": "sgg:41480000",
+    "wangsimni": "wangsimni",
+    "wondang": "sgg:41281000",
+    "yadang": "sgg:41480000",
+    "yangjae": "yangjae",
+    "ydp-gucheong": "ydp-gucheong",
+    "yeonhui": "yeonhui",
+    "yeonnam": "yeonnam",
+    "yeonsinnae": "yeonsinnae",
+    "yeouido": "yeouido",
+    "yongsan": "yongsan"
+   },
+   "pairs": [
+    {
+     "from": "sgg:41285000",
+     "to": "sgg:41287000",
+     "per_day": 110397.1,
+     "visit_per_day": 50488.6,
+     "work_per_day": 11753.0,
+     "home_per_day": 48155.5,
+     "purpose_group_share": {
+      "work": 10.6,
+      "home": 43.6,
+      "visit": 45.7
+     },
+     "peak_hours": [
+      18,
+      17,
+      16
+     ],
+     "avg_min": 31.8
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "sgg:41285000",
+     "per_day": 110158.6,
+     "visit_per_day": 58687.3,
+     "work_per_day": 19116.3,
+     "home_per_day": 32354.9,
+     "purpose_group_share": {
+      "work": 17.4,
+      "home": 29.4,
+      "visit": 53.3
+     },
+     "peak_hours": [
+      8,
+      18,
+      9
+     ],
+     "avg_min": 31.3
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "sgg:41281000",
+     "per_day": 81895.4,
+     "visit_per_day": 38409.2,
+     "work_per_day": 11393.0,
+     "home_per_day": 32093.2,
+     "purpose_group_share": {
+      "work": 13.9,
+      "home": 39.2,
+      "visit": 46.9
+     },
+     "peak_hours": [
+      18,
+      17,
+      16
+     ],
+     "avg_min": 39.3
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "sgg:41285000",
+     "per_day": 81607.2,
+     "visit_per_day": 41470.1,
+     "work_per_day": 14474.6,
+     "home_per_day": 25662.5,
+     "purpose_group_share": {
+      "work": 17.7,
+      "home": 31.4,
+      "visit": 50.8
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 39.5
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "sgg:41480000",
+     "per_day": 74308.2,
+     "visit_per_day": 34494.2,
+     "work_per_day": 12896.5,
+     "home_per_day": 26917.5,
+     "purpose_group_share": {
+      "work": 17.4,
+      "home": 36.2,
+      "visit": 46.4
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 38.7
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "sgg:41287000",
+     "per_day": 74017.2,
+     "visit_per_day": 34503.5,
+     "work_per_day": 11384.0,
+     "home_per_day": 28129.7,
+     "purpose_group_share": {
+      "work": 15.4,
+      "home": 38.0,
+      "visit": 46.6
+     },
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "avg_min": 39.2
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "sgg:41285000",
+     "per_day": 68387.8,
+     "visit_per_day": 35919.9,
+     "work_per_day": 14715.2,
+     "home_per_day": 17752.7,
+     "purpose_group_share": {
+      "work": 21.5,
+      "home": 26.0,
+      "visit": 52.5
+     },
+     "peak_hours": [
+      8,
+      9,
+      18
+     ],
+     "avg_min": 46.7
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "sgg:41480000",
+     "per_day": 67355.8,
+     "visit_per_day": 28998.2,
+     "work_per_day": 9146.3,
+     "home_per_day": 29211.2,
+     "purpose_group_share": {
+      "work": 13.6,
+      "home": 43.4,
+      "visit": 43.1
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 46.9
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "sgg:41281000",
+     "per_day": 47433.6,
+     "visit_per_day": 24021.3,
+     "work_per_day": 7634.2,
+     "home_per_day": 15778.1,
+     "purpose_group_share": {
+      "work": 16.1,
+      "home": 33.3,
+      "visit": 50.6
+     },
+     "peak_hours": [
+      18,
+      17,
+      8
+     ],
+     "avg_min": 52.8
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "sgg:41480000",
+     "per_day": 45489.2,
+     "visit_per_day": 21199.0,
+     "work_per_day": 8460.2,
+     "home_per_day": 15830.1,
+     "purpose_group_share": {
+      "work": 18.6,
+      "home": 34.8,
+      "visit": 46.6
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 53.1
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "sgg:41281000",
+     "per_day": 29218.3,
+     "visit_per_day": 13484.5,
+     "work_per_day": 6104.7,
+     "home_per_day": 9629.1,
+     "purpose_group_share": {
+      "work": 20.9,
+      "home": 33.0,
+      "visit": 46.2
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 50.5
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "sgg:41287000",
+     "per_day": 29035.5,
+     "visit_per_day": 12982.7,
+     "work_per_day": 4401.0,
+     "home_per_day": 11651.8,
+     "purpose_group_share": {
+      "work": 15.2,
+      "home": 40.1,
+      "visit": 44.7
+     },
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "avg_min": 49.6
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "yeonsinnae",
+     "per_day": 18779.3,
+     "visit_per_day": 8337.7,
+     "work_per_day": 2441.5,
+     "home_per_day": 8000.1,
+     "purpose_group_share": {
+      "work": 13.0,
+      "home": 42.6,
+      "visit": 44.4
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 42.1
+    },
+    {
+     "from": "yeonsinnae",
+     "to": "sgg:41281000",
+     "per_day": 18724.7,
+     "visit_per_day": 9564.8,
+     "work_per_day": 2770.8,
+     "home_per_day": 6389.1,
+     "purpose_group_share": {
+      "work": 14.8,
+      "home": 34.1,
+      "visit": 51.1
+     },
+     "peak_hours": [
+      12,
+      17,
+      18
+     ],
+     "avg_min": 41.5
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "bulgwang",
+     "per_day": 13534.1,
+     "visit_per_day": 6087.0,
+     "work_per_day": 2032.3,
+     "home_per_day": 5414.8,
+     "purpose_group_share": {
+      "work": 15.0,
+      "home": 40.0,
+      "visit": 45.0
+     },
+     "peak_hours": [
+      18,
+      17,
+      15
+     ],
+     "avg_min": 43.4
+    },
+    {
+     "from": "bulgwang",
+     "to": "sgg:41281000",
+     "per_day": 13479.0,
+     "visit_per_day": 6757.8,
+     "work_per_day": 1823.5,
+     "home_per_day": 4897.7,
+     "purpose_group_share": {
+      "work": 13.5,
+      "home": 36.3,
+      "visit": 50.1
+     },
+     "peak_hours": [
+      18,
+      17,
+      12
+     ],
+     "avg_min": 42.9
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "euljiro",
+     "per_day": 9578.4,
+     "visit_per_day": 4776.0,
+     "work_per_day": 4595.5,
+     "home_per_day": 206.9,
+     "purpose_group_share": {
+      "work": 48.0,
+      "home": 2.2,
+      "visit": 49.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 77.3
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "mangwon",
+     "per_day": 9532.5,
+     "visit_per_day": 5381.4,
+     "work_per_day": 2312.2,
+     "home_per_day": 1838.9,
+     "purpose_group_share": {
+      "work": 24.3,
+      "home": 19.3,
+      "visit": 56.5
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 55.6
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "bonseobu",
+     "per_day": 9202.1,
+     "visit_per_day": 3140.4,
+     "work_per_day": 1063.1,
+     "home_per_day": 4998.7,
+     "purpose_group_share": {
+      "work": 11.6,
+      "home": 54.3,
+      "visit": 34.1
+     },
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "avg_min": 44.5
+    },
+    {
+     "from": "euljiro",
+     "to": "sgg:41281000",
+     "per_day": 9079.7,
+     "visit_per_day": 2307.7,
+     "work_per_day": 182.5,
+     "home_per_day": 6589.5,
+     "purpose_group_share": {
+      "work": 2.0,
+      "home": 72.6,
+      "visit": 25.4
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 77.0
+    },
+    {
+     "from": "mangwon",
+     "to": "sgg:41281000",
+     "per_day": 9016.2,
+     "visit_per_day": 3574.7,
+     "work_per_day": 748.7,
+     "home_per_day": 4692.8,
+     "purpose_group_share": {
+      "work": 8.3,
+      "home": 52.0,
+      "visit": 39.6
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 51.1
+    },
+    {
+     "from": "bonseobu",
+     "to": "sgg:41281000",
+     "per_day": 8974.2,
+     "visit_per_day": 5181.9,
+     "work_per_day": 1709.2,
+     "home_per_day": 2083.2,
+     "purpose_group_share": {
+      "work": 19.0,
+      "home": 23.2,
+      "visit": 57.7
+     },
+     "peak_hours": [
+      8,
+      12,
+      11
+     ],
+     "avg_min": 43.3
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "sinchon",
+     "per_day": 8937.3,
+     "visit_per_day": 5263.8,
+     "work_per_day": 2818.6,
+     "home_per_day": 854.9,
+     "purpose_group_share": {
+      "work": 31.5,
+      "home": 9.6,
+      "visit": 58.9
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 59.2
+    },
+    {
+     "from": "sinchon",
+     "to": "sgg:41281000",
+     "per_day": 8778.1,
+     "visit_per_day": 3124.5,
+     "work_per_day": 418.5,
+     "home_per_day": 5235.1,
+     "purpose_group_share": {
+      "work": 4.8,
+      "home": 59.6,
+      "visit": 35.6
+     },
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "avg_min": 56.2
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "myeongdong",
+     "per_day": 7351.9,
+     "visit_per_day": 3503.4,
+     "work_per_day": 3687.8,
+     "home_per_day": 160.6,
+     "purpose_group_share": {
+      "work": 50.2,
+      "home": 2.2,
+      "visit": 47.7
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 78.3
+    },
+    {
+     "from": "myeongdong",
+     "to": "sgg:41281000",
+     "per_day": 6778.5,
+     "visit_per_day": 1746.5,
+     "work_per_day": 168.5,
+     "home_per_day": 4863.5,
+     "purpose_group_share": {
+      "work": 2.5,
+      "home": 71.7,
+      "visit": 25.8
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 76.8
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "cityhall",
+     "per_day": 6485.3,
+     "visit_per_day": 3050.5,
+     "work_per_day": 3290.8,
+     "home_per_day": 143.9,
+     "purpose_group_share": {
+      "work": 50.7,
+      "home": 2.2,
+      "visit": 47.0
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 78.3
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "hapjeong",
+     "per_day": 6330.6,
+     "visit_per_day": 3786.7,
+     "work_per_day": 1801.8,
+     "home_per_day": 742.0,
+     "purpose_group_share": {
+      "work": 28.5,
+      "home": 11.7,
+      "visit": 59.8
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 55.9
+    },
+    {
+     "from": "hapjeong",
+     "to": "sgg:41281000",
+     "per_day": 6001.9,
+     "visit_per_day": 2161.3,
+     "work_per_day": 330.8,
+     "home_per_day": 3509.9,
+     "purpose_group_share": {
+      "work": 5.5,
+      "home": 58.5,
+      "visit": 36.0
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 51.6
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "yeonnam",
+     "per_day": 5969.9,
+     "visit_per_day": 3506.1,
+     "work_per_day": 1731.1,
+     "home_per_day": 732.7,
+     "purpose_group_share": {
+      "work": 29.0,
+      "home": 12.3,
+      "visit": 58.7
+     },
+     "peak_hours": [
+      9,
+      10,
+      8
+     ],
+     "avg_min": 56.3
+    },
+    {
+     "from": "cityhall",
+     "to": "sgg:41281000",
+     "per_day": 5934.3,
+     "visit_per_day": 1550.7,
+     "work_per_day": 142.4,
+     "home_per_day": 4241.3,
+     "purpose_group_share": {
+      "work": 2.4,
+      "home": 71.5,
+      "visit": 26.1
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 76.5
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "gwangjang",
+     "per_day": 5889.4,
+     "visit_per_day": 3066.8,
+     "work_per_day": 2693.7,
+     "home_per_day": 128.9,
+     "purpose_group_share": {
+      "work": 45.7,
+      "home": 2.2,
+      "visit": 52.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 75.9
+    },
+    {
+     "from": "gwangjang",
+     "to": "sgg:41281000",
+     "per_day": 5786.9,
+     "visit_per_day": 1388.9,
+     "work_per_day": 113.3,
+     "home_per_day": 4284.6,
+     "purpose_group_share": {
+      "work": 2.0,
+      "home": 74.0,
+      "visit": 24.0
+     },
+     "peak_hours": [
+      19,
+      18,
+      17
+     ],
+     "avg_min": 76.7
+    },
+    {
+     "from": "yeonnam",
+     "to": "sgg:41281000",
+     "per_day": 5693.7,
+     "visit_per_day": 2026.4,
+     "work_per_day": 328.7,
+     "home_per_day": 3338.5,
+     "purpose_group_share": {
+      "work": 5.8,
+      "home": 58.6,
+      "visit": 35.6
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 52.7
+    },
+    {
+     "from": "sgg:41281000",
+     "to": "chungmuro",
+     "per_day": 5243.5,
+     "visit_per_day": 2531.1,
+     "work_per_day": 2596.3,
+     "home_per_day": 116.2,
+     "purpose_group_share": {
+      "work": 49.5,
+      "home": 2.2,
+      "visit": 48.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 79.7
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "mangwon",
+     "per_day": 4956.8,
+     "visit_per_day": 2972.3,
+     "work_per_day": 1155.4,
+     "home_per_day": 829.0,
+     "purpose_group_share": {
+      "work": 23.3,
+      "home": 16.7,
+      "visit": 60.0
+     },
+     "peak_hours": [
+      9,
+      8,
+      17
+     ],
+     "avg_min": 77.2
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "sinchon",
+     "per_day": 4820.5,
+     "visit_per_day": 2993.3,
+     "work_per_day": 1392.4,
+     "home_per_day": 434.7,
+     "purpose_group_share": {
+      "work": 28.9,
+      "home": 9.0,
+      "visit": 62.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 83.0
+    },
+    {
+     "from": "chungmuro",
+     "to": "sgg:41281000",
+     "per_day": 4815.8,
+     "visit_per_day": 1303.8,
+     "work_per_day": 116.5,
+     "home_per_day": 3395.5,
+     "purpose_group_share": {
+      "work": 2.4,
+      "home": 70.5,
+      "visit": 27.1
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 78.6
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "euljiro",
+     "per_day": 4764.6,
+     "visit_per_day": 2779.4,
+     "work_per_day": 1764.4,
+     "home_per_day": 220.8,
+     "purpose_group_share": {
+      "work": 37.0,
+      "home": 4.6,
+      "visit": 58.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 109.7
+    },
+    {
+     "from": "mangwon",
+     "to": "sgg:41480000",
+     "per_day": 4656.1,
+     "visit_per_day": 1780.3,
+     "work_per_day": 378.1,
+     "home_per_day": 2497.7,
+     "purpose_group_share": {
+      "work": 8.1,
+      "home": 53.6,
+      "visit": 38.2
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 69.4
+    },
+    {
+     "from": "euljiro",
+     "to": "sgg:41480000",
+     "per_day": 4519.6,
+     "visit_per_day": 1615.5,
+     "work_per_day": 89.3,
+     "home_per_day": 2814.8,
+     "purpose_group_share": {
+      "work": 2.0,
+      "home": 62.3,
+      "visit": 35.7
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 103.7
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "euljiro",
+     "per_day": 4512.6,
+     "visit_per_day": 2485.3,
+     "work_per_day": 1928.0,
+     "home_per_day": 99.3,
+     "purpose_group_share": {
+      "work": 42.7,
+      "home": 2.2,
+      "visit": 55.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 88.9
+    },
+    {
+     "from": "sinchon",
+     "to": "sgg:41480000",
+     "per_day": 4475.4,
+     "visit_per_day": 1521.5,
+     "work_per_day": 221.3,
+     "home_per_day": 2732.6,
+     "purpose_group_share": {
+      "work": 4.9,
+      "home": 61.1,
+      "visit": 34.0
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 75.0
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "sinchon",
+     "per_day": 4417.0,
+     "visit_per_day": 2501.0,
+     "work_per_day": 1550.1,
+     "home_per_day": 365.9,
+     "purpose_group_share": {
+      "work": 35.1,
+      "home": 8.3,
+      "visit": 56.6
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 70.6
+    },
+    {
+     "from": "euljiro",
+     "to": "sgg:41285000",
+     "per_day": 4193.7,
+     "visit_per_day": 1094.3,
+     "work_per_day": 102.4,
+     "home_per_day": 2997.0,
+     "purpose_group_share": {
+      "work": 2.4,
+      "home": 71.5,
+      "visit": 26.1
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 87.5
+    },
+    {
+     "from": "sinchon",
+     "to": "sgg:41285000",
+     "per_day": 4155.1,
+     "visit_per_day": 1350.0,
+     "work_per_day": 213.3,
+     "home_per_day": 2591.8,
+     "purpose_group_share": {
+      "work": 5.1,
+      "home": 62.4,
+      "visit": 32.5
+     },
+     "peak_hours": [
+      18,
+      19,
+      20
+     ],
+     "avg_min": 64.6
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "myeongdong",
+     "per_day": 4116.7,
+     "visit_per_day": 2338.7,
+     "work_per_day": 1606.2,
+     "home_per_day": 171.7,
+     "purpose_group_share": {
+      "work": 39.0,
+      "home": 4.2,
+      "visit": 56.8
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 102.5
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "mangwon",
+     "per_day": 4045.0,
+     "visit_per_day": 2286.1,
+     "work_per_day": 1111.2,
+     "home_per_day": 647.7,
+     "purpose_group_share": {
+      "work": 27.5,
+      "home": 16.0,
+      "visit": 56.5
+     },
+     "peak_hours": [
+      9,
+      10,
+      8
+     ],
+     "avg_min": 66.8
+    },
+    {
+     "from": "myeongdong",
+     "to": "sgg:41480000",
+     "per_day": 3974.0,
+     "visit_per_day": 1351.2,
+     "work_per_day": 100.0,
+     "home_per_day": 2522.8,
+     "purpose_group_share": {
+      "work": 2.5,
+      "home": 63.5,
+      "visit": 34.0
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 97.7
+    },
+    {
+     "from": "mangwon",
+     "to": "sgg:41285000",
+     "per_day": 3914.7,
+     "visit_per_day": 1403.3,
+     "work_per_day": 329.2,
+     "home_per_day": 2182.2,
+     "purpose_group_share": {
+      "work": 8.4,
+      "home": 55.7,
+      "visit": 35.8
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 60.5
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "cityhall",
+     "per_day": 3725.6,
+     "visit_per_day": 2117.7,
+     "work_per_day": 1454.7,
+     "home_per_day": 153.2,
+     "purpose_group_share": {
+      "work": 39.0,
+      "home": 4.1,
+      "visit": 56.8
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 101.2
+    },
+    {
+     "from": "yeonsinnae",
+     "to": "sgg:41285000",
+     "per_day": 3640.2,
+     "visit_per_day": 1707.2,
+     "work_per_day": 853.4,
+     "home_per_day": 1079.7,
+     "purpose_group_share": {
+      "work": 23.4,
+      "home": 29.7,
+      "visit": 46.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      18
+     ],
+     "avg_min": 57.9
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "hapjeong",
+     "per_day": 3621.9,
+     "visit_per_day": 2285.1,
+     "work_per_day": 981.7,
+     "home_per_day": 355.1,
+     "purpose_group_share": {
+      "work": 27.1,
+      "home": 9.8,
+      "visit": 63.1
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 78.5
+    },
+    {
+     "from": "cityhall",
+     "to": "sgg:41480000",
+     "per_day": 3605.5,
+     "visit_per_day": 1221.2,
+     "work_per_day": 93.1,
+     "home_per_day": 2291.2,
+     "purpose_group_share": {
+      "work": 2.6,
+      "home": 63.5,
+      "visit": 33.9
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 96.2
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "yeonsinnae",
+     "per_day": 3600.9,
+     "visit_per_day": 1391.1,
+     "work_per_day": 568.4,
+     "home_per_day": 1641.4,
+     "purpose_group_share": {
+      "work": 15.8,
+      "home": 45.6,
+      "visit": 38.6
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 61.7
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "myeongdong",
+     "per_day": 3590.7,
+     "visit_per_day": 1858.0,
+     "work_per_day": 1671.7,
+     "home_per_day": 61.0,
+     "purpose_group_share": {
+      "work": 46.6,
+      "home": 1.7,
+      "visit": 51.7
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 87.3
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "yeonnam",
+     "per_day": 3409.3,
+     "visit_per_day": 2152.7,
+     "work_per_day": 921.2,
+     "home_per_day": 335.5,
+     "purpose_group_share": {
+      "work": 27.0,
+      "home": 9.8,
+      "visit": 63.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 80.0
+    },
+    {
+     "from": "hapjeong",
+     "to": "sgg:41480000",
+     "per_day": 3371.5,
+     "visit_per_day": 1187.2,
+     "work_per_day": 190.3,
+     "home_per_day": 1994.0,
+     "purpose_group_share": {
+      "work": 5.6,
+      "home": 59.1,
+      "visit": 35.2
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 70.2
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "euljiro",
+     "per_day": 3364.2,
+     "visit_per_day": 1713.3,
+     "work_per_day": 1607.8,
+     "home_per_day": 43.1,
+     "purpose_group_share": {
+      "work": 47.8,
+      "home": 1.3,
+      "visit": 50.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 89.9
+    },
+    {
+     "from": "myeongdong",
+     "to": "sgg:41285000",
+     "per_day": 3336.4,
+     "visit_per_day": 881.5,
+     "work_per_day": 76.7,
+     "home_per_day": 2378.2,
+     "purpose_group_share": {
+      "work": 2.3,
+      "home": 71.3,
+      "visit": 26.4
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 85.2
+    },
+    {
+     "from": "yeonsinnae",
+     "to": "sgg:41480000",
+     "per_day": 3307.0,
+     "visit_per_day": 1526.4,
+     "work_per_day": 676.7,
+     "home_per_day": 1103.9,
+     "purpose_group_share": {
+      "work": 20.5,
+      "home": 33.4,
+      "visit": 46.2
+     },
+     "peak_hours": [
+      8,
+      7,
+      9
+     ],
+     "avg_min": 73.4
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "yeonsinnae",
+     "per_day": 3228.5,
+     "visit_per_day": 1361.6,
+     "work_per_day": 468.2,
+     "home_per_day": 1398.7,
+     "purpose_group_share": {
+      "work": 14.5,
+      "home": 43.3,
+      "visit": 42.2
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 73.3
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "cityhall",
+     "per_day": 3193.1,
+     "visit_per_day": 1605.4,
+     "work_per_day": 1537.2,
+     "home_per_day": 50.6,
+     "purpose_group_share": {
+      "work": 48.1,
+      "home": 1.6,
+      "visit": 50.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 86.6
+    },
+    {
+     "from": "yeonnam",
+     "to": "sgg:41480000",
+     "per_day": 3153.8,
+     "visit_per_day": 1106.1,
+     "work_per_day": 157.3,
+     "home_per_day": 1890.4,
+     "purpose_group_share": {
+      "work": 5.0,
+      "home": 59.9,
+      "visit": 35.1
+     },
+     "peak_hours": [
+      19,
+      20,
+      18
+     ],
+     "avg_min": 70.5
+    },
+    {
+     "from": "euljiro",
+     "to": "sgg:41287000",
+     "per_day": 3107.6,
+     "visit_per_day": 638.6,
+     "work_per_day": 55.3,
+     "home_per_day": 2413.7,
+     "purpose_group_share": {
+      "work": 1.8,
+      "home": 77.7,
+      "visit": 20.5
+     },
+     "peak_hours": [
+      19,
+      20,
+      18
+     ],
+     "avg_min": 91.8
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "sinchon",
+     "per_day": 3057.8,
+     "visit_per_day": 1724.7,
+     "work_per_day": 1166.8,
+     "home_per_day": 166.3,
+     "purpose_group_share": {
+      "work": 38.2,
+      "home": 5.4,
+      "visit": 56.4
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 75.7
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "hapjeong",
+     "per_day": 2983.1,
+     "visit_per_day": 1751.7,
+     "work_per_day": 931.9,
+     "home_per_day": 299.4,
+     "purpose_group_share": {
+      "work": 31.2,
+      "home": 10.0,
+      "visit": 58.7
+     },
+     "peak_hours": [
+      9,
+      10,
+      8
+     ],
+     "avg_min": 67.3
+    },
+    {
+     "from": "cityhall",
+     "to": "sgg:41285000",
+     "per_day": 2973.7,
+     "visit_per_day": 779.9,
+     "work_per_day": 65.3,
+     "home_per_day": 2128.5,
+     "purpose_group_share": {
+      "work": 2.2,
+      "home": 71.6,
+      "visit": 26.2
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 84.5
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "chungmuro",
+     "per_day": 2887.5,
+     "visit_per_day": 1647.3,
+     "work_per_day": 1092.8,
+     "home_per_day": 147.3,
+     "purpose_group_share": {
+      "work": 37.8,
+      "home": 5.1,
+      "visit": 57.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 109.2
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "myeongdong",
+     "per_day": 2863.5,
+     "visit_per_day": 1338.4,
+     "work_per_day": 1496.2,
+     "home_per_day": 29.0,
+     "purpose_group_share": {
+      "work": 52.2,
+      "home": 1.0,
+      "visit": 46.7
+     },
+     "peak_hours": [
+      8,
+      7,
+      9
+     ],
+     "avg_min": 85.3
+    },
+    {
+     "from": "sinchon",
+     "to": "sgg:41287000",
+     "per_day": 2841.2,
+     "visit_per_day": 737.7,
+     "work_per_day": 88.3,
+     "home_per_day": 2015.1,
+     "purpose_group_share": {
+      "work": 3.1,
+      "home": 70.9,
+      "visit": 26.0
+     },
+     "peak_hours": [
+      19,
+      22,
+      21
+     ],
+     "avg_min": 68.4
+    },
+    {
+     "from": "hapjeong",
+     "to": "sgg:41285000",
+     "per_day": 2818.5,
+     "visit_per_day": 914.3,
+     "work_per_day": 158.5,
+     "home_per_day": 1745.6,
+     "purpose_group_share": {
+      "work": 5.6,
+      "home": 61.9,
+      "visit": 32.4
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 60.6
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "yeonnam",
+     "per_day": 2790.4,
+     "visit_per_day": 1637.4,
+     "work_per_day": 895.9,
+     "home_per_day": 257.0,
+     "purpose_group_share": {
+      "work": 32.1,
+      "home": 9.2,
+      "visit": 58.7
+     },
+     "peak_hours": [
+      9,
+      10,
+      8
+     ],
+     "avg_min": 67.0
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "gwangjang",
+     "per_day": 2711.8,
+     "visit_per_day": 1601.9,
+     "work_per_day": 1053.0,
+     "home_per_day": 56.9,
+     "purpose_group_share": {
+      "work": 38.8,
+      "home": 2.1,
+      "visit": 59.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 89.9
+    },
+    {
+     "from": "chungmuro",
+     "to": "sgg:41480000",
+     "per_day": 2706.8,
+     "visit_per_day": 1025.1,
+     "work_per_day": 61.1,
+     "home_per_day": 1620.6,
+     "purpose_group_share": {
+      "work": 2.3,
+      "home": 59.9,
+      "visit": 37.9
+     },
+     "peak_hours": [
+      19,
+      20,
+      18
+     ],
+     "avg_min": 102.7
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "mangwon",
+     "per_day": 2685.2,
+     "visit_per_day": 1539.3,
+     "work_per_day": 822.7,
+     "home_per_day": 323.2,
+     "purpose_group_share": {
+      "work": 30.6,
+      "home": 12.0,
+      "visit": 57.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 72.1
+    },
+    {
+     "from": "myeongdong",
+     "to": "sgg:41287000",
+     "per_day": 2630.2,
+     "visit_per_day": 564.0,
+     "work_per_day": 41.8,
+     "home_per_day": 2024.4,
+     "purpose_group_share": {
+      "work": 1.6,
+      "home": 77.0,
+      "visit": 21.4
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 86.4
+    },
+    {
+     "from": "yeonnam",
+     "to": "sgg:41285000",
+     "per_day": 2620.7,
+     "visit_per_day": 831.5,
+     "work_per_day": 155.4,
+     "home_per_day": 1633.8,
+     "purpose_group_share": {
+      "work": 5.9,
+      "home": 62.3,
+      "visit": 31.7
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 60.8
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "bulgwang",
+     "per_day": 2598.2,
+     "visit_per_day": 1019.1,
+     "work_per_day": 493.0,
+     "home_per_day": 1086.1,
+     "purpose_group_share": {
+      "work": 19.0,
+      "home": 41.8,
+      "visit": 39.2
+     },
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "avg_min": 61.6
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "gwangjang",
+     "per_day": 2596.5,
+     "visit_per_day": 1561.0,
+     "work_per_day": 929.1,
+     "home_per_day": 106.5,
+     "purpose_group_share": {
+      "work": 35.8,
+      "home": 4.1,
+      "visit": 60.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 110.9
+    },
+    {
+     "from": "gwangjang",
+     "to": "sgg:41285000",
+     "per_day": 2547.9,
+     "visit_per_day": 652.3,
+     "work_per_day": 58.6,
+     "home_per_day": 1837.0,
+     "purpose_group_share": {
+      "work": 2.3,
+      "home": 72.1,
+      "visit": 25.6
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 89.0
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "cityhall",
+     "per_day": 2547.3,
+     "visit_per_day": 1179.4,
+     "work_per_day": 1342.6,
+     "home_per_day": 25.2,
+     "purpose_group_share": {
+      "work": 52.7,
+      "home": 1.0,
+      "visit": 46.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 84.4
+    },
+    {
+     "from": "mangwon",
+     "to": "sgg:41287000",
+     "per_day": 2545.4,
+     "visit_per_day": 745.3,
+     "work_per_day": 136.2,
+     "home_per_day": 1663.9,
+     "purpose_group_share": {
+      "work": 5.3,
+      "home": 65.4,
+      "visit": 29.3
+     },
+     "peak_hours": [
+      19,
+      20,
+      22
+     ],
+     "avg_min": 62.5
+    },
+    {
+     "from": "bulgwang",
+     "to": "sgg:41285000",
+     "per_day": 2542.4,
+     "visit_per_day": 1186.4,
+     "work_per_day": 529.8,
+     "home_per_day": 826.2,
+     "purpose_group_share": {
+      "work": 20.8,
+      "home": 32.5,
+      "visit": 46.7
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 60.6
+    },
+    {
+     "from": "gwangjang",
+     "to": "sgg:41480000",
+     "per_day": 2498.2,
+     "visit_per_day": 814.8,
+     "work_per_day": 43.7,
+     "home_per_day": 1639.7,
+     "purpose_group_share": {
+      "work": 1.8,
+      "home": 65.6,
+      "visit": 32.6
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 106.9
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "chungmuro",
+     "per_day": 2495.5,
+     "visit_per_day": 1323.3,
+     "work_per_day": 1107.1,
+     "home_per_day": 65.1,
+     "purpose_group_share": {
+      "work": 44.4,
+      "home": 2.6,
+      "visit": 53.0
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 89.2
+    },
+    {
+     "from": "bulgwang",
+     "to": "sgg:41480000",
+     "per_day": 2463.9,
+     "visit_per_day": 1125.1,
+     "work_per_day": 486.3,
+     "home_per_day": 852.5,
+     "purpose_group_share": {
+      "work": 19.7,
+      "home": 34.6,
+      "visit": 45.7
+     },
+     "peak_hours": [
+      8,
+      7,
+      14
+     ],
+     "avg_min": 73.2
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "bulgwang",
+     "per_day": 2407.8,
+     "visit_per_day": 966.6,
+     "work_per_day": 427.2,
+     "home_per_day": 1014.0,
+     "purpose_group_share": {
+      "work": 17.7,
+      "home": 42.1,
+      "visit": 40.1
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 74.8
+    },
+    {
+     "from": "cityhall",
+     "to": "sgg:41287000",
+     "per_day": 2318.5,
+     "visit_per_day": 504.5,
+     "work_per_day": 29.0,
+     "home_per_day": 1784.9,
+     "purpose_group_share": {
+      "work": 1.3,
+      "home": 77.0,
+      "visit": 21.8
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 85.4
+    },
+    {
+     "from": "chungmuro",
+     "to": "sgg:41285000",
+     "per_day": 2264.5,
+     "visit_per_day": 607.0,
+     "work_per_day": 65.8,
+     "home_per_day": 1591.8,
+     "purpose_group_share": {
+      "work": 2.9,
+      "home": 70.3,
+      "visit": 26.8
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 87.7
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "gwangjang",
+     "per_day": 2072.2,
+     "visit_per_day": 1116.4,
+     "work_per_day": 934.1,
+     "home_per_day": 21.7,
+     "purpose_group_share": {
+      "work": 45.1,
+      "home": 1.0,
+      "visit": 53.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 91.0
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "hapjeong",
+     "per_day": 2017.3,
+     "visit_per_day": 1195.8,
+     "work_per_day": 688.9,
+     "home_per_day": 132.6,
+     "purpose_group_share": {
+      "work": 34.1,
+      "home": 6.6,
+      "visit": 59.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 72.2
+    },
+    {
+     "from": "gwangjang",
+     "to": "sgg:41287000",
+     "per_day": 1956.2,
+     "visit_per_day": 382.2,
+     "work_per_day": 41.3,
+     "home_per_day": 1532.7,
+     "purpose_group_share": {
+      "work": 2.1,
+      "home": 78.4,
+      "visit": 19.5
+     },
+     "peak_hours": [
+      19,
+      20,
+      18
+     ],
+     "avg_min": 91.9
+    },
+    {
+     "from": "hapjeong",
+     "to": "sgg:41287000",
+     "per_day": 1919.2,
+     "visit_per_day": 498.1,
+     "work_per_day": 67.4,
+     "home_per_day": 1353.8,
+     "purpose_group_share": {
+      "work": 3.5,
+      "home": 70.5,
+      "visit": 26.0
+     },
+     "peak_hours": [
+      19,
+      22,
+      20
+     ],
+     "avg_min": 61.9
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "yeonnam",
+     "per_day": 1896.5,
+     "visit_per_day": 1111.6,
+     "work_per_day": 666.3,
+     "home_per_day": 118.6,
+     "purpose_group_share": {
+      "work": 35.1,
+      "home": 6.3,
+      "visit": 58.6
+     },
+     "peak_hours": [
+      8,
+      10,
+      9
+     ],
+     "avg_min": 72.1
+    },
+    {
+     "from": "bonseobu",
+     "to": "sgg:41285000",
+     "per_day": 1864.2,
+     "visit_per_day": 981.7,
+     "work_per_day": 527.2,
+     "home_per_day": 355.3,
+     "purpose_group_share": {
+      "work": 28.3,
+      "home": 19.1,
+      "visit": 52.7
+     },
+     "peak_hours": [
+      8,
+      7,
+      9
+     ],
+     "avg_min": 60.8
+    },
+    {
+     "from": "sgg:41285000",
+     "to": "bonseobu",
+     "per_day": 1850.4,
+     "visit_per_day": 606.7,
+     "work_per_day": 212.3,
+     "home_per_day": 1031.4,
+     "purpose_group_share": {
+      "work": 11.5,
+      "home": 55.7,
+      "visit": 32.8
+     },
+     "peak_hours": [
+      18,
+      19,
+      17
+     ],
+     "avg_min": 61.8
+    },
+    {
+     "from": "yeonnam",
+     "to": "sgg:41287000",
+     "per_day": 1838.3,
+     "visit_per_day": 466.3,
+     "work_per_day": 63.6,
+     "home_per_day": 1308.4,
+     "purpose_group_share": {
+      "work": 3.5,
+      "home": 71.2,
+      "visit": 25.4
+     },
+     "peak_hours": [
+      19,
+      22,
+      20
+     ],
+     "avg_min": 62.7
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "chungmuro",
+     "per_day": 1833.6,
+     "visit_per_day": 890.6,
+     "work_per_day": 915.7,
+     "home_per_day": 27.3,
+     "purpose_group_share": {
+      "work": 49.9,
+      "home": 1.5,
+      "visit": 48.6
+     },
+     "peak_hours": [
+      8,
+      7,
+      9
+     ],
+     "avg_min": 90.0
+    },
+    {
+     "from": "bonseobu",
+     "to": "sgg:41480000",
+     "per_day": 1762.3,
+     "visit_per_day": 945.0,
+     "work_per_day": 412.4,
+     "home_per_day": 404.8,
+     "purpose_group_share": {
+      "work": 23.4,
+      "home": 23.0,
+      "visit": 53.6
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 71.2
+    },
+    {
+     "from": "sgg:41480000",
+     "to": "bonseobu",
+     "per_day": 1740.6,
+     "visit_per_day": 567.8,
+     "work_per_day": 237.6,
+     "home_per_day": 935.2,
+     "purpose_group_share": {
+      "work": 13.7,
+      "home": 53.7,
+      "visit": 32.6
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 73.6
+    },
+    {
+     "from": "chungmuro",
+     "to": "sgg:41287000",
+     "per_day": 1660.9,
+     "visit_per_day": 357.9,
+     "work_per_day": 30.6,
+     "home_per_day": 1272.4,
+     "purpose_group_share": {
+      "work": 1.8,
+      "home": 76.6,
+      "visit": 21.5
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 92.5
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "yeonsinnae",
+     "per_day": 1568.5,
+     "visit_per_day": 629.7,
+     "work_per_day": 389.1,
+     "home_per_day": 549.7,
+     "purpose_group_share": {
+      "work": 24.8,
+      "home": 35.0,
+      "visit": 40.1
+     },
+     "peak_hours": [
+      8,
+      18,
+      19
+     ],
+     "avg_min": 64.8
+    },
+    {
+     "from": "yeonsinnae",
+     "to": "sgg:41287000",
+     "per_day": 1549.3,
+     "visit_per_day": 606.3,
+     "work_per_day": 278.5,
+     "home_per_day": 664.5,
+     "purpose_group_share": {
+      "work": 18.0,
+      "home": 42.9,
+      "visit": 39.1
+     },
+     "peak_hours": [
+      17,
+      8,
+      19
+     ],
+     "avg_min": 64.6
+    },
+    {
+     "from": "bulgwang",
+     "to": "sgg:41287000",
+     "per_day": 1198.5,
+     "visit_per_day": 467.3,
+     "work_per_day": 206.3,
+     "home_per_day": 524.9,
+     "purpose_group_share": {
+      "work": 17.2,
+      "home": 43.8,
+      "visit": 39.0
+     },
+     "peak_hours": [
+      19,
+      18,
+      8
+     ],
+     "avg_min": 66.9
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "bulgwang",
+     "per_day": 1196.2,
+     "visit_per_day": 461.6,
+     "work_per_day": 336.7,
+     "home_per_day": 397.8,
+     "purpose_group_share": {
+      "work": 28.2,
+      "home": 33.3,
+      "visit": 38.6
+     },
+     "peak_hours": [
+      8,
+      9,
+      18
+     ],
+     "avg_min": 66.9
+    },
+    {
+     "from": "bonseobu",
+     "to": "sgg:41287000",
+     "per_day": 718.4,
+     "visit_per_day": 339.0,
+     "work_per_day": 152.2,
+     "home_per_day": 227.2,
+     "purpose_group_share": {
+      "work": 21.2,
+      "home": 31.6,
+      "visit": 47.2
+     },
+     "peak_hours": [
+      19,
+      8,
+      7
+     ],
+     "avg_min": 65.3
+    },
+    {
+     "from": "sgg:41287000",
+     "to": "bonseobu",
+     "per_day": 703.2,
+     "visit_per_day": 269.4,
+     "work_per_day": 103.8,
+     "home_per_day": 330.0,
+     "purpose_group_share": {
+      "work": 14.8,
+      "home": 46.9,
+      "visit": 38.3
+     },
+     "peak_hours": [
+      17,
+      18,
+      19
+     ],
+     "avg_min": 69.2
+    }
+   ],
+   "synergies": [
+    {
+     "kind": "visit_link",
+     "node": "sgg:41281000",
+     "from": "sgg:41281000",
+     "to": "yeonsinnae",
+     "per_day": 18779.3,
+     "visit_per_day": 8337.7,
+     "work_per_day": 2441.5,
+     "home_per_day": 8000.1,
+     "purpose_group_share": {
+      "work": 13.0,
+      "home": 42.6,
+      "visit": 44.4
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 42.1,
+     "basis": "visit_per_day",
+     "value": 8337.7
+    },
+    {
+     "kind": "commute",
+     "node": "sgg:41281000",
+     "from": "sgg:41281000",
+     "to": "euljiro",
+     "per_day": 9578.4,
+     "visit_per_day": 4776.0,
+     "work_per_day": 4595.5,
+     "home_per_day": 206.9,
+     "purpose_group_share": {
+      "work": 48.0,
+      "home": 2.2,
+      "visit": 49.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 77.3,
+     "basis": "work_per_day",
+     "value": 4595.5
+    },
+    {
+     "kind": "inbound",
+     "node": "sgg:41281000",
+     "from": "yeonsinnae",
+     "to": "sgg:41281000",
+     "per_day": 18724.7,
+     "visit_per_day": 9564.8,
+     "work_per_day": 2770.8,
+     "home_per_day": 6389.1,
+     "purpose_group_share": {
+      "work": 14.8,
+      "home": 34.1,
+      "visit": 51.1
+     },
+     "peak_hours": [
+      12,
+      17,
+      18
+     ],
+     "avg_min": 41.5,
+     "basis": "visit_per_day",
+     "value": 9564.8
+    },
+    {
+     "kind": "local_belt",
+     "node": "sgg:41281000",
+     "from": "sgg:41281000",
+     "to": "sgg:41480000",
+     "per_day": 45489.2,
+     "visit_per_day": 21199.0,
+     "work_per_day": 8460.2,
+     "home_per_day": 15830.1,
+     "purpose_group_share": {
+      "work": 18.6,
+      "home": 34.8,
+      "visit": 46.6
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 53.1,
+     "back_per_day": 47433.6,
+     "per_day_both": 92922.8,
+     "basis": "per_day_both",
+     "value": 92922.8
+    },
+    {
+     "kind": "visit_link",
+     "node": "sgg:41285000",
+     "from": "sgg:41285000",
+     "to": "sinchon",
+     "per_day": 4417.0,
+     "visit_per_day": 2501.0,
+     "work_per_day": 1550.1,
+     "home_per_day": 365.9,
+     "purpose_group_share": {
+      "work": 35.1,
+      "home": 8.3,
+      "visit": 56.6
+     },
+     "peak_hours": [
+      9,
+      8,
+      10
+     ],
+     "avg_min": 70.6,
+     "basis": "visit_per_day",
+     "value": 2501.0
+    },
+    {
+     "kind": "commute",
+     "node": "sgg:41285000",
+     "from": "sgg:41285000",
+     "to": "euljiro",
+     "per_day": 4512.6,
+     "visit_per_day": 2485.3,
+     "work_per_day": 1928.0,
+     "home_per_day": 99.3,
+     "purpose_group_share": {
+      "work": 42.7,
+      "home": 2.2,
+      "visit": 55.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 88.9,
+     "basis": "work_per_day",
+     "value": 1928.0
+    },
+    {
+     "kind": "inbound",
+     "node": "sgg:41285000",
+     "from": "yeonsinnae",
+     "to": "sgg:41285000",
+     "per_day": 3640.2,
+     "visit_per_day": 1707.2,
+     "work_per_day": 853.4,
+     "home_per_day": 1079.7,
+     "purpose_group_share": {
+      "work": 23.4,
+      "home": 29.7,
+      "visit": 46.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      18
+     ],
+     "avg_min": 57.9,
+     "basis": "visit_per_day",
+     "value": 1707.2
+    },
+    {
+     "kind": "local_belt",
+     "node": "sgg:41285000",
+     "from": "sgg:41285000",
+     "to": "sgg:41480000",
+     "per_day": 67355.8,
+     "visit_per_day": 28998.2,
+     "work_per_day": 9146.3,
+     "home_per_day": 29211.2,
+     "purpose_group_share": {
+      "work": 13.6,
+      "home": 43.4,
+      "visit": 43.1
+     },
+     "peak_hours": [
+      18,
+      17,
+      19
+     ],
+     "avg_min": 46.9,
+     "back_per_day": 68387.8,
+     "per_day_both": 135743.6,
+     "basis": "per_day_both",
+     "value": 135743.6
+    },
+    {
+     "kind": "visit_link",
+     "node": "sgg:41287000",
+     "from": "sgg:41287000",
+     "to": "sinchon",
+     "per_day": 3057.8,
+     "visit_per_day": 1724.7,
+     "work_per_day": 1166.8,
+     "home_per_day": 166.3,
+     "purpose_group_share": {
+      "work": 38.2,
+      "home": 5.4,
+      "visit": 56.4
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 75.7,
+     "basis": "visit_per_day",
+     "value": 1724.7
+    },
+    {
+     "kind": "commute",
+     "node": "sgg:41287000",
+     "from": "sgg:41287000",
+     "to": "euljiro",
+     "per_day": 3364.2,
+     "visit_per_day": 1713.3,
+     "work_per_day": 1607.8,
+     "home_per_day": 43.1,
+     "purpose_group_share": {
+      "work": 47.8,
+      "home": 1.3,
+      "visit": 50.9
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 89.9,
+     "basis": "work_per_day",
+     "value": 1607.8
+    },
+    {
+     "kind": "inbound",
+     "node": "sgg:41287000",
+     "from": "mangwon",
+     "to": "sgg:41287000",
+     "per_day": 2545.4,
+     "visit_per_day": 745.3,
+     "work_per_day": 136.2,
+     "home_per_day": 1663.9,
+     "purpose_group_share": {
+      "work": 5.3,
+      "home": 65.4,
+      "visit": 29.3
+     },
+     "peak_hours": [
+      19,
+      20,
+      22
+     ],
+     "avg_min": 62.5,
+     "basis": "visit_per_day",
+     "value": 745.3
+    },
+    {
+     "kind": "local_belt",
+     "node": "sgg:41287000",
+     "from": "sgg:41287000",
+     "to": "sgg:41480000",
+     "per_day": 74308.2,
+     "visit_per_day": 34494.2,
+     "work_per_day": 12896.5,
+     "home_per_day": 26917.5,
+     "purpose_group_share": {
+      "work": 17.4,
+      "home": 36.2,
+      "visit": 46.4
+     },
+     "peak_hours": [
+      8,
+      18,
+      17
+     ],
+     "avg_min": 38.7,
+     "back_per_day": 74017.2,
+     "per_day_both": 148325.4,
+     "basis": "per_day_both",
+     "value": 148325.4
+    },
+    {
+     "kind": "visit_link",
+     "node": "sgg:41480000",
+     "from": "sgg:41480000",
+     "to": "sinchon",
+     "per_day": 4820.5,
+     "visit_per_day": 2993.3,
+     "work_per_day": 1392.4,
+     "home_per_day": 434.7,
+     "purpose_group_share": {
+      "work": 28.9,
+      "home": 9.0,
+      "visit": 62.1
+     },
+     "peak_hours": [
+      8,
+      9,
+      10
+     ],
+     "avg_min": 83.0,
+     "basis": "visit_per_day",
+     "value": 2993.3
+    },
+    {
+     "kind": "commute",
+     "node": "sgg:41480000",
+     "from": "sgg:41480000",
+     "to": "euljiro",
+     "per_day": 4764.6,
+     "visit_per_day": 2779.4,
+     "work_per_day": 1764.4,
+     "home_per_day": 220.8,
+     "purpose_group_share": {
+      "work": 37.0,
+      "home": 4.6,
+      "visit": 58.3
+     },
+     "peak_hours": [
+      8,
+      9,
+      7
+     ],
+     "avg_min": 109.7,
+     "basis": "work_per_day",
+     "value": 1764.4
+    },
+    {
+     "kind": "inbound",
+     "node": "sgg:41480000",
+     "from": "mangwon",
+     "to": "sgg:41480000",
+     "per_day": 4656.1,
+     "visit_per_day": 1780.3,
+     "work_per_day": 378.1,
+     "home_per_day": 2497.7,
+     "purpose_group_share": {
+      "work": 8.1,
+      "home": 53.6,
+      "visit": 38.2
+     },
+     "peak_hours": [
+      19,
+      18,
+      20
+     ],
+     "avg_min": 69.4,
+     "basis": "visit_per_day",
+     "value": 1780.3
+    },
+    {
+     "kind": "local_belt",
+     "node": "sgg:41480000",
+     "from": "sgg:41480000",
+     "to": "sgg:41287000",
+     "per_day": 74017.2,
+     "visit_per_day": 34503.5,
+     "work_per_day": 11384.0,
+     "home_per_day": 28129.7,
+     "purpose_group_share": {
+      "work": 15.4,
+      "home": 38.0,
+      "visit": 46.6
+     },
+     "peak_hours": [
+      18,
+      8,
+      17
+     ],
+     "avg_min": 39.2,
+     "back_per_day": 74308.2,
+     "per_day_both": 148325.4,
+     "basis": "per_day_both",
+     "value": 148325.4
+    }
+   ],
+   "params": {
+    "role_margin_pp": 3.0,
+    "pair_min_per_day": 50.0,
+    "seoul_ends": 12
+   },
+   "built_from": "bronze/corridor/2026-10-27/capital_od_paju-goyang-seoul.json"
+  }
+ }
+}

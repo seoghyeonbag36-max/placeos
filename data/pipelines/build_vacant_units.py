@@ -284,6 +284,18 @@ def run(slugs: list[str]) -> dict[str, int]:
         units = _units_for(slug)
         if not units:
             counts[slug] = 0
+            # 건물 마스터가 서 있는데 0유닛이면 **미실행이 아니라 판정**이다 — 조건(공실 ·
+            # 정밀 분모 · 대장 상업면적 · 면적 범위)을 통과한 건물이 없다. 종전에는 파일을
+            # 안 써서 프로버가 둘을 가르지 못했다(chain_status 「미실행이거나 후보 0」). 빈 목록과
+            # 사유를 남겨 판정을 명시한다(2026-10-26 · 운정). 마스터가 없으면 그대로 쓰지 않는다.
+            if (GOLD / slug / "page_building_master.geojson").exists():
+                (GOLD / slug / "vacant_units.json").write_text(json.dumps({
+                    "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적",
+                    "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    "empty_reason": ("조건을 통과한 공실 건물이 없다 — 공실 · 정밀 분모 · 대장 상업면적 · "
+                                     f"면적 {_MIN_PYEONG}~{_MAX_PYEONG}평. 면적을 가정해 채우지 않는다."),
+                    "units": [],
+                }, ensure_ascii=False, indent=2), encoding="utf-8")
             continue
         out = {
             "source": ("Gold 건물 마스터(공실 건물) + 건축물대장 상업면적"
@@ -320,8 +332,13 @@ def main() -> None:
         print(f"  {slug:18s} {n:3d}유닛")
     empty = [k for k, v in counts.items() if not v]
     if empty:
-        print(f"  0유닛(건물 마스터·대장면적 미적재): {', '.join(empty[:8])}"
-              f"{' 외 %d곳' % (len(empty) - 8) if len(empty) > 8 else ''}")
+        judged = [k for k in empty if (GOLD / k / "page_building_master.geojson").exists()]
+        rest = [k for k in empty if k not in judged]
+        if judged:
+            print(f"  0유닛 판정(조건 통과 건물 없음 — 빈 목록 기록): {', '.join(judged[:8])}")
+        if rest:
+            print(f"  0유닛(건물 마스터 미적재): {', '.join(rest[:8])}"
+                  f"{' 외 %d곳' % (len(rest) - 8) if len(rest) > 8 else ''}")
 
 
 if __name__ == "__main__":

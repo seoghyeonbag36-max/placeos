@@ -116,6 +116,26 @@ def _seoul_benchmark(quarter: str) -> dict | None:
     }
 
 
+def _rent_only(have: set[str], quarter: str) -> dict[str, dict]:
+    """TRDAR 밖 서빙 거점의 R-ONE 임대료만. 거점 → {rent, flpop None, foot None, rent_quarter}."""
+    from data.config.page_hubs import ACTIVE_HUBS
+
+    rows = load_latest(SLUG13, "rone_rent_small.json") or []
+    by: dict[str, dict[str, list[tuple[str, float]]]] = {}
+    for r in rows:
+        d, q, v = r.get("district_id"), str(r.get("quarter")), r.get("value")
+        if d in ACTIVE_HUBS and d not in have and v is not None:
+            # 같은 분기가 통계표 여럿에 걸치면(표본개편 경계) 최신 통계표를 쓴다 — `_seoul_benchmark` 와 같다
+            by.setdefault(d, {}).setdefault(q, []).append((str(r.get("statbl_id")), float(v)))
+    out: dict[str, dict] = {}
+    for d, qs in by.items():
+        q = quarter if quarter in qs else max(qs)
+        v = sorted(qs[q])[-1][1]
+        out[d] = {"rent_per_m2_krw_thousand": round(v, 2), "flpop": None, "foot": None,
+                  "rent_quarter": q}
+    return out
+
+
 def run() -> dict:
     if not _TIMESERIES.exists():
         raise FileNotFoundError(
@@ -139,6 +159,13 @@ def run() -> dict:
         for d, row in latest.iterrows()
         if pd.notna(row.rent_small) and pd.notna(row.flpop)
     }
+
+    # 서울 상권분석(TRDAR)이 서지 않는 서빙 거점(고양·파주, 2026-10-26)은 시계열에 없다 —
+    # 시계열이 TRDAR 매핑 거점만 잇기 때문이다. 임대료는 R-ONE 이라 전국 소스이므로 bronze 에서
+    # **같은 분기**(없으면 그 거점의 최신 분기) 값을 그대로 싣고, 유동(`flpop`·`foot`)은 비운다.
+    # 서울 유동을 흉내 낸 값을 채우지 않는다 — 소비자(`resolve_units`)는 등급이 없으면 그 칸을
+    # 건드리지 않는다.
+    districts.update(_rent_only(set(districts), str(quarter)))
 
     seoul = _seoul_benchmark(str(quarter))
 

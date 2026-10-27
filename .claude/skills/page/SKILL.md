@@ -19,7 +19,7 @@ description: PPPP 트랙 — Page(공실 히트맵 + 층별 매물 목록 + 네�
   (종전 라벨은 `Product/Price → Page`). 정본 `CLAUDE.md` §PPPP Framework.
 - 핵심 기술: **네이버 지도**(`naverMap.ts`, ncpKeyId — 지도 + 거리뷰 파노라마),
   **2D 층 스택**(`BuildingViewer.tsx`), 100m 그리드.
-  ⚠ 3D 트윈(@react-three/fiber)은 **2026-09-05 에 제거됐다** — 다시 끌어오지 말 것(feature-posting.md §0-V).
+  ⚠ 3D 디지털 트윈은 계획상가(집합건물) 전용 표면이다(2026-10-27 결정 · 구현 전) — 실시간 공실 · 건물별 공실 집계 · 외부→내부 최적 동선. 만들 때 `three`·`@react-three/fiber` 를 지연 로드 청크로 들인다(feature-posting.md §0-V).
 - 색상 규칙: 공실 위험도 저→고 = 디자인 토큰 `vacancy` 배열 (#22B07D … #E03E36).
 - ⛔ **이 트랙의 구현 화면(`MapShell` · `#/explore` 레일 「Page」)은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정
   PPPP 화면 보존 규칙). 흐름(5판)의 빈 자리 목록·자리 상세가 같은 질문을 답해도 **대신하지 않는다** — 10-18 에 흐름 안

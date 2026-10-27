@@ -11,7 +11,7 @@ export type RouteName =
   | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
-  | "home" | "me" | "explore" | "compare";
+  | "home" | "me" | "explore" | "compare" | "corridor";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
@@ -26,12 +26,13 @@ const SIMPLE: Record<string, RouteName> = {
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다).
- *  `#/compare/a,b` 는 상권 나란히 보기(2026-10-24) — 상권 id 를 쉼표로 잇는다(`comparePath`). */
+ *  `#/compare/a,b` 는 상권 나란히 보기(2026-10-24) — 상권 id 를 쉼표로 잇는다(`comparePath`).
+ *  `#/corridor/paju-goyang-seoul` 은 상권 흐름(2026-10-26) — 여러 도시를 고객 유입 흐름으로 잇는다. */
 export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
-  const m = /^\/(district|space|compare)\/([^/]+)$/.exec(path);
+  const m = /^\/(district|space|compare|corridor)\/([^/]+)$/.exec(path);
   if (m) {
     try { return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path }; } catch { return null; }
   }
@@ -40,6 +41,9 @@ export function parseRoute(hash: string): Route | null {
 
 /** 상권 나란히 보기 주소 — 상권 id 마다 인코딩하고 쉼표로 잇는다 */
 export const comparePath = (ids: string[]) => `/compare/${ids.map(encodeURIComponent).join(",")}`;
+
+/** 상권 흐름 주소 */
+export const corridorPath = (id: string) => `/corridor/${encodeURIComponent(id)}`;
 
 export const isFlowHash = (hash: string) => hash.startsWith("#/");
 

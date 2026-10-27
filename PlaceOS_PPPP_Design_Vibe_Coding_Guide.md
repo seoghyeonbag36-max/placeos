@@ -37,7 +37,7 @@ PlaceOS는 전통 마케팅 4P(**Place · Product · Price · Promotion**)를 **
 | 트랙 | 전환(기존 4P → 디지털) | 묻는 질문 | PlaceOS 구현 기능 | 핵심 기술 |
 |------|------------------------|-----------|-------------------|-----------|
 | **Platform** | **Place ▶ Platform** | 이 입지·상권은 **어떤 플랫폼인가?** | 상권 AI 추천 엔진 (각 상권을 하나의 플랫폼으로) | GNN, PostGIS |
-| **Page** | **Product ▶ Page** | 이 platform 안에 **어떤 page 가 만들어져야 하는가?** | 공실 히트맵 + 층별 매물 목록 + 네이버 거리뷰 | 네이버 지도 SDK (Three.js·Mapbox 는 제거됨) |
+| **Page** | **Product ▶ Page** | 이 platform 안에 **어떤 page 가 만들어져야 하는가?** | 공실 히트맵 + 층별 매물 목록 + 네이버 거리뷰 | 네이버 지도 SDK (Mapbox 는 제거됨 · Three.js 는 계획상가 3D 디지털 트윈에서 들인다 — 2026-10-27 결정) |
 | **Posting** | **Price ▶ Posting** | **어떤 가격대의 page** 가 이 platform 에 posting 되어야 하는가? | 입점 솔루션 (고급화/가성비/기능중심 비용-효용 분석) | LSTM, Scikit-learn |
 | **Program** | **Promotion ▶ Program** | posting 한 page 를 **어떤 홍보 program** 으로 돌릴 것인가? | 온·오프라인 마케팅 자동화 (LLM 콘텐츠 + 행사 추천) | LangChain, LLM |
 | **Design** | — (통합 레이어) | 네 트랙을 **하나의 앱으로 어떻게 묶는가?** | 디자인 시스템 + 화면 설계 + React 구현·배포 | React, CSS 변수 토큰, Figma |
@@ -676,11 +676,10 @@ export default function VacancyHeatmap({ district }: { district: string }) {
 
 ### 코드 — 3D 건물 트윈 (react-three-fiber)
 
-> ⚠ **이 예시도 낡았다(2026-09-06 확인).** 3D 트윈은 2026-09-05 에 폐기했고
-> `three`/`@react-three/fiber`/`@react-three/drei` 는 의존성에서 **제거됐다**
-> (번들 832KB → 4KB). 절차적 박스는 실측 형상이 아니라 층 상태를 색으로
-> 말하던 것뿐이라, **2D 층 스택 + 네이버 거리뷰**로 대체했다. 아래 코드를
-> 복사하지 말 것 → docs/feature-posting.md §0-V
+> ⚠ **이 예시는 2026-08 의 옛 컴포넌트다** — 층 수만큼 쌓은 박스에 상태 색을 칠하는 코드라,
+> 일반 건물 상세는 지금 **2D 층 스택 + 네이버 거리뷰**가 맡는다. 계획상가(집합건물)는 2026-10-27 결정으로
+> **3D 디지털 트윈**을 다시 만들지만(실시간 공실 · 건물별 공실 집계 · 외부→내부 최적 동선), 형상·공실을
+> 실측·실시간 자료로 그려야 하므로 아래 코드를 그대로 복사하지 말 것 → docs/feature-posting.md §0-V
 
 ```tsx
 // apps/frontend/src/components/BuildingTwin.tsx

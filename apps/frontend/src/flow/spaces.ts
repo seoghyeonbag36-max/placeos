@@ -43,7 +43,7 @@ function fromUnit(u: FloorVacancyUnit, calc: Set<string>): SpaceItem {
 }
 
 /** 한 상권의 빈 자리 전부. 세 응답 중 무엇이 없어도(404) 있는 만큼으로 선다 */
-export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[]; hasRent: boolean; rentNote: string | null; quarter: string | null }> & { retry: () => void } {
+export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[]; hasRent: boolean; noCalcReason: string | null; rentNote: string | null; quarter: string | null }> & { retry: () => void } {
   const data = useFlowData();
   const rent = useLoad(districtId ? `rent:${districtId}` : null, () => data.rent(districtId!));
   const floors = useLoad(districtId ? `fu:${districtId}` : null, () => data.floorUnits(districtId!));
@@ -54,7 +54,11 @@ export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[];
   // 404 는 「그 산출물이 없다」 — 있는 만큼으로 선다. 그 밖의 실패만 화면을 세운다
   const hard = loads.find((l) => l.status === "error" && httpStatus(l.error) !== 404);
   if (hard && hard.status === "error") return { status: "error", error: hard.error, retry };
-  const calc = new Set(posts.status === "ready" ? posts.data.map((p) => p.id.replace(/^vu-/, "")) : []);
+  // 회수기간 유닛이 있어도 본전 시점을 답하지 않는 상권이 있다(매출 재료가 없는 고양·파주 · 2026-10-27) —
+  // 그 유닛은 계산 가능으로 세지 않고, 사유를 자리 상세까지 올린다
+  const postings = posts.status === "ready" ? posts.data : [];
+  const calc = new Set(postings.filter((p) => !p.payback_unavailable_reason).map((p) => p.id.replace(/^vu-/, "")));
+  const noCalcReason = postings.find((p) => p.payback_unavailable_reason)?.payback_unavailable_reason ?? null;
   const units = floors.status === "ready" ? floors.data.units : [];
   const byId = new Map(units.map((u) => [u.id, u]));
   const items = rent.status === "ready"
@@ -62,7 +66,7 @@ export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[];
     : units.map((u) => fromUnit(u, calc));
   return {
     status: "ready", retry, data: {
-      items, hasRent: rent.status === "ready",
+      items, hasRent: rent.status === "ready", noCalcReason,
       rentNote: rent.status === "ready" ? rent.data.note : null,
       quarter: rent.status === "ready" ? rent.data.quarter ?? null : null,
     },

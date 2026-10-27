@@ -5,7 +5,7 @@
  *   지도 미리보기 · 「상권 나란히 보기」(R1-c). 탭 「지도」는 그대로 `#/explore` 다(PPPP 화면 보존 규칙).
  */
 import { useEffect, useId, useState } from "react";
-import { getAuthProviders, getMe, logoutSession, type AuthMe, type AuthProviders, type SavedResult } from "@/lib/api";
+import { CORRIDOR_ID, getAuthProviders, getMe, logoutSession, type AuthMe, type AuthProviders, type SavedResult } from "@/lib/api";
 import GoogleSignIn from "@/components/GoogleSignIn";
 import PrivacyNote from "@/components/PrivacyNote";
 import SocialSignIn from "@/components/SocialSignIn";
@@ -15,7 +15,7 @@ import { clearToken } from "@/lib/session";
 import { LOGIN_BENEFITS, useFlow, type LoginReason } from "../context";
 import { compareIds } from "@/lib/districtCompare";
 import { ro } from "../format";
-import { comparePath, explorePath, go, type ExploreTrack } from "../route";
+import { comparePath, corridorPath, explorePath, go, type ExploreTrack } from "../route";
 import { useSaved } from "../context";
 import { MiniMap, type MiniMapPin } from "../MiniMap";
 import { clearFlow, emptyFlow, setDistrict, setGoal, type SpaceAt } from "../state";
@@ -172,7 +172,11 @@ export function Home() {
           { value: "pivot", title: "지금 가게 업종을 바꿔요", desc: "자리는 그대로, 무엇으로 바꿀지 고민이에요" },
           { value: "move", title: "하던 장사를 다른 동네로 옮겨요", desc: "같은 업종으로 옮길 상권을 찾고 있어요" },
         ]} onChoose={(g) => { update((s) => setGoal(s, g)); go("/industry"); }} />
-        {!token && <div className="fl-actions"><TextButton onClick={openLogin}>로그인</TextButton></div>}
+        <div className="fl-actions">
+          {/* 상권 흐름(2026-10-26) — 업종을 고르기 전에도 볼 수 있다 */}
+          <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
+          {!token && <TextButton onClick={openLogin}>로그인</TextButton>}
+        </div>
       </FlowScreen>
     );
   }
@@ -221,6 +225,9 @@ export function Home() {
       {state.spaceId && mapDistrict && (
         <MapPreview districtId={mapDistrict} spaceId={state.spaceId} spaceLabel={state.spaceLabel} at={state.spaceAt} results={token ? results : null} />
       )}
+      <div className="fl-actions">
+        <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
+      </div>
       <h2 className="fl-h2">저장한 것</h2>
       {token ? (results ? <SavedList items={results} limit={5} /> : <p className="fl-note">불러오는 중…</p>)
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}

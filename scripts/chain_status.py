@@ -12,7 +12,8 @@
     python scripts/chain_status.py hwajeong --next    # 다음 명령 한 줄만
     python scripts/chain_status.py --all --next --include-paused   # 보류 도시까지
 
-⚠ 서빙 보류 도시(`measured_pages.SERVED_CITIES` 밖)의 거점은 **다음 한 수를 내지 않는다.**
+⚠ 서빙 보류 도시(`measured_pages.SERVED_CITIES` 밖)의 거점과 추후 확장 과제 거점
+  (`page_hubs.PageHub.deferred` — 계획상가·단일시설, 2026-10-26)은 **다음 한 수를 내지 않는다.**
   단계와 근거는 그대로 보이고 명령만 가려진다 — `--include-paused` 로 꺼낸다.
 """
 from __future__ import annotations
@@ -295,12 +296,19 @@ def stages(slug: str) -> list[dict]:
         prev = {s["stage"]: s["status"] for s in out}
         ready = prev.get("Page마스터") in (OK, PARTIAL) and prev.get("앵커") != BLOCKED
         on = _served_cities()
+        deferred = getattr(_hubs().get(slug), "deferred", "")
         if on is not None and declared not in on:
             # 산출물이 없어서가 아니라 **안 올리기로 정해서** 빠진다. 여기에 수집·디버깅
             # 명령을 주면 안 된다 — 다음 한 수로 뽑히지 않도록 next 를 비운다.
             add("서빙등재", PAUSED,
                 f"'{declared}' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다"
                 f" (measured_pages.SERVED_CITIES={{{', '.join(sorted(on))}}})"
+                + ("" if ready else " · Gold 도 아직 안 섰다"))
+        elif deferred:
+            # 도시는 서빙하지만 이 거점은 **추후 확장 과제**로 표기됐다(2026-10-26 ·
+            # page_hubs.PageHub.deferred). 도시 보류와 같은 이유로 명령을 가린다.
+            add("서빙등재", PAUSED,
+                f"추후 확장 과제({deferred}) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)"
                 + ("" if ready else " · Gold 도 아직 안 섰다"))
         else:
             add("서빙등재", TODO if ready else BLOCKED,
@@ -359,7 +367,9 @@ def main() -> int:
         if r["blocked"]:
             head += "  막힘: " + ", ".join(r["blocked"])
         if r["serving_paused"]:
-            head += "  보류: 서빙 대상 도시 아님" + ("" if incl else " (다음 한 수 없음)")
+            kind = getattr(_hubs().get(r["slug"]), "deferred", "")
+            why = f"추후 확장 과제({kind})" if kind else "서빙 대상 도시 아님"
+            head += f"  보류: {why}" + ("" if incl else " (다음 한 수 없음)")
         print(head)
         for s in r["stages"]:
             print(f"  {MARK[s['status']]} {s['stage']:10s} {s['evidence']}")
