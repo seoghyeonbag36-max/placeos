@@ -375,7 +375,7 @@ def _aggregate(rows: list[dict], extra: int = 0, fresh: int | None = None,
         hi = min(len(floors), lo + spare)
         return base | {"active": hi, "capacity": len(floors),
                        "active_floors_lo": lo, "active_floors_hi": hi,
-                       # 층 **번호** 자체 — 3D 트윈이 '몇 층이 비었나'를 실배치로 그리는 근거.
+                       # 층 **번호** 자체 — 건물 상세 층 스택이 '몇 층이 비었나'를 실배치로 그리는 근거.
                        # 개수(lo/hi)만 남기면 프론트는 아래부터 채우는 근사밖에 못 한다.
                        "com_floors": sorted(floors),   # 분모: 상업 용도 층
                        "occ_floors": occ_floors,       # 분자 하한: 점포·인허가·학원으로 확인된 층
