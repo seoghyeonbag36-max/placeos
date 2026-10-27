@@ -36,6 +36,7 @@
 
     --batch seoul2   서울 미커버 자치구 12거점 (SEOUL_BATCH2_HUBS)
     --batch gg2      경기 2차 13거점
+    --batch gg3      경기 3차 50거점(2026-10-28 · 59곳까지)
     --hubs a,b,c     직접 지정
     --skip-ledger    대장을 건너뛴다(쿼터 0 · 점포·폴리곤만)
 """
@@ -153,6 +154,8 @@ def hubs_of(batch: str) -> list[str]:
         return [k for k in ph.GYEONGGI_HUBS
                 if k not in ("hwajeong", "geumchon", "ilsan", "westerndom",
                              "tanhyeon", "unjeong", "yadang")]
+    if batch == "gg3":
+        return list(ph.GYEONGGI_BATCH3_HUBS)     # 경기 3차 50거점(2026-10-28 · 59곳까지)
     raise SystemExit(f"모르는 배치: {batch}")
 
 
@@ -237,6 +240,9 @@ def do_hub(slug: str, skip_ledger: bool) -> str:
         run(["data.pipelines.recalc_floor_ouln", slug], "분모 재계산")
         run(["data.pipelines.build_page_master", slug], "Page 마스터")
         run(["data.pipelines.build_vacant_units", slug], "공실유닛")
+        # 층 단위 빈 자리 — 창업자 흐름 R3 가 읽는다. 2026-10-27 고양·파주 9거점이 이 단계 없이 서빙돼
+        # R3 가 비었다(가드 tests/test_floor_vacancies.test_every_served_hub_has_floor_inventory).
+        run(["data.pipelines.build_vacant_floor_units", slug], "층 단위 빈 자리")
         done = stage_done(slug)
 
     if refreshed or done in ("master",):
