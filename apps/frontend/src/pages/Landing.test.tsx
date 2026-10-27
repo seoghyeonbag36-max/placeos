@@ -14,7 +14,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import Landing from "@/pages/Landing";
-import { LANDING_HUBS } from "@/lib/landingFacts";
+import { LANDING_HUBS, LANDING_REGION } from "@/lib/landingFacts";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 
 const text = () => document.body.textContent ?? "";
@@ -60,7 +60,7 @@ describe("랜딩 — 말하지 않는 것", () => {
     const digits = (text().match(/\d[\d,.]*/g) ?? []).map((d) => d.replace(/[.,]$/, ""));
     const allowed = new Set([String(LANDING_HUBS), "1", "2", "3", "4"]);
     expect(digits.filter((d) => !allowed.has(d))).toEqual([]);
-    expect(text()).toContain(`서울 ${LANDING_HUBS}개 상권`);
+    expect(text()).toContain(`${LANDING_REGION} ${LANDING_HUBS}개 상권`);
   });
 
   it("퍼센트·정확도·적중률을 쓰지 않는다(LSTM 두 축은 확인 대기, 업종 추천은 기준선 대비 +3.4%p 일 뿐이다)", () => {

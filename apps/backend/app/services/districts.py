@@ -204,6 +204,35 @@ def basis_note(basis: str) -> str:
     return COST_BASIS_NOTE if basis == COST_BASIS else COST_BASIS_LEGACY_NOTE
 
 
+def page_city(d: dict) -> cities.City:
+    """서빙 상권 → 도시. 실측 거점은 `city` 를 직접 갖고(gu 가 자치구가 아니라 도시명이라 of_gu 로는
+    못 찾는다), 시드 54는 gu 로 판정한다."""
+    return cities.by_id(d["city"]) if d.get("city") else cities.of_gu(d.get("gu"))
+
+
+PAYBACK_NO_REVENUE = ("{city} 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. "
+                      "원가·인건비가 빠진 계수로는 회수기간이 실제보다 짧게 나와요.")
+
+
+def payback_unavailable_reason(district_id: str) -> str | None:
+    """이 거점에서 본전 시점(회수기간)을 답하지 않는 사유. 답할 수 있으면 None.
+
+    2026-10-27: 고양·파주를 서빙하자 9거점 전부가 `rent+fitout` 계수 폴백을 탔다 — 매출 재료(서울
+    상권분석 추정매출)가 그 도시에 서지 않아서다. 결과는 회수 1개월 안팎 · 마진 80%대였고(금촌 가성비
+    0.9개월), 창업자 흐름의 머리 문장 「… 하면 N개월이면 본전이에요」가 그 값을 그대로 말했다.
+    `COST_BASIS_LEGACY_NOTE` 가 스스로 「회수기간이 과소하게 나온다」고 적는 값이다.
+    **도시 단위로 재료가 없을 때만** 막는다 — 서울 안에서 표본이 모자라 폴백한 유닛(가락·불광)은
+    여기 걸리지 않는다. 재료는 있는데 표본이 모자란 것이라 풀 방법이 다르다.
+    """
+    d = PAGES_BY_ID.get(district_id)
+    if not d:
+        return None
+    city = page_city(d)
+    if city.has_trdar or posting_revenue.available(district_id):
+        return None
+    return PAYBACK_NO_REVENUE.format(city=city.short)
+
+
 def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     """공실 유닛의 3-Tier 비용-효용 시나리오(월 단위, 만원/백만원).
 
@@ -219,7 +248,10 @@ def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     비교에 쓰는 값은 `_raw` 에 원값으로 함께 싣는다 — 반올림이 추천을 뒤집던 것을
     막는다(경위는 `recommend_tier` docstring).
     """
-    f_k = _FOOT_K[unit["foot"]]
+    # 유동 등급이 없는 유닛(유동 소스가 서지 않는 도시 — 고양·파주, 2026-10-26)은 **보정하지
+    # 않는다**(계수 1.0). 등급을 지어내지 않고, `resolve_units` 가 `inputs_source.foot="none"`
+    # 으로 그 사실을 밝힌다. 종전에는 빈 등급이 KeyError 로 죽었다(첨자로 읽었다).
+    f_k = _FOOT_K.get(unit.get("foot") or "", 1.0)
     base = unit["area"] * f_k
     # `prem`(권리금)은 공개 통계가 없어 **입력 계약**으로 받는다(2026-08-24 결정).
     # 안 주면 0 전제로 돈다 — 실측 감도는 추천 5.2% 뒤집힘 · roi 중앙 1.6개월이고
@@ -311,8 +343,7 @@ def _predicted(district_id: str, current_rate: float) -> dict:
 
 
 def _summary(d: dict) -> dict:
-    # 실측 거점은 `city` 를 직접 갖는다(gu 가 자치구가 아니라 도시명이라 of_gu 로는 못 찾는다).
-    _city = cities.by_id(d["city"]) if d.get("city") else cities.of_gu(d.get("gu"))
+    _city = page_city(d)
     # 감성은 **아무 거점에서도 재지 않았다**(2026-09-05). 종전에는 시드에 손으로 적은
     # `z["s"]`·`z["r"]` 을 가중평균해 "거점 감성"으로 내려보냈는데, 그 입력에 근거가
     # 없었다(54거점 × 6구역 = 324개 전부 사람이 쓴 값). 구역을 행정동 실측으로 갈면서
@@ -478,7 +509,11 @@ def get_postings(district_id: str) -> list[dict] | None:
     units = resolved_units(district_id)
     if units is None:
         return None
-    return [{**u, "scenarios": tier_scenarios(u, district_id)} for u in units]
+    # 시나리오는 그대로 싣는다(`basis` 가 계수 폴백임을 밝힌다). 사유가 있으면 화면은 회수기간을
+    # 머리 값으로 쓰지 않는다 — 자리(건축물대장 실측)는 남기고 답만 거둔다.
+    reason = payback_unavailable_reason(district_id)
+    return [{**u, "scenarios": tier_scenarios(u, district_id), "payback_unavailable_reason": reason}
+            for u in units]
 
 
 def get_marketing(district_id: str) -> dict | None:

@@ -980,7 +980,9 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
           use_adong: bool = False, use_jipgyegu: bool = False,
           resume: bool = True, ckpt_every: int = 25,
           label_level: str = "group", class_weight: bool = False,
-          select_by: str = "top1", dump_preds: str | None = None) -> dict:
+          select_by: str = "top1", dump_preds: str | None = None,
+          cities: set[str] | None = None, serve_cities: set[str] | None = None,
+          tag: str = "") -> dict:
     torch.manual_seed(SEED)
     rng = np.random.default_rng(SEED)
 
@@ -1000,6 +1002,21 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
 
     nodes, edges = load_graph()
     nodes = nodes.reset_index(drop=True)
+    # 도시 범위(2026-10-26) — 점포 그래프에 고양·파주 노드가 들어왔다. 수요 블록(TRDAR)은
+    # 서울에만 있어서, 범위를 안 정하면 경기 노드가 **0 으로 채워진 수요 열**을 단 채 서울
+    # 서빙본에 섞인다(조용히 틀리는 종류). 그래서 수요 블록을 켠 런의 기본 범위는 서울이고,
+    # 경기를 넣으려면 `--no-demand`(공통 피처판)와 `--cities` 를 함께 준다.
+    city_of = _hub_cities()
+    if cities is None and use_demand:
+        cities = {"seoul"}
+    if cities is not None:
+        keep = nodes["district_id"].astype(str).map(lambda d: city_of.get(d, "seoul")).isin(cities)
+        if not bool(keep.all()):
+            print(f"[gnn] 도시 범위 {sorted(cities)} — 노드 {int((~keep).sum()):,}개 제외 "
+                  f"(남는 노드 {int(keep.sum()):,})")
+        nodes = nodes[keep].reset_index(drop=True)
+    if serve_cities and not tag:
+        raise SystemExit("[gnn] --serve-cities 는 --tag 와 함께 준다 — 서울 서빙본을 덮지 않게")
     # 라벨 어휘가 모집단을 좁히는 경우(group_mapped)는 **피처·엣지보다 먼저** 걸러야
     # 한다 — 행 순서가 곧 노드 인덱스라 뒤에서 걸면 엣지가 어긋난다.
     nodes, edges, unmapped_dropped = _label_population(nodes, edges, label_level)
@@ -1045,7 +1062,9 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
            "label_level": label_level, "class_weight": int(class_weight),
            "hidden": hidden, "epochs": epochs, "patience": patience,
            # 기준이 다르면 best_state 의 의미가 달라진다 — 이어붙이면 안 된다.
-           "select_by": select_by}
+           "select_by": select_by,
+           # 도시 범위가 다르면 노드 집합이 다르다(2026-10-26) — in_dim 이 같아도 남의 런이다.
+           "cities": sorted(cities) if cities is not None else None}
     start_ep, best_val, best_state, bad = 1, -1.0, None, 0
     if resume and _RESUME.exists():
         # 저장 도중 죽으면 파일이 깨진다 — 무인 재시도 루프에서 그게 매 회 예외가 되면
@@ -1208,41 +1227,151 @@ def train(edge_types: set[str] | None = None, epochs: int = 400,
                     "edge_types": ",".join(sorted(edge_types)) if edge_types else "all"})
     print("[gnn·metrics]", metrics)
 
+    metrics["cities"] = sorted(cities) if cities is not None else None
     if save:
         _save_artifacts(model, nodes, classes, feat_names, logits, metrics,
-                        hidden=hidden)
+                        hidden=hidden, tag=tag, serve_cities=serve_cities, city_of=city_of)
     _log_mlflow(metrics, {"hidden": hidden, "lr": lr, "epochs": epochs,
                           "weight_decay": weight_decay})
     return metrics
 
 
+def _district_means(nodes: pd.DataFrame, classes: list[str],
+                    prob: torch.Tensor) -> dict[str, dict[str, float]]:
+    """거점 → {업종: 노드 Top-3 확률 합 / 노드 수}. `business_fit._all_means` 와 같은 정의다
+    (Top-3 밖의 확률은 0 으로 센다) — 정의가 갈리면 같은 모델의 순위가 두 값이 된다."""
+    k = min(TOP_K, len(classes))
+    top = prob.topk(k, dim=1)
+    agg: dict[str, dict[str, float]] = {}
+    cnt: dict[str, int] = {}
+    for i, did in enumerate(nodes["district_id"].astype(str)):
+        a = agg.setdefault(did, {})
+        cnt[did] = cnt.get(did, 0) + 1
+        for c, p in zip(top.indices[i], top.values[i]):
+            lab = classes[int(c)]
+            a[lab] = a.get(lab, 0.0) + float(p)
+    return {d: {lab: round(v / cnt[d], 6) for lab, v in a.items()} for d, a in agg.items()}
+
+
+def predict_only(tag: str, label_level: str = "group_mapped", cities: set[str] | None = None,
+                 use_building: bool = True) -> None:
+    """저장된 태그 체크포인트로 **추론만** 해 `district_means` 를 채운다(학습하지 않는다).
+
+    학습 런이 이 함수가 생기기 전 코드로 돌아 평균표 없이 저장됐을 때 쓴다. 피처 순서는
+    체크포인트의 `feature_names` 와 **같아야** 한다 — 다르면 멈춘다(조용히 다른 입력을 먹이지 않게).
+    """
+    artifact = _ARTIFACT.with_name(f"industry_gnn_{tag}.pt")
+    ck = torch.load(artifact, map_location="cpu", weights_only=False)
+    nodes, edges = load_graph()
+    nodes = nodes.reset_index(drop=True)
+    city_of = _hub_cities()
+    if cities is not None:
+        keep = nodes["district_id"].astype(str).map(lambda d: city_of.get(d, "seoul")).isin(cities)
+        nodes = nodes[keep].reset_index(drop=True)
+    nodes, edges, _ = _label_population(nodes, edges, label_level)
+    x_np, feat_names = _features(nodes, edges, use_demand=False, use_building=use_building)
+    if list(feat_names) != list(ck["feature_names"]):
+        raise SystemExit(f"[gnn] 피처 순서가 체크포인트와 다르다 ({len(feat_names)} vs "
+                         f"{len(ck['feature_names'])}) — 그래프가 바뀌었으면 다시 학습할 것")
+    model = IndustryGNN(ck["in_dim"], len(ck["classes"]), hidden=ck["hidden"])
+    model.load_state_dict(ck["state_dict"])
+    model.eval()
+    with torch.no_grad():
+        logits = model(torch.tensor(x_np), _edge_index(nodes, edges, None))
+    means = _district_means(nodes, ck["classes"], torch.exp(logits))
+    doc = json.loads(_RECOMMEND_JSON.read_text(encoding="utf-8"))
+    name = f"{PRIMARY_MODEL}-{tag}"
+    doc.setdefault("models", {}).setdefault(name, {})["district_means"] = means
+    _RECOMMEND_JSON.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    print(f"[gnn] {name} district_means — 거점 {len(means)}")
+
+
+def _hub_cities() -> dict[str, str]:
+    """거점 slug → 도시. 점포 노드의 `district_id` 가 거점 slug 다."""
+    try:
+        from data.config.page_hubs import ALL_HUBS
+    except ImportError:  # pragma: no cover — 저장소 루트 밖에서 부를 때
+        sys.path.insert(0, str(_REPO))
+        from data.config.page_hubs import ALL_HUBS
+    return {slug: getattr(h, "city", "seoul") for slug, h in ALL_HUBS.items()}
+
+
+PRIMARY_MODEL = "industry-gnn"
+
+
 def _save_artifacts(model: IndustryGNN, nodes: pd.DataFrame, classes: list[str],
                     feat_names: list[str], logits: torch.Tensor,
-                    metrics: dict, hidden: int) -> None:
-    _ARTIFACT.parent.mkdir(parents=True, exist_ok=True)
+                    metrics: dict, hidden: int, tag: str = "",
+                    serve_cities: set[str] | None = None,
+                    city_of: dict[str, str] | None = None) -> None:
+    """체크포인트와 서빙 json. **모델끼리 서로의 거점을 덮지 않는다**(2026-10-26).
+
+    서빙 json 하나에 두 모델이 산다 — 서울은 수요 블록을 쓴 기본 모델(`industry-gnn`),
+    고양·파주는 공통 피처판(`industry-gnn-common`). `district_models` 가 거점마다 어느
+    모델의 추천인지 밝히고, 기본 모델의 지표는 종전처럼 최상위 `metrics` 에, 태그 모델의
+    지표는 `models[이름].metrics` 에 둔다(kpi_baseline 이 따로 판정한다).
+    """
+    name = f"{PRIMARY_MODEL}-{tag}" if tag else PRIMARY_MODEL
+    artifact = _ARTIFACT.with_name(f"industry_gnn_{tag}.pt") if tag else _ARTIFACT
+    artifact.parent.mkdir(parents=True, exist_ok=True)
     torch.save({"state_dict": model.state_dict(), "classes": classes,
                 "feature_names": feat_names, "hidden": hidden,
-                "in_dim": len(feat_names), "metrics": metrics}, _ARTIFACT)
-    print(f"[gnn] 체크포인트: {_ARTIFACT}")
+                "in_dim": len(feat_names), "metrics": metrics}, artifact)
+    print(f"[gnn] 체크포인트: {artifact}")
 
     # 서빙용 배치 추천 — 배포 이미지에는 torch 를 싣지 않으므로 LSTM forecast json 과
     # 같은 방식으로 미리 계산해 둔다. 키는 공실 유닛이 아니라 그래프 노드(=현존 점포 자리)
     # 이므로, 백엔드는 조회 좌표에서 가장 가까운 노드의 추천을 쓴다.
     prob = torch.exp(logits)
     topk = prob.topk(min(TOP_K, len(classes)), dim=1)
+    city_of = city_of or {}
     out: dict[str, dict] = {}
     for i, (nid, did) in enumerate(zip(nodes["node_id"], nodes["district_id"])):
+        if serve_cities and city_of.get(str(did), "seoul") not in serve_cities:
+            continue                    # 태그 모델은 맡은 도시의 거점만 싣는다
         out.setdefault(str(did), {})[str(nid)] = {
             "lat": float(pd.to_numeric(nodes["lat"].iloc[i], errors="coerce") or 0.0),
             "lon": float(pd.to_numeric(nodes["lon"].iloc[i], errors="coerce") or 0.0),
             "top": [{"industry": classes[int(c)], "score": round(float(p), 4)}
                     for c, p in zip(topk.indices[i], topk.values[i])],
         }
+
+    means = _district_means(nodes, classes, prob)
+
+    prev = {}
+    if _RECOMMEND_JSON.exists():
+        prev = json.loads(_RECOMMEND_JSON.read_text(encoding="utf-8"))
+    districts = dict(prev.get("districts") or {})
+    owner = dict(prev.get("district_models") or {})
+    models = dict(prev.get("models") or {})
+    # 이 모델이 전에 맡았던 거점은 걷어 내고 새로 싣는다. 다른 모델 거점은 그대로 둔다.
+    for d in [d for d, m in owner.items() if m == name]:
+        districts.pop(d, None)
+        owner.pop(d, None)
+    if not tag:
+        # 기본 모델 — 소유 표가 없던 옛 거점은 전부 기본 모델 것이었다
+        for d in [d for d in districts if d not in owner]:
+            districts.pop(d, None)
+    for d, rows in out.items():
+        districts[d] = rows
+        owner[d] = name
+    doc = {
+        "model": PRIMARY_MODEL,
+        "metrics": metrics if not tag else prev.get("metrics", {}),
+        "districts": districts,
+        "district_models": owner,
+        "models": models,
+    }
+    if tag:
+        models[name] = {"metrics": metrics, "serve_cities": sorted(serve_cities or []),
+                        "districts": sorted(out),
+                        # 학습한 **모든** 거점의 업종 평균 확률 — 도시를 넘는 순위는 한 모델의
+                        # 잣대로만 매긴다(business_fit). 자리별 추천만 거점마다 다른 모델이다.
+                        "district_means": means}
     _RECOMMEND_JSON.parent.mkdir(parents=True, exist_ok=True)
-    _RECOMMEND_JSON.write_text(
-        json.dumps({"model": "industry-gnn", "metrics": metrics, "districts": out},
-                   ensure_ascii=False), encoding="utf-8")
-    print(f"[gnn] 서빙 json: {_RECOMMEND_JSON} ({len(nodes)}노드)")
+    _RECOMMEND_JSON.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    print(f"[gnn] 서빙 json: {_RECOMMEND_JSON} ({name} · 거점 {len(out)} · "
+          f"노드 {sum(len(v) for v in out.values())})")
 
 
 def _log_mlflow(metrics: dict, params: dict) -> None:
@@ -1309,8 +1438,24 @@ if __name__ == "__main__":
     ap.add_argument("--dump-preds", default=None,
                     help="off-prior test 자리의 노드별 예측을 JSON 으로 남긴다 — 두 런이 "
                          "같은 SEED 라 test 분할이 동일하므로 McNemar 쌍대검정에 쓴다")
+    ap.add_argument("--cities", default=None,
+                    help="학습할 거점 도시(쉼표). 비우면 수요 블록을 켠 런은 seoul, 끈 런은 전부. "
+                         "경기를 넣으려면 --no-demand 와 함께(2026-10-26 · 공통 피처판)")
+    ap.add_argument("--serve-cities", default=None,
+                    help="서빙 json 에 이 도시 거점만 싣는다(쉼표). --tag 필수 — 서울 서빙본을 "
+                         "덮지 않고 거점 단위로 병합한다")
+    ap.add_argument("--tag", default="",
+                    help="모델 이름 꼬리표(예: common → industry-gnn-common · industry_gnn_common.pt)")
+    ap.add_argument("--predict-only", action="store_true",
+                    help="태그 체크포인트로 추론만 해 서빙 json 의 district_means 를 채운다(--tag 필수)")
     a = ap.parse_args()
-    if a.report:
+    if a.predict_only:
+        if not a.tag:
+            raise SystemExit("[gnn] --predict-only 는 --tag 와 함께")
+        predict_only(a.tag, label_level=a.label_level,
+                     cities=set(a.cities.split(",")) if a.cities else None,
+                     use_building=not a.no_building)
+    elif a.report:
         quality_report()
     else:
         types = set(a.edge_types.split(",")) if a.edge_types else None
@@ -1323,4 +1468,7 @@ if __name__ == "__main__":
               resume=not a.no_resume, ckpt_every=a.ckpt_every,
               label_level=a.label_level, patience=a.patience,
               class_weight=a.class_weight, select_by=a.select_by,
-              dump_preds=a.dump_preds)
+              dump_preds=a.dump_preds,
+              cities=set(a.cities.split(",")) if a.cities else None,
+              serve_cities=set(a.serve_cities.split(",")) if a.serve_cities else None,
+              tag=a.tag)

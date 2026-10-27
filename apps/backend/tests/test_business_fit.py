@@ -35,10 +35,13 @@ def test_fit_ranks_districts_by_model_fit():
     assert body["model_covered"] is True
     ranked = [d for d in body["districts"] if d["fit_rank"] is not None]
     assert ranked, "카페는 모델 7종 안이라 순위가 있어야 한다"
-    assert body["ranked_n"] == len(ranked)
-    assert [d["fit_rank"] for d in ranked] == list(range(1, len(ranked) + 1))
-    fits = [d["fit"] for d in ranked]
-    assert fits == sorted(fits, reverse=True)
+    assert body["ranked_n"] == len(ranked) == sum(g["ranked_n"] for g in body["rank_groups"])
+    # 순위는 잣대(모델) 묶음마다 1 부터 다시 센다 — 묶음 안에서만 적합도 순이다(2026-10-27)
+    for g in body["rank_groups"]:
+        members = [d for d in ranked if d["fit_model"] == g["fit_model"]]
+        assert [d["fit_rank"] for d in members] == list(range(1, len(members) + 1)), g["name"]
+        assert [d["fit"] for d in members] == sorted((d["fit"] for d in members), reverse=True), g["name"]
+        assert all(d["rank_group_name"] == g["name"] and d["rank_n"] == len(members) for d in members)
     # 순위 없는 상권은 순위 있는 상권 뒤에만 온다(0 으로 섞이지 않는다)
     first_unranked = next((i for i, d in enumerate(body["districts"]) if d["fit_rank"] is None), None)
     if first_unranked is not None:
@@ -199,3 +202,53 @@ def test_missing_artifact_ranks_nothing(monkeypatch, fresh_cache):
     body = business_fit.fit_by_district("cafe")
     _assert_unranked(body)
     assert body["fit_unavailable_reason"] == business_fit.REASON_NO_ARTIFACT
+
+
+# ── 잣대별 순위(2026-10-27 사용자 결정 — 서울은 예전 잣대로 따로) ─────────────────────
+
+def _node_means(nodes: dict) -> dict[str, float]:
+    agg: dict[str, float] = {}
+    for item in nodes.values():
+        for t in item.get("top", []):
+            agg[t["industry"]] = agg.get(t["industry"], 0.0) + t["score"]
+    return {k: v / len(nodes) for k, v in agg.items()}
+
+
+def test_seoul_is_ranked_by_the_default_model_as_before(fresh_cache):
+    """서울 순위는 서빙 기본 모델(수요 블록판)의 노드 평균 그대로다 — 공통 피처판이 섞이지 않는다.
+
+    10-26 하루 동안 세 도시를 공통 피처판 하나로 줄 세우자 서울 카페 상위 10곳 중 4곳이 바뀌었다.
+    """
+    data = industry_recommend._load()
+    body = business_fit.fit_by_district("cafe")
+    default = data["model"]
+    seoul = [d for d in body["districts"] if d["fit_model"] == default and d["fit_rank"] is not None]
+    assert seoul and {d["rank_group_name"] for d in seoul} == {"서울"}
+    expected = sorted(((d["district_id"], round(_node_means(data["districts"][d["district_id"]]).get("카페", 0.0), 4))
+                       for d in seoul), key=lambda x: -x[1])
+    assert [d["district_id"] for d in seoul] == [x[0] for x in expected]
+    assert body["seoul_fit"] == next(g["mean_fit"] for g in body["rank_groups"] if g["fit_model"] == default)
+
+
+def test_gyeonggi_is_ranked_separately_by_its_own_model(fresh_cache):
+    data = industry_recommend._load()
+    assigned = data.get("district_models") or {}
+    if not assigned:
+        pytest.skip("태그 모델이 맡은 거점이 없다(서울만 서빙)")
+    body = business_fit.fit_by_district("cafe")
+    groups = {g["fit_model"]: g for g in body["rank_groups"]}
+    assert len(groups) >= 2 and body["rank_groups"][0]["fit_model"] == data["model"], "서울 묶음이 먼저다"
+    for model in set(assigned.values()):
+        members = [d for d in body["districts"] if d["fit_model"] == model and d["fit_rank"] is not None]
+        assert {d["district_id"] for d in members} == {k for k, v in assigned.items() if v == model}
+        means = data["models"][model]["district_means"]
+        assert all(d["fit"] == round(means[d["district_id"]].get("카페", 0.0), 4) for d in members)
+        assert groups[model]["name"] and groups[model]["name"] != "서울"
+
+
+def test_district_industries_use_that_districts_own_model(fresh_cache):
+    data = industry_recommend._load()
+    assigned = data.get("district_models") or {}
+    assert business_fit.industries_in_district("yeonnam")["fit_model"] == data["model"]
+    for did, model in list(assigned.items())[:2]:
+        assert business_fit.industries_in_district(did)["fit_model"] == model

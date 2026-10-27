@@ -188,6 +188,51 @@ def gnn_skill(recommend: dict) -> dict:
     return out
 
 
+def _hub_cities() -> dict[str, str]:
+    """거점 → 도시. `data/config/page_hubs.py` 를 경로로 읽는다(스크립트라 import 경로가 없다)."""
+    import importlib.util
+
+    path = ROOT / "data" / "config" / "page_hubs.py"
+    spec = importlib.util.spec_from_file_location("_kpi_page_hubs", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["_kpi_page_hubs"] = mod
+    spec.loader.exec_module(mod)
+    return {s: getattr(h, "city", "seoul") for s, h in mod.ALL_HUBS.items()}
+
+
+def gnn_city_skill(recommend: dict, model: str = "industry-gnn-common",
+                   cities: tuple[str, ...] = ("goyang", "paju")) -> dict:
+    """태그 모델의 **도시 부분집합** 실력 — 고양·파주 서빙 거점(2026-10-26 공통 피처판).
+
+    서울 서빙본(`gnn_skill`)과 같은 규칙이다: 같은 test 분할의 쌍대 표(`by_district` 의 [b, c, n])를
+    그 도시 거점만 골라 거점 군집 부트스트랩 구간 + McNemar 로 세 갈래 판정한다. 임계값을 새로
+    만들지 않는다. 거점이 적으면(9곳) 군집 부트스트랩 구간이 낙관적일 수 있어 군집 수를 함께 싣는다.
+    """
+    m = (((recommend or {}).get("models") or {}).get(model) or {}).get("metrics") or {}
+    by_d = (m.get("test_top3_paired") or {}).get("by_district") or {}
+    if not by_d:
+        return {"available": False, "reason": f"{model} 의 쌍대 표가 산출물에 없다"}
+    city_of = _hub_cities()
+    sub = {d: v for d, v in by_d.items() if city_of.get(d) in cities}
+    if not sub:
+        return {"available": False, "reason": f"{model} 에 {'·'.join(cities)} 거점이 없다"}
+    b = sum(v[0] for v in sub.values())
+    c = sum(v[1] for v in sub.values())
+    n = sum(v[2] for v in sub.values())
+    lo, hi = cluster_bootstrap_ratio_ci([(v[0] - v[1], v[2]) for v in sub.values()])
+    p = mcnemar_exact(b, c)
+    return {
+        "available": True, "model": model, "cities": list(cities),
+        "clusters": len(sub), "test_nodes": n,
+        "skill_pp_top3": (b - c) / n * 100.0 if n else None,
+        "skill_ci95_pp": [lo * 100.0, hi * 100.0],
+        "mcnemar": {"b_model_only": b, "c_prior_only": c, "p_two_sided": p},
+        "verdict": verdict((lo, hi), p),
+        "label_level": m.get("label_level"),
+        "features": m.get("features"),
+    }
+
+
 # ─────────────────────────── GNN 어휘 점검 (2026-09-28) ───────────────────────────
 #
 # 쌍대 판정은 "같은 test 에서 사전분포보다 나은가"만 묻고 **추천 어휘를 제품으로 쓸 수
@@ -299,6 +344,9 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
         vc = gnn["vocab"] = gnn_vocab_check(rec)
         if gnn["verdict"] == SKILL and vc["verdict"] != VOCAB_PASS:
             gnn["gate_verdict"] = vc["verdict"]
+    # 2026-10-26: 고양·파주 거점은 공통 피처판이 맡는다 — 그 도시 부분집합도 같은 규칙으로 판정한다.
+    # 산출물에 그 모델이 없으면(서울만 서빙하던 때) 축 자체가 없다 — 실패로 세지 않는다.
+    gnn_city = gnn_city_skill(rec) if rec else {"available": False, "reason": _missing(recommend_path)}
 
     # 실패는 **게이트 판정(gate_verdict)이 실력이 아닌 모든 축**이다. 부호가 양수여도
     # 구분불가면 적는다 — 그게 규칙 2 다. 문구는 무엇에 졌는지(베이스라인 이름)와
@@ -339,10 +387,17 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
             f"GNN Top-3 {gnn['top3']:.1%} vs 거점 사전분포 {gnn['baseline_top3']:.1%} "
             f"— 실력 {gnn['skill_pp_top3']:+.2f}%p · {why} → {gnn['gate_verdict']}")
 
+    if gnn_city.get("available") and gnn_city["verdict"] != SKILL:
+        lo, hi = gnn_city["skill_ci95_pp"]
+        failures.append(
+            f"GNN Top-3 ({'·'.join(gnn_city['cities'])} · {gnn_city['model']}) 실력 "
+            f"{gnn_city['skill_pp_top3']:+.2f}%p [{lo:+.2f}, {hi:+.2f}] · "
+            f"McNemar p={gnn_city['mcnemar']['p_two_sided']:.3f} → {gnn_city['verdict']}")
+
     # 있는 산출물을 못 읽은 것은 "판정 없음"이 아니라 판정 실패다 — 종료코드 0 으로 넘기지 않는다.
     failures += [f"{p.name} 읽기 실패 — {why} → 판정 못 냄" for p, why in errors.items()]
 
-    return {"lstm": lstm, "gnn": gnn, "failures": failures, "ok": not failures}
+    return {"lstm": lstm, "gnn": gnn, "gnn_city": gnn_city, "failures": failures, "ok": not failures}
 
 
 _MARK = {SKILL: "✅", UNRESOLVED: "⚠", WORSE: "❌", UNTESTABLE: "⚠", PENDING: "⏳",
@@ -494,6 +549,17 @@ def _fmt(res: dict) -> str:
         if gnn.get("offprior_top3") is not None:
             out.append(f"   off-prior   {gnn['offprior_top3']:.1%} "
                        f"({gnn.get('offprior_nodes')}자리) — 사전분포가 못 맞히는 자리")
+
+    gc = res.get("gnn_city") or {}
+    if gc.get("available"):
+        lo, hi = gc["skill_ci95_pp"]
+        mc = gc["mcnemar"]
+        out.append(f"\n[GNN] 업종 추천 — {'·'.join(gc['cities'])} ({gc['model']} · {gc['features']}열 · "
+                   f"서울 전용 수요 블록 없음)")
+        out.append(f"   {_MARK[gc['verdict']]} {gc['verdict']} — 실력 {gc['skill_pp_top3']:+.2f}%p "
+                   f"[{lo:+.2f}, {hi:+.2f}] · McNemar b={mc['b_model_only']} c={mc['c_prior_only']} "
+                   f"p={mc['p_two_sided']:.3f} (쌍대 · 거점 군집 {gc['clusters']}곳 · test {gc['test_nodes']}자리)")
+        out.append("   ⚠ 군집이 적으면 부트스트랩 구간이 낙관적일 수 있다 — 거점이 늘면 다시 잰다")
 
     out.append("\n" + "=" * 78)
     if res["ok"]:

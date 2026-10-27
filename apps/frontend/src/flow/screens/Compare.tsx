@@ -8,7 +8,7 @@
  */
 import { useMemo, useState } from "react";
 import DistrictCompareTable from "@/components/DistrictCompare";
-import { compareColumns, compareIds, compareRows, useDistrictCompare, type CompareColumn } from "@/lib/districtCompare";
+import { compareColumns, compareIds, compareRows, fitRulerNames, useDistrictCompare, type CompareColumn } from "@/lib/districtCompare";
 import { useFlow } from "../context";
 import { useFlowData } from "../data";
 import { eun, ro } from "../format";
@@ -57,6 +57,7 @@ export function Compare({ param }: { param: string }) {
   }
 
   const rows = compareRows(colIds, cmp.loads, ranked ? { key: ranked.key, label: ranked.label } : null, cmp.fit);
+  const rulerNames = fitRulerNames(cmp.fit, colIds);
   const quarter = colIds.map((id) => cmp.loads[id].rent).find((r) => r.status === "ready" && r.data.quarter);
   const openSpaces = (id: string) => {
     update((s) => setDistrict(s, id));
@@ -74,8 +75,11 @@ export function Compare({ param }: { param: string }) {
           </button>
         )} />
       {work && !ranked && <p className="fl-note">{eun(work.label)} 추천 모델이 다루지 않는 업종이라 입지 점수는 나란히 놓지 않았어요.</p>}
+      {/* 입지 점수 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 묶음이 섞이면 점수를 견주지 말라고 밝힌다 */}
+      {ranked && rulerNames && <WarnLine>입지 점수는 {rulerNames.join(" · ")} 묶음을 서로 다른 모델로 매겼어요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.</WarnLine>}
       {cols.filter((c) => c.caveat).map((c) => <WarnLine key={c.id}>{c.name}: {c.caveat}</WarnLine>)}
-      <p className="fl-source">카카오 플레이스 · 서울시 상권분석{quarter?.status === "ready" ? ` · R-ONE ${quarter.data.quarter}` : " · R-ONE"} · 건축물대장{ranked ? " · 업종 추천 모델" : ""}</p>
+      {/* 서울시 상권분석(유형·붐비는 때의 재료)은 서울 상권에만 선다 */}
+      <p className="fl-source">카카오 플레이스{cols.some((c) => (c.city ?? "seoul") === "seoul") ? " · 서울시 상권분석" : ""}{quarter?.status === "ready" ? ` · R-ONE ${quarter.data.quarter}` : " · R-ONE"} · 건축물대장{ranked ? " · 업종 추천 모델" : ""}</p>
       <Details summary="어떻게 셌나요?">
         <ul className="fl-facts">
           {ranked && <li>입지 점수는 비슷한 자리에 {ranked.label} 가게가 이미 얼마나 모여 있는지를 추천 모델이 배운 값이에요(×100). 매출이나 생존율이 아니에요.</li>}

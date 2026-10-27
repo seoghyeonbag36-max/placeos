@@ -20,7 +20,7 @@
 import illustration from "@/design/assets/iso-commercial-building.svg";
 import { IconKey, IconMegaphone, IconPin, IconSpark } from "@/components/TrackIcons";
 import { GOALS } from "@/lib/businessProfile";
-import { LANDING_HUBS } from "@/lib/landingFacts";
+import { LANDING_HUBS, LANDING_REGION } from "@/lib/landingFacts";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import "./Landing.css";
 
@@ -53,7 +53,7 @@ const STEPS: { track: Track; name: string; question: string; body: string; icon:
 const METHOD: { title: string; body: string }[] = [
   {
     title: "건물을 하나씩 셉니다",
-    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. 서울 ${LANDING_HUBS}개 상권이 모두 이 방식입니다.`,
+    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. ${LANDING_REGION} ${LANDING_HUBS}개 상권이 모두 이 방식입니다.`,
   },
   {
     title: "공식 통계와 나란히 놓습니다",
@@ -120,7 +120,7 @@ export default function Landing() {
               <p className="lp-eyebrow">창업자 전용 부동산 앱</p>
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다.</h1>
               <p className="lp-lede">
-                서울 {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
+                {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
                 고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
               </p>
               <div className="lp-cta-row">

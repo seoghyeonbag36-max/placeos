@@ -15,6 +15,7 @@ import {
   type DistrictIndustries, type DistrictSummary, type IndustryFit, type IndustryFitRow, type IndustryOption,
 } from "@/lib/api";
 import { GOALS, topic, toward, type BusinessProfile } from "@/lib/businessProfile";
+import { fitGroups, mixedRulers } from "@/lib/fitGroups";
 import "./IndustryFitCard.css";
 import { IndustryCompetitionPanel } from "@/components/IndustryDetailFields";
 
@@ -107,18 +108,23 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   const home = homeId ? byId.get(homeId) ?? null : null;
   const hereName = here?.name ?? districts.find((d) => d.id === districtId)?.name ?? districtId;
 
+  // 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 표는 지금 보는 상권이 든 묶음(없으면 첫 묶음 = 서울)의 상위 5
+  const groups = fitGroups(fit);
+  const group = groups.find((g) => here && g.rows.includes(here)) ?? groups[0];
+  const meanFit = fit.rank_groups?.find((g) => g.fit_model === group?.key)?.mean_fit ?? fit.seoul_fit;
   // 표: (옮기기) 지금 상권 고정 → 순위 상위 5 → 지금 보는 상권이 그 밖이면 한 줄 더
   const rows: Array<{ row: IndustryFitRow; tag?: string }> = [];
   if (fit.model_covered) {
     if (home) rows.push({ row: home, tag: "지금" });
-    for (const r of fit.districts.filter((d) => d.fit_rank != null && d.fit_rank <= TOP_N)) {
+    for (const r of (group?.rows ?? []).slice(0, TOP_N)) {
       if (r.district_id !== homeId) rows.push({ row: r });
     }
     if (here && !rows.some((x) => x.row.district_id === here.district_id)) rows.push({ row: here, tag: "보는 중" });
   }
 
+  // 지금 상권 대비 차이는 같은 잣대일 때만 — 묶음이 다르면 점수 차이가 모델 차이를 섞는다
   const diff = home && here && home.district_id !== here.district_id && home.fit != null && here.fit != null
-    ? (here.fit - home.fit) * 100 : null;
+    && !mixedRulers([home, here]) ? (here.fit - home.fit) * 100 : null;
 
   return (
     <section className="fitcard" aria-labelledby={headId}>
@@ -126,7 +132,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
       <h2 id={headId}>
         {ind.label} — {hereName}
         {fit.model_covered && (here?.fit_rank != null
-          ? <> 서울 {fit.ranked_n}곳 중 <b>{here.fit_rank}위</b></>
+          ? <> {here.rank_group_name ?? "서울"} {here.rank_n ?? fit.ranked_n}곳 중 <b>{here.fit_rank}위</b></>
           : <> <span className="fit-muted">순위 없음(이 상권은 모델 산출물이 없습니다)</span></>)}
       </h2>
       {!fit.model_covered && (
@@ -138,14 +144,17 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
       {home && home.district_id === districtId && (
         <p className="fit-diff">지금 가게 상권을 보고 있습니다 — 아래 표에서 다른 상권과 견주세요.</p>
       )}
-      {here && <Facts row={here} seoulFit={fit.seoul_fit} covered={fit.model_covered} />}
+      {home && here && home.district_id !== here.district_id && mixedRulers([home, here]) && (
+        <p className="fit-diff">지금 상권({home.name})과 이 상권은 다른 모델로 매긴 점수라 차이를 내지 않습니다.</p>
+      )}
+      {here && <Facts row={here} meanFit={meanFit} meanName={group?.name || "서울"} covered={fit.model_covered} />}
       {/* 적합도·순위를 읽는 법이라 순위가 없으면 싣지 않는다 */}
       {fit.model_covered && <p className="fit-note">{FIT_NOTE}</p>}
 
       {rows.length > 0 && (
         <div className="fit-table-wrap">
           <table className="fit-table">
-            <caption>{ind.label} 기준 상권 순위 · 상위 {TOP_N}</caption>
+            <caption>{ind.label} 기준 {group?.name ? `${group.name} ` : ""}상권 순위 · 상위 {TOP_N}</caption>
             <thead><tr><th scope="col">순위</th><th scope="col">상권</th><th scope="col">적합도</th><th scope="col">같은 업종</th><th scope="col">1층 평당</th><th scope="col"><span className="sr-only">이동</span></th></tr></thead>
             <tbody>
               {rows.map(({ row, tag }) => {
@@ -175,12 +184,12 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   );
 }
 
-function Facts({ row, seoulFit, covered }: {
-  row: IndustryFitRow; seoulFit: number | null; covered: boolean;
+function Facts({ row, meanFit, meanName, covered }: {
+  row: IndustryFitRow; meanFit: number | null; meanName: string; covered: boolean;
 }) {
   return (
     <dl className="fit-facts">
-      {covered && <div><dt>입지 적합도</dt><dd>{pct1(row.fit) ?? "미제공"}{seoulFit != null && <small> 서울 평균 {pct1(seoulFit)}</small>}</dd></div>}
+      {covered && <div><dt>입지 적합도</dt><dd>{pct1(row.fit) ?? "미제공"}{meanFit != null && <small> {meanName} 평균 {pct1(meanFit)}</small>}</dd></div>}
       <div><dt>같은 업종</dt><dd>{shareText(row)}</dd></div>
       <div><dt>1층 평당 월세</dt><dd>{row.rent_1f_per_pyeong != null ? `${row.rent_1f_per_pyeong}만원` : "미제공"}{row.rent_shared && <small> 인접 상권 표본</small>}</dd></div>
     </dl>

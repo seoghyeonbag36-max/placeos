@@ -204,6 +204,10 @@ class Posting(BaseModel):
     persona: str | None = None
     note: str | None = None
     scenarios: dict[str, TierScenario]
+    # 이 자리에서 본전 시점을 답하지 않는 사유(2026-10-27) — 매출 재료가 없는 도시(고양·파주).
+    # None 이면 답할 수 있다. 있으면 `scenarios` 는 계수 폴백이라 화면이 회수기간을 머리 값으로
+    # 쓰지 않는다(services/districts.payback_unavailable_reason).
+    payback_unavailable_reason: str | None = None
 
 
 class MarketingEvent(BaseModel):

@@ -1,7 +1,7 @@
 {
   "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
   "quarter": "20262",
-  "built_at": "2026-09-24T06:15:17+00:00",
+  "built_at": "2026-10-26T15:44:04+00:00",
   "rent_unit": "천원/㎡·월 (R-ONE 소규모상가, 사실상 1층 기준)",
   "floor_factor": {
     "B2": 0.6,
@@ -417,6 +417,60 @@
       "rent_per_m2_krw_thousand": 40.32,
       "flpop": 3038508,
       "foot": "저"
+    },
+    "wondang": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "baekseok": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "haengsin": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "bamgasi": {
+      "rent_per_m2_krw_thousand": 20.13,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "daehwa": {
+      "rent_per_m2_krw_thousand": 20.13,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "geumchon": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "unjeong": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "yadang": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "munsan": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
     }
   },
   "seoul": {

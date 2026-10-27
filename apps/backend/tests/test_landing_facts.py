@@ -38,7 +38,7 @@ def test_landing_hub_count_matches_served_hubs():
     served = len(_active_hubs())
     claimed = _landing_hubs()
     assert claimed == served, (
-        f"랜딩이 「서울 {claimed}개 상권」이라고 말하는데 서빙 거점은 {served}개다. "
+        f"랜딩이 「{claimed}개 상권」이라고 말하는데 서빙 거점은 {served}개다. "
         "apps/frontend/src/lib/landingFacts.ts 의 LANDING_HUBS 를 고칠 것(docs/spec-landing-founders-2026-10-08.md)."
     )
 

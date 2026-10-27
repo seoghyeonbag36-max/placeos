@@ -100,11 +100,14 @@ def collect_trend() -> dict:
     return data
 
 
-def collect_platform13_blog() -> list[dict]:
-    """[Platform·GNN/Program] 54거점 블로그 리뷰 수집 — Program 상권 컨텍스트 원천.
+def collect_platform13_blog(only: set[str] | None = None) -> list[dict]:
+    """[Platform·GNN/Program] 거점 블로그 리뷰 수집 — Program 상권 컨텍스트 원천.
 
-    거점당 '서울 {명칭} 맛집'·'서울 {명칭} 카페' 2키워드 × 2페이지(최대 400건).
+    거점당 '{도시} {명칭} 맛집'·'{도시} {명칭} 카페' 2키워드 × 2페이지(최대 400건).
     행에 district_id 부가. Bronze: data/bronze/platform13/{날짜}/naver_blog.json
+
+    도시 접두어는 거점의 `city` 다(서울·고양·파주, 2026-10-26). `only` 를 주면 그 거점만 받아
+    **최신 파일에 병합**한다 — 전 거점을 다시 받으면 서울 거점 컨텍스트까지 오늘 글로 바뀐다.
 
     ⚠️ **"서울" 접두어는 동명이지(同名異地) 차단용이다 — 빼지 말 것.**
     거점명만으로 질의하면 같은 이름의 타 시도 상권 글이 섞인다. 2026-08-01 전수 실측:
@@ -115,6 +118,8 @@ def collect_platform13_blog() -> list[dict]:
     Gold 단계(build_gold._is_offsite)에도 잔여분 필터가 있지만, 필터는 표본을 깎을 뿐
     좋은 글을 더 가져오지는 못한다 — 질의를 좁히는 쪽이 본 수정이고 필터는 보루다.
     """
+    from data.collectors.common import load_latest
+    from data.config.page_hubs import ALL_HUBS
     from data.config.platform_places import DISTRICT_PLACES
 
     headers = _headers()
@@ -122,10 +127,14 @@ def collect_platform13_blog() -> list[dict]:
         print("[naver_blog] NAVER_CLIENT_ID/SECRET 미설정(또는 requests 없음) — 건너뜀")
         return []
 
+    city_word = {"seoul": "서울", "goyang": "고양", "paju": "파주"}
     seen: dict[str, dict] = {}
     for did, (_lat, _lng, _radius, name) in DISTRICT_PLACES.items():
+        if only and did not in only:
+            continue
+        prefix = city_word.get(getattr(ALL_HUBS.get(did), "city", "seoul"), "서울")
         got = 0
-        for kw in (f"서울 {name} 맛집", f"서울 {name} 카페"):
+        for kw in (f"{prefix} {name} 맛집", f"{prefix} {name} 카페"):
             for page in range(2):
                 try:
                     resp = requests.get(
@@ -149,6 +158,9 @@ def collect_platform13_blog() -> list[dict]:
         print(f"  {did}: {got}건")
 
     posts = list(seen.values())
+    if only:
+        prev = load_latest("platform13", "naver_blog.json") or []
+        posts = [p for p in prev if p.get("district_id") not in only] + posts
     save_json(posts, "platform13", "naver_blog.json")
     return posts
 
@@ -158,7 +170,11 @@ if __name__ == "__main__":
 
     load_env()
     if "--platform13" in sys.argv:
-        collect_platform13_blog()
+        only = None
+        if "--hubs" in sys.argv:
+            i = sys.argv.index("--hubs")
+            only = {s for s in (sys.argv[i + 1] if i + 1 < len(sys.argv) else "").split(",") if s} or None
+        collect_platform13_blog(only)
     else:
         collect_blog()
         collect_trend()

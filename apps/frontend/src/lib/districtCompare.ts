@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import type {
   DistrictSummary, FloorVacancyList, IndustryFit, IndustryFitRow, PlatformProfile, Posting, RentHeatmap,
 } from "./api";
+import { mixedRulers, rankText } from "./fitGroups";
 
 /** 비교에 쓰는 응답 — 흐름은 FlowData(캐시·미리 받기)를, 지도 탐색은 api 함수를 넘긴다. 메서드 이름이 같다 */
 export interface CompareLoaders {
@@ -61,7 +62,8 @@ export function compareIds(raw: string[]): string[] {
  */
 export async function calculableCount(id: string, loaders: CompareLoaders): Promise<number> {
   const posts = await loaders.postings(id).catch((e: unknown) => (isNotFound(e) ? [] as Posting[] : Promise.reject(e)));
-  const calc = new Set(posts.map((p) => p.id.replace(/^vu-/, "")));
+  // 본전 시점을 답하지 않는 유닛(매출 재료가 없는 도시 · 2026-10-27)은 빈 자리 목록과 같이 세지 않는다
+  const calc = new Set(posts.filter((p) => !p.payback_unavailable_reason).map((p) => p.id.replace(/^vu-/, "")));
   let buildingIds: Array<string | null | undefined>;
   try {
     buildingIds = (await loaders.rent(id)).listings.map((l) => l.building_id);
@@ -146,8 +148,18 @@ function fitCell(fit: Settled<IndustryFit>, id: string): FactCell {
     const row: IndustryFitRow | undefined = data.districts.find((r) => r.district_id === id);
     if (!row || row.fit == null) return missing("점수 없음");
     const sub = row.same_n != null && row.sample_n != null ? `비슷한 자리 ${row.sample_n.toLocaleString("ko-KR")}곳 중 같은 업종 ${row.same_n.toLocaleString("ko-KR")}곳` : undefined;
-    return cell(`${Math.round(row.fit * 100)}점${row.fit_rank != null ? ` · ${row.fit_rank}위` : ""}`, sub);
+    // 순위는 묶음(잣대)마다 따로다 — 「서울 3위」처럼 묶음을 붙여 읽는다(2026-10-27)
+    const rank = rankText(row, true);
+    return cell(`${Math.round(row.fit * 100)}점${rank ? ` · ${rank}` : ""}`, sub);
   });
+}
+
+/** 고른 상권들의 입지 점수가 서로 다른 잣대로 매겨졌으면 그 묶음 이름들 — 화면이 「견주지 마세요」를 밝힌다. 아니면 null */
+export function fitRulerNames(fit: Settled<IndustryFit> | null, ids: string[]): string[] | null {
+  if (!fit || fit.status !== "ready") return null;
+  const rows = ids.map((id) => fit.data.districts.find((r) => r.district_id === id));
+  if (!mixedRulers(rows)) return null;
+  return [...new Set(rows.map((r) => r?.rank_group_name).filter((n): n is string => !!n))];
 }
 
 /**
@@ -184,10 +196,10 @@ export function compareRows(ids: string[], loads: Record<string, DistrictLoads>,
 }
 
 /** 상권 요약 → 열 머리. 목록에 없는 id 는 버린다(서빙하지 않는 상권) */
-export interface CompareColumn { id: string; name: string; gu: string; caveat: string | null }
+export interface CompareColumn { id: string; name: string; gu: string; caveat: string | null; city?: string }
 export function compareColumns(ids: string[], districts: DistrictSummary[]): CompareColumn[] {
   return ids.flatMap((id) => {
     const d = districts.find((x) => x.id === id);
-    return d ? [{ id, name: d.name, gu: d.gu, caveat: d.caveat || null }] : [];
+    return d ? [{ id, name: d.name, gu: d.gu, caveat: d.caveat || null, city: d.city ?? "seoul" }] : [];
   });
 }

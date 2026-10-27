@@ -75,6 +75,9 @@ def _paused() -> set[str]:
 
     판단을 못 읽으면 **빈 집합**을 돌려준다(아무것도 빼지 않는다). 못 읽은 것을
     '보류'로 단정하면 서울 잔여까지 조용히 사라져, 있는 일이 없는 것처럼 보인다.
+
+    2026-10-26: 고양·파주를 서빙 도시로 되넣었다. 대신 그 안의 **추후 확장 과제**
+    (`PageHub.deferred` — 계획상가·단일시설)를 거점 단위로 뺀다 — 도시 판단과 같은 이유다.
     """
     backend = ROOT / "apps" / "backend"
     if str(backend) not in sys.path:
@@ -84,7 +87,8 @@ def _paused() -> set[str]:
     except Exception:
         return set()
     return {slug for slug, hub in ALL_HUBS.items()
-            if getattr(hub, "city", "seoul") not in SERVED_CITIES}
+            if getattr(hub, "city", "seoul") not in SERVED_CITIES
+            or getattr(hub, "deferred", "")}
 
 
 def check_quota() -> tuple[str, str]:
@@ -254,8 +258,8 @@ def report_remaining() -> None:
     print(f"\n■ 전유부(대장) — 미수집 {len(missing)}거점 / 서빙 대상 {live}")
     if paused:
         # 숫자에서 뺐다는 사실을 밝힌다. 조용히 빼면 다음 사람이 "잔여 없음"을 완주로 읽는다.
-        print(f"  (서빙 보류로 제외 {len(paused)}거점 — measured_pages.SERVED_CITIES 밖. "
-              "재개하려면 거기에 도시 id 를 되넣는다)")
+        print(f"  (서빙 보류로 제외 {len(paused)}거점 — measured_pages.SERVED_CITIES 밖이거나 "
+              "추후 확장 과제(page_hubs.PageHub.deferred). 재개하려면 그 표기를 거둔다)")
     if missing:
         for label, grp in _GROUPS:
             part = [s for s in missing if s in grp]

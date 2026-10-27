@@ -41,7 +41,11 @@ def test_active_cities_equal_served_cities():
 
 def test_active_hubs_is_the_served_subset_of_all_hubs():
     mod = _page_hubs()
-    expected = {s for s, h in mod.ALL_HUBS.items() if h.city in SERVED_CITIES}
+    # 2026-10-26: 서빙 도시 안에서도 추후 확장 과제(`deferred`)는 빠진다 — 서빙(measured_pages)
+    # 과 산출(ACTIVE_HUBS)이 같은 표기를 읽어야 두 집합이 같다.
+    expected = {s for s, h in mod.ALL_HUBS.items()
+                if h.city in SERVED_CITIES and not h.deferred}
     assert set(mod.ACTIVE_HUBS) == expected
     # 시드 54 는 전부 들어 있어야 한다 — 빠지면 기존 산출물이 재빌드에서 사라진다.
     assert set(mod.HUBS) <= set(mod.ACTIVE_HUBS)
+    assert not (set(mod.DEFERRED_HUBS) & set(mod.ACTIVE_HUBS))

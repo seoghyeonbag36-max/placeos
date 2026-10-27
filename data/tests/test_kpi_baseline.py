@@ -724,3 +724,36 @@ def test_status_gate_names_are_basis_neutral_and_detail_names_the_basis() -> Non
     d, e = res["lstm"]["direction"], res["lstm"]["error"]
     assert f"'{d['baseline_label']}'" in gates[_LSTM_DIR_GATE].detail
     assert f"vs {e['baseline_label']} {e['baseline_mae']:.3f}" in gates[_LSTM_ERR_GATE].detail
+
+
+# ── 고양·파주 공통 피처판 — 도시 부분집합 판정(2026-10-26) ─────────────────────
+
+def _city_rec(by_district: dict) -> dict:
+    return {"models": {"industry-gnn-common": {"metrics": {
+        "test_top3_paired": {"by_district": by_district}, "label_level": "group_mapped", "features": 104}}}}
+
+
+def test_city_skill_uses_only_the_named_cities_hubs():
+    """서울 거점의 쌍대 표가 고양·파주 판정에 섞이면 안 된다 — 서울이 크게 이겨도 경기 판정은 따로다."""
+    from kpi_baseline import gnn_city_skill
+
+    rec = _city_rec({"garosugil": [500, 10, 1000],                    # 서울 — 빼야 한다
+                     "geumchon": [6, 1, 100], "daehwa": [5, 1, 100], "wondang": [6, 0, 100],
+                     "baekseok": [5, 1, 100], "munsan": [6, 1, 100]})
+    out = gnn_city_skill(rec)
+    assert out["available"] and out["clusters"] == 5 and out["test_nodes"] == 500
+    assert out["mcnemar"]["b_model_only"] == 28 and out["mcnemar"]["c_prior_only"] == 4
+    assert out["verdict"] == SKILL
+
+
+def test_city_skill_is_unresolved_when_the_interval_holds_zero():
+    from kpi_baseline import gnn_city_skill
+
+    rec = _city_rec({"geumchon": [3, 2, 100], "daehwa": [1, 2, 100], "wondang": [2, 2, 100]})
+    assert gnn_city_skill(rec)["verdict"] in (UNRESOLVED, UNTESTABLE)
+
+
+def test_city_skill_is_absent_without_the_model():
+    from kpi_baseline import gnn_city_skill
+
+    assert gnn_city_skill({"models": {}})["available"] is False

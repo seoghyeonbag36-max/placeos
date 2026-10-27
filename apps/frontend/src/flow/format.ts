@@ -41,6 +41,13 @@ export function parseManwon(text: string): number | null {
 /** 입력칸에 보일 문자열 — 천 단위 쉼표 */
 export const showManwon = (n: number | null | undefined) => (n == null ? "" : n.toLocaleString("ko-KR"));
 
+/** 사람 수 → 「8,338명」 · 「18.9만 명」. 만 명부터는 소수 한 자리(일평균 추정치라 그 아래는 뜻이 없다) */
+export function people(n: number): string {
+  const v = Math.round(n);
+  if (v < 10_000) return `${v.toLocaleString("ko-KR")}명`;
+  return `${(v / 10_000).toFixed(1)}만 명`;
+}
+
 /** 받침으로 가르는 조사 — 「카페는」 「음식점은」 · 「카페로」 「음식점으로」 */
 const lastHangul = (w: string) => [...w].reverse().find((ch) => ch >= "가" && ch <= "힣");
 const jong = (ch: string) => (ch.charCodeAt(0) - 0xac00) % 28;

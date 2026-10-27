@@ -270,6 +270,9 @@ export interface PostingUnit {
 /** 공실 유닛 + 3-Tier 시나리오 — GET /commercial-districts/{id}/postings */
 export interface Posting extends PostingUnit {
   scenarios: Record<string, TierScenario>;
+  /** 이 자리에서 본전 시점을 답하지 않는 사유(2026-10-27 · 매출 재료가 없는 고양·파주). 있으면 `scenarios` 는
+   *  계수 폴백이라 회수기간을 머리 값으로 쓰지 않는다. null 이면 답할 수 있다 */
+  payback_unavailable_reason?: string | null;
 }
 
 /** 상권 행사. 실데이터(서울 문화행사)와 시드가 같은 타입으로 흐른다.
@@ -860,10 +863,16 @@ export const listIndustries = () => getJSON<{ industries: IndustryOption[] }>("/
  *     Top-3 근사라 절대값은 낮다 — **순위로만** 읽는다. */
 export interface IndustryFitRow {
   district_id: string; name: string | null; gu: string | null;
+  /** 순위는 **잣대(모델) 묶음마다 따로** 1 부터 센다(2026-10-27 · 서울 = 수요 블록판, 고양·파주 = 공통 피처판).
+   *  묶음이 다른 두 줄의 점수·순위는 서로 견주지 않는다 */
   fit: number | null; fit_rank: number | null;
+  fit_model?: string | null; rank_group_name?: string | null; rank_n?: number | null;
   same_n: number | null; sample_n: number | null; same_share: number | null;
   rent_1f_per_pyeong: number | null; rent_shared: boolean;
 }
+
+/** 순위 묶음 하나 — 한 잣대(모델)로 매긴 상권들 */
+export interface RankGroup { fit_model: string; name: string; ranked_n: number; mean_fit: number }
 
 export interface IndustryFit {
   industry: IndustryOption;
@@ -871,14 +880,73 @@ export interface IndustryFit {
   model_covered: boolean;
   /** model_covered=false 인 사유(모델 라벨 없음 / 서빙 어휘 밖 / 산출물 없음). true 면 null */
   fit_unavailable_reason?: string | null;
+  /** 서울(기본 잣대) 묶음 평균 — 다른 묶음 평균은 `rank_groups[].mean_fit` */
   seoul_fit: number | null;
   ranked_n: number;
+  /** 서울 묶음이 먼저다. 없으면(옛 응답) 한 묶음으로 읽는다 */
+  rank_groups?: RankGroup[];
   districts: IndustryFitRow[];
   source: string; note: string;
 }
 
 export const getIndustryFit = (key: string) =>
   getJSON<IndustryFit>(`/ai/industry-fit?industry=${encodeURIComponent(key)}`);
+
+/* ===== 상권 흐름(파주-고양-서울) — GET /corridors/{id} (2026-10-26) =====
+ *
+ * 원천은 서울시×KT 수도권 생활이동 — **출발→도착 집계**다. 한 사람의 동선이 아니다.
+ * 서울 마디는 거점(행정동), 파주·고양 마디는 시군구다(`kind`) — 같은 시군구의 거점은 같은 흐름 값을 쓴다.
+ * 공실률은 싣지 않는다(상권 목록에서 합친다). 「방문」= 기타·쇼핑·관광·병원 — 「기타」를 쇼핑이라 부르지 않는다. */
+export type CorridorSegmentKey = "paju" | "goyang" | "seoul";
+export interface CorridorSegment { key: CorridorSegmentKey; name: string }
+export interface CorridorPeriod { days: string[]; n_days: number; weekday: number; weekend: number }
+export interface CorridorLink {
+  from: CorridorSegmentKey; to: CorridorSegmentKey; per_day: number;
+  avg_min: number | null; avg_km: number | null;
+  purpose_group_share: Record<string, number>; arr_hour_share: number[]; peak_hours: number[];
+}
+export interface CorridorPair {
+  from: string; to: string; per_day: number;
+  visit_per_day: number; work_per_day: number; home_per_day: number;
+  purpose_group_share: Record<string, number>; peak_hours: number[]; avg_min: number | null;
+}
+export interface CorridorHub {
+  id: string; name: string; rent_1f_per_pyeong: number | null; rent_shared: boolean;
+  fit: number | null; fit_rank: number | null; rank_group_name?: string | null; rank_n?: number | null;
+}
+export type CorridorRoleKind = "출근형" | "주거형" | "방문형" | "혼합";
+export interface CorridorNode {
+  id: string; kind: "hub" | "sgg"; segment: CorridorSegmentKey; name: string; hubs: CorridorHub[];
+  arrivals_per_day: number; from_gyeonggi_per_day: number; corridor_rank: number | null; on_corridor: boolean;
+  role: { kind: CorridorRoleKind; deviation_pp?: Record<string, number> | null; median_share?: Record<string, number> | null; margin_pp?: number | null };
+  inflow_share?: Record<string, number> | null;
+  purpose_group_share?: Record<string, number> | null;
+  arr_hour_share?: number[] | null;
+  peak_hours?: number[] | null;
+  external_share?: number | null;
+  top_destinations?: CorridorPair[] | null;
+  top_origins?: CorridorPair[] | null;
+}
+export type CorridorSynergyKind = "visit_link" | "commute" | "inbound" | "local_belt";
+export interface CorridorSynergy extends CorridorPair {
+  kind: CorridorSynergyKind; node: string; basis: string; value: number;
+  back_per_day?: number | null; per_day_both?: number | null;
+}
+export interface Corridor {
+  id: string; name: string; note: string; segments: CorridorSegment[]; period: CorridorPeriod;
+  source: string; dataset: string; resolution: Record<string, string>; caveats: string[];
+  links: CorridorLink[]; nodes: CorridorNode[]; hub_nodes: Record<string, string>;
+  pairs: CorridorPair[]; synergies: CorridorSynergy[];
+  /** 역할 여백(role_margin_pp) · 짝 최소 하루 이동(pair_min_per_day) · 서울 끝 수(seoul_ends) — 계수다 */
+  params: Record<string, number>;
+  industry?: IndustryOption | null; rank_groups?: RankGroup[] | null;
+}
+
+/** 지금 서빙하는 흐름 — 하나다(파주-고양-서울). 늘면 목록(`GET /corridors`)에서 고른다 */
+export const CORRIDOR_ID = "paju-goyang-seoul";
+
+export const getCorridor = (id: string, industry?: string | null) =>
+  getJSON<Corridor>(`/corridors/${encodeURIComponent(id)}${industry ? `?industry=${encodeURIComponent(industry)}` : ""}`);
 
 /** 한 상권 안 업종 순위 한 줄(업종 바꾸기). */
 export interface DistrictIndustryRow extends IndustryOption {

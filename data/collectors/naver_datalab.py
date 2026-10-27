@@ -119,6 +119,16 @@ _HUB_KEYWORDS: dict[str, list[str]] = {
     "jangan": ["장안동", "장안평"],           # 대구·안동에도 장안동
     "kyunghee": ["회기동", "경희대"],         # 경희대 국제캠은 수원이다
     "nambu": ["남부터미널"],                  # 타 지역 '남부터미널' 이 있으나 서울이 압도적
+    # ── 고양·파주(2026-10-26) — 이름이 일반어거나 다른 시에도 있는 곳은 역·동으로 좁힌다
+    "yadang": ["야당역", "야당동"],           # 「야당」 단독은 정당 검색량이다
+    "daehwa": ["대화역", "일산 대화동"],       # 「대화」 단독은 이야기다
+    "baekseok": ["백석역", "일산 백석동"],      # 천안·서울(성북)에도 백석이 있다
+    "munsan": ["문산역", "문산읍"],
+    "haengsin": ["행신역", "행신동"],
+    "wondang": ["원당역", "원당시장"],
+    "geumchon": ["금촌역", "금촌동"],
+    "unjeong": ["운정역", "운정신도시"],
+    "bamgasi": ["밤가시마을"],
 }
 
 
@@ -141,8 +151,8 @@ def _hub_keywords(slug: str, name: str) -> list[str]:
     return out[:5]
 
 
-def fetch_hub_trends(months: int = _TREND_MONTHS) -> dict[str, list[dict]]:
-    """거점 slug → [{period, ratio}] 월별 시계열. 키 없음·실패 시 빈 dict."""
+def fetch_hub_trends(months: int = _TREND_MONTHS, only: set[str] | None = None) -> dict[str, list[dict]]:
+    """거점 slug → [{period, ratio}] 월별 시계열. 키 없음·실패 시 빈 dict. `only` 면 그 거점만."""
     import datetime
 
     from data.config.page_hubs import ACTIVE_HUBS
@@ -161,7 +171,7 @@ def fetch_hub_trends(months: int = _TREND_MONTHS) -> dict[str, list[dict]]:
     headers = {"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": secret,
                "Content-Type": "application/json"}
 
-    items = sorted(ACTIVE_HUBS.items())
+    items = sorted((s, h) for s, h in ACTIVE_HUBS.items() if not only or s in only)
     out: dict[str, list[dict]] = {}
     for i in range(0, len(items), _HUB_BATCH):
         chunk = items[i:i + _HUB_BATCH]
@@ -186,26 +196,36 @@ def fetch_hub_trends(months: int = _TREND_MONTHS) -> dict[str, list[dict]]:
     return out
 
 
-def collect_hub_trends() -> None:
-    """거점 트렌드를 Bronze 에 저장 (platform13/naver_datalab_hub_trend.json)."""
-    from data.collectors.common import load_env, save_json
+def collect_hub_trends(only: set[str] | None = None) -> None:
+    """거점 트렌드를 Bronze 에 저장 (platform13/naver_datalab_hub_trend.json).
+
+    `only` 를 주면 그 거점만 받아 **최신 파일에 병합**한다(2026-10-26 고양·파주) — 전 거점을
+    다시 받으면 서울 거점의 방향 라벨까지 이번 달 값으로 바뀐다(이번 변경의 범위가 아니다).
+    배치마다 같은 기준어(_ANCHOR)를 넣어 비율을 맞추므로 따로 받은 배치도 같은 눈금이다.
+    """
+    from data.collectors.common import load_env, load_latest, save_json
     from data.config.platform_districts import SLUG as SLUG13
 
     load_env()
-    trends = fetch_hub_trends()
+    trends = fetch_hub_trends(only=only)
     if not trends:
         print("[datalab:hub] 수집 0건 — 저장하지 않는다")
         return
+    if only:
+        prev = (load_latest(SLUG13, "naver_datalab_hub_trend.json") or {}).get("trends") or {}
+        trends = {**{k: v for k, v in prev.items() if k not in only}, **trends}
     save_json({"collected_at": time.strftime("%Y-%m-%d"), "trends": trends},
               SLUG13, "naver_datalab_hub_trend.json")
-    print(f"[datalab:hub] {len(trends)}거점 저장")
+    print(f"[datalab:hub] {len(trends)}거점 저장" + (f" (새로 받은 {len(only)})" if only else ""))
 
 
 if __name__ == "__main__":
     import sys
 
     if "--hubs" in sys.argv:
-        collect_hub_trends()
+        i = sys.argv.index("--hubs")
+        arg = sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("-") else ""
+        collect_hub_trends(only={s for s in arg.split(",") if s} or None)
     else:
         data = fetch_map_interest()
         for gu, v in sorted(data.items(), key=lambda x: -x[1])[:5]:

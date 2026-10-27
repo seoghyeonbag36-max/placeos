@@ -662,7 +662,7 @@ function srcLabel(v: string | undefined): string {
   return ({
     rone: "실측", flpop: "실측", "flpop+seed": "실측+예시",
     "flpop+jipgyegu": "실측",
-    seed: "예시", absent: "전제(0)", contract: "직접 입력",
+    seed: "예시", absent: "전제(0)", contract: "직접 입력", none: "자료 없음(보정 안 함)",
     bldg: "실측", "gold-ledger": "실측", "bldg+split": "실측 면적·분할 추정",
   } as Record<string, string>)[v ?? ""] ?? (v ?? "미상");
 }

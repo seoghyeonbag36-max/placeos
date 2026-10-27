@@ -76,9 +76,14 @@ python -m data.pipelines.build_building_attrs <slug>
 python -m data.pipelines.recalc_floor_ouln <slug>
 python -m data.pipelines.build_page_master <slug>
 python -m data.pipelines.build_vacant_units <slug>
+python -m data.pipelines.build_vacant_floor_units <slug>   # 층 단위 매물 — 창업자 흐름 R3 가 읽는다
+python -m data.pipelines.build_industry_floor_fit          # 서빙 거점 풀링 관측표 — 거점이 늘면 다시
 python -m data.pipelines.calibrate_vacancy
 python scripts/chain_status.py <slug>
 ```
+⚠ 2026-10-27: 고양·파주 9거점이 이 목록대로 서고 **층 단위 매물만 빠진 채** 서빙에 올라, 흐름 R3 가 9곳 모두
+「빈 층 목록을 만들 자료가 없어요」였다(그때 이 목록에 `build_vacant_floor_units` 가 없었다). 가드:
+`tests/test_floor_vacancies.test_every_served_hub_has_floor_inventory`.
 
 ### 6. 서빙 등재 — **여기가 이 체인에서 유일하게 되돌리기 어려운 단계다**
 `app/data/seoul_pages.DISTRICTS` 에 오르는 순간 화면에 뜬다. Gold 가 서기 전에 올리면

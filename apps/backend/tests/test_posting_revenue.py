@@ -285,19 +285,33 @@ def test_revenue_artifact_covers_served_hubs():
     ⚠ **비율로 잰다**(거점 수를 박지 않는다 — 거점이 늘 때마다 깨진다). 얇은 표본 때문에
       tier 가 빠지는 거점이 소수 있을 수 있어(`_MIN_STORES`) 0 을 요구하지 않는다.
     """
+    from app.data import cities
+
     rev = P._read(P._REV)
-    served = [d["id"] for d in (getattr(D, "PAGES", None) or D.DISTRICTS)]
+    pages = getattr(D, "PAGES", None) or D.DISTRICTS
+    served = [d["id"] for d in pages]
     cov = rev.get("coverage") or {}
     assert cov.get("served") == len(served), (
         f"산출물이 본 서빙 거점 {cov.get('served')} ≠ 지금 {len(served)} — "
         "`python -m data.pipelines.build_posting_revenue` 를 다시 돌릴 것")
 
-    measured_hubs = [h for h in served if P.available(h)]
-    assert len(measured_hubs) / len(served) >= 0.9, (
-        f"실측 모델 거점 {len(measured_hubs)}/{len(served)} — 나머지는 근거 없는 계수 폴백이다")
+    # 2026-10-26 고양·파주 서빙 — 실측 매출 재료(서울 상권분석 추정매출)는 서울에만 선다. 비율은
+    # **재료가 서는 도시 안에서** 잰다. 재료가 없는 도시의 거점은 폴백이어야 하고 그 사실이
+    # `basis` 로 드러나야 한다 — 서울 값을 빌려 실측처럼 꽂으면 아래 두 번째 단언이 깨진다.
+    city = {d["id"]: (d.get("city") or "seoul") for d in pages}
+    with_src = [h for h in served if cities.by_id(city[h]).has_trdar]
+    without_src = [h for h in served if not cities.by_id(city[h]).has_trdar]
+    measured_hubs = [h for h in with_src if P.available(h)]
+    assert with_src and len(measured_hubs) / len(with_src) >= 0.9, (
+        f"실측 모델 거점 {len(measured_hubs)}/{len(with_src)} — 나머지는 근거 없는 계수 폴백이다")
+    leaked = [h for h in without_src if P.available(h)]
+    assert not leaked, f"매출 재료가 없는 도시의 거점이 실측 모델로 돈다: {leaked}"
+    for h in without_src:
+        for u in D.resolved_units(h) or []:
+            assert all(s["basis"] == D.COST_BASIS_LEGACY for s in D.tier_scenarios(u, h).values()), h
 
     n_all = n_legacy = 0
-    for h in served:
+    for h in with_src:
         n = len(D.resolved_units(h) or [])
         n_all += n
         if not P.available(h):

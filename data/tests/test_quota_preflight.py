@@ -36,14 +36,30 @@ def test_paused_excludes_exactly_the_unserved_cities(monkeypatch):
 
 
 def test_resuming_a_city_puts_its_hubs_back(monkeypatch):
-    """재개는 `SERVED_CITIES` 에 도시 id 를 되넣는 것 하나로 끝나야 한다."""
+    """도시 재개는 `SERVED_CITIES` 에 도시 id 를 되넣는 것으로 그 도시 거점을 되살린다.
+
+    2026-10-26 부터 예외가 하나 있다 — 추후 확장 과제(`PageHub.deferred`: 계획상가·단일시설)는
+    도시가 서빙돼도 계속 빠진다(거점 단위 판단). 그 밖의 거점은 전부 돌아와야 한다.
+    """
     import app.data.measured_pages as mp
 
     monkeypatch.setattr(mp, "SERVED_CITIES", frozenset({"seoul", "paju"}))
     paused = qp._paused()
 
-    assert not any(getattr(qp.ALL_HUBS[s], "city", "") == "paju" for s in paused)
+    paju_paused = {s for s in paused if getattr(qp.ALL_HUBS[s], "city", "") == "paju"}
+    assert all(getattr(qp.ALL_HUBS[s], "deferred", "") for s in paju_paused), paju_paused
+    assert any(not getattr(qp.ALL_HUBS[s], "deferred", "")
+               for s in qp.ALL_HUBS if getattr(qp.ALL_HUBS[s], "city", "") == "paju"
+               and s not in paused)
     assert any(getattr(qp.ALL_HUBS[s], "city", "") == "goyang" for s in paused)
+
+
+def test_deferred_hubs_stay_paused_even_in_a_served_city():
+    """추후 확장 과제 거점은 서빙 도시 안에서도 쿼터 대상에서 빠진다(2026-10-26 결정)."""
+    paused = qp._paused()
+    deferred = {s for s, h in qp.ALL_HUBS.items() if getattr(h, "deferred", "")}
+    assert deferred, "보류 표기가 사라졌다 — 결정이 바뀌었는지 확인할 것"
+    assert deferred <= paused
 
 
 def test_unreadable_decision_excludes_nothing(monkeypatch):

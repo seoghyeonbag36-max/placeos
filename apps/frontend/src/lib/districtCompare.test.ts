@@ -1,8 +1,8 @@
 /** 상권 ↔ 상권 비교의 줄 만들기 — 값을 옮겨 적기만 하는가, 없는 값을 지어내지 않는가(2026-10-24) */
 import { describe, expect, it } from "vitest";
-import type { FloorVacancyList, IndustryFit, PlatformProfile, Posting, RentHeatmap } from "./api";
+import type { FloorVacancyList, IndustryFit, IndustryFitRow, PlatformProfile, Posting, RentHeatmap } from "./api";
 import {
-  calculableCount, compareColumns, compareIds, compareRows, COMPARE_MAX, type CompareLoaders, type DistrictLoads, type Settled,
+  calculableCount, compareColumns, compareIds, compareRows, COMPARE_MAX, fitRulerNames, type CompareLoaders, type DistrictLoads, type Settled,
 } from "./districtCompare";
 import { district, rentHeatmap, rentListing } from "@/test/fixtures";
 
@@ -95,8 +95,8 @@ describe("compareColumns — 서비스하지 않는 상권은 버리고 caveat �
   it("목록 순서가 아니라 주소 순서", () => {
     const list = [district("a", { name: "A", gu: "가구" }), district("b", { name: "B", gu: "나구", caveat: "직접 비교하지 말 것" })];
     expect(compareColumns(["b", "zz", "a"], list)).toEqual([
-      { id: "b", name: "B", gu: "나구", caveat: "직접 비교하지 말 것" },
-      { id: "a", name: "A", gu: "가구", caveat: null },
+      { id: "b", name: "B", gu: "나구", caveat: "직접 비교하지 말 것", city: "seoul" },
+      { id: "a", name: "A", gu: "가구", caveat: null, city: "seoul" },
     ]);
   });
 });
@@ -125,5 +125,25 @@ describe("calculableCount — 빈 자리 목록(R3)의 「본전 계산 가능�
 
   it("404 가 아닌 실패는 숨기지 않는다(「불러오지 못했어요」로 간다)", async () => {
     await expect(calculableCount("x", loaders({ postings: () => Promise.reject(new Error("API /x failed: 500")) }))).rejects.toThrow("500");
+  });
+});
+
+describe("입지 점수 묶음 — 잣대가 다르면 견주지 말라고 밝힌다(2026-10-27)", () => {
+  const fit = (rows: Array<Partial<IndustryFitRow> & { district_id: string }>): Settled<IndustryFit> => ready({
+    industry: { key: "cafe", label: "카페·디저트", input: "카페", model_label: "카페" }, model_covered: true,
+    seoul_fit: 0.3, ranked_n: rows.length, districts: rows.map((r) => ({
+      name: r.district_id, gu: null, fit: 0.3, fit_rank: 1, same_n: null, sample_n: null, same_share: null,
+      rent_1f_per_pyeong: null, rent_shared: false, ...r })), source: "", note: "",
+  } as IndustryFit);
+  it("칸은 「서울 1위」처럼 묶음과 함께 읽는다", () => {
+    const rows = compareRows(["a"], { a: { platform: loading, rent: loading, floors: loading, calc: loading } },
+      { key: "cafe", label: "카페·디저트" }, fit([{ district_id: "a", fit_model: "industry-gnn", rank_group_name: "서울" }]));
+    expect(rows[0].cells[0].text).toBe("30점 · 서울 1위");
+  });
+  it("잣대가 섞이면 묶음 이름을, 같으면 null 을 준다", () => {
+    const mixed = fit([{ district_id: "a", fit_model: "industry-gnn", rank_group_name: "서울" },
+      { district_id: "b", fit_model: "industry-gnn-common", rank_group_name: "고양·파주" }]);
+    expect(fitRulerNames(mixed, ["a", "b"])).toEqual(["서울", "고양·파주"]);
+    expect(fitRulerNames(mixed, ["a"])).toBeNull();
   });
 });

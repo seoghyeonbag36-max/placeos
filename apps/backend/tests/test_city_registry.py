@@ -65,10 +65,11 @@ def test_gyeonggi_hubs_do_not_mutate_seoul_seed():
 def test_ilsan_exceptions_are_separate_hubs_with_their_own_caveats():
     """라페스타·웨스턴돔은 예외 근거를 밝힌 서로 다른 Gold 거점이어야 한다.
 
-    ⚠ 2026-09-03 부터 **서빙은 검사하지 않는다.** 경기 작업을 중단하며 화면 서빙을
-      서울로 좁혔기 때문이다(`measured_pages.SERVED_CITIES`). 등재·좌표·예외 문구는
-      그대로 살아 있어야 하고 — 재개하면 그날로 다시 떠야 하므로 — 여기서 계속 지킨다.
-      서빙 여부는 아래 `test_only_served_cities_reach_the_api` 가 따로 본다.
+    ⚠ 2026-10-26 부터 두 곳은 **추후 확장 과제(계획상가)**다 — 신규 확장에서 계획상가를
+      빼기로 했다(docs/decision-goyang-paju-corridor-2026-10-26.md). 08-30 의 예외 서빙
+      판단을 대체한 것이라 서빙은 여기서 검사하지 않는다. 등재·좌표·예외 문구·Gold 는
+      그대로 살아 있어야 한다 — 재개할 때 다시 받지 않게. 서빙 여부는 아래
+      `test_only_served_cities_reach_the_api` 가 따로 본다.
     """
     ph = _load_page_hubs()
     from app.services import districts as svc
@@ -87,30 +88,57 @@ def test_ilsan_exceptions_are_separate_hubs_with_their_own_caveats():
     for hub in required.values():
         # Gold 는 서 있어야 한다 — 서빙을 껐다고 산출물까지 사라지면 재개가 재수집이 된다.
         assert (_GOLD / hub.slug / "page_building_master.geojson").exists(), hub.name
-        assert hub.caveat.startswith("예외 서빙"), hub.name
+        assert hub.caveat.startswith("계획상가 밀집"), hub.name
+        assert hub.deferred == "계획상가", hub.name
 
 
 def test_only_served_cities_reach_the_api():
-    """화면에 오르는 도시는 `SERVED_CITIES` 가 정한다 — 산출물 유무와 별개다.
+    """화면에 오르는 거점은 `SERVED_CITIES`(도시)와 `deferred`(거점)가 함께 정한다.
 
-    2026-09-03: 경기(고양·파주) 작업 중단으로 서울만 서빙한다. 경기 7거점은 Gold·앵커가
-    다 선 채로 `GYEONGGI_HUBS` 에 남아 있고 **의도적으로** 목록에서 빠진다. 이 둘이
-    갈리지 않으면 "산출물이 없어서 안 뜬다"와 "안 띄우기로 정했다"를 구분할 수 없다.
+    2026-09-03 ~ 10-25 에는 서울만 서빙했다. 2026-10-26 사용자 결정으로 고양·파주를
+    되넣고, 그 안의 계획상가·단일시설 11곳은 **추후 확장 과제**로 빼 둔다. 그 11곳 중
+    Gold 가 선 곳(화정·라페스타·웨스턴돔·탄현)은 산출물이 있는데도 **의도적으로** 목록에서
+    빠진다 — "산출물이 없어서 안 뜬다"와 "안 띄우기로 정했다"를 갈라 두기 위한 검사다.
     """
     from app.data import measured_pages as mp
     from app.services import districts as svc
 
-    assert mp.SERVED_CITIES == frozenset({"seoul"}), (
+    assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju"}), (
         f"서빙 도시가 바뀌었다: {sorted(mp.SERVED_CITIES)} — 의도한 변경인지 확인할 것")
 
     rows = svc.list_summaries()
-    assert {r["city"] for r in rows} == mp.SERVED_CITIES
+    ids = {r["id"] for r in rows}
+    assert {r["city"] for r in rows} <= mp.SERVED_CITIES
+    assert "seoul" in {r["city"] for r in rows}
 
     ph = _load_page_hubs()
-    gg_with_gold = {s for s in getattr(ph, "GYEONGGI_HUBS", {})
-                    if (_GOLD / s / "page_building_master.geojson").exists()}
-    assert gg_with_gold, "경기 Gold 가 통째로 사라졌다 — 중단은 서빙만 끄는 것이다"
-    assert not (gg_with_gold & {r["id"] for r in rows}), "경기 거점이 서빙에 샜다"
+    deferred_with_gold = {s for s in ph.DEFERRED_HUBS
+                          if (_GOLD / s / "page_building_master.geojson").exists()}
+    assert deferred_with_gold, "보류 거점의 Gold 가 통째로 사라졌다 — 보류는 서빙만 끄는 것이다"
+    assert not (deferred_with_gold & ids), "추후 확장 과제 거점이 서빙에 샜다"
+
+    # 경기에서 서빙에 오른 거점은 전부 보류 표기가 없고 Gold 가 선 곳이어야 한다.
+    gg_served = {s for s in ph.GYEONGGI_HUBS if s in ids}
+    assert gg_served, "고양·파주를 되넣었는데 서빙에 오른 경기 거점이 없다"
+    for slug in gg_served:
+        assert not ph.GYEONGGI_HUBS[slug].deferred, slug
+        assert (_GOLD / slug / "page_building_master.geojson").exists(), slug
+
+
+def test_deferred_marks_only_new_expansion_and_known_kinds():
+    """추후 확장 과제 표기는 **신규 확장(서울 밖)에만**, 그리고 두 종류만 붙는다.
+
+    2026-10-26 결정: 서울 서빙 거점은 같은 기준(건물당 점포 >10 · 집합 호실 >80%)에 걸려도
+    그대로 둔다(여의도·반포·가락·용산·동대문·공덕·독산). 서울 거점에 표기가 붙으면 화면에서
+    거점이 조용히 사라진다. 종류를 자유 문구로 두면 두 문제(계획상가 · 단일시설)가 한 칸에
+    뭉쳐 나중에 무엇을 풀어야 재개되는지가 흐려진다.
+    """
+    ph = _load_page_hubs()
+    for slug, hub in ph.ALL_HUBS.items():
+        if hub.deferred:
+            assert hub.city != "seoul", f"{slug}: 서울 거점에 보류 표기 — 결정 위반"
+            assert hub.deferred in ph.DEFERRED_KINDS, f"{slug}: 모르는 보류 종류 {hub.deferred!r}"
+            assert hub.caveat, f"{slug}: 보류 근거(caveat)가 비어 있다"
 
 
 @pytest.mark.parametrize("pnu,expected", [

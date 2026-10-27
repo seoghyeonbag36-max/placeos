@@ -360,5 +360,18 @@ button.fl-row-btn:disabled { cursor: not-allowed; opacity: .55; }
   .flow ~ .visitor-feedback { bottom: calc(68px + env(safe-area-inset-bottom)); }
 }
 
+/* ── 상권 흐름(파주 → 고양 → 서울 · 2026-10-26) ──────────────────────────────── */
+.fl-cor-hours { margin: var(--sp-2) 0 0; }
+.fl-cor-bars { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); align-items: end; gap: 2px; height: 48px; }
+.fl-cor-bars span { display: block; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--grey-300); }
+.fl-cor-bars span.is-peak { background: var(--primary); }
+.fl-cor-axis { display: flex; justify-content: space-between; margin-top: var(--sp-1); font-size: .75rem; color: var(--grey-600); }
+.fl-cor-syns { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.fl-cor-syn { display: grid; gap: var(--sp-2); padding: var(--sp-4); border-radius: var(--radius-lg); background: var(--grey-50); min-width: 0; }
+.fl-cor-syn h3 { margin: 0; font-size: 1rem; line-height: 1.45; font-weight: var(--fw-bold); color: var(--grey-900); }
+.fl-cor-fact { margin: 0; font-size: .9375rem; color: var(--grey-800); font-variant-numeric: tabular-nums; }
+.fl-cor-idea { margin: 0; font-size: .9375rem; line-height: 1.55; color: var(--grey-700); }
+.fl-cor-syn .fl-actions { margin: 0; }
+
 /* R5 — 고른(추천) 가격대 카드는 바탕이 primary-soft 라 같은 색 배지가 묻힌다 */
 .fl-choice.is-on .fl-badge.is-primary { background: var(--primary); color: #fff; }

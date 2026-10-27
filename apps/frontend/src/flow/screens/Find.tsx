@@ -5,12 +5,13 @@
  */
 import { useEffect, useState } from "react";
 import type { BusinessGoal } from "@/lib/businessProfile";
-import type { DistrictSummary, IndustryFitRow } from "@/lib/api";
+import { CORRIDOR_ID, type DistrictSummary, type IndustryFitRow } from "@/lib/api";
 import { COMPARE_MAX } from "@/lib/districtCompare";
+import { fitGroups, rankText } from "@/lib/fitGroups";
 import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
-import { comparePath, go } from "../route";
+import { comparePath, corridorPath, go } from "../route";
 import { setDistrict, setGoal, setHomeDistrict, setIndustry } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet,
@@ -115,6 +116,14 @@ export function IndustryOther() {
   );
 }
 
+/** 서빙 도시 이름 — 「서울·고양·파주」. 2026-10-26 까지는 「서울」 하나라 문구에 박혀 있었다 */
+const CITY_ORDER = ["서울", "고양", "파주"];
+function cityNames(list: DistrictSummary[]): string {
+  const names = [...new Set(list.map((d) => d.city_name).filter(Boolean))];
+  names.sort((a, b) => (CITY_ORDER.indexOf(a) + 1 || 99) - (CITY_ORDER.indexOf(b) + 1 || 99));
+  return names.join("·") || "서울";
+}
+
 /* ── 상권 고르기 목록 — Q3 · Q4 가 같이 쓴다 ─────────────────────────────── */
 
 function DistrictPickList({ onPick, emptyHint }: { onPick: (d: DistrictSummary) => void; emptyHint: string }) {
@@ -130,7 +139,7 @@ function DistrictPickList({ onPick, emptyHint }: { onPick: (d: DistrictSummary) 
         <input type="search" value={q} placeholder="동네 이름으로 찾기" onChange={(e) => setQ(e.target.value)} />
       </label>
       {shown.length === 0 ? (
-        <p className="fl-empty">찾는 상권이 없어요. 지금은 서울 {ds.data.length}개 상권만 있어요 — {emptyHint}</p>
+        <p className="fl-empty">찾는 상권이 없어요. 지금은 {cityNames(ds.data)} {ds.data.length}개 상권이 있어요 — {emptyHint}</p>
       ) : (
         <RowList label="상권">
           {shown.map((d) => (
@@ -193,7 +202,7 @@ function PickLine({ row, on, disabled, pinned, onToggle }: { row: IndustryFitRow
         <span className={"fl-pick" + (on ? " is-on" : "")} aria-hidden="true">{on ? "✓" : ""}</span>
         <span className="fl-row-main">
           <span className="fl-row-title">{row.name ?? row.district_id}</span>
-          <span className="fl-row-meta">{[pinned ? "지금 내 상권" : null, row.fit_rank != null ? `${row.fit_rank}위` : null, row.gu].filter(Boolean).join(" · ")}</span>
+          <span className="fl-row-meta">{[pinned ? "지금 내 상권" : null, rankText(row, true), row.gu].filter(Boolean).join(" · ")}</span>
         </span>
       </button>
     </li>
@@ -246,11 +255,22 @@ export function Districts() {
     </FlowScreen>;
   }
   if (fit.status !== "ready" || !ind) return null;
-  const rows = fit.data.districts.filter((r) => r.fit_rank != null).sort((a, b) => a.fit_rank! - b.fit_rank!);
-  const top = rows.slice(0, 5);
+  // 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 서울과 고양·파주를 한 줄에 섞지 않고 묶음별 목록으로 세운다
+  const groups = fitGroups(fit.data);
+  const multi = groups.length > 1;
+  const rows = groups.flatMap((g) => g.rows);
   const home = state.goal === "move" ? rows.find((r) => r.district_id === state.homeDistrictId) : undefined;
-  const homeInTop = !!home && top.some((r) => r.district_id === home.district_id);
-  const diff = home && top[0] && home.fit != null && top[0].fit != null ? Math.round((top[0].fit - home.fit) * 100) : null;
+  const homeGroup = home ? groups.find((g) => g.rows.includes(home)) : undefined;
+  // 옮기기는 지금 상권이 든 묶음을 먼저 보인다
+  const tops = (homeGroup ? [homeGroup, ...groups.filter((g) => g !== homeGroup)] : groups).map((g) => ({ g, top: g.rows.slice(0, 5) }));
+  const top = tops.flatMap((t) => t.top);
+  const homeInTop = !!home && top.includes(home);
+  const lead = homeGroup?.rows[0];
+  const diff = home && lead && home.fit != null && lead.fit != null ? Math.round((lead.fit - home.fit) * 100) : null;
+  const others = groups.slice(1).map((g) => g.name).join(" · ");
+  const rulerShort = multi ? `${groups[0].name}과 ${eun(others)} 순위를 따로 매겨요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.` : null;
+  const rulerWhy = multi ? `${eun(groups[0].name)} 서울시 상권분석 수요 자료까지 넣은 모델로, ${eun(others)} 그 자료 없이 매긴 모델로 순위를 냈어요. `
+    + "잣대가 다른 두 점수를 한 줄에 세우면 순위가 모델 차이를 섞어서 따로 세워요." : null;
   if (picked) {
     const toggle = (id: string) => setPicked((p) => (!p ? p : p.includes(id) ? p.filter((x) => x !== id)
       : p.length < COMPARE_MAX ? [...p, id] : p));
@@ -271,6 +291,7 @@ export function Districts() {
           {top.map((r) => line(r, r.district_id === home?.district_id))}
         </RowList>
         {full && <p className="fl-note" role="status">{COMPARE_MAX}곳까지 나란히 볼 수 있어요. 다른 상권을 담으려면 하나를 빼 주세요.</p>}
+        {rulerShort && <p className="fl-note">{rulerShort}</p>}
       </FlowScreen>
     );
   }
@@ -278,15 +299,21 @@ export function Districts() {
     <FlowScreen wide back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
       title={`${ind.label} 입지 점수가 높은 상권이에요`}
       sub={`비슷한 자리에 ${iga(ind.label)} 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.`}>
-      <RowList label={`${ind.label} 상권 순위`}>
-        {home && !homeInTop && (
-          <RankLine row={home} pinned rankLabel={`${home.fit_rank}`} onPick={() => pick(home.district_id)} />
-        )}
-        {top.map((r) => <RankLine key={r.district_id} row={r} onPick={() => pick(r.district_id)} />)}
-      </RowList>
+      {tops.map(({ g, top: groupTop }) => (
+        <section key={g.key || "all"} aria-label={multi ? `${g.name} 상권` : undefined}>
+          {multi && <h2 className="fl-h2">{g.name}</h2>}
+          <RowList label={`${multi ? `${g.name} ` : ""}${ind.label} 상권 순위`}>
+            {home && homeGroup === g && !groupTop.includes(home) && (
+              <RankLine row={home} pinned rankLabel={`${home.fit_rank}`} onPick={() => pick(home.district_id)} />
+            )}
+            {groupTop.map((r) => <RankLine key={r.district_id} row={r} onPick={() => pick(r.district_id)} />)}
+          </RowList>
+        </section>
+      ))}
+      {rulerShort && <p className="fl-note">{rulerShort}</p>}
       {home && (
-        <p className="fl-note">{homeInTop ? `지금 내 상권 ${home.name}은 ${home.fit_rank}위예요.`
-          : `지금 내 상권 ${home.name}은 ${home.fit_rank}위예요${diff != null && diff > 0 ? ` — 1위보다 ${diff}점 낮아요` : ""}.`}</p>
+        <p className="fl-note">{homeInTop ? `지금 내 상권 ${home.name}은 ${rankText(home, multi)}예요.`
+          : `지금 내 상권 ${home.name}은 ${rankText(home, multi)}예요${diff != null && diff > 0 ? ` — ${multi && homeGroup ? `${homeGroup.name} ` : ""}1위보다 ${diff}점 낮아요` : ""}.`}</p>
       )}
       {rows.some((r) => r.rent_shared) && <p className="fl-note">* 가까운 상권의 임대료 통계를 빌려 쓴 값이에요.</p>}
       <div className="fl-actions">
@@ -294,14 +321,22 @@ export function Districts() {
         <TextButton onClick={() => setPicked(home ? [home.district_id] : [])}>상권 나란히 비교하기</TextButton>
         <TextButton onClick={() => setWhy(true)}>왜 이 순서인가요?</TextButton>
         <TextButton onClick={() => go("/district-search")}>다른 상권 직접 고르기</TextButton>
+        {/* 상권 흐름(2026-10-26) — 순위를 대신하지 않고 옆에 더한다 */}
+        <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
       </div>
       <Sheet open={why} onClose={() => setWhy(false)} title="왜 이 순서인가요?">
         <p>입지 점수는 비슷한 자리에 {ind.label} 가게가 이미 얼마나 모여 있는지를 추천 모델이 배운 값이에요(×100). 매출이나 생존율이 아니에요.</p>
         <ul className="fl-facts">
-          {fit.data.seoul_fit != null && <li>서울 평균 입지 점수 {Math.round(fit.data.seoul_fit * 100)}점</li>}
-          <li>순위를 매긴 상권 {fit.data.ranked_n}곳</li>
-          {top[0]?.same_n != null && top[0]?.sample_n != null && <li>1위 상권 표본 {top[0].sample_n}곳 중 같은 업종 {top[0].same_n}곳</li>}
+          {/* 묶음(잣대)마다 평균과 순위 수를 따로 — 묶음 없는 옛 응답이면 seoul_fit(서울 평균) 하나 */}
+          {fit.data.rank_groups?.length
+            ? fit.data.rank_groups.map((g) => <li key={g.fit_model}>{g.name} 평균 입지 점수 {Math.round(g.mean_fit * 100)}점 · 순위를 매긴 상권 {g.ranked_n}곳</li>)
+            : <>
+              {fit.data.seoul_fit != null && <li>서울 평균 입지 점수 {Math.round(fit.data.seoul_fit * 100)}점</li>}
+              <li>순위를 매긴 상권 {fit.data.ranked_n}곳</li>
+            </>}
+          {top[0]?.same_n != null && top[0]?.sample_n != null && <li>{multi ? `${tops[0].g.name} ` : ""}1위 상권 표본 {top[0].sample_n}곳 중 같은 업종 {top[0].same_n}곳</li>}
         </ul>
+        {rulerWhy && <p className="fl-note">{rulerWhy}</p>}
         <p className="fl-note">{fit.data.note}</p>
         <p className="fl-note mono">{fit.data.source}</p>
       </Sheet>
@@ -454,10 +489,14 @@ export function District({ id }: { id: string }) {
             : "층 단위 자료가 아직 없어요"}</dd></div>
         </dl>
       )}
-      <p className="fl-source">카카오 플레이스 · 서울시 상권분석{rent.status === "ready" && rent.data.quarter ? ` · R-ONE ${rent.data.quarter}` : " · R-ONE"} · 건축물대장</p>
+      {/* 서울시 상권분석(시간대·유동)은 서울 거점에만 선다 — 고양·파주 상권에는 그 출처를 적지 않는다 */}
+      <p className="fl-source">카카오 플레이스{d?.city === "seoul" || !d ? " · 서울시 상권분석" : ""}{rent.status === "ready" && rent.data.quarter ? ` · R-ONE ${rent.data.quarter}` : " · R-ONE"} · 건축물대장</p>
       {identity?.archetype_rule && <Details><p className="fl-note">상권 유형은 이렇게 정했어요: {identity.archetype_rule}</p></Details>}
       {/* PPPP 지도 탐색으로 — 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙) */}
-      <div className="fl-actions"><TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton></div>
+      <div className="fl-actions">
+        <TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton>
+        <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주·고양·서울 손님 흐름에서 보기</TextButton>
+      </div>
     </FlowScreen>
   );
 }
