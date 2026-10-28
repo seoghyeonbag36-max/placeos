@@ -335,10 +335,24 @@ def revenue_of(unit: dict, district_id: str | None, tier: str) -> float | None:
     return unit["area"] * fk * pp
 
 
+def tier_available(district_id: str | None, tier: str) -> bool:
+    """이 거점 × tier 에 실측 재료(평당매출 · 비임차 영업비용률)가 있는가."""
+    return per_pyeong(district_id, tier) is not None and opex_rate(tier) is not None
+
+
+def measured_tiers(district_id: str | None) -> list[str]:
+    """실측으로 계산할 수 있는 tier. 빠진 tier 는 계수로 채우지 않는다(2026-10-28 사용자 결정 (b)).
+
+    서울 79거점은 셋 다 서고, 가락·불광은 고급화가 빠지고(가성비·공장제만), 매출 재료가 없는
+    고양·파주는 하나도 안 선다(2026-10-28 실측). 종전에는 하나라도 빠지면 세 tier 를 **통째로**
+    손으로 적은 계수(`rent+fitout`)로 돌려 마진 76~80% · 회수 1개월 안팎을 냈다.
+    """
+    return [t for t in TIERS if tier_available(district_id, t)]
+
+
 def available(district_id: str | None) -> bool:
-    """이 거점에 실측 모델을 쓸 수 있는가 — 세 tier 전부 재료가 있어야 참."""
-    return all(per_pyeong(district_id, t) is not None and opex_rate(t) is not None
-               for t in TIERS)
+    """이 거점에 실측 모델을 **세 tier 전부** 쓸 수 있는가."""
+    return len(measured_tiers(district_id)) == len(TIERS)
 
 
 def diagnostics() -> dict:

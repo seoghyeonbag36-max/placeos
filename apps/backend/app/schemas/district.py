@@ -166,14 +166,18 @@ class TierScenario(BaseModel):
     tier: str
     name: str
     sub: str
-    invest_mn: int
-    month_cost: int
-    month_rev: int
-    month_net: int
-    roi_months: float
+    # False 면 실측 재료가 없어 **계산하지 않은** tier 다(2026-10-28 사용자 결정 (b)) — 숫자는 None 이고
+    # `unavailable_reason` 이 이유를 밝힌다. 화면은 「자료 부족」으로 그린다. 종전에는 손으로 적은 계수로 채웠다.
+    available: bool = True
+    unavailable_reason: str | None = None
+    invest_mn: int | None = None
+    month_cost: int | None = None
+    month_rev: int | None = None
+    month_net: int | None = None
+    roi_months: float | None = None
     recommended: bool
     # 순익이 0 이하면 False — 회수 자체가 성립하지 않는다. roi_months 의 99.0 은
-    # "매우 김"이 아니라 "불가"의 표식이었는데 구분이 안 됐다.
+    # "매우 김"이 아니라 "불가"의 표식이었는데 구분이 안 됐다. 자료 부족 tier 도 False 다(「모른다」).
     viable: bool = True
     # 이 회수기간이 **어떤 비용 항목까지** 넣고 계산됐는지. services/districts.COST_BASIS.
     basis: str | None = None
@@ -204,9 +208,9 @@ class Posting(BaseModel):
     persona: str | None = None
     note: str | None = None
     scenarios: dict[str, TierScenario]
-    # 이 자리에서 본전 시점을 답하지 않는 사유(2026-10-27) — 매출 재료가 없는 도시(고양·파주).
-    # None 이면 답할 수 있다. 있으면 `scenarios` 는 계수 폴백이라 화면이 회수기간을 머리 값으로
-    # 쓰지 않는다(services/districts.payback_unavailable_reason).
+    # 이 자리에서 본전 시점을 답하지 않는 사유(2026-10-27) — 실측으로 계산한 tier 가 하나도 없다
+    # (매출 재료가 없는 도시 고양·파주). None 이면 답할 수 있다. 있으면 `scenarios` 의 세 tier 가 모두
+    # 자료 부족이라 화면이 회수기간을 머리 값으로 쓰지 않는다(services/districts.payback_unavailable_reason).
     payback_unavailable_reason: str | None = None
 
 

@@ -64,3 +64,25 @@ describe("PostingConsole — 결과 저장", () => {
     expect(screen.queryByRole("region", { name: "저장한 결과" })).toBeNull();
   });
 });
+
+describe("PostingConsole — 10-28 이전 저장 결과 (사용자 결정 (b))", () => {
+  it("손 계수(rent+fitout)로 계산해 저장한 결과는 다시 그리되 그 사실을 맨 위에 밝힌다", async () => {
+    saveToken("test-token");
+    const legacy = simulateResult("garosugil", "garosugil-u1");
+    for (const s of Object.values(legacy.scenarios)) { s.basis = "rent+fitout"; s.roi_months = 1.1; }
+    installFetchStub([
+      { match: /\/api\/v1\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
+      { match: /\/api\/v1\/commercial-districts\/garosugil\/postings$/, body: postings("garosugil", 2) },
+      { match: /\/api\/v1\/ai\/simulate-revenue$/, body: () => simulateResult("garosugil", "garosugil-u1") },
+      { match: /\/auth\/results$/, body: [{ id: "old", kind: "posting", districtId: "garosugil", title: "가로수길 · 10-20",
+        createdAt: "2026-10-20T12:00:00Z", payload: { input: { district_id: "garosugil", unit_id: "garosugil-u1" }, result: legacy } }] },
+    ]);
+    render(<PostingConsole />);
+    await tiersReady();
+    const list = screen.getByRole("region", { name: "저장한 결과" });
+    fireEvent.click(await within(list).findByRole("button", { name: "보기" }));
+    const saved = within(list.querySelector(".saved-body") as HTMLElement);
+    expect(saved.getByText(/비용 일부 미반영\(10-28 이전 계산\)/)).toBeTruthy();
+    expect(saved.getAllByText("1.1개월").length).toBe(3);    // 숫자는 저장한 그대로 — 지어내지도 지우지도 않는다
+  });
+});

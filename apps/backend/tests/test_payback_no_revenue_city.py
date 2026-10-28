@@ -1,13 +1,14 @@
-"""매출 재료가 없는 도시(고양·파주)에서는 본전 시점을 답하지 않는다 — 2026-10-27.
+"""매출 재료가 없는 도시(고양·파주)에서는 본전 시점을 답하지 않는다 — 2026-10-27 · 10-28 갱신.
 
-고양·파주 서빙 거점은 전부 `rent+fitout` 계수 폴백을 탄다(서울 상권분석 추정매출이 그 도시에 서지
-않는다). 그 값은 원가·인건비가 빠져 회수 1개월 안팎으로 나오고(금촌 가성비 0.9개월), 창업자 흐름의
-머리 문장 「… 하면 N개월이면 본전이에요」로 그대로 나가고 있었다. 지키는 것:
+고양·파주 서빙 거점에는 서울 상권분석 추정매출이 서지 않는다. 10-27 까지는 세 tier 를 손으로 적은 계수
+(`rent+fitout`)로 채웠고 그 값은 원가·인건비가 빠져 회수 1개월 안팎으로 나왔다(금촌 가성비 0.9개월). 10-28
+사용자 결정 (b) 로 계수 폴백을 없앴다 — 재료가 없는 tier 는 계산하지 않는다. 지키는 것:
 
-  · `/postings` 유닛에 사유가 실린다 — 자리(건축물대장 실측)는 남기고 답만 거둔다
-  · `/ai/simulate-revenue` 가 계수 폴백 대신 「계산 불가」와 같은 사유로 답한다
-  · 서울 거점에는 사유가 없다 — 서울 안에서 표본이 모자라 폴백한 거점(가락·불광)도 마찬가지다.
-    재료는 있는데 표본이 모자란 것이라 풀 방법이 다르다(그 판단은 이 테스트 밖이다)
+  · `/postings` 유닛에 사유가 실린다 — 자리(건축물대장 실측)는 남기고 답만 거둔다. 세 tier 는 모두
+    「자료 부족」(`available: False` · 숫자 None)이고 각자 그 도시를 사유로 든다
+  · `/ai/simulate-revenue` 가 「계산 불가」와 같은 사유로 답한다
+  · 서울 거점에는 사유가 없다 — 서울 안에서 일부 tier 만 표본이 모자란 거점(가락·불광)은 선 tier 로 답한다
+    (그 판단은 tests/test_posting_revenue.test_partial_hubs_compute_only_the_measured_tiers)
 """
 from __future__ import annotations
 
@@ -44,8 +45,13 @@ def test_postings_carry_the_reason_in_cities_without_revenue_material():
         units = r.json()
         assert units and all(u["payback_unavailable_reason"] for u in units), slug
         assert _city(slug).short in units[0]["payback_unavailable_reason"], slug
-        # 자리와 시나리오는 그대로다 — 계수 폴백임을 `basis` 가 밝힌다
-        assert all(s["basis"] == D.COST_BASIS_LEGACY for u in units for s in u["scenarios"].values()), slug
+        # 자리는 그대로다. 시나리오의 세 tier 는 모두 자료 부족이고 숫자를 지어내지 않는다(2026-10-28 (b))
+        for u in units:
+            assert set(u["scenarios"]) == {"premium", "value", "factory"}, slug
+            for t, sc in u["scenarios"].items():
+                assert sc["available"] is False and sc["basis"] is None, (slug, t)
+                assert sc["roi_months"] is None and sc["month_net"] is None, (slug, t)
+                assert _city(slug).short in sc["unavailable_reason"], (slug, t)
 
 
 def test_simulate_refuses_instead_of_answering_from_coefficients():
@@ -60,7 +66,7 @@ def test_simulate_refuses_instead_of_answering_from_coefficients():
     assert body["unavailable_reason"] == D.payback_unavailable_reason(slug)
 
 
-def test_seoul_hubs_have_no_reason_even_when_they_fall_back():
+def test_seoul_hubs_have_no_reason_even_when_a_tier_is_missing():
     seoul = [s for s in D.PAGES_BY_ID if _city(s).has_trdar]
     assert all(D.payback_unavailable_reason(s) is None for s in seoul)
     measured = next(s for s in _with_units(seoul) if all(

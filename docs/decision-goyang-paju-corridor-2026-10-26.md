@@ -283,6 +283,9 @@
   `posting_revenue.available` 이 참이 되면 사유는 저절로 사라진다.
 - ⚠ **서울에도 같은 폴백이 남아 있다** — 가락 2유닛 · 불광 12유닛(10-27 실측, 거점 전체가 `rent+fitout`). 이 결정은 그 둘을 건드리지
   않았다. 재료는 있는데 표본(`_MIN_STORES`)이 모자란 것이라 풀 방법이 다르다. 같은 규칙을 서울에도 걸지는 사용자 판단이다(§7).
+- **10-28 사용자 결정 (b) 로 정리됐다** — 계수 폴백 자체를 서빙에서 없앴다. 재료가 없는 tier 만 「자료 부족」(`available: false`)이고
+  경기 9곳은 세 tier 모두, 가락·불광은 고급화만 그렇다. 위 사유(`payback_unavailable_reason`)는 「계산한 tier 가 하나도 없을 때」로 바뀌어
+  경기 9곳에 그대로 걸린다 → [finding-posting-tier-availability-2026-10-28.md](finding-posting-tier-availability-2026-10-28.md)
 - 가드: `tests/test_payback_no_revenue_city.py`(3) · `flow/FlowApp.test.tsx` F-08 의 경기 경우.
 
 ### 5-2. 층 단위 빈 자리 — 빠져 있던 산출물(10-27 · 검증 중 발견)
