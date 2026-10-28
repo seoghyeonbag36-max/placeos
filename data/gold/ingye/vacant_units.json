@@ -1,0 +1,401 @@
+{
+  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+  "built_at": "2026-10-27T23:26:24+00:00",
+  "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
+  "units": [
+    {
+      "id": "vu-4111514100111140008-1",
+      "n": "인계동 1114-8",
+      "grp": "기타 상품 소매",
+      "lat": 37.265389,
+      "lng": 127.033687,
+      "area": 188,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.2817,
+        "2F": 0.3588,
+        "3F": 0.3594
+      },
+      "vac_floor_mix": {
+        "1F": 0.2817,
+        "2F": 0.3588,
+        "3F": 0.3594
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.4996,
+        "3F": 0.5004
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "기타 상품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 1860.7
+    },
+    {
+      "id": "vu-4111313700110200008-1",
+      "n": "권선동 1020-8",
+      "grp": "가구 소매",
+      "lat": 37.259388,
+      "lng": 127.027435,
+      "area": 130,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "가구 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 1294.0
+    },
+    {
+      "id": "vu-4111313700110140005-1",
+      "n": "우덕빌딩",
+      "grp": "기타 간이",
+      "lat": 37.260533,
+      "lng": 127.030382,
+      "area": 124,
+      "floor": "1~7F",
+      "floor_mix": {
+        "1F": 0.1641,
+        "2F": 0.1847,
+        "3F": 0.1847,
+        "4F": 0.1847,
+        "6F": 0.1587,
+        "7F": 0.1233
+      },
+      "vac_floor_mix": {
+        "2F": 0.2835,
+        "4F": 0.2835,
+        "6F": 0.2436,
+        "7F": 0.1893
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.2835,
+        "4F": 0.2835,
+        "6F": 0.2436,
+        "7F": 0.1893
+      },
+      "occ_floors": [
+        1,
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 간이",
+      "capacity": 6,
+      "active": 2,
+      "vacancy_rate": 66.7,
+      "bld_floors": 7,
+      "com_area_m2": 2455.0
+    },
+    {
+      "id": "vu-4111313700110210008-1",
+      "n": "권선동 1021-8",
+      "grp": "가구 소매",
+      "lat": 37.258955,
+      "lng": 127.029153,
+      "area": 88,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3031,
+        "2F": 0.3484,
+        "3F": 0.3484
+      },
+      "vac_floor_mix": {
+        "1F": 0.3031,
+        "2F": 0.3484,
+        "3F": 0.3484
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "가구 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 870.0
+    },
+    {
+      "id": "vu-4111313700110210008-2",
+      "n": "권선동 1021-8",
+      "grp": "가구 소매",
+      "lat": 37.258864,
+      "lng": 127.029175,
+      "area": 88,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3031,
+        "2F": 0.3484,
+        "3F": 0.3484
+      },
+      "vac_floor_mix": {
+        "1F": 0.3031,
+        "2F": 0.3484,
+        "3F": 0.3484
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "가구 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 870.0
+    },
+    {
+      "id": "vu-4111313700110260000-1",
+      "n": "권선동 1026",
+      "grp": "스포츠 서비스",
+      "lat": 37.258093,
+      "lng": 127.029997,
+      "area": 62,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "스포츠 서비스",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 612.1
+    },
+    {
+      "id": "vu-4111313700110260000-2",
+      "n": "권선동 1026",
+      "grp": "스포츠 서비스",
+      "lat": 37.257971,
+      "lng": 127.029979,
+      "area": 62,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "스포츠 서비스",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 612.1
+    },
+    {
+      "id": "vu-4111313700110260000-3",
+      "n": "권선동 1026",
+      "grp": "스포츠 서비스",
+      "lat": 37.2579,
+      "lng": 127.029964,
+      "area": 62,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "스포츠 서비스",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 612.1
+    },
+    {
+      "id": "vu-4111313700110260000-4",
+      "n": "권선동 1026",
+      "grp": "스포츠 서비스",
+      "lat": 37.258047,
+      "lng": 127.029939,
+      "area": 62,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "스포츠 서비스",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 612.1
+    },
+    {
+      "id": "vu-4111313700110260000-5",
+      "n": "권선동 1026",
+      "grp": "스포츠 서비스",
+      "lat": 37.257977,
+      "lng": 127.029919,
+      "area": 62,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "스포츠 서비스",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 612.1
+    },
+    {
+      "id": "vu-4111514100110320014-1",
+      "n": "인계동 1032-14",
+      "grp": "주점",
+      "lat": 37.265434,
+      "lng": 127.029397,
+      "area": 53,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.1838,
+        "2F": 0.6002,
+        "3F": 0.216
+      },
+      "vac_floor_mix": {
+        "1F": 0.1838,
+        "2F": 0.6002,
+        "3F": 0.216
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.7354,
+        "3F": 0.2646
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "주점",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 522.5
+    },
+    {
+      "id": "vu-4111514100110430008-1",
+      "n": "인계동 1043-8",
+      "grp": "비알코올 ",
+      "lat": 37.264093,
+      "lng": 127.02994,
+      "area": 50,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.5294,
+        "2F": 0.3316,
+        "3F": 0.139
+      },
+      "vac_floor_mix": {
+        "2F": 0.7046,
+        "3F": 0.2954
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.7046,
+        "3F": 0.2954
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "비알코올 ",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 492.2
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+  "built_at": "2026-10-27T23:27:51+00:00",
+  "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
+  "units": [
+    {
+      "id": "vu-4113313200100090000-1",
+      "n": "중앙동 9",
+      "grp": "의원",
+      "lat": 37.443889,
+      "lng": 127.156893,
+      "area": 44,
+      "floor": "1~6F",
+      "floor_mix": {
+        "1F": 0.2172,
+        "2F": 0.1853,
+        "3F": 0.1853,
+        "4F": 0.1853,
+        "5F": 0.1853,
+        "6F": 0.0417
+      },
+      "vac_floor_mix": {
+        "1F": 0.2172,
+        "2F": 0.1853,
+        "3F": 0.1853,
+        "4F": 0.1853,
+        "5F": 0.1853,
+        "6F": 0.0417
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.2367,
+        "3F": 0.2367,
+        "4F": 0.2367,
+        "5F": 0.2367,
+        "6F": 0.0533
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "의원",
+      "capacity": 6,
+      "active": 1,
+      "vacancy_rate": 83.3,
+      "bld_floors": 6,
+      "com_area_m2": 874.4
+    },
+    {
+      "id": "vu-4113313200100770000-1",
+      "n": "중앙동 77",
+      "grp": "일반 숙박",
+      "lat": 37.443826,
+      "lng": 127.155739,
+      "area": 24,
+      "floor": "2~6F",
+      "floor_mix": {
+        "2F": 0.2302,
+        "3F": 0.2302,
+        "4F": 0.2302,
+        "5F": 0.2302,
+        "6F": 0.0793
+      },
+      "vac_floor_mix": {
+        "2F": 0.2302,
+        "3F": 0.2302,
+        "4F": 0.2302,
+        "5F": 0.2302,
+        "6F": 0.0793
+      },
+      "vac_floor_mix_lo": {
+        "3F": 0.299,
+        "4F": 0.299,
+        "5F": 0.299,
+        "6F": 0.103
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 5,
+      "active": 1,
+      "vacancy_rate": 80.0,
+      "bld_floors": 6,
+      "com_area_m2": 392.9
+    },
+    {
+      "id": "vu-4113313200102560000-1",
+      "n": "중앙동 256",
+      "grp": "일반 숙박",
+      "lat": 37.442963,
+      "lng": 127.15494,
+      "area": 15,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.25,
+        "2F": 0.25,
+        "3F": 0.25,
+        "4F": 0.25
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "3F": 0.3333,
+        "4F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.3333,
+        "3F": 0.3333,
+        "4F": 0.3333
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 4,
+      "active": 1,
+      "vacancy_rate": 75.0,
+      "bld_floors": 4,
+      "com_area_m2": 199.2
+    },
+    {
+      "id": "vu-4113313200101100000-1",
+      "n": "중앙동 110",
+      "grp": "일반 숙박",
+      "lat": 37.443523,
+      "lng": 127.156136,
+      "area": 25,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3604,
+        "2F": 0.3604,
+        "3F": 0.2792
+      },
+      "vac_floor_mix": {
+        "1F": 0.3604,
+        "2F": 0.3604,
+        "3F": 0.2792
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5635,
+        "3F": 0.4365
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 244.2
+    },
+    {
+      "id": "vu-4113310300143130000-1",
+      "n": "일부호",
+      "grp": "이용·미용",
+      "lat": 37.445998,
+      "lng": 127.158772,
+      "area": 25,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.2474,
+        "2F": 0.381,
+        "3F": 0.3716
+      },
+      "vac_floor_mix": {
+        "2F": 0.5062,
+        "3F": 0.4938
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5062,
+        "3F": 0.4938
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "이용·미용",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 246.6
+    },
+    {
+      "id": "vu-4113313200103780000-1",
+      "n": "중앙동 378",
+      "grp": "일반 숙박",
+      "lat": 37.44247,
+      "lng": 127.153653,
+      "area": 20,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.4209,
+        "2F": 0.4209,
+        "3F": 0.1582
+      },
+      "vac_floor_mix": {
+        "1F": 0.4209,
+        "2F": 0.4209,
+        "3F": 0.1582
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.7268,
+        "3F": 0.2732
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 197.7
+    },
+    {
+      "id": "vu-4113310300144650000-1",
+      "n": "AXIS 금광",
+      "grp": "가전·통신 소매",
+      "lat": 37.447297,
+      "lng": 127.158386,
+      "area": 16,
+      "floor": "1~7F",
+      "floor_mix": {
+        "1F": 0.2349,
+        "3F": 0.2361,
+        "4F": 0.2361,
+        "5F": 0.2361,
+        "7F": 0.0567
+      },
+      "vac_floor_mix": {
+        "3F": 0.3086,
+        "4F": 0.3086,
+        "5F": 0.3086,
+        "7F": 0.0741
+      },
+      "vac_floor_mix_lo": {
+        "3F": 0.3086,
+        "4F": 0.3086,
+        "5F": 0.3086,
+        "7F": 0.0741
+      },
+      "occ_floors": [
+        1,
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "가전·통신 소매",
+      "capacity": 6,
+      "active": 2,
+      "vacancy_rate": 66.7,
+      "bld_floors": 7,
+      "com_area_m2": 323.2
+    },
+    {
+      "id": "vu-4113313200102630000-1",
+      "n": "중앙동 263",
+      "grp": "일반 숙박",
+      "lat": 37.443022,
+      "lng": 127.154666,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3464,
+        "2F": 0.3464,
+        "3F": 0.3073
+      },
+      "vac_floor_mix": {
+        "1F": 0.3464,
+        "2F": 0.3464,
+        "3F": 0.3073
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5299,
+        "3F": 0.4701
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 146.8
+    },
+    {
+      "id": "vu-4113313200101160000-1",
+      "n": "중앙동 116",
+      "grp": "일반 숙박",
+      "lat": 37.443575,
+      "lng": 127.155881,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 149.3
+    },
+    {
+      "id": "vu-4113313200101140000-1",
+      "n": "중앙동 114",
+      "grp": "일반 숙박",
+      "lat": 37.443535,
+      "lng": 127.155998,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 146.2
+    },
+    {
+      "id": "vu-4113313200102250000-1",
+      "n": "중앙동 225",
+      "grp": "일반 숙박",
+      "lat": 37.443163,
+      "lng": 127.154473,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 144.6
+    },
+    {
+      "id": "vu-4113313200101150000-1",
+      "n": "중앙동 115",
+      "grp": "일반 숙박",
+      "lat": 37.443605,
+      "lng": 127.155947,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "일반 숙박",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 146.9
+    }
+  ]
+}

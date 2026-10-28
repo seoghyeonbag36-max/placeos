@@ -59,7 +59,258 @@
   "at": "2026-09-01T22:57:10",
   "minutes": 0.0
  },
- "finished_at": "2026-09-01T22:57:10",
- "stopped_reason": "battery 4%",
- "stopped_at": "2026-09-01T00:11:07"
+ "finished_at": "2026-10-28T12:19:17",
+ "stopped_reason": "quota",
+ "stopped_at": "2026-10-28T13:08:54",
+ "suwonst": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:07",
+  "minutes": 0.0
+ },
+ "ingye": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "paldalmun": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "pajang": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "ajou": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "yeongtong": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "moran": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "sinheung": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "dandae": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "bucheonst": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "anyangst": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:08",
+  "minutes": 0.0
+ },
+ "indeogwon": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:09",
+  "minutes": 0.0
+ },
+ "uijeongbust": {
+  "stage": "anchor",
+  "at": "2026-10-28T12:28:09",
+  "minutes": 0.0
+ },
+ "pyeongtaekst": {
+  "stage": "stores",
+  "at": "2026-10-28T12:32:05",
+  "minutes": 3.9
+ },
+ "pyeongtaekcity": {
+  "stage": "stores",
+  "at": "2026-10-28T12:34:45",
+  "minutes": 2.7
+ },
+ "songtan": {
+  "stage": "stores",
+  "at": "2026-10-28T12:37:27",
+  "minutes": 2.7
+ },
+ "guri": {
+  "stage": "stores",
+  "at": "2026-10-28T12:40:08",
+  "minutes": 2.7
+ },
+ "giheung": {
+  "stage": "stores",
+  "at": "2026-10-28T12:42:49",
+  "minutes": 2.7
+ },
+ "suji": {
+  "stage": "stores",
+  "at": "2026-10-28T12:45:26",
+  "minutes": 2.6
+ },
+ "gimnyangjang": {
+  "stage": "stores",
+  "at": "2026-10-28T12:48:02",
+  "minutes": 2.6
+ },
+ "byeongjeom": {
+  "stage": "stores",
+  "at": "2026-10-28T12:50:38",
+  "minutes": 2.6
+ },
+ "bongdam": {
+  "stage": "stores",
+  "at": "2026-10-28T12:53:15",
+  "minutes": 2.6
+ },
+ "osan": {
+  "stage": "stores",
+  "at": "2026-10-28T12:55:51",
+  "minutes": 2.6
+ },
+ "icheon": {
+  "stage": "stores",
+  "at": "2026-10-28T12:58:26",
+  "minutes": 2.6
+ },
+ "yeoju": {
+  "stage": "stores",
+  "at": "2026-10-28T13:01:07",
+  "minutes": 2.7
+ },
+ "pocheon": {
+  "stage": "stores",
+  "at": "2026-10-28T13:04:09",
+  "minutes": 3.0
+ },
+ "songu": {
+  "stage": "stores",
+  "at": "2026-10-28T13:06:59",
+  "minutes": 2.8
+ },
+ "dongducheon": {
+  "stage": "stores",
+  "at": "2026-10-28T11:19:54",
+  "minutes": 2.7
+ },
+ "deokjeong": {
+  "stage": "stores",
+  "at": "2026-10-28T11:22:35",
+  "minutes": 2.7
+ },
+ "hanam": {
+  "stage": "stores",
+  "at": "2026-10-28T11:25:18",
+  "minutes": 2.7
+ },
+ "gyeongan": {
+  "stage": "stores",
+  "at": "2026-10-28T11:27:59",
+  "minutes": 2.7
+ },
+ "gwangnam": {
+  "stage": "stores",
+  "at": "2026-10-28T11:30:40",
+  "minutes": 2.7
+ },
+ "cheolsan": {
+  "stage": "stores",
+  "at": "2026-10-28T11:33:22",
+  "minutes": 2.7
+ },
+ "sincheonst": {
+  "stage": "stores",
+  "at": "2026-10-28T11:36:04",
+  "minutes": 2.7
+ },
+ "anseong": {
+  "stage": "stores",
+  "at": "2026-10-28T11:38:45",
+  "minutes": 2.7
+ },
+ "songnae": {
+  "stage": "stores",
+  "at": "2026-10-28T11:41:29",
+  "minutes": 2.7
+ },
+ "yeokgok": {
+  "stage": "stores",
+  "at": "2026-10-28T11:44:12",
+  "minutes": 2.7
+ },
+ "sinjungdong": {
+  "stage": "stores",
+  "at": "2026-10-28T11:46:54",
+  "minutes": 2.7
+ },
+ "myeonghak": {
+  "stage": "stores",
+  "at": "2026-10-28T11:49:36",
+  "minutes": 2.7
+ },
+ "sujin": {
+  "stage": "stores",
+  "at": "2026-10-28T11:52:17",
+  "minutes": 2.7
+ },
+ "taepyeong": {
+  "stage": "stores",
+  "at": "2026-10-28T11:54:58",
+  "minutes": 2.7
+ },
+ "yatap": {
+  "stage": "stores",
+  "at": "2026-10-28T11:57:41",
+  "minutes": 2.7
+ },
+ "jeongja": {
+  "stage": "stores",
+  "at": "2026-10-28T12:00:22",
+  "minutes": 2.7
+ },
+ "skku": {
+  "stage": "stores",
+  "at": "2026-10-28T12:03:02",
+  "minutes": 2.7
+ },
+ "maetan": {
+  "stage": "stores",
+  "at": "2026-10-28T12:05:44",
+  "minutes": 2.7
+ },
+ "ganeung": {
+  "stage": "stores",
+  "at": "2026-10-28T12:08:28",
+  "minutes": 2.7
+ },
+ "osanst": {
+  "stage": "stores",
+  "at": "2026-10-28T12:11:10",
+  "minutes": 2.7
+ },
+ "gyomun": {
+  "stage": "stores",
+  "at": "2026-10-28T12:13:51",
+  "minutes": 2.7
+ },
+ "gwangmyeongsa": {
+  "stage": "stores",
+  "at": "2026-10-28T12:16:34",
+  "minutes": 2.7
+ },
+ "jukjeon": {
+  "stage": "stores",
+  "at": "2026-10-28T12:19:17",
+  "minutes": 2.7
+ },
+ "quota_day": "2026-10-28"
 }
