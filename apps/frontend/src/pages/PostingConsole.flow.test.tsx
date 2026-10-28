@@ -89,3 +89,39 @@ describe("Posting — 입력과 결과의 대응", () => {
     expect(document.querySelector(".tiers")).toBeNull();
   });
 });
+
+describe("Posting — 자료 부족 전략 (2026-10-28 사용자 결정 (b))", () => {
+  it("실측 재료가 없는 전략은 숫자 없이 「자료 부족」과 이유를 싣고, 결론은 계산한 전략으로만 낸다", async () => {
+    const why = "이 상권에는 이 가격대 업종(일식·양식·중식)의 매출 표본이 모자라 계산하지 않았어요.";
+    await mount((input) => {
+      const r = response(input);
+      r.scenarios.premium = {
+        ...r.scenarios.premium, available: false, unavailable_reason: why, invest_mn: null, month_cost: null,
+        month_rev: null, month_net: null, roi_months: null, viable: false, recommended: false, basis: null,
+      };
+      return r;
+    });
+    await screen.findByText("전제(0)");
+    expect(screen.getByText("자료 부족")).toBeTruthy();
+    expect(screen.getByText(why)).toBeTruthy();
+    // 계산한 두 전략만 초기 투자를 싣는다 — 자료 부족 전략에 0·NaN 같은 숫자를 그리지 않는다
+    expect(screen.getAllByText("8,000만원")).toHaveLength(2);
+    expect(screen.queryByText(/NaN/)).toBeNull();
+    expect(screen.getByText("2전략 중 2개")).toBeTruthy();
+  });
+});
+
+describe("Posting — 계산한 전략이 하나도 없는 응답 (10-28 리뷰)", () => {
+  it("자료 부족 전략만 온 응답을 「회수되지 않는다」로 읽지 않는다 — 「모른다」다", async () => {
+    const why = "이 상권에는 이 가격대 업종(일식·양식·중식)의 매출 표본이 모자라 계산하지 않았어요.";
+    await mount((input) => {
+      const r = response(input);
+      r.scenarios = { premium: { ...r.scenarios.premium, available: false, unavailable_reason: why, invest_mn: null, month_cost: null,
+        month_rev: null, month_net: null, roi_months: null, viable: false, recommended: false, basis: null } };
+      return r;
+    });
+    await screen.findByText("전제(0)");
+    expect(screen.getByText(/고른 전략을 계산하지 않았다/)).toBeTruthy();
+    expect(screen.queryByText(/회수되지 않는다/)).toBeNull();
+  });
+});

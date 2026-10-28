@@ -4,7 +4,7 @@ import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import AreaBepPlanner from "@/components/AreaBepPlanner";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import {
-  BASIS_LABEL, getPostings, listDistricts, recommendIndustry, simulateRevenue,
+  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPostings, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
 import type {
   DistrictSummary, IndustryRec, Posting, SavedResult, SimulateResult, TierScenario,
@@ -268,8 +268,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     if (!unit || !onMakeProgram) return;
     const used = calculation?.input.unit_id === unit.id ? calculation : null;
     const entries = used ? Object.entries(used.result.scenarios) : [];
-    const viable = entries.filter(([, t]) => t.viable);
-    const best = entries.find(([, t]) => t.recommended && t.viable)
+    // 자료 부족 전략(실측 재료 없음 · 2026-10-28 (b))은 숫자가 없어 후보가 아니다
+    const viable = entries.flatMap(([k, t]) => (tierAvailable(t) && t.viable ? [[k, t] as const] : []));
+    const best = viable.find(([, t]) => t.recommended)
       ?? [...viable].sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
     onMakeProgram({
       districtId, unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
@@ -494,8 +495,17 @@ function SavedPostingView({ item }: { item: SavedResult }) {
   const r = saved.result;
   if (r?.economics) return <IndustryEconomicsResult result={r.economics} />;
   if (!r?.scenarios) return <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
+  // 10-28 이전에 저장한 결과에는 손 계수(rent+fitout)로 계산한 전략이 있다 — 지금 서빙은 그 값을 내지 않는다((b)).
+  // 숫자는 저장한 그대로 다시 그리되, 그 사실을 맨 위에 밝힌다(안 밝히면 거둔 값이 실측처럼 다시 읽힌다).
+  const legacy = Object.values(r.scenarios).some((s) => s.basis === "rent+fitout");
   return (
     <div className="saved-posting">
+      {legacy && (
+        <p className="saved-note">
+          ⚠ {BASIS_LABEL["rent+fitout"]} — 원가·인건비가 빠진 손 계수로 계산한 결과라 마진이 크고 회수기간이 실제보다 짧게 나온다.
+          지금은 실측 재료가 없는 전략을 계산하지 않는다 — 같은 자리를 다시 계산해 볼 것.
+        </p>
+      )}
       <div className="posting-input-summary">
         계산에 사용한 입력: {saved.input?.industry_type || "자리 기본 업종"} · 권리금 {saved.input?.prem === undefined ? "미입력 · 0 전제" : won(saved.input.prem)}
         {" · "}{TIER_LABEL[saved.input?.strategy ?? ""]?.name ?? "세 전략 비교"}{r.inputs_quarter ? ` · ${r.inputs_quarter} 기준` : ""}
@@ -509,6 +519,18 @@ function SavedPostingView({ item }: { item: SavedResult }) {
 
 function TierCard({ tierKey, s, before }: { tierKey: string; s: TierScenario; before?: TierScenario }) {
   const meta = TIER_LABEL[tierKey] ?? { name: s.name ?? tierKey, sub: s.sub ?? "" };
+  // 실측 재료가 없어 계산하지 않은 전략 — 「모른다」다. 숫자를 지어내지 않고 이유를 싣는다(2026-10-28 (b))
+  if (!tierAvailable(s)) {
+    return (
+      <Card className="tier dead">
+        <div className="thd"><span className="tname">{meta.name}</span></div>
+        <div className="tsub">{meta.sub}</div>
+        <div className="trow big"><span>{TIER_UNAVAILABLE_LABEL}</span></div>
+        <div className="tier-difference">{s.unavailable_reason ?? "실측 자료가 없어 계산하지 않았어요."}</div>
+      </Card>
+    );
+  }
+  const prev = tierAvailable(before) ? before : undefined;
   return (
     <Card className={"tier" + (s.recommended ? " rec" : "") + (s.viable ? "" : " dead")}>
       <div className="thd">
@@ -531,12 +553,12 @@ function TierCard({ tierKey, s, before }: { tierKey: string; s: TierScenario; be
         {/* "모른다"와 "안 된다"는 다른 정보다 — 순익이 0 이하면 회수기간이 정의되지 않는다 */}
         <span>{s.viable ? `${s.roi_months}개월` : "회수 불가"}</span>
       </div>
-      {before && <div className="tier-difference" aria-label={`${meta.name} 직전 계산과 비교`}>
+      {prev && <div className="tier-difference" aria-label={`${meta.name} 직전 계산과 비교`}>
         <b>직전 계산 대비</b>
-        <span>초기 투자 {difference((s.invest_mn - before.invest_mn) * 100, "만원")}</span>
-        <span>월 순익 {difference(s.month_net - before.month_net, "만원")}</span>
-        <span>회수기간 {s.viable && before.viable && s.roi_months != null && before.roi_months != null
-          ? difference(s.roi_months - before.roi_months, "개월") : `${before.viable ? `${before.roi_months}개월` : "회수 불가"} → ${s.viable ? `${s.roi_months}개월` : "회수 불가"}`}</span>
+        <span>초기 투자 {difference((s.invest_mn - prev.invest_mn) * 100, "만원")}</span>
+        <span>월 순익 {difference(s.month_net - prev.month_net, "만원")}</span>
+        <span>회수기간 {s.viable && prev.viable
+          ? difference(s.roi_months - prev.roi_months, "개월") : `${prev.viable ? `${prev.roi_months}개월` : "회수 불가"} → ${s.viable ? `${s.roi_months}개월` : "회수 불가"}`}</span>
       </div>}
     </Card>
   );
@@ -599,21 +621,37 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
     };
   }
   const label = (key: string, s: TierScenario) => TIER_LABEL[key]?.name ?? s.name;
-  const viable = entries.filter(([, t]) => t.viable);
+  // 자료 부족 전략(실측 재료 없음 · 2026-10-28 (b))은 숫자가 없어 판정에서 뺀다 — 「모른다」지 「안 된다」가 아니다
+  const computed = entries.flatMap(([k, t]) => (tierAvailable(t) ? [[k, t] as const] : []));
+  const missing = entries.filter(([, t]) => !tierAvailable(t)).map(([k, t]) => label(k, t));
+  const viable = computed.filter(([, t]) => t.viable);
   // 추천 전략이 회수 불가일 수는 없지만, 백엔드가 recommended 를 안 준 경우를 대비해
   // **회수되는 것 중 가장 빠른 것**으로 떨어진다. 없는 값을 지어내지 않는다.
-  const best = entries.find(([, t]) => t.recommended && t.viable)
+  const best = viable.find(([, t]) => t.recommended)
     ?? [...viable].sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
   const where = unit?.n ?? result.unit_id;
   const premAbsent = result.inputs_source?.prem === "absent";
-  const basis = BASIS_LABEL[entries[0]?.[1]?.basis] ?? entries[0]?.[1]?.basis ?? "미상";
+  const basisKey = computed[0]?.[1].basis;
+  const basis = basisKey ? (BASIS_LABEL[basisKey] ?? basisKey) : "미상";
+  const missingNote = missing.length ? `${missing.join("·")}은 ${TIER_UNAVAILABLE_LABEL}이라 계산하지 않았다` : undefined;
 
-  // ③ 셋 다 회수 불가 — 이것도 답이다. 비워 두면 "계산이 안 됐다"로 읽힌다.
+  // ⓪ 계산한 전략이 하나도 없다 — 「모른다」다. ③ 의 「회수되지 않는다」로 떨어지면 계산하지 않은 것을 안 된다고 말한다
+  //    (서버는 자료 부족 전략만 고른 요청에 계산 불가로 답하지만, 다른 공급자·저장 결과가 이 모양일 수 있다 — 10-28 리뷰).
+  if (!computed.length) {
+    const why = entries.find(([, t]) => t.unavailable_reason)?.[1].unavailable_reason;
+    return {
+      verdict: <><b>{where}</b>는 고른 전략을 계산하지 않았다 — {why ?? "실측 자료가 없다"}.</>,
+      grounds: [{ label: "계산한 전략", value: "없음", source: missingNote }],
+      sources,
+    };
+  }
+
+  // ③ 계산한 전략이 모두 회수 불가 — 이것도 답이다. 비워 두면 "계산이 안 됐다"로 읽힌다.
   if (!best) {
     return {
-      verdict: <><b>{where}</b>는 세 전략 모두 회수되지 않는다.{result.unviable_note ? ` ${result.unviable_note}` : ""}</>,
+      verdict: <><b>{where}</b>는 {missing.length ? "계산한 전략 모두" : "세 전략 모두"} 회수되지 않는다.{result.unviable_note ? ` ${result.unviable_note}` : ""}</>,
       grounds: [
-        { label: "회수되는 전략", value: `없음 (${entries.length}전략 중 0)`, source: `비용 기준 ${basis}` },
+        { label: "회수되는 전략", value: `없음 (${computed.length}전략 중 0)`, source: missingNote ?? `비용 기준 ${basis}` },
         { label: "월 임대료", value: unit ? won(unit.rent) : "미상", source: "R-ONE 실측" },
         { label: "권리금", value: premAbsent ? "미입력 — 0 전제" : "기업 입력 반영", source: premAbsent ? "이 값을 넣으면 회수기간이 더 늘어난다" : undefined },
       ],
@@ -639,8 +677,9 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
       },
       {
         label: "회수되는 전략",
-        value: `${entries.length}전략 중 ${viable.length}개`,
-        source: viable.length < entries.length ? `${entries.length - viable.length}개는 월 순익이 0 이하다` : undefined,
+        value: `${computed.length}전략 중 ${viable.length}개`,
+        source: [viable.length < computed.length ? `${computed.length - viable.length}개는 월 순익이 0 이하다` : "", missingNote ?? ""]
+          .filter(Boolean).join(" · ") || undefined,
       },
       {
         label: "권리금",

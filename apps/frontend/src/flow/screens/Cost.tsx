@@ -5,7 +5,9 @@
  * 계산 못 하는 자리를 계산하는 척하지 않는다. 예산 점검은 **직접 확인한 금액만** 더한다.
  */
 import { useCallback, useMemo, useState } from "react";
-import { assessFounderCosts, BASIS_LABEL, simulateRevenue, type SimulateResult, type TierScenario } from "@/lib/api";
+import {
+  assessFounderCosts, BASIS_LABEL, simulateRevenue, TIER_UNAVAILABLE_LABEL, tierAvailable, type SimulateResult, type TierScenario,
+} from "@/lib/api";
 import { useFlow, useResume } from "../context";
 import { useLoad } from "../data";
 import { manwon, manwonToWon, months, monthsClause, parseManwon, showManwon, wonToManwon } from "../format";
@@ -29,7 +31,7 @@ const TIERS: { key: string; name: string; desc: string }[] = [
 const tierName = (k: string | null | undefined) => TIERS.find((t) => t.key === k)?.name ?? "이 가격대";
 
 /** 처음 드는 돈 — ⚠ invest_mn 은 **백만원** 단위다(invest_mn×100 ÷ month_net = roi_months · 2026-10-13 확인) */
-const investManwon = (s: TierScenario) => s.invest_mn * 100;
+const investManwon = (investMn: number) => investMn * 100;
 
 /** 고른 자리 — 비용 단계의 앞 답 */
 function useChosenSpace() {
@@ -88,11 +90,21 @@ const SOURCE_TEXT: Record<string, string> = {
 };
 
 function TierCardBody({ k, s }: { k: string; s: TierScenario }) {
+  // 실측 재료가 없는 가격대는 계산하지 않았다(2026-10-28 (b)) — 숫자를 지어내지 않고 이유를 말한다
+  if (!tierAvailable(s)) {
+    return (
+      <span className="fl-tier">
+        <span className="fl-tier-head"><b>{tierName(k)}</b><Badge tone="obs">{TIER_UNAVAILABLE_LABEL}</Badge></span>
+        <span className="fl-tier-desc">{TIERS.find((t) => t.key === k)?.desc}</span>
+        <span className="fl-tier-line">{s.unavailable_reason ?? "실측 자료가 없어 계산하지 않았어요."}</span>
+      </span>
+    );
+  }
   return (
     <span className="fl-tier">
       <span className="fl-tier-head"><b>{tierName(k)}</b>{s.recommended && <Badge tone="primary">추천</Badge>}</span>
       <span className="fl-tier-desc">{TIERS.find((t) => t.key === k)?.desc}</span>
-      <span className="fl-tier-line">처음 {manwon(investManwon(s))}</span>
+      <span className="fl-tier-line">처음 {manwon(investManwon(s.invest_mn))}</span>
       <span className="fl-tier-line">{s.month_net >= 0 ? `매달 ${manwon(s.month_net)} 남아요` : `매달 ${manwon(s.month_net)} 모자라요`}</span>
       <span className="fl-tier-roi">{s.viable ? <>본전 {months(s.roi_months)} <small>({s.roi_months}개월)</small></> : "이 가격대로는 본전이 안 나와요"}</span>
     </span>
@@ -115,9 +127,11 @@ export function Payback() {
   const save = useCallback(() => {
     if (sim.status !== "ready" || !item) return;
     const rec = Object.entries(sim.data.scenarios).find(([, s]) => s.recommended)?.[0] ?? null;
+    // 앞에서 골라 둔 가격대가 자료 부족이면(10-28 이전에 고른 가락의 「비싸게」) 화면처럼 추천으로 저장한다
+    const chosen = state.tier && tierAvailable(sim.data.scenarios[state.tier]) ? state.tier : rec;
     saveOutcome("posting", `${item.name} ${floorText(item.floor)} · ${work?.label ?? ""} 본전 시점`, {
       input: { district_id: state.districtId, unit_id: unitId, industry_type: work?.input, prem: prem ?? null, space_id: item.id },
-      result: { scenarios: sim.data.scenarios, source: sim.data.source, inputs_quarter: sim.data.inputs_quarter, recommended: rec, chosen: state.tier ?? rec },
+      result: { scenarios: sim.data.scenarios, source: sim.data.source, inputs_quarter: sim.data.inputs_quarter, recommended: rec, chosen },
     }, "save-payback");
   }, [sim, item, work, state.districtId, state.tier, unitId, prem, saveOutcome]);
   useResume("save-payback", ready, save);
@@ -139,40 +153,50 @@ export function Payback() {
   if (sim.status !== "ready") return null;
   const r = sim.data;
   const entries = TIERS.map((t) => [t.key, r.scenarios[t.key]] as const).filter(([, s]) => !!s) as [string, TierScenario][];
-  if ((r.calculation_status && r.calculation_status !== "calculated") || entries.length === 0) {
-    return cantCalc("이 자리는 본전 시점을 계산하지 못했어요", r.unavailable_reason ?? "계산에 필요한 값이 모자라요.");
+  // 계산한 가격대만 숫자를 가진다 — 자료 부족 가격대는 카드에 이유만 남는다(2026-10-28 (b))
+  const computed = entries.flatMap(([k, s]) => (tierAvailable(s) ? [[k, s] as const] : []));
+  if ((r.calculation_status && r.calculation_status !== "calculated") || computed.length === 0) {
+    const why = r.unavailable_reason ?? entries.find(([, s]) => s.unavailable_reason)?.[1].unavailable_reason;
+    return cantCalc("이 자리는 본전 시점을 계산하지 못했어요", why ?? "계산에 필요한 값이 모자라요.");
   }
-  const viable = entries.filter(([, s]) => s.viable);
-  const legacy = entries.some(([, s]) => s.basis === "rent+fitout");
-  const warn = `추정이에요 · 권리금 ${premText} · 건물 전체 기준${legacy ? " · 원가·인건비가 빠진 계산이에요" : ""}`;
+  const missing = entries.filter(([, s]) => !tierAvailable(s)).map(([k]) => tierName(k));
+  const viable = computed.filter(([, s]) => s.viable);
+  const warn = `추정이에요 · 권리금 ${premText} · 건물 전체 기준${missing.length ? ` · ${missing.join("·")} ${TIER_UNAVAILABLE_LABEL}` : ""}`;
+  const options = entries.map(([k, s]) => ({ value: k, title: <TierCardBody k={k} s={s} />, disabled: !tierAvailable(s) }));
   if (viable.length === 0) {
     return (
-      <FlowScreen back="/premium" right={<CloseButton />} caption={caption} title="세 가격대 모두 본전이 안 나와요"
+      <FlowScreen back="/premium" right={<CloseButton />} caption={caption}
+        title={missing.length ? "계산한 가격대 모두 본전이 안 나와요" : "세 가격대 모두 본전이 안 나와요"}
         cta={<BottomCTA primary={{ label: "다른 빈 자리 보기", onClick: () => go("/spaces") }} secondary={{ label: "작게 먼저 확인", onClick: () => go("/validate") }} />}>
         <WarnLine>{warn}</WarnLine>
         {r.unviable_note && <p className="fl-note">{r.unviable_note}</p>}
-        <ChoiceList label="세 가지 가격대" value={state.tier} onChoose={(v) => update((s) => ({ ...s, tier: v }))}
-          options={entries.map(([k, s]) => ({ value: k, title: <TierCardBody k={k} s={s} /> }))} />
+        <ChoiceList label="세 가지 가격대" value={state.tier && tierAvailable(r.scenarios[state.tier]) ? state.tier : null}
+          onChoose={(v) => update((s) => ({ ...s, tier: v }))} options={options} />
       </FlowScreen>
     );
   }
-  const rec = entries.find(([, s]) => s.recommended && s.viable) ?? viable.sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
-  const chosen = entries.find(([k]) => k === state.tier) ?? rec;
+  const rec = viable.find(([, s]) => s.recommended) ?? [...viable].sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
+  // 고른 가격대가 자료 부족이면(앞 화면에서 골라 둔 값) 추천으로 보여 준다 — 없는 숫자를 그리지 않는다
+  const chosen = computed.find(([k]) => k === state.tier) ?? rec;
   return (
     <FlowScreen wide back="/premium" right={<CloseButton />} caption={caption}
       title={`${tierName(rec[0])} 하면 ${monthsClause(rec[1].roi_months)} 본전이에요`}
-      cta={<BottomCTA primary={{ label: "작게 먼저 확인하기", onClick: () => { if (!state.tier) update((s) => ({ ...s, tier: rec[0] })); go("/validate"); } }}
+      // 검증 계획은 화면이 보여 준 가격대를 이어받는다 — 골라 둔 가격대가 자료 부족이면 그 값을 추천으로 바꿔 넘긴다
+      // (안 바꾸면 Validate 가 계산하지 않은 「비싸게」로 계획을 만든다 · 10-28 리뷰)
+      cta={<BottomCTA primary={{ label: "작게 먼저 확인하기", onClick: () => { if (state.tier !== chosen[0]) update((s) => ({ ...s, tier: chosen[0] })); go("/validate"); } }}
         secondary={{ label: "저장", onClick: save }} />}>
       <WarnLine>{warn}</WarnLine>
-      <ChoiceList label="세 가지 가격대" value={chosen[0]} onChoose={(v) => update((s) => ({ ...s, tier: v }))}
-        options={entries.map(([k, s]) => ({ value: k, title: <TierCardBody k={k} s={s} /> }))} />
+      <ChoiceList label="세 가지 가격대" value={chosen[0]} onChoose={(v) => update((s) => ({ ...s, tier: v }))} options={options} />
       <p className="fl-note">카드를 누르면 그 가격대로 검증 계획을 만들어요.</p>
       <Details>
         <ul className="fl-facts">
           <li>{tierName(chosen[0])}: 한 달 매출 {manwon(chosen[1].month_rev)} · 한 달 비용 {manwon(chosen[1].month_cost)}</li>
           {r.inputs_source && <li>입력 출처 — 면적 {SOURCE_TEXT[r.inputs_source.area] ?? r.inputs_source.area} · 임대료 {SOURCE_TEXT[r.inputs_source.rent] ?? r.inputs_source.rent} · 권리금 {SOURCE_TEXT[r.inputs_source.prem] ?? r.inputs_source.prem} · 유동 {SOURCE_TEXT[r.inputs_source.foot] ?? r.inputs_source.foot}</li>}
           {r.inputs_quarter && <li>기준 분기 {r.inputs_quarter}</li>}
-          <li>계산 방식 {BASIS_LABEL[chosen[1].basis] ?? chosen[1].basis} · {r.source === "copilot" ? "외부 창업 코파일럿" : "PlaceOS 3-Tier 계산"}{r.source_note ? ` (${r.source_note})` : ""}</li>
+          <li>계산 방식 {chosen[1].basis ? (BASIS_LABEL[chosen[1].basis] ?? chosen[1].basis) : "미상"} · {r.source === "copilot" ? "외부 창업 코파일럿" : "PlaceOS 3-Tier 계산"}{r.source_note ? ` (${r.source_note})` : ""}</li>
+          {entries.filter(([, s]) => !tierAvailable(s)).map(([k, s]) => (
+            <li key={k}>{tierName(k)}: {s.unavailable_reason ?? "실측 자료가 없어 계산하지 않았어요."}</li>
+          ))}
           <li>본전 시점 = 처음 드는 돈 ÷ 매달 남는 돈. 보증금은 돌려받는 돈이라 넣지 않았어요.</li>
         </ul>
       </Details>

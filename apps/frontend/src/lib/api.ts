@@ -231,21 +231,36 @@ export interface DistrictDetail {
 
 export interface TierScenario {
   tier: string; name: string; sub: string;
-  invest_mn: number; month_cost: number; month_rev: number; month_net: number;
-  roi_months: number; recommended: boolean;
-  /** 월 순익이 0 이하면 false — 회수기간이 정의되지 않는다.
+  /** false 면 실측 재료가 없어 **계산하지 않은** tier 다(2026-10-28 사용자 결정 (b)) — 숫자가 전부 null 이고
+   *  `unavailable_reason` 이 이유를 밝힌다. 화면은 「자료 부족」으로 그린다(종전에는 손으로 적은 계수로 채웠다).
+   *  외부 코파일럿 응답에는 없을 수 있어 없으면 true 로 읽는다(`tierAvailable`). */
+  available?: boolean;
+  unavailable_reason?: string | null;
+  invest_mn: number | null; month_cost: number | null; month_rev: number | null; month_net: number | null;
+  roi_months: number | null; recommended: boolean;
+  /** 월 순익이 0 이하면 false — 회수기간이 정의되지 않는다. 자료 부족 tier 도 false 다.
    *  "모른다"와 "안 된다"는 다른 정보다. 화면이 둘 다 "—"로 뭉개면 안 된다. */
   viable: boolean;
-  /** 이 회수기간이 **어떤 비용까지** 넣고 계산됐는지.
-   *  "kosis-opex+measured-revenue" = KOSIS 영업비용률 + 거점별 실측 평당매출(2026-08-23~)
-   *  "rent+fitout"                 = 원가·인건비가 빠진 낡은 폴백 */
-  basis: string;
+  /** 이 회수기간이 **어떤 비용까지** 넣고 계산됐는지. 자료 부족 tier 는 null.
+   *  "kosis-opex+measured-revenue" = KOSIS 영업비용률 + 거점별 실측 평당매출(2026-08-23~) */
+  basis: string | null;
 }
+
+/** 이 tier 를 계산했는가 — 자료 부족(`available: false`)이면 숫자를 읽지 않는다. */
+export function tierAvailable(s: TierScenario | undefined | null): s is TierScenario & {
+  invest_mn: number; month_cost: number; month_rev: number; month_net: number; roi_months: number;
+} {
+  return !!s && s.available !== false && s.roi_months != null && s.month_net != null;
+}
+
+/** 자료 부족 tier 의 짧은 표시 — 사유는 title·보조 문장으로 붙인다. */
+export const TIER_UNAVAILABLE_LABEL = "자료 부족";
 
 /** basis 문자열 → 화면에 붙일 짧은 배지 라벨. 모르는 값은 그대로 노출한다. */
 export const BASIS_LABEL: Record<string, string> = {
   "kosis-opex+measured-revenue": "KOSIS 실측비용",
-  "rent+fitout": "비용 일부 미반영",
+  // 서빙은 2026-10-28 부터 이 계수 폴백을 내지 않는다((b)). 그 전에 **저장해 둔 결과**에만 남아 있어 라벨을 둔다
+  "rent+fitout": "비용 일부 미반영(10-28 이전 계산)",
 };
 
 /** 입력 필드별 출처 — 프록시를 실측으로 오독하지 않기 위한 구분자.

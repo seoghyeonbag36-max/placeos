@@ -145,24 +145,44 @@ def test_rent_is_not_double_counted():
         assert P.opex_rate(t) < P._rates()[t]["opex_rate"]
 
 
-# ── 폴백을 조용히 하지 않는다 ───────────────────────────────────────────────
+# ── 재료가 없는 tier 는 계산하지 않는다 (2026-10-28 사용자 결정 (b)) ───────────────────────
+# 종전에는 tier 하나라도 재료가 없으면 세 tier 를 손으로 적은 계수(`rent+fitout`)로 통째로 돌렸다
+# (가락·불광 마진 76~80% · 회수 1개월 안팎). 이제 그 tier 만 「자료 부족」이고 숫자를 지어내지 않는다.
 
-def test_basis_distinguishes_the_two_models():
-    u = _units()[0]
-    assert all(v["basis"] == D.COST_BASIS for v in D.tier_scenarios(u, _D).values())
-    assert all(v["basis"] == D.COST_BASIS_LEGACY for v in D.tier_scenarios(u).values())
-
-
-def test_unviable_note_quotes_the_model_that_actually_ran():
-    """폴백으로 계산해 놓고 실측 모델의 한계를 적으면 그 자체가 거짓 근거다."""
-    legacy = {t: {"viable": False, "basis": D.COST_BASIS_LEGACY} for t in P.TIERS}
-    assert D.COST_BASIS_LEGACY_NOTE in D.unviable_note(legacy)
-    meas = {t: {"viable": False, "basis": D.COST_BASIS} for t in P.TIERS}
-    assert D.COST_BASIS_NOTE in D.unviable_note(meas)
+def _unavailable(s: dict) -> bool:
+    return (s["available"] is False and s["unavailable_reason"] and s["basis"] is None
+            and s["viable"] is False and s["recommended"] is False
+            and all(s[k] is None for k in ("invest_mn", "month_cost", "month_rev", "month_net", "roi_months")))
 
 
-def test_missing_artifact_falls_back_and_says_so(monkeypatch, tmp_path):
-    # A 는 공정위 실측(_AREA) → 임차료 역산(_RATE) 순으로 찾는다. 폴백까지 확인하려면
+def test_measured_hub_computes_all_three_tiers():
+    sc = D.tier_scenarios(_units()[0], _D)
+    assert all(v["available"] and v["basis"] == D.COST_BASIS for v in sc.values())
+
+
+def test_no_district_means_no_material_not_coefficients():
+    """거점을 모르면 재료를 고를 수 없다 — 계수로 채우지 않고 세 tier 모두 자료 부족이다."""
+    sc = D.tier_scenarios(_units()[0])
+    assert set(sc) == set(P.TIERS) and all(_unavailable(v) for v in sc.values())
+    assert D.recommend_tier(sc) is None
+
+
+def test_unviable_note_only_judges_computed_tiers():
+    """자료 부족 tier 는 「회수 불가」가 아니라 「모른다」다 — 계산한 tier 로만 판정한다."""
+    meas = {t: {"available": True, "viable": False, "basis": D.COST_BASIS, "name": D.TIER[t]["nm"]}
+            for t in P.TIERS}
+    note = D.unviable_note(meas)
+    assert "세 전략 모두" in note and D.COST_BASIS_NOTE in note
+    part = {**meas, "premium": {"available": False, "viable": False, "basis": None, "name": "고급화"}}
+    note = D.unviable_note(part)
+    assert "계산한 전략 2개 모두" in note, note
+    assert not any(n in note for n in ("고급화", "가성비", "공장제")), "화면마다 전략 이름이 달라 사유에 이름을 넣지 않는다"
+    none = {t: {"available": False, "viable": False, "basis": None, "name": D.TIER[t]["nm"]} for t in P.TIERS}
+    assert D.unviable_note(none) is None, "아무것도 계산하지 않았는데 회수 불가라고 적었다"
+
+
+def test_missing_artifact_marks_tiers_unavailable_and_says_so(monkeypatch, tmp_path):
+    # A 는 공정위 실측(_AREA) → 임차료 역산(_RATE) 순으로 찾는다. 재료 부재까지 확인하려면
     # 둘 다 지워야 한다 — 하나만 지우면 다른 하나가 조용히 메운다.
     monkeypatch.setattr(P, "_RATE", tmp_path / "absent.json")
     monkeypatch.setattr(P, "_AREA", tmp_path / "absent-area.json")
@@ -170,11 +190,43 @@ def test_missing_artifact_falls_back_and_says_so(monkeypatch, tmp_path):
     try:
         assert P.avg_store_pyeong() == {}
         assert P.area_basis() == "none"
-        assert not P.available(_D)
+        assert not P.available(_D) and P.measured_tiers(_D) == []
         sc = D.tier_scenarios(_units()[0], _D)
-        assert all(v["basis"] == D.COST_BASIS_LEGACY for v in sc.values())
+        assert all(_unavailable(v) for v in sc.values())
     finally:
         P.clear_cache()
+
+
+def test_partial_hubs_compute_only_the_measured_tiers():
+    """가락·불광처럼 일부 tier 만 재료가 있으면 그 tier 만 실측으로 계산하고 나머지는 자료 부족이다.
+
+    추천은 계산한 tier 안에서만 고른다. 거점 목록은 박지 않는다 — 산출물이 바뀌면 부분 거점도 바뀐다.
+    """
+    partial = [d["id"] for d in D.PAGES if 0 < len(P.measured_tiers(d["id"])) < len(P.TIERS)
+               and D.resolved_units(d["id"])]
+    if not partial:
+        pytest.skip("일부 tier 만 서는 서빙 거점이 없다")
+    for h in partial:
+        have = set(P.measured_tiers(h))
+        for u in D.resolved_units(h):
+            sc = D.tier_scenarios(u, h)
+            for t, s in sc.items():
+                if t in have:
+                    assert s["available"] and s["basis"] == D.COST_BASIS, (h, t)
+                else:
+                    assert _unavailable(s), (h, t)
+                    assert D.TIER_INDUSTRIES[t] in s["unavailable_reason"], (h, t, s["unavailable_reason"])
+            rec = [t for t, s in sc.items() if s["recommended"]]
+            assert all(t in have for t in rec), (h, rec)
+        assert D.payback_unavailable_reason(h) is None, f"{h}: 계산한 tier 가 있는데 본전 답을 거뒀다"
+
+
+def test_no_served_scenario_uses_hand_written_coefficients():
+    """서빙 거점 전부 — `rent+fitout` 계수 시나리오가 한 건도 안 나간다."""
+    leaked = [(d["id"], t) for d in D.PAGES for u in (D.resolved_units(d["id"]) or [])
+              for t, s in D.tier_scenarios(u, d["id"]).items()
+              if s["basis"] not in (D.COST_BASIS, None)]
+    assert not leaked, leaked[:5]
 
 
 # ── 순환하지 않는 대조: KOSIS 와의 격차가 산술로 닫히는가 ───────────────────
@@ -296,27 +348,28 @@ def test_revenue_artifact_covers_served_hubs():
         "`python -m data.pipelines.build_posting_revenue` 를 다시 돌릴 것")
 
     # 2026-10-26 고양·파주 서빙 — 실측 매출 재료(서울 상권분석 추정매출)는 서울에만 선다. 비율은
-    # **재료가 서는 도시 안에서** 잰다. 재료가 없는 도시의 거점은 폴백이어야 하고 그 사실이
-    # `basis` 로 드러나야 한다 — 서울 값을 빌려 실측처럼 꽂으면 아래 두 번째 단언이 깨진다.
+    # **재료가 서는 도시 안에서** 잰다. 재료가 없는 도시의 거점은 세 tier 모두 자료 부족이어야 한다
+    # (2026-10-28 (b) — 계수 폴백은 없앴다). 서울 값을 빌려 실측처럼 꽂으면 아래 두 번째 단언이 깨진다.
     city = {d["id"]: (d.get("city") or "seoul") for d in pages}
     with_src = [h for h in served if cities.by_id(city[h]).has_trdar]
     without_src = [h for h in served if not cities.by_id(city[h]).has_trdar]
     measured_hubs = [h for h in with_src if P.available(h)]
     assert with_src and len(measured_hubs) / len(with_src) >= 0.9, (
-        f"실측 모델 거점 {len(measured_hubs)}/{len(with_src)} — 나머지는 근거 없는 계수 폴백이다")
-    leaked = [h for h in without_src if P.available(h)]
+        f"세 tier 실측 거점 {len(measured_hubs)}/{len(with_src)} — 나머지는 tier 가 자료 부족이다")
+    leaked = [h for h in without_src if P.measured_tiers(h)]
     assert not leaked, f"매출 재료가 없는 도시의 거점이 실측 모델로 돈다: {leaked}"
     for h in without_src:
         for u in D.resolved_units(h) or []:
-            assert all(s["basis"] == D.COST_BASIS_LEGACY for s in D.tier_scenarios(u, h).values()), h
+            assert all(s["available"] is False and s["basis"] is None
+                       for s in D.tier_scenarios(u, h).values()), h
 
-    n_all = n_legacy = 0
+    n_all = n_partial = 0
     for h in with_src:
         n = len(D.resolved_units(h) or [])
         n_all += n
         if not P.available(h):
-            n_legacy += n
-    assert n_all and n_legacy / n_all <= 0.1, f"폴백 유닛 {n_legacy}/{n_all}"
+            n_partial += n
+    assert n_all and n_partial / n_all <= 0.1, f"tier 가 빠진 유닛 {n_partial}/{n_all}"
 
 
 def test_margins_stay_in_sane_bounds():
@@ -611,3 +664,66 @@ def test_kosis_rent_rate_cannot_be_rebased_by_a_single_floor_coefficient():
     assert spread > 0.15, (
         f"함의계수가 tier 간에 {spread:.3f} 밖에 안 갈린다 — 단일 층계수로 읽힐 여지가 "
         f"생겼다는 뜻이므로, 그때는 §0-N 의 가설을 다시 볼 것: {implied}")
+
+
+def test_simulating_an_unavailable_strategy_says_so_instead_of_unviable():
+    """자료 부족 전략을 골라 시뮬레이션하면 「계산 불가 + 그 사유」다 — 「계산했는데 회수 안 됨」이 아니다(10-28 리뷰).
+
+    종전에는 calculated 로 자료 부족 시나리오 하나만 돌려줘, 화면이 「계산한 전략 모두 회수되지 않는다(0전략 중 0)」라고 말했다."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    partial = next((d["id"] for d in D.PAGES if 0 < len(P.measured_tiers(d["id"])) < len(P.TIERS)
+                    and D.resolved_units(d["id"])), None)
+    if partial is None:
+        pytest.skip("일부 tier 만 서는 서빙 거점이 없다")
+    missing = next(t for t in P.TIERS if t not in P.measured_tiers(partial))
+    have = P.measured_tiers(partial)[0]
+    c = TestClient(app)
+    body = c.post("/api/v1/ai/simulate-revenue", json={"district_id": partial, "strategy": missing}).json()
+    assert body["calculation_status"] == "unavailable" and body["scenarios"] == {}, body
+    assert D.TIER_INDUSTRIES[missing] in body["unavailable_reason"], body["unavailable_reason"]
+    ok = c.post("/api/v1/ai/simulate-revenue", json={"district_id": partial, "strategy": have}).json()
+    assert ok.get("calculation_status", "calculated") == "calculated" and ok["scenarios"][have]["available"]
+
+
+# ── (A) 평당매출이 상식 대역 위인 tier 도 자료 부족 (2026-10-28 사용자 결정) ─────────────────────
+# 그날 잠실·가락·당산·미아사거리 공장제 · 상봉 고급화 5 tier 가 평당 월 600~1,080만원으로 회수 0.2~0.75개월을 냈고,
+# 그 거점 유닛 46개 전부의 추천이었다. 대역 아래는 회수를 길게 만드는 쪽이라 그대로 계산한다.
+
+def _band_cells(pred):
+    return [(d["id"], t) for d in D.PAGES for t in P.TIERS
+            if (v := P.per_pyeong(d["id"], t)) is not None and pred(v) and D.resolved_units(d["id"])]
+
+
+def test_tiers_above_the_sane_band_are_not_computed():
+    lo, hi = P.SANE_PER_PYEONG
+    cells = _band_cells(lambda v: v > hi)
+    if not cells:
+        pytest.skip("상식 대역 위 tier 가 없다")
+    for h, t in cells:
+        assert P.tier_status(h, t) == "above_band" and not P.tier_available(h, t), (h, t)
+        for u in D.resolved_units(h):
+            s = D.tier_scenarios(u, h)[t]
+            assert _unavailable(s), (h, t)
+            assert "상식 범위" in s["unavailable_reason"] and "평당 월" in s["unavailable_reason"], s["unavailable_reason"]
+
+
+def test_tiers_below_the_band_are_still_computed():
+    """대역 아래는 회수를 길게 만든다 — 낙관으로 속이지 않으므로 그대로 계산한다(사용자 결정 (A) 는 「넘는」 쪽만)."""
+    lo, hi = P.SANE_PER_PYEONG
+    cells = _band_cells(lambda v: v < lo)
+    if not cells:
+        pytest.skip("상식 대역 아래 tier 가 없다")
+    for h, t in cells:
+        assert P.tier_available(h, t), (h, t)
+        assert all(D.tier_scenarios(u, h)[t]["available"] for u in D.resolved_units(h)), (h, t)
+
+
+def test_no_recommended_tier_rests_on_out_of_band_revenue():
+    """추천은 상식 대역 안의 평당매출로만 선다 — 대역 위 tier 가 추천으로 나가던 46유닛의 자리다."""
+    hi = P.SANE_PER_PYEONG[1]
+    for d in D.PAGES:
+        for u in (D.resolved_units(d["id"]) or []):
+            for t, s in D.tier_scenarios(u, d["id"]).items():
+                if s["recommended"]:
+                    assert P.per_pyeong(d["id"], t) <= hi, (d["id"], t)

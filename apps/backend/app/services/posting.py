@@ -102,15 +102,19 @@ def simulate(district_id: str, unit_id: str | None = None,
     source = "copilot"
     source_note = None
     if scenarios is None:
-        # 매출 재료가 없는 도시(고양·파주)에서는 계수 폴백으로 본전 시점을 답하지 않는다(2026-10-27).
-        # 코파일럿이 답하면 그 답은 쓴다 — 막는 것은 우리 손으로 적은 계수뿐이다.
-        reason = svc.payback_unavailable_reason(district_id)
-        if reason:
+        # 실측으로 계산할 tier 가 하나도 없으면(매출 재료가 없는 고양·파주) 본전 시점을 답하지 않는다
+        # (2026-10-27). 코파일럿이 답하면 그 답은 쓴다 — 막는 것은 우리가 지어낼 값뿐이다.
+        scenarios = svc.tier_scenarios(unit, district_id)
+        reason = svc.payback_unavailable_reason(district_id) or next(
+            (s["unavailable_reason"] for s in scenarios.values()
+             if not s.get("available", True)), None)
+        if not any(s.get("available", True) for s in scenarios.values()):
             return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
                     "scenarios": {}, "source": "unavailable", "source_note": fail,
                     "inputs_source": unit.get("inputs_source"), "inputs_quarter": posting_inputs.quarter(),
                     "calculation_status": "unavailable", "unavailable_reason": reason}
-        scenarios = svc.tier_scenarios(unit, district_id)
+        # 일부 tier 만 자료 부족이면(가락·불광의 고급화) 선 tier 로 답하고, 빠진 tier 는 시나리오 안에서
+        # `available: False` + 사유로 내려간다(2026-10-28 사용자 결정 (b)).
         source = "fallback-3tier"
         source_note = fail
     else:
@@ -124,7 +128,15 @@ def simulate(district_id: str, unit_id: str | None = None,
     # "이 자리가 안 된다"가 뒤섞인다.
     note = svc.unviable_note(scenarios)
     if strategy in scenarios:
-        scenarios = {strategy: scenarios[strategy]}
+        picked = scenarios[strategy]
+        if picked.get("available") is False:
+            # 고른 전략이 자료 부족이다(가락·불광의 고급화). 「계산했는데 회수가 안 된다」로 읽히지 않게
+            # 계산 불가로 답한다 — 계산한 다른 전략은 전략을 비우고 다시 물으면 나온다(2026-10-28 리뷰).
+            return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
+                    "scenarios": {}, "source": "unavailable", "source_note": source_note,
+                    "inputs_source": unit.get("inputs_source"), "inputs_quarter": posting_inputs.quarter(),
+                    "calculation_status": "unavailable", "unavailable_reason": picked.get("unavailable_reason")}
+        scenarios = {strategy: picked}
     return {
         "district_id": district_id,
         "unit_id": unit["id"],

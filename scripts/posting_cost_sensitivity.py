@@ -222,7 +222,8 @@ def _shipped():
     units = _units()
     for u in units:
         sc = D.tier_scenarios(u, u["_did"])
-        if any(v["basis"] != D.COST_BASIS for v in sc.values()):
+        # 2026-10-28 (b): 계수 폴백은 없앴다 — 실측이 아닌 tier 는 `available: False`(자료 부족)로 온다
+        if any(v.get("available") is False for v in sc.values()):
             legacy += 1
         best = None
         for t, v in sc.items():
@@ -324,7 +325,7 @@ def main() -> None:
         print(f"  마진중앙 P/V/F {m['premium']:.1f}/{m['value']:.1f}/{m['factory']:.1f}"
               f"   회수불가 {r['unviable_pct']}%   회수중앙 {r['roi_median']}개월"
               f"   1위 {w['premium']}/{w['value']}/{w['factory']}")
-        print(f"  legacy 폴백으로 계산된 유닛: {r['legacy']}건")
+        print(f"  자료 부족 tier 가 있는 유닛(계산하지 않은 tier): {r['legacy']}건")
         rows.append(("배선 실측모델", "KOSIS 비용", "실측 평당매출", r))
 
     # 통과 조건 셋을 동시에 만족하는 조합만 추린다

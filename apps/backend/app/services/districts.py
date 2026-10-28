@@ -174,7 +174,9 @@ def recommend_tier(scenarios: dict) -> str | None:
         # 시나리오를 넘겨 온 경우(표시값만 남은 dict)에도 동작하도록 되돌린다.
         return s.get("_raw") or {"roi": s["roi_months"], "net": s["month_net"]}
 
-    viable = [s for s in scenarios.values() if raw(s)["net"] > 0]
+    # 실측 재료가 없어 계산하지 않은 tier(`available: False`)는 후보가 아니다 — 값이 없다.
+    viable = [s for s in scenarios.values()
+              if s.get("available", True) and raw(s)["net"] > 0]
     if not viable:
         return None
     return min(viable, key=lambda s: (raw(s)["roi"], -raw(s)["net"]))["tier"]
@@ -183,25 +185,51 @@ def recommend_tier(scenarios: dict) -> str | None:
 # 계산에 실제로 들어간 비용 항목. 마진·회수기간을 읽는 쪽이 무엇이 빠졌는지 알아야
 # 한다 — 이 문자열이 응답의 `basis` 로 내려간다(예전 docstring 이 `roi_basis` 라는
 # 필드가 있다고 적어 뒀으나 그런 필드는 구현된 적이 없다. 2026-08-22 실제로 만든다).
-# 계산에 실제로 들어간 항목을 밝히는 문자열. 응답의 `basis` 로 내려간다.
-# 두 모델이 공존한다 — 실측 재료가 있는 거점은 measured, 없으면 legacy 로 폴백하고
-# **어느 쪽이 돌았는지 카드가 구분할 수 있어야 한다.** 조용히 폴백하면 근거 없는 값이
-# 실측처럼 읽힌다(calibration.json 이 40거점에서 None 이던 것과 같은 실패 양식).
 COST_BASIS = "kosis-opex+measured-revenue"
 COST_BASIS_NOTE = ("월비용 = 임대료(R-ONE 실측) + 매출 × 비임차 영업비용률"
                    "(KOSIS 서울 2024). 매출은 거점별 실측 평당매출 × 면적 — 고정항 "
                    "없이 면적에 비례한다. ⚠ 평균 점포 면적 A 가 **하한**이라 마진이 "
                    "낙관 쪽으로 치우친다(docs/feature-posting.md §0-H).")
 
-COST_BASIS_LEGACY = "rent+fitout"
-COST_BASIS_LEGACY_NOTE = ("월비용 = 임대료 + 면적비례 관리비 + 고정비. **원가(매출비례)와 "
-                          "인건비가 빠져 있어 마진이 과대, 회수기간이 과소하게 나온다.** "
-                          "실측 재료(거점 매출·KOSIS 비용률)가 없어 폴백한 결과다.")
+# ── 실측 재료가 없는 tier 는 계산하지 않는다 (2026-10-28 사용자 결정 (b)) ─────────────────
+# 종전에는 tier 하나라도 재료가 없으면 세 tier 를 **통째로** 손으로 적은 계수(`rent+fitout` — 임대료 +
+# 면적비례 관리비 + 고정비, 원가·인건비 없음)로 돌렸다. 가락·불광은 고급화 표본만 모자랐는데 세 tier
+# 모두 마진 76~80% · 회수 1개월 안팎이 나왔다(실측 모델의 가로수길은 5.3% · 3.45개월). 이제 재료가
+# 있는 tier 만 실측으로 계산하고, 없는 tier 는 「자료 부족」(`available: False` + 사유 · 숫자 None)으로
+# 둔다. 계수 폴백은 서빙에서 없앴다 — 고양·파주처럼 재료가 하나도 없는 도시는 세 tier 가 모두 자료 부족이다.
+TIER_INDUSTRIES = {"premium": "일식·양식·중식", "value": "한식·분식·치킨·호프", "factory": "커피·패스트푸드·제과"}
+# ⚠ 사유 문장에 전략 이름(고급화·가성비·공장제)을 넣지 않는다 — 화면마다 이름이 다르다(흐름은 비싸게·알뜰하게·꼭 필요한
+#   것만, Posting 은 기능중심). 카드 머리가 이미 그 화면의 이름을 달고 있으니 사유는 업종만 밝힌다(10-28 리뷰).
+TIER_NO_SAMPLE = ("이 상권에는 이 가격대 업종({inds})의 매출 표본이 모자라 계산하지 않았어요 — 서울시 상권분석 "
+                  "추정매출은 상권·업종 칸마다 점포 5곳 이상일 때만 셉니다.")
+TIER_NO_CITY = "{city} 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 계산하지 않았어요."
+TIER_NO_RATE = "이 가격대의 비임차 영업비용률(KOSIS) 자료가 없어 계산하지 않았어요."
+# (A) 2026-10-28 — 평당매출이 상식 대역 위면 그 tier 도 자료 부족이다(posting_revenue.tier_status 「above_band」).
+TIER_ABOVE_BAND = ("이 상권의 이 가격대 업종({inds}) 매출이 평당 월 {v:,.0f}만원으로 상식 범위(월 {lo:,.0f}~{hi:,.0f}만원)를 "
+                   "넘어 계산하지 않았어요 — 표본이 얇거나(상권·업종 칸 한두 곳) 상권이 특수하면 이렇게 나와요.")
 
 
-def basis_note(basis: str) -> str:
-    """`basis` 문자열에 맞는 한계 설명. 카드가 두 모델을 구분해 보여주게 한다."""
-    return COST_BASIS_NOTE if basis == COST_BASIS else COST_BASIS_LEGACY_NOTE
+def basis_note(basis: str | None) -> str:
+    """`basis` 문자열에 맞는 한계 설명. 실측 모델이 아닌 값(외부 코파일럿 등)에는 붙이지 않는다."""
+    return COST_BASIS_NOTE if basis == COST_BASIS else ""
+
+
+def tier_unavailable_reason(district_id: str | None, tier: str) -> str | None:
+    """이 거점 × tier 를 계산하지 않는 사유. 계산할 수 있으면 None."""
+    status = posting_revenue.tier_status(district_id, tier)
+    if status == "ok":
+        return None
+    if status == "no_rate":
+        return TIER_NO_RATE
+    d = PAGES_BY_ID.get(district_id or "")
+    city = page_city(d) if d else None
+    if city is not None and not city.has_trdar:
+        return TIER_NO_CITY.format(city=city.short)
+    if status == "above_band":
+        lo, hi = posting_revenue.SANE_PER_PYEONG
+        return TIER_ABOVE_BAND.format(inds=TIER_INDUSTRIES[tier], v=posting_revenue.per_pyeong(district_id, tier),
+                                      lo=lo, hi=hi)
+    return TIER_NO_SAMPLE.format(inds=TIER_INDUSTRIES[tier])
 
 
 def page_city(d: dict) -> cities.City:
@@ -211,7 +239,9 @@ def page_city(d: dict) -> cities.City:
 
 
 PAYBACK_NO_REVENUE = ("{city} 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. "
-                      "원가·인건비가 빠진 계수로는 회수기간이 실제보다 짧게 나와요.")
+                      "실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요.")
+PAYBACK_NO_SAMPLE = ("이 상권에는 실측으로 계산할 수 있는 가격대가 없어 본전 시점을 계산하지 않아요 — 매출 표본이 "
+                     "모자라거나(상권·업종 칸마다 점포 5곳 이상일 때만 센다) 평당매출이 상식 범위를 넘었어요.")
 
 
 def payback_unavailable_reason(district_id: str) -> str | None:
@@ -220,29 +250,33 @@ def payback_unavailable_reason(district_id: str) -> str | None:
     2026-10-27: 고양·파주를 서빙하자 9거점 전부가 `rent+fitout` 계수 폴백을 탔다 — 매출 재료(서울
     상권분석 추정매출)가 그 도시에 서지 않아서다. 결과는 회수 1개월 안팎 · 마진 80%대였고(금촌 가성비
     0.9개월), 창업자 흐름의 머리 문장 「… 하면 N개월이면 본전이에요」가 그 값을 그대로 말했다.
-    `COST_BASIS_LEGACY_NOTE` 가 스스로 「회수기간이 과소하게 나온다」고 적는 값이다.
-    **도시 단위로 재료가 없을 때만** 막는다 — 서울 안에서 표본이 모자라 폴백한 유닛(가락·불광)은
-    여기 걸리지 않는다. 재료는 있는데 표본이 모자란 것이라 풀 방법이 다르다.
+    2026-10-28 부터는 계수 폴백 자체가 없다(사용자 결정 (b)) — **실측으로 계산한 tier 가 하나도 없을 때**
+    답하지 않는다. 가락·불광처럼 일부 tier 만 서는 거점은 선 tier 로 답한다(빠진 tier 는 `tier_scenarios`
+    가 자료 부족으로 표시한다).
     """
     d = PAGES_BY_ID.get(district_id)
     if not d:
         return None
-    city = page_city(d)
-    if city.has_trdar or posting_revenue.available(district_id):
+    if posting_revenue.measured_tiers(district_id):
         return None
-    return PAYBACK_NO_REVENUE.format(city=city.short)
+    city = page_city(d)
+    if not city.has_trdar:
+        return PAYBACK_NO_REVENUE.format(city=city.short)
+    return PAYBACK_NO_SAMPLE
 
 
 def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     """공실 유닛의 3-Tier 비용-효용 시나리오(월 단위, 만원/백만원).
 
-    `district_id` 를 주면 **실측 모델**로 계산한다(2026-08-23):
+    tier 마다 **실측 모델**로 계산한다(2026-08-23):
 
         rev  = area × foot_k_norm × 거점별 실측 평당매출[tier]
         cost = rent + rev × 비임차 영업비용률[tier]        # KOSIS 서울 2024
 
-    안 주거나 그 거점에 재료가 없으면 낡은 계수 모델로 폴백한다. 어느 쪽이 돌았는지는
-    각 시나리오의 `basis` 에 실린다 — **폴백을 조용히 하지 않는 것**이 요점이다.
+    그 거점 × tier 에 재료가 없으면 **계산하지 않는다**(2026-10-28 사용자 결정 (b)) — 키는 남기되
+    `available: False` · `unavailable_reason` · 숫자 None 으로 내보내 화면이 「자료 부족」으로 그린다.
+    종전의 계수 폴백(`rent+fitout`)은 없앴다(`TIER_NO_SAMPLE` 위 주석). `district_id` 가 없으면
+    재료를 고를 수 없으니 세 tier 모두 자료 부족이다.
 
     표시값(`invest_mn`·`month_cost`·`month_rev`·`roi_months`)은 반올림하되, 추천
     비교에 쓰는 값은 `_raw` 에 원값으로 함께 싣는다 — 반올림이 추천을 뒤집던 것을
@@ -251,43 +285,41 @@ def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     # 유동 등급이 없는 유닛(유동 소스가 서지 않는 도시 — 고양·파주, 2026-10-26)은 **보정하지
     # 않는다**(계수 1.0). 등급을 지어내지 않고, `resolve_units` 가 `inputs_source.foot="none"`
     # 으로 그 사실을 밝힌다. 종전에는 빈 등급이 KeyError 로 죽었다(첨자로 읽었다).
-    f_k = _FOOT_K.get(unit.get("foot") or "", 1.0)
-    base = unit["area"] * f_k
     # `prem`(권리금)은 공개 통계가 없어 **입력 계약**으로 받는다(2026-08-24 결정).
     # 안 주면 0 전제로 돈다 — 실측 감도는 추천 5.2% 뒤집힘 · roi 중앙 1.6개월이고
     # 회수가부 판정은 전혀 안 바뀐다(270유닛 전수, docs/feature-posting.md §0-K).
     rent, area, prem = unit["rent"], unit["area"], unit.get("prem") or 0
-    measured = posting_revenue.available(district_id)
 
-    # (투자계수·투자고정, 비용계수·비용고정, 매출계수·매출고정)
-    # ⚠ 매출계수 41/30/18 과 비용계수는 근거 없는 손으로 적은 값이다. 실측 모델이
-    #    설 수 없는 거점에서만 쓰인다(services/posting_revenue).
-    specs = {
-        "premium": (0.55, 4, 1.8, 180, 41, 1150),
-        "value": (0.32, 2.2, 1.1, 95, 30, 760),
-        "factory": (0.2, 1.1, 0.45, 25, 18, 430),
-    }
+    # (투자계수, 투자고정) — 백만원. ⚠ 실측이 아니라 손으로 적은 값이다(인테리어·설비 공개 통계가 없다).
+    #   매출·비용은 실측으로 갈았지만 투자비는 이 계수가 그대로라 회수기간의 분자에 남는다.
+    invest = {"premium": (0.55, 4), "value": (0.32, 2.2), "factory": (0.2, 1.1)}
     out = {}
-    for k, (i_a, i_c, c_a, c_f, r_a, r_f) in specs.items():
-        inv = prem / 100 + area * i_a + i_c        # 백만원
-        if measured:
-            rev = posting_revenue.revenue_of(unit, district_id, k)   # 만원/월
-            cost = rent + rev * posting_revenue.opex_rate(k)         # 만원/월
-            basis = COST_BASIS
-        else:
-            cost = rent + area * c_a + c_f         # 만원/월
-            rev = base * r_a + r_f                 # 만원/월
-            basis = COST_BASIS_LEGACY
+    for k, (i_a, i_c) in invest.items():
+        reason = tier_unavailable_reason(district_id, k)
+        rev = None if reason else posting_revenue.revenue_of(unit, district_id, k)   # 만원/월
+        if rev is None:
+            # 재료가 없는 tier — 계산하지 않는다. 면적이 없어 매출을 못 세는 유닛도 같다.
+            out[k] = {
+                "tier": k, "name": TIER[k]["nm"], "sub": TIER[k]["sub"],
+                "available": False,
+                "unavailable_reason": reason or "이 자리는 면적 자료가 없어 계산하지 않았어요.",
+                "invest_mn": None, "month_cost": None, "month_rev": None,
+                "month_net": None, "roi_months": None, "viable": False, "basis": None,
+            }
+            continue
+        inv = prem / 100 + area * i_a + i_c                                  # 백만원
+        cost = rent + rev * posting_revenue.opex_rate(k)                    # 만원/월
         net = rev - cost
         # 회수기간(개월). invest 는 백만원, net 은 만원이라 ×100 으로 단위를 맞춘다
         # (2026-08-01 교정 — 이전에는 100배 작게 나와 "0.1개월"로 찍혔다).
         roi = float("inf") if net <= 0 else inv * 100 / net
         out[k] = {
             "tier": k, "name": TIER[k]["nm"], "sub": TIER[k]["sub"],
+            "available": True, "unavailable_reason": None,
             "invest_mn": round(inv), "month_cost": round(cost), "month_rev": round(rev),
             "month_net": round(net), "roi_months": 99.0 if net <= 0 else round(roi, 1),
             "viable": net > 0,
-            "basis": basis,
+            "basis": COST_BASIS,
             "_raw": {"invest_mn": inv, "cost": cost, "rev": rev, "net": net, "roi": roi},
         }
     # 추천은 **계산한다** — 시드의 `unit["rec"]` 을 읽지 않는다. 그래야 실제 건물에서
@@ -296,7 +328,7 @@ def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     best = recommend_tier(out)
     for k, s in out.items():
         s["recommended"] = k == best
-        s.pop("_raw")
+        s.pop("_raw", None)
     return out
 
 
@@ -310,11 +342,14 @@ def unviable_note(scenarios: dict) -> str | None:
     한계 설명도 실제로 돈 모델의 것을 붙인다 — 폴백으로 계산해 놓고 실측 모델의 한계를
     적으면 그 자체가 거짓 근거가 된다.
     """
-    if any(s["viable"] for s in scenarios.values()):
+    # 계산한 tier 만 본다 — 자료 부족 tier 는 「안 된다」가 아니라 「모른다」다(2026-10-28 (b)).
+    done = [s for s in scenarios.values() if s.get("available", True)]
+    if not done or any(s["viable"] for s in done):
         return None
-    basis = next(iter(scenarios.values())).get("basis", COST_BASIS)
-    return ("이 자리는 지금 계산으로는 회수 불가 — 세 전략 모두 월 순익이 0 이하다. "
-            f"({basis_note(basis)})")
+    who = ("세 전략 모두" if len(done) == len(scenarios)
+           else f"계산한 전략 {len(done)}개 모두")   # 이름은 넣지 않는다 — 화면마다 전략 이름이 다르다
+    note = basis_note(done[0].get("basis"))
+    return f"이 자리는 지금 계산으로는 회수 불가 — {who} 월 순익이 0 이하다." + (f" ({note})" if note else "")
 
 
 def _predicted_none() -> dict:
@@ -509,8 +544,9 @@ def get_postings(district_id: str) -> list[dict] | None:
     units = resolved_units(district_id)
     if units is None:
         return None
-    # 시나리오는 그대로 싣는다(`basis` 가 계수 폴백임을 밝힌다). 사유가 있으면 화면은 회수기간을
-    # 머리 값으로 쓰지 않는다 — 자리(건축물대장 실측)는 남기고 답만 거둔다.
+    # 재료가 없는 tier 는 시나리오 안에서 자료 부족으로 내려간다(`available: False`). 계산한 tier 가
+    # 하나도 없으면 사유가 붙고 화면은 회수기간을 머리 값으로 쓰지 않는다 — 자리(건축물대장 실측)는
+    # 남기고 답만 거둔다.
     reason = payback_unavailable_reason(district_id)
     return [{**u, "scenarios": tier_scenarios(u, district_id), "payback_unavailable_reason": reason}
             for u in units]

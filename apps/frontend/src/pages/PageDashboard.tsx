@@ -3,7 +3,7 @@ import type { NaverMap, NaverOverlay, NaverListener, NaverInfoWindow } from "@/l
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import {
-  BASIS_LABEL,
+  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable,
   listDistricts, getDistrict, getPostings, getMarketing, getVacancyHeatmap, getBuildingVacancy,
   getFloorVacancies,
 } from "@/lib/api";
@@ -160,11 +160,14 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
                 <span className={s.risk_zones > 0 ? "risk" : ""}>위험구역 {s.risk_zones}</span>}
             </div>
             <div className="dtiers">
-              {(["premium", "value", "factory"] as const).map((t) => (
-                <span key={t} className="tchip" style={{ color: TIER_COLOR[t], borderColor: TIER_COLOR[t] }}>
-                  {TIER_LABEL[t]} {s.tier_mix[t]}
-                </span>
-              ))}
+              {/* 추천이 하나도 없으면(실측으로 계산한 전략이 없거나 모두 회수 불가) 0 셋 대신 그 사실을 적는다 */}
+              {s.tier_mix.premium + s.tier_mix.value + s.tier_mix.factory === 0
+                ? <span className="tchip value-absent" title="실측으로 계산한 전략이 없거나 모두 회수 불가다">추천 없음</span>
+                : (["premium", "value", "factory"] as const).map((t) => (
+                  <span key={t} className="tchip" style={{ color: TIER_COLOR[t], borderColor: TIER_COLOR[t] }}>
+                    {TIER_LABEL[t]} {s.tier_mix[t]}
+                  </span>
+                ))}
             </div>
           </button>
         ))}
@@ -742,7 +745,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                     {/* 매출 재료가 없는 도시(고양·파주)는 계수 폴백이라 회수기간을 싣지 않고 사유를 싣는다(2026-10-27) */}
                     {p.payback_unavailable_reason ? <div className="unote">{p.payback_unavailable_reason}</div> : <>
                     <div className="tiers">
-                      {Object.values(p.scenarios).map((sc: TierScenario) => (
+                      {Object.values(p.scenarios).map((sc: TierScenario) => tierAvailable(sc) ? (
                         <div key={sc.tier} className={"tier" + (sc.recommended ? " rec" : "")} style={{ borderColor: sc.recommended ? TIER_COLOR[sc.tier] : undefined }}>
                           <div className="tname" style={{ color: TIER_COLOR[sc.tier] }}>{sc.name}{sc.recommended && <em> 추천</em>}</div>
                           <div className="trow"><span>초기투자</span><b>{sc.invest_mn}백만</b></div>
@@ -756,20 +759,33 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                             </b>
                           </div>
                         </div>
+                      ) : (
+                        // 실측 재료가 없어 계산하지 않은 전략 — 「모른다」다. 숫자를 지어내지 않는다(2026-10-28 (b))
+                        <div key={sc.tier} className="tier" title={sc.unavailable_reason ?? undefined}>
+                          <div className="tname" style={{ color: TIER_COLOR[sc.tier] }}>{sc.name}</div>
+                          <div className="trow"><span>{TIER_UNAVAILABLE_LABEL}</span></div>
+                          <div className="unote">{sc.unavailable_reason}</div>
+                        </div>
                       ))}
                     </div>
-                    {/* 세 전략 모두 회수불가면 그 사실과 계산의 한계를 함께 밝힌다.
-                        숫자만 비워 두면 "데이터가 없다"로 읽힌다. */}
-                    {!Object.values(p.scenarios).some((sc: TierScenario) => sc.viable) && (
-                      <div className="unote neg">
-                        이 자리는 지금 계산으로는 <b>회수 불가</b> — 세 전략 모두 월 순익이 0 이하다.
-                        {" "}임대료가 이 면적이 낼 수 있는 매출에 비해 높다.
-                      </div>
-                    )}
-                    <div className="unote">
-                      비용 기준: {BASIS_LABEL[Object.values(p.scenarios)[0]?.basis]
-                        ?? Object.values(p.scenarios)[0]?.basis ?? "미상"}
-                    </div>
+                    {/* 계산한 전략이 모두 회수불가면 그 사실과 계산의 한계를 함께 밝힌다.
+                        숫자만 비워 두면 "데이터가 없다"로 읽힌다. 자료 부족 전략은 판정에서 뺀다. */}
+                    {(() => {
+                      const done = Object.values(p.scenarios).filter(tierAvailable);
+                      if (!done.length || done.some((sc) => sc.viable)) return null;
+                      const who = done.length === Object.values(p.scenarios).length
+                        ? "세 전략 모두" : `계산한 전략(${done.map((sc) => sc.name).join("·")}) 모두`;
+                      return (
+                        <div className="unote neg">
+                          이 자리는 지금 계산으로는 <b>회수 불가</b> — {who} 월 순익이 0 이하다.
+                          {" "}임대료가 이 면적이 낼 수 있는 매출에 비해 높다.
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const basis = Object.values(p.scenarios).find(tierAvailable)?.basis;
+                      return <div className="unote">비용 기준: {basis ? (BASIS_LABEL[basis] ?? basis) : "미상"}</div>;
+                    })()}
                     </>}
                   </div>
                 ))}

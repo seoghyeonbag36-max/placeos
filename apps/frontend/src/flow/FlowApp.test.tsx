@@ -259,11 +259,14 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.getByRole("button", { name: "후보로 저장하기" })).toBeTruthy();
     expect(screen.getByText("본전 시점은 건물 단위 자리만 계산해요.")).toBeTruthy();
     b.unmount();
-    // 매출 재료가 없는 도시(고양·파주 · 2026-10-27)는 회수기간 유닛이 있어도 계수 폴백이라 답하지 않고 사유를 보인다
+    // 매출 재료가 없는 도시(고양·파주 · 2026-10-27)는 회수기간을 답하지 않고 사유를 보인다. 10-28 (b) 부터
+    // 세 가격대는 계수로 채우지 않고 모두 자료 부족(available: false · 숫자 null)으로 온다
     const reason = "파주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요.";
+    const noData = { available: false, unavailable_reason: "파주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 계산하지 않았어요.",
+      invest_mn: null, month_cost: null, month_rev: null, month_net: null, roi_months: null, viable: false, recommended: false, basis: null };
     stub([{ match: /\/seongsu\/postings$/, body: [{ id: "vu-B1", n: "B1", grp: "A", lat: 0, lng: 0, area: 19, rent: 412, prem: 0, floor: "1F", was: "카페", foot: "",
-      scenarios: { premium: tier("premium", { basis: "rent+fitout", roi_months: 1.1 }), value: tier("value", { basis: "rent+fitout", roi_months: 0.9 }),
-        factory: tier("factory", { basis: "rent+fitout", roi_months: 1.0 }) }, payback_unavailable_reason: reason }] }]);
+      scenarios: { premium: tier("premium", noData), value: tier("value", noData), factory: tier("factory", noData) },
+      payback_unavailable_reason: reason }] }]);
     open("/space/vfu-B1-1");
     const c = render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" })).toBeTruthy();
@@ -287,6 +290,35 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.getByText("처음 2,000만원")).toBeTruthy();
     expect(screen.getByText("처음 3,400만원")).toBeTruthy();
     expect(screen.getByText(/추정이에요 · 권리금 0원\(모름\)/)).toBeTruthy();
+  });
+
+  it("F-09b 실측 재료가 없는 가격대는 「자료 부족」으로 두고, 계산한 가격대로 본전을 말한다 (2026-10-28 (b))", async () => {
+    // 가락·불광 — 고급화 표본만 모자란다. 종전에는 세 가격대를 통째로 계수로 채워 회수 1개월 안팎이 나왔다
+    const why = "이 상권에는 이 가격대 업종(일식·양식·중식)의 매출 표본이 모자라 계산하지 않았어요 — 서울시 상권분석 추정매출은 상권·업종 칸마다 점포 5곳 이상일 때만 셉니다.";
+    const none = { available: false, unavailable_reason: why, invest_mn: null, month_cost: null, month_rev: null, month_net: null,
+      roi_months: null, viable: false, recommended: false, basis: null };
+    stub([{ match: /\/ai\/simulate-revenue$/, body: (_m: RegExpExecArray, call: ApiCall) => ({
+      district_id: "seongsu", unit_id: (call.body as { unit_id: string }).unit_id, industry_type: "카페",
+      scenarios: { premium: tier("premium", none), value: tier("value", { recommended: false, roi_months: 5.0 }),
+        factory: tier("factory", { recommended: true, invest_mn: 12, month_net: 395, roi_months: 3.3 }) },
+      source: "fallback-3tier", source_note: null, inputs_source: { area: "bldg", rent: "rone", prem: "absent", foot: "seed" }, inputs_quarter: "20262", unviable_note: null,
+    }) }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu", spaceId: "vfu-B1-1", premium: { kind: "unknown" }, tier: "premium" }));
+    open("/payback");
+    render(<FlowApp token={null} />);
+    // 앞에서 「비싸게」를 골라 뒀어도 없는 숫자를 그리지 않는다 — 머리 문장은 계산한 추천 가격대다
+    expect(await screen.findByRole("heading", { level: 1, name: "꼭 필요한 것만 하면 약 3개월이면 본전이에요" })).toBeTruthy();
+    const premium = screen.getByRole("radio", { name: /비싸게/ }) as HTMLButtonElement;
+    expect(premium.disabled).toBe(true);
+    expect(within(premium).getByText("자료 부족")).toBeTruthy();
+    expect(within(premium).getByText(why)).toBeTruthy();
+    expect(within(premium).queryByText(/처음|매달|본전/)).toBeNull();
+    expect(screen.getByText(/추정이에요 · 권리금 0원\(모름\) · 건물 전체 기준 · 비싸게 자료 부족/)).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /꼭 필요한 것만/ }).getAttribute("aria-checked")).toBe("true");
+    // 검증 계획은 화면이 보여 준 가격대를 이어받는다 — 골라 뒀던 「비싸게」(자료 부족)를 그대로 넘기면 계산하지 않은
+    // 가격대로 계획을 만든다(10-28 리뷰)
+    fireEvent.click(screen.getByRole("button", { name: "작게 먼저 확인하기" }));
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY) ?? "{}").tier).toBe("factory"));
   });
 
   it("F-10 ♡ 를 누르면 그때 로그인 시트가 뜨고, 로그인하면 누르려던 저장을 잇는다", async () => {
