@@ -66,6 +66,19 @@ def _place(addr: str) -> tuple[str, str, str] | None:
     return (sig.group(1), gu.group(1) if gu else "", leaf.group(1))
 
 
+def _key(p: tuple[str, str, str]) -> tuple[str, str]:
+    """거점 버킷을 고르는 키 — (시군, 동). **구는 뺀다.**
+
+    두 소스가 같은 필지에 구를 다르게 적을 수 있다 — 부천은 2024 에 일반구가 부활했고
+    (원미·소사·오정), 화성은 2026 에 일반구가 섰다(만세·효행·병점·동탄). 상가정보 주소에는
+    새 구가 붙는데 인허가 정제주소가 아직 옛 표기면 (시군, 구, 동) 이 어긋나 그 거점의
+    인허가가 **통째로 0 행이 되고 예외는 안 난다**. 이 키는 대상 행을 고르는 거친 필터일 뿐이고,
+    건물 귀속은 `build_page_master._licensed_pip` 의 좌표 PIP 가 정한다 — 같은 시에 같은 이름의
+    동이 다른 구에 있어도 거점 폴리곤 밖의 행은 어느 건물에도 안 걸린다(행이 늘 뿐 틀리지 않는다).
+    """
+    return (p[0], p[2])
+
+
 def _hub_places(slug: str) -> set[tuple[str, str, str]]:
     """거점 stores_raw 의 lnoAdr 에서 (시군, 구, 동) 집합 파생.
 
@@ -116,14 +129,20 @@ def _fetch(key: str, page: int) -> dict | None:
         return None
 
 
-def _scan(key: str, idx: dict[tuple[str, str, str], list[str]],
-          targets: list[str]) -> tuple[dict[str, list[dict]], bool]:
+def _scan(key: str, idx: dict[tuple[str, str], list[str]],
+          targets: list[str],
+          exact: dict[str, set[tuple[str, str, str]]] | None = None,
+          ) -> tuple[dict[str, list[dict]], bool]:
     """전량 페이징하며 거점 버킷으로 나눠 담는다. (버킷, 완주여부)
 
     완주 여부를 함께 돌려주는 이유는 서울 수집기와 같다 — 중간에 끊긴 부분 결과를
     완료로 저장하면 **빠진 줄 모른 채** 산출물이 만들어진다.
+
+    `exact` 를 주면 (시군, 구, 동) 이 그 거점 점포 주소와 **구까지 같지 않은데** 잡힌 행을 센다 —
+    `_key` 가 구를 뺀 덕에 살아난 행이다(두 소스의 구 표기 차이를 숫자로 남긴다).
     """
     part: dict[str, list[dict]] = {s: [] for s in targets}
+    gu_diff: dict[str, int] = {s: 0 for s in targets}
     page, total, done = 1, None, False
     while True:
         body = _fetch(key, page)
@@ -139,12 +158,14 @@ def _scan(key: str, idx: dict[tuple[str, str, str], list[str]],
             p = _place(str(r.get("REFINE_LOTNO_ADDR") or ""))
             if not p:
                 continue
-            hits = idx.get(p)
+            hits = idx.get(_key(p))
             if not hits:
                 continue
             row = _norm(r)
             for s in hits:
                 part[s].append(row)
+                if exact is not None and p not in exact.get(s, ()):
+                    gu_diff[s] += 1
         if page * _PAGE >= total:
             done = True
             break
@@ -156,6 +177,10 @@ def _scan(key: str, idx: dict[tuple[str, str, str], list[str]],
     print(f"[gg-lic] 스캔 {total:,}행 · 거점 적재 "
           f"{sum(len(v) for v in part.values()):,}행"
           f"{'' if done else ' · ⚠ 미완주(저장 안 함)'}")
+    diff = {s: n for s, n in gu_diff.items() if n}
+    if diff:
+        print("[gg-lic] 구 표기가 점포 주소와 달라 (시군, 동) 키로만 잡힌 행: "
+              + " · ".join(f"{s} {n:,}" for s, n in sorted(diff.items())))
     return part, done
 
 
@@ -177,34 +202,52 @@ def collect(slugs: list[str], force: bool = False) -> None:
     if not targets:
         return
 
-    # (시군,구,동) → [거점...]  한 동이 여러 거점에 걸릴 수 있다.
-    idx: dict[tuple[str, str, str], list[str]] = {}
+    # (시군,동) → [거점...]  한 동이 여러 거점에 걸릴 수 있다. 구를 빼는 이유는 `_key`.
+    idx: dict[tuple[str, str], list[str]] = {}
+    exact: dict[str, set[tuple[str, str, str]]] = {}
     for s in targets:
         places = _hub_places(s)
         if not places:
             print(f"[gg-lic] {s}: stores_raw 가 없어 대상 동을 못 만든다 — 먼저 "
                   f"`python -m data.collectors.building_vacancy {s} --no-ledger`")
             continue
+        exact[s] = places
         for p in places:
-            idx.setdefault(p, []).append(s)
+            hubs = idx.setdefault(_key(p), [])
+            if s not in hubs:
+                hubs.append(s)
+    # ⚠ 대상 동을 못 만든 거점은 **저장 대상에서 뺀다.** 종전에는 남겨 둬서 빈 목록이
+    #   licensing_biz.json 으로 저장됐고, 다음 실행부터 「이미 있음」으로 건너뛰어 그 거점은
+    #   인허가 0 행인 채로 굳었다(예외도 경고도 없이).
+    targets = [s for s in targets if s in exact]
     if not idx:
         raise SystemExit("[gg-lic] 대상 동 0 — 수집할 것이 없다")
     print(f"[gg-lic] 대상 거점 {len(targets)} · 동 {len(idx)}개")
 
     stage = _STAGE / f"{today()}.json"
+    cached: dict[str, list[dict]] = {}
     part: dict[str, list[dict]] | None = None
-    if stage.exists() and not force:
-        cached = json.loads(stage.read_text(encoding="utf-8"))
-        if all(s in cached for s in targets):
+    if stage.exists():
+        try:
+            cached = json.loads(stage.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            # 쓰다 죽은 스테이지(50거점이면 100MB 대)가 그날의 모든 실행을 죽이지 않게 한다 — 버리고 다시 스캔한다.
+            print("[gg-lic] 오늘 자 스테이지가 깨졌다 — 버리고 다시 스캔한다")
+            cached = {}
+        if not force and cached and all(s in cached for s in targets):
             part = {s: cached[s] for s in targets}
             print(f"[gg-lic] 오늘 자 스테이지 재사용 — 스캔 생략")
 
     if part is None:
-        part, done = _scan(key, idx, targets)
+        part, done = _scan(key, idx, targets, exact)
         if not done:
             raise SystemExit("[gg-lic] 미완주 — 저장하지 않는다. 다시 실행할 것")
         _STAGE.mkdir(parents=True, exist_ok=True)
-        stage.write_text(json.dumps(part, ensure_ascii=False), encoding="utf-8")
+        # 같은 날 앞선 실행이 담아 둔 거점을 지우지 않는다(합쳐서 쓴다). 임시 파일에 쓰고 바꿔 끼운다 —
+        # 쓰다 죽어도 깨진 스테이지가 남지 않는다.
+        tmp = stage.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps({**cached, **part}, ensure_ascii=False), encoding="utf-8")
+        tmp.replace(stage)
 
     for s in targets:
         rows = part.get(s) or []

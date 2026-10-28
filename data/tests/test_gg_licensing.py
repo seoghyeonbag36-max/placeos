@@ -70,3 +70,84 @@ def test_licensed_pip_skips_transform_for_wgs84_rows():
     # 변환 호출은 `_lonlat` 안의 **한 곳뿐**이어야 한다. 루프에서 직접 부르는 자리가
     # 남아 있으면 그 경로만 WGS84 행을 다시 변환한다.
     assert text.count("tr.transform(x, y)") == 1, "변환을 직접 부르는 자리가 남아 있다"
+
+
+# ── 일반구 표기 차이(2026-10-28) ──────────────────────────────────────────────────
+# 경기 3차 50거점에는 부천(2024 일반구 부활)·화성(2026 일반구) 거점이 있다. 상가정보 주소에는 새 구가
+# 붙는데 인허가 정제주소가 옛 표기면 (시군, 구, 동) 이 어긋나 그 거점의 인허가가 **통째로 0 행**이 된다.
+# 건물 귀속은 좌표 PIP 가 하므로 거점 버킷은 (시군, 동) 으로 고른다.
+
+def test_bucket_key_ignores_gu():
+    from data.collectors.gg_licensing import _key
+    new = _place("경기도 화성시 병점구 진안동 856-5")
+    old = _place("경기도 화성시 진안동 856-5")
+    assert new == ("화성시", "병점구", "진안동") and old == ("화성시", "", "진안동")
+    assert _key(new) == _key(old) == ("화성시", "진안동")
+    assert _key(_place("경기도 부천시 원미구 심곡동 120")) == _key(_place("경기도 부천시 심곡동 120"))
+
+
+def test_scan_keeps_rows_whose_gu_differs(monkeypatch):
+    """구 표기만 다른 행도 거점 버킷에 담긴다 — 종전 키로는 0 행이었다."""
+    import data.collectors.gg_licensing as gg
+    rows = [
+        {"REFINE_LOTNO_ADDR": "경기도 화성시 진안동 856-5", "BSN_STATE_NM": "영업"},       # 옛 표기(구 없음)
+        {"REFINE_LOTNO_ADDR": "경기도 화성시 병점구 진안동 860", "BSN_STATE_NM": "영업"},  # 새 표기
+        {"REFINE_LOTNO_ADDR": "경기도 오산시 원동 1", "BSN_STATE_NM": "영업"},           # 다른 시
+    ]
+    body = {"GENRESTRT": [{"head": [{"list_total_count": len(rows)}]}, {"row": rows}]}
+    monkeypatch.setattr(gg, "_fetch", lambda key, page: body)
+    monkeypatch.setattr(gg.time, "sleep", lambda s: None)
+    hub_places = {("화성시", "병점구", "진안동")}
+    idx = {gg._key(p): ["byeongjeom"] for p in hub_places}
+    part, done = gg._scan("k", idx, ["byeongjeom"], {"byeongjeom": hub_places})
+    assert done
+    assert len(part["byeongjeom"]) == 2, "구 표기가 다른 행을 놓쳤다"
+
+
+def test_hub_without_stores_is_not_saved_as_empty(tmp_path, monkeypatch):
+    """대상 동을 못 만든 거점은 빈 licensing_biz.json 으로 굳으면 안 된다.
+
+    종전에는 빈 목록이 저장돼 다음 실행부터 「이미 있음」으로 건너뛰었다 — 인허가 0 행인 채로 굳었다.
+    """
+    import data.collectors.gg_licensing as gg
+    monkeypatch.setattr(gg, "load_env", lambda: None)
+    monkeypatch.setenv("GG_OPENAPI_KEY", "test-key")
+    monkeypatch.setattr(gg, "latest_bronze", lambda s, name: None)
+    monkeypatch.setattr(gg, "_hub_places",
+                        lambda s: {("화성시", "병점구", "진안동")} if s == "has-stores" else set())
+    seen_targets = []
+
+    def fake_scan(key, idx, targets, exact=None):
+        seen_targets.extend(targets)
+        return {s: [{"TRDSTATEGBN": "01", "DCBYMD": ""}] for s in targets}, True
+
+    monkeypatch.setattr(gg, "_scan", fake_scan)
+    monkeypatch.setattr(gg, "_STAGE", tmp_path / "stage")
+    monkeypatch.setattr(gg, "today", lambda: "2026-10-28")
+    saved = []
+    monkeypatch.setattr(gg, "save_json", lambda rows, s, name: saved.append(s))
+    gg.collect(["has-stores", "no-stores"])
+    assert seen_targets == ["has-stores"]
+    assert saved == ["has-stores"], "점포 없는 거점에 빈 인허가 파일을 썼다"
+
+
+def test_corrupt_stage_cache_does_not_kill_the_day(tmp_path, monkeypatch):
+    """쓰다 죽은 스테이지가 그날의 모든 실행(--force 포함)을 JSONDecodeError 로 죽이면 안 된다(10-28 리뷰)."""
+    import json
+
+    import data.collectors.gg_licensing as gg
+    monkeypatch.setattr(gg, "load_env", lambda: None)
+    monkeypatch.setenv("GG_OPENAPI_KEY", "test-key")
+    monkeypatch.setattr(gg, "latest_bronze", lambda s, name: None)
+    monkeypatch.setattr(gg, "_hub_places", lambda s: {("수원시", "팔달구", "매산로1가")})
+    monkeypatch.setattr(gg, "_STAGE", tmp_path / "stage")
+    monkeypatch.setattr(gg, "today", lambda: "2026-10-28")
+    (tmp_path / "stage").mkdir()
+    (tmp_path / "stage" / "2026-10-28.json").write_text('{"suwonst": [{"MGTNO": ', encoding="utf-8")   # 잘린 파일
+    scanned = []
+    monkeypatch.setattr(gg, "_scan", lambda key, idx, targets, exact=None: (scanned.extend(targets) or
+                                                                         {s: [] for s in targets}, True))
+    monkeypatch.setattr(gg, "save_json", lambda rows, s, name: None)
+    gg.collect(["suwonst"])
+    assert scanned == ["suwonst"], "깨진 스테이지 때문에 스캔하지 못했다"
+    assert json.loads((tmp_path / "stage" / "2026-10-28.json").read_text(encoding="utf-8")) == {"suwonst": []}
