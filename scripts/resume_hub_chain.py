@@ -50,9 +50,10 @@ python.exe 로 바꿔도 같은 자리에서 멈췄다(20분). 셋 다 공통점
 관리자 권한이 필요 없다. 현재 사용자로 도는 작업이라 **로그온한 상태에서만** 뛴다
 (그 편이 맞다 — 이 작업은 사용자 PATH 의 python 과 .env 를 쓴다).
 
-⚠ 되살리는 것이지 고치는 것이 아니다. 쿼터가 소진돼 못 받는 상태라면 10분마다 깨어나
-  "대장 대상 N동"만 찍고 진행 없이 끝난다. 그건 정상이고, 다음 날 쿼터가 열리면 같은
-  감시자가 이어서 받는다.
+⚠ 되살리는 것이지 고치는 것이 아니다. 쿼터가 소진되면 배치가 「대장을 한 동도 못 받았다」로 스스로
+  멈추고 상태파일에 `quota_day` 를 남긴다 — 이 감시자는 그날은 되살리지 않고 10분마다 한 줄만 찍고 끝난다.
+  다음 날 쿼터가 열리면 같은 감시자가 이어서 받는다. (2026-10-28 까지는 쿼터가 끝나도 배치를 다시 띄워,
+  배치가 거점마다 2.5분씩 429 백오프로 헛돌았다.)
 """
 from __future__ import annotations
 
@@ -62,7 +63,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,11 +112,18 @@ def _start_time(pid: int) -> datetime | None:
     import ctypes.wintypes as wt
 
     PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+    STILL_ACTIVE = 259
     k32 = ctypes.windll.kernel32
     h = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
     if not h:
         return None
     try:
+        # ⚠ **끝난 프로세스도 열린다.** 누가 핸들을 쥐고 있으면 프로세스 객체가 남아 OpenProcess·
+        #   GetProcessTimes 가 성공하고 시작시각도 그대로 맞는다 — 2026-10-28 에 Stop-Process 로 끈 배치를
+        #   「이미 실행 중」으로 보고 재개하지 않았다. 종료코드가 STILL_ACTIVE 가 아니면 죽은 것이다.
+        code = wt.DWORD()
+        if k32.GetExitCodeProcess(h, ctypes.byref(code)) and code.value != STILL_ACTIVE:
+            return None
         creation = wt.FILETIME()
         rest = (wt.FILETIME * 3)()
         if not k32.GetProcessTimes(h, ctypes.byref(creation), *[ctypes.byref(x) for x in rest]):
@@ -147,10 +155,19 @@ def already_running(batch: str) -> int | None:
     return int(rec["pid"])
 
 
+def quota_spent_today() -> bool:
+    """배치가 오늘 쿼터 소진으로 멈췄나 — 상태파일의 `quota_day`(run_hub_chain_batch.QUOTA)."""
+    from run_hub_chain_batch import load_state
+    return load_state().get("quota_day") == date.today().isoformat()
+
+
 def remaining(batch: str) -> list[str]:
-    """남은 거점을 **산출물로** 센다. 상태파일은 이력이지 진실이 아니다."""
-    from run_hub_chain_batch import hubs_of, stage_done
-    return [s for s in hubs_of(batch) if stage_done(s) != "anchor"]
+    """남은 거점을 **산출물로** 센다. 상태파일은 이력이지 진실이 아니다.
+
+    같은 단계가 연달아 실패해 사람 확인을 기다리는 거점(`gave_up`)은 세지 않는다 — 세면 그 거점 하나 때문에
+    10분마다 배치를 되살려 같은 실패를 되풀이한다(2026-10-28 리뷰)."""
+    from run_hub_chain_batch import gave_up, hubs_of, stage_done
+    return [s for s in hubs_of(batch) if stage_done(s) != "anchor" and not gave_up(s)]
 
 
 def launch(batch: str) -> int:
@@ -265,6 +282,11 @@ def main() -> int:
     pid = already_running(a.batch)
     if pid:
         say(f"이미 실행 중 (PID {pid}) — 건드리지 않는다.")
+        return 0
+    if quota_spent_today():
+        # 배치가 「대장을 한 동도 못 받았다」로 멈춘 날이다. 오늘 되살리면 거점마다 429 백오프로 헛돈다
+        # (2026-10-28). 날이 바뀌면 쿼터가 열리므로 그때 잇는다.
+        say("오늘은 건축HUB 대장 쿼터가 끝났다(배치가 쿼터 소진으로 멈췄다) — 날이 바뀐 뒤 잇는다.")
         return 0
     left = remaining(a.batch)
     if not left:

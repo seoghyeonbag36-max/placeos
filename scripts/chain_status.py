@@ -122,6 +122,16 @@ def _city_of(hub) -> tuple[str, str]:
     return declared, known
 
 
+def _is_gyeonggi(city_id: str) -> bool:
+    """도시 레지스트리의 시도가 경기도인가. 못 읽으면 False(인허가 줄을 안 단다)."""
+    try:
+        from app.data import cities
+    except Exception:
+        return False
+    city = cities.CITIES.get(city_id)
+    return bool(city and city.sido == "경기도")
+
+
 def _backend_caveat(slug: str) -> str:
     """서빙이 실제로 내려보내는 예외 문구(app/data/hub_caveats). 없으면 빈 문자열.
 
@@ -222,7 +232,27 @@ def stages(slug: str) -> list[dict]:
         for b in bv:
             m = b.get("capacity_method", "?")
             methods[m] = methods.get(m, 0) + 1
-        add("대장", OK, f"{len(bv):,}동 · " + " ".join(f"{k}={v}" for k, v in sorted(methods.items())))
+        mix = " ".join(f"{k}={v}" for k, v in sorted(methods.items()))
+        # ⚠ 파일이 있다고 대장이 끝난 게 아니다(2026-10-28) — 수집기는 쿼터가 끝나도 받은 데까지 저장한다.
+        #   후보(점포를 건물로 묶은 수) 대비 **받은** 행 수로 잘림을 잰다 — run_hub_chain_batch.ledger_counts 와 같은 셈이다.
+        #   429 로 못 받은 `rate_limited` 행은 수집기가 재개 때 다시 받으므로 받은 것이 아니다.
+        #   종전에는 존재만 봐서 대장이 239동 잘린 평택역이 Tier1 · 앵커 OK 로 보였다.
+        try:
+            import contextlib
+            import io
+            from data.collectors.building_vacancy import group_by_building
+            with contextlib.redirect_stdout(io.StringIO()):   # 「[group] …」 이 --json·--next 출력을 깨뜨린다
+                cand = len(group_by_building(stores)) if stores else None
+        except Exception:
+            cand = None
+        got = len(bv) - methods.get("rate_limited", 0)
+        gap = cand - got if cand is not None else 0
+        if gap > 0:
+            # TODO 로 둔다 — PARTIAL 은 「다음 한 수」로 뽑히지 않아 잘린 대장이 「모두 통과」로 읽혔다(리뷰).
+            add("대장", TODO, f"{got:,}/{cand:,}동 받음 — {gap:,}동 남음(쿼터 소진·중단으로 잘렸다) · {mix}",
+                f"python -m data.collectors.building_vacancy {slug}   # 쿼터: scripts/quota_preflight.py")
+        else:
+            add("대장", OK, f"{len(bv):,}동 · {mix}")
         precise = methods.get("floor_ouln", 0) + methods.get("expos_units", 0)
         # 분모는 **상업 건물만**이다. 비상업(non_commercial)·대장 미확인(no_ledger)은
         # 애초에 capacity 를 매길 대상이 아니라, 분모에 넣으면 정밀도가 낮아 보인다
@@ -288,6 +318,30 @@ def stages(slug: str) -> list[dict]:
         add("공실유닛", TODO,
             "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
             f"python -m data.pipelines.build_vacant_units {slug}")
+
+    # 체인 실패 표식(2026-10-28) — 무인 배치가 이 거점의 한 단계에서 멈췄다. 뒤 산출물(앵커·유닛)이
+    # 있어도 그것은 실패한 단계 **앞**의 입력으로 선 값이다(run_hub_chain_batch §지키는 것 4).
+    # 표식이 있을 때만 줄을 단다 — 정상 거점은 9단계 그대로다.
+    mark = _load(GOLD / slug / "chain_failed.json")
+    if mark:
+        tries = int(mark.get("attempts") or 1)
+        add("체인실패", BLOCKED,
+            f"「{mark.get('step', '?')}」 실패 {tries}회({mark.get('at', '?')}) — "
+            + ("같은 단계가 연달아 실패해 배치·재개가 건너뛴다(사람 확인 · 원인을 본 뒤 표식 파일을 지울 것)"
+               if tries >= 3 else f"다음 배치가 '{mark.get('redo_from', 'none')}' 부터 다시 민다"),
+            f"python scripts/run_hub_chain_batch.py --hubs {slug}")
+
+    # 경기 인허가(2026-10-28) — 없거나 Page 마스터보다 늦게 들어왔으면 분자 보강이 빠진 값이라 공실이 과대다.
+    # 대조 기준은 인허가를 실제로 읽는 page_building_master 다(앵커 보정만 다시 돌면 calibration 은 새로워진다).
+    # 문제가 있을 때만 줄을 단다 — 할 일이라 TODO 다(PARTIAL 은 「다음 한 수」로 안 뽑힌다).
+    if cal and _is_gyeonggi(declared):
+        lic = _latest(slug, "licensing_biz.json")
+        if lic is None:
+            add("인허가", TODO, "경기 인허가(GENRESTRT) 없이 Gold 가 섰다 — 공실이 과대일 수 있다",
+                f"python -m data.collectors.gg_licensing {slug}")
+        elif master.exists() and lic.stat().st_mtime > master.stat().st_mtime:
+            add("인허가", TODO, f"인허가({lic.parent.name})가 Page 마스터보다 늦게 들어왔다 — 다시 세워야 반영된다",
+                f"python scripts/run_hub_chain_batch.py --hubs {slug}")
 
     # S9 서빙 등재 — 수집 등록과 다른 축이다
     if slug in _served_ids():

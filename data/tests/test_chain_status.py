@@ -146,3 +146,54 @@ def test_include_paused_restores_the_next_move(tmp_path, monkeypatch):
     assert report["next"] != ""
     # 단계 목록에는 보류 여부와 무관하게 늘 남아 있다.
     assert any(s["next"] for s in report["stages"])
+
+
+# ── 대장 잘림: 파일이 있다고 대장이 끝난 게 아니다 (2026-10-28) ─────────────────────────
+# 수집기는 쿼터가 끝나도 받은 데까지 저장한다. 존재만 보면 대장이 239동 잘린 평택역이 Tier1·앵커 OK 로 보였다.
+
+def _ledger_report(tmp_path, monkeypatch, *, rows: list[str]) -> dict:
+    slug = "ledger-probe"
+    hub = PageHub(slug, "대장 잘림 검증 거점", 127.0, 37.5)
+    stores = [{"bldMngNo": f"b{i}", "lat": "37.5", "lon": "127.0", "indsMclsNm": "커피점"} for i in range(3)]
+    p = tmp_path / "bronze" / slug / "2026-10-28" / "stores_raw.json"
+    p.parent.mkdir(parents=True)
+    p.write_text(json.dumps(stores), encoding="utf-8")
+    (p.parent / "bldg_polygons.geojson").write_text(json.dumps({"features": [{}] * 3}), encoding="utf-8")
+    g = tmp_path / "gold" / slug / "building_vacancy.json"
+    g.parent.mkdir(parents=True)
+    g.write_text(json.dumps([{"capacity_method": m} for m in rows]), encoding="utf-8")
+    monkeypatch.setattr(chain, "BRONZE", tmp_path / "bronze")
+    monkeypatch.setattr(chain, "GOLD", tmp_path / "gold")
+    monkeypatch.setattr(chain, "_hubs", lambda: {slug: hub})
+    monkeypatch.setattr(chain, "_city_of", lambda _hub: ("seoul", "seoul"))
+    monkeypatch.setattr(chain, "_served_ids", lambda: {slug})
+    return chain.summarize(slug)
+
+
+def _ledger(report: dict) -> dict:
+    return next(s for s in report["stages"] if s["stage"] == "대장")
+
+
+def test_truncated_ledger_is_todo_and_becomes_the_next_move(tmp_path, monkeypatch):
+    """잘린 대장은 할 일이다 — PARTIAL 로 두면 「다음 한 수」로 안 뽑혀 「모두 통과」로 읽혔다(리뷰)."""
+    report = _ledger_report(tmp_path, monkeypatch, rows=["floor_ouln"])
+    stage = _ledger(report)
+    assert stage["status"] == chain.TODO and "2동 남음" in stage["evidence"], stage
+    assert report["next_stage"] == "대장", (report["next_stage"], report["next"])
+
+
+def test_rate_limited_rows_are_not_received(tmp_path, monkeypatch):
+    """429 로 못 받은 행은 수집기가 재개 때 다시 받는다 — 받은 것으로 세면 잘린 대장이 완주로 보인다."""
+    stage = _ledger(_ledger_report(tmp_path, monkeypatch, rows=["floor_ouln", "rate_limited", "rate_limited"]))
+    assert stage["status"] == chain.TODO and "1/3동 받음" in stage["evidence"], stage
+
+
+def test_complete_ledger_is_ok(tmp_path, monkeypatch):
+    stage = _ledger(_ledger_report(tmp_path, monkeypatch, rows=["floor_ouln"] * 3))
+    assert stage["status"] == chain.OK, stage
+
+
+def test_probe_does_not_print_into_machine_output(tmp_path, monkeypatch, capsys):
+    """--json·--next 를 읽는 쪽이 있다 — 판정 중의 「[group] …」 이 표준출력에 새면 json.loads 가 깨진다(리뷰)."""
+    _ledger_report(tmp_path, monkeypatch, rows=["floor_ouln"])
+    assert capsys.readouterr().out == ""
