@@ -684,3 +684,46 @@ def test_simulating_an_unavailable_strategy_says_so_instead_of_unviable():
     assert D.TIER_INDUSTRIES[missing] in body["unavailable_reason"], body["unavailable_reason"]
     ok = c.post("/api/v1/ai/simulate-revenue", json={"district_id": partial, "strategy": have}).json()
     assert ok.get("calculation_status", "calculated") == "calculated" and ok["scenarios"][have]["available"]
+
+
+# ── (A) 평당매출이 상식 대역 위인 tier 도 자료 부족 (2026-10-28 사용자 결정) ─────────────────────
+# 그날 잠실·가락·당산·미아사거리 공장제 · 상봉 고급화 5 tier 가 평당 월 600~1,080만원으로 회수 0.2~0.75개월을 냈고,
+# 그 거점 유닛 46개 전부의 추천이었다. 대역 아래는 회수를 길게 만드는 쪽이라 그대로 계산한다.
+
+def _band_cells(pred):
+    return [(d["id"], t) for d in D.PAGES for t in P.TIERS
+            if (v := P.per_pyeong(d["id"], t)) is not None and pred(v) and D.resolved_units(d["id"])]
+
+
+def test_tiers_above_the_sane_band_are_not_computed():
+    lo, hi = P.SANE_PER_PYEONG
+    cells = _band_cells(lambda v: v > hi)
+    if not cells:
+        pytest.skip("상식 대역 위 tier 가 없다")
+    for h, t in cells:
+        assert P.tier_status(h, t) == "above_band" and not P.tier_available(h, t), (h, t)
+        for u in D.resolved_units(h):
+            s = D.tier_scenarios(u, h)[t]
+            assert _unavailable(s), (h, t)
+            assert "상식 범위" in s["unavailable_reason"] and "평당 월" in s["unavailable_reason"], s["unavailable_reason"]
+
+
+def test_tiers_below_the_band_are_still_computed():
+    """대역 아래는 회수를 길게 만든다 — 낙관으로 속이지 않으므로 그대로 계산한다(사용자 결정 (A) 는 「넘는」 쪽만)."""
+    lo, hi = P.SANE_PER_PYEONG
+    cells = _band_cells(lambda v: v < lo)
+    if not cells:
+        pytest.skip("상식 대역 아래 tier 가 없다")
+    for h, t in cells:
+        assert P.tier_available(h, t), (h, t)
+        assert all(D.tier_scenarios(u, h)[t]["available"] for u in D.resolved_units(h)), (h, t)
+
+
+def test_no_recommended_tier_rests_on_out_of_band_revenue():
+    """추천은 상식 대역 안의 평당매출로만 선다 — 대역 위 tier 가 추천으로 나가던 46유닛의 자리다."""
+    hi = P.SANE_PER_PYEONG[1]
+    for d in D.PAGES:
+        for u in (D.resolved_units(d["id"]) or []):
+            for t, s in D.tier_scenarios(u, d["id"]).items():
+                if s["recommended"]:
+                    assert P.per_pyeong(d["id"], t) <= hi, (d["id"], t)

@@ -335,17 +335,36 @@ def revenue_of(unit: dict, district_id: str | None, tier: str) -> float | None:
     return unit["area"] * fk * pp
 
 
+def tier_status(district_id: str | None, tier: str) -> str:
+    """이 거점 × tier 를 실측으로 계산할 수 있는가 — "ok" · "no_rate" · "no_sample" · "above_band".
+
+    "above_band" — 평당매출이 상식 대역(`SANE_PER_PYEONG`) **위**다(2026-10-28 사용자 결정 (A)). 재료는 있지만
+    그대로 쓰면 회수가 한 달 안쪽으로 나온다 — 그날 잠실·가락·당산·미아사거리 공장제 · 상봉 고급화 5 tier 가
+    회수 0.2~0.75개월로 그 거점 유닛 46개 전부의 추천이었다. 상권·업종 칸 한두 곳(점포 5곳 남짓)에 끌려간 값이다.
+    대역 **아래**는 그대로 계산한다 — 회수를 길게 만드는 쪽이라 창업자를 낙관으로 속이지 않는다.
+    """
+    if opex_rate(tier) is None:
+        return "no_rate"
+    pp = per_pyeong(district_id, tier)
+    if pp is None:
+        return "no_sample"
+    if pp > SANE_PER_PYEONG[1]:
+        return "above_band"
+    return "ok"
+
+
 def tier_available(district_id: str | None, tier: str) -> bool:
-    """이 거점 × tier 에 실측 재료(평당매출 · 비임차 영업비용률)가 있는가."""
-    return per_pyeong(district_id, tier) is not None and opex_rate(tier) is not None
+    """이 거점 × tier 를 실측으로 계산하는가 — 재료(평당매출 · 비임차 영업비용률)가 있고 평당매출이 상식 대역을 넘지 않는다."""
+    return tier_status(district_id, tier) == "ok"
 
 
 def measured_tiers(district_id: str | None) -> list[str]:
     """실측으로 계산할 수 있는 tier. 빠진 tier 는 계수로 채우지 않는다(2026-10-28 사용자 결정 (b)).
 
-    서울 79거점은 셋 다 서고, 가락·불광은 고급화가 빠지고(가성비·공장제만), 매출 재료가 없는
-    고양·파주는 하나도 안 선다(2026-10-28 실측). 종전에는 하나라도 빠지면 세 tier 를 **통째로**
-    손으로 적은 계수(`rent+fitout`)로 돌려 마진 76~80% · 회수 1개월 안팎을 냈다.
+    (b) 당일 실측: 서울 79거점은 셋 다 서고, 가락·불광은 고급화가 빠지고(가성비·공장제만), 매출 재료가 없는
+    고양·파주는 하나도 안 선다. 같은 날 (A) 로 평당매출이 상식 대역 위인 tier 도 뺐다(`tier_status`).
+    종전에는 하나라도 빠지면 세 tier 를 **통째로** 손으로 적은 계수(`rent+fitout`)로 돌려 마진 76~80% · 회수
+    1개월 안팎을 냈다.
     """
     return [t for t in TIERS if tier_available(district_id, t)]
 

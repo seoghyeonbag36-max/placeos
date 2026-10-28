@@ -204,6 +204,9 @@ TIER_NO_SAMPLE = ("이 상권에는 이 가격대 업종({inds})의 매출 표�
                   "추정매출은 상권·업종 칸마다 점포 5곳 이상일 때만 셉니다.")
 TIER_NO_CITY = "{city} 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 계산하지 않았어요."
 TIER_NO_RATE = "이 가격대의 비임차 영업비용률(KOSIS) 자료가 없어 계산하지 않았어요."
+# (A) 2026-10-28 — 평당매출이 상식 대역 위면 그 tier 도 자료 부족이다(posting_revenue.tier_status 「above_band」).
+TIER_ABOVE_BAND = ("이 상권의 이 가격대 업종({inds}) 매출이 평당 월 {v:,.0f}만원으로 상식 범위(월 {lo:,.0f}~{hi:,.0f}만원)를 "
+                   "넘어 계산하지 않았어요 — 표본이 얇거나(상권·업종 칸 한두 곳) 상권이 특수하면 이렇게 나와요.")
 
 
 def basis_note(basis: str | None) -> str:
@@ -213,14 +216,19 @@ def basis_note(basis: str | None) -> str:
 
 def tier_unavailable_reason(district_id: str | None, tier: str) -> str | None:
     """이 거점 × tier 를 계산하지 않는 사유. 계산할 수 있으면 None."""
-    if posting_revenue.tier_available(district_id, tier):
+    status = posting_revenue.tier_status(district_id, tier)
+    if status == "ok":
         return None
-    if posting_revenue.opex_rate(tier) is None:
+    if status == "no_rate":
         return TIER_NO_RATE
     d = PAGES_BY_ID.get(district_id or "")
     city = page_city(d) if d else None
     if city is not None and not city.has_trdar:
         return TIER_NO_CITY.format(city=city.short)
+    if status == "above_band":
+        lo, hi = posting_revenue.SANE_PER_PYEONG
+        return TIER_ABOVE_BAND.format(inds=TIER_INDUSTRIES[tier], v=posting_revenue.per_pyeong(district_id, tier),
+                                      lo=lo, hi=hi)
     return TIER_NO_SAMPLE.format(inds=TIER_INDUSTRIES[tier])
 
 
@@ -232,8 +240,8 @@ def page_city(d: dict) -> cities.City:
 
 PAYBACK_NO_REVENUE = ("{city} 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. "
                       "실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요.")
-PAYBACK_NO_SAMPLE = ("이 상권에는 세 전략 모두 매출 표본이 모자라 본전 시점을 계산하지 않아요 — 서울시 상권분석 "
-                     "추정매출은 상권·업종 칸마다 점포 5곳 이상일 때만 셉니다.")
+PAYBACK_NO_SAMPLE = ("이 상권에는 실측으로 계산할 수 있는 가격대가 없어 본전 시점을 계산하지 않아요 — 매출 표본이 "
+                     "모자라거나(상권·업종 칸마다 점포 5곳 이상일 때만 센다) 평당매출이 상식 범위를 넘었어요.")
 
 
 def payback_unavailable_reason(district_id: str) -> str | None:
