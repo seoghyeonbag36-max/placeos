@@ -1,0 +1,57 @@
+[
+  {
+    "gu": "동구",
+    "codes": [
+      "5805000"
+    ],
+    "rows": 8777,
+    "active_rows": 2307,
+    "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+    "industry": "일반음식점",
+    "complete": true
+  },
+  {
+    "gu": "서구",
+    "codes": [
+      "5810000"
+    ],
+    "rows": 12891,
+    "active_rows": 3762,
+    "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+    "industry": "일반음식점",
+    "complete": true
+  },
+  {
+    "gu": "남구",
+    "codes": [
+      "5815000"
+    ],
+    "rows": 7562,
+    "active_rows": 2002,
+    "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+    "industry": "일반음식점",
+    "complete": true
+  },
+  {
+    "gu": "북구",
+    "codes": [
+      "5820000"
+    ],
+    "rows": 17491,
+    "active_rows": 4667,
+    "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+    "industry": "일반음식점",
+    "complete": true
+  },
+  {
+    "gu": "광산구",
+    "codes": [
+      "5825000"
+    ],
+    "rows": 14040,
+    "active_rows": 4521,
+    "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+    "industry": "일반음식점",
+    "complete": true
+  }
+]

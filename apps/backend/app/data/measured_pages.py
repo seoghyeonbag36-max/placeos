@@ -95,11 +95,11 @@ _PAGE_HUBS = _REPO / "data" / "config" / "page_hubs.py"
 # 거점 단위 표기(`page_hubs.PageHub.deferred`)로 빠진다. 아래 `build()` 와 위의 두
 # 스크립트(chain_status · quota_preflight)가 같은 표기를 읽는다.
 # → docs/decision-goyang-paju-corridor-2026-10-26.md
-SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju"})
+SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu"})
 
 
 def _load_hubs() -> dict:
-    """`data/config/page_hubs.py` 를 경로로 로드.
+    """`data/config/page_hubs.py`의 서빙 대상 ACTIVE_HUBS를 경로로 로드.
 
     `data/` 는 백엔드 패키지 밖이라 import 경로가 없다(tests/test_city_registry.py 와 같은 방식).
     """
@@ -114,12 +114,12 @@ def _load_hubs() -> dict:
         return {}
     key = "_measured_pages_hubs"
     if key in sys.modules:
-        return getattr(sys.modules[key], "ALL_HUBS", {})
+        return getattr(sys.modules[key], "ACTIVE_HUBS", {})
     spec = importlib.util.spec_from_file_location(key, _PAGE_HUBS)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[key] = mod
     spec.loader.exec_module(mod)
-    return getattr(mod, "ALL_HUBS", {})
+    return getattr(mod, "ACTIVE_HUBS", {})
 
 
 def _coverage(slug: str) -> dict | None:

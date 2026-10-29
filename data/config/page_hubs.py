@@ -405,7 +405,14 @@ ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS
 # ⚠ 이 집합은 **서빙 목록과 같아야 한다**(`app/data/measured_pages.SERVED_CITIES`).
 #   달라지면 "화면에는 뜨는데 산출물은 안 만드는" 거점이 생긴다 — 그 어긋남을
 #   `tests/test_active_cities_match_serving.py` 가 잡는다. 어느 쪽을 바꾸든 둘 다 바꾼다.
-ACTIVE_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju"})
+# 2026-10-28: 대장 추가 호출 없이 완주한 경기 3차 거점만 서빙한다.
+GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
+    "suwonst", "ingye", "paldalmun", "pajang", "ajou", "yeongtong",
+    "moran", "sinheung", "dandae", "bucheonst", "anyangst", "indeogwon", "uijeongbust",
+})
+ACTIVE_CITIES: frozenset[str] = frozenset({
+    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
+})
 
 # 추후 확장 과제(`PageHub.deferred`) — 서빙 도시 안에 있어도 서빙·기본 순회에서 뺀다.
 # 지우지 않고 등록·Gold 를 남기는 이유: 재개할 때 쿼터를 다시 태우지 않게.
@@ -416,6 +423,7 @@ DEFERRED_HUBS: dict[str, PageHub] = {
 ACTIVE_HUBS: dict[str, PageHub] = {
     slug: hub for slug, hub in ALL_HUBS.items()
     if hub.city in ACTIVE_CITIES and not hub.deferred
+    and (slug not in GYEONGGI_BATCH3_HUBS or slug in GYEONGGI_BATCH3_SERVED_HUBS)
 }
 
 
