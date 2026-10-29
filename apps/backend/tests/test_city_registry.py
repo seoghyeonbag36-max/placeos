@@ -103,7 +103,7 @@ def test_only_served_cities_reach_the_api():
     from app.data import measured_pages as mp
     from app.services import districts as svc
 
-    assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju"}), (
+    assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu"}), (
         f"서빙 도시가 바뀌었다: {sorted(mp.SERVED_CITIES)} — 의도한 변경인지 확인할 것")
 
     rows = svc.list_summaries()

@@ -1,0 +1,68 @@
+{
+  "active_hubs": 103,
+  "gyeonggi_hubs": 22,
+  "added": [
+    "ajou",
+    "anyangst",
+    "bucheonst",
+    "dandae",
+    "indeogwon",
+    "ingye",
+    "moran",
+    "pajang",
+    "paldalmun",
+    "sinheung",
+    "suwonst",
+    "uijeongbust",
+    "yeongtong"
+  ],
+  "missing": {
+    "platform_industry_recommend": [
+      "ajou",
+      "anyangst",
+      "bucheonst",
+      "dandae",
+      "indeogwon",
+      "ingye",
+      "moran",
+      "pajang",
+      "paldalmun",
+      "sinheung",
+      "suwonst",
+      "uijeongbust",
+      "yeongtong"
+    ],
+    "platform_posting_inputs": [
+      "ajou",
+      "anyangst",
+      "bucheonst",
+      "dandae",
+      "indeogwon",
+      "ingye",
+      "moran",
+      "pajang",
+      "paldalmun",
+      "sinheung",
+      "suwonst",
+      "uijeongbust",
+      "yeongtong"
+    ],
+    "platform_collected_context": [
+      "ajou",
+      "anyangst",
+      "bucheonst",
+      "dandae",
+      "indeogwon",
+      "ingye",
+      "moran",
+      "pajang",
+      "paldalmun",
+      "sinheung",
+      "suwonst",
+      "uijeongbust",
+      "yeongtong"
+    ]
+  },
+  "building_hub_calls": 0,
+  "deployed": false
+}

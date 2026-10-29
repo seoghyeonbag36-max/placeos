@@ -1,0 +1,535 @@
+[
+  {
+    "slug": "gj-chungjang",
+    "anchor": "광주>금남로/충장로",
+    "landmark": "충장로우체국",
+    "gu": "동구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.91710250017714,
+    "cy": 35.14759120576095,
+    "selected": {
+      "id": "POI01000000J43SWA",
+      "title": "광주충장로우체국",
+      "category": "중앙행정기관 > 우정사업본부 > 우체국",
+      "address": {
+        "road": "전남광주통합특별시 동구 충장로2가 충장로 94",
+        "parcel": "전남광주통합특별시 동구 충장로2가 16"
+      },
+      "point": {
+        "x": "126.91710250017714",
+        "y": "35.14759120576095"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 659,
+    "nearest_candidate_m": 1318,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12210",
+      "12270"
+    ],
+    "building_code_prefixes": [
+      "",
+      "29110",
+      "29155"
+    ],
+    "stores": 3365,
+    "buildings": 1202,
+    "stores_per_building": 2.8,
+    "top10_parcel_pct": 12.57,
+    "verdict": "1차 통과",
+    "polygons": 2581,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-geumho",
+    "anchor": "광주>금호지구",
+    "landmark": "금호1동행정복지센터",
+    "gu": "서구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.85714831161745,
+    "cy": 35.135180751782215,
+    "selected": {
+      "id": "POI01000000DQ0T4W",
+      "title": "금호1동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 서구 운천로31번길 17",
+        "parcel": "전남광주통합특별시 서구 금호동 747-8"
+      },
+      "point": {
+        "x": "126.85714831161745",
+        "y": "35.135180751782215"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1489,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12240"
+    ],
+    "building_code_prefixes": [
+      "29140"
+    ],
+    "stores": 1134,
+    "buildings": 371,
+    "stores_per_building": 3.06,
+    "top10_parcel_pct": 14.9,
+    "verdict": "1차 통과",
+    "polygons": 700,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-bongseon",
+    "anchor": "광주>봉선동",
+    "landmark": "봉선2동행정복지센터",
+    "gu": "남구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.91588587827577,
+    "cy": 35.12327585738889,
+    "selected": {
+      "id": "POI01000000BTJBZT",
+      "title": "봉선2동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 남구 봉선로 189",
+        "parcel": "전남광주통합특별시 남구 봉선동 134-1"
+      },
+      "point": {
+        "x": "126.91588587827577",
+        "y": "35.12327585738889"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 2701,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12210",
+      "12270"
+    ],
+    "building_code_prefixes": [
+      "",
+      "29110",
+      "29155"
+    ],
+    "stores": 1213,
+    "buildings": 336,
+    "stores_per_building": 3.61,
+    "top10_parcel_pct": 16.24,
+    "verdict": "1차 통과",
+    "polygons": 607,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-sangmu",
+    "anchor": "광주>상무지구",
+    "landmark": "상무역",
+    "gu": "서구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.8489254268258,
+    "cy": 35.14678084000399,
+    "selected": {
+      "id": "POI010000009H6TN8",
+      "title": "상무역",
+      "category": "철도시설 > 철도/지하철 > 지하철역",
+      "address": {
+        "road": "전남광주통합특별시 서구 상무대로 777",
+        "parcel": "전남광주통합특별시 서구 마륵동 162-3"
+      },
+      "point": {
+        "x": "126.8489254268258",
+        "y": "35.14678084000399"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1489,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12240"
+    ],
+    "building_code_prefixes": [
+      "29140"
+    ],
+    "stores": 1938,
+    "buildings": 399,
+    "stores_per_building": 4.86,
+    "top10_parcel_pct": 28.22,
+    "verdict": "주의(대장 확인)",
+    "polygons": 868,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-songjeong",
+    "anchor": "광주>송정동지구",
+    "landmark": "광주송정역",
+    "gu": "광산구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.79090410007072,
+    "cy": 35.13770263068936,
+    "selected": {
+      "id": "POI01000000JLC64M",
+      "title": "광주송정역",
+      "category": "철도시설 > 철도/지하철 > 철도정거장",
+      "address": {
+        "road": "전남광주통합특별시 광산구 상무대로 201",
+        "parcel": "전남광주통합특별시 광산구 송정동 1003-1"
+      },
+      "point": {
+        "x": "126.79090410007072",
+        "y": "35.13770263068936"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1555,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12330"
+    ],
+    "building_code_prefixes": [
+      "29200"
+    ],
+    "stores": 949,
+    "buildings": 475,
+    "stores_per_building": 2.0,
+    "top10_parcel_pct": 11.91,
+    "verdict": "1차 통과",
+    "polygons": 1769,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-yangsan",
+    "anchor": "광주>양산지구",
+    "landmark": "양산동행정복지센터",
+    "gu": "북구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.87964187608713,
+    "cy": 35.20916556555777,
+    "selected": {
+      "id": "POI01000000DQ0SOF",
+      "title": "양산동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 북구 양산택지로 32",
+        "parcel": "전남광주통합특별시 북구 양산동 1019"
+      },
+      "point": {
+        "x": "126.87964187608713",
+        "y": "35.20916556555777"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1641,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12300"
+    ],
+    "building_code_prefixes": [
+      "29170"
+    ],
+    "stores": 1150,
+    "buildings": 394,
+    "stores_per_building": 2.92,
+    "top10_parcel_pct": 11.39,
+    "verdict": "1차 통과",
+    "polygons": 876,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-eoryong",
+    "anchor": "광주>어룡동",
+    "landmark": "어룡동행정복지센터",
+    "gu": "광산구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.77989517214385,
+    "cy": 35.14841261001198,
+    "selected": {
+      "id": "POI01000000DQ0ROE",
+      "title": "어룡동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 광산구 선운중앙로67번길 6",
+        "parcel": "전남광주통합특별시 광산구 선암동 516"
+      },
+      "point": {
+        "x": "126.77989517214385",
+        "y": "35.14841261001198"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1555,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12330"
+    ],
+    "building_code_prefixes": [
+      "29200"
+    ],
+    "stores": 318,
+    "buildings": 97,
+    "stores_per_building": 3.28,
+    "top10_parcel_pct": 38.36,
+    "verdict": "주의(대장 확인)",
+    "polygons": 466,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-yongbong",
+    "anchor": "광주>용봉동",
+    "landmark": "용봉동행정복지센터",
+    "gu": "북구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.90117602717449,
+    "cy": 35.18039991415172,
+    "selected": {
+      "id": "POI01000000DQ0SRI",
+      "title": "용봉동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 북구 용주로18번길 28",
+        "parcel": "전남광주통합특별시 북구 용봉동 1228-7"
+      },
+      "point": {
+        "x": "126.90117602717449",
+        "y": "35.18039991415172"
+      }
+    },
+    "radius_m": 207,
+    "stores_radius_m": 207,
+    "nearest_candidate_m": 416,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12300"
+    ],
+    "building_code_prefixes": [
+      "29170"
+    ],
+    "stores": 186,
+    "buildings": 102,
+    "stores_per_building": 1.82,
+    "top10_parcel_pct": 27.96,
+    "verdict": "주의(대장 확인)",
+    "polygons": 510,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-usan",
+    "anchor": "광주>우산동",
+    "landmark": "우산동행정복지센터",
+    "gu": "광산구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.80705816090232,
+    "cy": 35.16021577998626,
+    "selected": {
+      "id": "POI010000009FGFFU",
+      "title": "우산동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 광산구 무진대로 246-12",
+        "parcel": "전남광주통합특별시 광산구 우산동 1601-7"
+      },
+      "point": {
+        "x": "126.80705816090232",
+        "y": "35.16021577998626"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 2798,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12330"
+    ],
+    "building_code_prefixes": [
+      "29200"
+    ],
+    "stores": 958,
+    "buildings": 269,
+    "stores_per_building": 3.56,
+    "top10_parcel_pct": 24.32,
+    "verdict": "1차 통과",
+    "polygons": 751,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-wolsan",
+    "anchor": "광주>월산동지구",
+    "landmark": "월산동행정복지센터",
+    "gu": "남구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.90262052148474,
+    "cy": 35.14754352224754,
+    "selected": {
+      "id": "POI010000009FGH3K",
+      "title": "월산동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 남구 덕림2길 3",
+        "parcel": "전남광주통합특별시 남구 월산동 31-2"
+      },
+      "point": {
+        "x": "126.90262052148474",
+        "y": "35.14754352224754"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 659,
+    "nearest_candidate_m": 1318,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12240",
+      "12270",
+      "12300"
+    ],
+    "building_code_prefixes": [
+      "29140",
+      "29155",
+      "29170"
+    ],
+    "stores": 797,
+    "buildings": 386,
+    "stores_per_building": 2.06,
+    "top10_parcel_pct": 17.31,
+    "verdict": "1차 통과",
+    "polygons": 4167,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-ilgok",
+    "anchor": "광주>일곡동",
+    "landmark": "일곡동행정복지센터",
+    "gu": "북구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.89727749723673,
+    "cy": 35.206029146612074,
+    "selected": {
+      "id": "POI01000000DQ0SWN",
+      "title": "일곡동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 북구 설죽로 525",
+        "parcel": "전남광주통합특별시 북구 일곡동 849-5"
+      },
+      "point": {
+        "x": "126.89727749723673",
+        "y": "35.206029146612074"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 1641,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12300"
+    ],
+    "building_code_prefixes": [
+      "29170"
+    ],
+    "stores": 1074,
+    "buildings": 402,
+    "stores_per_building": 2.67,
+    "top10_parcel_pct": 15.18,
+    "verdict": "1차 통과",
+    "polygons": 773,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-chonnam",
+    "anchor": "광주>전남대",
+    "landmark": "전남대학교",
+    "gu": "북구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.90345959986915,
+    "cy": 35.17715734078289,
+    "selected": {
+      "id": "POI01000000JG80AD",
+      "title": "전남대학교",
+      "category": "중앙행정기관 > 교육부",
+      "address": {
+        "road": "전남광주통합특별시 북구 용봉로 45",
+        "parcel": "전남광주통합특별시 북구 용봉동 300"
+      },
+      "point": {
+        "x": "126.90345959986915",
+        "y": "35.17715734078289"
+      }
+    },
+    "radius_m": 207,
+    "stores_radius_m": 207,
+    "nearest_candidate_m": 416,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12300"
+    ],
+    "building_code_prefixes": [
+      "29170"
+    ],
+    "stores": 127,
+    "buildings": 61,
+    "stores_per_building": 2.08,
+    "top10_parcel_pct": 33.86,
+    "verdict": "주의(대장 확인)",
+    "polygons": 139,
+    "blog_search_items": 100
+  },
+  {
+    "slug": "gj-cheomdan1",
+    "anchor": "광주>첨단1지구",
+    "landmark": "첨단1동행정복지센터",
+    "gu": "광산구",
+    "status": "stores_and_polygons",
+    "source": "V-World 검색·상가정보",
+    "cx": 126.84236356483689,
+    "cy": 35.21952704385802,
+    "selected": {
+      "id": "POI010000009FGG9P",
+      "title": "첨단1동행정복지센터",
+      "category": "지방행정기관 > 동행정복지센터",
+      "address": {
+        "road": "전남광주통합특별시 광산구 첨단중앙로 160",
+        "parcel": "전남광주통합특별시 광산구 쌍암동 656-2"
+      },
+      "point": {
+        "x": "126.84236356483689",
+        "y": "35.21952704385802"
+      }
+    },
+    "radius_m": 500,
+    "stores_radius_m": 700,
+    "nearest_candidate_m": 3580,
+    "outside_city_rows": 0,
+    "administrative_codes": [
+      "12300",
+      "12330"
+    ],
+    "building_code_prefixes": [
+      "",
+      "29170",
+      "29200"
+    ],
+    "stores": 1577,
+    "buildings": 315,
+    "stores_per_building": 5.01,
+    "top10_parcel_pct": 16.74,
+    "verdict": "1차 통과",
+    "polygons": 804,
+    "blog_search_items": 100
+  }
+]

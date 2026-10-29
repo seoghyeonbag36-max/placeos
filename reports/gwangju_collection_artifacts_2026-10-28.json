@@ -1,0 +1,262 @@
+[
+  {
+    "slug": "gj-bongseon",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-bongseon/2026-10-28/stores_raw.json",
+        "bytes": 1517112,
+        "sha256": "49e5ee170d2c63b3295372d905a0ebe9e29ccd0f4e099ad0a044406b83dd9b70"
+      },
+      {
+        "path": "data/bronze/gj-bongseon/2026-10-28/bldg_polygons.geojson",
+        "bytes": 921915,
+        "sha256": "8d67c49fb75280f4d5013b549248e7bae70b9756e0e1f96894f5db4dd4f6dc0e"
+      },
+      {
+        "path": "data/bronze/gj-bongseon/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65645,
+        "sha256": "c75f2f711be441f33cf598494acbe5a5a10a9938379330812502cbca742b17d5"
+      }
+    ]
+  },
+  {
+    "slug": "gj-cheomdan1",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-cheomdan1/2026-10-28/stores_raw.json",
+        "bytes": 2013349,
+        "sha256": "534b1269f1caec9668b2976cfd25bcb02800f1af85cb9d9f8cd9749a5121e771"
+      },
+      {
+        "path": "data/bronze/gj-cheomdan1/2026-10-28/bldg_polygons.geojson",
+        "bytes": 1318364,
+        "sha256": "12eca3fe3de84dfda5eb474f4bb7af8e5e2daf9a3ce443a00fff4947e201a44f"
+      },
+      {
+        "path": "data/bronze/gj-cheomdan1/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 66233,
+        "sha256": "41e00a868814c2b958226a28204f3d4eb821b737c0d0a2499d92d6e327f8b5bf"
+      }
+    ]
+  },
+  {
+    "slug": "gj-chonnam",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-chonnam/2026-10-28/stores_raw.json",
+        "bytes": 159164,
+        "sha256": "b2e249de265fda6d45c621b9354a853a9f7af09ea8a3c3804a5bb96b43379d78"
+      },
+      {
+        "path": "data/bronze/gj-chonnam/2026-10-28/bldg_polygons.geojson",
+        "bytes": 193231,
+        "sha256": "8a6a8908f591764cc3f51139d58e1df0ed36b2e6890003832ab7b04a1e665707"
+      },
+      {
+        "path": "data/bronze/gj-chonnam/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65769,
+        "sha256": "4e7269fa165b7227e3685cc1d9f6867b9ef5987a5f063f53d22b15ea6cca1afb"
+      }
+    ]
+  },
+  {
+    "slug": "gj-chungjang",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-chungjang/2026-10-28/stores_raw.json",
+        "bytes": 4207372,
+        "sha256": "081e0a5ab58a615ee991a4225708879d4299ced30677072f772ccc8c8c699311"
+      },
+      {
+        "path": "data/bronze/gj-chungjang/2026-10-28/bldg_polygons.geojson",
+        "bytes": 3736895,
+        "sha256": "f0653a1891f77e24b2597833abf910ba4f6edd59897c4435b3491feda4bce38e"
+      },
+      {
+        "path": "data/bronze/gj-chungjang/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65817,
+        "sha256": "5b82cb0ebb07e4fcbf8bc4691c585f15b97812eaf09df4839c7f18082b518d07"
+      }
+    ]
+  },
+  {
+    "slug": "gj-eoryong",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-eoryong/2026-10-28/stores_raw.json",
+        "bytes": 401866,
+        "sha256": "c1aded8c318c149559e8890edfb963fc85cfb69369d5153845348ae79d605eaf"
+      },
+      {
+        "path": "data/bronze/gj-eoryong/2026-10-28/bldg_polygons.geojson",
+        "bytes": 605540,
+        "sha256": "f22f1ba3d106af627a95c61baacc025ee73d13797ab2ce5defee13215c0e639e"
+      },
+      {
+        "path": "data/bronze/gj-eoryong/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 64152,
+        "sha256": "bec6d32c2dcd4d8a952150672bc5e93245ac71e0270c9013841c21cc3d235bb0"
+      }
+    ]
+  },
+  {
+    "slug": "gj-geumho",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-geumho/2026-10-28/stores_raw.json",
+        "bytes": 1416731,
+        "sha256": "35cfca205be8da8a35abb53b435ff5ae9c0a34dfc52cf2a845e29bb756881810"
+      },
+      {
+        "path": "data/bronze/gj-geumho/2026-10-28/bldg_polygons.geojson",
+        "bytes": 993745,
+        "sha256": "9df1ec94e31eb3b42ca9c3a3c831f7adda71c95cdd9637d1d8b7767fd01319bd"
+      },
+      {
+        "path": "data/bronze/gj-geumho/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65746,
+        "sha256": "0e6a396efcd127a4f17463ea09428f3c0ddbf1471ca5edd385205465b7010335"
+      }
+    ]
+  },
+  {
+    "slug": "gj-ilgok",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-ilgok/2026-10-28/stores_raw.json",
+        "bytes": 1340202,
+        "sha256": "7bcf7858bdde8ad9d6afc36843c4175d98216c344613e5befb9bd7c6a711e174"
+      },
+      {
+        "path": "data/bronze/gj-ilgok/2026-10-28/bldg_polygons.geojson",
+        "bytes": 1024092,
+        "sha256": "64d237c188cb0fc723397cfe2b110ba6ce8ba3c664a117f0c6f704fe5299523c"
+      },
+      {
+        "path": "data/bronze/gj-ilgok/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65212,
+        "sha256": "151cfcd439765f2aaff6790b8ff053e1f98e6a72155396f3963618e83d80574a"
+      }
+    ]
+  },
+  {
+    "slug": "gj-sangmu",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-sangmu/2026-10-28/stores_raw.json",
+        "bytes": 2437467,
+        "sha256": "03f8cd632c349704b6915592da988f75d84642851049b552a790e5ae825791c7"
+      },
+      {
+        "path": "data/bronze/gj-sangmu/2026-10-28/bldg_polygons.geojson",
+        "bytes": 1160810,
+        "sha256": "99a07d00ffe2ad83e9d7d8eb11fbc3078dea537d2301864f3c87a05867eed8af"
+      },
+      {
+        "path": "data/bronze/gj-sangmu/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65877,
+        "sha256": "b2965dc69cd0b965760ab3b49251ba43c0525e37bb3e581e9566c0cce7cf68e8"
+      }
+    ]
+  },
+  {
+    "slug": "gj-songjeong",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-songjeong/2026-10-28/stores_raw.json",
+        "bytes": 1195223,
+        "sha256": "5090a1ee6eb7c024c7744cf0a337ef7b9707f1efb0e146766d3a865670a3c1b3"
+      },
+      {
+        "path": "data/bronze/gj-songjeong/2026-10-28/bldg_polygons.geojson",
+        "bytes": 2317225,
+        "sha256": "fef4b9b509b365da59457f06a6fdc372dfaae008e4c424565593eccb3191b4db"
+      },
+      {
+        "path": "data/bronze/gj-songjeong/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 66065,
+        "sha256": "dc37b41b4076f76d5df97f301dfd45a222ea6a71b5b25c1f31561b30f078b94e"
+      }
+    ]
+  },
+  {
+    "slug": "gj-usan",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-usan/2026-10-28/stores_raw.json",
+        "bytes": 1216149,
+        "sha256": "602d8d565656cfd2aaa630057feebc2e7af599626c3df9eada8f6b7160c0124d"
+      },
+      {
+        "path": "data/bronze/gj-usan/2026-10-28/bldg_polygons.geojson",
+        "bytes": 1032565,
+        "sha256": "6733f56c1784d0f1a73cf12e3c0f07ddb2d03c9e4ef310f4452e60ef4d6388aa"
+      },
+      {
+        "path": "data/bronze/gj-usan/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 64107,
+        "sha256": "e131cfb1c197df76b778d06483a881811671dc3988f83cf08797b5c9b9683438"
+      }
+    ]
+  },
+  {
+    "slug": "gj-wolsan",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-wolsan/2026-10-28/stores_raw.json",
+        "bytes": 994641,
+        "sha256": "fa0cd2524467ca0f676600904a68d8d2cf8d1b708a453d21f33c61e243884d90"
+      },
+      {
+        "path": "data/bronze/gj-wolsan/2026-10-28/bldg_polygons.geojson",
+        "bytes": 5590820,
+        "sha256": "a9976d4679fb27f87d9b2106da3e98318ba0c966d9f0b762cb583e37fc908a4b"
+      },
+      {
+        "path": "data/bronze/gj-wolsan/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 66327,
+        "sha256": "f3f9c3b3ced8095fd939593554bc2ed2128a5600766c0db0339d059cfa06b65f"
+      }
+    ]
+  },
+  {
+    "slug": "gj-yangsan",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-yangsan/2026-10-28/stores_raw.json",
+        "bytes": 1434078,
+        "sha256": "dc97f9d46bd460116c21fed3e98b06bc6b1d3c8017f707bae156019a595655b6"
+      },
+      {
+        "path": "data/bronze/gj-yangsan/2026-10-28/bldg_polygons.geojson",
+        "bytes": 1287600,
+        "sha256": "c176cd2f0fb9b8aaca8ec8f1dc67977621d091f3438ed3448039a8fe1503b7a2"
+      },
+      {
+        "path": "data/bronze/gj-yangsan/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 65045,
+        "sha256": "ea105260e33d26755af5e936381f06c6de2cabbe26bcd59c9bafec935074390f"
+      }
+    ]
+  },
+  {
+    "slug": "gj-yongbong",
+    "artifacts": [
+      {
+        "path": "data/bronze/gj-yongbong/2026-10-28/stores_raw.json",
+        "bytes": 232935,
+        "sha256": "09c2b056403ef38e0a1b7f43eb29b0ad7b71d2ef324a0109b866e18128b63108"
+      },
+      {
+        "path": "data/bronze/gj-yongbong/2026-10-28/bldg_polygons.geojson",
+        "bytes": 744399,
+        "sha256": "6a6fe6d2062bdc73f7db0d6194a42e9bbea00fb5289a54e107078569ed620ac7"
+      },
+      {
+        "path": "data/bronze/gj-yongbong/2026-10-28/naver_blog_search_raw.json",
+        "bytes": 66336,
+        "sha256": "f5bba696564bbc47a769b8e36103ee4551c0e3a62c8a340dde5ba6d3f63bcd53"
+      }
+    ]
+  }
+]

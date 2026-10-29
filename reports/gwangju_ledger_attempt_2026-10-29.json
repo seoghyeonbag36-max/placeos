@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-10-29T21:19:31+09:00",
+  "target": "gwangju_13_candidates",
+  "probe": "scripts.quota_preflight.check_quota",
+  "endpoint": "getBrExposPubuseAreaInfo",
+  "http_status": 429,
+  "status": "blocked_by_quota",
+  "ac_connected": true,
+  "new_gwangju_ledger_rows": 0,
+  "bulk_collection_started": false,
+  "candidates": [
+    "gj-chungjang",
+    "gj-geumho",
+    "gj-bongseon",
+    "gj-sangmu",
+    "gj-songjeong",
+    "gj-yangsan",
+    "gj-eoryong",
+    "gj-yongbong",
+    "gj-usan",
+    "gj-wolsan",
+    "gj-ilgok",
+    "gj-chonnam",
+    "gj-cheomdan1"
+  ],
+  "next_step": "Wait for quota availability; verify source administrative codes before bulk collection."
+}

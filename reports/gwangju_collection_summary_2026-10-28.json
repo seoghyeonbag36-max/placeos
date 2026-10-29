@@ -1,0 +1,23 @@
+{
+  "candidate_hubs": 13,
+  "stores_rows_sum": 14786,
+  "polygon_features_sum": 15011,
+  "blog_search_items_before_dedup": 1300,
+  "licensing_general_restaurants": 60761,
+  "licensing_active_rows": 17259,
+  "licensing_completed_gus": 5,
+  "new_api_keys_required_for_this_collection": [],
+  "building_hub_calls": 0,
+  "gold_promoted": false,
+  "serving_enabled": false,
+  "tests": "data/tests/test_gwangju_collection.py; data/tests/test_gwangju_capacity.py",
+  "blockers": [
+    "building_ledger_daily_quota",
+    "unverified_admin_and_building_code_join"
+  ],
+  "reports": [
+    "gwangju_candidates_collection_2026-10-28.json",
+    "gwangju_licensing_collection_2026-10-28.json",
+    "gwangju_collection_artifacts_2026-10-28.json"
+  ]
+}

@@ -2,33 +2,41 @@
   "slug": "gimnyangjang",
   "hub_name": "김량장동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-28T12:48:01",
-  "shown": 701,
-  "excluded_total": 1503,
-  "excluded_unknown": 19,
-  "excluded_non_commercial": 1484,
-  "excluded_determined": 0,
-  "coverage_pct": 31.8,
+  "built_at": "2026-10-29T00:36:41",
+  "shown": 659,
+  "excluded_total": 1545,
+  "excluded_unknown": 32,
+  "excluded_non_commercial": 1414,
+  "excluded_determined": 99,
+  "coverage_pct": 29.9,
   "status": {
-    "full": 404,
-    "partial": 100,
-    "high": 63,
-    "empty": 134
+    "full": 440,
+    "partial": 69,
+    "high": 47,
+    "empty": 103
   },
   "source": {
-    "pip_only": 567,
-    "polygon_only": 134
+    "stores+ledger": 496,
+    "polygon_only": 103,
+    "pip_only": 48,
+    "stores+ledger+pip": 12
   },
-  "reference_vacancy_pct": null,
-  "reference_buildings": 0,
-  "reference_coverage_pct": 0.0,
-  "mixed_vacancy_pct": 15.1,
+  "reference_vacancy_pct": 34.9,
+  "reference_buildings": 303,
+  "reference_coverage_pct": 100.0,
+  "mixed_vacancy_pct": 42.3,
   "by_capacity_method": {
-    "floor_approx": {
-      "buildings": 354,
-      "active": 1123,
-      "capacity": 1385,
-      "vacancy_pct": 18.9
+    "floor_ouln": {
+      "buildings": 282,
+      "active": 565,
+      "capacity": 628,
+      "vacancy_pct": 10.0
+    },
+    "expos_units": {
+      "buildings": 21,
+      "active": 222,
+      "capacity": 580,
+      "vacancy_pct": 61.7
     }
   },
   "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."
