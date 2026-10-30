@@ -375,6 +375,29 @@ GYEONGGI_BATCH3_HUBS: dict[str, PageHub] = {
     "jukjeon": PageHub("jukjeon", "죽전역", 127.107505, 37.324377, 500, 700, city="yongin"),  # 주의 — top10 지번 46.5% · 건물당 5.56(대장으로 집합 비중 확인)
 }
 
+# ── 광주광역시 13곳 (2026-10-30 · **등록만** — 서빙·Gold 는 대장 수집·앵커 대조 뒤) ───────────────────────────
+# R-ONE 광주 상권 13곳(중대형·소규모 공실·소규모 임대 세 표의 합집합 · 2026Q2) 각각을 한 후보로 둔다. 중심은 그 상권의
+# 공공시설·역·대학의 V-World 검색 좌표이지 **R-ONE 상권 경계가 아니다**(조사 중심) — 겹치는 반경은 절반으로 줄였다.
+# → docs/finding-gwangju-collection-2026-10-28.md · reports/gwangju_candidates_collection_2026-10-28.json
+# ⚠ 상무지구·어룡동·용봉동·전남대는 top10 지번 집중도 >25% 라 대장으로 집합 비중을 확인한 뒤 판정한다. 용봉동·전남대는 반경이 207m 로 줄어
+#   상권 대표성이 약하다(상업 가로 후보 위치 재검토 필요).
+# ⚠ 점포 `bldMngNo` 는 옛 코드(29xxx) · `lnoCd`·PNU 는 새 코드(12xxx) — 대장은 lnoCd 로 부르므로 새 코드만 쓰고, 조인율은 거점마다 센다.
+GWANGJU_HUBS: dict[str, PageHub] = {
+    "gj-chungjang": PageHub("gj-chungjang", "광주 금남로/충장로", 126.917103, 35.147591, 500, 659, city="gwangju"),  # 동구 · 점포 3,365 · 건물 1,202 · 1차 통과
+    "gj-geumho": PageHub("gj-geumho", "광주 금호지구", 126.857148, 35.135181, 500, 700, city="gwangju"),  # 서구 · 점포 1,134 · 건물 371 · 1차 통과
+    "gj-bongseon": PageHub("gj-bongseon", "광주 봉선동", 126.915886, 35.123276, 500, 700, city="gwangju"),  # 남구 · 점포 1,213 · 건물 336 · 1차 통과
+    "gj-sangmu": PageHub("gj-sangmu", "광주 상무지구", 126.848925, 35.146781, 500, 700, city="gwangju"),  # 서구 · 점포 1,938 · 건물 399 · 주의(대장 확인)
+    "gj-songjeong": PageHub("gj-songjeong", "광주 송정동지구", 126.790904, 35.137703, 500, 700, city="gwangju"),  # 광산구 · 점포 949 · 건물 475 · 1차 통과
+    "gj-yangsan": PageHub("gj-yangsan", "광주 양산지구", 126.879642, 35.209166, 500, 700, city="gwangju"),  # 북구 · 점포 1,150 · 건물 394 · 1차 통과
+    "gj-eoryong": PageHub("gj-eoryong", "광주 어룡동", 126.779895, 35.148413, 500, 700, city="gwangju"),  # 광산구 · 점포 318 · 건물 97 · 주의(대장 확인)
+    "gj-yongbong": PageHub("gj-yongbong", "광주 용봉동", 126.901176, 35.180400, 207, 207, city="gwangju"),  # 북구 · 점포 186 · 건물 102 · 주의(대장 확인)
+    "gj-usan": PageHub("gj-usan", "광주 우산동", 126.807058, 35.160216, 500, 700, city="gwangju"),  # 광산구 · 점포 958 · 건물 269 · 1차 통과
+    "gj-wolsan": PageHub("gj-wolsan", "광주 월산동지구", 126.902621, 35.147544, 500, 659, city="gwangju"),  # 남구 · 점포 797 · 건물 386 · 1차 통과
+    "gj-ilgok": PageHub("gj-ilgok", "광주 일곡동", 126.897277, 35.206029, 500, 700, city="gwangju"),  # 북구 · 점포 1,074 · 건물 402 · 1차 통과
+    "gj-chonnam": PageHub("gj-chonnam", "광주 전남대", 126.903460, 35.177157, 207, 207, city="gwangju"),  # 북구 · 점포 127 · 건물 61 · 주의(대장 확인)
+    "gj-cheomdan1": PageHub("gj-cheomdan1", "광주 첨단1지구", 126.842364, 35.219527, 500, 700, city="gwangju"),  # 광산구 · 점포 1,577 · 건물 315 · 1차 통과
+}
+
 # 거점 id 별칭 → 정규 slug (프론트/레거시 경로 호환).
 ALIASES: dict[str, str] = {
     "gangnam-garosugil": "garosugil",
@@ -389,7 +412,8 @@ ALIASES: dict[str, str] = {
 # 거점 수를 세는 곳(coverage tier · Dockerfile 가드 · pppp_status)의 분모가 흔들린다.
 # 그래서 **이름을 대고 부를 때만** 잡히게 한다.
 ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS,
-                                **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS}
+                                **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS,
+                                **GWANGJU_HUBS}
 
 # ── 기본 순회 집합 (2026-09-03) ──────────────────────────────────────────────
 # 위 주석은 "`HUBS`(서울 54)가 기본 순회 집합"이라고 적었는데, 서울 2차 12거점이
