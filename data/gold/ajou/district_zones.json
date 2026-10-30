@@ -1,0 +1,92 @@
+{
+ "slug": "ajou",
+ "built_at": "2026-10-30T13:34:23+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 220,
+  "knn_vs_pnu_compared": 220,
+  "knn_vs_pnu_agree_pct": 100.0
+ },
+ "dropped_spillover": [
+  {
+   "n": "인계동",
+   "buildings": 2,
+   "stores": 79,
+   "capacity": 8,
+   "active": 8
+  }
+ ],
+ "residual": {
+  "buildings": 2,
+  "capacity": 8,
+  "active": 8
+ },
+ "zones": [
+  {
+   "n": "원천동",
+   "grp": "원천동",
+   "lat": 37.27616,
+   "lng": 127.04586,
+   "stores": 684,
+   "buildings": 86,
+   "capacity": 206,
+   "active": 176,
+   "vacancy_rate": 14.56,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "매탄1동",
+   "grp": "매탄동",
+   "lat": 37.273803,
+   "lng": 127.043104,
+   "stores": 498,
+   "buildings": 68,
+   "capacity": 162,
+   "active": 145,
+   "vacancy_rate": 10.49,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "우만2동",
+   "grp": "우만동",
+   "lat": 37.277598,
+   "lng": 127.042472,
+   "stores": 452,
+   "buildings": 40,
+   "capacity": 139,
+   "active": 123,
+   "vacancy_rate": 11.51,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "매탄2동",
+   "grp": "매탄동",
+   "lat": 37.272562,
+   "lng": 127.048017,
+   "stores": 443,
+   "buildings": 24,
+   "capacity": 68,
+   "active": 54,
+   "vacancy_rate": 20.59,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  }
+ ]
+}

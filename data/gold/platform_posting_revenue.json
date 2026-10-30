@@ -1,7 +1,7 @@
 {
   "source": "서울 열린데이터 상권분석 추정매출(VwsmTrdarSelngQq) ÷ 점포수(VwsmTrdarStorQq) ÷ 3개월. 단위 만원/월, 점포당.",
   "quarter": "20262",
-  "built_at": "2026-10-26T16:08:52+00:00",
+  "built_at": "2026-10-30T13:34:34+00:00",
   "min_stores": 5,
   "tier_induty": {
     "premium": {
@@ -118,7 +118,7 @@
     }
   },
   "coverage": {
-    "served": 90,
+    "served": 103,
     "full": 79,
     "missing_tiers": {
       "garak": [
@@ -137,7 +137,20 @@
       "baekseok",
       "daehwa",
       "haengsin",
-      "munsan"
+      "munsan",
+      "suwonst",
+      "ingye",
+      "paldalmun",
+      "pajang",
+      "ajou",
+      "yeongtong",
+      "moran",
+      "sinheung",
+      "dandae",
+      "bucheonst",
+      "anyangst",
+      "indeogwon",
+      "uijeongbust"
     ]
   },
   "districts": {

@@ -127,7 +127,8 @@ def collect_platform13_blog(only: set[str] | None = None) -> list[dict]:
         print("[naver_blog] NAVER_CLIENT_ID/SECRET 미설정(또는 requests 없음) — 건너뜀")
         return []
 
-    city_word = {"seoul": "서울", "goyang": "고양", "paju": "파주"}
+    city_word = {"seoul": "서울", "goyang": "고양", "paju": "파주", "suwon": "수원", "seongnam": "성남",
+                 "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부"}
     seen: dict[str, dict] = {}
     for did, (_lat, _lng, _radius, name) in DISTRICT_PLACES.items():
         if only and did not in only:
