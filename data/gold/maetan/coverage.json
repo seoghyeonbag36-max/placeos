@@ -2,33 +2,46 @@
   "slug": "maetan",
   "hub_name": "매탄동",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-28T12:05:40",
-  "shown": 392,
-  "excluded_total": 457,
-  "excluded_unknown": 5,
-  "excluded_non_commercial": 452,
-  "excluded_determined": 0,
-  "coverage_pct": 46.2,
+  "built_at": "2026-10-30T00:56:28",
+  "shown": 182,
+  "excluded_total": 667,
+  "excluded_unknown": 1,
+  "excluded_non_commercial": 447,
+  "excluded_determined": 219,
+  "coverage_pct": 21.4,
   "status": {
-    "full": 196,
-    "partial": 47,
-    "high": 130,
-    "empty": 19
+    "full": 146,
+    "partial": 13,
+    "high": 5,
+    "empty": 18
   },
   "source": {
-    "pip_only": 373,
-    "polygon_only": 19
+    "stores+ledger": 137,
+    "polygon_only": 18,
+    "pip_only": 27
   },
-  "reference_vacancy_pct": null,
-  "reference_buildings": 0,
-  "reference_coverage_pct": 0.0,
-  "mixed_vacancy_pct": 44.9,
+  "reference_vacancy_pct": 23.1,
+  "reference_buildings": 38,
+  "reference_coverage_pct": 97.4,
+  "mixed_vacancy_pct": 8.0,
   "by_capacity_method": {
+    "floor_ouln": {
+      "buildings": 21,
+      "active": 44,
+      "capacity": 46,
+      "vacancy_pct": 4.3
+    },
+    "expos_units": {
+      "buildings": 17,
+      "active": 223,
+      "capacity": 301,
+      "vacancy_pct": 25.9
+    },
     "floor_approx": {
-      "buildings": 188,
-      "active": 445,
-      "capacity": 747,
-      "vacancy_pct": 40.4
+      "buildings": 1,
+      "active": 3,
+      "capacity": 4,
+      "vacancy_pct": 25.0
     }
   },
   "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."
