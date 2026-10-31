@@ -111,6 +111,23 @@ def _served_cities() -> frozenset[str] | None:
     return frozenset(SERVED_CITIES)
 
 
+def _batch_unserved(slug: str) -> bool:
+    """경기 3차 배치 중 **서빙 목록 밖**으로 정한 거점인가(`page_hubs.GYEONGGI_BATCH3_SERVED_HUBS`).
+
+    도시 판단(`_served_cities`)·추후 확장 표기(`deferred`)와 같은 축의 **거점 단위** 판단이다. 2026-10-31 화성을 서빙
+    도시로 넣자(병점역 1곳) 같은 도시의 봉담이 「Gold 가 섰는데 목록에 없다 — _is_measured 확인」으로 보고됐다. 서빙 도시의
+    다른 미서빙 3차 거점(ganeung·jeongja·skku …)도 그 전부터 그렇게 나왔다(리뷰). 못 읽으면 False — 판정하지 않는다.
+    `slug not in ACTIVE_HUBS` 로 쓰지 않는 이유: 배치 밖 거점의 진짜 결손까지 보류로 삼킨다.
+    """
+    try:
+        from data.config import page_hubs as ph
+    except Exception:
+        return False
+    batch = getattr(ph, "GYEONGGI_BATCH3_HUBS", None) or {}
+    served = getattr(ph, "GYEONGGI_BATCH3_SERVED_HUBS", None) or frozenset()
+    return slug in batch and slug not in served
+
+
 def _city_of(hub) -> tuple[str, str]:
     """(page_hubs 의 city, 백엔드 레지스트리가 아는 city). 어긋나면 그 자리에서 드러난다."""
     declared = getattr(hub, "city", "seoul")
@@ -369,6 +386,10 @@ def stages(slug: str) -> list[dict]:
             add("서빙등재", PAUSED,
                 f"추후 확장 과제({deferred}) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)"
                 + ("" if ready else " · Gold 도 아직 안 섰다"))
+        elif _batch_unserved(slug):
+            add("서빙등재", PAUSED,
+                "경기 3차 서빙 목록(page_hubs.GYEONGGI_BATCH3_SERVED_HUBS) 밖 — 제품 판단으로 뺐다"
+                + ("" if ready else " · Gold 도 아직 안 섰다"))
         else:
             add("서빙등재", TODO if ready else BLOCKED,
                 "거점 목록 미등재 (지도·API 목록에 안 뜬다)",
@@ -427,7 +448,8 @@ def main() -> int:
             head += "  막힘: " + ", ".join(r["blocked"])
         if r["serving_paused"]:
             kind = getattr(_hubs().get(r["slug"]), "deferred", "")
-            why = f"추후 확장 과제({kind})" if kind else "서빙 대상 도시 아님"
+            why = (f"추후 확장 과제({kind})" if kind else
+                   "경기 3차 서빙 목록 밖" if _batch_unserved(r["slug"]) else "서빙 대상 도시 아님")
             head += f"  보류: {why}" + ("" if incl else " (다음 한 수 없음)")
         print(head)
         for s in r["stages"]:

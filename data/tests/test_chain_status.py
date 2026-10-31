@@ -227,3 +227,21 @@ def test_fallback_anchor_is_todo_not_ok(tmp_path, monkeypatch):
     passed = [{**s, "status": chain.OK, "next": ""} for s in real[:i]] + real[i:]
     monkeypatch.setattr(chain, "stages", lambda _slug: passed)
     assert "rone_rent" in chain.summarize(slug)["next"]
+
+
+# ── 경기 3차 거점 단위 서빙 판단 (2026-10-31 리뷰) ───────────────────────────────
+# 화성을 서빙 도시로 넣자(병점역 1곳) 같은 도시의 봉담이 「_is_measured 확인」으로 보고됐다 — 배선 결손이 아니라 제품 판단이다.
+
+def test_unserved_batch_hub_in_served_city_is_paused(tmp_path, monkeypatch):
+    monkeypatch.setattr(chain, "_batch_unserved", lambda s: True)
+    report = _serving_report(tmp_path, monkeypatch, city="hwaseong", served=frozenset({"hwaseong"}))
+    stage = _serving_stage(report)
+    assert stage["status"] == chain.PAUSED and not stage["next"], stage
+    assert "GYEONGGI_BATCH3_SERVED_HUBS" in stage["evidence"]
+
+
+def test_batch_unserved_reads_the_real_lists():
+    assert chain._batch_unserved("bongdam") is True          # 화성 — 서빙 목록 밖
+    assert chain._batch_unserved("byeongjeom") is False      # 화성 — 10-31 재판정 뒤 서빙
+    assert chain._batch_unserved("garosugil") is False       # 배치 밖 — 판단 대상이 아니다
+

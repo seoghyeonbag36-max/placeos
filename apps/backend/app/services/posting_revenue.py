@@ -101,11 +101,19 @@ def _industries() -> dict:
 
 @lru_cache(maxsize=1)
 def _pyeong_rent() -> float | None:
-    """서빙 거점 R-ONE 소규모상가 임대료의 중앙(만원/평·월). A 유도의 분모다."""
+    """**서울** 서빙 거점 R-ONE 소규모상가 임대료의 중앙(만원/평·월). A 유도의 분모다.
+
+    짝이 되는 두 값이 서울 모집단이다 — `location_premium()` 의 R-ONE 서울 집계, `_area_from_rent()` 의 KOSIS 서울
+    전역 임차료. 그래서 분모도 서울 거점만 센다(2026-10-31). 서울 밖 거점에 R-ONE 임대료가 붙자(경기 3차 · 광주 · 병점)
+    전 거점 중앙이 지역 임대료 수준만큼 내려가 입지 배율이 0.793 이 됐다 — 서울만 세면 그 전과 같다.
+    """
+    from app.data import measured_pages
+
     doc = _read(_INPUTS)
     src = doc.get("districts") or doc
-    vals = sorted(v["rent_per_m2_krw_thousand"] for v in src.values()
-                  if isinstance(v, dict) and "rent_per_m2_krw_thousand" in v)
+    vals = sorted(v["rent_per_m2_krw_thousand"] for k, v in src.items()
+                  if isinstance(v, dict) and "rent_per_m2_krw_thousand" in v
+                  and measured_pages.city_of(k) in ("seoul", None))
     if not vals:
         return None
     return vals[len(vals) // 2] * 3.3058 / 10      # 천원/㎡ → 만원/평

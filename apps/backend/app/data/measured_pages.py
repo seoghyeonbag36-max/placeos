@@ -96,8 +96,9 @@ _PAGE_HUBS = _REPO / "data" / "config" / "page_hubs.py"
 # 스크립트(chain_status · quota_preflight)가 같은 표기를 읽는다.
 # → docs/decision-goyang-paju-corridor-2026-10-26.md
 # 2026-10-31 광주(13곳) 서빙 — page_hubs.ACTIVE_CITIES 와 함께 바꿨다.
+# 2026-10-31 화성(병점역 1곳 — 화성의 다른 거점은 GYEONGGI_BATCH3_SERVED_HUBS 밖이라 그대로 꺼져 있다).
 SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
-                                          "gwangju"})
+                                          "gwangju", "hwaseong"})
 
 
 def _load_hubs() -> dict:
@@ -122,6 +123,16 @@ def _load_hubs() -> dict:
     sys.modules[key] = mod
     spec.loader.exec_module(mod)
     return getattr(mod, "ACTIVE_HUBS", {})
+
+
+def city_of(slug: str) -> str | None:
+    """서빙 거점의 도시 슬러그(`PageHub.city`). 서빙 거점이 아니면 None.
+
+    서울 시드 54곳도 ACTIVE_HUBS 에 들어 있다(tests/test_active_cities_match_serving 이 고정) — 그래서 이것 하나로
+    「이 거점이 서울인가」를 물을 수 있다. 서울 모집단 통계(R-ONE 서울 집계 · KOSIS 서울 전역)와 짝을 지을 때 쓴다.
+    """
+    hub = _load_hubs().get(slug)
+    return getattr(hub, "city", "seoul") if hub is not None else None
 
 
 def _coverage(slug: str) -> dict | None:

@@ -192,10 +192,10 @@ def test_small_sample_hubs_are_still_small():
 def test_small_sample_disagreement_is_bounded():
     """「표본 소형」은 사용자가 정한 두 곳(용봉동·전남대)에만 단다 — 같은 크기 이하인데 문구가 없는 거점은 **알고 남긴 것**이다.
 
-    2026-10-31 실측: 두 곳의 대표 지번(147·70) 이하인데 아무 문구가 없는 서빙 거점이 18곳이다
+    2026-10-31 실측: 두 곳의 대표 지번(147·70) 이하인데 아무 문구가 없는 서빙 거점이 19곳이다
     (daehwa 10 · gj-eoryong 14 · haengsin 18 · bamgasi 26 · baekseok 31 · doksan 41 · unjeong 42 · gj-ilgok 71 ·
-    wondang 71 · yadang 93 · gj-geumho 109 · gj-bongseon 110 · dangsan 118 · moran 119 · sinheung 121 · jangan 142 ·
-    munsan 145 · gj-wolsan 146). 규칙(예: 하위 10%)으로 자동으로 넓히지 않는 이유는 계획상가 판단과 같다 —
+    wondang 71 · yadang 93 · byeongjeom 101 · gj-geumho 109 · gj-bongseon 110 · dangsan 118 · moran 119 · sinheung 121 ·
+    jangan 142 · munsan 145 · gj-wolsan 146 — 병점역은 같은 날 재판정 뒤 서빙). 규칙(예: 하위 10%)으로 자동으로 넓히지 않는 이유는 계획상가 판단과 같다 —
     화면 문구가 조용히 번지면 안 된다(위 test_withheld_hub_is_uniquely_shallow). 넓힐지는 사용자 결정 대기다
     → docs/decision-gwangju-serve-2026-10-31.md §5.
 
@@ -205,7 +205,7 @@ def test_small_sample_disagreement_is_bounded():
     ceiling = max(rows[s]["building_count"] for s in hc.SMALL_SAMPLE)
     unmarked = sorted(s for s, r in rows.items()
                       if r.get("building_count") and r["building_count"] <= ceiling and not r.get("caveat"))
-    assert unmarked == ["baekseok", "bamgasi", "daehwa", "dangsan", "doksan", "gj-bongseon", "gj-eoryong",
+    assert unmarked == ["baekseok", "bamgasi", "byeongjeom", "daehwa", "dangsan", "doksan", "gj-bongseon", "gj-eoryong",
                         "gj-geumho", "gj-ilgok", "gj-wolsan", "haengsin", "jangan", "moran", "munsan", "sinheung",
                         "unjeong", "wondang", "yadang"], (
         f"표본 소형 두 곳 이하인데 문구가 없는 거점이 바뀌었다: {unmarked} — 문구를 넓힐지 다시 정할 것")

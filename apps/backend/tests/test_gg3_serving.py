@@ -24,6 +24,7 @@ def test_selected_hubs_have_complete_chain_and_usable_anchor():
     sys.path.insert(0, str(root))
     from scripts.run_hub_chain_batch import ledger_counts, stage_done
 
+    rows = {r['id']: r for r in districts.list_summaries()}
     for slug in _page_hubs().GYEONGGI_BATCH3_SERVED_HUBS:
         gold = root / 'data' / 'gold' / slug
         # 점포 원본(Bronze)은 gitignore 라 CI 체크아웃에는 없다 — 거기서는 후보 건물 수를 못 세므로
@@ -41,4 +42,9 @@ def test_selected_hubs_have_complete_chain_and_usable_anchor():
         calibration = json.loads((gold / 'calibration.json').read_text(encoding='utf-8'))
         assert coverage['tier'].startswith('Tier1'), slug
         assert coverage['reference_coverage_pct'] >= 90, slug
-        assert abs(calibration['primary']['gap_pp']) <= 30, slug
+        # 앵커 게이트는 **서빙 대표값**(floor_ouln 만) 기준이다 — chain_status 「앵커」·hub-chain 5단계와 같은 값.
+        # calibration['primary']['gap_pp'] 는 집합건물을 섞은 혼합 추정이라 인용하지 않는다(verify 스킬 ⚠). 2026-10-31 병점역이
+        # 그 값(+33.6%p)으로 서빙 보류됐는데, 서빙 대표값은 −3.6%p 였다.
+        assert not calibration.get('anchor_is_fallback'), slug
+        gap = rows[slug].get('anchor_gap_pp')
+        assert gap is not None and abs(gap) <= 30, (slug, gap)

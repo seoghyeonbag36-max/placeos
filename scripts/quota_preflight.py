@@ -36,6 +36,8 @@ from data.collectors.building_vacancy import NON_STOREFRONT_LCLS  # noqa: E402
 from data.collectors.common import load_env  # noqa: E402
 from data.config.page_hubs import (  # noqa: E402
     ALL_HUBS,
+    GYEONGGI_BATCH3_HUBS,
+    GYEONGGI_BATCH3_SERVED_HUBS,
     GYEONGGI_HUBS,
     HUBS,
     SEOUL_BATCH2_HUBS,
@@ -86,9 +88,12 @@ def _paused() -> set[str]:
         from app.data.measured_pages import SERVED_CITIES
     except Exception:
         return set()
+    # 2026-10-31: 경기 3차 서빙 목록 밖 거점도 뺀다 — 화성을 서빙 도시로 넣자(병점역) 봉담이 도시 판단만으로는
+    #   다시 대상이 됐다(chain_status._batch_unserved 와 같은 판단 · 리뷰).
     return {slug for slug, hub in ALL_HUBS.items()
             if getattr(hub, "city", "seoul") not in SERVED_CITIES
-            or getattr(hub, "deferred", "")}
+            or getattr(hub, "deferred", "")
+            or (slug in GYEONGGI_BATCH3_HUBS and slug not in GYEONGGI_BATCH3_SERVED_HUBS)}
 
 
 def check_quota() -> tuple[str, str]:
