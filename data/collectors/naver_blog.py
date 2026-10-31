@@ -27,7 +27,7 @@ _PAGES = 3              # 키워드당 300건 (start 상한 1000)
 # 거점 도시 → 블로그 질의 접두어(「{접두어} {거점명} 맛집」). 동명이지 차단의 1차 방어다(collect_platform13_blog 독스트링).
 # `build_gold._home_terms` 가 이 표를 읽어 접두어를 그 거점의 **자기 도시**로 본다 — 둘이 어긋나면 글이 통째로 버려진다(2026-10-31).
 CITY_WORD: dict[str, str] = {"seoul": "서울", "goyang": "고양", "paju": "파주", "suwon": "수원", "seongnam": "성남",
-                             "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부", "gwangju": "광주"}
+                             "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부", "gwangju": "광주", "hwaseong": "화성"}
 
 
 def _headers() -> dict[str, str] | None:

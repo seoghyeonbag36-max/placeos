@@ -48,6 +48,37 @@ def test_caveat_absent_hub_still_blocks_on_store_ratio(tmp_path, monkeypatch):
     assert "점포" in report["blocked"]
 
 
+def test_small_sample_caption_is_not_a_planned_mall_approval(tmp_path, monkeypatch):
+    """「표본 소형」 문구는 계획상가 예외 승인이 아니다(2026-11-01 — 표본 소형을 서빙 24곳으로 넓혔다).
+
+    프로버는 백엔드 문구가 **있으면** 승인으로 읽었다. 표본 소형만 받은 거점의 건물당 점포가 10 을 넘으면 그 문구로
+    BLOCKED 가 조용히 풀린다 — 판단 축이 다른 두 문구를 프로버가 섞으면 안 된다.
+    """
+    from app.data import hub_caveats as hc
+
+    slug = "store-ratio-probe"
+    monkeypatch.setattr(hc, "SMALL_SAMPLE", hc.SMALL_SAMPLE | {slug})
+    monkeypatch.setattr(hc, "_split_with_neighbor", lambda _slug: False)   # 짝 조회(서빙 목록)를 타지 않는다
+    assert hc.caveat_of(slug).startswith("표본 소형")                       # 서빙 문구는 실제로 있다
+    report = _store_ratio_report(tmp_path, monkeypatch, caveat="")
+
+    assert _store_stage(report)["status"] == chain.BLOCKED
+    assert "점포" in report["blocked"]
+
+
+def test_backend_planned_mall_judgment_still_approves(tmp_path, monkeypatch):
+    """반대쪽 — 백엔드 계획상가 판단(`DISCLOSED`)은 여전히 승인이다(가락·여의도가 그렇게 선다)."""
+    from app.data import hub_caveats as hc
+
+    slug = "store-ratio-probe"
+    monkeypatch.setattr(hc, "DISCLOSED", hc.DISCLOSED | {slug})
+    report = _store_ratio_report(tmp_path, monkeypatch, caveat="")
+    store = _store_stage(report)
+
+    assert store["status"] != chain.BLOCKED
+    assert "예외 승인" in store["evidence"]
+
+
 # ── 서빙등재: 제품 판단(SERVED_CITIES)과 배선 결손을 가른다 ────────────────────────
 #
 # 2026-09-05 에 geumchon·tanhyeon·yadang 셋이 "Gold 가 섰는데 목록에 없다 —
@@ -227,3 +258,21 @@ def test_fallback_anchor_is_todo_not_ok(tmp_path, monkeypatch):
     passed = [{**s, "status": chain.OK, "next": ""} for s in real[:i]] + real[i:]
     monkeypatch.setattr(chain, "stages", lambda _slug: passed)
     assert "rone_rent" in chain.summarize(slug)["next"]
+
+
+# ── 경기 3차 거점 단위 서빙 판단 (2026-10-31 리뷰) ───────────────────────────────
+# 화성을 서빙 도시로 넣자(병점역 1곳) 같은 도시의 봉담이 「_is_measured 확인」으로 보고됐다 — 배선 결손이 아니라 제품 판단이다.
+
+def test_unserved_batch_hub_in_served_city_is_paused(tmp_path, monkeypatch):
+    monkeypatch.setattr(chain, "_batch_unserved", lambda s: True)
+    report = _serving_report(tmp_path, monkeypatch, city="hwaseong", served=frozenset({"hwaseong"}))
+    stage = _serving_stage(report)
+    assert stage["status"] == chain.PAUSED and not stage["next"], stage
+    assert "GYEONGGI_BATCH3_SERVED_HUBS" in stage["evidence"]
+
+
+def test_batch_unserved_reads_the_real_lists():
+    assert chain._batch_unserved("bongdam") is True          # 화성 — 서빙 목록 밖
+    assert chain._batch_unserved("byeongjeom") is False      # 화성 — 10-31 재판정 뒤 서빙
+    assert chain._batch_unserved("garosugil") is False       # 배치 밖 — 판단 대상이 아니다
+

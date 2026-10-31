@@ -733,3 +733,16 @@ def test_no_recommended_tier_rests_on_out_of_band_revenue():
             for t, s in D.tier_scenarios(u, d["id"]).items():
                 if s["recommended"]:
                     assert P.per_pyeong(d["id"], t) <= hi, (d["id"], t)
+
+
+def test_median_rent_counts_only_seoul_hubs():
+    """「우리 중앙」은 서울 거점만 센다 — 짝이 되는 R-ONE 서울 집계·KOSIS 서울 전역이 서울 모집단이다(2026-10-31).
+
+    서울 밖 거점(경기·광주)이 임대료를 가진 채 들어와도 이 값이 움직이면 입지 배율이 지역 임대료 수준을 재게 된다.
+    """
+    from app.data import measured_pages
+    src = P._read(P._INPUTS)["districts"]
+    outside = [k for k in src if measured_pages.city_of(k) not in ("seoul", None)]
+    assert outside, "서울 밖 거점에 임대료가 없다 — 이 검사가 아무것도 안 잰다"
+    seoul = sorted(v["rent_per_m2_krw_thousand"] for k, v in src.items() if measured_pages.city_of(k) in ("seoul", None))
+    assert P._pyeong_rent() == seoul[len(seoul) // 2] * 3.3058 / 10

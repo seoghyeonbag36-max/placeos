@@ -159,25 +159,49 @@ def test_caveat_is_not_empty_and_says_not_to_compare(slug: str):
     assert "집합상가" in text, slug
 
 
-# ── 표본 소형(2026-10-31) ────────────────────────────────────────────────────
-# 용봉동·전남대는 PlaceOS 의 시작점이라 빼지 않는다(사용자 결정). 대신 「표본이 작다」를 밝힌다.
-# 이 판단이 낡는 방식은 둘이다 — 재수집으로 건물이 늘어 더는 작지 않거나, 문구가 집계와 다른 수를 말하거나.
+# ── 표본 소형(2026-10-31 · 11-01 전부로 넓힘) ──────────────────────────────────
+# 용봉동·전남대는 PlaceOS 의 시작점이라 빼지 않는다(사용자 결정 10-31). 대신 「표본이 작다」를 밝힌다.
+# 11-01 사용자 결정 — 같은 크기 이하(시작점 두 곳 중 큰 쪽) 서빙 거점 **전부**에 단다.
+# 이 판단이 낡는 방식은 셋이다 — 재수집으로 건물이 늘어 더는 작지 않거나, 문구가 집계와 다른 수를 말하거나,
+# 기준선 아래 거점이 문구 없이 서빙되거나.
+
+_ORIGINS = {"gj-yongbong", "gj-chonnam"}   # 판단의 기준선 — 둘 중 큰 쪽의 대표 지번이 「표본 소형」의 천장이다
+
 
 def test_small_sample_is_its_own_judgment():
-    """계획상가 판단과 섞이면 chain_status 의 BLOCKED 해제(`is_excepted`)까지 따라간다."""
-    assert hc.SMALL_SAMPLE == {"gj-yongbong", "gj-chonnam"}
-    assert not (hc.SMALL_SAMPLE & (hc.WITHHELD | hc.DISCLOSED))
-    assert not any(hc.is_excepted(s) for s in hc.SMALL_SAMPLE)
+    """계획상가 판단과 섞이면 chain_status 의 BLOCKED 해제(`is_excepted`)까지 따라간다.
+
+    두 판단이 **겹치는** 거점은 있다(가락·영통·여의도 — 계획상가 문구 뒤에 표본 한계를 잇는다). 막는 것은
+    표본 소형만으로 BLOCKED 가 풀리는 것이다(프로버 쪽 가드: data/tests/test_chain_status.py).
+    """
+    assert _ORIGINS <= hc.SMALL_SAMPLE
+    assert not (hc.SMALL_SAMPLE & hc.WITHHELD), "대표값을 내린 거점에는 흔들릴 대표값이 없다"
+    assert not any(hc.is_excepted(s) for s in hc.SMALL_SAMPLE - hc.DISCLOSED)
 
 
 @pytest.mark.parametrize("slug", sorted(hc.SMALL_SAMPLE))
 def test_small_sample_caveat_quotes_the_live_building_count(slug: str):
     s = _summary(slug)
     assert s["vacancy_withheld"] is False and s["vacancy_rate"] is not None, slug   # 내리지 않고 싣는다
-    assert s["caveat"].startswith("표본 소형"), s["caveat"]
+    # 앞머리는 화면 표식을 가른다 — 계획상가 판단이 겹치면 그쪽 앞머리(▤)를 지키고 표본 한계는 뒤에 잇는다.
+    head = "계획상가 밀집" if slug in hc.DISCLOSED else "표본 소형"
+    assert s["caveat"].startswith(head), s["caveat"]
     n = s["building_count"]
     assert n and f"건물 {n:,}동" in s["caveat"], f"{slug}: 문구의 건물 수가 집계와 다르다 — {s['caveat']}"
     assert "직접 비교" in s["caveat"], slug
+
+
+def test_partition_sentence_only_where_the_hub_is_split():
+    """「겹친 점포·건물은 가까운 쪽 한 곳에만 넣었다」는 범위를 실제로 나눈 거점(`PageHub.partition_with`)만의 사실이다.
+
+    10-31 문구는 두 곳 모두 짝이 있어 이 문장을 늘 붙였다. 11-01 에 문구를 넓히면서 짝 없는 22곳까지 따라가면 거짓이 된다.
+    """
+    from app.data import measured_pages
+
+    assert all(measured_pages.partners_of(s) for s in _ORIGINS)
+    for slug in hc.SMALL_SAMPLE:
+        said = "가까운 쪽" in _summary(slug)["caveat"]
+        assert said == bool(measured_pages.partners_of(slug)), slug
 
 
 def test_small_sample_hubs_are_still_small():
@@ -189,23 +213,21 @@ def test_small_sample_hubs_are_still_small():
         assert n <= p25, f"{slug}: 건물 {n}동 > 서빙 하위 25%({p25}동) — 「표본 소형」을 계속 달지 다시 정할 것"
 
 
-def test_small_sample_disagreement_is_bounded():
-    """「표본 소형」은 사용자가 정한 두 곳(용봉동·전남대)에만 단다 — 같은 크기 이하인데 문구가 없는 거점은 **알고 남긴 것**이다.
+def test_every_small_hub_carries_the_notice():
+    """기준선(시작점 두 곳 중 큰 쪽의 대표 지번) 이하 서빙 거점은 **전부** 「표본 소형」을 단다 — 2026-11-01 사용자 결정.
 
-    2026-10-31 실측: 두 곳의 대표 지번(147·70) 이하인데 아무 문구가 없는 서빙 거점이 18곳이다
-    (daehwa 10 · gj-eoryong 14 · haengsin 18 · bamgasi 26 · baekseok 31 · doksan 41 · unjeong 42 · gj-ilgok 71 ·
-    wondang 71 · yadang 93 · gj-geumho 109 · gj-bongseon 110 · dangsan 118 · moran 119 · sinheung 121 · jangan 142 ·
-    munsan 145 · gj-wolsan 146). 규칙(예: 하위 10%)으로 자동으로 넓히지 않는 이유는 계획상가 판단과 같다 —
-    화면 문구가 조용히 번지면 안 된다(위 test_withheld_hub_is_uniquely_shallow). 넓힐지는 사용자 결정 대기다
-    → docs/decision-gwangju-serve-2026-10-31.md §5.
+    10-31 에는 문구 없는 19곳을 「알고 남긴 것」으로 고정했다(daehwa 10 · gj-eoryong 14 · … · gj-wolsan 146).
+    11-01 사용자가 전부 달기로 정했다. 대표값을 내린 반포만 뺀다 — 흔들릴 대표값이 없다.
 
-    여기서 막는 것은 그 목록이 **조용히 바뀌는 것**이다. 바뀌면 넓힐지 사람이 다시 정한다.
+    규칙으로 자동으로 붙이지 않고 목록에 적는 이유는 계획상가 판단과 같다(머리말 「판단 자체만 집합에 적는다」).
+    대신 기준선 아래 거점이 문구 없이 서빙되면 여기서 깨진다 — 새 거점이면 `SMALL_SAMPLE` 에 넣는다(11-01 결정).
+    반대로 목록의 거점이 재수집으로 기준선을 넘거나 서빙에서 빠지면 문구를 뗄지 사람이 다시 정한다.
+    → docs/decision-gwangju-serve-2026-10-31.md §5
     """
     rows = {r["id"]: r for r in svc.list_summaries()}
-    ceiling = max(rows[s]["building_count"] for s in hc.SMALL_SAMPLE)
-    unmarked = sorted(s for s, r in rows.items()
-                      if r.get("building_count") and r["building_count"] <= ceiling and not r.get("caveat"))
-    assert unmarked == ["baekseok", "bamgasi", "daehwa", "dangsan", "doksan", "gj-bongseon", "gj-eoryong",
-                        "gj-geumho", "gj-ilgok", "gj-wolsan", "haengsin", "jangan", "moran", "munsan", "sinheung",
-                        "unjeong", "wondang", "yadang"], (
-        f"표본 소형 두 곳 이하인데 문구가 없는 거점이 바뀌었다: {unmarked} — 문구를 넓힐지 다시 정할 것")
+    ceiling = max(rows[s]["building_count"] for s in _ORIGINS)
+    small = {s for s, r in rows.items() if r.get("building_count") and r["building_count"] <= ceiling}
+    missing = sorted(small - hc.SMALL_SAMPLE - hc.WITHHELD)
+    assert not missing, f"기준선({ceiling}동) 이하인데 「표본 소형」이 없다: {missing} — SMALL_SAMPLE 에 넣을 것(11-01 결정)"
+    stale = sorted(hc.SMALL_SAMPLE - small)
+    assert not stale, f"「표본 소형」인데 기준선({ceiling}동)을 넘었거나 서빙 목록에 없다: {stale} — 문구를 뗄지 다시 정할 것"

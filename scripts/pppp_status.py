@@ -721,14 +721,14 @@ def platform_track() -> Track:
                 f"{top3:.1%} — 그러나 metrics 에 baseline_district_prior_top3 이 없어 "
                 f"**실력을 못 잰다**. 베이스라인 없는 정확도는 판정 근거가 아니다",
             ))
-        # 2026-10-26 고양·파주 — 공통 피처판(서울 전용 수요 블록 없음)이 맡는 거점의 판정.
+        # 2026-10-26 고양·파주 → 10-31 서울 밖 9개 도시 — 공통 피처판(서울 전용 수요 블록 없음)이 맡는 거점의 판정.
         # 판정은 kpi_baseline 한 곳(gnn_city_skill). 축이 없으면(서울만 서빙) 게이트도 없다.
         gc = (kb or {}).get("gnn_city") or {}
         if gc.get("available"):
             clo, chi = gc["skill_ci95_pp"]
             cm = gc["mcnemar"]
             t.gates.append(Gate(
-                "KPI 업종추천 Top-3 실력 — 고양·파주 (공통 피처판)",
+                "KPI 업종추천 Top-3 실력 — 서울 밖 (공통 피처판)",
                 1.0 if gc["verdict"] == "실력" else 0.0,
                 f"{gc['model']} · {gc['features']}열(서울 전용 TRDAR 수요 블록 없음) · 실력 "
                 f"**{gc['skill_pp_top3']:+.2f}%p** [{clo:+.2f}, {chi:+.2f}] · McNemar b={cm['b_model_only']} "

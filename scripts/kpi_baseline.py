@@ -201,14 +201,20 @@ def _hub_cities() -> dict[str, str]:
 
 
 def gnn_city_skill(recommend: dict, model: str = "industry-gnn-common",
-                   cities: tuple[str, ...] = ("goyang", "paju")) -> dict:
-    """태그 모델의 **도시 부분집합** 실력 — 고양·파주 서빙 거점(2026-10-26 공통 피처판).
+                   cities: tuple[str, ...] | None = None) -> dict:
+    """태그 모델의 **도시 부분집합** 실력 — 공통 피처판이 맡는 서울 밖 서빙 거점(2026-10-26 고양·파주 → 10-31 9개 도시).
+
+    부분집합은 그 모델이 산출물에 적어 둔 `serve_cities` 다(없으면 10-26 의 고양·파주). 도시 목록을 여기 손으로 적으면
+    서빙 도시가 늘 때마다 판정이 옛 두 도시만 재고 「실력」을 찍는다 — 10-31 재학습 전에 그 상태였다.
 
     서울 서빙본(`gnn_skill`)과 같은 규칙이다: 같은 test 분할의 쌍대 표(`by_district` 의 [b, c, n])를
     그 도시 거점만 골라 거점 군집 부트스트랩 구간 + McNemar 로 세 갈래 판정한다. 임계값을 새로
     만들지 않는다. 거점이 적으면(9곳) 군집 부트스트랩 구간이 낙관적일 수 있어 군집 수를 함께 싣는다.
     """
-    m = (((recommend or {}).get("models") or {}).get(model) or {}).get("metrics") or {}
+    entry = ((recommend or {}).get("models") or {}).get(model) or {}
+    m = entry.get("metrics") or {}
+    if cities is None:
+        cities = tuple(entry.get("serve_cities") or ("goyang", "paju"))
     by_d = (m.get("test_top3_paired") or {}).get("by_district") or {}
     if not by_d:
         return {"available": False, "reason": f"{model} 의 쌍대 표가 산출물에 없다"}
@@ -344,7 +350,7 @@ def check(forecast_path: Path = FORECAST, recommend_path: Path = RECOMMEND) -> d
         vc = gnn["vocab"] = gnn_vocab_check(rec)
         if gnn["verdict"] == SKILL and vc["verdict"] != VOCAB_PASS:
             gnn["gate_verdict"] = vc["verdict"]
-    # 2026-10-26: 고양·파주 거점은 공통 피처판이 맡는다 — 그 도시 부분집합도 같은 규칙으로 판정한다.
+    # 2026-10-26: 서울 밖 거점은 공통 피처판이 맡는다 — 그 도시 부분집합(모델의 serve_cities)도 같은 규칙으로 판정한다.
     # 산출물에 그 모델이 없으면(서울만 서빙하던 때) 축 자체가 없다 — 실패로 세지 않는다.
     gnn_city = gnn_city_skill(rec) if rec else {"available": False, "reason": _missing(recommend_path)}
 

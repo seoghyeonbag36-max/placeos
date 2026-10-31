@@ -441,10 +441,13 @@ ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS
 GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
     "suwonst", "ingye", "paldalmun", "pajang", "ajou", "yeongtong",
     "moran", "sinheung", "dandae", "bucheonst", "anyangst", "indeogwon", "uijeongbust",
+    # 2026-10-31 재판정 뒤 서빙(사용자 지시) — 「+33.6%p」는 집합건물을 섞은 calibration.primary 값이었다.
+    # 서빙 대표값 기준은 9.5% vs R-ONE 13.11% = −3.6%p(크기 맞춤 −5.5%p) → docs/decision-gwangju-serve-2026-10-31.md §2
+    "byeongjeom",
 })
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 ACTIVE_CITIES: frozenset[str] = frozenset({
-    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju",
+    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju", "hwaseong",
 })
 
 # 추후 확장 과제(`PageHub.deferred`) — 서빙 도시 안에 있어도 서빙·기본 순회에서 뺀다.

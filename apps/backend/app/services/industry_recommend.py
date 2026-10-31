@@ -60,8 +60,16 @@ def recommend(district_id: str, lat: float | None = None,
     if not nodes:
         return None
 
-    common = {"district_id": district_id, "model": data.get("model", "industry-gnn"),
-              "metrics": data.get("metrics"), "source": "recommend_json"}
+    # 거점마다 추천을 낸 모델이 다르다(2026-10-26 `district_models` — 서울은 기본 모델, 서울 밖은 공통 피처판).
+    # 출처·지표는 **그 거점의 모델** 것을 싣는다. 2026-10-31 까지 최상위(서울 모델) 이름·지표를 실어, 화면 출처 줄이
+    # 고양·파주·광주 거점에서도 「GNN industry-gnn · 노드 90,419개」로 남의 모델을 밝히고 있었다.
+    # 기본 모델은 소유 표에 올라도(태그 없는 재학습이 서울 거점을 적는다) 지표가 최상위 `metrics` 에 있다 —
+    # `models[...]` 는 태그 모델만 쓴다(train_gnn._save_artifacts). business_fit._rulers 와 같은 규칙이다(리뷰).
+    default = data.get("model") or "industry-gnn"
+    owner = (data.get("district_models") or {}).get(district_id) or default
+    metrics = (((data.get("models") or {}).get(owner) or {}).get("metrics") if owner != default
+               else data.get("metrics"))
+    common = {"district_id": district_id, "model": owner, "metrics": metrics, "source": "recommend_json"}
 
     if lat is None or lon is None:
         agg: dict[str, float] = {}

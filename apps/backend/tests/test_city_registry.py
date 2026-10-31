@@ -103,9 +103,9 @@ def test_only_served_cities_reach_the_api():
     from app.data import measured_pages as mp
     from app.services import districts as svc
 
-    # 2026-10-31 사용자 결정으로 광주(13곳 전부)가 들어왔다.
+    # 2026-10-31 사용자 결정으로 광주(13곳 전부)와 화성(병점역 재판정 뒤)이 들어왔다.
     assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
-                                          "gwangju"}), (
+                                          "gwangju", "hwaseong"}), (
         f"서빙 도시가 바뀌었다: {sorted(mp.SERVED_CITIES)} — 의도한 변경인지 확인할 것")
 
     rows = svc.list_summaries()
