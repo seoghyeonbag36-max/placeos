@@ -150,14 +150,18 @@ def _is_gyeonggi(city_id: str) -> bool:
 
 
 def _backend_caveat(slug: str) -> str:
-    """서빙이 실제로 내려보내는 예외 문구(app/data/hub_caveats). 없으면 빈 문자열.
+    """서빙이 실제로 내려보내는 **계획상가** 예외 문구(app/data/hub_caveats). 없으면 빈 문자열.
 
     판단이 코드에 있는데 프로버가 계속 "정해라"를 물으면 그것이 곧 낡은 선언이다 —
     이 저장소가 반복해 당한 실패 양식이라 프로버가 같은 자리를 본다.
+    「표본 소형」(`SMALL_SAMPLE`)만 받은 거점은 빈 문자열이다 — 축이 다른 문구다. 문구가 있다는 것만으로 `점포` BLOCKED 를
+    풀면 2026-11-01 에 표본 소형을 서빙 24곳으로 넓히면서 계획상가 승인이 조용히 번진다(`is_excepted` 만 승인으로 센다).
     """
     try:
         from app.data import hub_caveats
     except Exception:
+        return ""
+    if not hub_caveats.is_excepted(slug):
         return ""
     # 문구의 비율은 서빙이 집계에서 뽑는다. 프로버는 서빙을 띄우지 않으므로 같은 재료
     # (coverage.json 의 capacity 근거별 호실 수)로 같은 값을 만들어 넘긴다 — 넘기지

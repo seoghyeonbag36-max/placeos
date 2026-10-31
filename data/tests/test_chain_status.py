@@ -48,6 +48,37 @@ def test_caveat_absent_hub_still_blocks_on_store_ratio(tmp_path, monkeypatch):
     assert "점포" in report["blocked"]
 
 
+def test_small_sample_caption_is_not_a_planned_mall_approval(tmp_path, monkeypatch):
+    """「표본 소형」 문구는 계획상가 예외 승인이 아니다(2026-11-01 — 표본 소형을 서빙 24곳으로 넓혔다).
+
+    프로버는 백엔드 문구가 **있으면** 승인으로 읽었다. 표본 소형만 받은 거점의 건물당 점포가 10 을 넘으면 그 문구로
+    BLOCKED 가 조용히 풀린다 — 판단 축이 다른 두 문구를 프로버가 섞으면 안 된다.
+    """
+    from app.data import hub_caveats as hc
+
+    slug = "store-ratio-probe"
+    monkeypatch.setattr(hc, "SMALL_SAMPLE", hc.SMALL_SAMPLE | {slug})
+    monkeypatch.setattr(hc, "_split_with_neighbor", lambda _slug: False)   # 짝 조회(서빙 목록)를 타지 않는다
+    assert hc.caveat_of(slug).startswith("표본 소형")                       # 서빙 문구는 실제로 있다
+    report = _store_ratio_report(tmp_path, monkeypatch, caveat="")
+
+    assert _store_stage(report)["status"] == chain.BLOCKED
+    assert "점포" in report["blocked"]
+
+
+def test_backend_planned_mall_judgment_still_approves(tmp_path, monkeypatch):
+    """반대쪽 — 백엔드 계획상가 판단(`DISCLOSED`)은 여전히 승인이다(가락·여의도가 그렇게 선다)."""
+    from app.data import hub_caveats as hc
+
+    slug = "store-ratio-probe"
+    monkeypatch.setattr(hc, "DISCLOSED", hc.DISCLOSED | {slug})
+    report = _store_ratio_report(tmp_path, monkeypatch, caveat="")
+    store = _store_stage(report)
+
+    assert store["status"] != chain.BLOCKED
+    assert "예외 승인" in store["evidence"]
+
+
 # ── 서빙등재: 제품 판단(SERVED_CITIES)과 배선 결손을 가른다 ────────────────────────
 #
 # 2026-09-05 에 geumchon·tanhyeon·yadang 셋이 "Gold 가 섰는데 목록에 없다 —

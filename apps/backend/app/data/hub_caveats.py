@@ -47,6 +47,16 @@
 * **gj-yongbong · gj-chonnam → `SMALL_SAMPLE`.** 계획상가와 다른 문제다. 분모가 재고를 못 덮는 게 아니라 **덮는 건물
   자체가 적다**(서빙 상권 하위권). 둘은 PlaceOS 의 시작점이라 빼지 않고, 반경을 넓혀(가까운 쪽 귀속 —
   `data/config/page_hubs.PageHub.partition_with`) 표본을 늘린 뒤 남은 한계를 밝힌다. 건물 수는 서빙 집계에서 읽는다.
+
+## 2026-11-01 — 「표본 소형」을 같은 크기 이하 서빙 거점 전부에 단다(사용자 결정)
+
+10-31 에는 시작점 두 곳에만 달고, 그보다 작거나 같은데 문구가 없는 19곳을 「알고 남긴 것」으로 고정했다.
+11-01 사용자가 **전부** 달기로 정했다. 기준선은 시작점 두 곳 중 큰 쪽(용봉동)의 대표 지번이다.
+
+* 문구가 없던 19곳 → 「표본 소형」 문구. 「겹친 점포·건물은 가까운 쪽 한 곳에만」 문장은 범위를 실제로 나눈
+  거점(`PageHub.partition_with`)에만 붙는다 — 19곳 모두에 따라가면 거짓이다.
+* 계획상가 문구를 이미 단 가락·영통·여의도 → 그 문구 뒤에 표본 한계를 잇는다. 앞머리는 계획상가 그대로라 화면 표식(▤)도 그대로다.
+* 대표값을 내린 반포는 뺀다 — 흔들릴 대표값이 없다.
 """
 from __future__ import annotations
 
@@ -58,8 +68,15 @@ WITHHELD: frozenset[str] = frozenset({"banpo"})
 DISCLOSED: frozenset[str] = frozenset({"garak", "yeouido", "yeongtong"})
 
 # 표본이 작아 **싣되 한계를 밝히는** 거점 — 계획상가 판단과 다른 축이라 따로 둔다(`is_excepted` 에 넣지 않는다:
-# 그것은 chain_status 의 계획상가 BLOCKED 를 푸는 표식이다).
-SMALL_SAMPLE: frozenset[str] = frozenset({"gj-yongbong", "gj-chonnam"})
+# 그것은 chain_status 의 계획상가 BLOCKED 를 푸는 표식이다). 기준선 이하 서빙 거점 전부다(머리말 2026-11-01) —
+# 목록이 기준선과 어긋나면 tests/test_hub_caveats.test_every_small_hub_carries_the_notice 가 깨진다.
+SMALL_SAMPLE: frozenset[str] = frozenset({
+    "gj-yongbong", "gj-chonnam",                                    # 시작점(10-31) — 기준선
+    "daehwa", "gj-eoryong", "haengsin", "bamgasi", "baekseok", "doksan", "unjeong", "gj-ilgok", "wondang",
+    "yadang", "byeongjeom", "gj-geumho", "gj-bongseon", "dangsan", "moran", "sinheung", "jangan", "munsan",
+    "gj-wolsan",                                                    # 11-01 — 문구가 없던 19곳
+    "garak", "yeongtong", "yeouido",                                # 11-01 — 계획상가 문구 뒤에 잇는다
+})
 
 # 표본이 작은 까닭이 거점마다 다르면 한 문장을 더한다 — 사실만 적고 수는 적지 않는다(수는 집계에서 읽는다).
 _SMALL_SAMPLE_WHY: dict[str, str] = {
@@ -89,6 +106,18 @@ def _pct(v: float | None) -> str:
     return f"{v:.1f}%" if v is not None else "일부"
 
 
+def _sample_body(n: int | None) -> str:
+    """표본 한계 문장 — 「표본 소형」 단독 문구와 계획상가 문구 뒤에 잇는 꼬리가 같이 쓴다. 수는 서빙 집계에서 읽는다."""
+    return ("공실률을 " + (f"건물 {n:,}동(지번 기준)으로" if n else "적은 건물로")
+            + " 낸다. 서빙 상권 대부분보다 적어 한두 동의 변화로 값이 크게 움직인다.")
+
+
+def _split_with_neighbor(district_id: str) -> bool:
+    """이웃 거점과 수집 범위를 가까운 쪽 귀속으로 나눴는가(`data/config/page_hubs.PageHub.partition_with`)."""
+    from app.data import measured_pages      # 지연 import — 이 모듈은 머리에서 다른 app 모듈을 부르지 않는다
+    return bool(measured_pages.partners_of(district_id))
+
+
 def caveat_of(district_id: str, cells: dict | None = None) -> str:
     """화면에 실을 예외 문구. 예외가 아니면 빈 문자열.
 
@@ -113,23 +142,25 @@ def caveat_of(district_id: str, cells: dict | None = None) -> str:
         )
 
     if district_id in DISCLOSED:
-        return (
+        text = (
             "계획상가 밀집 — 공실률 분모가 이 거점 상업 재고의 "
             f"{_pct(cov)}" + (f"({cap:,}호실)" if cap else "") + "만 덮는다. 나머지는 "
             "집합상가 내부 호실이라 점포가 건물에 귀속되지 않아 분모에서 뺐다. "
             "다른 거점과 공실률을 직접 비교하지 말 것."
         )
+        if district_id in SMALL_SAMPLE:
+            # 두 판단이 겹친다(2026-11-01). 앞머리는 계획상가 그대로 둔다 — 화면 표식(▤)이 이것으로 갈린다.
+            text += " 표본도 작다 — " + _sample_body(ci.get("buildings"))
+        return text
 
     if district_id in SMALL_SAMPLE:
         # 앞머리 "표본 소형" 은 화면이 예외 종류를 가르는 데 쓴다(lib/districtCaveat.ts 의 caveatKind).
-        n = ci.get("buildings")
         return (
-            "표본 소형 — 공실률을 "
-            + (f"건물 {n:,}동(지번 기준)으로" if n else "적은 건물로")
-            + " 낸다. 서빙 상권 대부분보다 적어 한두 동의 변화로 값이 크게 움직인다. "
+            "표본 소형 — " + _sample_body(ci.get("buildings")) + " "
             + _SMALL_SAMPLE_WHY.get(district_id, "")
-            + "이웃 상권과 수집 범위가 겹쳐, 겹친 점포·건물은 중심이 가까운 쪽 한 곳에만 넣었다. "
-            "다른 거점과 공실률을 직접 비교하지 말 것."
+            + ("이웃 상권과 수집 범위가 겹쳐, 겹친 점포·건물은 중심이 가까운 쪽 한 곳에만 넣었다. "
+               if _split_with_neighbor(district_id) else "")
+            + "다른 거점과 공실률을 직접 비교하지 말 것."
         )
 
     return ""

@@ -135,6 +135,15 @@ def city_of(slug: str) -> str | None:
     return getattr(hub, "city", "seoul") if hub is not None else None
 
 
+def partners_of(slug: str) -> tuple[str, ...]:
+    """수집 범위를 가까운 쪽 귀속으로 나눠 가진 이웃 거점(`PageHub.partition_with`). 서빙 거점이 아니거나 짝이 없으면 빈 튜플.
+
+    예외 문구(`hub_caveats`)가 「겹친 점포·건물은 가까운 쪽 한 곳에만 넣었다」를 **실제로 나눈 거점에만** 싣는 데 쓴다 —
+    2026-11-01 「표본 소형」을 서빙 24곳으로 넓힐 때 그 문장이 짝 없는 거점까지 따라가면 거짓이 된다.
+    """
+    return tuple(getattr(_load_hubs().get(slug), "partition_with", ()) or ())
+
+
 def _coverage(slug: str) -> dict | None:
     p = _GOLD / slug / "coverage.json"
     if not p.exists():

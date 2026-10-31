@@ -106,11 +106,21 @@ Posting 입력 비어 있음 — 10-31 실화면 검사가 수원역에서 잡�
 - **조치 B — 「표본 소형」 문구.** `app/data/hub_caveats.SMALL_SAMPLE` — 계획상가(분모가 재고를 못 덮는다)와 다른 축이다
   (덮는 건물 자체가 적다). 건물 수는 서빙 집계(`building_count`)에서 읽는다. 화면 종류 `sample`(▥ · `lib/districtCaveat.ts`).
   가드: 두 곳이 서빙 하위 25% 를 벗어나면 테스트가 깨진다.
-- ⚠ **결정 대기 — 같은 크기 이하인데 문구가 없는 서빙 거점 18곳.** 대표 지번 147(용봉동) 이하이면서 아무 문구가 없는 곳:
-  `daehwa` 10 · `gj-eoryong` 14 · `haengsin` 18 · `bamgasi` 26 · `baekseok` 31 · `doksan` 41 · `unjeong` 42 · `gj-ilgok` 71 ·
-  `wondang` 71 · `yadang` 93 · `gj-geumho` 109 · `gj-bongseon` 110 · `dangsan` 118 · `moran` 119 · `sinheung` 121 · `jangan` 142 ·
-  `munsan` 145 · `gj-wolsan` 146. 규칙으로 자동으로 넓히지 않았다 — 화면 문구가 조용히 번지면 안 된다는
-  계획상가 판단과 같은 이유다. 목록은 `tests/test_hub_caveats.test_small_sample_disagreement_is_bounded` 가 고정한다.
+- ~~결정 대기 — 같은 크기 이하인데 문구가 없는 서빙 거점~~ → **2026-11-01 사용자 결정: 전부 단다.**
+  기준선은 시작점 두 곳 중 큰 쪽(용봉동 대표 지번 147)이다. 10-31 에 「알고 남긴 것」으로 고정했던 19곳
+  (`daehwa` 10 · `gj-eoryong` 14 · `haengsin` 18 · `bamgasi` 26 · `baekseok` 31 · `doksan` 41 · `unjeong` 42 · `gj-ilgok` 71 ·
+  `wondang` 71 · `yadang` 93 · `byeongjeom` 101 · `gj-geumho` 109 · `gj-bongseon` 110 · `dangsan` 118 · `moran` 119 · `sinheung` 121 ·
+  `jangan` 142 · `munsan` 145 · `gj-wolsan` 146)에 「표본 소형」을 달았다.
+  - 계획상가 문구가 이미 있는 `garak` 16 · `yeongtong` 50 · `yeouido` 73 은 그 문구 뒤에 「표본도 작다 — …」를 잇는다(앞머리·표식 ▤ 그대로).
+  - 대표값을 내린 `banpo` 55 는 뺀다 — 흔들릴 대표값이 없다.
+  - 「겹친 점포·건물은 가까운 쪽 한 곳에만」 문장은 범위를 실제로 나눈 두 곳(`partition_with`)에만 붙는다.
+  - 서빙 117곳: 「표본 소형」 21 · 계획상가+표본 3 · 대표값 미제공 1 · 문구 없음 92. 기준선 바로 위는 `gj-usan` 149 · `gj-yangsan` 150 ·
+    `hapjeong`·`yongsan`·`gj-cheomdan1` 153 — 문구가 없다(기준선은 하위 25% 153동보다 낮다).
+  - 규칙으로 자동으로 붙이지 않고 목록(`hub_caveats.SMALL_SAMPLE`)에 적는다. 대신 기준선 아래 거점이 문구 없이 서빙되면
+    `tests/test_hub_caveats.test_every_small_hub_carries_the_notice` 가 깨진다 — 새 거점이면 목록에 넣는다.
+  - 같이 막은 것: 프로버(`chain_status`)는 백엔드 문구가 **있으면** 계획상가 승인으로 읽었다 — 표본 소형 문구로 `점포` BLOCKED 가
+    풀리지 않게 `is_excepted` 만 센다(가드 `data/tests/test_chain_status.py`). 지금 서빙 거점 중 바뀐 판정은 없다
+    (표본 소형만 받은 21곳의 건물당 점포 1.7~7.9).
 
 ## 6. 영통 — 여의도와 같은 문구
 
