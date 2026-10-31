@@ -10,6 +10,7 @@ Page 체인은 `bronze/<거점>/<날짜>/stores_raw.json` · `licensing_biz.json
   stores_raw.json     상가정보 `storeListInRadius` 페이지의 body.items 를 이어 붙인다.
                       요청이 `building_vacancy.fetch_stores` 와 같다(엔드포인트·반경
                       `stores_radius_m`·중심 cx/cy·1000행 페이징) — 형식도 같은 list[dict].
+                      짝 거점이 있으면(`PageHub.partition_with`) 같은 가까운 쪽 귀속을 건다(2026-10-31).
                       거점별 수집 상태는 manifest 로 고른다: 최초 실패분은 recovery 원본을 쓴다
                       (2026-10-09 suyu: 2페이지에서 끊김 → recovery 5페이지 4,050행).
   licensing_biz.json  서울 LOCALDATA 전역 페이지를 `seoul_licensing` 과 같은 (구,동) 필터·
@@ -41,6 +42,7 @@ from collections import Counter
 from pathlib import Path
 
 from data.collectors.common import BRONZE, DATA_ROOT, latest_bronze, save_json
+from data.collectors.building_vacancy import _owned   # 가까운 쪽 귀속 — fetch_stores 와 같은 판정
 from data.collectors.seoul_licensing import _GU_DONG, _KEEP, SERVICES, _hub_pairs
 from data.config.page_hubs import ACTIVE_HUBS
 
@@ -145,6 +147,13 @@ def import_stores(run: Path, date: str, apply: bool, force: bool) -> tuple[dict,
         if not rows:
             out[slug] = info | {"result": "skip_incomplete_pages"}
             continue
+        hub = ACTIVE_HUBS[slug]
+        if hub.partition_with:
+            # 수집기와 같은 규칙 — 짝 거점과 겹친 점포는 중심이 가까운 쪽에만 담는다(PageHub.partition_with).
+            # 빠지면 다음 가져오기가 겹친 점포 전량을 최신 stores_raw 로 만들어 두 거점이 같은 건물을 센다(2026-10-31 리뷰).
+            before = len(rows)
+            rows = [r for r in rows if _owned(hub, r)]
+            info = info | {"partition": f"{before}->{len(rows)} (짝 {', '.join(hub.partition_with)})"}
         result, prev = _decide(slug, "stores_raw.json", date, rows, force)
         rec = info | {"result": result,
                       "previous": _rel(prev) if prev else None}

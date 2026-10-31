@@ -197,3 +197,33 @@ def test_probe_does_not_print_into_machine_output(tmp_path, monkeypatch, capsys)
     """--json·--next 를 읽는 쪽이 있다 — 판정 중의 「[group] …」 이 표준출력에 새면 json.loads 가 깨진다(리뷰)."""
     _ledger_report(tmp_path, monkeypatch, rows=["floor_ouln"])
     assert capsys.readouterr().out == ""
+
+
+# ── 앵커 폴백: 값이 폴백 10.0 인데 「R-ONE 대조 통과」로 보이면 안 된다 (2026-10-31) ─────────────────────
+# 경기 3차 50거점·광주 13거점은 R-ONE 값을 받기 전에 calibrate 를 돌려, 라벨은 「R-ONE … 경기>수원역」인데 값은 폴백 10.0 이었다.
+
+def test_fallback_anchor_is_todo_not_ok(tmp_path, monkeypatch):
+    slug = "anchor-probe"
+    hub = PageHub(slug, "앵커 폴백 검증 거점", 127.0, 37.5)
+    g = tmp_path / "gold" / slug
+    g.mkdir(parents=True)
+    (g / "calibration.json").write_text(json.dumps({"anchor_pct": 10.0, "anchor_is_fallback": True}), encoding="utf-8")
+    (g / "coverage.json").write_text(json.dumps({"tier": "Tier1", "reference_coverage_pct": 100, "shown": 3,
+                                                 "representative_vacancy_pct": 12.0}), encoding="utf-8")
+    (g / "page_building_master.geojson").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(chain, "BRONZE", tmp_path / "bronze")
+    monkeypatch.setattr(chain, "GOLD", tmp_path / "gold")
+    monkeypatch.setattr(chain, "_hubs", lambda: {slug: hub})
+    monkeypatch.setattr(chain, "_city_of", lambda _hub: ("seoul", "seoul"))
+    monkeypatch.setattr(chain, "_served_ids", lambda: {slug})
+    summary = chain.summarize(slug)
+    stage = next(s for s in summary["stages"] if s["stage"] == "앵커")
+    # PARTIAL 이면 「다음 한 수」로 안 뽑혀 「모두 통과」로 읽힌다 — TODO 여야 다음 명령이 나온다(리뷰)
+    assert stage["status"] == chain.TODO and "폴백" in stage["evidence"], stage
+    assert "rone_rent" in stage["next"]
+    # 앞 단계가 다 통과한 거점이면 이 TODO 가 「다음 한 수」로 뽑혀야 한다(PARTIAL 이면 「모두 통과」로 끝났다)
+    real = summary["stages"]
+    i = next(k for k, s in enumerate(real) if s["stage"] == "앵커")
+    passed = [{**s, "status": chain.OK, "next": ""} for s in real[:i]] + real[i:]
+    monkeypatch.setattr(chain, "stages", lambda _slug: passed)
+    assert "rone_rent" in chain.summarize(slug)["next"]

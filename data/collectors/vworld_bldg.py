@@ -28,7 +28,7 @@ except ImportError:  # pragma: no cover
     requests = None
 
 from data.collectors.common import bronze_dir, latest_bronze, load_env, save_json
-from data.config.page_hubs import ACTIVE_HUBS, PageHub, get_hub
+from data.config.page_hubs import ACTIVE_HUBS, PageHub, get_hub, owns_point
 
 _URL = "https://api.vworld.kr/ned/wfs/getBldgisSpceWFS"
 _TYPENAME = "dt_d010"
@@ -136,6 +136,18 @@ def _collect(key: str, box: tuple[float, float, float, float],
     return feats
 
 
+def _polygon_owned(hub: PageHub, feat: dict) -> bool:
+    """폴리곤 첫 고리의 평균점으로 귀속을 판정한다. 좌표가 없으면 버리지 않는다."""
+    try:
+        geom = feat["geometry"]
+        ring = geom["coordinates"][0] if geom["type"] == "Polygon" else geom["coordinates"][0][0]
+        lon = sum(p[0] for p in ring) / len(ring)
+        lat = sum(p[1] for p in ring) / len(ring)
+        return owns_point(hub, lat, lon)
+    except (KeyError, IndexError, TypeError, ZeroDivisionError):
+        return True
+
+
 def collect_hub(key: str, hub: PageHub) -> int:
     """거점 하나의 건물 폴리곤 수집 → bldg_polygons.geojson. 반환: 건물 수."""
     raws: list[str] = []
@@ -153,6 +165,12 @@ def collect_hub(key: str, hub: PageHub) -> int:
             continue
         seen.add(k)
         uniq.append(f)
+
+    if hub.partition_with:
+        # 짝 거점과 겹친 폴리곤은 중심점이 가까운 쪽에만 담는다(PageHub.partition_with)
+        before = len(uniq)
+        uniq = [f for f in uniq if _polygon_owned(hub, f)]
+        print(f"[vworld:{hub.slug}] 가까운 쪽 귀속 — {before} → {len(uniq)}동 (짝 {', '.join(hub.partition_with)})")
 
     raw_path = bronze_dir(hub.slug) / "vworld_bldg_raw.xml"
     raw_path.write_text("\n<!-- TILE -->\n".join(raws), encoding="utf-8")

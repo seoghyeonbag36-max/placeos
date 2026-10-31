@@ -1,0 +1,415 @@
+{
+  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+  "built_at": "2026-10-31T08:36:28+00:00",
+  "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
+  "units": [
+    {
+      "id": "vu-1227011500101640002-1",
+      "n": "봉선동 164-2",
+      "grp": "기타 교육",
+      "lat": 35.126276,
+      "lng": 126.91588,
+      "area": 61,
+      "floor": "1~5F",
+      "floor_mix": {
+        "1F": 0.1356,
+        "2F": 0.2161,
+        "3F": 0.2161,
+        "4F": 0.2161,
+        "5F": 0.2161
+      },
+      "vac_floor_mix": {
+        "1F": 0.173,
+        "2F": 0.2757,
+        "3F": 0.2757,
+        "4F": 0.2757
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.173,
+        "2F": 0.2757,
+        "3F": 0.2757,
+        "4F": 0.2757
+      },
+      "occ_floors": [
+        5
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 교육",
+      "capacity": 5,
+      "active": 1,
+      "vacancy_rate": 80.0,
+      "bld_floors": 5,
+      "com_area_m2": 1003.7
+    },
+    {
+      "id": "vu-1227011500105600004-1",
+      "n": "일부및",
+      "grp": "일반 교육",
+      "lat": 35.120488,
+      "lng": 126.912477,
+      "area": 61,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3293,
+        "2F": 0.3386,
+        "3F": 0.3322
+      },
+      "vac_floor_mix": {
+        "2F": 0.5048,
+        "3F": 0.4952
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5048,
+        "3F": 0.4952
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "일반 교육",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 601.3
+    },
+    {
+      "id": "vu-1227011500104690001-1",
+      "n": "봉선동 469-1",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 35.124245,
+      "lng": 126.912094,
+      "area": 47,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3313,
+        "2F": 0.3343,
+        "3F": 0.3343
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 465.3
+    },
+    {
+      "id": "vu-1227011500104690001-2",
+      "n": "봉선동 469-1",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 35.124391,
+      "lng": 126.911949,
+      "area": 47,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3313,
+        "2F": 0.3343,
+        "3F": 0.3343
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 465.3
+    },
+    {
+      "id": "vu-1227011500104690001-3",
+      "n": "봉선동 469-1",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 35.124264,
+      "lng": 126.912023,
+      "area": 47,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3313,
+        "2F": 0.3343,
+        "3F": 0.3343
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 465.3
+    },
+    {
+      "id": "vu-1227011500105410000-1",
+      "n": "봉선동 541",
+      "grp": "도서관·사적지",
+      "lat": 35.122031,
+      "lng": 126.911453,
+      "area": 42,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3105,
+        "2F": 0.3448,
+        "3F": 0.3448
+      },
+      "vac_floor_mix": {
+        "1F": 0.3105,
+        "2F": 0.3448,
+        "3F": 0.3448
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "도서관·사적지",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 417.8
+    },
+    {
+      "id": "vu-1227011500105410000-2",
+      "n": "봉선동 541",
+      "grp": "도서관·사적지",
+      "lat": 35.122112,
+      "lng": 126.911526,
+      "area": 42,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3105,
+        "2F": 0.3448,
+        "3F": 0.3448
+      },
+      "vac_floor_mix": {
+        "1F": 0.3105,
+        "2F": 0.3448,
+        "3F": 0.3448
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "도서관·사적지",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 417.8
+    },
+    {
+      "id": "vu-1227011500110150005-1",
+      "n": "봉선동 1015-5",
+      "grp": "기타 가정용품 수리",
+      "lat": 35.127405,
+      "lng": 126.911031,
+      "area": 41,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3178,
+        "2F": 0.3571,
+        "3F": 0.3251
+      },
+      "vac_floor_mix": {
+        "1F": 0.4943,
+        "3F": 0.5057
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.4943,
+        "3F": 0.5057
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 가정용품 수리",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 409.3
+    },
+    {
+      "id": "vu-1227011500104600006-1",
+      "n": "봉선동 460-6",
+      "grp": "비알코올 ",
+      "lat": 35.126927,
+      "lng": 126.911388,
+      "area": 38,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.351,
+        "2F": 0.3467,
+        "3F": 0.3022
+      },
+      "vac_floor_mix": {
+        "2F": 0.5343,
+        "3F": 0.4657
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5343,
+        "3F": 0.4657
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "비알코올 ",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 380.2
+    },
+    {
+      "id": "vu-1227011500104600006-2",
+      "n": "봉선동 460-6",
+      "grp": "비알코올 ",
+      "lat": 35.126988,
+      "lng": 126.911425,
+      "area": 38,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.351,
+        "2F": 0.3467,
+        "3F": 0.3022
+      },
+      "vac_floor_mix": {
+        "2F": 0.5343,
+        "3F": 0.4657
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5343,
+        "3F": 0.4657
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "비알코올 ",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 380.2
+    },
+    {
+      "id": "vu-1227011500100440003-1",
+      "n": "봉선동 44-3",
+      "grp": "철물·건설자재 소매",
+      "lat": 35.121579,
+      "lng": 126.920584,
+      "area": 21,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.4447,
+        "2F": 0.3602,
+        "3F": 0.1951
+      },
+      "vac_floor_mix": {
+        "1F": 0.4447,
+        "2F": 0.3602,
+        "3F": 0.1951
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.6487,
+        "3F": 0.3513
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "철물·건설자재 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 209.9
+    },
+    {
+      "id": "vu-1227011500101550006-1",
+      "n": "봉선동 155-6 교육연구시설 (윤병철)",
+      "grp": "가전·통신 소매",
+      "lat": 35.125655,
+      "lng": 126.913711,
+      "area": 53,
+      "floor": "1~6F",
+      "floor_mix": {
+        "1F": 0.1654,
+        "2F": 0.1669,
+        "3F": 0.1669,
+        "4F": 0.1669,
+        "5F": 0.1669,
+        "6F": 0.1669
+      },
+      "vac_floor_mix": {
+        "1F": 0.2483,
+        "3F": 0.2506,
+        "5F": 0.2506,
+        "6F": 0.2506
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.2483,
+        "3F": 0.2506,
+        "5F": 0.2506,
+        "6F": 0.2506
+      },
+      "occ_floors": [
+        2,
+        4,
+        7
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "가전·통신 소매",
+      "capacity": 7,
+      "active": 3,
+      "vacancy_rate": 57.1,
+      "bld_floors": 7,
+      "com_area_m2": 1229.8
+    }
+  ]
+}

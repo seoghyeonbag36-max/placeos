@@ -78,7 +78,8 @@ python -m data.pipelines.build_page_master <slug>
 python -m data.pipelines.build_vacant_units <slug>
 python -m data.pipelines.build_vacant_floor_units <slug>   # 층 단위 매물 — 창업자 흐름 R3 가 읽는다
 python -m data.pipelines.build_industry_floor_fit          # 서빙 거점 풀링 관측표 — 거점이 늘면 다시
-python -m data.pipelines.calibrate_vacancy
+python -m data.collectors.rone_rent                       # ⚠ 새 거점이면 먼저 — 아래 함정 「앵커 폴백」
+python -m data.pipelines.calibrate_vacancy <slug…>
 python scripts/chain_status.py <slug>
 ```
 ⚠ 2026-10-27: 고양·파주 9거점이 이 목록대로 서고 **층 단위 매물만 빠진 채** 서빙에 올라, 흐름 R3 가 9곳 모두
@@ -165,11 +166,19 @@ python scripts/chain_status.py <slug>
 - **경기 인허가는 배치 앞에서 한 번에 받는다.** `GENRESTRT` 는 시군 필터가 없어 전량 스캔(≈490콜)이다 — 거점마다 부르지 않는다.
   인허가가 Gold 보다 늦게 들어오면 배치가 그 Gold 를 낡은 것으로 보고 다시 세운다. 인허가 없이 세운 경기 공실은 과대다
   (10-28 수원역 +2.4 → −0.5%p · 인계동 +3.6 → −0.3%p).
+- **새 거점의 앵커가 폴백 10.0 이었다(2026-10-31).** `calibrate_vacancy` 는 Bronze R-ONE 에 그 거점 행이 없으면 조용히
+  10.0 을 쓴다. `rone_rent` 를 새 매핑으로 다시 안 돌려 경기 3차 50 · 광주 13 = 63거점이 그 값으로 「대조 통과」였고,
+  공개 중인 경기 13곳의 화면 격차가 틀렸다. 지금은 `calibration.json` 의 `anchor_is_fallback` · 프로버의 앵커 TODO(다음 한 수로
+  `rone_rent` 가 나온다) · 서빙의 폴백 앵커 거부(`gold_vacancy.anchor_of`)가 막는다. 같은 Bronze 를 Posting 임대(`build_posting_inputs`)도 읽으니 재수집 뒤 같이 다시 빌드한다
+  → docs/decision-gwangju-serve-2026-10-31.md §2·§4
+- **서울 밖 거점의 블로그 필터는 질의 접두어를 자기 도시로 본다.** `naver_blog.CITY_WORD` 에 새 도시를 넣지 않으면
+  접두어가 「서울」로 떨어지고, 넣어도 `platform_places.DISTRICT_PLACES` 에 거점이 없으면 0건이다(10-30·10-31 두 번 밟았다).
 
 ## 규칙
 
 - **신규 거점은 기존 거점과 이격을 먼저 확인한다.** 1.0km 미만이면 반경을 줄이거나
-  넣지 않는다. 운정역은 기존 `unjeong`과 **414m**라 제외했고, 마두↔웨스턴돔은
+  넣지 않는다 — 또는 **가까운 쪽 귀속**(`PageHub.partition_with`, 2026-10-31 용봉동·전남대)으로 반경을 지키고 겹친
+  점포·폴리곤만 중심이 가까운 거점에 담는다(반경을 줄여 상가가 잘리면 이쪽 — 용봉동 207m 때 점포의 18%만 담겼다). 운정역은 기존 `unjeong`과 **414m**라 제외했고, 마두↔웨스턴돔은
   **629m**라 마두 반경을 줄였다. 같은 점포를 두 거점에서 중복 집계하지 않기 위한 규칙이다.
 - **대장(3단계)은 한 거점씩.** 건축HUB 쿼터는 키 단위라 동시에 돌리면 서로를 죽인다
   (429 는 키 단위 — 프리플라이트도 "전유부와 층별개요를 동시에 돌리지 말 것"이라 적는다).

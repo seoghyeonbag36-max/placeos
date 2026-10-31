@@ -59,7 +59,7 @@
   "at": "2026-09-01T22:57:10",
   "minutes": 0.0
  },
- "finished_at": "2026-10-30T01:23:29",
+ "finished_at": "2026-10-31T17:37:09",
  "stopped_reason": "quota (anseong)",
  "stopped_at": "2026-10-29T01:40:18",
  "suwonst": {
@@ -312,5 +312,70 @@
   "at": "2026-10-30T01:23:29",
   "minutes": 3.2
  },
- "quota_day": "2026-10-29"
+ "quota_day": "2026-10-29",
+ "gj-chungjang": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:22",
+  "minutes": 0.1
+ },
+ "gj-geumho": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:26",
+  "minutes": 0.1
+ },
+ "gj-bongseon": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:29",
+  "minutes": 0.1
+ },
+ "gj-sangmu": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:33",
+  "minutes": 0.1
+ },
+ "gj-songjeong": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:37",
+  "minutes": 0.1
+ },
+ "gj-yangsan": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:41",
+  "minutes": 0.1
+ },
+ "gj-eoryong": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:44",
+  "minutes": 0.1
+ },
+ "gj-yongbong": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:48",
+  "minutes": 0.1
+ },
+ "gj-usan": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:52",
+  "minutes": 0.1
+ },
+ "gj-wolsan": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:36:57",
+  "minutes": 0.1
+ },
+ "gj-ilgok": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:37:01",
+  "minutes": 0.1
+ },
+ "gj-chonnam": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:37:04",
+  "minutes": 0.1
+ },
+ "gj-cheomdan1": {
+  "stage": "anchor",
+  "at": "2026-10-31T17:37:09",
+  "minutes": 0.1
+ }
 }

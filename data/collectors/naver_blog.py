@@ -24,6 +24,11 @@ _DATALAB_URL = "https://openapi.naver.com/v1/datalab/search"
 _DISPLAY = 100          # 요청당 최대
 _PAGES = 3              # 키워드당 300건 (start 상한 1000)
 
+# 거점 도시 → 블로그 질의 접두어(「{접두어} {거점명} 맛집」). 동명이지 차단의 1차 방어다(collect_platform13_blog 독스트링).
+# `build_gold._home_terms` 가 이 표를 읽어 접두어를 그 거점의 **자기 도시**로 본다 — 둘이 어긋나면 글이 통째로 버려진다(2026-10-31).
+CITY_WORD: dict[str, str] = {"seoul": "서울", "goyang": "고양", "paju": "파주", "suwon": "수원", "seongnam": "성남",
+                             "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부", "gwangju": "광주"}
+
 
 def _headers() -> dict[str, str] | None:
     cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
@@ -127,13 +132,11 @@ def collect_platform13_blog(only: set[str] | None = None) -> list[dict]:
         print("[naver_blog] NAVER_CLIENT_ID/SECRET 미설정(또는 requests 없음) — 건너뜀")
         return []
 
-    city_word = {"seoul": "서울", "goyang": "고양", "paju": "파주", "suwon": "수원", "seongnam": "성남",
-                 "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부"}
     seen: dict[str, dict] = {}
     for did, (_lat, _lng, _radius, name) in DISTRICT_PLACES.items():
         if only and did not in only:
             continue
-        prefix = city_word.get(getattr(ALL_HUBS.get(did), "city", "seoul"), "서울")
+        prefix = CITY_WORD.get(getattr(ALL_HUBS.get(did), "city", "seoul"), "서울")
         got = 0
         for kw in (f"{prefix} {name} 맛집", f"{prefix} {name} 카페"):
             for page in range(2):

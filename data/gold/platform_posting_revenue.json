@@ -1,7 +1,7 @@
 {
   "source": "서울 열린데이터 상권분석 추정매출(VwsmTrdarSelngQq) ÷ 점포수(VwsmTrdarStorQq) ÷ 3개월. 단위 만원/월, 점포당.",
   "quarter": "20262",
-  "built_at": "2026-10-30T13:34:34+00:00",
+  "built_at": "2026-10-31T09:16:02+00:00",
   "min_stores": 5,
   "tier_induty": {
     "premium": {
@@ -118,7 +118,7 @@
     }
   },
   "coverage": {
-    "served": 103,
+    "served": 116,
     "full": 79,
     "missing_tiers": {
       "garak": [
@@ -150,7 +150,20 @@
       "bucheonst",
       "anyangst",
       "indeogwon",
-      "uijeongbust"
+      "uijeongbust",
+      "gj-chungjang",
+      "gj-geumho",
+      "gj-bongseon",
+      "gj-sangmu",
+      "gj-songjeong",
+      "gj-yangsan",
+      "gj-eoryong",
+      "gj-yongbong",
+      "gj-usan",
+      "gj-wolsan",
+      "gj-ilgok",
+      "gj-chonnam",
+      "gj-cheomdan1"
     ]
   },
   "districts": {

@@ -295,7 +295,12 @@ def stages(slug: str) -> list[dict]:
     else:
         anchor = cal.get("anchor_pct") or (cal.get("combined") or {}).get("anchor_pct")
         ref = _served_vac(cov)
-        if anchor is None:
+        if cal.get("anchor_is_fallback"):
+            # 앵커 값이 R-ONE 이 아니라 폴백 10.0 이다 — 격차가 작아 보여도 **대조를 한 적이 없다**(2026-10-31).
+            # TODO 로 둔다 — PARTIAL 은 「다음 한 수」로 뽑히지 않아 「모두 통과」로 읽힌다(위 대장 줄과 같은 이유 · 리뷰).
+            add("앵커", TODO, f"앵커가 폴백 {anchor}% 다 — R-ONE 값을 아직 안 받았다 · 대표 {ref}%",
+                "python -m data.collectors.rone_rent  →  python -m data.pipelines.calibrate_vacancy " + slug)
+        elif anchor is None:
             add("앵커", PARTIAL, "R-ONE 앵커 없음 (표본 미매핑)",
                 "data/config/rone_districts.py 에 매핑 추가 — 공유면 rone-shared 로 표기")
         elif ref is None:

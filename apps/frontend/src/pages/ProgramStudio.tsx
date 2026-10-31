@@ -1,7 +1,7 @@
 import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CaveatNote } from "@/components/DistrictPicker";
-import { caveatKind } from "@/lib/districtCaveat";
+import { caveatKind, MARK } from "@/lib/districtCaveat";
 import LoginHint from "@/components/LoginHint";
 import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
@@ -336,7 +336,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
               <option value="">{districts === null ? "거점 불러오는 중…" : "— 결합 안 함 —"}</option>
               {(districts ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
-                  {caveatKind(d) ? (caveatKind(d) === "mall" ? "▣ " : "▤ ") : ""}{d.name} · {d.gu}
+                  {(() => { const k = caveatKind(d); return k ? `${MARK[k]} ` : ""; })()}{d.name} · {d.gu}
                 </option>
               ))}
             </select>

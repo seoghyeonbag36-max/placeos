@@ -222,9 +222,16 @@ def run(slug: str) -> bool:
         return False                       # Tier2(대장 없음) — 보정 대상 아님
 
     anchor = anchor_of(slug)
+    # ⚠ R-ONE 값이 Bronze 에 없으면 `anchor_of` 가 조용히 10.0 으로 폴백한다. 2026-10-31 에 경기 3차 50거점·광주 13거점이 그 상태로
+    #   「앵커 대조 통과」였다(출처 라벨은 「R-ONE … 경기>수원역」인데 값은 폴백 10.0 — `rone_rent` 를 새 거점으로 다시 안 돌렸다).
+    #   폴백이면 라벨과 플래그가 그 사실을 밝히고, 프로버(chain_status)가 앵커 단계를 통과로 치지 않는다.
+    is_fallback = not _rone_latest("vac_mid").get(slug)
     out: dict = {
         "anchor_pct": round(anchor, 2),
-        "anchor_source": ("R-ONE 중대형상가 공실률 (최신 분기) — "
+        "anchor_is_fallback": is_fallback,
+        "anchor_source": (f"폴백 {ANCHOR_FALLBACK}% — R-ONE 값 없음(`python -m data.collectors.rone_rent` 를 다시 돌릴 것) · 매핑 "
+                          f"{DISTRICT_RONE.get(slug, '없음')}" if is_fallback else
+                          "R-ONE 중대형상가 공실률 (최신 분기) — "
                           f"{DISTRICT_RONE.get(slug, '매핑 없음')}"),
         "anchor_vac_small_pct": _rone_latest("vac_small").get(slug),
         "ref_garosu_street_2024_pct": REF_GAROSU_STREET_2024 if slug == "garosugil" else None,
