@@ -130,7 +130,10 @@ def anchor_of(district_id: str) -> float | None:
     path = _GOLD_DIR / slug / "calibration.json"
     pct = None
     if path.exists():
-        pct = json.loads(path.read_text(encoding="utf-8")).get("anchor_pct")
+        cal = json.loads(path.read_text(encoding="utf-8"))
+        # 폴백 앵커(R-ONE 값 없이 calibrate 가 쓴 10.0)는 R-ONE 이 아니다 — 앵커로 내려보내지 않는다(2026-10-31).
+        # 내려보내면 격차가 「R-ONE 대조」처럼 화면에 서고, 진행률 게이트 「R-ONE 앵커 대조 보유」도 그 거점을 센다.
+        pct = None if cal.get("anchor_is_fallback") else cal.get("anchor_pct")
     _anchor_cache[slug] = {"at": now, "pct": pct}
     return pct
 

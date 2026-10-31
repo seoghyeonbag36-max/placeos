@@ -1,10 +1,11 @@
 {
-  "anchor_pct": 10.0,
+  "anchor_pct": 9.97,
+  "anchor_is_fallback": false,
   "anchor_source": "R-ONE 중대형상가 공실률 (최신 분기) — 경기>포천소흘읍",
-  "anchor_vac_small_pct": null,
+  "anchor_vac_small_pct": 11.8820955534532,
   "ref_garosu_street_2024_pct": null,
   "estimated_vacancy_pct": 18.8,
-  "alpha_street": 0.532,
+  "alpha_street": 0.53,
   "gap_pp": 8.8,
   "buildings_used": 270,
   "rone_aligned": {
@@ -15,7 +16,7 @@
       "vacancy_floor_hi_pct": 12.5,
       "vacancy_floor_lo_pct": 41.6,
       "vacancy_area_pct": 11.6,
-      "anchor_pct": 10.0,
+      "anchor_pct": 9.97,
       "gap_pp": 1.6
     },
     "small": {
@@ -24,7 +25,9 @@
       "buildings_floor": 58,
       "vacancy_floor_hi_pct": 7.6,
       "vacancy_floor_lo_pct": 51.9,
-      "vacancy_area_pct": 5.5
+      "vacancy_area_pct": 5.5,
+      "anchor_pct": 11.88,
+      "gap_pp": -6.4
     },
     "mall": {
       "buildings": 23,
@@ -39,8 +42,8 @@
   "primary": {
     "estimated_vacancy_pct": 24.5,
     "buildings": 215,
-    "anchor_pct": 10.0,
-    "alpha": 0.408,
+    "anchor_pct": 9.97,
+    "alpha": 0.407,
     "gap_pp": 14.5,
     "coverage_pct": 100.0,
     "excluded_floor_approx": 0
@@ -48,14 +51,14 @@
   "segments": {
     "street": {
       "estimated_vacancy_pct": 8.6,
-      "anchor_pct": 10.0,
-      "alpha": 1.163,
+      "anchor_pct": 9.97,
+      "alpha": 1.159,
       "gap_pp": -1.4,
       "buildings": 191
     },
     "mall": {
       "estimated_vacancy_pct": 45.8,
-      "anchor_pct": 10.0,
+      "anchor_pct": 9.97,
       "alpha": 0.218,
       "gap_pp": 35.8,
       "buildings": 24
@@ -65,15 +68,15 @@
     "expos_units": {
       "estimated_vacancy_pct": 45.8,
       "buildings": 24,
-      "anchor_pct": 10.0,
+      "anchor_pct": 9.97,
       "alpha": 0.218,
       "gap_pp": 35.8
     },
     "floor_ouln": {
       "estimated_vacancy_pct": 8.6,
       "buildings": 191,
-      "anchor_pct": 10.0,
-      "alpha": 1.163,
+      "anchor_pct": 9.97,
+      "alpha": 1.159,
       "gap_pp": -1.4
     }
   },
