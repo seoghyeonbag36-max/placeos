@@ -14,7 +14,9 @@
 from __future__ import annotations
 
 from data.pipelines.build_gold import (
+    _HOME_TERMS_DEFAULT,
     _complete_trend_points,
+    _home_terms,
     _hub_terms,
     _is_offsite,
     _program_context_rows,
@@ -88,3 +90,36 @@ def test_missing_end_date_keeps_all():
     """endDate 를 모르면 자르지 않는다 — 근거 없이 데이터를 버리지 않는다."""
     g = _group(["2026-06-01", "2026-07-01"])
     assert len(_complete_trend_points(g, "")) == 2
+
+
+# ── 거점 도시 이름 (2026-10-31) ─────────────────────────────────────────────
+# 서울 밖 거점은 질의가 「{도시} {거점명} 맛집」이다. 그 도시 이름을 타지명으로 세면 「수원 인계동」처럼
+# 자기 도시 + 거점명 인접이 동명이지 1번 규칙에 걸려 글이 거의 다 버려진다(서빙 22거점 85% 폐기 실측).
+
+def _posts(query: str, *texts: str) -> list[dict]:
+    return [{"_query": query, "title": t, "description": "", "bloggerlink": f"b{i}"} for i, t in enumerate(texts)]
+
+
+def test_home_terms_come_from_the_query_prefix():
+    assert _home_terms(_posts("수원 인계동 맛집", "x")) == frozenset({"수원"})
+    assert _home_terms(_posts("광주 충장로 카페", "x")) == frozenset({"광주"})
+    # 「부천」은 타지명 목록에 없다 — 수집기 접두어 표(CITY_WORD)로 도시를 인정한다
+    assert _home_terms(_posts("부천 부천역 맛집", "x")) == frozenset({"부천"})
+    # 서울 거점·도시 접두어가 없는 질의는 종전 기본값 그대로다(서울 판정 회귀 없음)
+    assert _home_terms(_posts("서울 장안동 맛집", "x")) == _HOME_TERMS_DEFAULT
+    assert _home_terms(_posts("신사동 가로수길", "x")) == _HOME_TERMS_DEFAULT
+    assert _home_terms([]) == _HOME_TERMS_DEFAULT
+
+
+def test_own_city_next_to_hub_name_is_not_offsite():
+    text = "수원 인계동 맛집 추천 — 인계동 술집 거리"
+    assert _is_offsite(text, frozenset({"인계동"}))                              # 종전 호출(기본값 서울) — 버렸다
+    assert not _is_offsite(text, frozenset({"인계동"}), frozenset({"수원"}))      # 도시 이름을 넘기면 산다
+    # 다른 도시의 같은 동네는 여전히 버린다
+    assert _is_offsite("평택시 장안동 분양", frozenset({"장안동"}), frozenset({"수원"}))
+
+
+def test_context_rows_keep_posts_that_name_their_own_city():
+    posts = _posts("수원 인계동 맛집", *[f"수원 인계동 맛집 {i} 곱창 후기" for i in range(6)])
+    rows = _program_context_rows(posts, [], None, set())
+    assert any(r["kind"] == "blog_keyword" and r["key"] == "곱창" for r in rows), rows

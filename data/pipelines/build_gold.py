@@ -488,11 +488,13 @@ def _program_context_rows(posts: list[dict], places: list[dict],
 
     tokens: Counter = Counter()
     kept = offsite = flooded = 0
-    hub_terms = _hub_terms(posts)
+    # 거점 도시 이름은 그 거점에게 타지명이 아니다 — 질의 접두어에서 뽑아 넘긴다(`_home_terms`).
+    home_terms = _home_terms(posts)
+    hub_terms = _hub_terms(posts) - home_terms
     per_blogger: Counter = Counter()
     for p in posts:
         text = re.sub(r"<[^>]+>", "", f"{p.get('title', '')} {p.get('description', '')}")
-        if _is_offsite(text, hub_terms):
+        if _is_offsite(text, hub_terms, home_terms):
             offsite += 1
             continue
         blogger = str(p.get("bloggerlink", ""))
@@ -578,6 +580,25 @@ _PROGRAM_STOPWORDS = {
 def _query_tokens(posts: list[dict]) -> set[str]:
     """블로그 글의 `_query`(검색어)에서 나온 토큰 — 신호가 아니라 질의 자체다."""
     return {t for p in posts for t in re.findall(r"[가-힣]{2,}", str(p.get("_query", "")))}
+
+
+def _home_terms(posts: list[dict]) -> frozenset[str]:
+    """거점이 속한 도시의 지명 — 질의 접두어(「수원 인계동 맛집」의 「수원」)에서 뽑는다.
+
+    `_is_offsite` 는 이 이름들을 타지명으로 세지 않는다. 접두어가 도시 지명이 아니거나 질의가 없으면
+    `_HOME_TERMS_DEFAULT`({"서울"}) 그대로다 — 서울 거점의 판정은 한 건도 바뀌지 않는다.
+
+    ⚠ 2026-10-31 까지 이 값을 아무도 넘기지 않았다. `home_terms` 인자는 08-29 에 생겼지만 호출부가
+      기본값 {"서울"} 로 불러, 서울 밖 서빙 22거점(고양·파주·경기 3차 13)의 블로그 글 6,591건 중
+      5,628건(85%)이 「고양 화정」「수원 인계동」 같은 **자기 도시 + 거점명** 인접으로 동명이지 판정을 받아
+      버려졌다. 남은 15% 는 서울을 언급한 글이라 상권 키워드가 그쪽으로 기울었다. 고친 뒤 2% 다.
+    """
+    from data.collectors.naver_blog import CITY_WORD   # 수집기가 실제로 붙인 접두어만 도시로 인정한다
+
+    cities = _OFFSITE_PLACES | _HOME_TERMS_DEFAULT | frozenset(CITY_WORD.values())
+    first = Counter(str(p.get("_query") or "").split()[0] for p in posts if str(p.get("_query") or "").split())
+    words = {w for w, _ in first.most_common() if w in cities}
+    return frozenset(words) if words else _HOME_TERMS_DEFAULT
 
 
 def build_program13_context() -> None:
