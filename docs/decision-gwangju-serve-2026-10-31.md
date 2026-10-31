@@ -59,7 +59,12 @@
   앵커 단계는 폴백이면 **TODO** 다(PARTIAL 이면 「다음 한 수」로 안 뽑혀 「모두 통과」로 읽힌다 — 리뷰가 잡았다). 서빙은 폴백 앵커를
   내려보내지 않는다(`gold_vacancy.anchor_of` → None · 가드 `tests/test_anchor_fallback_not_served.py` — 서빙 산출물에 폴백 0).
 - **순서 규칙.** 새 거점 배치는 `python -m data.collectors.rone_rent` → `calibrate_vacancy <slugs>` 순서다(hub-chain 스킬에 적었다).
-- ⚠ `byeongjeom`(경기 3차 · 서빙 아님)은 실제 앵커로 다시 재니 격차 +33.6%p 로 가드레일 30 을 넘는다 — 서빙 전에 다시 판정한다.
+- **병점역 재판정(같은 날 · 사용자 지시) → 서빙.** 처음 「+33.6%p 로 가드레일을 넘는다」고 적었는데, 그것은 `calibration.json` 의
+  `primary.gap_pp` — 집합건물(전유부 18동 · 376호실 · 공실 46.5%)을 섞은 혼합 추정(46.7%)이었다. 이 값은 인용하지 말라고
+  verify 스킬이 적어 둔 바로 그 필드다. 서빙 대표값(`floor_ouln` 101지번)은 **9.5% vs R-ONE `경기>병점역` 13.11% = −3.6%p**,
+  크기 맞춤 대조도 −5.5%p 다. Tier1 · 정밀 100% · 건물당 점포 5.4 — 서빙 기준을 전부 통과해 `GYEONGGI_BATCH3_SERVED_HUBS` 에 넣었다
+  (화성의 다른 거점 `bongdam` 은 그대로 꺼져 있다). 같은 혼합 필드를 보던 `tests/test_gg3_serving.py` 의 앵커 단언은 서빙 대표값
+  (`anchor_gap_pp`)으로 바꿨다. 서빙 117곳.
 
 ## 3. ② 서울 밖 블로그 필터 — 자기 도시 이름을 타지명으로 셌다
 
@@ -114,8 +119,8 @@ Posting 입력 비어 있음 — 10-31 실화면 검사가 수원역에서 잡�
 
 ## 7. 하지 않은 것
 
-- **업종 추천(GNN)** — 경기 3차 13 · 광주 13 은 학습에 없어 `/ai/recommend-industry` 가 404 다(Platform 업종 추천이 빈다).
-  공통 피처판(`industry-gnn-common`) 재학습이 다음 일이다.
+- ~~업종 추천(GNN)~~ — 같은 날 공통 피처판을 서울 밖 36곳으로 재학습했다(실력 +3.60%p · 서빙 117곳 전부 200)
+  → docs/finding-gnn-common-retrain-2026-10-31.md
 - **공실 예측(LSTM)** — 확장에서 뺐다(10-26 결정). `/ai/predict-vacancy` 404 는 설계다.
 - **본전 시점** — 서울 상권분석 추정매출이 없어 거둔다(고양·파주와 같다 · `payback_unavailable_reason`).
 - **수요신호** — 서울 상권분석(TRDAR) 전용이라 없다.

@@ -213,13 +213,24 @@ def _all_means() -> dict[str, dict[str, float]]:
 
 
 def _group_name(pages: list[dict]) -> str:
-    """순위 묶음 이름 — 소속 도시를 레지스트리 순서로 잇는다(「서울」 · 「고양·파주」). 넷 이상이면 시도로 줄인다."""
+    """순위 묶음 이름 — 소속 도시를 레지스트리 순서로 잇는다(「서울」 · 「고양·파주」). 넷 이상이면 시도로 줄인다.
+
+    시도 안에 서빙 도시가 하나뿐이면 그 도시 이름을 쓴다(2026-10-31) — 광주의 시도는 「전남광주통합특별시」라
+    접미만 떼면 「경기·전남광주통합」이 됐다. 사람들이 아는 이름은 「광주」다.
+    """
     order = list(cities.CITIES)
     found = sorted({districts_svc.page_city(p).id for p in pages}, key=order.index)
     if len(found) <= 3:
         return "·".join(cities.by_id(c).short for c in found)
-    sidos = sorted({cities.by_id(c).sido for c in found})
-    return "·".join(s.removesuffix("특별시").removesuffix("광역시").removesuffix("도") for s in sidos)
+    by_sido: dict[str, list[str]] = {}
+    for c in found:
+        by_sido.setdefault(cities.by_id(c).sido, []).append(c)
+    names = []
+    for sido in sorted(by_sido):
+        members = by_sido[sido]
+        names.append(cities.by_id(members[0]).short if len(members) == 1 else
+                     sido.removesuffix("특별시").removesuffix("광역시").removesuffix("도"))
+    return "·".join(names)
 
 
 def _same_counts(district_id: str) -> tuple[dict[str, int], int] | None:

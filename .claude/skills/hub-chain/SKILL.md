@@ -91,6 +91,11 @@ python scripts/chain_status.py <slug>
 **시드(zones·units)를 지어내야 하고**, 그러면 합성값이 실측처럼 보인다. 4~5 를 통과하기
 전에는 올리지 않는다. 새 도시 거점은 `city` 필드가 붙어 있어야 프론트가 가른다.
 
+**서울 밖 거점을 서빙하면 업종 추천 공통 피처판도 다시 학습한다**(거점 원핫 열 수가 바뀌어 `--predict-only` 로는 못 늘린다).
+학습 전에 그래프 입력 셋을 **같은 날짜로** 맞춘다 — `build_gold --platform13`(노드) → `build_store_graph_edges --platform13` →
+`build_page_building_features`. 2026-10-31 에 노드만 새것이고 엣지·건물 피처가 10-27(90거점)이었다 — 그대로 학습하면 새 거점 노드가
+이웃·건물 피처 없이 조용히 약해진다. 학습 명령·판정 → docs/finding-gnn-common-retrain-2026-10-31.md
+
 ### 7~8. 검증과 배포
 `verify` → `deploy`. 푸시는 백그라운드로(GCM 인증창).
 

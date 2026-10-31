@@ -757,3 +757,16 @@ def test_city_skill_is_absent_without_the_model():
     from kpi_baseline import gnn_city_skill
 
     assert gnn_city_skill({"models": {}})["available"] is False
+
+
+def test_city_skill_follows_the_models_serve_cities():
+    """부분집합은 모델이 적어 둔 serve_cities 다 — 손으로 적은 두 도시가 아니다(2026-10-31 서울 밖 9개 도시)."""
+    from kpi_baseline import gnn_city_skill
+
+    rec = _city_rec({"garosugil": [500, 10, 1000],                    # 서울 — 빼야 한다
+                     "geumchon": [6, 1, 100], "gj-chungjang": [9, 1, 200], "suwonst": [7, 2, 150]})
+    rec["models"]["industry-gnn-common"]["serve_cities"] = ["gwangju", "paju", "suwon"]
+    out = gnn_city_skill(rec)
+    assert out["available"] and sorted(out["cities"]) == ["gwangju", "paju", "suwon"]
+    assert out["clusters"] == 3 and out["test_nodes"] == 450
+

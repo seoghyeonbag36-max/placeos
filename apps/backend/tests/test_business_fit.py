@@ -252,3 +252,39 @@ def test_district_industries_use_that_districts_own_model(fresh_cache):
     assert business_fit.industries_in_district("yeonnam")["fit_model"] == data["model"]
     for did, model in list(assigned.items())[:2]:
         assert business_fit.industries_in_district(did)["fit_model"] == model
+
+
+def test_group_name_uses_the_city_when_its_province_has_one(monkeypatch):
+    """시도 안 서빙 도시가 하나면 도시 이름 — 「경기·전남광주통합」이 아니라 「경기·광주」(2026-10-31)."""
+    from app.data import cities
+    monkeypatch.setattr(business_fit.districts_svc, "page_city", lambda p: cities.by_id(p["city"]))
+    four = [{"city": c} for c in ("goyang", "paju", "suwon", "gwangju")]
+    assert business_fit._group_name(four) == "경기·광주"
+    assert business_fit._group_name([{"city": "goyang"}, {"city": "paju"}]) == "고양·파주"      # 셋 이하는 종전대로
+    assert business_fit._group_name([{"city": "seoul"}]) == "서울"
+
+
+def test_recommendation_names_the_model_that_made_it():
+    """서울 밖 거점의 추천은 공통 피처판이 냈다 — 출처·지표도 그 모델 것이어야 한다(화면 출처 줄 · 2026-10-31)."""
+    data = industry_recommend._load()
+    owners = data.get("district_models") or {}
+    common_hub = next(d for d, m in owners.items() if m == "industry-gnn-common")
+    seoul_hub = next(d for d in data["districts"] if owners.get(d, data["model"]) == data["model"])
+    c = industry_recommend.recommend(common_hub)
+    s = industry_recommend.recommend(seoul_hub)
+    assert c["model"] == "industry-gnn-common", c["model"]
+    assert c["metrics"]["nodes"] == data["models"]["industry-gnn-common"]["metrics"]["nodes"]
+    assert s["model"] == data.get("model") and s["metrics"] == data.get("metrics")
+
+
+def test_default_model_owning_entries_keeps_its_metrics(monkeypatch):
+    """태그 없는 재학습은 서울 거점을 `district_models` 에 기본 모델로 적고 `models[...]` 는 안 만든다 — 그때도 지표가
+    최상위 `metrics` 에서 와야 한다(리뷰 2026-10-31: 안 그러면 서울 81곳이 metrics=None 이 된다)."""
+    import copy
+    data = copy.deepcopy(industry_recommend._load())
+    seoul_hub = next(d for d in data["districts"] if d not in (data.get("district_models") or {}))
+    data["district_models"][seoul_hub] = data["model"]
+    monkeypatch.setattr(industry_recommend, "_load", lambda: data)
+    out = industry_recommend.recommend(seoul_hub)
+    assert out["model"] == data["model"] and out["metrics"] == data["metrics"]
+
