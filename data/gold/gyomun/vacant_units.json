@@ -1,6 +1,326 @@
 {
-  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적",
-  "built_at": "2026-10-28T03:13:49+00:00",
-  "empty_reason": "조건을 통과한 공실 건물이 없다 — 공실 · 정밀 분모 · 대장 상업면적 · 면적 5~200평. 면적을 가정해 채우지 않는다.",
-  "units": []
+  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+  "built_at": "2026-10-29T16:13:07+00:00",
+  "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
+  "units": [
+    {
+      "id": "vu-4131010500103700018-1",
+      "n": "수택동 370-18",
+      "grp": "주점",
+      "lat": 37.600034,
+      "lng": 127.136191,
+      "area": 49,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "주점",
+      "capacity": 2,
+      "active": 0,
+      "vacancy_rate": 100.0,
+      "bld_floors": 2,
+      "com_area_m2": 323.4
+    },
+    {
+      "id": "vu-4131010500103700018-2",
+      "n": "수택동 370-18",
+      "grp": "주점",
+      "lat": 37.600077,
+      "lng": 127.136232,
+      "area": 49,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "주점",
+      "capacity": 2,
+      "active": 0,
+      "vacancy_rate": 100.0,
+      "bld_floors": 1,
+      "com_area_m2": 323.4
+    },
+    {
+      "id": "vu-4131010400101940060-1",
+      "n": "교문동 194-60",
+      "grp": "섬유·의복·신발 소매",
+      "lat": 37.598321,
+      "lng": 127.134757,
+      "area": 26,
+      "floor": "1~2F",
+      "floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5,
+        "2F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "섬유·의복·신발 소매",
+      "capacity": 2,
+      "active": 0,
+      "vacancy_rate": 100.0,
+      "bld_floors": 3,
+      "com_area_m2": 173.3
+    },
+    {
+      "id": "vu-4131010300106110000-1",
+      "n": "인창동 611",
+      "grp": "자동차 부품 소매",
+      "lat": 37.602497,
+      "lng": 127.131894,
+      "area": 56,
+      "floor": "1~5F",
+      "floor_mix": {
+        "1F": 0.4344,
+        "4F": 0.4292,
+        "5F": 0.1364
+      },
+      "vac_floor_mix": {
+        "1F": 0.4344,
+        "4F": 0.4292,
+        "5F": 0.1364
+      },
+      "vac_floor_mix_lo": {
+        "4F": 0.7588,
+        "5F": 0.2412
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "자동차 부품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 5,
+      "com_area_m2": 558.5
+    },
+    {
+      "id": "vu-4131010300105630073-1",
+      "n": "인창동 563-73",
+      "grp": "자동차 수리·세차",
+      "lat": 37.602658,
+      "lng": 127.132191,
+      "area": 55,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "자동차 수리·세차",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 541.4
+    },
+    {
+      "id": "vu-4131010300105630073-2",
+      "n": "인창동 563-73",
+      "grp": "자동차 수리·세차",
+      "lat": 37.602623,
+      "lng": 127.132003,
+      "area": 55,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "자동차 수리·세차",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 5,
+      "com_area_m2": 541.4
+    },
+    {
+      "id": "vu-4131010500103730001-1",
+      "n": "수택동 373-1",
+      "grp": "의원",
+      "lat": 37.599597,
+      "lng": 127.136277,
+      "area": 53,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix": {
+        "1F": 0.3333,
+        "2F": 0.3333,
+        "3F": 0.3333
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "의원",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 526.3
+    },
+    {
+      "id": "vu-4131010400101940053-1",
+      "n": "교문동 194-53",
+      "grp": "기타 교육",
+      "lat": 37.598426,
+      "lng": 127.133876,
+      "area": 15,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.7541,
+        "2F": 0.1229,
+        "3F": 0.1229
+      },
+      "vac_floor_mix": {
+        "1F": 0.8599,
+        "3F": 0.1401
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.8599,
+        "3F": 0.1401
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 교육",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 152.3
+    },
+    {
+      "id": "vu-4131010400102330047-1",
+      "n": "교문동 233-47",
+      "grp": "기타 간이",
+      "lat": 37.601702,
+      "lng": 127.133339,
+      "area": 10,
+      "floor": "2~4F",
+      "floor_mix": {
+        "2F": 0.2406,
+        "3F": 0.5922,
+        "4F": 0.1672
+      },
+      "vac_floor_mix": {
+        "3F": 0.7798,
+        "4F": 0.2202
+      },
+      "vac_floor_mix_lo": {
+        "3F": 0.7798,
+        "4F": 0.2202
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 간이",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 101.9
+    },
+    {
+      "id": "vu-4131010400102560005-1",
+      "n": "후문약국",
+      "grp": "의약·화장품 소매",
+      "lat": 37.601566,
+      "lng": 127.131827,
+      "area": 8,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.4594,
+        "2F": 0.3833,
+        "3F": 0.1573
+      },
+      "vac_floor_mix": {
+        "1F": 0.7449,
+        "3F": 0.2551
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.7449,
+        "3F": 0.2551
+      },
+      "occ_floors": [
+        2
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "의약·화장품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 3,
+      "com_area_m2": 81.6
+    }
+  ]
 }

@@ -2,33 +2,40 @@
   "slug": "jeongja",
   "hub_name": "정자역",
   "tier": "Tier1(대장)",
-  "built_at": "2026-10-28T12:00:18",
-  "shown": 292,
-  "excluded_total": 151,
-  "excluded_unknown": 3,
-  "excluded_non_commercial": 148,
-  "excluded_determined": 0,
-  "coverage_pct": 65.9,
+  "built_at": "2026-10-30T00:49:50",
+  "shown": 162,
+  "excluded_total": 281,
+  "excluded_unknown": 8,
+  "excluded_non_commercial": 142,
+  "excluded_determined": 131,
+  "coverage_pct": 36.6,
   "status": {
-    "full": 132,
-    "partial": 52,
-    "high": 94,
-    "empty": 14
+    "full": 96,
+    "partial": 50,
+    "high": 9,
+    "empty": 7
   },
   "source": {
-    "pip_only": 278,
-    "polygon_only": 14
+    "stores+ledger": 150,
+    "pip_only": 5,
+    "polygon_only": 7
   },
-  "reference_vacancy_pct": null,
-  "reference_buildings": 0,
-  "reference_coverage_pct": 0.0,
-  "mixed_vacancy_pct": 22.5,
+  "reference_vacancy_pct": 16.6,
+  "reference_buildings": 84,
+  "reference_coverage_pct": 100.0,
+  "mixed_vacancy_pct": 12.1,
   "by_capacity_method": {
-    "floor_approx": {
-      "buildings": 187,
-      "active": 1288,
-      "capacity": 1715,
-      "vacancy_pct": 24.9
+    "expos_units": {
+      "buildings": 50,
+      "active": 1176,
+      "capacity": 1415,
+      "vacancy_pct": 16.9
+    },
+    "floor_ouln": {
+      "buildings": 34,
+      "active": 96,
+      "capacity": 111,
+      "vacancy_pct": 13.5
     }
   },
   "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."

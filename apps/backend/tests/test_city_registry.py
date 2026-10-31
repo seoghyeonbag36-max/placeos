@@ -228,7 +228,7 @@ def test_default_iteration_stays_seoul_only():
     # 어느 배치도 서로 슬러그를 겹치지 않는다. 종전에는 `54 + GYEONGGI` 로 적혀 있어
     # 배치가 하나 늘 때마다 깨졌다(09-01 에 86 != 74 로 배포가 막혔다).
     batches = (ph.SEOUL_BATCH2_HUBS, ph.SEOUL_BATCH3_HUBS, ph.SEOUL_BATCH4_HUBS,
-               ph.GYEONGGI_HUBS, ph.GYEONGGI_BATCH3_HUBS)
+               ph.GYEONGGI_HUBS, ph.GYEONGGI_BATCH3_HUBS, ph.GWANGJU_HUBS)
     assert len(ph.ALL_HUBS) == 54 + sum(len(b) for b in batches)
     for b in batches:
         assert not (set(b) & set(ph.HUBS))
