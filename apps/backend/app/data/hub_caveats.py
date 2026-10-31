@@ -39,6 +39,14 @@
 움직인다. 판단 자체(어느 거점을 어느 쪽으로 두는가)만 아래 두 집합에 적는다.
 
 판단이 여전히 유효한지는 `tests/test_hub_caveats.py` 가 산출물로 감시한다.
+
+## 2026-10-31 — 영통은 밝히고, 표본이 작은 두 곳은 따로 밝힌다(사용자 결정)
+
+* **yeongtong → `DISCLOSED`.** 재고 커버가 12% 대로 여의도(11%)와 같은 수준인데 표시가 없었다. 건물당 점포로는
+  기준(10)을 안 넘으므로 판단 축이 서울 셋과 다르다 — **재고 커버 축**으로 같은 문구를 단다.
+* **gj-yongbong · gj-chonnam → `SMALL_SAMPLE`.** 계획상가와 다른 문제다. 분모가 재고를 못 덮는 게 아니라 **덮는 건물
+  자체가 적다**(서빙 상권 하위권). 둘은 PlaceOS 의 시작점이라 빼지 않고, 반경을 넓혀(가까운 쪽 귀속 —
+  `data/config/page_hubs.PageHub.partition_with`) 표본을 늘린 뒤 남은 한계를 밝힌다. 건물 수는 서빙 집계에서 읽는다.
 """
 from __future__ import annotations
 
@@ -46,8 +54,17 @@ from __future__ import annotations
 # 거점을 대표하지 못한다고 판정한 자리다. 위 머리말 참조.
 WITHHELD: frozenset[str] = frozenset({"banpo"})
 
-# 대표 공실률을 **싣되 예외를 밝히는** 거점.
-DISCLOSED: frozenset[str] = frozenset({"garak", "yeouido"})
+# 대표 공실률을 **싣되 예외를 밝히는** 거점. yeongtong 은 재고 커버 축으로 들어왔다(머리말 2026-10-31).
+DISCLOSED: frozenset[str] = frozenset({"garak", "yeouido", "yeongtong"})
+
+# 표본이 작아 **싣되 한계를 밝히는** 거점 — 계획상가 판단과 다른 축이라 따로 둔다(`is_excepted` 에 넣지 않는다:
+# 그것은 chain_status 의 계획상가 BLOCKED 를 푸는 표식이다).
+SMALL_SAMPLE: frozenset[str] = frozenset({"gj-yongbong", "gj-chonnam"})
+
+# 표본이 작은 까닭이 거점마다 다르면 한 문장을 더한다 — 사실만 적고 수는 적지 않는다(수는 집계에서 읽는다).
+_SMALL_SAMPLE_WHY: dict[str, str] = {
+    "gj-chonnam": "상권 한쪽을 대학 캠퍼스가 차지해 반경을 넓혀도 건물이 거의 늘지 않는다. ",
+}
 
 # 판단을 촉발한 축 — 건물당 점포 수 임계(계획상가 밀집). chain_status 와 같은 값을 쓴다.
 # 여기 두 집합에 든 거점은 전부 이 선을 넘는다(테스트가 고정).
@@ -100,6 +117,18 @@ def caveat_of(district_id: str, cells: dict | None = None) -> str:
             "계획상가 밀집 — 공실률 분모가 이 거점 상업 재고의 "
             f"{_pct(cov)}" + (f"({cap:,}호실)" if cap else "") + "만 덮는다. 나머지는 "
             "집합상가 내부 호실이라 점포가 건물에 귀속되지 않아 분모에서 뺐다. "
+            "다른 거점과 공실률을 직접 비교하지 말 것."
+        )
+
+    if district_id in SMALL_SAMPLE:
+        # 앞머리 "표본 소형" 은 화면이 예외 종류를 가르는 데 쓴다(lib/districtCaveat.ts 의 caveatKind).
+        n = ci.get("buildings")
+        return (
+            "표본 소형 — 공실률을 "
+            + (f"건물 {n:,}동(지번 기준)으로" if n else "적은 건물로")
+            + " 낸다. 서빙 상권 대부분보다 적어 한두 동의 변화로 값이 크게 움직인다. "
+            + _SMALL_SAMPLE_WHY.get(district_id, "")
+            + "이웃 상권과 수집 범위가 겹쳐, 겹친 점포·건물은 중심이 가까운 쪽 한 곳에만 넣었다. "
             "다른 거점과 공실률을 직접 비교하지 말 것."
         )
 

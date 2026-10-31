@@ -602,7 +602,11 @@ def test_prime_inventory_premise_is_measurably_false():
     """
     seoul_pm2 = (P._read(P._INPUTS).get("seoul") or {}).get("rent_per_m2_krw_thousand")
     assert seoul_pm2
-    dist = P._read(P._INPUTS)["districts"]
+    # 기준선이 **서울** R-ONE 평균이므로 잴 모집단도 서울 거점이다(2026-10-31). 경기·광주 거점을 서울 평균에 대면
+    # 지역 임대료 수준이 낮다는 사실만 재고 「프라임이 아니다」를 재지 못한다 — 그날 R-ONE 재수집으로 서울 밖
+    # 20거점에 임대료가 붙자 기준선 미만이 65.5%(72/110)로 띠를 넘었는데, 서울만 세면 분포는 그대로였다.
+    seoul_ids = {r["id"] for r in D.list_summaries() if r.get("city") == "seoul"}
+    dist = {k: v for k, v in P._read(P._INPUTS)["districts"].items() if k in seoul_ids}
 
     below = [k for k, v in dist.items() if v["rent_per_m2_krw_thousand"] < seoul_pm2]
     # ⚠ **비율로 잰다.** 종전에는 `15 <= len(below) <= 30` 이라고 절대 개수로 적었는데,
@@ -618,6 +622,8 @@ def test_prime_inventory_premise_is_measurably_false():
     # 시드 54가 아니라 **서빙 목록(PAGES)** 을 돈다 — 2026-09-04 부터 시드 밖 거점도
     # 실 인벤토리로 유닛을 내므로, DISTRICTS 로 세면 제품과 다른 모집단을 재게 된다.
     for d in getattr(D, "PAGES", None) or D.DISTRICTS:
+        if d["id"] not in seoul_ids:
+            continue                      # 같은 이유 — 서울 기준선은 서울 유닛에만 댄다
         n = len(D.resolved_units(d["id"]) or [])
         n_all += n
         if dist.get(d["id"], {}).get("rent_per_m2_krw_thousand", 0) < seoul_pm2:

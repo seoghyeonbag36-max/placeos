@@ -44,7 +44,7 @@ except ImportError:  # pragma: no cover
     requests = None
 
 from data.collectors.common import GOLD, latest_bronze, load_env, load_latest, save_json
-from data.config.page_hubs import ACTIVE_HUBS, PageHub, get_hub
+from data.config.page_hubs import ACTIVE_HUBS, PageHub, get_hub, owns_point
 
 BASE_SDSC = "http://apis.data.go.kr/B553077/api/open/sdsc2"
 BASE_BLD = "http://apis.data.go.kr/1613000/BldRgstHubService"
@@ -315,7 +315,19 @@ def fetch_stores(key: str, hub: PageHub) -> list[dict]:
             break
         page += 1
         time.sleep(_SLEEP)
+    if hub.partition_with:
+        # 짝 거점과 겹친 점포는 가까운 쪽에만 담는다(PageHub.partition_with) — 이중 계수 방지
+        before = len(rows)
+        rows = [r for r in rows if _owned(hub, r)]
+        print(f"[stores] 가까운 쪽 귀속 — {before} → {len(rows)}건 (짝 {', '.join(hub.partition_with)})")
     return rows
+
+
+def _owned(hub: PageHub, row: dict) -> bool:
+    try:
+        return owns_point(hub, float(row["lat"]), float(row["lon"]))
+    except (KeyError, TypeError, ValueError):
+        return True        # 좌표를 못 읽은 점포는 버리지 않는다 — 기존 동작 그대로
 
 
 def group_by_building(stores: list[dict]) -> dict[str, dict]:

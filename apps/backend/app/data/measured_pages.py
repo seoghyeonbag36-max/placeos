@@ -95,7 +95,9 @@ _PAGE_HUBS = _REPO / "data" / "config" / "page_hubs.py"
 # 거점 단위 표기(`page_hubs.PageHub.deferred`)로 빠진다. 아래 `build()` 와 위의 두
 # 스크립트(chain_status · quota_preflight)가 같은 표기를 읽는다.
 # → docs/decision-goyang-paju-corridor-2026-10-26.md
-SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu"})
+# 2026-10-31 광주(13곳) 서빙 — page_hubs.ACTIVE_CITIES 와 함께 바꿨다.
+SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
+                                          "gwangju"})
 
 
 def _load_hubs() -> dict:

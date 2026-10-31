@@ -103,7 +103,9 @@ def test_only_served_cities_reach_the_api():
     from app.data import measured_pages as mp
     from app.services import districts as svc
 
-    assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu"}), (
+    # 2026-10-31 사용자 결정으로 광주(13곳 전부)가 들어왔다.
+    assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
+                                          "gwangju"}), (
         f"서빙 도시가 바뀌었다: {sorted(mp.SERVED_CITIES)} — 의도한 변경인지 확인할 것")
 
     rows = svc.list_summaries()
@@ -123,6 +125,10 @@ def test_only_served_cities_reach_the_api():
     for slug in gg_served:
         assert not ph.GYEONGGI_HUBS[slug].deferred, slug
         assert (_GOLD / slug / "page_building_master.geojson").exists(), slug
+
+    # 광주는 13곳 전부 서빙한다 — 한 곳이라도 빠지면 Gold 가 사라졌거나 표기가 붙은 것이다.
+    gj_served = {s for s in ph.GWANGJU_HUBS if s in ids}
+    assert gj_served == set(ph.GWANGJU_HUBS), f"광주 서빙 누락: {sorted(set(ph.GWANGJU_HUBS) - gj_served)}"
 
 
 def test_deferred_marks_only_new_expansion_and_known_kinds():
@@ -263,8 +269,8 @@ def test_caveat_is_carried_from_hub_to_api():
     # 프로덕션 화면에서 조용히 사라진다. 여기서는 둘 다 예외로 인정한다.
     from app.data import hub_caveats as hc
 
-    excepted = set(hub_caveats) | hc.WITHHELD | hc.DISCLOSED
-    for slug in hc.WITHHELD | hc.DISCLOSED:
+    excepted = set(hub_caveats) | hc.WITHHELD | hc.DISCLOSED | hc.SMALL_SAMPLE
+    for slug in hc.WITHHELD | hc.DISCLOSED | hc.SMALL_SAMPLE:
         if slug in rows:
             assert rows[slug]["caveat"], f"{slug}: 판단은 있는데 문구가 응답에 없다"
 

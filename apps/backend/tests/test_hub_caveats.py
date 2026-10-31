@@ -16,9 +16,10 @@ from app.services import districts as svc
 client = TestClient(app)
 V1 = "/api/v1"
 
-# 판단이 선 근거 — 이 셋만 건물당 점포 10 을 넘고, 4위 gangnam(8.7)과 사이가 비어 있다.
+# 판단이 선 근거 — 서울 셋은 건물당 점포 10 을 넘고, 4위 gangnam(8.7)과 사이가 비어 있다.
 # 재고 커버(호실 기준)는 서빙 집계에서 뽑는다.
-_EXPECTED = {"banpo", "garak", "yeouido"}
+# yeongtong(수원)은 2026-10-31 사용자 결정으로 들어왔다 — 건물당 점포가 아니라 **재고 커버 축**(12%, 여의도 11%)이다.
+_EXPECTED = {"banpo", "garak", "yeouido", "yeongtong"}
 
 
 def _summary(slug: str) -> dict:
@@ -143,7 +144,7 @@ def test_the_two_axes_disagreement_is_bounded():
     거점이 새로 들어오면 미룬 과제를 다시 꺼내야 한다.
     """
     covs = _seoul_coverage()
-    ceiling = max(covs[s] for s in _EXPECTED)          # garak 24.7%
+    ceiling = max(covs[s] for s in _EXPECTED if s in covs)   # garak 24.7% — 서울 판단의 천장(경기 yeongtong 은 뺀다)
     unmarked = sorted(s for s, c in covs.items() if c < ceiling and s not in _EXPECTED)
     assert unmarked == ["doksan", "dongdaemun", "gongdeok", "nambu", "yongsan"], (
         f"예외 셋 아래 표시 없는 거점 목록이 바뀌었다: {unmarked} — "
@@ -156,3 +157,55 @@ def test_caveat_is_not_empty_and_says_not_to_compare(slug: str):
     text = _summary(slug)["caveat"]
     assert len(text) > 40, slug
     assert "집합상가" in text, slug
+
+
+# ── 표본 소형(2026-10-31) ────────────────────────────────────────────────────
+# 용봉동·전남대는 PlaceOS 의 시작점이라 빼지 않는다(사용자 결정). 대신 「표본이 작다」를 밝힌다.
+# 이 판단이 낡는 방식은 둘이다 — 재수집으로 건물이 늘어 더는 작지 않거나, 문구가 집계와 다른 수를 말하거나.
+
+def test_small_sample_is_its_own_judgment():
+    """계획상가 판단과 섞이면 chain_status 의 BLOCKED 해제(`is_excepted`)까지 따라간다."""
+    assert hc.SMALL_SAMPLE == {"gj-yongbong", "gj-chonnam"}
+    assert not (hc.SMALL_SAMPLE & (hc.WITHHELD | hc.DISCLOSED))
+    assert not any(hc.is_excepted(s) for s in hc.SMALL_SAMPLE)
+
+
+@pytest.mark.parametrize("slug", sorted(hc.SMALL_SAMPLE))
+def test_small_sample_caveat_quotes_the_live_building_count(slug: str):
+    s = _summary(slug)
+    assert s["vacancy_withheld"] is False and s["vacancy_rate"] is not None, slug   # 내리지 않고 싣는다
+    assert s["caveat"].startswith("표본 소형"), s["caveat"]
+    n = s["building_count"]
+    assert n and f"건물 {n:,}동" in s["caveat"], f"{slug}: 문구의 건물 수가 집계와 다르다 — {s['caveat']}"
+    assert "직접 비교" in s["caveat"], slug
+
+
+def test_small_sample_hubs_are_still_small():
+    """서빙 상권의 하위 25% 안이어야 「표본 소형」이 참이다 — 벗어나면 문구를 뗄지 사람이 다시 정한다."""
+    counts = sorted(r["building_count"] for r in svc.list_summaries() if r.get("building_count"))
+    p25 = counts[len(counts) // 4]
+    for slug in hc.SMALL_SAMPLE:
+        n = _summary(slug)["building_count"]
+        assert n <= p25, f"{slug}: 건물 {n}동 > 서빙 하위 25%({p25}동) — 「표본 소형」을 계속 달지 다시 정할 것"
+
+
+def test_small_sample_disagreement_is_bounded():
+    """「표본 소형」은 사용자가 정한 두 곳(용봉동·전남대)에만 단다 — 같은 크기 이하인데 문구가 없는 거점은 **알고 남긴 것**이다.
+
+    2026-10-31 실측: 두 곳의 대표 지번(147·70) 이하인데 아무 문구가 없는 서빙 거점이 18곳이다
+    (daehwa 10 · gj-eoryong 14 · haengsin 18 · bamgasi 26 · baekseok 31 · doksan 41 · unjeong 42 · gj-ilgok 71 ·
+    wondang 71 · yadang 93 · gj-geumho 109 · gj-bongseon 110 · dangsan 118 · moran 119 · sinheung 121 · jangan 142 ·
+    munsan 145 · gj-wolsan 146). 규칙(예: 하위 10%)으로 자동으로 넓히지 않는 이유는 계획상가 판단과 같다 —
+    화면 문구가 조용히 번지면 안 된다(위 test_withheld_hub_is_uniquely_shallow). 넓힐지는 사용자 결정 대기다
+    → docs/decision-gwangju-serve-2026-10-31.md §5.
+
+    여기서 막는 것은 그 목록이 **조용히 바뀌는 것**이다. 바뀌면 넓힐지 사람이 다시 정한다.
+    """
+    rows = {r["id"]: r for r in svc.list_summaries()}
+    ceiling = max(rows[s]["building_count"] for s in hc.SMALL_SAMPLE)
+    unmarked = sorted(s for s, r in rows.items()
+                      if r.get("building_count") and r["building_count"] <= ceiling and not r.get("caveat"))
+    assert unmarked == ["baekseok", "bamgasi", "daehwa", "dangsan", "doksan", "gj-bongseon", "gj-eoryong",
+                        "gj-geumho", "gj-ilgok", "gj-wolsan", "haengsin", "jangan", "moran", "munsan", "sinheung",
+                        "unjeong", "wondang", "yadang"], (
+        f"표본 소형 두 곳 이하인데 문구가 없는 거점이 바뀌었다: {unmarked} — 문구를 넓힐지 다시 정할 것")

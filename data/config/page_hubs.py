@@ -26,6 +26,7 @@ config/garosugil.py 의 검증된 반경(400/600)을 그대로 보존한다 (재
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
@@ -53,6 +54,10 @@ class PageHub:
     # 둔다(같은 날 같은 결정: 여의도·반포·가락·용산·동대문·공덕·독산 7곳은 서빙 유지).
     # → docs/decision-goyang-paju-corridor-2026-10-26.md §2
     deferred: str = ""
+    # 가까운 쪽 귀속 — 이 거점의 수집 범위가 **다른 거점의 범위와 겹칠 때**, 겹친 점포·건물을 중심이 더 가까운 거점 한 곳에만 담는다
+    # (같으면 slug 가 앞선 쪽). 값은 짝 거점의 slug. 겹침 때문에 반경을 줄여야 했던 자리(2026-10-31 용봉동·전남대 — 중심 416m 라 반경 207m 로
+    # 상가가 잘렸다)를 풀기 위한 것이다. 같은 점포가 두 거점에 이중 계수되는 문제만 막고, 반경 자체는 각자 정한다.
+    partition_with: tuple[str, ...] = ()
 
 
 # 추후 확장 과제의 종류. 두 종류를 한 문구로 뭉치지 않는다 — 풀어야 할 문제가 다르다.
@@ -379,8 +384,11 @@ GYEONGGI_BATCH3_HUBS: dict[str, PageHub] = {
 # R-ONE 광주 상권 13곳(중대형·소규모 공실·소규모 임대 세 표의 합집합 · 2026Q2) 각각을 한 후보로 둔다. 중심은 그 상권의
 # 공공시설·역·대학의 V-World 검색 좌표이지 **R-ONE 상권 경계가 아니다**(조사 중심) — 겹치는 반경은 절반으로 줄였다.
 # → docs/finding-gwangju-collection-2026-10-28.md · reports/gwangju_candidates_collection_2026-10-28.json
-# ⚠ 상무지구·어룡동·용봉동·전남대는 top10 지번 집중도 >25% 라 대장으로 집합 비중을 확인한 뒤 판정한다. 용봉동·전남대는 반경이 207m 로 줄어
-#   상권 대표성이 약하다(상업 가로 후보 위치 재검토 필요).
+# ⚠ 상무지구·어룡동·용봉동·전남대는 top10 지번 집중도 >25% 라 대장으로 집합 비중을 확인한 뒤 판정한다.
+# 용봉동·전남대(중심 416m)는 PlaceOS 의 시작점이라 빼지 않는다(2026-10-31 사용자 결정). 겹침을 피하려고 반경을 207m 로 줄였더니
+#   1km 안 점포 2,505곳 중 313곳만 담겨 상가가 잘렸다 → 반경을 350m 로 되돌리고 겹친 점포·건물은 중심이 가까운 쪽에만 담는다
+#   (점포 반경은 폴리곤 사각형 대각 350×√2 ≈ 495m — 커버리지 ⊇ 원칙. 350 이면 모서리 건물이 점포 없이 「빈 건물」로 찍혔다 · 리뷰)
+#   (`partition_with`). 둘 다 서빙 상권 중 건물이 적어 「표본 소형」 문구를 단다(app/data/hub_caveats.SMALL_SAMPLE).
 # ⚠ 점포 `bldMngNo` 는 옛 코드(29xxx) · `lnoCd`·PNU 는 새 코드(12xxx) — 대장은 lnoCd 로 부르므로 새 코드만 쓰고, 조인율은 거점마다 센다.
 GWANGJU_HUBS: dict[str, PageHub] = {
     "gj-chungjang": PageHub("gj-chungjang", "광주 금남로/충장로", 126.917103, 35.147591, 500, 659, city="gwangju"),  # 동구 · 점포 3,365 · 건물 1,202 · 1차 통과
@@ -390,11 +398,11 @@ GWANGJU_HUBS: dict[str, PageHub] = {
     "gj-songjeong": PageHub("gj-songjeong", "광주 송정동지구", 126.790904, 35.137703, 500, 700, city="gwangju"),  # 광산구 · 점포 949 · 건물 475 · 1차 통과
     "gj-yangsan": PageHub("gj-yangsan", "광주 양산지구", 126.879642, 35.209166, 500, 700, city="gwangju"),  # 북구 · 점포 1,150 · 건물 394 · 1차 통과
     "gj-eoryong": PageHub("gj-eoryong", "광주 어룡동", 126.779895, 35.148413, 500, 700, city="gwangju"),  # 광산구 · 점포 318 · 건물 97 · 주의(대장 확인)
-    "gj-yongbong": PageHub("gj-yongbong", "광주 용봉동", 126.901176, 35.180400, 207, 207, city="gwangju"),  # 북구 · 점포 186 · 건물 102 · 주의(대장 확인)
+    "gj-yongbong": PageHub("gj-yongbong", "광주 용봉동", 126.901176, 35.180400, 350, 495, city="gwangju", partition_with=("gj-chonnam",)),  # 북구 · 점포 186 · 건물 102 · 주의(대장 확인)
     "gj-usan": PageHub("gj-usan", "광주 우산동", 126.807058, 35.160216, 500, 700, city="gwangju"),  # 광산구 · 점포 958 · 건물 269 · 1차 통과
     "gj-wolsan": PageHub("gj-wolsan", "광주 월산동지구", 126.902621, 35.147544, 500, 659, city="gwangju"),  # 남구 · 점포 797 · 건물 386 · 1차 통과
     "gj-ilgok": PageHub("gj-ilgok", "광주 일곡동", 126.897277, 35.206029, 500, 700, city="gwangju"),  # 북구 · 점포 1,074 · 건물 402 · 1차 통과
-    "gj-chonnam": PageHub("gj-chonnam", "광주 전남대", 126.903460, 35.177157, 207, 207, city="gwangju"),  # 북구 · 점포 127 · 건물 61 · 주의(대장 확인)
+    "gj-chonnam": PageHub("gj-chonnam", "광주 전남대", 126.903460, 35.177157, 350, 495, city="gwangju", partition_with=("gj-yongbong",)),  # 북구 · 점포 127 · 건물 61 · 주의(대장 확인)
     "gj-cheomdan1": PageHub("gj-cheomdan1", "광주 첨단1지구", 126.842364, 35.219527, 500, 700, city="gwangju"),  # 광산구 · 점포 1,577 · 건물 315 · 1차 통과
 }
 
@@ -434,8 +442,9 @@ GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
     "suwonst", "ingye", "paldalmun", "pajang", "ajou", "yeongtong",
     "moran", "sinheung", "dandae", "bucheonst", "anyangst", "indeogwon", "uijeongbust",
 })
+# 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 ACTIVE_CITIES: frozenset[str] = frozenset({
-    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
+    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju",
 })
 
 # 추후 확장 과제(`PageHub.deferred`) — 서빙 도시 안에 있어도 서빙·기본 순회에서 뺀다.
@@ -467,3 +476,27 @@ def get_hub(district: str) -> PageHub | None:
     """
     slug = resolve(district)
     return ALL_HUBS.get(slug) if slug else None
+
+
+def owns_point(hub: PageHub, lat: float, lon: float) -> bool:
+    """이 좌표가 `hub` 의 몫인가 — `partition_with` 짝 거점보다 중심이 더 가까울 때(같으면 slug 가 앞선 쪽)만 참.
+
+    짝이 없으면 항상 참이라 기존 거점의 수집은 한 글자도 안 바뀐다.
+    """
+    if not hub.partition_with:
+        return True
+    k = math.pi / 180
+
+    def dist(h: PageHub) -> float:
+        x = (lon - h.cx) * k * math.cos((lat + h.cy) / 2 * k)
+        return math.hypot(x, (lat - h.cy) * k)
+
+    mine = dist(hub)
+    for slug in hub.partition_with:
+        other = ALL_HUBS.get(slug)
+        if other is None:
+            continue
+        theirs = dist(other)
+        if theirs < mine or (theirs == mine and slug < hub.slug):
+            return False
+    return True
