@@ -84,7 +84,7 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
   - Airflow DAG 골격이 `data/pipelines/dags/` 에 둘 있으나 **스케줄러가 돌고 있지 않다** —
     수집·가공은 전부 수동 스크립트다. "Airflow 로 돌린다"고 읽지 말 것
 - **Infra**: **GCP Cloud Run**(`spaceos` · us-central1) + **Firebase Hosting**(사이트 `placeos` · 정식 주소 **placeos.co.kr** —
-  2026-11-01 부터 Firebase 기본 주소는 서빙 주소로 쓰지 않는다. 들어오면 앱이 정식 주소로 옮긴다 · `lib/canonicalHost.ts`)
+  2026-11-01 부터 Firebase 기본 주소는 서빙 주소로 쓰지 않는다. 들어오면 정식 주소로 옮긴다 · `public/canonical-host.js`(번들 앞 · 정적 페이지) + `lib/canonicalHost.ts` — 두 목록은 테스트가 대조한다)
   + Docker + GitHub Actions
   - ⚠ 이 줄은 2026-09-15 까지 `AWS (S3/EC2/RDS/EKS)` 라고 적고 있었다. 이 저장소는 AWS 를
     **한 번도 쓴 적이 없다**(리소스·SDK·설정 모두 0건). 배포 경로는

@@ -75,6 +75,15 @@ R2_STEPS = "Platform → Page → Posting → Program"
 FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
           "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
           "return { sw: b.scrollWidth, cw: b.clientWidth, lines: tops.size }; }")
+# 하단 고정 버튼 영역이 본문을 가리는가 — 맨 아래로 내린 뒤 잰다. 본문 글자 범위의 아래끝이 영역 위끝보다 위여야 하고(gap >= 0),
+# 마지막 버튼 · 링크의 가운데를 누르면 영역이 아니라 그것이 받아야 한다
+CLEAR_JS = ("() => { const cta = document.querySelector('.fl-cta').getBoundingClientRect(); "
+            "const body = document.querySelector('.fl-main .fl-body'); const r = document.createRange(); r.selectNodeContents(body); "
+            "const acts = [...body.querySelectorAll('a, button, summary')].filter((e) => e.getBoundingClientRect().height > 0); "
+            "const last = acts[acts.length - 1]; const lb = last ? last.getBoundingClientRect() : null; "
+            "const hit = lb ? document.elementFromPoint(lb.left + lb.width / 2, lb.top + lb.height / 2) : null; "
+            "return { cta_h: Math.round(cta.height), gap: Math.round(cta.top - r.getBoundingClientRect().bottom), "
+            "last: last ? last.innerText.trim().slice(0, 30) : null, last_hit_cta: !!(hit && hit.closest('.fl-cta')) }; }")
 
 
 def wait_http(url: str, timeout: int = 180) -> None:
@@ -375,10 +384,10 @@ def main() -> int:
                 rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
             shot(page, f"p7-{ctx_name}")
             page.close()
-        # P7 글자 — 360px 휴대폰(버튼 안 폭 288px). 글자를 고른 근거가 이 폭이다: 390px(318) 에서는 띄어 쓴 글자(308px)도
-        # 한 줄이라 위 휴대폰 검사로는 그 회귀를 못 잡는다(리뷰 2026-11-01). 320px 은 두 줄이 정상이라 재지 않는다
-        cid = "P7 상권 소개 주 버튼 글자 한 줄(360px 휴대폰)"
-        narrow = browser.new_context(viewport={"width": 360, "height": 780}, locale="ko-KR", is_mobile=True, has_touch=True)
+        # P7 글자 — 320px 휴대폰(버튼 안 폭 280px). 안 A 를 고른 근거가 이 폭이다 — 버튼 글자(181px)와 네 단계 한 줄(244px)이 한 줄로 든다.
+        # 390px 휴대폰(위 mobile)은 넉넉해 그 회귀를 못 잡는다(리뷰 2026-11-01). 첫 판 글자(285px)는 여기서 두 줄이라 360px 을 쟀었다
+        cid = "P7 상권 소개 주 버튼 · 네 단계 한 줄 — 글자 한 줄(320px 휴대폰)"
+        narrow = browser.new_context(viewport={"width": 320, "height": 640}, locale="ko-KR", is_mobile=True, has_touch=True)
         narrow.add_init_script(seed)
         page = watch(narrow.new_page(), cid)
         page.goto(base + f"/#/district/{target['id']}")
@@ -387,12 +396,36 @@ def main() -> int:
             btn.wait_for(state="visible", timeout=60000)
             page.wait_for_timeout(800)
             fit = btn.evaluate(FIT_JS)
-            rep.add(cid, fit["sw"] <= fit["cw"] and fit["lines"] == 1, {"button": fit})
+            note = page.get_by_text(R2_STEPS, exact=True).first.evaluate(FIT_JS)
+            rep.add(cid, fit["sw"] <= fit["cw"] and fit["lines"] == 1 and note["sw"] <= note["cw"] and note["lines"] == 1,
+                    {"button": fit, "steps_line": note})
         except Exception as e:
             rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
-        shot(page, "p7-r2-360")
+        shot(page, "p7-r2-320")
         page.close()
         narrow.close()
+        # P7 여백 — 글자를 키우면 네 단계 한 줄이 두 줄로 접혀 하단 영역이 커진다. 화면 아래 여백이 그 높이를 따라가야 한다(BottomCTA 가 잰다).
+        # 112px 고정이던 때 글자 150% 에서 R2 마지막 링크가 영역 밑에 깔렸고, 기본 글자 크기만 재서 못 잡았다(2026-11-01 검증)
+        for width, height, scale in ((360, 780, "150%"), (320, 640, "125%")):
+            cid = f"P7 하단 영역이 본문을 가리지 않는다(글자 {scale} · {width}px 휴대폰)"
+            big = browser.new_context(viewport={"width": width, "height": height}, locale="ko-KR", is_mobile=True, has_touch=True)
+            big.add_init_script(seed)
+            big.add_init_script("document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '%s'; })" % scale)
+            page = watch(big.new_page(), cid)
+            page.goto(base + f"/#/district/{target['id']}")
+            try:
+                page.get_by_role("button", name=R2_CTA, exact=True).wait_for(state="visible", timeout=60000)
+                page.get_by_text("무엇이 모여 있나요").wait_for(timeout=60000)   # 불러오기가 끝나야 본문 길이가 맞다
+                page.wait_for_timeout(800)
+                page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight)")
+                page.wait_for_timeout(500)
+                clear = page.evaluate(CLEAR_JS)
+                rep.add(cid, clear["gap"] >= 0 and not clear["last_hit_cta"], clear)
+            except Exception as e:
+                rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
+            shot(page, f"p7-r2-font{scale.rstrip('%')}-{width}")
+            page.close()
+            big.close()
         browser.close()
 
     result = {

@@ -4,7 +4,7 @@
  *
  * 출처 표기는 설계서 §3-3 에 있다(TDS Top·ListRow·FixedBottomCTA·Toast·BottomSheet·Result · Montage Card·Action area).
  */
-import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { back, go } from "./route";
 
 /* ── 아이콘 — 장식이다(버튼에 aria-label 이 있다) ─────────────────────────── */
@@ -186,16 +186,40 @@ export function Row({ rank, title, meta, right, onClick, pinned, current, action
 
 export interface CtaAction { label: string; onClick: () => void; disabled?: boolean; busy?: boolean }
 
+/** 화면 아래 여백(`.fl-screen.has-cta`)은 이 영역의 실제 높이(`--fl-cta-h`)를 따른다 — 위 한 줄(note)이 글자 확대 · 좁은 폭에서
+ *  두 줄로 접히면 영역이 커지는데, 고정값으로 비워 두면 본문 마지막 줄이 그 밑에 깔린다(2026-11-01 검증 · R2 「네 단계」 한 줄).
+ *  note 는 주 버튼의 설명으로 묶는다(aria-describedby) — 버튼 사이를 건너뛰며 듣는 화면 낭독기도 그 한 줄을 듣는다. */
 export function BottomCTA({ primary, secondary, note }: { primary: CtaAction; secondary?: CtaAction; note?: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  const noteId = useId();
+  useLayoutEffect(() => {
+    const el = box.current;
+    const screen = el?.closest<HTMLElement>(".fl-screen");
+    if (!el || !screen) return;
+    const measure = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      // 잴 수 없으면(높이 0 — jsdom 등) 값을 걸지 않아 CSS 의 기본값을 쓴다
+      if (h > 0) screen.style.setProperty("--fl-cta-h", `${h}px`);
+      else screen.style.removeProperty("--fl-cta-h");
+    };
+    measure();
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    ro?.observe(el);
+    return () => {
+      ro?.disconnect();
+      screen.style.removeProperty("--fl-cta-h");
+    };
+  }, []);
   return (
-    <div className="fl-cta">
-      {note && <p className="fl-cta-note">{note}</p>}
+    <div className="fl-cta" ref={box}>
+      {note && <p id={noteId} className="fl-cta-note">{note}</p>}
       <div className={"fl-cta-row" + (secondary ? " is-double" : "")}>
         {secondary && (
           <button type="button" className="fl-btn fl-btn-weak" disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</button>
         )}
         <button type="button" className="fl-btn fl-btn-strong" disabled={primary.disabled || primary.busy}
-          aria-busy={primary.busy || undefined} onClick={primary.onClick}>{primary.label}</button>
+          aria-busy={primary.busy || undefined} aria-describedby={note ? noteId : undefined}
+          onClick={primary.onClick}>{primary.label}</button>
       </div>
     </div>
   );
