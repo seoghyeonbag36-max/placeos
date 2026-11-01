@@ -15,5 +15,6 @@ PlaceOS 프론트엔드에 UI를 추가한다. 대상: 호출 인수(추가할 U
    3D 디지털 트윈은 계획상가(집합건물) 전용 표면이다(2026-10-27 결정 · 구현 전) — 실시간 공실 · 건물별 공실 집계 · 외부→내부 최적 동선. 만들 때 `three`·`@react-three/fiber` 를 지연 로드 청크로 들인다(feature-posting.md §0-V).
 4. 경로 별칭 `@/` 사용. 작업 후 `npm run build`로 타입체크.
 5. ⛔ **PPPP 네 구현 화면은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정). `App.tsx` 레일의 Platform·Page·Posting·Program,
-   흐름의 「지도」 진입로 셋(→ `#/explore`), 랜딩의 네 질문(`#how`)을 지우거나 · 숨기거나 · 다른 화면으로 돌리지 않는다.
+   흐름의 「지도」 진입로 셋(→ `#/explore`) · 상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」(→ 그 상권 · Platform 트랙 ·
+   2026-11-01), 랜딩의 네 질문(`#how`)을 지우거나 · 숨기거나 · 다른 화면으로 돌리지 않는다.
    UI 를 붙여 더 나은 길을 내더라도 **더하지, 대신하지 않는다.** 가드 `src/ppppScreens.test.tsx` → `CLAUDE.md` 「PPPP 화면 보존 규칙」.

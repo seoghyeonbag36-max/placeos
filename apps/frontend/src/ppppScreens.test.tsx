@@ -9,6 +9,8 @@
  *   ① 레일에 네 트랙이 PPPP 순서로 늘 있다(로그인 없이도)
  *   ② 네 버튼이 각자 **자기 구현 모듈**을 그린다 — 같은 패널 이름표를 단 빈 대체 화면으로 갈아끼우면 여기서 걸린다
  *   ③ 흐름(5판)의 「지도」 진입로 셋 — 허브 탭 · 상권 소개 · 빈 자리 목록 — 이 그 화면으로 간다
+ *      (2026-11-01 사용자 결정으로 입구 하나를 더 잠근다 — 상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」가
+ *       그 상권 · Platform 트랙으로 간다. 그전 이 버튼은 「빈 자리 보기」 → 흐름의 빈 자리 목록이었다)
  *   ④ 랜딩이 PPPP 네 질문을 접지 않고 보인다
  *   ⑤ 그 화면이 흐름에서 고른 상권으로 열린다(우회할 이유를 남기지 않는다 — 아래 10-18 참조)
  *   ⑥ 흐름 앱이 #/explore 로 바뀐 주소를 홈으로 되감지 않는다(아래 10-21 참조)
@@ -172,6 +174,18 @@ describe("PPPP 화면 보존 규칙 (2026-10-21) — 흐름(5판)에서 가는 �
     expect(window.location.hash).toBe("#/explore");
     expect(await railTracks()).toEqual(PPPP);
     await impl("platform");
+  });
+
+  it("상권 소개의 하단 주 버튼(2026-11-01)은 그 상권으로 PPPP 레일과 Platform 구현 화면을 연다", async () => {
+    stub();
+    startFlow();                                   // 흐름의 상권은 seongsu — 버튼이 보던 상권(garosugil)을 싣는지 본다
+    open("#/district/garosugil");
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Platform·Page·Posting·Program 보기" }, LOAD));
+    expect(window.location.hash).toBe("#/explore?track=platform&district=garosugil");
+    expect(await railTracks()).toEqual(PPPP);
+    expect((await impl("platform")).getAttribute("data-district")).toBe("garosugil");
+    expect(screen.getByRole("button", { name: "Platform" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("빈 자리 목록의 「지도」를 누르면 PPPP 레일과 Platform 구현 화면이 뜬다", async () => {

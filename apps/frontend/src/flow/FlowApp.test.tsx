@@ -159,7 +159,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(saved).toMatchObject({ industryKey: "bar", districtId: null, spaceId: null, premium: null });
   });
 
-  it("R1 순위는 잣대 묶음마다 따로 세운다 — 서울과 고양·파주를 한 줄에 섞지 않는다(2026-10-27)", async () => {
+  it("R1 순위는 잣대 묶음마다 따로 세운다 — 서울과 고양·파주를 한 줄에 섞지 않는다(2026-10-27 · 묶음 열쇠 없는 옛 응답)", async () => {
     const grouped = (id: string, name: string, rank: number, model: string, group: string, n: number) =>
       ({ ...fitRow(id, name, rank), fit_model: model, rank_group_name: group, rank_n: n });
     stub([{ match: /\/ai\/industry-fit\?industry=cafe$/, body: {
@@ -180,7 +180,41 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(seoul.getByText("성수동 카페거리")).toBeTruthy();
     expect(seoul.queryByText("금촌")).toBeNull();
     expect(gg.getByText("금촌")).toBeTruthy();
-    expect(screen.getByText("서울과 고양·파주는 순위를 따로 매겨요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.")).toBeTruthy();
+    expect(screen.getByText("순위는 서울 · 고양·파주 묶음마다 따로 매겨요 — 서울 점수와 고양·파주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
+  });
+
+  it("R1 순위는 시도마다 따로 — 같은 잣대의 경기 · 광주도 한 줄에 세우지 않는다(2026-11-01)", async () => {
+    const C = "industry-gnn-common";
+    const S = "industry-gnn/서울특별시", G = `${C}/경기도`, J = `${C}/전남광주통합특별시`;
+    const grouped = (id: string, name: string, rank: number, model: string, key: string, group: string, n: number) =>
+      ({ ...fitRow(id, name, rank), fit_model: model, rank_group: key, rank_group_name: group, rank_n: n });
+    stub([{ match: /\/ai\/industry-fit\?industry=cafe$/, body: {
+      industry: INDUSTRIES[0], model_covered: true, seoul_fit: 0.3, ranked_n: 4,
+      rank_groups: [{ key: S, fit_model: "industry-gnn", name: "서울", ranked_n: 2, mean_fit: 0.3 },
+        { key: G, fit_model: C, name: "경기", ranked_n: 1, mean_fit: 0.11 },
+        { key: J, fit_model: C, name: "광주", ranked_n: 1, mean_fit: 0.14 }],
+      districts: [grouped("seongsu", "성수동 카페거리", 1, "industry-gnn", S, "서울", 2), grouped("garosugil", "가로수길", 2, "industry-gnn", S, "서울", 2),
+        grouped("bamgasi", "밤가시마을", 1, C, G, "경기", 1), grouped("gj-chungjang", "광주 금남로/충장로", 1, C, J, "광주", 1)],
+      source: "출처", note: "매출이 아니다",
+    } }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 2, name: "서울" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "경기" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "광주" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { level: 2, name: "경기·광주" })).toBeNull();
+    // 같은 잣대라도 다른 묶음의 줄을 끌어오지 않는다 — 잣대로 가르면 두 목록에 넷이 다 들어간다
+    const gg = within(screen.getByRole("list", { name: "경기 카페·디저트 상권 순위" }));
+    const gj = within(screen.getByRole("list", { name: "광주 카페·디저트 상권 순위" }));
+    expect(gg.getByText("밤가시마을")).toBeTruthy();
+    expect(gg.queryByText("광주 금남로/충장로")).toBeNull();
+    expect(gj.getByText("광주 금남로/충장로")).toBeTruthy();
+    expect(gj.queryByText("밤가시마을")).toBeNull();
+    expect(screen.getByText("순위는 서울 · 경기 · 광주 묶음마다 따로 매겨요 — 서울 점수와 경기 · 광주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "왜 이 순서인가요?" }));
+    expect(await screen.findByText(/경기 · 광주는 같은 모델이라 점수는 견줄 수 있지만, 순위는 지역마다 따로 세워요\./)).toBeTruthy();
+    expect(screen.getByText("광주 평균 입지 점수 14점 · 순위를 매긴 상권 1곳")).toBeTruthy();
   });
 
   it("F-06 모델 밖 업종은 순위 대신 「상권 순위를 아직 못 드려요」와 「상권 직접 고르기」", async () => {
@@ -224,14 +258,36 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.queryByText(/상권 순위를 아직 못 드려요/)).toBeNull();
   });
 
-  it("상권에서 목록으로 바로 진입하고 월세는 목록에서 조정한다", async () => {
+  it("상권 소개의 주 버튼은 PPPP 네 화면(그 상권 · Platform)으로 바로 간다 — 2026-11-01, 종전 「빈 자리 보기」", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
     open("/district/seongsu");
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "성수동 카페거리는 카페 중심 상권이에요" })).toBeTruthy();
     expect(screen.getByText("14~17시")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "빈 자리 보기" }));
+    expect(screen.queryByRole("button", { name: "빈 자리 보기" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Platform·Page·Posting·Program 보기" }));
+    expect(window.location.hash).toBe("#/explore?track=platform&district=seongsu");
+  });
+
+  it("홈의 「빈 자리」 단계가 R3 로 가는 입구다 — R2 주 버튼이 PPPP 로 바뀐 뒤 남은 길(2026-11-01)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/home");
+    render(<FlowApp token={null} />);
+    const steps = within(await screen.findByRole("list", { name: "네 단계" }));
+    fireEvent.click(steps.getByRole("button", { name: /빈 자리/ }));
+    expect(window.location.hash).toBe("#/rent-cap");
+    await screen.findByRole("heading", { name: "월세는 얼마까지 생각하세요?" });
+    pick(/아직 몰라요/);
+    expect(await screen.findByRole("heading", { level: 1, name: "빈 자리가 2곳 있어요" })).toBeTruthy();
+  });
+
+  it("빈 자리 목록에서 월세를 조정한다(R3 · 주소로 바로 연다)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/spaces");
+    render(<FlowApp token={null} />);
     await screen.findByRole("heading", { level: 1, name: "빈 자리가 2곳 있어요" });
     fireEvent.click(screen.getByRole("button", { name: /월세 전체/ }));
     await screen.findByRole("heading", { name: "월세는 얼마까지 생각하세요?" });

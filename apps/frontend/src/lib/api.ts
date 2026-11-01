@@ -878,16 +878,17 @@ export const listIndustries = () => getJSON<{ industries: IndustryOption[] }>("/
  *     Top-3 근사라 절대값은 낮다 — **순위로만** 읽는다. */
 export interface IndustryFitRow {
   district_id: string; name: string | null; gu: string | null;
-  /** 순위는 **잣대(모델) 묶음마다 따로** 1 부터 센다(2026-10-27 · 서울 = 수요 블록판, 고양·파주 = 공통 피처판).
-   *  묶음이 다른 두 줄의 점수·순위는 서로 견주지 않는다 */
+  /** 순위는 **묶음마다 따로** 1 부터 센다 — 묶음 = 잣대(모델) × 시도(2026-10-27 잣대별 · 2026-11-01 시도별:
+   *  서울 = 수요 블록판, 경기 · 광주 = 공통 피처판을 시도마다 나눴다). 잣대가 다르면 점수를, 묶음이 다르면 순위를 견주지 않는다 */
   fit: number | null; fit_rank: number | null;
-  fit_model?: string | null; rank_group_name?: string | null; rank_n?: number | null;
+  /** 이 줄이 든 묶음의 열쇠(`RankGroup.key`) — 같은 잣대의 두 묶음(경기 · 광주)은 잣대로는 못 가른다 */
+  fit_model?: string | null; rank_group?: string | null; rank_group_name?: string | null; rank_n?: number | null;
   same_n: number | null; sample_n: number | null; same_share: number | null;
   rent_1f_per_pyeong: number | null; rent_shared: boolean;
 }
 
-/** 순위 묶음 하나 — 한 잣대(모델)로 매긴 상권들 */
-export interface RankGroup { fit_model: string; name: string; ranked_n: number; mean_fit: number }
+/** 순위 묶음 하나 — 한 잣대(모델)로 매긴 한 시도의 상권들. `key` 가 없으면 옛 응답(잣대마다 한 묶음)이다 */
+export interface RankGroup { key?: string; fit_model: string; name: string; ranked_n: number; mean_fit: number }
 
 export interface IndustryFit {
   industry: IndustryOption;

@@ -102,7 +102,11 @@ def test_industry_adds_fit_rank_from_the_same_ranking_as_business_fit():
             assert h["rank_group_name"] == fit[h["id"]]["rank_group_name"], h["id"]
             seen += 1
     assert seen
-    assert doc["rank_groups"] == business_fit.fit_by_district("cafe")["rank_groups"]
+    # 묶음은 business_fit 그대로이되 이 흐름의 상권이 든 것만 — 시도별로 나눈 뒤(2026-11-01) 「광주」가 끼지 않는다
+    full = business_fit.fit_by_district("cafe")["rank_groups"]
+    mine = {fit[h["id"]]["rank_group"] for n in doc["nodes"] for h in n["hubs"]}
+    assert doc["rank_groups"] == [g for g in full if g["key"] in mine]
+    assert {g["name"] for g in doc["rank_groups"]} == {"서울", "경기"}
     # 서울 거점은 서울 묶음으로만 줄 선다 — 경기 점수와 한 줄에 섞이지 않는다(2026-10-27)
     assert {h["rank_group_name"] for n in doc["nodes"] if n["segment"] == "seoul" for h in n["hubs"]} == {"서울"}
 

@@ -75,8 +75,9 @@ export function Compare({ param }: { param: string }) {
           </button>
         )} />
       {work && !ranked && <p className="fl-note">{eun(work.label)} 추천 모델이 다루지 않는 업종이라 입지 점수는 나란히 놓지 않았어요.</p>}
-      {/* 입지 점수 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 묶음이 섞이면 점수를 견주지 말라고 밝힌다 */}
-      {ranked && rulerNames && <WarnLine>입지 점수는 {rulerNames.join(" · ")} 묶음을 서로 다른 모델로 매겼어요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.</WarnLine>}
+      {/* 점수는 잣대(모델)마다, 순위는 묶음(잣대 × 시도)마다 따로다(2026-10-27 · 11-01) — 잣대가 섞이면 점수를 견주지 말라고 밝힌다.
+          잣대 단위로 적는다: 경기와 광주는 같은 잣대라 둘만 고르면 이 줄이 서지 않는다 */}
+      {ranked && rulerNames && <WarnLine>{rulerNames.map((names) => `${names.join(" · ")} 점수`).join("와 ")}는 서로 다른 모델로 매겼어요 — 모델이 다른 상권끼리는 점수를 견주지 마세요.</WarnLine>}
       {cols.filter((c) => c.caveat).map((c) => <WarnLine key={c.id}>{c.name}: {c.caveat}</WarnLine>)}
       {/* 서울시 상권분석(유형·붐비는 때의 재료)은 서울 상권에만 선다 */}
       <p className="fl-source">카카오 플레이스{cols.some((c) => (c.city ?? "seoul") === "seoul") ? " · 서울시 상권분석" : ""}{quarter?.status === "ready" ? ` · R-ONE ${quarter.data.quarter}` : " · R-ONE"} · 건축물대장{ranked ? " · 업종 추천 모델" : ""}</p>

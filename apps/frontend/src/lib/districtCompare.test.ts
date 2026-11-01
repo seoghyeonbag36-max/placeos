@@ -143,7 +143,14 @@ describe("입지 점수 묶음 — 잣대가 다르면 견주지 말라고 밝�
   it("잣대가 섞이면 묶음 이름을, 같으면 null 을 준다", () => {
     const mixed = fit([{ district_id: "a", fit_model: "industry-gnn", rank_group_name: "서울" },
       { district_id: "b", fit_model: "industry-gnn-common", rank_group_name: "고양·파주" }]);
-    expect(fitRulerNames(mixed, ["a", "b"])).toEqual(["서울", "고양·파주"]);
+    expect(fitRulerNames(mixed, ["a", "b"])).toEqual([["서울"], ["고양·파주"]]);
     expect(fitRulerNames(mixed, ["a"])).toBeNull();
+  });
+  it("이름은 잣대마다 모은다 — 같은 잣대의 경기 · 광주는 한 칸이고, 둘만 고르면 경고가 없다(2026-11-01)", () => {
+    const C = "industry-gnn-common";
+    const three = fit([{ district_id: "s", fit_model: "industry-gnn", rank_group_name: "서울" },
+      { district_id: "g", fit_model: C, rank_group_name: "경기" }, { district_id: "j", fit_model: C, rank_group_name: "광주" }]);
+    expect(fitRulerNames(three, ["s", "g", "j"])).toEqual([["서울"], ["경기", "광주"]]);
+    expect(fitRulerNames(three, ["g", "j"])).toBeNull();       // 같은 잣대 — 점수를 견줄 수 있다
   });
 });

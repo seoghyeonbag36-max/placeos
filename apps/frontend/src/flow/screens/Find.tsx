@@ -11,7 +11,7 @@ import { fitGroups, rankText } from "@/lib/fitGroups";
 import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
-import { comparePath, corridorPath, go } from "../route";
+import { comparePath, corridorPath, explorePath, go } from "../route";
 import { setDistrict, setGoal, setHomeDistrict, setIndustry } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet,
@@ -255,7 +255,7 @@ export function Districts() {
     </FlowScreen>;
   }
   if (fit.status !== "ready" || !ind) return null;
-  // 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 서울과 고양·파주를 한 줄에 섞지 않고 묶음별 목록으로 세운다
+  // 순위는 묶음(잣대 × 시도)마다 따로다(2026-10-27 · 11-01) — 서울 · 경기 · 광주를 한 줄에 섞지 않고 묶음별 목록으로 세운다
   const groups = fitGroups(fit.data);
   const multi = groups.length > 1;
   const rows = groups.flatMap((g) => g.rows);
@@ -267,10 +267,19 @@ export function Districts() {
   const homeInTop = !!home && top.includes(home);
   const lead = homeGroup?.rows[0];
   const diff = home && lead && home.fit != null && lead.fit != null ? Math.round((lead.fit - home.fit) * 100) : null;
-  const others = groups.slice(1).map((g) => g.name).join(" · ");
-  const rulerShort = multi ? `${groups[0].name}과 ${eun(others)} 순위를 따로 매겨요 — 묶음이 다른 상권끼리는 점수를 견주지 마세요.` : null;
-  const rulerWhy = multi ? `${eun(groups[0].name)} 서울시 상권분석 수요 자료까지 넣은 모델로, ${eun(others)} 그 자료 없이 매긴 모델로 순위를 냈어요. `
-    + "잣대가 다른 두 점수를 한 줄에 세우면 순위가 모델 차이를 섞어서 따로 세워요." : null;
+  // 순위는 묶음마다 따로지만, 점수를 견줄 수 있는지는 잣대(모델)가 가른다 — 경기 · 광주는 같은 잣대라 점수는 견줄 수 있다(11-01)
+  const firstModel = groups[0]?.model;
+  const firstNames = groups.filter((g) => g.model === firstModel).map((g) => g.name).join(" · ");
+  const otherNames = groups.filter((g) => g.model !== firstModel).map((g) => g.name).join(" · ");
+  const splitNames = [...new Set(groups.map((g) => g.model))]
+    .map((m) => groups.filter((g) => g.model === m).map((g) => g.name)).filter((ns) => ns.length > 1).map((ns) => ns.join(" · "));
+  const rulerShort = multi ? `순위는 ${groups.map((g) => g.name).join(" · ")} 묶음마다 따로 매겨요`
+    + (otherNames ? ` — ${firstNames} 점수와 ${otherNames} 점수는 잣대가 달라 견주지 마세요.` : ".") : null;
+  const rulerWhy = multi ? [
+    otherNames ? `${eun(firstNames)} 서울시 상권분석 수요 자료까지 넣은 모델로, ${eun(otherNames)} 그 자료 없이 매긴 모델로 점수를 냈어요. `
+      + "잣대가 다른 점수를 한 줄에 세우면 순위가 모델 차이를 섞어서 따로 세워요." : null,
+    ...splitNames.map((ns) => `${eun(ns)} 같은 모델이라 점수는 견줄 수 있지만, 순위는 지역마다 따로 세워요.`),
+  ].filter(Boolean).join(" ") : null;
   if (picked) {
     const toggle = (id: string) => setPicked((p) => (!p ? p : p.includes(id) ? p.filter((x) => x !== id)
       : p.length < COMPARE_MAX ? [...p, id] : p));
@@ -327,9 +336,9 @@ export function Districts() {
       <Sheet open={why} onClose={() => setWhy(false)} title="왜 이 순서인가요?">
         <p>입지 점수는 비슷한 자리에 {ind.label} 가게가 이미 얼마나 모여 있는지를 추천 모델이 배운 값이에요(×100). 매출이나 생존율이 아니에요.</p>
         <ul className="fl-facts">
-          {/* 묶음(잣대)마다 평균과 순위 수를 따로 — 묶음 없는 옛 응답이면 seoul_fit(서울 평균) 하나 */}
+          {/* 묶음마다 평균과 순위 수를 따로 — 묶음 없는 옛 응답이면 seoul_fit(서울 평균) 하나. 같은 잣대의 묶음이 둘이라 열쇠는 묶음 열쇠다 */}
           {fit.data.rank_groups?.length
-            ? fit.data.rank_groups.map((g) => <li key={g.fit_model}>{g.name} 평균 입지 점수 {Math.round(g.mean_fit * 100)}점 · 순위를 매긴 상권 {g.ranked_n}곳</li>)
+            ? fit.data.rank_groups.map((g) => <li key={g.key ?? g.fit_model}>{g.name} 평균 입지 점수 {Math.round(g.mean_fit * 100)}점 · 순위를 매긴 상권 {g.ranked_n}곳</li>)
             : <>
               {fit.data.seoul_fit != null && <li>서울 평균 입지 점수 {Math.round(fit.data.seoul_fit * 100)}점</li>}
               <li>순위를 매긴 상권 {fit.data.ranked_n}곳</li>
@@ -444,6 +453,10 @@ export function DistrictSearch() {
 /** archetype 「카페 중심형」 「음식·카페 복합형」 → 문장 속 말 */
 const archetypePhrase = (a: string) => a.replace(/중심형$/, "중심").replace(/복합형$/, "복합");
 
+/** R2 하단 주 버튼 — PPPP 네 구현 화면으로 바로 간다(2026-11-01 사용자 결정 · 종전 「빈 자리 보기」). 이름은 지도 탐색 레일 그대로.
+ *  가운뎃점을 붙여 쓴다 — 띄어 쓰면(308px) 360px 휴대폰 버튼 안 폭(288px)을 넘어 「보기」가 다음 줄로 접혔다(실측 · Pretendard 17px) */
+const PPPP_CTA = "Platform·Page·Posting·Program 보기";
+
 export function District({ id }: { id: string }) {
   const { state, update } = useFlow();
   const data = useFlowData();
@@ -469,13 +482,13 @@ export function District({ id }: { id: string }) {
   const gap = demand?.bands?.find((b) => b.band === demand.gap_band)?.label;
   const title = identity?.archetype ? `${eun(name)} ${archetypePhrase(identity.archetype)} 상권이에요` : `${name}을 한눈에 볼게요`;
   const loading = platform.status === "loading" || rent.status === "loading" || floors.status === "loading" || ds.status === "loading";
-  const next = () => {
-    data.prefetch(() => data.rent(id), () => data.floorUnits(id), () => data.postings(id));
-    go("/spaces");
-  };
+  // 하단 주 버튼은 PPPP 네 구현 화면(지도 탐색)으로 바로 간다 — 2026-11-01 사용자 결정. 그전에는 「빈 자리 보기」 → R3 였다.
+  // 이 상권 · Platform 트랙으로 연다(홈 지도 미리보기 칩과 같은 길). 흐름의 빈 자리 목록(R3)은 홈의 「빈 자리」 단계가 그대로 연다.
+  // ⛔ 이 버튼도 PPPP 화면 입구다 — 다른 곳으로 돌리지 않는다(PPPP 화면 보존 규칙 · 가드 src/ppppScreens.test.tsx).
+  const openPppp = () => go(explorePath({ track: "platform", district: id }));
   return (
     <FlowScreen back="/districts" right={<CloseButton />} caption={`상권${d ? ` · ${d.gu}` : ""}`} title={loading ? `${name}을 살펴보고 있어요` : title}
-      cta={<BottomCTA primary={{ label: "빈 자리 보기", onClick: next }} />}>
+      cta={<BottomCTA primary={{ label: PPPP_CTA, onClick: openPppp }} />}>
       {d?.caveat && <WarnLine>{d.caveat}</WarnLine>}
       {loading ? <SkeletonRows n={4} label="상권 소개를 불러오는 중" /> : (
         <dl className="fl-facts-list">

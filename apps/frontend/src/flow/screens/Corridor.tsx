@@ -249,7 +249,8 @@ export function Corridor({ id }: { id: string }) {
       <Details summary="자료와 한계">
         <ul className="fl-facts">{c.caveats.map((t) => <li key={t}>{t}</li>)}</ul>
         <p className="fl-note">역할(출근형·주거형·방문형)은 도착 목적 구성이 흐름 안 중앙값보다 {c.params.role_margin_pp ?? 3}%p 이상 높은 쪽이에요. 넘는 것이 없으면 혼합이에요.</p>
-        {industry && (c.rank_groups?.length ?? 0) > 1 && <p className="fl-note">입지 점수 순위는 {c.rank_groups!.map((g) => g.name).join(" · ")} 묶음마다 다른 모델로 따로 매겼어요 — 묶음이 다른 상권끼리는 견주지 않아요.</p>}
+        {/* 묶음은 이 흐름의 상권이 든 것만 온다(2026-11-01). 묶음 = 잣대 × 시도라 「묶음마다 다른 모델」은 아니다 — 순위만 따로라고 말한다 */}
+        {industry && (c.rank_groups?.length ?? 0) > 1 && <p className="fl-note">입지 점수 순위는 {c.rank_groups!.map((g) => g.name).join(" · ")} 묶음마다 따로 매겼어요 — 묶음이 다른 상권끼리는 순위를 견주지 않아요.</p>}
         <p className="fl-note mono">{c.source}</p>
       </Details>
 

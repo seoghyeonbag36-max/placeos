@@ -93,7 +93,8 @@ R2·R3 버튼은 `go()` 가 JS 안에서 이벤트를 쏘아 두 갱신이 한 �
   Page `MapShell` · Posting `PostingConsole` · Program `CampaignStudio`. 좌측 레일에 PPPP 순서로 늘 넷이 있고, 로그인 없이도 열린다.
 - **「제외」로 보는 것 — 전부 금지**
   1. 화면이나 레일 버튼을 지우거나 숨김(조건부 렌더 · `hidden` · 접힌 `<details>` 포함)
-  2. 진입로를 다른 곳으로 돌림 — 허브 탭 「지도」 · R2 「지도에서 자세히」 · R3 「지도」는 늘 `#/explore`
+  2. 진입로를 다른 곳으로 돌림 — 허브 탭 「지도」 · R2 「지도에서 자세히」 · R3 「지도」는 늘 `#/explore` ·
+     R2 하단 주 버튼 「Platform·Page·Posting·Program 보기」는 늘 그 상권 · Platform 트랙(§7 · 2026-11-01)
   3. 다른 화면(흐름 안 지도 등)으로 갈아끼움
   4. 랜딩의 PPPP 네 질문(`#how`)을 빼거나 접음
   5. 로그인을 요구해 막음
@@ -105,9 +106,9 @@ R2·R3 버튼은 `go()` 가 JS 안에서 이벤트를 쏘아 두 갱신이 한 �
 
 | 층 | 위치 | 하는 일 |
 |---|---|---|
-| 가드 테스트(CI) | `apps/frontend/src/ppppScreens.test.tsx` · 8건 | ① 로그인 없이 레일 네 트랙·PPPP 순서 ② 네 버튼이 각자 **자기 구현 모듈**을 그림(네 모듈을 표식으로 대신 그려 배선을 본다 — 같은 이름표의 빈 대체 화면이 걸린다) ③ 허브 탭(홈·내 정보 × 상권 고름/안 고름) href ④ R2 클릭 → 레일·Platform ⑤ R3 클릭 → 레일·Platform ⑥ 흐름 앱이 `#/explore` 를 되감지 않음 ⑦ C2 상권 이어받기(Platform·Page 가 받은 상권) ⑧ 랜딩 네 질문이 접힌 `<details>` 밖 |
+| 가드 테스트(CI) | `apps/frontend/src/ppppScreens.test.tsx` · 9건 | ① 로그인 없이 레일 네 트랙·PPPP 순서 ② 네 버튼이 각자 **자기 구현 모듈**을 그림(네 모듈을 표식으로 대신 그려 배선을 본다 — 같은 이름표의 빈 대체 화면이 걸린다) ③ 허브 탭(홈·내 정보 × 상권 고름/안 고름) href ④ R2 클릭 → 레일·Platform ⑤ R3 클릭 → 레일·Platform ⑥ 흐름 앱이 `#/explore` 를 되감지 않음 ⑦ C2 상권 이어받기(Platform·Page 가 받은 상권) ⑧ 랜딩 네 질문이 접힌 `<details>` 밖 ⑨ (11-01) R2 하단 주 버튼 → 그 상권 · Platform 트랙 · 레일 넷 |
 | 배포 차단 | `.github/workflows/deploy.yml`(`workflow_run`) | CI 가 전부 초록일 때만 Cloud Run 으로 나간다 — 가드가 빨개지면 그 커밋은 프로덕션에 못 나간다 |
-| 실화면 검사(/verify) | `scripts/pppp_screens_check.py` | jsdom 이 원리상 못 보는 **CSS 숨김**과 **브라우저가 낸 이벤트 순서**를 실제 브라우저로 잰다 — P1 레일이 보임 · P2 네 화면이 보임 · P3 진입로 넷을 **새 페이지로 주소를 바로 연 뒤** 눌러 2.5초 뒤에도 `#/explore` · P4 C2 · P5 랜딩. 흐름 · App · 랜딩 · 레일을 건드린 변경은 /verify 에서 돌린다 |
+| 실화면 검사(/verify) | `scripts/pppp_screens_check.py` | jsdom 이 원리상 못 보는 **CSS 숨김**과 **브라우저가 낸 이벤트 순서**를 실제 브라우저로 잰다 — P1 레일이 보임 · P2 네 화면이 보임 · P3 진입로 넷을 **새 페이지로 주소를 바로 연 뒤** 눌러 2.5초 뒤에도 `#/explore` · P4 C2 · P5 랜딩 · P6 홈의 새 입구(10-24) · P7 R2 하단 주 버튼(11-01 · 데스크톱·휴대폰 · 버튼 글자 한 줄). 흐름 · App · 랜딩 · 레일을 건드린 변경은 /verify 에서 돌린다 |
 | 지침 | 루트 `CLAUDE.md` 「PPPP 화면 보존 규칙」 · `AGENTS.md`(머리말 · §4 Codex 담당 밖) · `apps/frontend/AGENTS.md` · 스킬 `design`·`frontend-dev`·`platform`·`page`·`posting`·`program`·`verify`(실화면 검사 절차) · 설계서 5판 §10 | 사람과 에이전트(Claude Code · Codex)가 읽는 규칙 |
 | 코드 주석 | `App.tsx`(NAV · EXPLORE_HASH · 상권 이어받기) · `flow/ui.tsx`(TABS) · `flow/route.ts` · `flow/FlowApp.tsx` · R2·R3 버튼 · `Landing.tsx`(머리말 규칙 5 · `#how`) | 고치려는 자리에서 바로 보이게 |
 | 메모리 | Claude Code 프로젝트 메모리(feedback) | 다음 세션이 같은 실수를 하지 않게 |
@@ -134,3 +135,17 @@ R2·R3 버튼은 `go()` 가 JS 안에서 이벤트를 쏘아 두 갱신이 한 �
 
 - 이 규칙을 바꾸는 것은 **사용자만** 한다. 승인을 받으면 CLAUDE.md 절 · 가드 · 이 문서를 **같은 PR** 에서 고친다.
 - Codex(`chore/*`·`fix/*`)는 이 영역을 손대지 않고 보고한다(AGENTS.md §4).
+
+## 7. 2026-11-01 — 입구 하나를 더 잠근다(R2 하단 주 버튼)
+
+사용자 지시: 「상권 소개(R2) 다음은 『빈 자리 보기』가 아니라 Platform-Page-Posting-Program 으로 바로 넘어가게, 워딩도 그에 맞게」.
+
+- R2 하단 주 버튼 「빈 자리 보기」(→ 흐름의 빈 자리 목록 R3) → **「Platform·Page·Posting·Program 보기」**(→ `#/explore?track=platform&district={그 상권}`).
+  지도 탐색은 10-24 부터 트랙·상권을 쿼리로 받는다(`flow/route.explorePath` — 홈 지도 미리보기 칩과 같은 길). 그래서 백엔드 응답은 바꿀 것이 없다.
+- 이 규칙의 「더하지, 대신하지 않는다」와 어긋나지 않는다 — 대신한 것은 흐름 화면(R3)으로 가는 길이고, PPPP 로 가는 길은 늘었다.
+  R3 는 홈의 「빈 자리」 단계(→ 월세 상한 → R3)와 비용 화면의 「다른 빈 자리」로 그대로 열린다.
+- 텍스트 버튼 「지도에서 자세히」는 그대로 둔다(같은 네 화면 · 진입로 규칙 ②) — 지우면 입구가 하나 줄어든다.
+- 글자: 가운뎃점을 붙여 쓴다. 띄어 쓰면 308px 로 360px 휴대폰의 버튼 안 폭(288px)을 넘어 「보기」가 다음 줄로 접혔다(Pretendard 17px 실측).
+  붙여 쓰면 285px — 320px 폭(248px)에서만 두 줄이 된다.
+- 가드: `ppppScreens.test.tsx` ⑨ · 실화면 P7 · `FlowApp.test` 「상권 소개의 주 버튼은 PPPP 네 화면…」. 결정 기록 →
+  docs/decision-region-rank-groups-r2-pppp-2026-11-01.md

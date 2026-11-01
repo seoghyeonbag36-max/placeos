@@ -212,11 +212,22 @@ def _all_means() -> dict[str, dict[str, float]]:
     return _cached("means", build)
 
 
+def _region(page: dict) -> str:
+    """순위 묶음을 가르는 권역 — 상권 도시의 시도.
+
+    2026-11-01 사용자 결정: 같은 잣대(공통 피처판) 안에서도 「경기」와 「광주」를 한 줄에 세우지 않는다. 10-31 에는 잣대마다
+    한 묶음이라 「경기·광주」 36곳이 한 순위였다(R1 화면에서 광주 금남로 1위 · 고양 밤가시마을 2위 · 광주 월산동 3위 …).
+    점수는 같은 잣대라 견줄 수 있지만, 창업자가 고르는 단위는 지역이라 순위는 시도마다 1 부터 센다.
+    """
+    return districts_svc.page_city(page).sido
+
+
 def _group_name(pages: list[dict]) -> str:
     """순위 묶음 이름 — 소속 도시를 레지스트리 순서로 잇는다(「서울」 · 「고양·파주」). 넷 이상이면 시도로 줄인다.
 
     시도 안에 서빙 도시가 하나뿐이면 그 도시 이름을 쓴다(2026-10-31) — 광주의 시도는 「전남광주통합특별시」라
     접미만 떼면 「경기·전남광주통합」이 됐다. 사람들이 아는 이름은 「광주」다.
+    2026-11-01 부터 묶음이 시도 하나(`_region`)라 서빙 결과는 「서울」 · 「경기」(8개 시) · 「광주」다.
     """
     order = list(cities.CITIES)
     found = sorted({districts_svc.page_city(p).id for p in pages}, key=order.index)
@@ -291,8 +302,8 @@ def _fit_by_district(item: dict) -> dict:
         rows.append({
             "district_id": did, "name": s.get("name"), "gu": s.get("gu"),
             "fit": fit, "fit_rank": None,
-            # 이 점수를 매긴 잣대와 순위 묶음 — 묶음이 다르면 점수·순위를 서로 견주지 않는다
-            "fit_model": rulers.get(did, default), "rank_group_name": None, "rank_n": None,
+            # 이 점수를 매긴 잣대와 순위 묶음 — 잣대가 다르면 점수를, 묶음이 다르면 순위를 서로 견주지 않는다
+            "fit_model": rulers.get(did, default), "rank_group": None, "rank_group_name": None, "rank_n": None,
             "same_n": same[0][key] if same else None,
             "sample_n": same[1] if same else None,
             "same_share": (round(same[0][key] / same[1], 4) if same and same[1] else None),
@@ -303,18 +314,28 @@ def _fit_by_district(item: dict) -> dict:
     covered = bool(label) and any(r["fit"] is not None for r in rows)
     groups: list[dict] = []
     if covered:
-        # 적합도가 있는 상권만, **잣대(모델)마다 따로** 순위를 매긴다 — 기본 잣대(서울) 묶음이 먼저다.
-        # 그래프에 없는 상권은 0 이 아니라 순위 없음으로 뒤에 둔다.
-        models = sorted({r["fit_model"] for r in rows if r["fit"] is not None}, key=lambda m: (m != default, m))
+        # 적합도가 있는 상권만, **묶음마다 따로** 순위를 매긴다. 묶음 = 잣대(모델) × 시도(`_region` · 2026-11-01).
+        # 기본 잣대(서울) 묶음이 먼저고, 나머지는 도시 레지스트리 순서(경기 → 광주)다. 묶음 안 순서는 종전과 같은
+        # 안정 정렬이라 서울 순위는 한 글자도 안 바뀐다. 그래프에 없는 상권은 0 이 아니라 순위 없음으로 뒤에 둔다.
+        order = list(cities.CITIES)
+        buckets: dict[tuple[str, str], list[dict]] = {}
+        for r in rows:
+            if r["fit"] is not None:
+                buckets.setdefault((r["fit_model"], _region(pages[r["district_id"]])), []).append(r)
+
+        def first_city(members: list[dict]) -> int:
+            return min(order.index(districts_svc.page_city(pages[r["district_id"]]).id) for r in members)
+
         ranked: list[dict] = []
-        for model in models:
-            members = sorted((r for r in rows if r["fit"] is not None and r["fit_model"] == model),
-                             key=lambda r: -r["fit"])
+        for (model, region), members in sorted(buckets.items(),
+                                                key=lambda kv: (kv[0][0] != default, first_city(kv[1]), kv[0])):
+            members.sort(key=lambda r: -r["fit"])
             name = _group_name([pages[r["district_id"]] for r in members])
+            gkey = f"{model}/{region}"      # 같은 잣대의 두 묶음(경기 · 광주)을 화면이 가르는 열쇠 — 이름이 아니라 이것으로 묶는다
             for n, r in enumerate(members, start=1):
-                r.update(fit_rank=n, rank_group_name=name, rank_n=len(members))
+                r.update(fit_rank=n, rank_group=gkey, rank_group_name=name, rank_n=len(members))
             fits = [r["fit"] for r in members]
-            groups.append({"fit_model": model, "name": name, "ranked_n": len(members),
+            groups.append({"key": gkey, "fit_model": model, "name": name, "ranked_n": len(members),
                            "mean_fit": round(sum(fits) / len(fits), 4)})
             ranked += members
         rows = ranked + sorted((r for r in rows if r["fit"] is None), key=lambda r: r["name"] or "")
@@ -335,7 +356,7 @@ def _fit_by_district(item: dict) -> dict:
         "ranked_n": sum(g["ranked_n"] for g in groups),
         "districts": rows,
         "source": SOURCE + ("" if len(groups) < 2 else
-                            " · 순위는 잣대마다 따로 — " + " · ".join(f"{g['name']} {g['fit_model']}" for g in groups)),
+                            " · 순위는 묶음마다 따로 — " + " · ".join(f"{g['name']} {g['fit_model']}" for g in groups)),
         "note": NOTE,
     }
 
