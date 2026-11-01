@@ -14,7 +14,7 @@ Promotion 을 나눠 가졌다):
 > ⛔ **PPPP 화면 보존 규칙 (2026-10-21 사용자 확정 — 절대 규칙)** — Platform · Page · Posting · Program 의 구현 화면은
 > 절대 화면에서 제외하지 않는다. 구현 화면 = `#/explore` 레일의 네 트랙(PlatformConsole · MapShell · PostingConsole ·
 > CampaignStudio). 화면·레일 버튼·진입로(흐름의 허브 탭 「지도」 · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」 →
-> 늘 `#/explore` · 상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」 → 늘 `#/explore?track=platform&district={상권}`
+> 늘 `#/explore` · 상권 소개 하단 주 버튼 「이 상권 네 단계로 따져 보기」(버튼 위 「Platform → Page → Posting → Program」) → 늘 `#/explore?track=platform&district={상권}`
 > (2026-11-01))·랜딩의 네 질문(`#how`)을 지우거나 · 숨기거나(접힌 `<details>` 포함) · 다른 화면으로 돌리거나 갈아끼우지 않는다.
 > 가드 `apps/frontend/src/ppppScreens.test.tsx` 를 지우거나 고쳐서 통과시키지 않는다. 흐름·App·랜딩·레일을 건드렸으면
 > 실화면 검사 `scripts/pppp_screens_check.py` 결과(종료코드 0)도 함께 낸다. 상세는 [CLAUDE.md](CLAUDE.md) 같은 이름의 절.

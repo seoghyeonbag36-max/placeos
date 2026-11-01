@@ -453,9 +453,13 @@ export function DistrictSearch() {
 /** archetype 「카페 중심형」 「음식·카페 복합형」 → 문장 속 말 */
 const archetypePhrase = (a: string) => a.replace(/중심형$/, "중심").replace(/복합형$/, "복합");
 
-/** R2 하단 주 버튼 — PPPP 네 구현 화면으로 바로 간다(2026-11-01 사용자 결정 · 종전 「빈 자리 보기」). 이름은 지도 탐색 레일 그대로.
- *  가운뎃점을 붙여 쓴다 — 띄어 쓰면(308px) 360px 휴대폰 버튼 안 폭(288px)을 넘어 「보기」가 다음 줄로 접혔다(실측 · Pretendard 17px) */
-const PPPP_CTA = "Platform·Page·Posting·Program 보기";
+/** R2 하단 주 버튼 — PPPP 네 구현 화면으로 바로 간다(2026-11-01 사용자 결정 · 종전 「빈 자리 보기」).
+ *  문구는 같은 날 사용자가 고른 안 A — 창업자의 말(「따져 보기」)로 쓰고, 「네 단계」가 무엇인지는 버튼 위 한 줄(PPPP_STEPS)이 밝힌다.
+ *  181px 이라 320px 폰(버튼 안 폭 248px)에서도 한 줄이다(Pretendard 17px 실측). 앞서 쓴 「Platform·Page·Posting·Program 보기」(285px)는
+ *  320px 에서 「보기」가 다음 줄로 접혔고, 영어 이름만 늘어놓아 안내로 읽히지 않았다 */
+const PPPP_CTA = "이 상권 네 단계로 따져 보기";
+/** 버튼 위 한 줄 — 「네 단계」의 이름. 다음 화면(지도 탐색) 레일의 순서·이름 그대로다 */
+const PPPP_STEPS = "Platform → Page → Posting → Program";
 
 export function District({ id }: { id: string }) {
   const { state, update } = useFlow();
@@ -488,7 +492,7 @@ export function District({ id }: { id: string }) {
   const openPppp = () => go(explorePath({ track: "platform", district: id }));
   return (
     <FlowScreen back="/districts" right={<CloseButton />} caption={`상권${d ? ` · ${d.gu}` : ""}`} title={loading ? `${name}을 살펴보고 있어요` : title}
-      cta={<BottomCTA primary={{ label: PPPP_CTA, onClick: openPppp }} />}>
+      cta={<BottomCTA note={PPPP_STEPS} primary={{ label: PPPP_CTA, onClick: openPppp }} />}>
       {d?.caveat && <WarnLine>{d.caveat}</WarnLine>}
       {loading ? <SkeletonRows n={4} label="상권 소개를 불러오는 중" /> : (
         <dl className="fl-facts-list">

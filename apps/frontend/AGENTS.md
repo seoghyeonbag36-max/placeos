@@ -18,7 +18,7 @@ src/design/      디자인 토큰 + 토큰 기반 컴포넌트
 - ⛔ **PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙)** — Platform·Page·Posting·Program 의 구현 화면은 절대 화면에서
   빼지 않는다. `App.tsx` 의 `NAV`(레일 네 트랙)에서 빼거나 숨기지 않고, 흐름의 「지도」 진입로 셋(`flow/ui.tsx` 허브 탭 ·
   `flow/screens/Find.tsx` 상권 소개 「지도에서 자세히」 · `flow/screens/Space.tsx` 빈 자리 목록 「지도」)은 늘 `#/explore` 로 보낸다.
-  상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」(`Find.tsx` `PPPP_CTA` · 2026-11-01)는 늘 그 상권 · Platform 트랙
+  상권 소개 하단 주 버튼 「이 상권 네 단계로 따져 보기」(버튼 위 「Platform → Page → Posting → Program」)(`Find.tsx` `PPPP_CTA` · 2026-11-01)는 늘 그 상권 · Platform 트랙
   (`explorePath({ track: "platform", district })`)으로 보낸다 — 가드 ⑨ · 실화면 P7.
   흐름 안에 지도를 따로 두어 그 자리를 대신하지 않고, 랜딩의 네 질문(`#how`)을 접지 않는다. 가드 `src/ppppScreens.test.tsx` 를
   지우거나 · `skip` 하거나 · `{ hidden: true }`·기대값 수정으로 통과시키지 않는다 → 루트 CLAUDE.md 같은 이름의 절

@@ -29,7 +29,7 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
   Page `MapShell` · Posting `PostingConsole` · Program `CampaignStudio`. 좌측 레일에 PPPP 순서로 늘 넷이 있고, 로그인 없이도 열린다.
 - **「제외」로 보는 것 — 전부 금지**: ① 화면이나 레일 버튼을 지우거나 숨김(조건부 렌더 · `hidden` · 접힌 `<details>` 포함)
   ② 진입로를 다른 곳으로 돌림 — 흐름(5판)의 허브 탭 「지도」 · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」는 늘 `#/explore` ·
-  상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」는 늘 그 상권 · Platform 트랙(`#/explore?track=platform&district=…` ·
+  상권 소개 하단 주 버튼 「이 상권 네 단계로 따져 보기」(버튼 위 「Platform → Page → Posting → Program」)는 늘 그 상권 · Platform 트랙(`#/explore?track=platform&district=…` ·
   2026-11-01 사용자 결정 — 그전 「빈 자리 보기」 → 흐름의 빈 자리 목록)
   ③ 다른 화면(흐름 안 지도 등)으로 갈아끼움 ④ 랜딩의 PPPP 네 질문(`#how`)을 빼거나 접음 ⑤ 로그인을 요구해 막음
 - 새 화면이 같은 질문에 더 잘 답하더라도 **더하지, 대신하지 않는다.** 진입로가 불편하면(예: 상권이 안 이어짐) 진입로를

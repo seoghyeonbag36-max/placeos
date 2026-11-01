@@ -107,12 +107,13 @@ Cloud Monitoring 업타임 체크 **4개**가 5분마다 돈다. 실패하면
 |---|---|---|
 | PlaceOS health (`spaceos-health-Fu5ygSRiKro`) | Cloud Run 원본 | `/health` 가 200 이고 `"status":"ok"` 를 담는가 |
 | PlaceOS districts gold (`spaceos-districts-gold-QvQ7eGG9ly8`) | Cloud Run 원본 | 분석 API 가 `"vacancy_source":"gold"` 를 담는가 |
-| PlaceOS hosting health (`placeos-hosting-health-3a9w07wQOTw`) | 사이트 `placeos` 의 Firebase 기본 주소 | 같은 검사, Hosting 리라이트를 거친 주소에서 |
-| PlaceOS hosting gold (`placeos-hosting-gold-43YzLqMfgKo`) | 사이트 `placeos` 의 Firebase 기본 주소 | 같은 검사, Hosting 리라이트를 거친 주소에서 |
+| PlaceOS hosting health (`placeos-hosting-health-uz4YMRdRMWY`) | `placeos.co.kr` | 같은 검사, 사용자가 실제로 쓰는 주소에서 |
+| PlaceOS hosting gold (`placeos-hosting-gold-uz4YMRdRNnU`) | `placeos.co.kr` | 같은 검사, 사용자가 실제로 쓰는 주소에서 |
 
-⚠ **2026-11-01 정식 주소가 placeos.co.kr 로 바뀌었다** — 위 두 Hosting 체크는 아직 옛 기본 주소를 본다(같은 사이트라 서버 응답은 같아
-감시는 그대로 맞다). 사용자가 쓰는 주소로 맞추려면 아래 규칙대로 `placeos.co.kr` 체크 둘을 새로 만들고 옛 둘을 지운다 — 외부 설정 변경이라
-사용자 승인 뒤에 한다.
+2026-11-01 정식 주소가 placeos.co.kr 로 바뀌어 Hosting 체크 둘을 옮겼다(사용자 승인) — 아래 규칙대로 새로 만들고, 첫 결과가 통과한 뒤
+(health 3/3 · gold 12/12) 옛 Firebase 기본 주소 체크 둘(`placeos-hosting-health-3a9w07wQOTw` · `placeos-hosting-gold-43YzLqMfgKo`)을 지웠다.
+알림 정책 필터가 `resource.type="uptime_url"` 전부라 새 체크도 그대로 감시에 들어간다(읽어서 확인).
+⚠ 새 체크의 첫 결과는 바로 안 나올 수 있다 — 이날 gold 는 1분 안, health 는 약 10분 뒤에 첫 결과가 왔다. 첫 결과 전에 옛 체크를 지우지 않는다.
 
 알림 정책은 check_id 가 아니라 **`uptime_url` 체크 전부**를 본다 — 체크를 새로 만들면 따로 묶지 않아도
 감시에 들어간다. 호스트는 수정이 안 돼 주소를 옮길 때는 **새로 만들고 옛 것을 지운다**(2026-09-13 에
@@ -162,10 +163,13 @@ Cloud Run Always Free: 월 200만 요청 · 180,000 vCPU초 · 360,000 GiB초 ·
 - Firebase 는 사이트 기본 주소를 지울 수 없고, 리다이렉트 규칙은 호스트를 못 가른다(같은 사이트라 걸면 정식 주소도 돈다).
   그래서 기본 주소로 들어오면 **앱이 첫 화면에서 정식 주소로 옮긴다**(`apps/frontend/src/lib/canonicalHost.ts` · 경로·쿼리·해시 보존).
 - 옛 사이트 `spaceos-twin` 의 페이지 301 목적지를 `https://placeos.co.kr/` 로 바꿨다(`firebase.json`). **Hosting 설정은 CI 가 내지 않는다** —
-  `npx firebase-tools deploy --only hosting:spaceos-twin --project spaceos-digital-twin` 을 돌려야 반영된다(그 전에는 옛 목적지로 301 한 뒤
-  앱이 다시 정식 주소로 옮긴다 — 두 번 튀지만 끊기지 않는다). `--only hosting:placeos` 는 바뀐 것이 주석뿐이라 돌릴 필요가 없다.
-- 남은 외부 정리(사용자 승인 뒤): 위 Hosting 업타임 체크 둘 옮기기 · NCP Maps / 구글 OAuth 원본의 옛 기본 주소 항목 지우기(지워도 정식
-  주소에는 영향 없다 — 앱이 옮긴 뒤 정식 주소에서 인증한다).
+  `npx firebase-tools deploy --only hosting:spaceos-twin --project spaceos-digital-twin` 으로 냈다(**11-01 배포 완료 · 사용자 승인**). 확인:
+  `curl -sI https://spaceos-twin.web.app/` → `301` + `location: https://placeos.co.kr/` · `/index.html` 도 같다 · 옛 사이트 `/health` · `/api` 는 200
+  그대로 · `placeos.co.kr` 200 · `www` → 본 주소 301 그대로. `--only hosting:placeos` 는 바뀐 것이 주석뿐이라 돌리지 않았다.
+- Hosting 업타임 체크 둘을 정식 주소로 옮겼다(**11-01 · 사용자 승인** — 위 표). 새로 만들고 옛 둘을 지웠다(호스트는 수정이 안 된다).
+  설정은 대상 주소만 빼고 옛 것과 같다(REST 로 옛 설정을 그대로 복사 — gcloud 인자의 따옴표 함정을 피한다).
+- 남은 외부 정리(콘솔 작업 — CLI·API 로 못 한다): NCP Maps Web 서비스 URL · 구글 OAuth 승인된 JavaScript 원본에서 옛 기본 주소 항목 지우기
+  (지워도 정식 주소에는 영향 없다 — 기본 주소로 들어온 사람은 지도·로그인 전에 앱이 정식 주소로 옮긴다).
 
 ### 2026-09-13 — 정식 주소를 사이트 `placeos` 의 기본 주소로(2026-11-01 은퇴 — 위 절)
 
