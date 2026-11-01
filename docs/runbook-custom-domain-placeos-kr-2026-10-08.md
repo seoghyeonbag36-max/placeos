@@ -1,6 +1,9 @@
 # 런북 — placeos.kr 로 서비스 열기 (2026-10-08)
 
-`placeos.web.app` 에서 `placeos.kr` 로 옮기고, 구글 로그인을 일반 사용자에게 여는 순서다.
+> ⚠ 실제로 산 도메인은 `placeos.co.kr` 이다(2026-10-10 → docs/runbook-custom-domain-placeos-co-kr-2026-10-10.md · 11-01 정식 주소 전환 완료).
+> 이 문서는 구글 로그인 앱 게시 순서(§5)를 보려고 남겨 둔다 — 도메인 이름은 `placeos.co.kr` 로 바꿔 읽는다.
+
+Firebase 기본 주소에서 `placeos.kr` 로 옮기고, 구글 로그인을 일반 사용자에게 여는 순서다.
 **도메인 구매·콘솔 클릭은 사람 몫**이고(결제·계정 로그인), 코드·문서 쪽은 이 저장소가 한다.
 
 > 왜 이 순서가 중요한가 — 도메인은 이름 문제가 아니다. 구글 로그인이 지금 「테스트 중」이라 등록한 테스트 사용자만 들어온다.
@@ -65,14 +68,14 @@ curl.exe -sI https://placeos.kr/privacy.html           # 200 · cache-control: n
 curl.exe -sI https://www.placeos.kr/                   # 301 → https://placeos.kr/
 ```
 
-기대와 다르면 §2-2 의 DNS 값을 먼저 의심한다. 옛 주소 `placeos.web.app` 은 그대로 살아 있다(커스텀 도메인을 붙여도 `web.app` 은 계속 서빙한다).
+기대와 다르면 §2-2 의 DNS 값을 먼저 의심한다. 옛 Firebase 기본 주소는 그대로 살아 있다(커스텀 도메인을 붙여도 `web.app` 은 계속 서빙한다).
 
 ## 4. 코드·문서 — 정식 주소 전환 (저장소가 한다 · §1 의 4·5 뒤)
 
 | 곳 | 할 일 |
 |---|---|
-| `apps/frontend/src/lib/canonicalHost.ts` | `CANONICAL_ORIGIN` → `https://placeos.kr`. `NON_CANONICAL_HOSTS` 에 `placeos.web.app` · `placeos.firebaseapp.com` 추가(지금은 **옛** 호스트 셋만 있다). 테스트 `canonicalHost.test.ts` 같이 고침 |
-| `firebase.json` | `spaceos-twin` 의 301 목적지 `https://placeos.web.app/` → `https://placeos.kr/`(체인이 두 번 튀지 않게). `placeos` 사이트에도 같은 `/` · `/index.html` 301 을 둘지 결정(API 는 계속 서빙). 주석의 NCP 등록 origin 목록 갱신. **고친 뒤 `npx firebase-tools deploy --only hosting` 로 사이트별 배포 필요** — 이것은 main 푸시 자동 배포에 안 묶여 있다 |
+| `apps/frontend/src/lib/canonicalHost.ts` | `CANONICAL_ORIGIN` → `https://placeos.kr`. `NON_CANONICAL_HOSTS` 에 사이트 `placeos` 의 기본 주소 둘 추가(지금은 **옛** 호스트 셋만 있다). 테스트 `canonicalHost.test.ts` 같이 고침 |
+| `firebase.json` | `spaceos-twin` 의 301 목적지(그때의 사이트 기본 주소) → `https://placeos.kr/`(체인이 두 번 튀지 않게). ⚠ `placeos` 사이트에는 같은 `/` · `/index.html` 301 을 **두지 않는다** — 정식 주소가 그 사이트에 붙은 도메인이고 Firebase 리다이렉트는 호스트를 못 가려, 걸면 정식 주소가 자기 자신으로 돈다(11-01 정리 · 기본 주소는 앱이 옮긴다). 주석의 NCP 등록 origin 목록 갱신. **고친 뒤 `npx firebase-tools deploy --only hosting` 로 사이트별 배포 필요** — 이것은 main 푸시 자동 배포에 안 묶여 있다 |
 | `apps/frontend/index.html` | `<link rel="canonical">` · Open Graph(`og:title` · `og:description` · `og:url` · `og:image` = `https://placeos.kr/icons/icon-512.png`). **새 주소가 살아난 뒤에만** 넣는다 — 먼저 넣으면 인스타·카톡 링크 미리보기가 죽은 주소를 가리킨다 |
 | `apps/frontend/src/lib/naverMap.ts` · `googleIdentity.ts` | 주석의 허용 도메인 목록 |
 | `scripts/watch_deploy_verify.py` | `ORIGIN` — 한동안 옛 주소도 함께 확인하게 둔다 |
@@ -91,7 +94,7 @@ CORS 는 **손댈 것이 없다** — 프론트와 API 가 한 컨테이너·한
    - **개인정보처리방침** `https://placeos.kr/privacy.html` ← 이 브랜치가 만든 페이지
    - **승인된 도메인** `placeos.kr`
    - 개발자 연락처 이메일
-3. **클라이언트**(웹 애플리케이션) → **승인된 JavaScript 원본**에 `https://placeos.kr` 추가. 기존 `https://placeos.web.app` · `http://localhost:5173` · `http://localhost` 는 남긴다.
+3. **클라이언트**(웹 애플리케이션) → **승인된 JavaScript 원본**에 `https://placeos.kr` 추가. 기존 원본(그때의 사이트 기본 주소 · `http://localhost:5173` · `http://localhost`)은 남긴다.
 4. **대상 → 앱 게시**(테스트 → 프로덕션). 10-05 에 확인했듯 브랜딩 필수 항목을 다 채우기 전에는 버튼이 비활성이다.
 5. **확인**: 테스트 사용자 목록에 **없는** 구글 계정(시크릿 창)으로 `https://placeos.kr` 에서 「Google 계정으로 계속하기」를 끝까지 눌러 본다. 이 로그인 완주를 한 번 보고 나서야 CSP 를 Report-Only 에서 강제로 바꿀 수 있다(구글 로그인은 iframe·스타일을 쓰고, 막히면 로그인이 통째로 안 뜬다 — `apps/backend/app/core/security_headers.py` 머리말).
 

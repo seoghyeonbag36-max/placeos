@@ -17,7 +17,7 @@
 |---|---|
 | 공모 | 2026 DATA·AI 분석 경진대회 · 문제해결 부문 |
 | 마감 | 2026-11-25 |
-| 접속 | https://placeos.web.app |
+| 접속 | https://placeos.co.kr |
 
 ---
 

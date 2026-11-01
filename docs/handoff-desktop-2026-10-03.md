@@ -104,7 +104,7 @@ T1~T8 은 09-28 에 모두 끝났다. 09-29~30 의 작업(#66~#77)은 이 목록
 | #60 (머지) | **지도 위 칩·오버레이만** — 프로덕션에서 눈으로 한 번 | 나머지 화면은 머지 전 대조로 색 차이 0 ([결과 댓글](https://github.com/seoghyeonbag36-max/placeos/pull/60#issuecomment-5886048330)). 다크 모드는 앱에 없다 |
 | #55 (머지) | 가입 화면 문구 | 문구 변경 |
 
-- 참고: PR 프리뷰 링크로 확인하지 말고 `placeos.web.app` 으로 볼 것.
+- 참고: PR 프리뷰 링크로 확인하지 말고 `placeos.co.kr` 으로 볼 것.
 
 ## 4. 다음 마감 — [submission-plan-2026-09-21.md](apply/submission-plan-2026-09-21.md) §3·§5
 

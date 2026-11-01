@@ -266,7 +266,9 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(await screen.findByRole("heading", { level: 1, name: "성수동 카페거리는 카페 중심 상권이에요" })).toBeTruthy();
     expect(screen.getByText("14~17시")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "빈 자리 보기" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Platform·Page·Posting·Program 보기" }));
+    // 문구 A(11-01) — 버튼은 창업자의 말, 네 단계의 이름은 버튼 위 한 줄
+    expect(screen.getByText("Platform → Page → Posting → Program")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "이 상권 네 단계로 따져 보기" }));
     expect(window.location.hash).toBe("#/explore?track=platform&district=seongsu");
   });
 

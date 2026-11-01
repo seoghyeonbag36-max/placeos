@@ -85,7 +85,7 @@ MVP 를 검증하려는 창업자를 위한 것이고, PlaceOS 의 Program 트�
    같은 화면의 **테스트 사용자**에 본인 구글 이메일을 넣으면 그 계정은 지금도 로그인된다(최대 100명).
    ⚠ 브랜딩이 개인정보처리방침 링크를 요구하면 §8 의 처리방침 페이지가 먼저 있어야 한다.
 2. **클라이언트 → 클라이언트 만들기 → 웹 애플리케이션.** 승인된 JavaScript 원본:
-   `https://placeos.web.app` · `http://localhost:5173` · `http://localhost`. 리디렉션 URI 는 필요 없다(팝업 흐름).
+   `https://placeos.co.kr`(정식 주소 · 2026-10-10 사용자 추가 · 11-01 확인 — 구글 버튼 요청 200, 등록 안 된 origin 대조군은 403) · `http://localhost:5173` · `http://localhost`. 리디렉션 URI 는 필요 없다(팝업 흐름).
    원본이 빠지면 버튼은 뜨지만 누를 때 `origin_mismatch` 로 막힌다.
    ⚠ 클라이언트 ID 앞자리는 **프로젝트 번호**다. 10-05 에 만든 ID(`714790792235-…`)는 서버 프로젝트
    (`798830962560`)가 아니라 다른 프로젝트(My First Project)에 있다 — 로그인은 정상 동작한다(서버는 ID 값만
@@ -97,7 +97,7 @@ MVP 를 검증하려는 창업자를 위한 것이고, PlaceOS 의 Program 트�
        --update-env-vars=GOOGLE_CLIENT_ID=<클라이언트 ID>
    ```
    배포 워크플로(`deploy.yml`)는 런타임 환경변수를 건드리지 않으므로 한 번 넣으면 남는다.
-4. 확인: `curl.exe -s https://placeos.web.app/api/v1/auth/providers` → `{"google_client_id":"…"}`,
+4. 확인: `curl.exe -s https://placeos.co.kr/api/v1/auth/providers` → `{"google_client_id":"…"}`,
    첫 화면에 「Google 계정으로 계속하기」. 로컬은 `apps/backend/.env` 에 같은 줄.
 
 ## 2. 개인정보 — 최소화 · 안내 · 파기

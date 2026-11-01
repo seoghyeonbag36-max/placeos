@@ -7,7 +7,7 @@ description: 프로덕션 배포 — main 푸시로 도는 Cloud Run 자동 배�
 
 | 항목 | 값 |
 |---|---|
-| 프로덕션 | **https://placeos.web.app** (Firebase Hosting → Cloud Run) · 옛 주소 `spaceos-twin.web.app` 은 페이지만 301, `/api` 는 계속 서빙 |
+| 프로덕션 | **https://placeos.co.kr** (Firebase Hosting 사이트 `placeos` → Cloud Run · 2026-11-01 정식 주소) · Firebase 기본 주소와 옛 주소 `spaceos-twin.web.app` 으로 들어오면 앱이 정식 주소로 옮긴다, `/api` 는 계속 서빙 |
 | Cloud Run | `spaceos` / `us-central1` (무료 한도 리전) · 프로젝트 `spaceos-digital-twin` |
 | 파이프라인 | `ci.yml` **전부 통과** → `.github/workflows/deploy.yml`(`workflow_run`) — 테스트 → 빌드 → 배포 → **검증** |
 
@@ -41,10 +41,11 @@ CI 검증 단계가 `/health` 200 과 분석 API 의 `"vacancy_source":"gold"` �
 ## 배포 후 확인
 
 ```bash
-curl.exe -s https://placeos.web.app/health          # ⚠ /api/v1 아래가 아니다
-curl.exe -s "https://placeos.web.app/api/v1/heatmap/vacancy?district=<slug>" | head -c 200
+curl.exe -s https://placeos.co.kr/health          # ⚠ /api/v1 아래가 아니다
+curl.exe -s "https://placeos.co.kr/api/v1/heatmap/vacancy?district=<slug>" | head -c 200
 #   → vacancy_source: "gold" 인가("synthetic" 이면 그 거점은 합성 폴백이다)
-curl.exe -s "https://placeos.web.app/api/v1/commercial-districts" | head -c 300
+curl.exe -s "https://placeos.co.kr/api/v1/commercial-districts" | head -c 300
+# ⚠ 배포 잡이 끝난 직후 1분 안에는 옛 리비전 응답이 섞인다(2026-11-01 실측) — 한 번 틀리면 같은 URL 을 다시 잰 뒤 판정한다
 ```
 
 ## 긴급 수동 배포 (PowerShell)

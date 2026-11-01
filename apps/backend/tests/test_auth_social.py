@@ -33,7 +33,7 @@ def social(monkeypatch):
     for provider in ("naver", "kakao"):
         monkeypatch.setattr(settings, f"{provider}_login_client_id", f"mock-{provider}-client")
         monkeypatch.setattr(settings, f"{provider}_login_client_secret", "mock-secret")
-        monkeypatch.setattr(settings, f"{provider}_login_redirect_uri", f"https://placeos.web.app/?social={provider}")
+        monkeypatch.setattr(settings, f"{provider}_login_redirect_uri", f"https://placeos.co.kr/?social={provider}")
     replies = {"naver": {"resultcode": "00", "response": {"id": "naver-user", "email": "naver@example.com"}},
                "kakao": {"id": 12345, "kakao_account": {"email": "kakao@example.com", "is_email_valid": True, "is_email_verified": True}}}
     replies["token"] = {"access_token": "mock-provider-token"}

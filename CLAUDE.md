@@ -29,7 +29,7 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
   Page `MapShell` · Posting `PostingConsole` · Program `CampaignStudio`. 좌측 레일에 PPPP 순서로 늘 넷이 있고, 로그인 없이도 열린다.
 - **「제외」로 보는 것 — 전부 금지**: ① 화면이나 레일 버튼을 지우거나 숨김(조건부 렌더 · `hidden` · 접힌 `<details>` 포함)
   ② 진입로를 다른 곳으로 돌림 — 흐름(5판)의 허브 탭 「지도」 · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」는 늘 `#/explore` ·
-  상권 소개 하단 주 버튼 「Platform·Page·Posting·Program 보기」는 늘 그 상권 · Platform 트랙(`#/explore?track=platform&district=…` ·
+  상권 소개 하단 주 버튼 「이 상권 네 단계로 따져 보기」(버튼 위 「Platform → Page → Posting → Program」)는 늘 그 상권 · Platform 트랙(`#/explore?track=platform&district=…` ·
   2026-11-01 사용자 결정 — 그전 「빈 자리 보기」 → 흐름의 빈 자리 목록)
   ③ 다른 화면(흐름 안 지도 등)으로 갈아끼움 ④ 랜딩의 PPPP 네 질문(`#how`)을 빼거나 접음 ⑤ 로그인을 요구해 막음
 - 새 화면이 같은 질문에 더 잘 답하더라도 **더하지, 대신하지 않는다.** 진입로가 불편하면(예: 상권이 안 이어짐) 진입로를
@@ -83,7 +83,8 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 - **Data**: Selenium/Playwright + Bronze/Silver/Gold 3계층
   - Airflow DAG 골격이 `data/pipelines/dags/` 에 둘 있으나 **스케줄러가 돌고 있지 않다** —
     수집·가공은 전부 수동 스크립트다. "Airflow 로 돌린다"고 읽지 말 것
-- **Infra**: **GCP Cloud Run**(`spaceos` · us-central1) + **Firebase Hosting**(placeos.web.app)
+- **Infra**: **GCP Cloud Run**(`spaceos` · us-central1) + **Firebase Hosting**(사이트 `placeos` · 정식 주소 **placeos.co.kr** —
+  2026-11-01 부터 Firebase 기본 주소는 서빙 주소로 쓰지 않는다. 들어오면 앱이 정식 주소로 옮긴다 · `lib/canonicalHost.ts`)
   + Docker + GitHub Actions
   - ⚠ 이 줄은 2026-09-15 까지 `AWS (S3/EC2/RDS/EKS)` 라고 적고 있었다. 이 저장소는 AWS 를
     **한 번도 쓴 적이 없다**(리소스·SDK·설정 모두 0건). 배포 경로는
@@ -312,8 +313,9 @@ docker compose -f infra/docker/docker-compose.yml up
 # 배포 — main 에 푸시하면 CI 가 돌고, CI 가 **전부** 통과한 뒤에만 Deploy 가 Cloud Run 으로 낸다
 # (2026-10-06 부터 `workflow_run` — 프론트 lint·vitest·data pytest 가 빨개도 배포되던 틈을 막았다).
 # 수동 배포·좌표·무료 한도의 경계는 docs/deploy-cloud-run.md 참조.
-#   프로덕션: https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
-#   옛 주소 https://spaceos-twin.web.app 은 페이지만 301 로 정식 주소에 보내고 /api 는 계속 서빙한다(firebase.json)
+#   프로덕션: https://placeos.co.kr  (Firebase Hosting 사이트 placeos → Cloud Run · 2026-11-01 정식 주소)
+#   Firebase 기본 주소와 옛 주소 https://spaceos-twin.web.app 으로 들어오면 앱이 정식 주소로 옮기고, /api 는 계속 서빙한다(firebase.json)
+#   ⚠ 사이트 placeos 를 지우면 placeos.co.kr 이 끊긴다 — 정식 주소가 그 사이트에 붙은 도메인이다
 git push origin main
 
 # ML 골격 확인

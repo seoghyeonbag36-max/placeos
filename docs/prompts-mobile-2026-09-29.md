@@ -379,7 +379,7 @@ submission-plan §3-B 의 절 표를 채운다:
   KPI 를 임계값이 아니라 무정보 베이스라인 대비 실력으로 판정하는 게이트(09-16 · 09-26)
 - 완성도·재현성: 진행률을 문서가 아니라 산출물에서 세는 스크립트(pppp_status · kpi_baseline) · 테스트 수는
   이 세션에서 실제로 돌린 값만
-- 시연: https://placeos.web.app + 3분 영상(영상은 내가 만든다 — 장면 목록만 초안으로)
+- 시연: https://placeos.co.kr + 3분 영상(영상은 내가 만든다 — 장면 목록만 초안으로)
 서식을 공고에서 확인할 수 있으면 따르고, 못 하면 <!-- 확인필요(서식) --> 로 남긴다.
 
 ## 통과 조건
@@ -430,7 +430,7 @@ claims 밖 숫자 · 쓰지 않는 기술을 쓴다고 적기 · 팀원이 있�
 ## 기준값 — 실행해서 읽는다
     python scripts/pppp_status.py
     python -c "import sys; sys.path.insert(0,'.'); from data.config.page_hubs import ACTIVE_HUBS; print(len(ACTIVE_HUBS))"
-정식 주소 https://placeos.web.app (09-13). 옛 주소 spaceos-twin.web.app 은 페이지만 301, /api 는 계속 서빙한다.
+정식 주소 https://placeos.co.kr (2026-11-01 · 09-13 에는 Firebase 기본 주소). 옛 주소 spaceos-twin.web.app 은 페이지만 301, /api 는 계속 서빙한다.
 
 ## 찾을 것 (09-28 실측)
     grep -rnE "(33|54|66)거점" apps/frontend/src apps/backend/app --include=*.ts --include=*.tsx --include=*.py
@@ -443,7 +443,7 @@ claims 밖 숫자 · 쓰지 않는 기술을 쓴다고 적기 · 팀원이 있�
 - 이력 주석("09-04 에는 54거점이었다") → 그대로 둔다
 - 현재형으로 쓴 낡은 주석 → 현재 사실로
 - 테스트 픽스처 숫자 → 그 숫자를 검사하는 테스트가 아니면 그대로
-- 문서의 옛 주소 → 사용자 안내 문장이면 placeos.web.app 으로, 이력·배포 설정 설명이면 그대로
+- 문서의 옛 주소 → 사용자 안내 문장이면 정식 주소(2026-11-01 placeos.co.kr)로, 이력·배포 설정 설명이면 그대로
   (firebase.json 등 설정 파일은 건드리지 않는다)
 - "7종" → 서빙 어휘는 산출물이 정한다(09-28 #42 · #52). 현재형 서술이면 "서빙 어휘(산출물 기준)"로
 

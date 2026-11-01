@@ -140,7 +140,7 @@ def build_resume(out: Path) -> Path:
         ["주소", "[ 시 / 구 까지만 기재 — 상세주소는 최종합격 후 ]"],
         ["휴대전화", BLANK],
         ["이메일", "seoghyeonbag36@gmail.com"],
-        ["포트폴리오", "https://placeos.web.app"],
+        ["포트폴리오", "https://placeos.co.kr"],
         ["병역 / 보훈 / 장애", "[ 해당 시에만 기재 ]"],
     ])
     bp.caption(doc, "주민등록번호는 기재하지 않는다. 기관 채용은 최종합격 후 별도 서식으로 수집한다.")
@@ -281,7 +281,7 @@ def build_experience(out: Path) -> Path:
          "PyTorch, PyTorch Geometric, MLflow, Anthropic SDK / "
          "React, TypeScript, Vite, 네이버 지도 API / "
          "Docker, GitHub Actions, Google Cloud Run, Firebase Hosting"],
-        ["운영 주소", "https://placeos.web.app"],
+        ["운영 주소", "https://placeos.co.kr"],
         ["문제 정의",
          "상권 정보가 '어느 동네가 뜨는가' 수준의 행정동 통계에 머물러, "
          "'어느 건물 몇 층이 비었고 거기에 무엇이 들어가야 하는가'를 답하지 못한다."],
@@ -502,7 +502,7 @@ def build_portfolio(out: Path) -> Path:
     p = bp.para(doc, before=1, after=0, line=1.45)
     bp.run(p, "성명 " + BLANK, size=9.5, color=bp.MUTED)
     p = bp.para(doc, before=0, after=0, line=1.45)
-    bp.run(p, "seoghyeonbag36@gmail.com  ·  https://placeos.web.app", size=9.5, color=bp.MUTED)
+    bp.run(p, "seoghyeonbag36@gmail.com  ·  https://placeos.co.kr", size=9.5, color=bp.MUTED)
     p = bp.para(doc, before=0, after=0, line=1.45)
     bp.run(p, "2026. 10.", size=9.5, color=bp.MUTED)
 
@@ -637,7 +637,7 @@ def build_portfolio(out: Path) -> Path:
     bp.h1(doc, "06", "링크 및 연락처")
     bp.make_table(doc, [
         ["구분", "주소"],
-        ["PlaceOS 운영", "https://placeos.web.app"],
+        ["PlaceOS 운영", "https://placeos.co.kr"],
         ["Co.I", FILL],
         ["저장소", FILL],
         ["이메일", "seoghyeonbag36@gmail.com"],
@@ -668,7 +668,7 @@ def build_talent_profile(out: Path) -> Path:
         ["성명", BLANK, "희망 직무", "창업보육 (보육매니저 · 창업지원)"],
         ["연락처", BLANK, "고용 형태", "정규직 · 계약직 모두 가능"],
         ["이메일", "seoghyeonbag36@gmail.com", "근무 가능 시점", FILL],
-        ["포트폴리오", "https://placeos.web.app", "근무 희망 지역", "서울 전역"],
+        ["포트폴리오", "https://placeos.co.kr", "근무 희망 지역", "서울 전역"],
     ], [2.2, 5.4, 2.8, 5.4], head=False, sizes=[8.5, 9.0, 8.5, 9.0],
         aligns=[L, L, L, L], zebra=False, bold_first_col=True)
 
@@ -822,7 +822,7 @@ MAIL_UNIV_BI = f"""
 
 저는 창업 도메인에서 두 개의 서비스를 직접 만들어 운영 중입니다.
 
-- PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.web.app)
+- PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.co.kr)
   서울 {M['hubs']}개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
   업종 추천과 입점 ROI 시뮬레이션, 예비창업자의 팝업·가오픈·MVP 검증
   program 설계를 결합했습니다.
@@ -872,7 +872,7 @@ MAIL_PUBLIC_BI = f"""
 
 저는 창업 도메인에서 두 개의 서비스를 직접 만들어 운영 중입니다.
 
-- PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.web.app)
+- PlaceOS — 상권 디지털 트윈 플랫폼 (운영 중: https://placeos.co.kr)
   서울 {M['hubs']}개 상권의 공실을 건축물대장 실측으로 건물·층 단위까지 산출하고,
   업종 추천과 입점 ROI 시뮬레이션, 예비창업자의 팝업·가오픈·MVP 검증
   program 설계를 결합했습니다. 오프라인 점포 기반 창업팀의 입지 판단에

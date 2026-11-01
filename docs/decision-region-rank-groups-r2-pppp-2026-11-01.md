@@ -10,7 +10,7 @@
 |---|---|---|
 | R1 순위 묶음 | 「서울」 81 · **「경기·광주」 36** | 「서울」 81 · **「경기」 23 · 「광주」 13** |
 | 묶음 정의 | 잣대(모델)마다 하나 | **잣대 × 시도** |
-| R2 하단 주 버튼 | 「빈 자리 보기」 → 흐름의 빈 자리 목록(R3) | **「Platform·Page·Posting·Program 보기」** → PPPP 네 화면(그 상권 · Platform 트랙) |
+| R2 하단 주 버튼 | 「빈 자리 보기」 → 흐름의 빈 자리 목록(R3) | **「이 상권 네 단계로 따져 보기」**(버튼 위 「Platform → Page → Posting → Program」 · 같은 날 문구 A) → PPPP 네 화면(그 상권 · Platform 트랙) |
 
 ## 1. 순위 묶음 — 같은 잣대 안에서도 시도마다 따로
 
@@ -45,18 +45,25 @@
 ## 2. R2 상권 소개 다음은 PPPP 네 화면
 
 **무엇을 바꿨나.** `flow/screens/Find.tsx` 의 R2 하단 주 버튼:
-`go("/spaces")` 「빈 자리 보기」 → `go(explorePath({ track: "platform", district: id }))` 「Platform·Page·Posting·Program 보기」.
+`go("/spaces")` 「빈 자리 보기」 → `go(explorePath({ track: "platform", district: id }))` 「이 상권 네 단계로 따져 보기」
+(버튼 위 「Platform → Page → Posting → Program」 · 첫 판은 「Platform·Page·Posting·Program 보기」였다 — 아래 「글자」).
 지도 탐색(`App.tsx` `WorkspaceApp`)이 그 상권 · Platform 트랙으로 열리고 레일 넷(Platform · Page · Posting · Program)이 그대로 있다.
 
 **백엔드는 이 항목에서 바꿀 것이 없었다.** 지도 탐색은 10-24 부터 트랙 · 상권을 주소 쿼리로 받는다(`flow/route.explorePath` · `parseExplore` —
 홈 지도 미리보기 칩과 같은 길). 네 화면이 부르는 API 도 그대로다. 백엔드 변경은 §1(순위 묶음)에 있다.
 
-**글자.** 레일 이름 그대로 넷을 적고 가운뎃점을 붙여 쓴다. 버튼(Pretendard 17px · 좌우 여백 16px) 안 폭에 견준 실측:
+**글자(첫 판).** 레일 이름 그대로 넷을 적고 가운뎃점을 붙여 썼다. 버튼(Pretendard 17px · 좌우 여백 16px) 안 폭에 견준 실측:
 
 | 글자 | 폭 | 320px(안 폭 248) | 360px(288) | 390px(318) |
 |---|---:|---|---|---|
 | `Platform · Page · Posting · Program 보기`(띄어 씀) | 308 | 두 줄 | **두 줄**(「보기」만 다음 줄) | 한 줄 |
-| `Platform·Page·Posting·Program 보기`(붙여 씀 · 채택) | 285 | 두 줄 | 한 줄 | 한 줄 |
+| `Platform·Page·Posting·Program 보기`(붙여 씀 · 첫 판) | 285 | 두 줄 | 한 줄 | 한 줄 |
+| **`이 상권 네 단계로 따져 보기`(같은 날 사용자 결정 · 안 A)** | 181 | 한 줄 | 한 줄 | 한 줄 |
+
+**글자를 다시 고른 까닭(같은 날 · 사용자 「더 자연스러운 안내」).** 첫 판은 레일 이름 넷을 영어로 늘어놓아 버튼이 안내가 아니라 메뉴처럼 읽혔다.
+세 안을 실측해 내놓았고 사용자가 A 를 골랐다 — B 「Platform부터 Program까지 이어 보기」(266px · 320px 에서 두 줄) ·
+C 「빈 자리·비용·검증까지 이어 보기」(212px · 실제로는 Platform 부터 열려 말과 어긋남). A 는 창업자의 말(「따져 보기」)로 쓰고,
+「네 단계」가 무엇인지는 버튼 위 한 줄 「Platform → Page → Posting → Program」(253px · 다음 화면 레일 순서 그대로)이 밝힌다.
 
 **남긴 것.**
 

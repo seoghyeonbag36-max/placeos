@@ -1,8 +1,8 @@
 // 네이버 지도 Dynamic Map v3 래퍼
 // 키: apps/frontend/.env 의 VITE_NAVER_MAPS_KEY_ID (Client ID = 9nbzrvj8qj)
 // ※ NCP 콘솔 > Maps > Application 의 Web 서비스 URL 에 서비스할 origin 을 전부 등록해야 한다.
-//   로컬 http://localhost:5173 / 프로덕션 https://placeos.web.app (2026-09-13 등록) · 옛 https://spaceos-twin.web.app
-//   `*.firebaseapp.com` 은 등록하지 않는다 — 앱이 첫 화면에서 정식 주소로 옮긴다(lib/canonicalHost.ts).
+//   로컬 http://localhost:5173 / 프로덕션 https://placeos.co.kr (2026-10-10 등록 · 11-01 정식 주소 — 실화면에서 지도 인증 확인)
+//   Firebase 기본 주소(`*.web.app` · `*.firebaseapp.com`)는 더 서빙하지 않는다 — 앱이 첫 화면에서 정식 주소로 옮긴다(lib/canonicalHost.ts).
 //   미등록 origin(file:// 포함)에서는 인증오류로 지도가 표시되지 않는다.
 //   브라우저 없이 확인하는 법 — result 면 통과, errorCode 200 이면 그 origin 이 미등록이다:
 //     curl "https://oapi.map.naver.com/v3/auth?ncpKeyId=<KEY>&url=<encoded origin>&time=<ms>&callback=cb"

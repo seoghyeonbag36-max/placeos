@@ -28,7 +28,8 @@
   P6  (2026-10-24) 홈의 새 입구 — 네 단계를 다 마친 홈의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
       보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 넷이 보이고, 그 트랙 화면이
       서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 네 화면으로 간다
-  P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「Platform·Page·Posting·Program 보기」(그전 「빈 자리 보기」) — 데스크톱 ·
+  P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 네 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
+      「Platform → Page → Posting → Program」이 보이는지도 잰다) — 데스크톱 ·
       휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 넷이
       보이고, Platform 이 현재 트랙이며 Platform 의 상권 선택 값이 그 상권이다. 버튼 글자가 한 줄인지 데스크톱 · 390px · 360px 에서 잰다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
@@ -67,7 +68,9 @@ PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "
           ("Posting", "complementary", "입점 계산"), ("Program", "complementary", "오프라인 캠페인")]
 SETTLE_MS = 2500
 # 상권 소개(R2) 하단 주 버튼(2026-11-01 사용자 결정) — flow/screens/Find.tsx 의 PPPP_CTA 와 같은 글자
-R2_CTA = "Platform·Page·Posting·Program 보기"
+R2_CTA = "이 상권 네 단계로 따져 보기"
+# 그 버튼 위 한 줄 — 「네 단계」의 이름(Find.tsx 의 PPPP_STEPS). 레일 순서와 같아야 한다
+R2_STEPS = "Platform → Page → Posting → Program"
 # 버튼 글자가 버튼 안에 한 줄로 드는가 — 넘침(scrollWidth > clientWidth)과 줄 수(글자 범위의 줄 사각형 top 개수)
 FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
           "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
@@ -352,8 +355,9 @@ def main() -> int:
             try:
                 btn = page.get_by_role("button", name=R2_CTA, exact=True)
                 btn.wait_for(state="visible", timeout=60000)
-                # 글자가 버튼 안에 한 줄로 들어가는가(넘치거나 두 줄로 접히면 실패)
+                # 글자가 버튼 안에 한 줄로 들어가는가(넘치거나 두 줄로 접히면 실패) · 네 단계의 이름 한 줄이 보이는가
                 fit = btn.evaluate(FIT_JS)
+                steps = page.get_by_text(R2_STEPS, exact=True).first.is_visible()
                 shot(page, f"p7-r2-{ctx_name}")
                 page.wait_for_timeout(800)
                 btn.tap() if ctx_name == "mobile" else btn.click()
@@ -365,8 +369,8 @@ def main() -> int:
                 value = sel.input_value() if sel.count() else None
                 current = page.get_by_role("button", name="Platform", exact=True).get_attribute("aria-current")
                 rep.add(cid, st["hash"] == want and rail_ok(st["rail"]) and current == "page" and value == target["id"]
-                        and fit["sw"] <= fit["cw"] and fit["lines"] == 1,
-                        {**st, "aria-current": current, "platform_district": value, "button": fit})
+                        and fit["sw"] <= fit["cw"] and fit["lines"] == 1 and steps,
+                        {**st, "aria-current": current, "platform_district": value, "button": fit, "steps_line": steps})
             except Exception as e:
                 rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
             shot(page, f"p7-{ctx_name}")

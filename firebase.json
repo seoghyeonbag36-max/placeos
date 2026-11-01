@@ -1,7 +1,7 @@
 {
   "_주석": [
     "Firebase Hosting 을 Cloud Run 앞에 세워 읽기 좋은 주소를 얻는다.",
-    "spaceos-798830962560.us-central1.run.app → placeos.web.app",
+    "spaceos-798830962560.us-central1.run.app → placeos.co.kr(사이트 placeos 에 붙인 사용자 도메인 · 2026-11-01 정식 주소)",
     "",
     "왜 전부(**) 를 Cloud Run 으로 넘기고, 프론트를 Hosting 에 따로 올리지 않는가:",
     "  프론트를 Hosting 에 배포하면 CDN 이라 빠르고 Cloud Run egress(월 1GiB)도 아낀다.",
@@ -12,14 +12,16 @@
     "public 디렉터리는 비어 있다(파일을 올리지 않는다). 모든 요청이 리라이트로 나간다.",
     "",
     "사이트가 둘이다(2026-09-13).",
-    "  placeos      → https://placeos.web.app       **정식 주소**(브랜드 PlaceOS). 전부 Cloud Run 리라이트",
+    "  placeos      → https://placeos.co.kr         **정식 주소**(브랜드 PlaceOS · www 는 Firebase 가 본 주소로 보낸다). 전부 Cloud Run 리라이트",
+    "               ⚠ 이 사이트를 지우거나 리라이트를 바꾸면 placeos.co.kr 이 끊긴다. 사이트 기본 주소(*.web.app)는 Firebase 가 지울 수 없어",
+    "                 같은 화면이 계속 나오므로, 들어온 사람은 앱이 정식 주소로 옮긴다(canonicalHost.ts · 2026-11-01 기본 주소 은퇴)",
     "  spaceos-twin → https://spaceos-twin.web.app  옛 주소. **페이지(/ · /index.html)만 정식 주소로 301**, 나머지는 리라이트",
     "옛 사이트에서 /api/** 까지 301 로 돌리지 않는 이유: 301 을 받은 클라이언트 다수가 POST 를 GET 으로 바꿔",
     "  옛 주소로 API 를 부르던 호출(POST /api/v1/ai/simulate-revenue 등)이 조용히 깨진다. Firebase 리다이렉트는",
     "  307/308 을 못 쓴다. 그래서 사람만 옮기고 API 는 계속 서빙한다.",
     "Firebase 리다이렉트는 호스트를 가르지 못한다 — *.firebaseapp.com 과 옛 주소의 나머지 경로는 앱이",
     "  첫 화면에서 정식 주소로 옮긴다(apps/frontend/src/lib/canonicalHost.ts).",
-    "NCP Maps 에 등록된 origin 은 placeos.web.app · spaceos-twin.web.app 둘이다(09-13 인증 API 로 확인).",
+    "NCP Maps 에 placeos.co.kr 을 등록했다(2026-10-10 사용자 · 11-01 실화면에서 지도 인증 확인). 옛 Firebase 주소 등록은 지워도 된다.",
     "⚠ 프로젝트 ID(spaceos-digital-twin)·Cloud Run 서비스명(spaceos)은 이미 만들어진 리소스라 그대로 둔다."
   ],
   "hosting": [
@@ -52,12 +54,12 @@
       "redirects": [
         {
           "source": "/",
-          "destination": "https://placeos.web.app/",
+          "destination": "https://placeos.co.kr/",
           "type": 301
         },
         {
           "source": "/index.html",
-          "destination": "https://placeos.web.app/",
+          "destination": "https://placeos.co.kr/",
           "type": 301
         }
       ],

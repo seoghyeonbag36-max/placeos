@@ -152,7 +152,7 @@
 ## 하지 말 것
 1. 전유부 수집. 15거점은 끝났다. 경기 보류 13거점(bamgasi 등)에도 쓰지 않는다 — 쓸지는 내가 정한다.
 2. git commit · push · 브랜치 전환 · stash · worktree 추가/삭제. 등록 변경이 현재 브랜치 작업트리에 미커밋으로 있다.
-   push 하면 Gold 가 선 거점이 그대로 프로덕션(placeos.web.app)에 뜬다.
+   push 하면 Gold 가 선 거점이 그대로 프로덕션(placeos.co.kr)에 뜬다.
 3. 거점 등록 · SERVED_CITIES · seoul_pages.DISTRICTS 수정.
 4. 층별개요와 다른 수집기 동시 실행. 429 는 키 단위라 서로를 죽인다.
 5. 세션 안 백그라운드로 긴 작업 띄우기. scripts/run_batch3_chain.sh · run_batch4_after.sh 사용.

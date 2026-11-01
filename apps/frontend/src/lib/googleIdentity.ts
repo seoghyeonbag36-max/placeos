@@ -8,7 +8,7 @@
  * 스크립트는 구글 버튼을 그릴 때만 받는다 — 지도 첫 화면 번들에 싣지 않는다(naverMap.ts 와 같은 방식).
  *
  * ⚠ GCP 콘솔의 OAuth 클라이언트(웹)에 **승인된 JavaScript 원본**으로 서비스할 origin 을 등록해야
- *   버튼이 뜬다 — 프로덕션 https://placeos.web.app · 로컬 http://localhost:5173 과 http://localhost
+ *   버튼이 뜬다 — 프로덕션 https://placeos.co.kr(2026-11-01 정식 주소) · 로컬 http://localhost:5173 과 http://localhost
  *   (로컬은 포트 있는 것과 없는 것 둘 다 필요하다는 것이 GIS 의 알려진 요구다).
  */
 

@@ -17,7 +17,7 @@
 | **B16** M2-1 앵커 라벨 | ✅ | `MapShell.tsx:714` 앵커 칩 + `PageDashboard.tsx:225` `<Anchor>` — 둘 다 "모집단이 달라 격차 0 이 목표가 아니다" 문구 동반 |
 | **B10** D5-6 글자 정리 | ❌ **역행 심화** | PlatformConsole 989 → **1,236줄** · ProgramStudio 772 → **1,165줄**. 09-13 화면설계서 3판이 +1,538줄을 넣었다(커밋 6777796) |
 | **B14** D5-2 하드코딩 색 | 🔶 **전진했으나 미달** | 같은 명령 기준 hex 388 → **342**(목표 100 이하) · `var(--)` 543 → **1,072** → 채택률 **75.8%**(목표 80%) |
-| **A5** 도메인 | ✅ **끝났다 — 목록에서 뺀다** | `placeos.web.app` 이 09-13 정식 주소로 확정됐고, 옛 주소 처리까지 코드로 섰다(`src/lib/canonicalHost.ts` + 테스트). 남은 `spaceos-twin` 표기 15곳은 **리다이렉트 기계·키 등록 메모·과거 기록**이라 고치면 오히려 틀려진다 |
+| **A5** 도메인 | ✅ **끝났다 — 목록에서 뺀다** | Firebase 기본 주소가 09-13 정식 주소로 확정됐고(2026-11-01 부터 정식 주소는 `placeos.co.kr`), 옛 주소 처리까지 코드로 섰다(`src/lib/canonicalHost.ts` + 테스트). 남은 `spaceos-twin` 표기 15곳은 **리다이렉트 기계·키 등록 메모·과거 기록**이라 고치면 오히려 틀려진다 |
 | **A9** D4 랜딩 | ⬜ 미착수 | `apps/landing/` 없음. PRD(`docs/prd-landing.md`)만 있다 |
 | B5 컴포넌트 실투입 | 🔶 | `@/design/components` import **파일 4개** — 09-13 에 새로 들어온 컴포넌트 3종이 쓰지 않았다 |
 | A7 아웃리치 · A10 데모 대본 | ⬜ 저장소에 산출물 없음 | 폰 작업이라 저장소 밖일 수 있다 — **판정 보류** |
@@ -55,7 +55,7 @@ A1 은 **모레가 마감**이라 내일이 사실상 마지막 작성일이다.
 
 [서비스 한 줄]
 PlaceOS — 상권 단위로 뭉쳐 있던 공실을 **건물·층 단위**로 내려 읽는 서비스.
-아이디어가 아니라 접속 가능한 프로덕션이다(https://placeos.web.app).
+아이디어가 아니라 접속 가능한 프로덕션이다(https://placeos.co.kr).
 
 [쓸 수 있는 수치 — 이 목록 밖의 숫자를 절대 만들지 마라]
  · 66거점 — 서울. **'건축물대장' 이라는 한정어를 같은 절에 반드시 함께 쓴다.**
@@ -120,7 +120,7 @@ PlaceOS — 상권 단위로 뭉쳐 있던 공실을 **건물·층 단위**로 �
  "공공·민간 플랫폼과의 데이터 연계 확장"으로 쓴다.
 
 [서비스] PlaceOS — 상권 공실을 건물·층 단위로 내려 읽고, 그 자리에 무엇을 얼마에 열고
-어떻게 알릴지까지 잇는 상권 디지털 트윈. 프로덕션 https://placeos.web.app
+어떻게 알릴지까지 잇는 상권 디지털 트윈. 프로덕션 https://placeos.co.kr
 
 [쓸 수 있는 수치 — 이 밖의 숫자를 만들지 마라]
  66거점(건축물대장 기반 · 서울) · 공실 유닛 664 · 업종추천 Top-3 91.7%
@@ -202,7 +202,7 @@ PlaceOS B2B 파일럿 접촉을 오늘 실제로 보낼 수 있는 형태까지 
 [쓸 수 있는 실측 — 이 밖의 숫자를 만들지 마라]
  서울 66거점(건축물대장 기반) · 공실 유닛 664 · 업종추천 Top-3 91.7%
  (거점 사전분포 기준선 89.4% 대비 Top-1 lift 5.3%) · 공실 예측 방향 정확도 70.8%
- 히트맵 4레이어(공실·임대·유동·밀도)가 같은 100m 격자 · 프로덕션 https://placeos.web.app
+ 히트맵 4레이어(공실·임대·유동·밀도)가 같은 100m 격자 · 프로덕션 https://placeos.co.kr
 
 [낼 것]
  1. 접촉 후보 20곳 — 군별로(프랜차이즈 본사 / 자산운용·리츠 / 자치구).
@@ -384,5 +384,5 @@ python scripts/check_application.py                                    # FILL �
 cd apps/frontend && grep -rln "로그인\|login\|signup\|회원가입" src | wc -l   # B1 — 0 이면 미착수
 cd apps/frontend && grep -oE "#[0-9a-fA-F]{3,8}" src/pages/*.css src/components/*.css src/App.css | wc -l  # B2 — 342 기준
 cd apps/frontend && wc -l src/pages/*.tsx | sort -rn | head -5          # B3 — 1236·1165 기준
-curl -H "X-Admin-Token: $ADMIN_TOKEN" https://placeos.web.app/api/v1/admin/usage   # KPI② active_orgs
+curl -H "X-Admin-Token: $ADMIN_TOKEN" https://placeos.co.kr/api/v1/admin/usage   # KPI② active_orgs
 ```

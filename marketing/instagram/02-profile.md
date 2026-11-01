@@ -5,7 +5,7 @@
 - 표시 이름: `PlaceOS | 상권분석·입점준비`
 - 사용자 이름 후보: `placeos.kr` → `placeos_official` → `placeos.space` (사용 가능 여부 미확인)
 - 프로필 사진: `placeos-profile.png`
-- 링크: `https://placeos.web.app/` — 저장소에 기재된 주소. 실제 계정 등록 전 모바일에서 이용 동선과 작동을 확인한다.
+- 링크: `https://placeos.co.kr/` — 정식 주소(2026-11-01). 실제 계정 등록 전 모바일에서 이용 동선과 작동을 확인한다.
 
 ## 소개글 — 그대로 복사
 
