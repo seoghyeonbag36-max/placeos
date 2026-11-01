@@ -8,9 +8,13 @@
 /* ── 뼈대 ── 질문 화면은 가운데 한 열 560, 목록·비교는 960(§4-1) */
 .fl-screen { --col: 560px; max-width: var(--col); margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
 .fl-screen.is-wide { --col: 960px; }
-.fl-screen.has-cta { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
+/* 하단 고정 버튼 밑 여백 = 버튼 영역의 실제 높이(--fl-cta-h · BottomCTA 가 잰다) + 틈. 못 재면 버튼 한 줄 영역(96px)으로 본다.
+   112px 고정이던 때는 버튼 위 한 줄(note)이 글자 확대 · 좁은 폭에서 두 줄로 접히면 영역이 167px 까지 커져 본문 마지막 줄을 가렸다
+   (2026-11-01 검증 — R2 「네 단계」 한 줄 · 글자 150% · 360px). 영역 높이에는 아래 안전 여백이 이미 들어 있다(.fl-cta 의 padding). */
+.fl-screen.has-cta { padding-bottom: calc(var(--fl-cta-h, calc(96px + env(safe-area-inset-bottom))) + 16px); }
 .fl-screen.has-tab { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
-.fl-screen.has-cta.has-tab { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
+/* 탭바 위에 뜨는 버튼(.has-tab .fl-cta) — 영역 높이에 안전 여백이 없고, 탭바 56px + 틈 28px 위에 선다(못 재면 92px 영역 · 합 176px) */
+.fl-screen.has-cta.has-tab { padding-bottom: calc(var(--fl-cta-h, 92px) + 84px + env(safe-area-inset-bottom)); }
 
 .fl-bar { position: sticky; top: 0; z-index: 5; height: 56px; display: flex; align-items: center; gap: var(--sp-1);
   padding: 0 var(--sp-2); background: var(--surface); }
@@ -342,7 +346,7 @@ button.fl-row-btn:disabled { cursor: not-allowed; opacity: .55; }
   .fl-tabbar { display: none; }
   .fl-tabs-top { display: flex; gap: var(--sp-1); }
   .fl-screen.has-tab { padding-bottom: 0; }
-  .fl-screen.has-cta.has-tab { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
+  .fl-screen.has-cta.has-tab { padding-bottom: calc(var(--fl-cta-h, 92px) + 20px + env(safe-area-inset-bottom)); }
   .has-tab .fl-cta { bottom: 0; }
   .fl-toast-slot { bottom: 120px; }
 }

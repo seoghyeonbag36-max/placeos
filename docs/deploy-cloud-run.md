@@ -170,6 +170,13 @@ Cloud Run Always Free: 월 200만 요청 · 180,000 vCPU초 · 360,000 GiB초 ·
   설정은 대상 주소만 빼고 옛 것과 같다(REST 로 옛 설정을 그대로 복사 — gcloud 인자의 따옴표 함정을 피한다).
 - 남은 외부 정리(콘솔 작업 — CLI·API 로 못 한다): NCP Maps Web 서비스 URL · 구글 OAuth 승인된 JavaScript 원본에서 옛 기본 주소 항목 지우기
   (지워도 정식 주소에는 영향 없다 — 기본 주소로 들어온 사람은 지도·로그인 전에 앱이 정식 주소로 옮긴다).
+- **배포 뒤 독립 검증의 후속(같은 날)** — 옮기기가 번들(`canonicalHost.ts`) 안에만 있어 ① 정적 페이지(`privacy.html` · `maptest.html`)는 옛 주소에 머물렀고
+  ② 번들을 다 받은 뒤에야 옮겨 느린 회선(Fast 3G)에서 빈 화면이 약 4초 갔으며 ③ 끝에 점이 붙은 이름(`placeos.web.app.`)은 옮기지 못했다.
+  → 같은 출처 파일 `public/canonical-host.js` 를 HTML 페이지마다 **async** 로 싣는다(정식 주소의 첫 화면을 기다리게 하지 않는다 · CSP `script-src 'self'` 안).
+  번들의 `canonicalHost.ts` 는 뒤를 받치고, 두 곳의 목록·판정은 `canonicalHost.test.ts` 가 대조한다. privacy.html 에 canonical 도 달았다.
+- **그대로 두는 것** — 그림 · manifest · 글꼴 같은 파일은 옛 주소에서도 200 이다(스크립트를 돌릴 수 없고, 앱이 쓰는 파일이다). `/api` · `/health` 도 그대로(POST 를 깨지 않게).
+- **주소가 바뀌어 피할 수 없는 것(받아들임)** — 옛 주소에서 로그인 없이 남긴 답(localStorage)은 새 주소로 넘어오지 않는다(저장소는 주소마다 따로다 · 로그인한 사람의 자료는 서버에 있어 영향 없다).
+  옛 주소에서 홈 화면에 설치한 앱(PWA)은 열 때마다 새 주소로 옮겨지므로 `placeos.co.kr` 에서 다시 설치해야 한다.
 
 ### 2026-09-13 — 정식 주소를 사이트 `placeos` 의 기본 주소로(2026-11-01 은퇴 — 위 절)
 

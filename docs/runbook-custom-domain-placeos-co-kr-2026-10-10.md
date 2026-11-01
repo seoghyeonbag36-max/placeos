@@ -68,6 +68,7 @@ HTTPS 준비 후 `git apply --check`로 그 패치의 적용 가능 여부를 �
 > 2026-11-01: 아래 중단 지점은 풀렸다 — 인증서가 서서 HTTPS 가 정상이고, 정식 주소 변경을 적용했다(위 절). 같은 날 사용자 승인으로
 > 외부 정리도 했다 — Hosting 업타임 체크 둘을 정식 주소로 옮김 · `spaceos-twin` hosting 배포(옛 사이트 `/` → `https://placeos.co.kr/` 301).
 > 남은 것은 콘솔 작업 둘뿐이다(NCP Maps · 구글 OAuth 원본에서 옛 기본 주소 항목 지우기 — 정식 주소에는 영향 없다) → docs/deploy-cloud-run.md 「2026-11-01」.
+> 옛 주소 목록은 두 곳이다 — `apps/frontend/src/lib/canonicalHost.ts` · `apps/frontend/public/canonical-host.js`(번들 앞 · 정적 페이지 · 같은 날 후속). 고칠 땐 함께 고친다(테스트가 대조한다).
 
 ### DNS 입력 후 재확인
 
