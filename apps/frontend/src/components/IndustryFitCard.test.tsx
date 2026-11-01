@@ -1,6 +1,6 @@
 /** 입력은 모두 합성 테스트 픽스처이며 실제 상권 관측값이 아니다. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import IndustryFitCard from "./IndustryFitCard";
 import { getDistrictIndustries, getIndustryFit, type IndustryFit, type DistrictIndustries } from "@/lib/api";
 import type { BusinessGoal } from "@/lib/businessProfile";
@@ -74,5 +74,41 @@ describe("상세 출처 접기", () => {
     await screen.findByRole("table");
     expect(screen.queryByRole("button", { name: "데이터 기준·출처" })).toBeNull();
     expect(screen.queryByText(source)).toBeNull();
+  });
+});
+
+describe("순위 묶음 — 잣대 × 시도(2026-11-01)", () => {
+  const C = "industry-gnn-common";
+  const r = (id: string, name: string, f: number, rank: number, key: string, group: string, n: number, model = C) =>
+    ({ ...row, district_id: id, name, fit: f, fit_rank: rank, fit_model: model, rank_group: key, rank_group_name: group, rank_n: n });
+  const threeGroups: IndustryFit = { ...fit, seoul_fit: 0.13, ranked_n: 4,
+    rank_groups: [{ key: "industry-gnn/서울특별시", fit_model: "industry-gnn", name: "서울", ranked_n: 1, mean_fit: 0.13 },
+      { key: `${C}/경기도`, fit_model: C, name: "경기", ranked_n: 2, mean_fit: 0.11 },
+      { key: `${C}/전남광주통합특별시`, fit_model: C, name: "광주", ranked_n: 1, mean_fit: 0.14 }],
+    districts: [r("seoul-a", "서울 상권", 0.3, 1, "industry-gnn/서울특별시", "서울", 1, "industry-gnn"),
+      r("gg-a", "경기 상권 하나", 0.2, 1, `${C}/경기도`, "경기", 2), r("gg-b", "경기 상권 둘", 0.1, 2, `${C}/경기도`, "경기", 2),
+      r("test", "테스트 상권", 0.15, 1, `${C}/전남광주통합특별시`, "광주", 1)] };
+
+  it("옮기기의 「지금」 줄이 다른 묶음이면 순위에 묶음을 붙인다 — 광주 표에 경기 1위가 「1」로 서지 않는다", async () => {
+    vi.mocked(getIndustryFit).mockResolvedValue(threeGroups);
+    render(<IndustryFitCard business={{ goal: "move", industryKey: "cafe", homeDistrictId: "gg-a" }}
+      industries={[industry]} districtId="test" districts={[district("test", { vacancy_rate: null })]} onDistrictChange={vi.fn()} />);
+    await screen.findByRole("table");
+    expect(within(screen.getByText("경기 상권 하나").closest("tr")!).getByText("경기 1위")).toBeTruthy();
+    expect(within(screen.getByText("테스트 상권").closest("tr")!).getByText("1")).toBeTruthy();   // 이 표(광주)의 줄은 숫자만
+    // 같은 잣대(공통 피처판)라 지금 상권 대비 차이는 낸다 — 잣대가 다를 때만 거둔다
+    expect(screen.getByText(/지금 상권\(경기 상권 하나\) 대비 적합도/)).toBeTruthy();
+  });
+
+  it("광주 상권은 광주 묶음의 순위·평균으로 읽는다 — 같은 잣대의 경기 줄·평균을 끌어오지 않는다", async () => {
+    vi.mocked(getIndustryFit).mockResolvedValue(threeGroups);
+    mount();
+    await screen.findByRole("table");
+    expect(screen.getByText("카페·디저트 기준 광주 상권 순위 · 상위 5")).toBeTruthy();
+    // 평균은 그 묶음 것 — 잣대로 찾으면 같은 잣대의 첫 묶음(경기 11.0%)을 「광주 평균」이라 적는다
+    expect(screen.getByText("광주 평균 14.0%")).toBeTruthy();
+    expect(screen.queryByText(/경기 평균/)).toBeNull();
+    expect(screen.queryByText("경기 상권 하나")).toBeNull();
+    expect(screen.queryByText("서울 상권")).toBeNull();
   });
 });

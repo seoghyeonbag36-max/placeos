@@ -15,7 +15,7 @@ import {
   type DistrictIndustries, type DistrictSummary, type IndustryFit, type IndustryFitRow, type IndustryOption,
 } from "@/lib/api";
 import { GOALS, topic, toward, type BusinessProfile } from "@/lib/businessProfile";
-import { fitGroups, mixedRulers } from "@/lib/fitGroups";
+import { fitGroups, mixedRulers, rankText } from "@/lib/fitGroups";
 import "./IndustryFitCard.css";
 import { IndustryCompetitionPanel } from "@/components/IndustryDetailFields";
 
@@ -108,10 +108,11 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
   const home = homeId ? byId.get(homeId) ?? null : null;
   const hereName = here?.name ?? districts.find((d) => d.id === districtId)?.name ?? districtId;
 
-  // 순위는 잣대(모델) 묶음마다 따로다(2026-10-27) — 표는 지금 보는 상권이 든 묶음(없으면 첫 묶음 = 서울)의 상위 5
+  // 순위는 묶음(잣대 × 시도)마다 따로다(2026-10-27 · 11-01) — 표는 지금 보는 상권이 든 묶음(없으면 첫 묶음 = 서울)의 상위 5.
+  // 평균도 그 묶음 것이다 — 같은 잣대의 묶음이 둘(경기 · 광주)이라 잣대가 아니라 묶음 열쇠로 찾는다
   const groups = fitGroups(fit);
   const group = groups.find((g) => here && g.rows.includes(here)) ?? groups[0];
-  const meanFit = fit.rank_groups?.find((g) => g.fit_model === group?.key)?.mean_fit ?? fit.seoul_fit;
+  const meanFit = fit.rank_groups?.find((g) => (g.key ?? g.fit_model) === group?.key)?.mean_fit ?? fit.seoul_fit;
   // 표: (옮기기) 지금 상권 고정 → 순위 상위 5 → 지금 보는 상권이 그 밖이면 한 줄 더
   const rows: Array<{ row: IndustryFitRow; tag?: string }> = [];
   if (fit.model_covered) {
@@ -122,7 +123,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
     if (here && !rows.some((x) => x.row.district_id === here.district_id)) rows.push({ row: here, tag: "보는 중" });
   }
 
-  // 지금 상권 대비 차이는 같은 잣대일 때만 — 묶음이 다르면 점수 차이가 모델 차이를 섞는다
+  // 지금 상권 대비 차이는 같은 잣대일 때만 — 잣대가 다르면 점수 차이가 모델 차이를 섞는다(묶음만 다른 경기 · 광주는 낸다 · 11-01)
   const diff = home && here && home.district_id !== here.district_id && home.fit != null && here.fit != null
     && !mixedRulers([home, here]) ? (here.fit - home.fit) * 100 : null;
 
@@ -159,9 +160,12 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
             <tbody>
               {rows.map(({ row, tag }) => {
                 const current = row.district_id === districtId;
+                // 표는 한 묶음의 순위다. 그 묶음 밖 줄(옮기기의 「지금」 상권)은 숫자만 두면 이 묶음의 순위로 읽힌다 —
+                // 「경기 1위」처럼 묶음을 붙인다(리뷰 2026-11-01: 광주 표에 밤가시마을 「1」이 섰다)
+                const rank = row.fit_rank == null ? "—" : group && !group.rows.includes(row) ? rankText(row, true) : row.fit_rank;
                 return (
                   <tr key={`${tag ?? "r"}-${row.district_id}`} className={current ? "is-current" : undefined}>
-                    <td className="num">{row.fit_rank ?? "—"}</td>
+                    <td className="num">{rank}</td>
                     <th scope="row">{row.name}{tag && <em className="fit-tag">{tag}</em>}<small>{row.gu}</small></th>
                     <td className="num">{pct1(row.fit) ?? "미제공"}</td>
                     <td className="num">{shareText(row)}</td>

@@ -64,7 +64,7 @@ class CorridorHub(_Model):
     rent_shared: bool = False
     fit: float | None = None
     fit_rank: int | None = None
-    rank_group_name: str | None = None   # 순위 묶음(서울 · 고양·파주) — 묶음이 다르면 견주지 않는다
+    rank_group_name: str | None = None   # 순위 묶음(서울 · 경기 · 광주 — 2026-11-01 시도별) — 묶음이 다르면 견주지 않는다
     rank_n: int | None = None
 
 
@@ -132,6 +132,6 @@ class CorridorResponse(_Model):
     pairs: list[CorridorPair]
     synergies: list[CorridorSynergy]
     params: dict[str, float]
-    # 업종을 골라 물었을 때만 — 순위 묶음(잣대별 · business_fit.rank_groups 그대로)
+    # 업종을 골라 물었을 때만 — 순위 묶음(잣대 × 시도 · business_fit.rank_groups 중 이 흐름의 상권이 든 것만 · 2026-11-01)
     industry: dict | None = None
     rank_groups: list[dict] | None = None

@@ -148,18 +148,27 @@ function fitCell(fit: Settled<IndustryFit>, id: string): FactCell {
     const row: IndustryFitRow | undefined = data.districts.find((r) => r.district_id === id);
     if (!row || row.fit == null) return missing("점수 없음");
     const sub = row.same_n != null && row.sample_n != null ? `비슷한 자리 ${row.sample_n.toLocaleString("ko-KR")}곳 중 같은 업종 ${row.same_n.toLocaleString("ko-KR")}곳` : undefined;
-    // 순위는 묶음(잣대)마다 따로다 — 「서울 3위」처럼 묶음을 붙여 읽는다(2026-10-27)
+    // 순위는 묶음(잣대 × 시도)마다 따로다 — 「서울 3위」 · 「경기 1위」처럼 묶음을 붙여 읽는다(2026-10-27 · 11-01)
     const rank = rankText(row, true);
     return cell(`${Math.round(row.fit * 100)}점${rank ? ` · ${rank}` : ""}`, sub);
   });
 }
 
-/** 고른 상권들의 입지 점수가 서로 다른 잣대로 매겨졌으면 그 묶음 이름들 — 화면이 「견주지 마세요」를 밝힌다. 아니면 null */
-export function fitRulerNames(fit: Settled<IndustryFit> | null, ids: string[]): string[] | null {
+/** 고른 상권들의 입지 점수가 서로 다른 잣대로 매겨졌으면 **잣대마다** 묶음 이름들(`[["서울"], ["경기", "광주"]]`) — 화면이
+ *  「견주지 마세요」를 밝힌다. 아니면 null. 묶음(잣대 × 시도)이 아니라 잣대로 모은다 — 경기와 광주는 같은 잣대라 점수를 견줄 수 있다.
+ *  2026-11-01 묶음을 시도별로 나눈 뒤 묶음 이름을 그대로 늘어놓자 「서울 · 경기 · 광주 묶음을 서로 다른 모델로」라는 거짓이 됐다(리뷰) */
+export function fitRulerNames(fit: Settled<IndustryFit> | null, ids: string[]): string[][] | null {
   if (!fit || fit.status !== "ready") return null;
   const rows = ids.map((id) => fit.data.districts.find((r) => r.district_id === id));
   if (!mixedRulers(rows)) return null;
-  return [...new Set(rows.map((r) => r?.rank_group_name).filter((n): n is string => !!n))];
+  const byRuler = new Map<string, string[]>();
+  for (const r of rows) {
+    if (r?.fit == null || !r.rank_group_name) continue;
+    const names = byRuler.get(r.fit_model ?? "") ?? [];
+    if (!names.includes(r.rank_group_name)) names.push(r.rank_group_name);
+    byRuler.set(r.fit_model ?? "", names);
+  }
+  return [...byRuler.values()];
 }
 
 /**

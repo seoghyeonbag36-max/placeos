@@ -36,9 +36,9 @@ def test_fit_ranks_districts_by_model_fit():
     ranked = [d for d in body["districts"] if d["fit_rank"] is not None]
     assert ranked, "카페는 모델 7종 안이라 순위가 있어야 한다"
     assert body["ranked_n"] == len(ranked) == sum(g["ranked_n"] for g in body["rank_groups"])
-    # 순위는 잣대(모델) 묶음마다 1 부터 다시 센다 — 묶음 안에서만 적합도 순이다(2026-10-27)
+    # 순위는 묶음(잣대 × 시도)마다 1 부터 다시 센다 — 묶음 안에서만 적합도 순이다(2026-10-27 · 11-01)
     for g in body["rank_groups"]:
-        members = [d for d in ranked if d["fit_model"] == g["fit_model"]]
+        members = [d for d in ranked if d["rank_group"] == g["key"]]
         assert [d["fit_rank"] for d in members] == list(range(1, len(members) + 1)), g["name"]
         assert [d["fit"] for d in members] == sorted((d["fit"] for d in members), reverse=True), g["name"]
         assert all(d["rank_group_name"] == g["name"] and d["rank_n"] == len(members) for d in members)
@@ -236,14 +236,37 @@ def test_gyeonggi_is_ranked_separately_by_its_own_model(fresh_cache):
     if not assigned:
         pytest.skip("태그 모델이 맡은 거점이 없다(서울만 서빙)")
     body = business_fit.fit_by_district("cafe")
-    groups = {g["fit_model"]: g for g in body["rank_groups"]}
-    assert len(groups) >= 2 and body["rank_groups"][0]["fit_model"] == data["model"], "서울 묶음이 먼저다"
+    assert len(body["rank_groups"]) >= 2 and body["rank_groups"][0]["fit_model"] == data["model"], "서울 묶음이 먼저다"
     for model in set(assigned.values()):
         members = [d for d in body["districts"] if d["fit_model"] == model and d["fit_rank"] is not None]
         assert {d["district_id"] for d in members} == {k for k, v in assigned.items() if v == model}
         means = data["models"][model]["district_means"]
         assert all(d["fit"] == round(means[d["district_id"]].get("카페", 0.0), 4) for d in members)
-        assert groups[model]["name"] and groups[model]["name"] != "서울"
+        # 한 잣대가 묶음 여럿일 수 있다(2026-11-01 — 공통 피처판 = 경기 · 광주)
+        names = {g["name"] for g in body["rank_groups"] if g["fit_model"] == model}
+        assert names and "서울" not in names
+
+
+def test_regions_are_ranked_apart_even_on_the_same_ruler(fresh_cache):
+    """「경기·광주」 한 묶음이던 공통 피처판 36곳을 시도마다 따로 센다 — 2026-11-01 사용자 결정(R1 「경기」·「광주」).
+
+    점수는 같은 잣대라 견줄 수 있지만 순위는 지역마다 1 부터다. 묶음 하나 = 잣대 하나 × 시도 하나여야 한다 —
+    둘 중 하나라도 섞이면 화면의 「경기 3위」가 다른 지역·다른 모델을 끼워 센 수가 된다.
+    """
+    body = business_fit.fit_by_district("cafe")
+    groups = body["rank_groups"]
+    pages = {p["id"]: p for p in business_fit._served()}
+    assert len({g["key"] for g in groups}) == len(groups), "묶음 열쇠가 겹친다 — 화면이 두 묶음을 한 목록으로 그린다"
+    for g in groups:
+        members = [d for d in body["districts"] if d["rank_group"] == g["key"]]
+        assert len({business_fit._region(pages[d["district_id"]]) for d in members}) == 1, g["name"]
+        assert {d["fit_model"] for d in members} == {g["fit_model"]}, g["name"]
+        assert [d["fit_rank"] for d in members] == list(range(1, len(members) + 1)), g["name"]
+    names = [g["name"] for g in groups]
+    assert names[0] == "서울" and "경기·광주" not in names, names
+    assert "경기" in names and "광주" in names and names.index("경기") < names.index("광주"), names
+    # 순위 없는 상권은 묶음도 없다
+    assert all(d["rank_group"] is None for d in body["districts"] if d["fit_rank"] is None)
 
 
 def test_district_industries_use_that_districts_own_model(fresh_cache):

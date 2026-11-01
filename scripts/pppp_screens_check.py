@@ -28,6 +28,9 @@
   P6  (2026-10-24) 홈의 새 입구 — 네 단계를 다 마친 홈의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
       보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 넷이 보이고, 그 트랙 화면이
       서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 네 화면으로 간다
+  P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「Platform·Page·Posting·Program 보기」(그전 「빈 자리 보기」) — 데스크톱 ·
+      휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 넷이
+      보이고, Platform 이 현재 트랙이며 Platform 의 상권 선택 값이 그 상권이다. 버튼 글자가 한 줄인지 데스크톱 · 390px · 360px 에서 잰다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
   그건 이 규칙과 무관하다(지도 SDK 는 레일·패널을 가리지 않는다).
 
@@ -63,6 +66,12 @@ TRACKS = ["Platform", "Page", "Posting", "Program"]
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
           ("Posting", "complementary", "입점 계산"), ("Program", "complementary", "오프라인 캠페인")]
 SETTLE_MS = 2500
+# 상권 소개(R2) 하단 주 버튼(2026-11-01 사용자 결정) — flow/screens/Find.tsx 의 PPPP_CTA 와 같은 글자
+R2_CTA = "Platform·Page·Posting·Program 보기"
+# 버튼 글자가 버튼 안에 한 줄로 드는가 — 넘침(scrollWidth > clientWidth)과 줄 수(글자 범위의 줄 사각형 top 개수)
+FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
+          "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
+          "return { sw: b.scrollWidth, cw: b.clientWidth, lines: tops.size }; }")
 
 
 def wait_http(url: str, timeout: int = 180) -> None:
@@ -334,6 +343,52 @@ def main() -> int:
                     shot(page, cid.split()[0].lower() + f"-{ctx_name}")
                     page.close()
                 donectx.close()
+
+        # P7 — 상권 소개(R2) 하단 주 버튼(2026-11-01). 진입로 검사와 같이 매번 새 페이지로 주소를 바로 연 뒤 누른다
+        for ctx_name, ctx in (("desktop", flowctx), ("mobile", mobile)):
+            cid = f"P7 상권 소개 주 버튼 「{R2_CTA}」({ctx_name} · #/district/{target['id']})"
+            page = watch(ctx.new_page(), cid)
+            page.goto(base + f"/#/district/{target['id']}")
+            try:
+                btn = page.get_by_role("button", name=R2_CTA, exact=True)
+                btn.wait_for(state="visible", timeout=60000)
+                # 글자가 버튼 안에 한 줄로 들어가는가(넘치거나 두 줄로 접히면 실패)
+                fit = btn.evaluate(FIT_JS)
+                shot(page, f"p7-r2-{ctx_name}")
+                page.wait_for_timeout(800)
+                btn.tap() if ctx_name == "mobile" else btn.click()
+                st = settled(page)
+                want = f"#/explore?track=platform&district={target['id']}"
+                page.get_by_role("complementary", name="상권 정체성").first.wait_for(state="visible", timeout=60000)
+                page.wait_for_timeout(1500)
+                sel = page.locator("aside[aria-label='상권 정체성'] select").first
+                value = sel.input_value() if sel.count() else None
+                current = page.get_by_role("button", name="Platform", exact=True).get_attribute("aria-current")
+                rep.add(cid, st["hash"] == want and rail_ok(st["rail"]) and current == "page" and value == target["id"]
+                        and fit["sw"] <= fit["cw"] and fit["lines"] == 1,
+                        {**st, "aria-current": current, "platform_district": value, "button": fit})
+            except Exception as e:
+                rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
+            shot(page, f"p7-{ctx_name}")
+            page.close()
+        # P7 글자 — 360px 휴대폰(버튼 안 폭 288px). 글자를 고른 근거가 이 폭이다: 390px(318) 에서는 띄어 쓴 글자(308px)도
+        # 한 줄이라 위 휴대폰 검사로는 그 회귀를 못 잡는다(리뷰 2026-11-01). 320px 은 두 줄이 정상이라 재지 않는다
+        cid = "P7 상권 소개 주 버튼 글자 한 줄(360px 휴대폰)"
+        narrow = browser.new_context(viewport={"width": 360, "height": 780}, locale="ko-KR", is_mobile=True, has_touch=True)
+        narrow.add_init_script(seed)
+        page = watch(narrow.new_page(), cid)
+        page.goto(base + f"/#/district/{target['id']}")
+        try:
+            btn = page.get_by_role("button", name=R2_CTA, exact=True)
+            btn.wait_for(state="visible", timeout=60000)
+            page.wait_for_timeout(800)
+            fit = btn.evaluate(FIT_JS)
+            rep.add(cid, fit["sw"] <= fit["cw"] and fit["lines"] == 1, {"button": fit})
+        except Exception as e:
+            rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
+        shot(page, "p7-r2-360")
+        page.close()
+        narrow.close()
         browser.close()
 
     result = {

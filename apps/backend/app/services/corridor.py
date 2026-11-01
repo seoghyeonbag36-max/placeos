@@ -61,7 +61,7 @@ def _hub(slug: str, fits: dict[str, dict]) -> dict:
         "rent_shared": posting_inputs.is_shared_rone(slug),
         "fit": fit.get("fit"),
         "fit_rank": fit.get("fit_rank"),
-        # 순위는 잣대마다 따로다(서울 · 고양·파주) — 화면이 「서울 3위」처럼 묶음과 함께 읽는다
+        # 순위는 묶음마다 따로다(서울 · 경기 · 광주) — 화면이 「서울 3위」처럼 묶음과 함께 읽는다
         "rank_group_name": fit.get("rank_group_name"),
         "rank_n": fit.get("rank_n"),
     }
@@ -74,14 +74,20 @@ def get(corridor_id: str, industry: str | None = None) -> dict | None:
         return None
     doc = copy.deepcopy(doc)
     fits: dict[str, dict] = {}
+    groups: list[dict] = []
     if industry:
         res = business_fit.fit_by_district(industry) or {}
         fits = {r["district_id"]: r for r in res.get("districts") or []}
         doc["industry"] = res.get("industry")
-        doc["rank_groups"] = res.get("rank_groups")
+        groups = res.get("rank_groups") or []
     served = set(districts_svc.PAGES_BY_ID)
     for nd in doc.get("nodes") or []:
         # 서빙 목록에 없는 거점(보류·미빌드)은 마디에서 뺀다 — 화면이 누를 수 없는 거점을 내지 않는다
         nd["hubs"] = [_hub(s, fits) for s in nd.get("hubs") or [] if s in served]
     doc["hub_nodes"] = {s: n for s, n in (doc.get("hub_nodes") or {}).items() if s in served}
+    if industry:
+        # 이 흐름의 상권이 든 묶음만 싣는다(2026-11-01) — 묶음을 시도별로 나누자 파주·고양·서울 흐름의 안내가
+        # 흐름에 없는 「광주」까지 말했다. 묶음 정의·순서는 business_fit 그대로다.
+        mine = {fits[h["id"]].get("rank_group") for nd in doc.get("nodes") or [] for h in nd["hubs"] if h["id"] in fits}
+        doc["rank_groups"] = [g for g in groups if g.get("key") in mine]
     return doc

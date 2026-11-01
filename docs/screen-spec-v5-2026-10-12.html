@@ -369,10 +369,10 @@ q { quotes:"“" "”"; }
       <div class="table-wrap"><table>
         <thead><tr><th>목적</th><th>경로</th><th class="c">첫 결과까지 질문</th><th class="c">본전 시점까지 탭</th></tr></thead>
         <tbody>
-          <tr><th>새로 창업</th><td>Q1 → Q2 → <b>R1 상권 순위</b> → R2 → Q5 → R3 → R4 → Q6 → <b>R5</b> → Q10 …</td><td class="c tnum">2</td><td class="c tnum">8</td></tr>
+          <tr><th>새로 창업</th><td>Q1 → Q2 → <b>R1 상권 순위</b> → R2 → Q5 → R3 → R4 → Q6 → <b>R5</b> → Q10 … <span class="tag real">2026-11-01</span> R2 하단 버튼이 X(Platform)로 간다 — 빈 자리(R3)는 홈 「빈 자리」 단계 → Q5 로 연다</td><td class="c tnum">2</td><td class="c tnum">8</td></tr>
           <tr><th>상권 옮기기</th><td>Q1 → Q2 → Q3 → <b>R1</b>(지금 상권 고정 줄) → R2 → … 창업과 같다</td><td class="c tnum">3</td><td class="c tnum">9</td></tr>
           <tr><th>업종 바꾸기</th><td>Q1 → Q2(지금 업종) → Q3 → <b>R1-p 업종 순위</b> → Q-p → <b>Q10 작게 확인</b> 또는 Q5 빈 자리</td><td class="c tnum">3</td><td class="c">—<span class="src">지금 가게 자리 계산은 미지원(§12)</span></td></tr>
-          <tr><th>모델 밖 업종(술집 등 6종 · 기타)</th><td>Q1 → Q2 → <b>R1 안내</b>「순위를 아직 못 드려요」 → Q4 → R2 → 빈 자리부터 같다</td><td class="c tnum">2</td><td class="c tnum">9</td></tr>
+          <tr><th>모델 밖 업종(술집 등 6종 · 기타)</th><td>Q1 → Q2 → <b>R1 안내</b>「순위를 아직 못 드려요」 → Q4 → R2 → 빈 자리부터 같다 <span class="tag real">2026-11-01</span> R2 하단 버튼이 X(Platform)로 간다 — 빈 자리(R3)는 홈 「빈 자리」 단계 → Q5 로 연다</td><td class="c tnum">2</td><td class="c tnum">9</td></tr>
         </tbody></table></div>
       <p class="note">비교: 3·4판은 랜딩 → 가입(이메일·비밀번호·조직명 또는 소셜) → 「내 사업」 카드(사업 이름·소개·목적·업종·세부 업종) → 시작 → Platform 패널. 서울시 상권분석서비스 「나도 곧 사장」은 문 3개 → 「업종이 있으세요?」 → 업종 → 지역 순위(로그인 없음, §3-5).</p>
 
@@ -416,7 +416,7 @@ q { quotes:"“" "”"; }
           <tr><th>Explain Why</th><td>왜 해야 하는지 설명했는가</td><td>공통 프레임 ④ 보조 한 줄 = 왜 묻는지(§4-1) · 로그인 시트의 「얻는 것 세 줄」</td></tr>
           <tr><th>Clear Action</th><td>다음 행동이 한눈에</td><td>하단 고정 버튼 하나 · 문구는 누르면 일어날 일(「상권 순위 보기」 · 「몇 달이면 본전인지 보기」)</td></tr>
           <tr><th>Context Based</th><td>여정 전체를 보고 설계</td><td>목적별 경로(§2-1) — 바꾸기는 상권 순위를 건너뛰고 지금 상권의 업종 순위(R1-p)로</td></tr>
-          <tr><th>No More Loading</th><td>기다림을 없앴는가</td><td>다음 화면 데이터를 앞 화면에서 미리 받는다(Q2→R1 · R2→Q5·R3) · 스피너 대신 골격(§4-5)</td></tr>
+          <tr><th>No More Loading</th><td>기다림을 없앴는가</td><td>다음 화면 데이터를 앞 화면에서 미리 받는다(Q2→R1 · R2→Q5·R3 — <span class="tag real">2026-11-01</span> R2 하단 버튼이 X 로 가며 R2 의 R3 미리 받기는 걷었다. Q5 가 R3 것을 미리 받는다) · 스피너 대신 골격(§4-5)</td></tr>
           <tr><th>Minimum Features</th><td>기능이 많을수록 복잡·느림·버그</td><td>흐름 밖 기능(벤치마킹 가게·소요시간·공실 예측·감성)은 지도 탐색으로(§1-2 · §10) · 「네 질문 중 어디에 답하나」를 말 못 하면 흐름에 넣지 않는다</td></tr>
           <tr><th>Casual Concept</th><td>어려운 개념은 익숙한 말로</td><td>용어 치환표(§4-4) — 회수기간 → 본전 시점, 공실 → 빈 자리, 3-Tier → 세 가지 가격대</td></tr>
           <tr><th>Simple Policy</th><td>정책은 단순하게</td><td>「본전 시점은 건물 단위 자리만 계산한다」 「예산 점검은 직접 확인한 금액만 더한다」 두 문장으로 고정(§2-2)</td></tr>
@@ -782,7 +782,7 @@ q { quotes:"“" "”"; }
       </article>
 
       <article class="screen" id="R2">
-        <div class="phone" role="img" aria-label="R2 상권 소개: 사실 네 줄과 빈 자리 보기 버튼">
+        <div class="phone" role="img" aria-label="R2 상권 소개: 사실 네 줄과 Platform·Page·Posting·Program 보기 버튼">
           <div class="bar"><span class="bk">‹</span><span class="sp"></span><span>닫기</span></div>
           <div class="cap">상권 · 성동구</div>
           <div class="qt">성수동 카페거리는<br>카페·디저트 중심 상권이에요</div>
@@ -793,7 +793,7 @@ q { quotes:"“" "”"; }
             <div class="row" style="grid-template-columns:1fr auto"><em>빈 자리는</em><span class="rt"><b>빈 층 280곳</b> · 1층 51</span></div>
             <div class="note" style="font-size:2.9cqw;margin-top:2cqw">카카오 플레이스 · 서울시 상권분석 · R-ONE 26년 2분기 · 건축물대장</div>
           </div>
-          <div class="cta">빈 자리 보기</div>
+          <div class="cta">Platform·Page·Posting·Program 보기</div>
         </div>
         <div class="spec">
           <div class="sid"><b>R2</b> · <code>#/district/{id}</code> · 앞: R1 · Q4 · (옮기기) · 지도 탐색에서도</div>
@@ -806,7 +806,7 @@ q { quotes:"“" "”"; }
               <li>1층 월세는 — <code>GET /heatmap/rent</code> 의 <code>base_rent_per_pyeong</code> + 「추정」 · R-ONE 없으면 <q>이 상권은 임대료 통계가 없어요</q>(이웃 값으로 채우지 않는다)</li>
               <li>빈 자리는 — <code>floor-vacancies</code> <code>counts_all.units</code> · 1층 <code>by_floor["1"]</code></li></ul></dd>
             <dt>출처 한 줄</dt><dd>결론 아래 접지 않는 한 줄(C4). 예외 거점이면 caveat 전문을 그 위에</dd>
-            <dt>버튼</dt><dd>하단 「빈 자리 보기」 → Q5 · 텍스트 버튼 「지도에서 자세히」 → X(Platform, 같은 상권)</dd>
+            <dt>버튼</dt><dd>하단 「Platform·Page·Posting·Program 보기」 → X(Platform, 같은 상권 · <code>#/explore?track=platform&amp;district={id}</code>) <span class="tag real">2026-11-01 바꿈</span> — 사용자 결정. 그전 하단 「빈 자리 보기」 → Q5·R3. R3 는 홈의 「빈 자리」 단계로 연다 · 텍스트 버튼 「지도에서 자세히」 → X(Platform, 같은 상권)</dd>
             <dt>미리 받기</dt><dd>진입 시 <code>GET /heatmap/rent?district=</code> 를 받아 Q5 선택지 옆 개수와 R3 에 쓴다</dd>
           </dl>
         </div>
@@ -864,7 +864,7 @@ q { quotes:"“" "”"; }
           </div>
         </div>
         <div class="spec">
-          <div class="sid"><b>Q5</b> · <code>#/rent-cap</code> · 앞: R2</div>
+          <div class="sid"><b>Q5</b> · <code>#/rent-cap</code> · 앞: R2 → <span class="tag real">2026-11-01</span> 홈 「빈 자리」 단계(R2 하단 버튼은 X 로 간다)</div>
           <h3>월세는 얼마까지 생각하세요?</h3>
           <dl>
             <dt>답하는 법</dt><dd>한 줄을 누른다 → 바로 R3. 각 줄 오른쪽에 <b>그 조건의 빈 자리 수</b>를 보여 준다(누르기 전에 결과를 안다 — Easy to Answer)</dd>
@@ -1383,7 +1383,7 @@ q { quotes:"“" "”"; }
       <div class="sec-head"><span class="num">§10</span><h2>지도 탐색 — 종전 4트랙 화면</h2>
         <p class="lede">3·4판의 지도 + 네 트랙 패널은 지우지 않는다. 반복 사용자(본사·운용사)와 「자세히」의 끝에 남는다. 주소는 <code>#/explore</code>, 허브 탭 「지도」.</p></div>
       <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
-        <li><b>⛔ PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙).</b> 이 네 트랙(Platform·Page·Posting·Program)의 구현 화면은 절대 화면에서 빼지 않는다. 허브 탭 「지도」 · R2 「지도에서 자세히」 · R3 「지도」는 늘 <code>#/explore</code> 로 오고, 흐름 안에 지도를 따로 두어 이 자리를 대신하지 않는다(10-18 에 그렇게 해서 네 화면이 UI 에서 사라졌다 → 10-21 복구). 정본 CLAUDE.md · 가드 <code>apps/frontend/src/ppppScreens.test.tsx</code> · <code>docs/decision-pppp-screens-always-on-2026-10-21.md</code></li>
+        <li><b>⛔ PPPP 화면 보존 규칙(2026-10-21 사용자 확정 — 절대 규칙).</b> 이 네 트랙(Platform·Page·Posting·Program)의 구현 화면은 절대 화면에서 빼지 않는다. 허브 탭 「지도」 · R2 「지도에서 자세히」 · R3 「지도」는 늘 <code>#/explore</code> 로 오고(<span class="tag real">2026-11-01</span> R2 하단 주 버튼 「Platform·Page·Posting·Program 보기」는 그 상권 · Platform 트랙으로), 흐름 안에 지도를 따로 두어 이 자리를 대신하지 않는다(10-18 에 그렇게 해서 네 화면이 UI 에서 사라졌다 → 10-21 복구). 정본 CLAUDE.md · 가드 <code>apps/frontend/src/ppppScreens.test.tsx</code> · <code>docs/decision-pppp-screens-always-on-2026-10-21.md</code></li>
         <li><b>로그인 없이 연다.</b> 비로그인이면 「내 사업」을 흐름의 답에서 만들어 넘기고, 저장(<code>/auth/workspace</code>)은 건너뛴다. 로그인했으면 종전처럼 계정 값을 쓴다</li>
         <li>흐름에서 고른 상권을 이어받는다(C2). 흐름의 R2 「지도에서 자세히」 · R3 「지도」가 같은 상권으로 연다 — <i>10-21 에야 구현했다. 그전에는 늘 가로수길로 열렸고, 그 불편을 고치려던 10-18 변경이 진입로를 돌려 네 화면을 지웠다</i></li>
         <li>레일 맨 위에 「홈」(<code>#/home</code>)을 더한다 — 지도 탐색에서 흐름으로 돌아가는 길</li>

@@ -131,7 +131,8 @@ const TRACK_VIEW: Record<ExploreTrack, View> = { platform: "platform", page: "ma
  */
 export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string | null }) {
   // 흐름이 실어 보낸 대상(2026-10-24) — 홈의 「지도에서 내 자리 보기」·지도 미리보기가 트랙·상권·건물을 쿼리로 싣는다.
-  // 열리는 순간 한 번만 읽는다. 쿼리 없는 진입(허브 탭 · R2 · R3 · 주소창)은 아래 기본 규칙 그대로다.
+  // 열리는 순간 한 번만 읽는다. 쿼리 없는 진입(허브 탭 · R2 「지도에서 자세히」 · R3 · 주소창)은 아래 기본 규칙 그대로다.
+  // R2 하단 주 버튼(2026-11-01)은 쿼리를 싣는다 — 그 상권 · Platform 트랙.
   const [target] = useState(() => parseExplore(window.location.hash));
   const [openedFlow] = useState(loadFlow);
   // 첫 화면은 **Platform** 이다(2026-09-26 — 그전 Page 지도, 2026-09-12). 되돌리려면 이 한 줄만 바꾼다.
