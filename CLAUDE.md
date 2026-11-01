@@ -83,7 +83,8 @@ Price 는 Posting 으로, Promotion 은 Program 으로만 간다.
 - **Data**: Selenium/Playwright + Bronze/Silver/Gold 3계층
   - Airflow DAG 골격이 `data/pipelines/dags/` 에 둘 있으나 **스케줄러가 돌고 있지 않다** —
     수집·가공은 전부 수동 스크립트다. "Airflow 로 돌린다"고 읽지 말 것
-- **Infra**: **GCP Cloud Run**(`spaceos` · us-central1) + **Firebase Hosting**(placeos.web.app)
+- **Infra**: **GCP Cloud Run**(`spaceos` · us-central1) + **Firebase Hosting**(사이트 `placeos` · 정식 주소 **placeos.co.kr** —
+  2026-11-01 부터 Firebase 기본 주소는 서빙 주소로 쓰지 않는다. 들어오면 앱이 정식 주소로 옮긴다 · `lib/canonicalHost.ts`)
   + Docker + GitHub Actions
   - ⚠ 이 줄은 2026-09-15 까지 `AWS (S3/EC2/RDS/EKS)` 라고 적고 있었다. 이 저장소는 AWS 를
     **한 번도 쓴 적이 없다**(리소스·SDK·설정 모두 0건). 배포 경로는
@@ -312,8 +313,9 @@ docker compose -f infra/docker/docker-compose.yml up
 # 배포 — main 에 푸시하면 CI 가 돌고, CI 가 **전부** 통과한 뒤에만 Deploy 가 Cloud Run 으로 낸다
 # (2026-10-06 부터 `workflow_run` — 프론트 lint·vitest·data pytest 가 빨개도 배포되던 틈을 막았다).
 # 수동 배포·좌표·무료 한도의 경계는 docs/deploy-cloud-run.md 참조.
-#   프로덕션: https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
-#   옛 주소 https://spaceos-twin.web.app 은 페이지만 301 로 정식 주소에 보내고 /api 는 계속 서빙한다(firebase.json)
+#   프로덕션: https://placeos.co.kr  (Firebase Hosting 사이트 placeos → Cloud Run · 2026-11-01 정식 주소)
+#   Firebase 기본 주소와 옛 주소 https://spaceos-twin.web.app 으로 들어오면 앱이 정식 주소로 옮기고, /api 는 계속 서빙한다(firebase.json)
+#   ⚠ 사이트 placeos 를 지우면 placeos.co.kr 이 끊긴다 — 정식 주소가 그 사이트에 붙은 도메인이다
 git push origin main
 
 # ML 골격 확인

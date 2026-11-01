@@ -570,7 +570,7 @@ Exit 시계에 들어오지 않는다.** 해외 확장은 로드맵에 없고(�
 ## 11. V12 · 인프라 정합 — 유일하게 진짜인 이점
 
 우리는 이미 GCP 를 쓴다 — Cloud Run(`spaceos-digital-twin` / us-central1) + Firebase Hosting
-(`placeos.web.app`). 그래서 Maps Platform 도입은 **행정적으로는 가장 쉽다**(기존 프로젝트에서
+(사이트 `placeos` · 지금 정식 주소 `placeos.co.kr`). 그래서 Maps Platform 도입은 **행정적으로는 가장 쉽다**(기존 프로젝트에서
 API 활성화, 단일 청구, IAM 일원화). 네이버 지도는 NCP 라는 **별도 콘솔·별도 청구·별도 키**를
 유지해야 하고, 도메인 화이트리스트 운영 부담이 실제로 있다
 (`naverMap.ts` 머리말이 그 함정의 기록이다 — 미등록 origin 이면 SDK 가 인증 실패를

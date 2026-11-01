@@ -94,7 +94,7 @@ apps/frontend    React + TypeScript + Vite — API 호출은 src/lib/api.ts 로 
 ml               PyTorch LSTM(공실 예측) / GNN(업종 추천) + MLflow
 data             수집기 collectors/ · 파이프라인 pipelines/ · Bronze→Silver→Gold 3계층
 infra            docker-compose / nginx / GitHub Actions  (k8s/ 는 빈 디렉터리)
-배포             Dockerfile → Cloud Build → Cloud Run · 앞에 Firebase Hosting(placeos.web.app)
+배포             Dockerfile → Cloud Build → Cloud Run · 앞에 Firebase Hosting(정식 주소 placeos.co.kr · 2026-11-01)
 docs             설계 문서 (진행 상태는 placeos-vibe-build-sequence.md 가 정본)
 ```
 

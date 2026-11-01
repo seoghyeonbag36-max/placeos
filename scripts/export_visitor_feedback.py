@@ -26,7 +26,7 @@ import httpx
 
 KST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE = "https://placeos.web.app"
+DEFAULT_BASE = "https://placeos.co.kr"
 DEFAULT_OUT = ROOT / "exports" / "visitor_feedback" / "visitor_feedback.csv"
 TOKEN_FILE = ROOT / "secrets" / "admin_token.txt"
 PAGE = 100  # 서버 상한(le=100)

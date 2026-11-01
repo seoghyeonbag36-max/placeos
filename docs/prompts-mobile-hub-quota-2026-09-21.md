@@ -150,7 +150,7 @@ Monitor 를 하나만 건다:
 
 ## 하지 말 것
 1. 전유부·층별개요 동시 실행. 5연속 429 면 그 실행 내내 엔드포인트를 포기해 하루치를 버린다.
-2. git commit · git push. push 하면 Gold 가 선 거점이 그대로 프로덕션(placeos.web.app)에 뜬다.
+2. git commit · git push. push 하면 Gold 가 선 거점이 그대로 프로덕션(placeos.co.kr)에 뜬다.
    신규 거점 공개는 내가 정한다. push 는 GCM 인증 창 때문에 폰에서 끝나지도 않는다.
 3. 거점 등록 · SERVED_CITIES · seoul_pages.DISTRICTS 수정.
 4. scripts/run_batch3_chain.sh · run_batch4_after.sh 사용. 09-20 임시 스크립트이고 층별개요가 빠져 있다.

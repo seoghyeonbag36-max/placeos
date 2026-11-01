@@ -21,7 +21,7 @@
 | `ml` | AI 모델 | PyTorch · LSTM(공실 예측) · GNN(업종 추천) · MLflow |
 | `data` | ETL·크롤링 | Selenium/Playwright · Bronze/Silver/Gold (Airflow DAG 은 골격만 — 스케줄러 미가동) |
 | `infra` | 로컬 스택·배포 보조 | Docker Compose · nginx · GitHub Actions (⚠ `infra/k8s/` 는 **빈 디렉터리**다) |
-| 배포 경로 | 프로덕션 | `Dockerfile` → Cloud Build → **Cloud Run**(us-central1), 앞에 **Firebase Hosting**(placeos.web.app) |
+| 배포 경로 | 프로덕션 | `Dockerfile` → Cloud Build → **Cloud Run**(us-central1), 앞에 **Firebase Hosting**(정식 주소 placeos.co.kr) |
 | `docs` · `memory` | 문서·전략 메모리 | — | 
 
 ## 팀원 온보딩
@@ -62,7 +62,7 @@ docker compose -f infra/docker/docker-compose.yml up
 
 # 4) 배포 — main 에 푸시하면 GitHub Actions 가 Cloud Run 으로 낸다(테스트→빌드→배포→검증)
 git push origin main   # 상세: docs/deploy-cloud-run.md
-#    → https://placeos.web.app  (Firebase Hosting → Cloud Run, 2026-09-13 정식 주소)
+#    → https://placeos.co.kr  (Firebase Hosting → Cloud Run, 2026-11-01 정식 주소)
 ```
 
 ### 지금 어디까지 와 있나

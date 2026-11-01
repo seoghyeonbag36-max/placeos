@@ -43,9 +43,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "reports" / "deploy_verify.json"
-# 2026-09-13 정식 주소를 placeos.web.app 으로 옮겼다(firebase.json). 옛 spaceos-twin.web.app 도
-# 같은 Cloud Run 을 리라이트하므로 어느 쪽을 재도 같은 배포다 — 사용자가 쓰는 쪽을 잰다.
-ORIGIN = "https://placeos.web.app"
+# 정식 주소 placeos.co.kr(2026-11-01 — Firebase 기본 주소는 더 서빙하지 않는다 · firebase.json). 옛 주소들도 같은
+# Cloud Run 을 리라이트하므로 어느 쪽을 재도 같은 배포다 — 사용자가 쓰는 쪽을 잰다.
+ORIGIN = "https://placeos.co.kr"
 BASE = f"{ORIGIN}/api/v1"
 # ⚠ `/health` 는 **앱 루트**다(main.py `@app.get("/health")`) — `/api/v1/health` 가
 #   아니다. docs/deploy-cloud-run.md 와 deploy skill 이 `/api/v1/health` 로 적어 두어

@@ -245,7 +245,7 @@ apps/backend/app/api/v1/ 의 auth 라우터와 app/schemas 를 읽고, PR 의 sr
 
 ## 4. 프로덕션 연결 — 확인만
 docs/deploy-cloud-run.md 를 읽고 프로덕션에 계정 DB(Neon)·JWT_SECRET 이 붙어 있다는 근거를 인용한다.
-이 세션에서 프로덕션 URL 을 호출할 수 있으면(네트워크 허용 시) GET https://placeos.web.app/api/v1/auth/me 가
+이 세션에서 프로덕션 URL 을 호출할 수 있으면(네트워크 허용 시) GET https://placeos.co.kr/api/v1/auth/me 가
 인증 없이 401 을 내는지만 본다. 가입·로그인 요청은 보내지 않는다(실사용 DB 에 테스트 계정이 생긴다).
 네트워크가 막히면 "프로덕션 미확인"으로 적는다.
 
@@ -532,7 +532,7 @@ Program 트랙 대상: 팝업스토어·가오픈·MVP 로 검증하려는 예�
     python scripts/pppp_status.py
     python -c "import sys; sys.path.insert(0,'.'); from data.config.page_hubs import ACTIVE_HUBS; print(len(ACTIVE_HUBS))"
     (import 경로가 다르면 CLAUDE.md 「거점」 줄이 가리키는 곳에서 찾는다)
-정식 주소 https://placeos.web.app (09-13) · 옛 주소 spaceos-twin.web.app 은 페이지만 301, /api 는 계속 서빙.
+정식 주소 https://placeos.co.kr (2026-11-01 · 09-13 에는 Firebase 기본 주소) · 옛 주소 spaceos-twin.web.app 은 페이지만 301, /api 는 계속 서빙.
 
 ## 찾을 것
     grep -rnE "(33|54|66)거점" apps/frontend/src apps/backend/app --include=*.ts --include=*.tsx --include=*.py
@@ -546,7 +546,7 @@ Program 트랙 대상: 팝업스토어·가오픈·MVP 로 검증하려는 예�
   - **이력 주석**("09-04 에는 54거점이었다" 처럼 그때의 사실) → 그대로 둔다. 이력을 지우지 않는다
   - **현재형으로 쓴 낡은 주석**("54거점 pooled 로 학습된다") → 현재 사실로 고친다
   - 테스트 픽스처의 숫자 → 테스트가 그 숫자를 검사하는 것이 아니면 그대로 둔다
-  - 문서의 spaceos-twin.web.app → 사용자 안내 문장이면 placeos.web.app 으로, 이력·배포 설정 설명이면 그대로
+  - 문서의 spaceos-twin.web.app → 사용자 안내 문장이면 정식 주소(2026-11-01 placeos.co.kr)로, 이력·배포 설정 설명이면 그대로
     (firebase.json 이 옛 주소를 계속 쓴다 — 설정 파일은 건드리지 않는다)
 - "7종"은 T1 이후 서빙 어휘가 산출물로 정해지므로, 현재형 서술이면 "서빙 어휘(산출물 기준)"로 고친다.
 - T4(LSTM 표시)가 이미 머지됐으면 그 자리는 건너뛴다.
