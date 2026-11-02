@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from data.collectors.common import GOLD, load_latest
 from data.config.page_hubs import ACTIVE_HUBS
 from data.config.rone_districts import DISTRICT_RONE, SHARED_RONE
-from data.pipelines.build_posting_inputs import SLUG13
+from data.config.platform_districts import SLUG as SLUG13
 
 OUT = "platform_rone_history.json"
 SERIES = {"rent_per_m2": "rone_rent_small.json", "vacancy_mid_pct": "rone_vac_mid.json",
