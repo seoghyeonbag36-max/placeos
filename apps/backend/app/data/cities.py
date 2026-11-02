@@ -144,6 +144,10 @@ CITIES: dict[str, City] = {
                                          "29110", "29140", "29155", "29170", "29200"}),
                     gus=frozenset({"광주광역시"}),
                     note="R-ONE 13상권(중대형 13 · 소규모 공실 10 · 소규모 임대 10) — 어룡동·우산동·일곡동은 소규모 임대 없음. 서울 전용 소스 없음"),
+    "jeonju": City(id="jeonju", name="전주시", short="전주", sido="전북특별자치도",
+                   sgg_codes=frozenset({"52111", "52113", "45111", "45113"}),
+                   gus=frozenset({"전주시"}),
+                   note="점포·PNU 52111·52113, 건물관리번호 45111·45113도 관측. R-ONE 전북 5상권. 서울 전용 소스 없음"),
 }
 
 DEFAULT_CITY = "seoul"

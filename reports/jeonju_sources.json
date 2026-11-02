@@ -1,0 +1,136 @@
+{
+  "source": "한국부동산원 R-ONE 실호출",
+  "rone": {
+    "vac_mid": {
+      "bronze": "data\\bronze\\platform13\\2026-11-01\\rone_vac_mid.json",
+      "quarter": "20262",
+      "values": {
+        "jj-songcheon": 18.0496561358815,
+        "jj-east": 27.9941975996059,
+        "jj-west": 3.12416109916863,
+        "jj-newtown": 17.0215976065435,
+        "jj-hanok": 31.2398420671691
+      }
+    },
+    "vac_small": {
+      "bronze": "data\\bronze\\platform13\\2026-11-01\\rone_vac_small.json",
+      "quarter": "20262",
+      "values": {
+        "jj-songcheon": 16.3136263041416,
+        "jj-east": 6.09918162910879,
+        "jj-west": 7.01938687804412,
+        "jj-hanok": 0
+      }
+    },
+    "rent_small": {
+      "bronze": "data\\bronze\\platform13\\2026-11-01\\rone_rent_small.json",
+      "quarter": "20262",
+      "values": {
+        "jj-songcheon": 12.7655724747403,
+        "jj-east": 12.8767856940845,
+        "jj-west": 13.6048227539543,
+        "jj-hanok": 39.7477387307236
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "data\\bronze\\jj-east\\2026-11-01\\vworld_candidate_search.json",
+      "sha256": "74b595030af87b59fbc82b9388e17ce566f7109371435b1c32a56cca5ce12e36"
+    },
+    {
+      "path": "data\\bronze\\jj-east\\2026-11-01\\stores_raw.json",
+      "sha256": "aabbc90699251ca00d267a3992194ef70d0337e700125535b99585b21b9c3bdb"
+    },
+    {
+      "path": "data\\bronze\\jj-east\\2026-11-01\\bldg_polygons.geojson",
+      "sha256": "024b64e39fd21124fe06891180b50d956b402bd120eb6d3f9beddb846d80c6ca"
+    },
+    {
+      "path": "data\\bronze\\jj-west\\2026-11-01\\vworld_candidate_search.json",
+      "sha256": "3982f48b11fd52ef3642c55ff5fad5e4aaef8249b78453278c37f4ee180997a3"
+    },
+    {
+      "path": "data\\bronze\\jj-west\\2026-11-01\\stores_raw.json",
+      "sha256": "e61d9f3ba11d27359c08f0f0e240a14a834401fd7e681c2a23ff301d2830acb1"
+    },
+    {
+      "path": "data\\bronze\\jj-west\\2026-11-01\\bldg_polygons.geojson",
+      "sha256": "0f0eca508d94b8dd09b7a36f1361262c6fffaabdaa79ac0770b03cb45ffb6003"
+    },
+    {
+      "path": "data\\bronze\\jj-newtown\\2026-11-01\\vworld_candidate_search.json",
+      "sha256": "967707362e67fbe214975887f74d0bf4cfb9dbef550c6154febc35bd08ebc343"
+    },
+    {
+      "path": "data\\bronze\\jj-newtown\\2026-11-01\\stores_raw.json",
+      "sha256": "d60a43e7dc3a58f16dc769eb79ad4a68a48375e579beae8f833f7eb518d8dfd6"
+    },
+    {
+      "path": "data\\bronze\\jj-newtown\\2026-11-01\\bldg_polygons.geojson",
+      "sha256": "75eb6e2d71222a5ff4991d209a880c72eb9eeea458360780366ac92fbbaba1ad"
+    },
+    {
+      "path": "data\\bronze\\jj-hanok\\2026-11-01\\vworld_candidate_search.json",
+      "sha256": "1d2cead8c3560dda8752389896baa68c6ab77bc9c9347ac317e2ef8677d63df4"
+    },
+    {
+      "path": "data\\bronze\\jj-hanok\\2026-11-01\\stores_raw.json",
+      "sha256": "fd82d8988200dc64f5ed9327032cf849f64a55036f4f3fbe4dc77da106ba4389"
+    },
+    {
+      "path": "data\\bronze\\jj-hanok\\2026-11-01\\bldg_polygons.geojson",
+      "sha256": "2ef22c4b9d334d7dbb79bf39303c88bd1ce84cef1057011e8633b6fe9d27b177"
+    },
+    {
+      "path": "data\\bronze\\jj-songcheon\\2026-11-01\\vworld_candidate_search.json",
+      "sha256": "056e20b2f2a907218ce8ad791b5a522d1149fc546df8502868a83c39e8a14935"
+    },
+    {
+      "path": "data\\bronze\\jj-songcheon\\2026-11-01\\stores_raw.json",
+      "sha256": "7db13b6dc747a2516d9533f5f40b7a3e77811023527a98dbaf26d3dd7e6177d3"
+    },
+    {
+      "path": "data\\bronze\\jj-songcheon\\2026-11-01\\bldg_polygons.geojson",
+      "sha256": "155df8ac75e2c468c540bd0fbe7e601eaabaf4cd70af3073ce6f5e5bf5a03460"
+    }
+  ],
+  "git_ignore_exit_codes": {
+    "data/gold/jj-east/page_building_master.geojson": 1,
+    "data/gold/jj-east/coverage.json": 1,
+    "data/gold/jj-east/calibration.json": 1,
+    "data/gold/jj-east/building_history.json": 1,
+    "data/gold/jj-east/vacant_units.json": 1,
+    "data/gold/jj-east/vacant_floor_units.json": 1,
+    "data/gold/jj-east/district_zones.json": 1,
+    "data/gold/jj-west/page_building_master.geojson": 1,
+    "data/gold/jj-west/coverage.json": 1,
+    "data/gold/jj-west/calibration.json": 1,
+    "data/gold/jj-west/building_history.json": 1,
+    "data/gold/jj-west/vacant_units.json": 1,
+    "data/gold/jj-west/vacant_floor_units.json": 1,
+    "data/gold/jj-west/district_zones.json": 1,
+    "data/gold/jj-newtown/page_building_master.geojson": 1,
+    "data/gold/jj-newtown/coverage.json": 1,
+    "data/gold/jj-newtown/calibration.json": 1,
+    "data/gold/jj-newtown/building_history.json": 1,
+    "data/gold/jj-newtown/vacant_units.json": 1,
+    "data/gold/jj-newtown/vacant_floor_units.json": 1,
+    "data/gold/jj-newtown/district_zones.json": 1,
+    "data/gold/jj-hanok/page_building_master.geojson": 1,
+    "data/gold/jj-hanok/coverage.json": 1,
+    "data/gold/jj-hanok/calibration.json": 1,
+    "data/gold/jj-hanok/building_history.json": 1,
+    "data/gold/jj-hanok/vacant_units.json": 1,
+    "data/gold/jj-hanok/vacant_floor_units.json": 1,
+    "data/gold/jj-hanok/district_zones.json": 1,
+    "data/gold/jj-songcheon/page_building_master.geojson": 1,
+    "data/gold/jj-songcheon/coverage.json": 1,
+    "data/gold/jj-songcheon/calibration.json": 1,
+    "data/gold/jj-songcheon/building_history.json": 1,
+    "data/gold/jj-songcheon/vacant_units.json": 1,
+    "data/gold/jj-songcheon/vacant_floor_units.json": 1,
+    "data/gold/jj-songcheon/district_zones.json": 1
+  },
+  "synthetic_values": false
+}

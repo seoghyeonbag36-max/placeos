@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaceOS 창업자용 PPP 종합 보고서</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --s: #ffffff;
+            --t: #212529;
+            --m: #495057;
+            --l: #dee2e6;
+            --a: #007bff;
+            --soft: #e9ecef;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #121212;
+                --s: #1e1e1e;
+                --t: #e0e0e0;
+                --m: #b0b0b0;
+                --l: #333;
+                --a: #66b0ff;
+                --soft: #2a2a2a;
+            }
+        }
+        body { margin: 0; background: var(--bg); color: var(--t); font-family: 'Pretendard', 'Noto Sans KR', sans-serif; line-height: 1.6; padding: 20px; }
+        .w { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 24px; color: var(--a); margin-bottom: 30px; border-bottom: 2px solid var(--a); padding-bottom: 10px; }
+        h2 { font-size: 20px; margin-top: 30px; border-left: 4px solid var(--a); padding-left: 10px; }
+        .card { background: var(--s); border: 1px solid var(--l); border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+        .kpi { display: flex; gap: 15px; margin-bottom: 20px; }
+        .kpi-item { background: var(--s); padding: 15px; border-radius: 8px; border: 1px solid var(--l); flex: 1; }
+        .kpi-val { font-size: 20px; font-weight: bold; color: var(--a); }
+        .error { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="w">
+        <h1>PlaceOS 창업자용 핵심 데이터 요약 및 PPPP 설계 적용 보고서</h1>
+
+        <h2>Executive Summary</h2>
+        <div class="card">
+            PlaceOS는 예비 창업자 및 상업용 부동산 투자자를 위한 데이터 기반 의사결정 플랫폼입니다. 가로수길 카페 창업 사례를 통해, 상권 분석(Platform)부터 자리 선정(Page), 수익성 계산(Posting), 그리고 검증 프로그램(Program)까지의 'PPPP 프레임워크'를 적용하여 창업 리스크를 최소화합니다.
+        </div>
+
+        <h2>1. Platform: 상권 플랫폼 및 입지 적합도 분석</h2>
+        <div class="card">
+            서울 81개 상권 중 데이터에 기반하여 입지를 필터링합니다. 가로수길의 경우, 카페 업종 비중 23.1%로 높은 경쟁도를 보이며, 모델상 입지 적합도는 44위 수준입니다.
+        </div>
+
+        <h2>2. Page: 건물 · 공실 · 층 단위 자리 분석</h2>
+        <div class="card">
+            가로수길 대상 분석: 841개 건물 중 203개 확정 공실 확인. 정밀한 공실률(16.6%) 및 층 단위 매물 데이터(429개)를 제공하여 비어있는 자리를 선제적으로 식별합니다.
+        </div>
+
+        <h2>3. Posting: 매물별 손익분기점 및 투자 분석</h2>
+        <div class="card">
+            가로수길 신사동 방림빌딩(1층, 23.4평) 기준:
+            <ul>
+                <li>필요 초기 현금: 약 1억 5,603만 원</li>
+                <li>본전(BEP) 매출 달성 필요 판매 건수: 하루 264건 (최대 처리 능력 340건의 78%)</li>
+                <li>월세 상한: 363만 원 (사장 몫 확보 기준)</li>
+                <li>본전 매출 배수: 기준선 대비 1.59배</li>
+            </ul>
+        </div>
+
+        <h2>4. Program: 검증 프로그램</h2>
+        <div class="card">
+            팝업 매장(14일) 등을 통한 실질 수요 검증. 하루 결제 건수가 212건 미만 시 기각하는 등 정량적 판정 로직을 통해 맹목적인 창업을 방지합니다.
+        </div>
+
+        <h2>발견된 문제점 및 개선 사항</h2>
+        <div class="card">
+            <ul>
+                <li><span class="error">F1-F43 발견:</span> 초기 투자 단위 오류, 지하층 데이터 누락, 로그인 콜백 고정 이슈 등 43개 앱 점검 사항 식별.</li>
+                <li><span class="error">개선점:</span> 층 단위 임대료 추정 로직 정밀화, 로그인 로직 다변화(placeos.co.kr 전환), 3D 트윈 데이터 정확도 개선 필요.</li>
+            </ul>
+        </div>
+
+        <h2>창업 성공을 위한 가이드</h2>
+        <div class="card">
+            데이터가 가리키는 '기준선'은 단순히 희망 사항이 아닌 '생존선'입니다. PlaceOS가 제공하는 본전 매출 배수(1.59배)를 참고하여, 자신의 예산과 처리 능력이 허용하는지 먼저 검증하십시오.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{
+  "jj-east": {
+    "status": "gold",
+    "tier": "Tier1(대장)",
+    "reference_coverage_pct": 100.0,
+    "reference_vacancy_pct": 21.2,
+    "served_basis_vacancy_pct": 20.9,
+    "served_basis_anchor_gap_pp": -7.09,
+    "anchor_pct": 27.99,
+    "anchor_is_fallback": false,
+    "ledger_counts": [
+      276,
+      276,
+      0
+    ],
+    "note": "Gold 산출·검증 완료. 서빙 목록 변경·배포와 별개"
+  },
+  "jj-west": {
+    "status": "gold",
+    "tier": "Tier1(대장)",
+    "reference_coverage_pct": 100.0,
+    "reference_vacancy_pct": 34.9,
+    "served_basis_vacancy_pct": 28.3,
+    "served_basis_anchor_gap_pp": 25.18,
+    "anchor_pct": 3.12,
+    "anchor_is_fallback": false,
+    "ledger_counts": [
+      627,
+      627,
+      0
+    ],
+    "note": "Gold 산출·검증 완료. 서빙 목록 변경·배포와 별개"
+  },
+  "jj-newtown": {
+    "status": "gold",
+    "tier": "Tier1(대장)",
+    "reference_coverage_pct": 100.0,
+    "reference_vacancy_pct": 30.8,
+    "served_basis_vacancy_pct": 13.7,
+    "served_basis_anchor_gap_pp": -3.32,
+    "anchor_pct": 17.02,
+    "anchor_is_fallback": false,
+    "ledger_counts": [
+      600,
+      600,
+      0
+    ],
+    "note": "Gold 산출·검증 완료. 서빙 목록 변경·배포와 별개"
+  },
+  "jj-hanok": {
+    "status": "gold",
+    "tier": "Tier1(대장)",
+    "reference_coverage_pct": 100.0,
+    "reference_vacancy_pct": 40.4,
+    "served_basis_vacancy_pct": 8.5,
+    "served_basis_anchor_gap_pp": -22.74,
+    "anchor_pct": 31.24,
+    "anchor_is_fallback": false,
+    "ledger_counts": [
+      395,
+      395,
+      0
+    ],
+    "note": "Gold 산출·검증 완료. 서빙 목록 변경·배포와 별개"
+  },
+  "jj-songcheon": {
+    "status": "gold",
+    "tier": "Tier1(대장)",
+    "reference_coverage_pct": 100.0,
+    "reference_vacancy_pct": 47.5,
+    "served_basis_vacancy_pct": 20.9,
+    "served_basis_anchor_gap_pp": 2.85,
+    "anchor_pct": 18.05,
+    "anchor_is_fallback": false,
+    "ledger_counts": [
+      312,
+      312,
+      0
+    ],
+    "note": "Gold 산출·검증 완료. 서빙 목록 변경·배포와 별개"
+  }
+}

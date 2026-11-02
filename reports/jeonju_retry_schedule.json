@@ -1,0 +1,11 @@
+{
+  "task": "PlaceOS-Jeonju-QuotaRetry",
+  "start_kst": "2026-11-02T00:05:00+09:00",
+  "poll_minutes": 10,
+  "maximum_api_retries": 1,
+  "requires": "로그온·AC 전원·네트워크",
+  "verified": true,
+  "active": false,
+  "reason": "5상권 Gold 완료·실제 429 미발생",
+  "api_retries_after_midnight": 0
+}
