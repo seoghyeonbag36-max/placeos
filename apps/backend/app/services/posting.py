@@ -20,9 +20,11 @@ from __future__ import annotations
 
 from app.core.config import settings
 from app.services import districts as svc
+from app.services import floor_vacancy
 from app.services import posting_copilot
 from app.services import posting_inputs
 from app.services import industry_detail
+from app.services import vacant_inventory
 
 
 def _call_copilot(district_id: str, unit: dict,
@@ -52,10 +54,46 @@ def _call_copilot(district_id: str, unit: dict,
         return None, f"코파일럿 호출 중 예외: {type(exc).__name__}: {exc}"
 
 
+def _floor_unit_raw(district_id: str, unit_id: str) -> dict | None:
+    """층 매물(`vfu-`) → 3-Tier 입력 모양. 그 층의 대장 면적·층 계수로 계산한다."""
+    u = next((x for x in (floor_vacancy.load(district_id) or {}).get("units") or [] if x.get("id") == unit_id), None)
+    if u is None:
+        return None
+    # `floor_mix` 를 비우면 임대료 계수가 건물 혼합이 아니라 이 층 라벨의 것이 된다.
+    return {"id": u["id"], "n": u.get("n"), "lat": u.get("lat"), "lng": u.get("lng"),
+            "area": u.get("area"), "floor": u.get("floor_label") or "1F", "was": u.get("was") or ""}
+
+
+def _resolve_requested_unit(district_id: str, unit_id: str | None, area_py_override: float | None) -> dict | None:
+    """요청이 층 매물이거나 면적을 덮어쓸 때만 입력을 다시 푼다. 그 밖은 종전 경로 그대로다(`vu-` 응답 불변).
+
+    ⚠ 층 매물은 이 한 번의 계산에만 쓴다 — `/postings`·ROI 표본에 넣으면 중앙값 유닛이 상층부로 올라가 프라임
+    프리미엄 트립와이어가 부호를 넘는다(`floor_vacancy` 머리말).
+    유동 등급은 거점 안 서열이라 건물 유닛과 함께 풀고 그중 이 유닛만 꺼낸다.
+    """
+    peers = vacant_inventory.units(district_id) if posting_inputs.for_district(district_id) else []
+    if unit_id and unit_id.startswith("vfu-"):
+        raw = _floor_unit_raw(district_id, unit_id)
+        if raw is None:
+            return None
+        peers = [*peers, raw]
+    elif area_py_override is None:
+        return None
+    if not peers:
+        return None
+    target = unit_id or peers[0].get("id")
+    if not any(p.get("id") == target for p in peers):
+        return None
+    if area_py_override is not None:
+        peers = [{**p, "area": area_py_override} if p.get("id") == target else p for p in peers]
+    return next(u for u in posting_inputs.resolve_units(district_id, peers) if u.get("id") == target)
+
+
 def simulate(district_id: str, unit_id: str | None = None,
              industry_type: str | None = None, strategy: str | None = None,
              prem: int | None = None, industry_detail_key: str | None = None,
-             operating_inputs: dict | None = None) -> dict | None:
+             operating_inputs: dict | None = None,
+             area_py_override: float | None = None) -> dict | None:
     """공실 유닛의 입점 시뮬레이션. 코파일럿 우선, 실패 시 3-Tier 폴백.
 
     strategy(premium/value/factory) 지정 시 해당 전략만, 미지정 시 3전략 비교 반환.
@@ -63,14 +101,31 @@ def simulate(district_id: str, unit_id: str | None = None,
     계산하고 `inputs_source["prem"]` 이 어느 쪽인지 밝힌다(2026-08-24 결정).
     반환: SimulateResult 스키마 dict. 거점/유닛을 찾지 못하면 None.
     """
-    units = svc.resolved_units(district_id)
-    if not units:
-        return None
-    unit = next((u for u in units if u["id"] == unit_id), None) if unit_id else units[0]
+    is_floor_unit = bool(unit_id and unit_id.startswith("vfu-"))
+    unit = None
+    if is_floor_unit or area_py_override is not None:
+        unit = _resolve_requested_unit(district_id, unit_id, area_py_override)
     if unit is None:
-        return None
+        if is_floor_unit:
+            return None
+        units = svc.resolved_units(district_id)
+        if not units:
+            return None
+        unit = next((u for u in units if u["id"] == unit_id), None) if unit_id else units[0]
+        if unit is None:
+            return None
+    if is_floor_unit:
+        # 면적은 그 층의 대장 실측이다. `gold-ledger` 를 건물 유닛만 달아 주는 규칙(`_origin_src`)을 여기서 메운다.
+        unit = {**unit, "inputs_source": {**(unit.get("inputs_source") or {}), "area": "gold-ledger-floor",
+                                          "prem": "absent", "floor": "floor_unit"}}
+    if area_py_override is not None:
+        unit = {**unit, "area": area_py_override,
+                "inputs_source": {**(unit.get("inputs_source") or {}), "area": "user_input"}}
     if operating_inputs is not None and not industry_detail_key:
         raise ValueError("운영 입력에는 세부 업종이 필요합니다")
+    # 화면의 BEP·Program 인계도 이 계산과 정확히 같은 면적·임대료를 쓴다.
+    resolved_inputs = ({"area_py": unit["area"], "rent_manwon": unit["rent"], "floor": unit["floor"]}
+                       if is_floor_unit or area_py_override is not None else None)
     if industry_detail_key:
         from app.services import business_fit
         item = industry_detail.get(industry_detail_key)
@@ -85,13 +140,13 @@ def simulate(district_id: str, unit_id: str | None = None,
                 "industry_type": economics["label"], "scenarios": {},
                 "source": "user_input_scenario", "calculation_status": economics["status"],
                 "unavailable_reason": "필수 운영 조건을 모두 입력해 주세요" if economics["status"] == "needs_inputs" else None,
-                "economics": economics}
+                "economics": economics, "resolved_inputs": resolved_inputs}
     # 외식 평균 3-Tier를 다른 업종의 손익처럼 내보내지 않는다.
     # 업종 미선택은 종전 참고 계산이며 선택된 외식 업종도 세부 업종 예측이 아니다.
     if industry_type and industry_type.strip() not in {"카페", "카페·디저트", "음식점", "cafe", "restaurant"}:
         return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
                 "scenarios": {}, "source": "unavailable", "calculation_status": "unavailable",
-                "unavailable_reason": "선택 업종의 손익에는 세부 업종과 운영 조건이 필요합니다. 아래 세부 업종에서 입력해 주세요."}
+                "unavailable_reason": "선택 업종의 손익에는 세부 업종과 운영 조건이 필요합니다. 아래 세부 업종에서 입력해 주세요.", "resolved_inputs": resolved_inputs}
     if prem is not None:
         # 음수 권리금은 계약 위반이다 — 0 으로 잘라 내리지 않고 거부하면 400 이 필요한데,
         # 이 경로는 어떤 입력에도 같은 스키마를 돌려주는 것이 계약이라 0 으로 눕힌다.
@@ -112,7 +167,7 @@ def simulate(district_id: str, unit_id: str | None = None,
             return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
                     "scenarios": {}, "source": "unavailable", "source_note": fail,
                     "inputs_source": unit.get("inputs_source"), "inputs_quarter": posting_inputs.quarter(),
-                    "calculation_status": "unavailable", "unavailable_reason": reason}
+                    "calculation_status": "unavailable", "unavailable_reason": reason, "resolved_inputs": resolved_inputs}
         # 일부 tier 만 자료 부족이면(가락·불광의 고급화) 선 tier 로 답하고, 빠진 tier 는 시나리오 안에서
         # `available: False` + 사유로 내려간다(2026-10-28 사용자 결정 (b)).
         source = "fallback-3tier"
@@ -135,7 +190,7 @@ def simulate(district_id: str, unit_id: str | None = None,
             return {"district_id": district_id, "unit_id": unit["id"], "industry_type": industry_type,
                     "scenarios": {}, "source": "unavailable", "source_note": source_note,
                     "inputs_source": unit.get("inputs_source"), "inputs_quarter": posting_inputs.quarter(),
-                    "calculation_status": "unavailable", "unavailable_reason": picked.get("unavailable_reason")}
+                    "calculation_status": "unavailable", "unavailable_reason": picked.get("unavailable_reason"), "resolved_inputs": resolved_inputs}
         scenarios = {strategy: picked}
     return {
         "district_id": district_id,
@@ -149,4 +204,5 @@ def simulate(district_id: str, unit_id: str | None = None,
         "inputs_source": unit.get("inputs_source"),
         "inputs_quarter": posting_inputs.quarter(),
         "unviable_note": note,
+        "resolved_inputs": resolved_inputs,
     }

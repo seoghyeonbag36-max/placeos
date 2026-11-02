@@ -4,8 +4,12 @@ import type { OpeningSite } from "@/lib/api";
 import "./PlatformComparison.css";
 
 /** 자리 비교는 같은 상권에서 고른 응답만 받는다. 점수·평균·차이는 재계산하지 않는다. */
-export default function PlatformComparison({ sites, districtName, source, distinctNote }: {
+export default function PlatformComparison({ sites, districtName, source, distinctNote, selectedLabel, benchmarkNearby }: {
   sites: OpeningSite[]; districtName: string; source: string; distinctNote?: string;
+  /** 내 업종 이름. `/site-ranking` 값이 있을 때만 그 줄을 더한다 */
+  selectedLabel?: string | null;
+  /** 벤치마킹 검색 뒤에만 — 자리마다 반경 안 후보 수. 반경은 서버의 추천 매칭 반경 그대로다 */
+  benchmarkNearby?: { radiusM: number; count: (site: OpeningSite) => number } | null;
 }) {
   const headingId = useId();
   const chartLabelId = useId();
@@ -27,14 +31,27 @@ export default function PlatformComparison({ sites, districtName, source, distin
     { label: "해당 업종의 상권 평균 (0~1)", value: (site) => numberOrAbsent(site.distinct?.district_mean) },
     { label: "상권 평균 대비 차이 (p)", value: (site) => isProvided(site.distinct?.delta_pp)
       ? deltaLabel(site.distinct!.delta_pp) : "차이 미제공" },
-    { label: "직전 업종 · 상가정보 분류", value: (site) => site.was || "미제공" },
+    { label: "건물 대표 업종 · 상가정보 분류", value: (site) => site.was || "미제공" },
   ];
+  if (selectedLabel) {
+    rows.push(
+      { label: `${selectedLabel} 자리 점수 (0~1)`, value: (site) => site.selected?.score != null
+        ? String(site.selected.score) : site.selected?.rank_note ?? "상위 3개 밖" },
+      { label: `${selectedLabel} 상권 평균 (0~1)`, value: (site) => numberOrAbsent(site.selected?.district_mean) },
+      { label: `${selectedLabel} 상권 평균 대비 차이 (p)`, value: (site) => isProvided(site.selected?.delta_pp)
+        ? deltaLabel(site.selected!.delta_pp) : "차이 미제공" },
+    );
+  }
+  if (benchmarkNearby) {
+    rows.push({ label: `이 자리 반경 ${benchmarkNearby.radiusM}m 안 벤치마킹 후보 (반경은 서버 고정값)`,
+      value: (site) => site.lat != null && site.lng != null ? `${benchmarkNearby.count(site)}곳` : "좌표 미제공" });
+  }
 
   return (
     <section className="platform-comparison" aria-labelledby={headingId}>
       <div className="platform-comparison-heading">
         <h3 id={headingId}>{districtName} · 선택한 {sites.length}곳 근거 비교</h3>
-        <p>GNN 점수는 입점 성공 확률이 아닙니다. 직전 업종과 추천 업종은 분류 기준이 다릅니다.</p>
+        <p>GNN 점수는 입점 성공 확률이 아닙니다. 건물 대표 업종은 그 건물의 현재 업종이지 직전 입점 업종이 아니고, 추천 업종과 분류 기준이 다릅니다.</p>
       </div>
       <p className="platform-comparison-source"><b>출처</b> {source}</p>
       {distinctNote && <p className="platform-comparison-note">{distinctNote}</p>}

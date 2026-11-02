@@ -6,3 +6,7 @@
 .benchmark-explorer small { display: block; }
 .benchmark-explorer button[aria-pressed="true"] { outline: 2px solid var(--brand); }
 .benchmark-explorer a { color: var(--brand); }
+
+.benchmark-radius { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-block: var(--sp-2); }
+.benchmark-radius button[aria-pressed="true"] { font-weight: 700; color: var(--track-platform); border-color: var(--track-platform); }
+.benchmark-radius small { font-size: 12px; color: var(--text-secondary); }

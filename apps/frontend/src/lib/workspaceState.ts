@@ -1,5 +1,5 @@
 /** Page의 탐색 조건과 후보는 앱 메모리에서만 유지한다. 서버 자료를 별도로 저장하지 않는다. */
-export type VacancyFilter = "all" | "full" | "partial" | "high" | "empty";
+export type VacancyFilter = "all" | "full" | "partial" | "high" | "empty" | "confirmed" | "probable" | "unknown";
 
 export interface PageWorkspace {
   districtId: string;
@@ -8,6 +8,8 @@ export interface PageWorkspace {
   selectedId: string | null;
   savedIds: Record<string, string[]>;
   notes: Record<string, string>;
+  /** Platform 「이 상권 공실 3D로 보기」 — Page 가 열리면 트윈을 띄우고 지운다 */
+  openTwin?: boolean;
 }
 
 export const createPageWorkspace = (): PageWorkspace => ({
@@ -20,6 +22,8 @@ export interface BuildingSelection {
   districtId: string;
   buildingId: string;
   buildingName: string;
+  /** 3D 트윈에서 층을 골라 넘겼으면 층 매물 id(`vfu-`) */
+  unitId?: string;
 }
 
 /**
@@ -32,6 +36,7 @@ export interface BuildingSelection {
  */
 export interface ProgramHandoff {
   districtId: string;
+  districtName?: string;
   unitId: string;
   unitName: string;
   lat: number;
@@ -45,4 +50,6 @@ export interface ProgramHandoff {
   industry: string | null;
   /** 회수되는 전략 중 추천(없으면 가장 빠른 것)의 이름. 계산 전·전부 회수 불가면 null */
   strategy: string | null;
+  /** 생성 시점에 확인한 비용 결과. 숫자는 재계산하거나 매출 실측처럼 해석하지 않는다. */
+  calculation?: { input: unknown; result: import("./api").SimulateResult };
 }

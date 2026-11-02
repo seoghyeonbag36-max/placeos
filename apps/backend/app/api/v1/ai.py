@@ -1,8 +1,12 @@
 """AI 추론 엔드포인트 — LSTM 공실 예측 / GNN 업종 추천 / 매출 시뮬레이션."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from app.core.config import settings
+from app.core.security import CurrentUser, get_current_user
+from app.schemas.interior import InteriorRequest, InteriorResult
+from app.services import interior as interior_svc
 
-from app.schemas.posting import SimulateRequest, SimulateResult
+from app.schemas.posting import SimulateRequest, SimulateResult, SimulateResultWithInputs
 from app.services import business_fit as fit_svc
 from app.services import industry_recommend as industry_svc
 from app.services import posting as posting_svc
@@ -10,6 +14,19 @@ from app.services import industry_detail as detail_svc
 from app.services import vacancy_forecast as vacancy_svc
 
 router = APIRouter()
+
+
+@router.post("/interior-preview", response_model=InteriorResult)
+async def interior_preview(
+    req: InteriorRequest, current: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """인증·명시적 동의 후 참고 이미지 한 장. 미설정·공급자 실패는 이미지 없이 실패한다."""
+    if not settings.interior_images_enabled or not settings.openai_api_key:
+        raise HTTPException(503, "이미지 생성이 설정되지 않았습니다. 생성 지시문을 저장해 사용할 수 있습니다.")
+    try:
+        return await interior_svc.generate(req)
+    except Exception as exc:
+        raise HTTPException(502, "이미지를 생성하지 못했습니다. 입력과 공급자 상태를 확인하세요.") from exc
 
 
 class VacancyRequest(BaseModel):
@@ -123,7 +140,7 @@ async def district_industries(district_id: str) -> dict[str, object]:
     return out
 
 
-@router.post("/simulate-revenue", response_model=SimulateResult)
+@router.post("/simulate-revenue", response_model=SimulateResultWithInputs | SimulateResult)
 async def simulate_revenue(req: SimulateRequest) -> dict:
     """입점 시뮬레이션(Posting) — 외부 AI 창업 코파일럿 어댑터 경유.
 
@@ -132,7 +149,8 @@ async def simulate_revenue(req: SimulateRequest) -> dict:
     try:
         result = posting_svc.simulate(req.district_id, req.unit_id,
                                       req.industry_type, req.strategy, req.prem,
-                                      req.industry_detail_key, req.operating_inputs)
+                                      req.industry_detail_key, req.operating_inputs,
+                                      area_py_override=req.area_py_override)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if result is None:

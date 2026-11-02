@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -19,8 +20,9 @@ for _stream in (sys.stdout, sys.stderr):
             pass
 
 DATA_ROOT = Path(__file__).resolve().parents[1]  # data/
-BRONZE = DATA_ROOT / "bronze"
-SILVER = DATA_ROOT / "silver"
+# worktree 처럼 bronze·silver 가 없는 체크아웃에서 빌드할 때 원천 루트만 돌린다(출력 GOLD 는 그대로).
+BRONZE = Path(os.environ.get("PLACEOS_BRONZE_ROOT") or DATA_ROOT / "bronze")
+SILVER = Path(os.environ.get("PLACEOS_SILVER_ROOT") or DATA_ROOT / "silver")
 GOLD = DATA_ROOT / "gold"
 
 

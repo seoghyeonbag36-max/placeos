@@ -1,5 +1,7 @@
 export interface ViewerBuilding {
   name: string;
+  /** 있으면 건물 상세가 그 지번 인허가 이력을 부른다. 샘플·식별자 없는 화면에서는 비워 둔다. */
+  buildingId?: string | null;
   capacity: number;    // 상가 수용 **호** 수(분모). 층 근거가 있으면 상업 **층** 수
   active: number;      // 영업 **호** 수(분자)
   floors?: number;     // 건축물대장 지상 **층** 수 — 스택의 실제 높이
@@ -47,7 +49,8 @@ export function placeFloors(b: ViewerBuilding): FloorKind[] | null {
 
 /** 층 근거가 없는 건물 — 근사. 점유율만큼 아래부터 채운다. */
 export function approxFloors(b: ViewerBuilding): FloorKind[] {
-  const stack = Math.max(1, Math.min(b.floors || b.capacity, MAX_STACK));
+  // 층수를 모르면 1층으로 그린다. `capacity` 는 호실 수라 층으로 쓰면 지하상가가 20층 건물이 된다(F43).
+  const stack = Math.max(1, Math.min(b.floors || 1, MAX_STACK));
   const ratio = b.capacity > 0 ? Math.min(b.active / b.capacity, 1) : 0;
   const occ = Math.max(0, Math.min(Math.round(stack * ratio), stack));
   return Array.from({ length: stack }, (_, i) => (i < occ ? "occupied" : "vacant"));

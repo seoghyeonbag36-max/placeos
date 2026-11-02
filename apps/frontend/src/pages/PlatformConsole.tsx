@@ -1,15 +1,22 @@
-import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import DistrictPicker, { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import PlatformComparison from "@/components/PlatformComparison";
 import DistrictCompareDialog from "@/components/DistrictCompareDialog";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
+import TravelTimePanel, { type TravelDestination } from "@/components/TravelTimePanel";
+import DistrictMapExplorer from "@/components/DistrictMapExplorer";
+import DistrictBrief from "@/components/DistrictBrief";
+import { distanceM } from "@/lib/districtMapModel";
+import { loadJourney, updateJourney } from "@/lib/journeyState";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import {
-  getPlatformProfile, getSentiment, getVacancyHeatmap, listDistricts, predictVacancy, recommendIndustry,
+  getHubOutlines, getIndustryFit, getPlatformProfile, getSentiment, getSiteRanking, getVacancyHeatmap, listDistricts,
+  listIndustries, predictVacancy, recommendIndustry,
 } from "@/lib/api";
 import type {
-  DistrictSummary, IndustryOption, IndustryRecommend, OpeningSite, PlatformProfile, VacancyForecast, Zone,
+  BenchmarkPlaces, DistrictSummary, HubOutlines, IndustryFit, IndustryOption, IndustryRecommend, OpeningSite, PlatformProfile,
+  SiteRanking, VacancyForecast, Zone,
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
@@ -35,6 +42,8 @@ import "./PlatformConsole.css";
 const DEFAULT_DISTRICT = "garosugil";
 const QUARTERS = [1, 2, 3, 4];
 const SITES_PAGE = 9;
+/** 묶음 임대 중앙값을 얻을 때 쓰는 업종 — `/ai/industry-fit` 은 어느 업종이든 줄마다 같은 임대를 싣는다 */
+const RENT_ONLY_INDUSTRY = "cafe";
 
 /** 업종 군 색 — 순위 순서대로 집는다(군 이름에 색을 고정하면 거점마다 범례가 뒤바뀐다) */
 const GROUP_COLORS = [
@@ -69,7 +78,7 @@ function approxVacancyPct(fc: VacancyForecast | null, hub?: DistrictSummary): nu
 const dirMark = (d: string) => (d === "up" ? "▲" : d === "down" ? "▼" : "—");
 
 export default function PlatformConsole({ districtId: sharedDistrict, onDistrictChange, onOpenInPage,
-  business = null, industries = null, onOpenBusiness, onTryIndustry }: {
+  business = null, industries = null, onOpenBusiness, onTryIndustry, onOpenPage }: {
   /** 네 트랙이 공유하는 상권(App). 주면 제어 모드, 안 주면 화면이 스스로 든다(단독 렌더·테스트). */
   districtId?: string;
   onDistrictChange?: (id: string) => void;
@@ -82,6 +91,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   onOpenBusiness?: () => void;
   /** 업종 바꾸기 표 「이 업종으로 입점 계산 →」 → Posting 업종칸(인계 표 Platform → Posting). */
   onTryIndustry?: (input: string) => void;
+  /** 상세 카드 「이 상권 공실 3D로 보기 → Page」. 상권은 네 트랙이 공유하니 트랙만 옮긴다. */
+  onOpenPage?: () => void;
 } = {}) {
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
   const [ownDistrict, setOwnDistrict] = useState(sharedDistrict ?? DEFAULT_DISTRICT);
@@ -182,12 +193,59 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
   // 창업·옮기기이고 내 업종이 서빙 모델 어휘 안이면 자리를 **내 업종 점수 순**으로 세우고 칩도 그 점수를 말한다
   // (화면설계서 3판 「자리 칩 · 자리 카드 — 내 업종이 있을 때」). 바꾸기·어휘 밖이면 2판 규칙 그대로.
-  const myIndustry = findIndustry(industries, business?.industryKey);
+  // 상권 지도에서 고른 업종이 「내 사업」보다 앞선다(이 화면 안에서 바꿔 보는 값). 저장은 이 브라우저 journey 뿐이다.
+  const [pickedIndustry, setPickedIndustry] = useState<string | null>(() => loadJourney().industryKey ?? null);
+  const pickIndustry = useCallback((key: string) => { setPickedIndustry(key); updateJourney({ industryKey: key }); }, []);
+  const [ownIndustries, setOwnIndustries] = useState<IndustryOption[] | null>(null);
+  const industryList = industries ?? ownIndustries;
+  useEffect(() => {
+    if (industries) return;
+    let live = true;
+    listIndustries().then((r) => { if (live) setOwnIndustries(r.industries); }).catch(() => { /* 선택지 없이 목록은 돈다 */ });
+    return () => { live = false; };
+  }, [industries]);
+  const rankKey = pickedIndustry ?? workIndustryKey(business);
+  const rankIndustry = findIndustry(industryList, rankKey);
+  const myIndustry = pickedIndustry ? rankIndustry : findIndustry(industryList, business?.industryKey);
   // 서빙 어휘 밖(fit_unavailable_reason)이면 모델 라벨이 있어도 점수가 없다 — 모델 라벨이 없는 업종과 똑같이 둔다.
-  const mySite = business?.goal !== "pivot" && myIndustry?.model_label && !myIndustry.fit_unavailable_reason
+  const mySite = (pickedIndustry || business?.goal !== "pivot") && myIndustry?.model_label && !myIndustry.fit_unavailable_reason
     ? { label: myIndustry.model_label, input: myIndustry.input } : null;
+
+  // 상권 지도 · 상세 카드 재료 — 패널이 처음 그려질 때 한 번씩이다.
+  const [outlines, setOutlines] = useState<HubOutlines | null>(null);
+  const [outlineErr, setOutlineErr] = useState(false);
+  useEffect(() => {
+    let live = true;
+    getHubOutlines().then((o) => { if (live) { setOutlines(o); setOutlineErr(o === null); } })
+      .catch(() => { if (live) setOutlineErr(true); });
+    return () => { live = false; };
+  }, []);
+  const fitKey = rankKey ?? RENT_ONLY_INDUSTRY;
+  const [fit, setFit] = useState<IndustryFit | null>(null);
+  useEffect(() => {
+    let live = true;
+    getIndustryFit(fitKey).then((f) => { if (live) setFit(f); }).catch(() => { if (live) setFit(null); });
+    return () => { live = false; };
+  }, [fitKey]);
+  const [ranking, setRanking] = useState<{ key: string; r: SiteRanking | null } | null>(null);
+  useEffect(() => {
+    if (!rankKey) return;
+    let live = true;
+    const key = `${districtId}:${rankKey}`;
+    getSiteRanking(districtId, rankKey).then((r) => { if (live) setRanking({ key, r }); })
+      .catch(() => { if (live) setRanking({ key, r: null }); });
+    return () => { live = false; };
+  }, [districtId, rankKey]);
+  const rankingHere = rankKey && ranking?.key === `${districtId}:${rankKey}` ? ranking.r : null;
+  const [benchmark, setBenchmark] = useState<BenchmarkPlaces | null>(null);
   const openingsHere = useMemo(() => {
     if (prof?.district_id !== districtId) return null;
+    // 서버가 선택 업종 점수 순으로 세운 자리(값 없는 자리는 뒤로). 모델 밖 업종이면 점수가 없으니 원래 순서다.
+    if (rankingHere?.model_covered && rankingHere.sites.length) {
+      const sites = rankingHere.sites.filter((s) => s.unit_id && s.name)
+        .map((s) => ({ ...s, unit_id: s.unit_id as string, name: s.name as string }));
+      return { ...prof.openings, sites };
+    }
     if (!mySite) return prof.openings;
     const score = (site: OpeningSite) => site.recommendations.find((r) => r.industry === mySite.label)?.score ?? -1;
     // 안정 정렬 — 점수가 같으면(둘 다 3위 밖 등) 원래 순서(상권 평균 대비 두드러진 자리부터)를 지킨다.
@@ -196,7 +254,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     return { ...prof.openings, sites };
     // mySite 는 렌더마다 새 객체라 값으로 비교한다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prof, districtId, mySite?.label]);
+  }, [prof, districtId, mySite?.label, rankingHere]);
   const sitesHere = openingsHere?.sites ?? null;
   const boundary = usePlatformMap({ districtId, sites: sitesHere, selectedIds: selectedSiteIds, onToggle: toggleSite, mySite });
   // 상권 비교의 업종 — 해 볼 업종(바꾸기면 바꿀 업종). 추천 모델 밖이면 입지 점수 줄을 빼고 그렇다고 적는다
@@ -206,6 +264,23 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   const togglePick = () => setDistrictPicks((ids) => (ids.includes(districtId) ? ids.filter((x) => x !== districtId)
     : ids.length < COMPARE_MAX ? [...ids, districtId] : ids));
   const pickNames = districtPicks.map((id) => districts.find((d) => d.id === id)?.name ?? id);
+  // 고른 자리(없으면 맨 위 자리) — 벤치마킹 반경의 기준 · 소요시간 목적지
+  const firstSite = selectedSiteIds.map((id) => sitesHere?.find((s) => s.unit_id === id)).find(Boolean) ?? null;
+  const anchorSite = firstSite ?? sitesHere?.[0] ?? null;
+  const benchmarkAnchor = anchorSite?.lat != null && anchorSite.lng != null
+    ? { id: anchorSite.unit_id, name: anchorSite.name, lat: anchorSite.lat, lng: anchorSite.lng } : null;
+  const benchmarkHere = benchmark?.district_id === districtId && benchmark.places.length ? benchmark : null;
+  const matchRadius = openingsHere?.match_radius_m ?? null;
+  const benchmarkNearby = useMemo(() => (benchmarkHere && matchRadius != null ? {
+    radiusM: matchRadius,
+    count: (site: OpeningSite) => site.lat == null || site.lng == null ? 0
+      : benchmarkHere.places.filter((p) => distanceM({ lat: site.lat as number, lng: site.lng as number }, p) <= matchRadius).length,
+  } : null), [benchmarkHere, matchRadius]);
+  const travelDestinations: TravelDestination[] = hub ? [
+    { id: "center", label: `${hub.name} 중심`, point: { lat: hub.center[0], lng: hub.center[1] } },
+    ...(firstSite?.lat != null && firstSite.lng != null
+      ? [{ id: firstSite.unit_id, label: firstSite.name, point: { lat: firstSite.lat, lng: firstSite.lng } }] : []),
+  ] : [];
 
   return (
     <div className="platconsole"><div className="wrap">
@@ -271,13 +346,21 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           onClose={() => setComparingDistricts(false)} />
       )}
 
+      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
+        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
+      {hub && <DistrictBrief hub={hub} districts={districts} outline={outlines?.hubs.find((o) => o.id === districtId)}
+        identity={prof?.district_id === districtId ? prof.identity : null} fitForRent={fit}
+        picked={pickedHere} pickDisabled={!pickedHere && districtPicks.length >= COMPARE_MAX} onTogglePick={togglePick}
+        onOpenPage={onOpenPage} />}
+      {hub && <TravelTimePanel key={`travel:${districtId}`} destinations={travelDestinations} />}
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
-      <BenchmarkExplorer key={`${districtId}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
+      <BenchmarkExplorer key={`${districtId}:${pickedIndustry}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
         districtId={districtId}
-        defaultIndustry={business?.goal === "pivot"
+        defaultIndustry={pickedIndustry ?? (business?.goal === "pivot"
           ? business.targetIndustryDetailKey ?? business.targetIndustryKey ?? ""
-          : business?.industryDetailKey ?? business?.industryKey ?? ""} />
+          : business?.industryDetailKey ?? business?.industryKey ?? "")}
+        anchor={benchmarkAnchor} radiusM={matchRadius} onResult={setBenchmark} />
 
       {profErr && (
         <div className="err">
@@ -295,9 +378,17 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
       {!profErr && !prof && <div className="loading">상권 정체성 불러오는 중…</div>}
 
       {prof?.identity && <IdentitySection ident={prof.identity} hub={hub} />}
+      {prof?.district_id === districtId && prof.identity && (
+        <KeywordSearchSection words={prof.identity.keywords.words.map((w) => w.word)} districtName={hub?.name ?? districtId} />
+      )}
       {openingsHere && (
         <OpeningsSection key={districtId} openings={openingsHere} districtName={hub?.name ?? districtId} mySite={mySite}
           selectedIds={selectedSiteIds} onToggle={toggleSite} onClear={() => setSelectedSiteIds([])}
+          selectedLabel={rankingHere?.model_covered ? rankIndustry?.label ?? null : null}
+          rankNote={rankingHere && !rankingHere.model_covered
+            ? `${rankIndustry?.label ?? "이 업종"} 자리 점수 없음 — ${rankingHere.unavailable_reason ?? "추천 모델이 다루지 않는 업종"}. 자리는 상권 평균과 가장 다른 순서입니다.`
+            : rankingHere?.model_covered ? rankingHere.note : null}
+          benchmarkNearby={benchmarkNearby}
           onOpenInPage={onOpenInPage ? (site) => onOpenInPage(siteToBuilding(districtId, site)) : undefined} />
       )}
 
@@ -723,6 +814,30 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
   );
 }
 
+/** 단어마다 외부 검색 링크 — 수치를 만들지 않고 원문으로 내보낸다. */
+function KeywordSearchSection({ words, districtName }: { words: string[]; districtName: string }) {
+  const q = (word: string) => encodeURIComponent(`${districtName} ${word}`);
+  const shown = words.slice(0, 10);
+  return (
+    <Fold title="이 상권 검색어로 직접 찾아보기" summary={shown.length ? `단어 ${shown.length}개 · 네이버 · 인스타 링크` : "수집된 단어 없음"}>
+      <p className="pnote">자주 쓰인 단어입니다. 어떤 단어가 알고리즘에 유리한지는 측정하지 않았습니다.
+        광고 글이 섞여 있을 수 있으니 원문을 읽어 보세요. 인스타그램은 수집하지 않아 수치가 없고 태그 링크만 드립니다.</p>
+      {shown.length === 0 && <div className="empty">이 상권에서 수집된 단어가 없습니다.</div>}
+      <ul className="kwlinks">{shown.map((word) => (
+        <li key={word}>
+          <b>{word}</b>
+          <span>
+            <a href={`https://search.naver.com/search.naver?where=blog&query=${q(word)}`} target="_blank" rel="noopener noreferrer">네이버 블로그</a>
+            <a href={`https://search.naver.com/search.naver?where=news&query=${q(word)}`} target="_blank" rel="noopener noreferrer">뉴스</a>
+            <a href={`https://search.naver.com/search.naver?where=article&query=${q(word)}`} target="_blank" rel="noopener noreferrer">카페</a>
+            <a href={`https://www.instagram.com/explore/tags/${encodeURIComponent(word.replace(/\s+/g, ""))}/`} target="_blank" rel="noopener noreferrer">인스타 태그</a>
+          </span>
+        </li>
+      ))}</ul>
+    </Fold>
+  );
+}
+
 /** 수집 원문 링크와 행정동 소비를 공간 단위와 함께 표시한다. */
 export function CollectedSection({ data }: { data: NonNullable<NonNullable<PlatformProfile["identity"]>["collected"]> }) {
   const channels: Record<string, string> = { blog: "블로그", cafearticle: "카페글", news: "뉴스" };
@@ -762,8 +877,11 @@ function Spark({ points, direction }: { points: number[]; direction: string }) {
 
 /* ───────────────── ② 어느 자리에 어떤 업소가 ───────────────── */
 
-function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggleSite, onClear, onOpenInPage, mySite }: {
+function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggleSite, onClear, onOpenInPage, mySite,
+  selectedLabel, rankNote, benchmarkNearby }: {
   openings: PlatformProfile["openings"]; districtName: string;
+  selectedLabel?: string | null; rankNote?: string | null;
+  benchmarkNearby?: { radiusM: number; count: (site: OpeningSite) => number } | null;
   /** 3판 — 창업·옮기기 · 서빙 어휘(산출물 기준) 안 업종이면 자리가 이 업종 점수 순으로 온다 */
   mySite?: { label: string; input: string } | null;
   onOpenInPage?: (site: OpeningSite) => void;
@@ -795,6 +913,7 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
       summary={<>공실 <b>{openings.unit_count}곳</b> · 추천이 붙은 자리 <b>{openings.matched_count}곳</b>
         {" · "}{mySite ? <><b>{mySite.input}</b> 점수 높은 자리부터</> : "상권 평균과 가장 다른 자리부터"}</>}>
 
+      {rankNote && <p className="pnote" role="note">{rankNote}</p>}
       {sites.length === 0 && <div className="loading">이 상권에는 실측 공실 자리가 없다.</div>}
 
       {sites.length > 0 && (
@@ -841,7 +960,8 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
           <div id={comparisonId}>
             {canCompare && comparisonOpen && (
               <PlatformComparison sites={selectedSites} districtName={districtName}
-                source={openings.source} distinctNote={openings.distinct_note} />
+                source={openings.source} distinctNote={openings.distinct_note}
+                selectedLabel={selectedLabel} benchmarkNearby={benchmarkNearby} />
             )}
           </div>
           <fieldset className="site-candidates" aria-describedby={selectionHintId}>
@@ -867,7 +987,7 @@ function OpeningsSection({ openings, districtName, selectedIds, onToggle: toggle
       )}
 
       <div className="sitesrc">
-        추천 점수는 입점 성공 확률이 아닙니다. 직전 업종과 추천 업종은 분류 기준이 다릅니다.
+        추천 점수는 입점 성공 확률이 아닙니다. 건물 대표 업종은 그 건물의 현재 업종이지 직전 입점 업종이 아닙니다.
       </div>
     </Fold>
   );
@@ -933,7 +1053,21 @@ function SiteCard({ site, seq, selected, disabled, onToggle, onOpenInPage }: {
         </div>
       )}
 
-      {site.was && <div className="swas">직전 업종 <b>{site.was}</b></div>}
+      {site.selected && (
+        <div className="sdistinct">
+          {site.selected.label ?? site.selected.industry}{" "}
+          {site.selected.score != null
+            ? <>자리 점수 <b>{pct(site.selected.score)}</b>
+              {site.selected.district_mean != null && <> · 상권 평균 {pct(site.selected.district_mean)}</>}
+              {site.selected.delta_pp != null && <span>{site.selected.delta_pp > 0 ? "+" : ""}{site.selected.delta_pp}p</span>}</>
+            : <span className="value-absent">{site.selected.rank_note ?? "상위 3개 밖"}</span>}
+        </div>
+      )}
+      {site.floor_units && site.floor_units.length > 0 && (
+        <div className="swas">이 건물 빈 층 후보 <b>{site.floor_units.map((u) => u.floor_label ?? "층 미상").slice(0, 4).join(" · ")}</b>
+          {site.floor_units.length > 4 && ` 외 ${site.floor_units.length - 4}`}</div>
+      )}
+      {site.was && <div className="swas">건물 대표 업종 <b>{site.was}</b></div>}
       {onOpenInPage && (
         <button type="button" className="site-open-page" onClick={onOpenInPage}
           aria-label={`${site.name} Page에서 이 건물 보기`}>Page에서 이 건물 보기 →</button>

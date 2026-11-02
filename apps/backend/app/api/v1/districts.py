@@ -7,8 +7,10 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.district import DistrictSummary, Posting, Zone
 from app.schemas.floor_vacancy import FloorVacancyList
+from app.schemas.renewal import DistrictReport, HubOutlines, NearbyStores, RentHistory, SiteRanking
 from app.services import districts as svc
-from app.services import floor_vacancy, platform_profile
+from app.services import (district_report, floor_vacancy, hub_outlines, nearby_stores, platform_profile,
+                          rone_history)
 
 router = APIRouter()
 
@@ -17,6 +19,15 @@ router = APIRouter()
 async def list_districts() -> list[dict]:
     """서울 13 Page 거점 요약(감성·공실·리뷰·Tier 구성) — City Dashboard 용."""
     return svc.list_summaries()
+
+
+@router.get("/outlines", response_model=HubOutlines)
+async def get_outlines() -> dict:
+    """전 거점 실측 범위 외곽선 + 유형. ⚠ `/{district_id}` 보다 먼저 선언해야 한다."""
+    out = hub_outlines.outlines()
+    if out is None:
+        raise HTTPException(status_code=404, detail="hub outlines not built")
+    return out
 
 
 @router.get("/{district_id}/summary", response_model=DistrictSummary)
@@ -79,6 +90,69 @@ async def get_postings(district_id: str) -> list[dict]:
     if p is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {district_id}")
     return p
+
+
+@router.get("/{district_id}/rent-history", response_model=RentHistory)
+async def get_rent_history(district_id: str) -> dict:
+    """R-ONE 22분기 임대·공실 시계열. 표본 상권의 통계이고 거점 실측이 아니다."""
+    out = rone_history.history(district_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"no rent history for district: {district_id}")
+    return out
+
+
+@router.get("/{district_id}/site-ranking", response_model=SiteRanking)
+async def get_site_ranking(
+    district_id: str,
+    industry: str | None = Query(None, min_length=1, max_length=40),
+) -> dict:
+    """빈 자리를 선택 업종 기준으로 — 점수 내림차순(값 없는 자리는 뒤로) + 같은 지번의 층 매물."""
+    try:
+        out = platform_profile.site_ranking(district_id, industry)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"unknown district: {district_id}")
+    return out
+
+
+@router.get("/{district_id}/nearby-stores", response_model=NearbyStores)
+async def get_nearby_stores(
+    district_id: str,
+    lat: float = Query(..., ge=33, le=39, allow_inf_nan=False),
+    lng: float = Query(..., ge=124, le=132, allow_inf_nan=False),
+    radius: int = Query(100, ge=nearby_stores.MIN_RADIUS_M, le=nearby_stores.MAX_RADIUS_M),
+    industry: str | None = Query(None, min_length=1, max_length=40),
+    detail_key: str | None = Query(None, min_length=1, max_length=100),
+    floor: bool = Query(False, description="층 반영 — 경쟁 점포 자체의 층으로 참고 가중치를 곱한다"),
+    building_id: str | None = Query(None, min_length=1, max_length=60),
+) -> dict:
+    """이 자리 반경 안 점포 — 직선거리. 경쟁 강도는 이 상권 빈 자리들과 비교한 상대 위치다."""
+    try:
+        out = nearby_stores.nearby(district_id, lat, lng, radius, industry, detail_key,
+                                   floor_weighted=floor, building_id=building_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"no store data for district: {district_id}")
+    return out
+
+
+@router.get("/{district_id}/report", response_model=DistrictReport)
+async def get_report(
+    district_id: str,
+    industry: str | None = Query(None, min_length=1, max_length=40),
+    unit_id: str | None = Query(None, min_length=1, max_length=60),
+    building_id: str | None = Query(None, min_length=1, max_length=60),
+) -> dict:
+    """검증 리포트 — 칸마다 status·source·as_of·note·data. 비는 칸도 칸째 나간다."""
+    try:
+        out = district_report.report(district_id, industry, unit_id, building_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"unknown district: {district_id}")
+    return out
 
 
 @router.get("/{district_id}/floor-vacancies", response_model=FloorVacancyList)

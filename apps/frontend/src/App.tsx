@@ -34,6 +34,8 @@ const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
 const ProgramStudio = lazy(loadProgram);
+const ValidationStudio = lazy(() => import("@/pages/ProgramStudio"));
+const InteriorPlanner = lazy(() => import("@/components/InteriorPlanner"));
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -362,7 +364,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <TrackMapFrame track="platform" label="상권 정체성">
               <PlatformConsole districtId={districtId} onDistrictChange={setDistrictId} onOpenInPage={openInPage}
                 business={profile} industries={Array.isArray(industries) ? industries : null}
-                onOpenBusiness={() => setBizOpen(true)} onTryIndustry={tryIndustry} />
+                onOpenBusiness={() => setBizOpen(true)} onTryIndustry={tryIndustry} onOpenPage={() => { setPageWorkspace((w) => ({ ...w, query: "", status: "all", openTwin: true })); setView("map"); }} />
             </TrackMapFrame>
           )}
           {view === "map" && <MapShell workspace={pageWorkspace} onWorkspaceChange={setPageWorkspace} onReview={reviewBuilding}
@@ -384,6 +386,12 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
                 defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
+              <ValidationStudio key={`brief-${programHandoff?.requestId ?? "direct"}`} mapDistrictId={districtId}
+                handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
+                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
+              <InteriorPlanner key={`interior-${districtId}-${programHandoff?.requestId ?? "direct"}`}
+                handoff={programHandoff?.districtId === districtId ? programHandoff : undefined}
+                district={districtId} industry={customIndustry ?? workIndustry?.input} />
             </TrackMapFrame>
           )}
         </Suspense>

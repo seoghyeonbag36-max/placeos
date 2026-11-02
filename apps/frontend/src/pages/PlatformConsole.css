@@ -280,3 +280,9 @@
 .platconsole .vfold .fx { position: absolute; right: var(--sp-4); top: var(--sp-5); }
 .platconsole .vfold > summary { position: relative; padding-right: var(--sp-8); }
 .platconsole .vfold .vfoldbody { padding: var(--sp-4); }
+
+/* 검색어 외부 링크 */
+.platconsole .kwlinks{list-style:none;margin:var(--sp-2) 0 0;padding:0;display:grid;gap:6px}
+.platconsole .kwlinks li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px}
+.platconsole .kwlinks span{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px}
+.platconsole .kwlinks a{color:var(--ui-blue);text-decoration:underline}

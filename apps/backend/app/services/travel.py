@@ -7,6 +7,10 @@
 
 요청량 상한은 프로세스별 24시간 외부 호출 수이며 재시작하면 초기화된다. 좌표·경로는 저장하지
 않는다. 한 번의 조회는 최대 8회(카카오 2 + TMAP 6)를 쓰고 실패 호출도 센다.
+
+출발지 → 목적지 소요(`/times` · 2026-11-02 되살림 · `/access` 와 공존): 차량 = 카카오모빌리티, 대중교통 = ODsay.
+실패를 수치로 대체하지 않고 수단별로 돌려준다. ODsay 도시간 응답은 터미널 전후 구간이 빠지므로 총 이동시간으로 쓰지
+않는다. 같은 상한을 함께 쓴다(수단당 1회 · 주소 검색 1회).
 """
 from __future__ import annotations
 
@@ -22,12 +26,16 @@ import httpx
 
 from app.core.config import settings
 from app.schemas.travel import (
-    AccessGroup, AccessPlace, AccessRequest, AccessResponse, TravelPoint, WalkTime,
+    AccessGroup, AccessPlace, AccessRequest, AccessResponse, AddressCandidate, AddressSearchResponse,
+    TravelPoint, TravelRequest, TravelResponse, TravelResult, WalkTime,
 )
 from app.services import bus_stops
 
 LOCAL_URL = "https://dapi.kakao.com/v2/local/search/category.json"
 WALK_URL = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1"
+DRIVING_URL = "https://apis-navi.kakaomobility.com/v1/directions"
+TRANSIT_URL = "https://api.odsay.com/v1/api/searchPubTransPathT"
+ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json"
 
 SUBWAY_RADIUS_M, SUBWAY_LIMIT = 1000, 3
 BUS_RADIUS_M, BUS_LIMIT = 500, 3
@@ -220,3 +228,111 @@ async def get_transit_access(request: AccessRequest) -> AccessResponse:
             _subway(client, destination), _bus(client, destination), _parking(client, destination))
     return AccessResponse(destination=destination, queried_at=queried_at, subway=subway,
                           bus_stops=bus, parking=parking, bus_window=bus_stops.window())
+
+
+async def _lookup(mode: str, request: TravelRequest, client: httpx.AsyncClient) -> TravelResult:
+    driving = mode == "driving"
+    base = {
+        "mode": mode, "provider": "kakao_mobility" if driving else "odsay",
+        "time_basis": "current_departure" if driving else "standard_route",
+    }
+    key = settings.kakao_mobility_api_key if driving else settings.odsay_api_key
+    if not key.strip():
+        return TravelResult(**base, status="not_configured")
+    if not _reserve_call():
+        return TravelResult(**base, status="quota_exceeded")
+    origin, destination = request.origin, request.destination
+    try:
+        if driving:
+            response = await client.get(DRIVING_URL, headers={"Authorization": f"KakaoAK {key}"}, params={
+                "origin": f"{origin.lng},{origin.lat}",
+                "destination": f"{destination.lng},{destination.lat}",
+                "priority": "RECOMMEND", "summary": "true", "alternatives": "false",
+            })
+        else:
+            response = await client.get(TRANSIT_URL, params={
+                "apiKey": key, "SX": origin.lng, "SY": origin.lat,
+                "EX": destination.lng, "EY": destination.lat,
+                "SearchType": 0, "SearchPathType": 0, "output": "json",
+            })
+        response.raise_for_status()
+        payload = response.json()
+        if driving:
+            routes = payload["routes"]
+            if not routes:
+                return TravelResult(**base, status="no_route")
+            route = routes[0]
+            if route["result_code"] != 0:
+                return TravelResult(**base, status="upstream_error")
+            summary = route["summary"]
+            return TravelResult(**base, status="ok", duration_seconds=_number(summary["duration"]),
+                                distance_meters=_number(summary["distance"]))
+        if "error" in payload:
+            error = payload["error"]
+            if isinstance(error, list):
+                error = error[0]
+            code = str(error.get("code"))
+            status = "no_route" if code in {"3", "4", "5", "-98", "-99"} else (
+                "unsupported_route" if code == "6" else "upstream_error")
+            return TravelResult(**base, status=status)
+        result = payload["result"]
+        if result["searchType"] != 0:
+            return TravelResult(**base, status="unsupported_route")
+        paths = result["path"]
+        if not paths:
+            return TravelResult(**base, status="no_route")
+        # 제공사가 돌려준 도시내 경로 중 총 소요시간이 가장 짧은 것을 고른다.
+        path = min(paths, key=lambda item: _number(item["info"]["totalTime"]))
+        info = path["info"]
+        # 도보(3)를 뺀 지하철(1)·버스(2) 탑승 구간에서 환승 횟수를 구한다.
+        boardings = sum(1 for leg in path["subPath"] if leg["trafficType"] in (1, 2))
+        if boardings < 1:
+            raise ValueError("교통 탑승 구간이 없습니다.")
+        values: dict[str, float | int] = {
+            "duration_seconds": _number(info["totalTime"]) * 60,
+            "transfers": boardings - 1,
+        }
+        for external, internal in (("totalDistance", "distance_meters"), ("payment", "fare_won")):
+            if info.get(external) is not None:
+                values[internal] = _number(info[external])
+        # totalWalkTime 은 공식 응답 계약에 없고 실호출에서 -1 도 온다 — 도보시간은 null 로 둔다.
+        return TravelResult(**base, status="ok", **values)
+    except (httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, AttributeError):
+        # 예외 원문에는 API 키·좌표가 들어 있을 수 있다. 응답·로그에 싣지 않는다.
+        return TravelResult(**base, status="upstream_error")
+
+
+async def get_travel_times(request: TravelRequest) -> TravelResponse:
+    queried_at = datetime.now(timezone.utc)
+    async with httpx.AsyncClient(timeout=httpx.Timeout(3.0), follow_redirects=False) as client:
+        # 느린 한 수단이 다른 수단의 결과를 바꾸지 않는다.
+        results = await asyncio.gather(*(_lookup(mode, request, client) for mode in ("driving", "transit")))
+    return TravelResponse(origin=request.origin, destination=request.destination,
+                          queried_at=queried_at, results=list(results))
+
+
+async def search_addresses(query: str) -> AddressSearchResponse:
+    """카카오 주소 검색의 실제 주소만 돌려준다. 주소·키는 기록하지 않는다."""
+    key = _local_key()
+    if not key:
+        return AddressSearchResponse(status="not_configured")
+    if not _reserve_call():
+        return AddressSearchResponse(status="quota_exceeded")
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(3.0), follow_redirects=False) as client:
+            response = await client.get(ADDRESS_URL, headers={"Authorization": f"KakaoAK {key}"},
+                                        params={"query": query.strip(), "size": 10})
+            response.raise_for_status()
+            documents = response.json()["documents"]
+            if not isinstance(documents, list):
+                raise ValueError("주소 응답 형식 오류")
+            candidates = []
+            for item in documents:
+                # 동·도로 중심을 실제 건물 주소처럼 쓰지 않는다.
+                if item["address_type"] not in {"REGION_ADDR", "ROAD_ADDR"}:
+                    continue
+                candidates.append(AddressCandidate(
+                    address=item["address_name"], point=TravelPoint(lat=float(item["y"]), lng=float(item["x"]))))
+            return AddressSearchResponse(status="ok" if candidates else "no_results", candidates=candidates)
+    except (httpx.HTTPError, ValueError, KeyError, TypeError, AttributeError):
+        return AddressSearchResponse(status="upstream_error")

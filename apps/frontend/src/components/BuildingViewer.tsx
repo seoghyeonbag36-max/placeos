@@ -1,6 +1,10 @@
+import { useEffect, useState } from "react";
 import { placeFloors, approxFloors, stackBasis, type FloorKind, type ViewerBuilding } from "./buildingFloors";
 // 건물 상세 — 2D 층 근거와 공실 이력. 확인되지 않은 이력은 채우지 않는다.
+import HistoryTimeline from "@/components/twin/HistoryTimeline";
+import { getBuildingHistory, type BuildingHistory } from "@/lib/api";
 import { kakaoMapUrl } from "@/lib/externalMap";
+import { dateText, lastClosed, type HistoryItem } from "@/lib/twinGeometry";
 import "./BuildingViewer.css";
 
 const OCCUPIED = "#22B07D";  // 영업(녹색)
@@ -35,6 +39,38 @@ export function FloorStack({ b }: { b: ViewerBuilding }) {
   );
 }
 
+const ABSENT = "확인 자료 없음";
+
+/** 지번 인허가 이력. 공실 기간은 이 자료로 답할 수 없어 비워 둔다 — 폐업일 다음 날부터 비었다는 근거가 없다. */
+function VacancyHistory({ buildingId }: { buildingId?: string | null }) {
+  const [state, setState] = useState<{ id: string; data: BuildingHistory | null } | null>(null);
+  useEffect(() => {
+    if (!buildingId) return;
+    let live = true;
+    getBuildingHistory(buildingId)
+      .then((data) => { if (live) setState({ id: buildingId, data }); })
+      .catch(() => { if (live) setState({ id: buildingId, data: null }); });
+    return () => { live = false; };
+  }, [buildingId]);
+  const loading = !!buildingId && state?.id !== buildingId;
+  const data = state && state.id === buildingId ? state.data : null;
+  const items: HistoryItem[] = (data?.history ?? []).map((r) => ({
+    start: r.start_date, end: r.end_date, industry: r.industry_type ?? null, name: r.business_name ?? null,
+  })).sort((a, c) => (c.start ?? "").localeCompare(a.start ?? ""));
+  const closed = lastClosed(items);
+  return (
+    <section aria-label="공실 이력">
+      <h3>공실 이력</h3>
+      <dl><dt>직전 업종 (지번 단위 · 층 불명)</dt><dd>{loading ? "불러오는 중…" : closed?.industry ?? ABSENT}</dd>
+        <dt>폐업일</dt><dd>{loading ? "불러오는 중…" : dateText(closed?.end) ?? ABSENT}</dd>
+        <dt>공실 기간</dt><dd>{ABSENT}</dd></dl>
+      {items.length > 0
+        ? <HistoryTimeline items={items} lotBuildings={data?.lot_buildings} />
+        : !loading && <p>이 공실에 귀속된 영업·폐업 이력이 아직 제공되지 않습니다.</p>}
+    </section>
+  );
+}
+
 /** 층 근거와 확인 가능한 이력을 함께 표시한다. */
 export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
   const measured = stackBasis(b) === "measured";
@@ -45,13 +81,7 @@ export default function BuildingViewer({ b }: { b: ViewerBuilding }) {
           <FloorStack b={b} />
         </div>
         <div className="bviewer-street">
-          <section aria-label="공실 이력">
-            <h3>공실 이력</h3>
-            <dl><dt>이전 업종</dt><dd>확인 자료 없음</dd>
-              <dt>폐업일</dt><dd>확인 자료 없음</dd>
-              <dt>공실 기간</dt><dd>확인 자료 없음</dd></dl>
-            <p>이 공실에 귀속된 영업·폐업 이력이 아직 제공되지 않습니다.</p>
-          </section>
+          <VacancyHistory buildingId={b.buildingId} />
         </div>
       </div>
       {b.center && (

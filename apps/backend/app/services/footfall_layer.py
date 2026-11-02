@@ -236,6 +236,55 @@ def _footfall_jipgyegu(district_id: str, jg: dict, cells: list[dict],
     }
 
 
+def hourly_profile(district_id: str, daytype: str = "weekday") -> dict | None:
+    """상권 합계 24시간 곡선. 서울 밖·산출물 없음은 None(→ 404).
+
+    집계구 배정이 있으면 거점의 **서로 다른 집계구**를 시각별로 더한다(셀마다 더하면 넓은 집계구가 셀 수만큼 겹친다).
+    없으면 행정동 구성비로 물러나되 그쪽은 절대값이 없어 `value` 가 None 이다 — 눈금이 다른 값을 섞지 않는다.
+    """
+    daytype = "weekend" if daytype == "weekend" else "weekday"
+    doc = _load_jipgyegu()
+    jg = jipgyegu_of(district_id)
+    rows: list[dict] = []
+    source, unit, sample_days, note = None, None, None, None
+    if jg:
+        field = "we" if daytype == "weekend" else "wd"
+        oas = {oa for oa in (jg.get("cells") or {}).values() if oa}
+        series = [(doc.get("oa") or {}).get(oa, {}).get(field) for oa in oas]
+        series = [s for s in series if isinstance(s, list) and len(s) == 24]
+        if series:
+            values = [round(sum(float(s[h] or 0.0) for s in series), 1) for h in range(24)]
+            total = sum(values)
+            rows = [{"hour": h, "value": values[h], "share": round(values[h] / total, 4) if total else None}
+                    for h in range(24)]
+            source, unit = "flpop_jipgyegu", "명(시각 생활인구 · 집계구 합)"
+            sample_days = doc.get("sample_weekend" if daytype == "weekend" else "sample_weekday")
+            note = (f"이 상권에 걸친 집계구 {len(series)}곳의 시각별 생활인구를 더한 값이다. 집계구가 상권보다 넓을 수 있어 "
+                    "상권 안 인원수가 아니라 시간대 모양을 읽는 값이다. 원천 계열은 2026-07-31 로 생산이 끝났다.")
+    if not rows:
+        hd = (_load_hourly().get("districts") or {}).get(district_id) or {}
+        day = hd.get(daytype) or {}
+        share = day.get("hour_share") or {}
+        if share:
+            at = (lambda h: share[h]) if isinstance(share, list) else (lambda h: share.get(str(h), 0.0))
+            rows = [{"hour": h, "value": None, "share": round(float(at(h)), 4)} for h in range(24)]
+            source, unit = "adong_hourly", "구성비"
+            note = "행정동 생활인구의 시각별 구성비다. 상권 내부 분포가 아니고, 건물·격자 실측이 아니다."
+    if not rows:
+        return None
+    key = "value" if rows[0]["value"] is not None else "share"
+    peak = max(rows, key=lambda r: r[key] or 0.0)
+    days = doc.get("sample_days") if source == "flpop_jipgyegu" else None
+    return {
+        "district": district_id, "daytype": daytype, "hours": rows,
+        "peak": {"hour": peak["hour"], "value": peak["value"], "share": peak["share"]},
+        "source": source, "unit": unit,
+        "sample_days": sample_days,
+        "as_of": max(days) if isinstance(days, list) and days else None,
+        "note": note,
+    }
+
+
 def footfall_heatmap(district_id: str, hour: int = 12,
                      daytype: str = "weekday") -> dict | None:
     """시간대별 유동인구를 공실 격자에 얹는다.

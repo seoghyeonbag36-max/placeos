@@ -298,7 +298,7 @@ export function SpaceDetail({ id }: { id: string }) {
       <Sheet open={viewer} onClose={() => setViewer(false)} title={`${item.name} · 거리뷰와 층`}>
         <Suspense fallback={<SkeletonRows n={3} />}>
           {viewer && <BuildingViewer b={{
-            name: item.name, capacity: item.unit?.com_floors.length ?? 1, active: item.unit?.occ_floors.length ?? 0,
+            name: item.name, buildingId: item.buildingId, capacity: item.unit?.com_floors.length ?? 1, active: item.unit?.occ_floors.length ?? 0,
             floors: item.unit?.bld_floors, statusColor: "#E03E36", statusLabel: "빈 층 있음", center: { lat: item.lat, lng: item.lng },
             comFloors: item.unit?.com_floors, occFloors: item.unit?.occ_floors, unknownN: item.unit?.unknown_n,
           }} />}
