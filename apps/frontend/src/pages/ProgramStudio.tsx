@@ -319,7 +319,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
             <Field label="아이템" required hint="무엇을 팔거나 보여줄지 한 줄. 아직 브랜드명이 없어도 된다.">
               <input value={form.item} onChange={(e) => changeField("item", e.target.value)} placeholder="예: 산미 중심 원두 팝업" />
             </Field>
-            <Field label="업종" required>
+            <Field label="검증 업종" required>
               <input value={form.category} onChange={(e) => changeField("category", e.target.value)} list="cat-hints" placeholder="예: 카페" />
               <datalist id="cat-hints">
                 {CATEGORY_HINTS.map((c) => <option key={c} value={c} />)}

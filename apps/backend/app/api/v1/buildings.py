@@ -1,7 +1,9 @@
 """건물 관련 엔드포인트 — 공실 히스토리."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.building import BuildingHistory
+from app.schemas.renewal import BuildingTwin
+from app.services import building_twin
 from app.services.building_history import get_history
 
 router = APIRouter()
@@ -19,6 +21,18 @@ async def get_building_history(building_id: str) -> BuildingHistory:
         lot_buildings=lot_buildings,
         history=history,
     )
+
+
+@router.get("/{building_id}/twin", response_model=BuildingTwin)
+async def get_building_twin(
+    building_id: str,
+    district: str = Query(..., min_length=1, max_length=40),
+) -> dict:
+    """3D 트윈 입력 — 실측 외곽선 · 층별 상태(`/floor-vacancies` 와 같은 근거) · 주변 건물 · 기준별 공실률."""
+    out = building_twin.twin(district, building_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"unknown building: {building_id}")
+    return out
 
 
 @router.get("/{building_id}/model")

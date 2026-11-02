@@ -1,0 +1,19 @@
+.plp { flex-shrink: 0; max-height: 40vh; overflow-y: auto; padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--line); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.plp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: 4px; }
+.plp-note { margin: 4px 0 0; color: var(--muted); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.plp-note b { color: var(--ink); }
+.plp-chart { display: block; width: 100%; height: auto; }
+.plp-bar { fill: var(--line); }
+.plp-bar.is-peak { fill: var(--muted); }
+.plp-bar.is-now { fill: var(--track-page); }
+.plp-axis { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+.plp-spark { margin-top: var(--sp-2); }
+.plp-spark-head, .plp-spark-foot { display: flex; justify-content: space-between; gap: var(--sp-2); }
+.plp-spark-foot { color: var(--muted); }
+.plp-line { fill: none; stroke: var(--track-page); stroke-width: 1.8; stroke-linejoin: round; }
+.plp-dot { fill: var(--track-page); }
+.plp-more { margin-top: var(--sp-2); }
+.plp-more summary { cursor: pointer; }
+.plp-cell { margin: 4px 0 0; padding: 4px 8px; background: var(--track-page-soft); border-radius: 6px; }
+.b-travel { margin: var(--sp-2) 0; }
+.b-travel-item { display: inline-flex; align-items: center; gap: 4px; margin-right: var(--sp-2); }

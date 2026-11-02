@@ -19,6 +19,7 @@ from pathlib import Path
 # repo/data/gold  (services → app → backend → apps → repo)
 _GOLD_DIR = Path(__file__).resolve().parents[4] / "data" / "gold"
 _cache: dict[str, dict] = {}   # slug → {"mtime", "fc"}
+_enriched: dict[str, tuple[tuple, list[dict]]] = {}   # slug → (재료 mtime 들, 피처)
 
 # 거점 id 별칭 → 정규 slug (data/config/page_hubs.py ALIASES 와 동일하게 유지)
 _ALIASES = {"gangnam-garosugil": "garosugil", "sinsa": "garosugil"}
@@ -95,6 +96,33 @@ def _garosu_sample(district: str) -> dict:
     return {"type": "FeatureCollection", "district": district, "features": features}
 
 
+def _enriched_features(slug: str, gold: dict) -> list[dict]:
+    """피처에 `vac_class`(3분류) · `road_addr`(대장 도로명)를 더한다. 화면이 추가 호출 없이 3분류를 쓰려는 값이다.
+
+    마스터 원본을 건드리지 않는다 — `load_master` 를 함께 쓰는 집계가 그 값에 기대지 않게.
+    재료 파일이 바뀌면 다시 만든다(mtime). 거점당 수천 피처라 요청마다 만들지 않는다.
+    """
+    from app.services import building_floors, floor_vacancy, vacancy_class
+
+    path = floor_vacancy.path(slug)
+    key = (_cache[slug]["mtime"], path.stat().st_mtime if path.exists() else 0.0, building_floors.mtime(slug))
+    hit = _enriched.get(slug)
+    if hit and hit[0] == key:
+        return hit[1]
+    listed = vacancy_class.floors_by_pnu(slug)
+    lots = (building_floors.load(slug) or {}).get("lots") or {}
+    features = []
+    for f in gold.get("features") or []:
+        p = f.get("properties") or {}
+        pnu = str(p.get("pnu") or building_floors.pnu_of(str(p.get("id") or "")))
+        features.append({**f, "properties": {
+            **p, "vac_class": vacancy_class.classify(p, listed.get(pnu)),
+            "road_addr": (lots.get(pnu) or {}).get("road"),
+        }})
+    _enriched[slug] = (key, features)
+    return features
+
+
 def building_vacancy_geojson(district: str) -> dict | None:
     """건물 공실 GeoJSON FeatureCollection. 미지원 거점이면 None.
 
@@ -103,7 +131,7 @@ def building_vacancy_geojson(district: str) -> dict | None:
     slug = _resolve(district)
     gold = _load_gold(slug)
     if gold is not None:
-        return {**gold, "district": district}
+        return {**gold, "features": _enriched_features(slug, gold), "district": district}
     if slug == "garosugil":
         return _garosu_sample(district)
     return None

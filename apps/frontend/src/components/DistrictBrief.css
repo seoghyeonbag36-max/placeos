@@ -1,0 +1,38 @@
+/* 상권 상세 카드 */
+.brief { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 14px; margin-bottom: 14px; font-size: 13px; }
+.brief h2 { margin: 6px 0 2px; font-size: 18px; font-weight: 700; }
+.brief h3 { margin: 12px 0 6px; font-size: 13px; font-weight: 700; }
+.brief-chips, .brief-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.brief-tags { gap: 4px 8px; }
+.brief-chip { font-size: 12px; font-weight: 700; color: var(--text-secondary); background: var(--surface-sunken); border-radius: 6px; padding: 2px 7px; }
+.brief-chip.is-type { color: var(--track-platform); background: var(--track-platform-soft); }
+.brief-chip small { margin-left: 4px; font-size: 12px; font-weight: 400; }
+.brief-sum { margin: 0 0 6px; line-height: 1.5; color: var(--text-secondary); }
+.brief-tags span { font-size: 12px; color: var(--text-secondary); }
+.brief-reg { margin-top: 10px; background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 9px; padding: 9px 11px; color: var(--warn-ink); font-size: 12.5px; line-height: 1.55; }
+.brief-reg p { margin: 2px 0 0; }
+.brief-reg a { color: inherit; text-decoration: underline; }
+.brief-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.brief-tile { border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; min-width: 0; }
+.brief-tile-l { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.brief-tile-v { font-size: 18px; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.brief-tile-v small { font-size: 12px; margin-left: 2px; font-weight: 700; color: var(--text-secondary); }
+.brief-tile-v .value-absent { font-size: 12.5px; font-weight: 400; }
+.brief-tile-f { font-size: 12px; line-height: 1.4; color: var(--text-secondary); }
+.brief-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 420px) { .brief-cols, .brief-tiles { grid-template-columns: minmax(0, 1fr); } }
+.brief-rank { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.brief-rank li { display: grid; gap: 0; }
+.brief-rank span { font-size: 12px; color: var(--text-secondary); }
+.brief-note { margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
+.brief-hours { display: flex; align-items: flex-end; gap: 2px; height: 56px; }
+.brief-hours i { flex: 1; min-height: 2px; background: #7C9BC7; border-radius: 2px 2px 0 0; }
+.brief-hours i.is-peak { background: var(--track-platform); }
+.brief-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+.brief-ages { display: grid; gap: 3px; }
+.brief-age { display: grid; grid-template-columns: 62px 1fr 46px; align-items: center; gap: 6px; font-size: 12px; }
+.brief-age b { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.brief-agebar { height: 8px; background: var(--surface-sunken); border-radius: 4px; overflow: hidden; }
+.brief-agebar i { display: block; height: 100%; background: #7C9BC7; }
+.brief-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.brief .value-absent { font-size: 12px; }

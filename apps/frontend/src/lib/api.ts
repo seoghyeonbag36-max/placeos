@@ -132,8 +132,19 @@ export async function getHealth(): Promise<Health> {
   return res.json();
 }
 
-export async function getBuildingHistory(buildingId: string) {
-  const res = await analysisFetch(`/buildings/${buildingId}/history`);
+export interface BuildingHistoryRow {
+  start_date: string | null; end_date: string | null; industry_type?: string | null;
+  business_name?: string | null; source?: string | null; closure_reason_summary?: string | null;
+}
+export interface BuildingHistory {
+  building_id: string;
+  /** localdata = 지번에 동 하나 · localdata_lot = 지번 단위(이 건물의 것이라 말할 수 없다) · none */
+  history_source: "localdata" | "localdata_lot" | "none" | string;
+  lot_buildings: number | null;
+  history: BuildingHistoryRow[];
+}
+export async function getBuildingHistory(buildingId: string): Promise<BuildingHistory> {
+  const res = await analysisFetch(`/buildings/${encodeURIComponent(buildingId)}/history`);
   if (!res.ok) throw new Error("failed to load history");
   return res.json();
 }
@@ -310,6 +321,8 @@ export interface Marketing {
   /** 행사 출처 — "seoul-open-data"(실데이터) | "seed". 실데이터인데 0건이면
    *  그 거점에 예정된 공공 문화행사가 없다는 뜻이다(시드로 채우지 않는다). */
   events_source?: string;
+  /** `events_source === "none"` 의 사유(이 도시에 행사 원천이 없다). */
+  events_note?: string | null;
   /** HA 후처리 검증 결과. violation 이 있는데 source 가 "seed" 면 LLM 이 생성은 했으나
    *  검증에 걸려 폐기된 것이다 — 키 미설정·Gold 미적재 폴백과 구분된다. */
   ha_findings?: HAFinding[];
@@ -496,6 +509,10 @@ export const getBuildingVacancy = (district: string) =>
 
 /** 건물 공실 GeoJSON 최소 타입 */
 export interface BuildingProps {
+  /** 공실 3분류 + 자료 없음(서버 계산). 샘플 폴백에는 없으니 없으면 `status` 로 물러난다. */
+  vac_class?: VacClass;
+  /** 대장 도로명 주소. 지번에 대장 자료가 없으면 null */
+  road_addr?: string | null;
   id: string; name: string; status: "full" | "partial" | "high" | "empty";
   capacity: number; active: number; industry: string; vacancy_rate: number;
   /** 건축물대장 지상 층수(V-World). 0 또는 누락 가능 — 2D 층 스택의 실제 높이 근거.
@@ -601,7 +618,7 @@ export const getMarketing = (id: string) => getJSON<Marketing>(`/marketing/${id}
 /** 상권 행사만 — LLM 을 부르지 않는다. Program 지도의 오프라인 홍보 장소(2026-09-13).
  *  `getMarketing` 은 온라인 콘텐츠 생성까지 돌므로 지도에서 부르지 말 것. */
 export const getDistrictEvents = (id: string) =>
-  getJSON<Pick<Marketing, "district_id" | "events" | "events_source">>(`/marketing/events?district_id=${encodeURIComponent(id)}`);
+  getJSON<Pick<Marketing, "district_id" | "events" | "events_source" | "events_note">>(`/marketing/events?district_id=${encodeURIComponent(id)}`);
 
 async function postJSON<T>(
   path: string,
@@ -634,6 +651,7 @@ export interface SimulateResult {
   calculation_status?: "calculated" | "needs_inputs" | "unavailable";
   unavailable_reason?: string | null;
   economics?: IndustryEconomics | null;
+  resolved_inputs?: { area_py: number; rent_manwon: number; floor: string } | null;
 }
 
 /** 입점 시뮬레이션(Posting) — 외부 AI 창업 코파일럿 어댑터 경유(미설정 시 3-Tier 폴백).
@@ -643,6 +661,8 @@ export const simulateRevenue = (req: {
   district_id: string; unit_id?: string; industry_type?: string;
   strategy?: string; prem?: number;
   industry_detail_key?: string; operating_inputs?: Record<string, number>;
+  /** 사용자가 계약서·도면으로 넣은 내부면적(평). `inputs_source.area === "user_input"` 으로 돌아온다. */
+  area_py_override?: number;
 }) => postJSON<SimulateResult>("/ai/simulate-revenue", req);
 
 export interface OperatingField {
@@ -735,6 +755,9 @@ export interface OpeningSite {
    *  GNN Top-1 은 상권 사전확률에 눌려 거의 모든 자리가 같은 답을 낸다 — 평균을 빼야
    *  자리별 신호가 남는다. 노드 Top-3 밖 업종을 0 으로 보는 근사라 **자리 간 비교용**이다. */
   distinct: { industry: string; score: number; district_mean: number; delta_pp: number } | null;
+  /** `/site-ranking` 으로 받은 자리에만 — 선택 업종 자리 점수와 같은 좌표의 층 매물 */
+  selected?: SiteSelectedScore | null;
+  floor_units?: RankedFloorUnit[];
 }
 
 export interface PlatformProfile {
@@ -1476,3 +1499,211 @@ export async function visitorFeedbackAdmin(token: string, id?: string, status?: 
   const data = await res.json() as VisitorFeedbackRecord | VisitorFeedbackRecord[];
   return Array.isArray(data) ? data : [data];
 }
+
+/* ===== 2026-11 리뉴얼 새 경로 ===== */
+
+export type VacClass = "confirmed" | "probable" | "full" | "unknown";
+
+/** 404 를 정상 상태(null)로 받는 조회 — 서울 전용 소스·없는 산출물은 오류가 아니다. */
+async function getOptional<T>(path: string, signal?: AbortSignal): Promise<T | null> {
+  const res = await analysisFetch(path, { signal });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+function query(params: Record<string, string | number | boolean | null | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v !== null && v !== undefined && v !== "") q.set(k, String(v));
+  const text = q.toString();
+  return text ? `?${text}` : "";
+}
+
+export interface HubOutline {
+  id: string;
+  /** 조각마다 바깥 고리 [[lat, lng], …] — 공식 상권 경계가 아니라 실측이 닿은 범위 */
+  rings: [number, number][][];
+  holes: [number, number][][];
+  type_code: string | null; type_name: string | null;
+  /** 사람이 붙인 라벨인가. false 는 원본의 데이터 분류이거나 유형 없음(서울 밖) */
+  type_is_manual: boolean;
+}
+export interface HubOutlines { note: string | null; hubs: HubOutline[] }
+export const getHubOutlines = (signal?: AbortSignal) =>
+  getOptional<HubOutlines>("/commercial-districts/outlines", signal);
+
+export interface RentHistory {
+  district_id: string; quarters: string[];
+  /** 1층 기준 · 만원/평·월. 값이 없는 분기는 null */
+  rent_per_pyeong_manwon: (number | null)[];
+  rent_available: boolean;
+  floor_factor: Record<string, number>;
+  vacancy_mid_pct: (number | null)[]; vacancy_small_pct: (number | null)[];
+  source: "rone" | "rone-shared" | string; source_name: string | null; shared_from: string | null; note: string | null;
+}
+export const getRentHistory = (id: string, signal?: AbortSignal) =>
+  getOptional<RentHistory>(`/commercial-districts/${encodeURIComponent(id)}/rent-history`, signal);
+
+export interface SiteSelectedScore {
+  industry: string; label: string | null; score: number | null; rank_note: string | null;
+  district_mean: number | null; delta_pp: number | null;
+}
+export interface RankedFloorUnit {
+  id: string; floor_label: string | null; certainty: "confirmed" | "probable" | string | null;
+  area: number | null; area_m2: number | null; purps: string | null;
+}
+export interface RankedSite {
+  unit_id: string | null; name: string | null; lat: number | null; lng: number | null;
+  area_py: number | null; floor: string | null; capacity: number | null; vacancy_rate: number | null;
+  /** ⚠ 직전 업종이 아니다 — 건물 현재 대표 업종 */
+  was: string | null;
+  recommendations: { industry: string; score: number }[];
+  matched_distance_m: number | null;
+  distinct: { industry: string; score: number; district_mean: number; delta_pp: number } | null;
+  selected: SiteSelectedScore | null;
+  floor_units: RankedFloorUnit[];
+}
+export interface SiteRanking {
+  district_id: string; industry: string | null; model_covered: boolean; unavailable_reason: string | null;
+  sites: RankedSite[]; unit_count: number; matched_count: number; match_radius_m: number; note: string;
+}
+export const getSiteRanking = (id: string, industry?: string | null, signal?: AbortSignal) =>
+  getOptional<SiteRanking>(`/commercial-districts/${encodeURIComponent(id)}/site-ranking${query({ industry })}`, signal);
+
+export interface HourPoint { hour: number; value: number | null; share: number | null }
+export interface HourlyProfile {
+  district: string; daytype: "weekday" | "weekend"; hours: HourPoint[]; peak: HourPoint;
+  source: string; unit: string; sample_days: number | null; as_of: string | null; note: string | null;
+}
+/** 서울 전용 — 서울 밖은 null */
+export const getHourlyProfile = (district: string, daytype: "weekday" | "weekend" = "weekday", signal?: AbortSignal) =>
+  getOptional<HourlyProfile>(`/heatmap/hourly-profile${query({ district, daytype })}`, signal);
+
+export type TwinFloorStatus = "vacant_confirmed" | "vacant_probable" | "occupied" | "uncertain" | "noncom" | "unknown";
+export interface TwinFloor {
+  /** 지하는 음수 */
+  lv: number; label: string; status: TwinFloorStatus;
+  /** `placeFloors` 규칙값. vacant·uncertain 인데 status 가 uncertain 이면 규칙상 비었지만 매물 목록에 없는 층이다 */
+  rule_kind: "occupied" | "uncertain" | "vacant" | "noncom" | null;
+  area_m2: number | null; area_source: string | null; purps: string | null;
+  /** 층 전체 월임대 추정(만원) · 평당(만원). 호가가 아니다 */
+  rent_est_manwon: number | null; rent_per_pyeong: number | null;
+  /** 층 매물 `vfu-` */
+  unit_id: string | null;
+  units: { ho: string | null; area_m2: number | null; purps: string | null }[] | null;
+}
+export interface TwinVacancyStat {
+  basis: string; label: string; vacant: number; total: number; rate_pct: number | null; note: string;
+}
+export interface BuildingTwin {
+  id: string | null; name: string | null; road_addr: string | null; lat: number; lng: number;
+  ring: [number, number][];
+  floors_above: number; floors_below: number; floors_conflict: boolean;
+  height_m: number | null; height_source: "vworld" | "estimated";
+  approval_date: string | null; built_at: string | null;
+  vac_class: VacClass;
+  /** 건물 현재 대표 업종(직전 업종이 아니다) */
+  representative_industry: string | null;
+  lot_buildings: number | null;
+  sources: string[];
+  floors: TwinFloor[];
+  neighbors: { id: string | null; ring: [number, number][]; floors: number; height_m: number | null;
+    height_source: "vworld" | "estimated" | null; vac_class: VacClass }[];
+  vacancy_stats: TwinVacancyStat[];
+  range: { min: number | null; max: number | null };
+  history: {
+    source: string; lot_buildings: number | null; items_total: number;
+    items: { start: string | null; end: string | null; industry: string | null; name: string | null }[];
+    summary: { total: number; closed: number; last_closed: string | null; note: string } | null;
+  };
+  notes: string[];
+}
+export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
+  getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);
+
+export interface InteriorImage { source: "ai_generated"; image_data_url: string; model: string; note: string }
+export async function generateInterior(token: string, body: {
+  district: string; industry: string; style: string; strategy: "고급화" | "가성비" | "기능중심";
+  area_py?: number; constraints: string; links: string[]; consent: true;
+  references: { kind: "plan" | "photo"; mime: string; data: string }[];
+}): Promise<InteriorImage> {
+  return accountRequest<InteriorImage>("POST", "/ai/interior-preview", { token, body });
+}
+
+export interface RelationCounts { same: number; same_chain: number; similar: number; colocated: number; other: number; total: number }
+export type StoreRelation = "same" | "similar" | "colocated" | "other";
+export interface NearbyStore {
+  name: string | null; brand: string | null; is_chain: boolean; cat: string | null; relation: StoreRelation;
+  lat: number; lng: number;
+  /** 지하 음수 · -99 = 지하(층 번호 없음) · null = 층 미상 */
+  floor: number | null; floor_label: string | null;
+  distance_m: number; same_building: boolean;
+}
+export interface NearbyStores {
+  center: { lat: number; lng: number }; radius: number; basis: "직선"; floor_weighted: boolean;
+  edge_truncated: boolean; store_as_of: string | null;
+  counts: RelationCounts;
+  floor_split: { basement: number; f1: number; f2: number; f3p: number; unknown: number };
+  by_radius: Record<"50" | "100", RelationCounts>;
+  nearest_same: { name: string | null; distance_m: number; floor: number | null } | null;
+  chains: { brand: string; n: number }[];
+  relative: {
+    percentile: number | null; band: "여유 쪽" | "중간" | "붐비는 쪽" | null;
+    /** 참고 지수 — 매출·성과로 검증된 값이 아니다 */
+    index: number | null; compared_sites: number; note: string;
+  };
+  stores: NearbyStore[];
+  relations: { same: string[]; similar: string[]; colocated: { name: string | null; lift: number | null }[] };
+  notes: string[];
+}
+export const getNearbyStores = (id: string, params: {
+  lat: number; lng: number; radius?: number; industry?: string | null; detail_key?: string | null;
+  floor?: boolean; building_id?: string | null;
+}, signal?: AbortSignal) =>
+  getOptional<NearbyStores>(`/commercial-districts/${encodeURIComponent(id)}/nearby-stores${query(params)}`, signal);
+
+export type TravelStatus = "ok" | "not_configured" | "no_route" | "unsupported_route" | "upstream_error" | "quota_exceeded";
+export interface TravelResult {
+  mode: "driving" | "transit"; provider: "kakao_mobility" | "odsay"; status: TravelStatus;
+  source: "provider_estimate"; time_basis: "current_departure" | "standard_route";
+  duration_seconds: number | null; distance_meters: number | null; fare_won: number | null;
+  transfers: number | null; walk_seconds: number | null;
+}
+export interface TravelTimes { origin: TravelPoint; destination: TravelPoint; queried_at: string; results: TravelResult[] }
+export async function getTravelTimes(origin: TravelPoint, destination: TravelPoint, signal?: AbortSignal): Promise<TravelTimes> {
+  const res = await analysisFetch("/travel/times", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ origin, destination }), signal,
+  });
+  if (!res.ok) throw new Error(`소요시간 조회 실패: ${res.status}`);
+  return res.json();
+}
+export interface AddressCandidate { address: string; point: TravelPoint; source: "kakao_local" }
+export interface AddressSearch {
+  status: "ok" | "no_results" | "not_configured" | "upstream_error" | "quota_exceeded";
+  candidates: AddressCandidate[];
+}
+/** 주소 검색 — 주소가 접근 로그에 남지 않게 본문으로 보낸다. */
+export async function searchTravelAddresses(queryText: string, signal?: AbortSignal): Promise<AddressSearch> {
+  const res = await analysisFetch("/travel/addresses", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: queryText }), signal,
+  });
+  if (!res.ok) throw new Error(`주소 검색 실패: ${res.status}`);
+  return res.json();
+}
+
+/** 리포트 칸 — 비는 칸은 status "unavailable" + note(사유) · data null */
+export interface ReportSection<T = Record<string, unknown>> {
+  status: "ok" | "unavailable"; source: string | null; as_of: string | null; note: string | null; data: T | null;
+}
+export interface DistrictReport {
+  district_id: string; selected_industry: string | null; unit_id: string | null; building_id: string | null;
+  overview: ReportSection; industry: ReportSection; population: ReportSection; sales: ReportSection;
+  openclose: ReportSection; vacancy: ReportSection; rent: ReportSection; site: ReportSection;
+  competition: ReportSection; posting: ReportSection; events: ReportSection;
+}
+export const getDistrictReport = (id: string, params: {
+  industry?: string | null; unit_id?: string | null; building_id?: string | null;
+} = {}, signal?: AbortSignal) =>
+  getOptional<DistrictReport>(`/commercial-districts/${encodeURIComponent(id)}/report${query(params)}`, signal);

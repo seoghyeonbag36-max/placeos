@@ -179,12 +179,42 @@ export function installNaverStub(): NaverStub {
     },
   };
 
+  /** 실제 SDK 처럼 시점을 들고 있고, 방위는 좌표 차이로 흉내 낸다. 이벤트는 `emit(pano, "pov_changed")` 로 발화한다. */
+  class StubPanorama {
+    el: unknown;
+    options: Record<string, unknown>;
+    pov = { pan: 0, tilt: 0, fov: 90 };
+    destroyed = false;
+    constructor(el: unknown, options: Record<string, unknown>) {
+      this.el = el;
+      this.options = options;
+      if (options.pov) this.pov = { ...this.pov, ...(options.pov as object) };
+    }
+    getPosition() { return this.options.position; }
+    getLocation() { return { panoId: "stub", photodate: "2024-05-01", coord: this.options.position }; }
+    getPov() { return this.pov; }
+    setPov(p: { pan: number; tilt: number; fov: number }) { this.pov = p; }
+    getSize() { return { width: 800, height: 600 }; }
+    getProjection() {
+      const from = this.options.position as { lat(): number; lng(): number };
+      return {
+        fromCoordToPov: (c: { lat(): number; lng(): number }) => ({
+          pan: (Math.atan2(c.lng() - from.lng(), c.lat() - from.lat()) * 180) / Math.PI,
+          tilt: 0, fov: this.pov.fov,
+        }),
+      };
+    }
+    destroy() { this.destroyed = true; }
+  }
+
   const naver = {
     maps: {
       LatLng, LatLngBounds, Point, Map: NaverMap, Event,
       Polygon: overlayCtor("Polygon"),
       Marker: overlayCtor("Marker"),
       Circle: overlayCtor("Circle"),
+      Polyline: overlayCtor("Polyline"),
+      Panorama: StubPanorama,
       Rectangle: overlayCtor("Rectangle"),
       InfoWindow: overlayCtor("InfoWindow"),
       visualization: { HeatMap: overlayCtor("HeatMap") },

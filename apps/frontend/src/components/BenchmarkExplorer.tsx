@@ -5,11 +5,21 @@ import { useFitMap, useMapMarkers } from "@/components/useMapMarkers";
 import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
 import { space } from "@/design/tokens/layout";
+import { distanceM } from "@/lib/districtMapModel";
 import "./BenchmarkExplorer.css";
 
-export default function BenchmarkExplorer({ districtId, defaultIndustry = "" }: {
+export interface BenchmarkAnchor { id: string; name: string; lat: number; lng: number }
+
+export default function BenchmarkExplorer({ districtId, defaultIndustry = "", anchor = null, radiusM = null, onResult }: {
   districtId: string; defaultIndustry?: string;
+  /** 「이 자리 반경」의 기준 — 고른 빈 자리. 없으면 그 선택지를 잠근다 */
+  anchor?: BenchmarkAnchor | null;
+  /** 서버가 정한 추천 매칭 반경. 없으면 전체만 */
+  radiusM?: number | null;
+  /** 검색 결과가 바뀔 때 — 자리 비교표가 반경 안 후보를 센다 */
+  onResult?: (places: BenchmarkPlaces | null) => void;
 }) {
+  const [nearOnly, setNearOnly] = useState(false);
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<BenchmarkIndustry[] | null>(null);
   const [industry, setIndustry] = useState(defaultIndustry);
@@ -30,7 +40,11 @@ export default function BenchmarkExplorer({ districtId, defaultIndustry = "" }: 
     return () => { live = false; };
   }, [open, options]);
   const current = result?.district_id === districtId && result.industry_key === industry ? result : null;
-  const places = useMemo(() => open ? current?.places ?? [] : [], [open, current]);
+  useEffect(() => { onResult?.(current); }, [onResult, current]);
+  const allPlaces = useMemo(() => open ? current?.places ?? [] : [], [open, current]);
+  const radiusOn = nearOnly && anchor != null && radiusM != null;
+  const places = useMemo(() => (radiusOn ? allPlaces.filter((p) => distanceM(anchor, p) <= radiusM) : allPlaces),
+    [allPlaces, radiusOn, anchor, radiusM]);
   const selected = places.find((p) => p.id === selectedId);
   const markers = useMemo(() => places.map((p) => ({ id: p.id, lat: p.lat, lng: p.lng,
     html: mapLabelHTML({ text: p.name, sub: "벤치마킹 후보", color: colors.brand.primary, active: p.id === selectedId }),
@@ -68,7 +82,13 @@ export default function BenchmarkExplorer({ districtId, defaultIndustry = "" }: 
         <p>출처: 카카오 Local · 조회 {new Date(current.queried_at).toLocaleString("ko-KR")}</p>
         <p>{current.note}</p>
         {current.truncated && <p>검색 제한으로 일부 결과만 조회했습니다.</p>}
-        {!places.length && <p role="status">측정 범위와 업종 조건에 맞는 검색 후보가 없습니다.</p>}
+        {!places.length && <p role="status">{radiusOn ? "이 자리 반경 안에 검색 후보가 없습니다." : "측정 범위와 업종 조건에 맞는 검색 후보가 없습니다."}</p>}
+        {radiusM != null && <div className="benchmark-radius" role="group" aria-label="찾는 범위">
+          <button type="button" aria-pressed={!radiusOn} onClick={() => setNearOnly(false)}>전체</button>
+          <button type="button" aria-pressed={radiusOn} disabled={!anchor} onClick={() => { setNearOnly(true); setSelectedId(null); }}>
+            이 자리 반경 {radiusM}m</button>
+          <small>{anchor ? `기준: ${anchor.name} · 직선거리 · 반경은 서버 고정값` : "자리를 비교 후보로 고르면 쓸 수 있습니다"}</small>
+        </div>}
         <ul aria-label="벤치마킹 후보 목록">{places.map((p) => <li key={p.id} style={{ paddingBlock: space[2] }}>
           <button type="button" aria-pressed={selectedId === p.id} onClick={() => setSelectedId(p.id)}>
             {p.name} · 중심에서 {p.distance_m.toLocaleString()}m

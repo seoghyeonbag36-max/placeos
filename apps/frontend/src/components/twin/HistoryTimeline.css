@@ -1,0 +1,12 @@
+.htl { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--ink); }
+.htl-sum { margin: 0 0 2px; }
+.htl-note, .htl-empty { margin: 0 0 var(--sp-2); color: var(--muted); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.htl-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.htl-rows li { display: grid; gap: 2px; }
+.htl-name { overflow-wrap: anywhere; }
+.htl-date { color: var(--muted); }
+.htl-track { position: relative; display: block; height: 6px; border-radius: 3px; background: var(--surface-sunken); }
+.htl-bar { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--muted); }
+.htl-bar.is-open { background: var(--track-page); }
+.htl-axis { display: flex; justify-content: space-between; color: var(--muted); margin-top: 2px; }
+.htl-more { margin-top: var(--sp-2); padding: 4px 10px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); cursor: pointer; }

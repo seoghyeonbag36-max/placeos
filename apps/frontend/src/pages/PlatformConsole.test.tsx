@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import PlatformConsole from "./PlatformConsole";
 import type { OpeningSite, PlatformProfile } from "@/lib/api";
+import type { BusinessProfile } from "@/lib/businessProfile";
 import { district } from "@/test/fixtures";
 import { installFetchStub } from "@/test/fetchStub";
 
@@ -280,5 +281,59 @@ describe("PlatformConsole — 상권 ↔ 상권 비교(2026-10-24)", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "가로수길 상권 보기" }));
     expect(screen.queryByRole("dialog", { name: "상권 2곳 나란히" })).toBeNull();
     expect((screen.getByRole("combobox") as HTMLSelectElement).value).toBe("garosugil");
+  });
+});
+
+describe("PlatformConsole — 내 업종 자리 순서(site-ranking)", () => {
+  const ranked = (n: number, score: number | null) => site(n, {
+    selected: { industry: "cafe", label: "카페·디저트", score, rank_note: score == null ? "상위 3개 밖" : "이 자리 업종 1위", district_mean: 0.2, delta_pp: score == null ? null : 5 },
+    floor_units: n === 2 ? [{ id: "vfu-1", floor_label: "2F", certainty: "confirmed", area: 10, area_m2: 33, purps: null }] : [],
+  });
+  function mountRanked(body: unknown) {
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
+      { match: /\/garosugil\/platform$/, body: profile("garosugil", [site(1), site(2)]) },
+      { match: /\/garosugil\/site-ranking/, body },
+      { match: /\/garosugil\/sentiment$/, body: [] },
+    ]);
+    const key = (body as { model_covered: boolean }).model_covered ? "cafe" : "beauty";
+    const option = key === "cafe" ? { key, label: "카페·디저트", input: "카페", model_label: "카페" }
+      : { key, label: "미용·네일", input: "미용실", model_label: null, fit_unavailable_reason: "추천 모델이 다루지 않는 업종" };
+    render(<PlatformConsole industries={[option]} business={{ goal: "start", industryKey: key } as BusinessProfile} />);
+  }
+
+  it("서버 순서대로 세우고 점수 없는 자리는 상위 3개 밖이라 적으며 비교표에 선택 업종 줄이 더해진다", async () => {
+    mountRanked({ district_id: "garosugil", industry: "cafe", model_covered: true, unavailable_reason: null,
+      sites: [ranked(2, 0.3), ranked(1, null)], unit_count: 2, matched_count: 2, match_radius_m: 400, note: "자리 간 비교용" });
+    await screen.findByText("이 건물 빈 층 후보", { exact: false });
+    const names = [...document.querySelectorAll(".site .sname")].map((n) => n.textContent);
+    expect(names).toEqual(["테스트 자리 2", "테스트 자리 1"]);
+    expect(screen.getByText("상위 3개 밖")).toBeTruthy();
+    choose(1); choose(2);
+    fireEvent.click(screen.getByRole("button", { name: "선택한 2곳 비교" }));
+    expect(rowValue(comparison(), "카페·디저트 자리 점수").textContent).toContain("0.3");
+    expect(rowValue(comparison(), "건물 대표 업종").textContent).toContain("직전 테스트 업종");
+    expect(within(comparison()).queryByRole("row", { name: /^직전 업종/ })).toBeNull();
+  });
+
+  it("모델 밖 업종은 자리 점수를 짓지 않고 사유를 적으며 원래 순서를 지킨다", async () => {
+    mountRanked({ district_id: "garosugil", industry: "beauty", model_covered: false, unavailable_reason: "추천 모델이 다루지 않는 업종",
+      sites: [ranked(2, null), ranked(1, null)], unit_count: 2, matched_count: 2, match_radius_m: 400, note: "" });
+    await screen.findByText(/미용·네일 자리 점수 없음 — 추천 모델이 다루지 않는 업종/);
+    expect([...document.querySelectorAll(".site .sname")].map((n) => n.textContent)).toEqual(["테스트 자리 1", "테스트 자리 2"]);
+  });
+
+  it("상세 카드 상권 비교 담기는 기존 트레이와 같은 상태다 · 검색어 링크는 측정하지 않았다고 밝힌다", async () => {
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
+      { match: /\/garosugil\/platform$/, body: { ...profile("garosugil", []), identity: { ...profile("garosugil", []).identity!, keywords: { words: [{ word: "맛집", n: 3 }], dropped: 0, scanned: 3 } } } },
+    ]);
+    render(<PlatformConsole />);
+    fireEvent.click(await screen.findByRole("button", { name: "+ 이 상권 비교에 담기" }));
+    const tray = screen.getByRole("group", { name: "상권 비교" });
+    expect(within(tray).getByRole("button", { name: "✓ 상권 비교에 담음" })).toBeTruthy();
+    expect(await screen.findByText(/어떤 단어가 알고리즘에 유리한지는 측정하지 않았습니다/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "인스타 태그" }).getAttribute("href")).toContain("/explore/tags/");
+    expect(screen.getByRole("link", { name: "네이버 블로그" }).getAttribute("href")).toContain(encodeURIComponent("가로수길 맛집"));
   });
 });

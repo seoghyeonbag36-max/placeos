@@ -325,6 +325,78 @@ def openings(district_id: str, limit: int = 60) -> dict:
     }
 
 
+_NOT_IN_TOP3 = "상위 3개 밖"
+_NO_NODE = "가까운 모델 노드가 없어 점수를 모릅니다"
+_NOT_COVERED = "모델 밖 업종"
+
+
+def _selected(industry: dict, label: str | None, recs: list[dict], matched: bool,
+              means: dict[str, float]) -> dict:
+    """이 자리에서 선택 업종의 점수. 저장값이 Top-3 뿐이라 그 밖이면 null 이다 — 0 으로 쓰지 않는다."""
+    mean = means.get(label) if label else None
+    base = {"industry": industry["key"], "label": industry["label"], "score": None, "rank_note": None,
+            "district_mean": round(mean, 4) if mean is not None else None, "delta_pp": None}
+    if label is None:
+        return {**base, "rank_note": _NOT_COVERED}
+    if not matched:
+        return {**base, "rank_note": _NO_NODE}
+    pos = next((n for n, r in enumerate(recs, start=1) if r["industry"] == label), None)
+    if pos is None:
+        return {**base, "rank_note": _NOT_IN_TOP3}
+    score = recs[pos - 1]["score"]
+    return {**base, "score": score, "rank_note": f"이 자리 업종 {pos}위",
+            "delta_pp": round((score - (mean or 0.0)) * 100, 1)}
+
+
+def site_ranking(district_id: str, industry_key: str | None = None) -> dict | None:
+    """빈 자리(건물 유닛 `vu-`)를 선택 업종 점수 순으로. 서빙 거점이 아니면 None · 모르는 업종은 ValueError.
+
+    같은 지번의 층 매물(`vfu-`)을 붙이되 순위 대상에는 넣지 않는다 — 층 매물은 ROI 표본이 아니다.
+    `was` 는 직전 업종이 아니라 건물 현재 대표 업종이다.
+    """
+    from app.services import building_floors, business_fit, floor_vacancy
+    from app.services import districts as districts_svc
+
+    if district_id not in districts_svc.PAGES_BY_ID:
+        return None
+    item = None
+    if industry_key is not None:
+        item = business_fit.get(industry_key)
+        if item is None:
+            raise ValueError("알 수 없는 업종")
+    label = business_fit._model_label(item) if item else None
+
+    base = openings(district_id, limit=len(vacant_inventory.units(district_id)) or 1)
+    means = _district_means(district_id)
+    by_pnu: dict[str, list[dict]] = {}
+    for u in (floor_vacancy.load(district_id) or {}).get("units") or []:
+        by_pnu.setdefault(str(u.get("pnu")), []).append({k: u.get(k) for k in (
+            "id", "floor_label", "certainty", "area", "area_m2", "purps")})
+
+    sites = []
+    for site in base["sites"]:
+        extra = {"floor_units": by_pnu.get(building_floors.pnu_of(str(site.get("unit_id") or "")), [])}
+        if item:
+            extra["selected"] = _selected(item, label, site["recommendations"],
+                                          site["matched_distance_m"] is not None, means)
+        sites.append({**site, **extra})
+    if item:
+        # 점수 내림차순 · 값 없는 자리는 뒤로. 뒤쪽은 종전 순서(상권 평균과 다른 자리부터)를 유지한다.
+        sites.sort(key=lambda o: (o["selected"]["score"] is None, -(o["selected"]["score"] or 0.0)))
+    return {
+        "district_id": district_id,
+        "industry": industry_key,
+        "model_covered": bool(label),
+        "unavailable_reason": business_fit.unavailable_reason(item) if item else None,
+        "sites": sites,
+        "unit_count": base["unit_count"],
+        "matched_count": base["matched_count"],
+        "match_radius_m": base["match_radius_m"],
+        "note": ("점수는 그 자리에서 가까운 모델 노드의 값이고 이미 모여 있는 정도이지 매출·생존이 아닙니다. 노드마다 상위 3개만 "
+                 "저장해 그 밖은 값을 모르고, 상권 평균도 근사입니다. 자리 간 비교용으로만 읽어 주세요."),
+    }
+
+
 def profile(district_id: str) -> dict | None:
     """정체성 + 자리 제안. 둘 다 없으면 None(= 이 거점은 Platform 산출물이 없다)."""
     ident = identity(district_id)

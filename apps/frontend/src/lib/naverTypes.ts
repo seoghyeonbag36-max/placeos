@@ -31,11 +31,17 @@ export interface NaverInfoWindow {
   open(map: NaverMap, position: NaverLatLng): void;
   close(): void;
 }
+export interface NaverPov { pan: number; tilt: number; fov: number }
+/** 파노라마 이벤트: `init` · `pano_status` · `pano_changed` · `pov_changed` (`Event.addListener` 로 듣는다). */
 export interface NaverPanorama {
   destroy?(): void;
   getPosition?(): NaverLatLng;
-  getLocation?(): { panoId?: string; photodate?: string; address?: string; title?: string };
-  setPov(pov: { pan: number; tilt: number; fov: number }): void;
+  getLocation?(): { panoId?: string; photodate?: string; address?: string; title?: string; coord?: NaverLatLng };
+  getPov?(): NaverPov;
+  getSize?(): { width: number; height: number };
+  /** 좌표 → 그 좌표를 바라보는 시점. 층 라벨 투영의 방위에 쓴다. */
+  getProjection?(): { fromCoordToPov(point: NaverLatLng): NaverPov };
+  setPov(pov: NaverPov): void;
 }
 type OverlayConstructor = new (options: Record<string, unknown>) => NaverOverlay;
 export interface NaverMaps {
@@ -46,6 +52,7 @@ export interface NaverMaps {
   Marker: OverlayConstructor;
   Polygon: OverlayConstructor;
   Circle: OverlayConstructor;
+  Polyline: OverlayConstructor;
   Rectangle: OverlayConstructor;
   InfoWindow: new (options: Record<string, unknown>) => NaverInfoWindow;
   Panorama?: new (element: HTMLElement, options: Record<string, unknown>) => NaverPanorama;
