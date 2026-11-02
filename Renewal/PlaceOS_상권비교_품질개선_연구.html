@@ -1,0 +1,106 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>상권 비교 품질 연구</title>
+<style>:root{--bg:#f6f7f9;--s:#fff;--t:#152030;--m:#5d6876;--l:#dde3ea;--a:#1f5f99;--soft:#e9f0f8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0e131a;--s:#151c25;--t:#e5ebf1;--m:#98a5b3;--l:#283342;--a:#7fb3e6;--soft:#1b2836}}
+:root[data-theme="dark"]{--bg:#0e131a;--s:#151c25;--t:#e5ebf1;--m:#98a5b3;--l:#283342;--a:#7fb3e6;--soft:#1b2836}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:15px;line-height:1.7}
+.w{max-width:1120px;margin:0 auto;padding:26px 16px 70px}h1{font-size:26px;margin:0 0 4px}h2{font-size:21px;margin:40px 0 10px;border-bottom:2px solid var(--a);padding-bottom:5px}
+h3{font-size:17px;margin:24px 0 6px}.meta,.muted{color:var(--m)}.meta{font-size:13px}small{color:var(--m)}
+.note{background:var(--soft);border:1px solid var(--l);border-radius:8px;padding:12px 16px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--s)}th,td{border-bottom:1px solid var(--l);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--soft)}td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.tw{overflow-x:auto;border:1px solid var(--l);border-radius:8px;margin:8px 0}
+.bar{display:inline-block;vertical-align:middle;margin-right:4px}.bar i{display:inline-block;height:10px;border-radius:2px}
+.card{background:var(--s);border:1px solid var(--l);border-radius:10px;padding:12px 16px;margin:10px 0}.card h4{margin:0 0 4px;font-size:15.5px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:4px;padding:0 6px;margin-right:4px;color:#fff}
+.r{background:#1f7a4d}.d{background:#2f7fd1}.x{background:#8e63e8}.u{background:#d98a12}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:820px){.grid{grid-template-columns:1fr}}
+ol li,ul li{margin:4px 0}</style></head><body><div class="w">
+<h1>상권별 공통점·차이점·특이점 — 품질을 높이는 방법 연구</h1>
+<p class="meta">대상 파일: PlaceOS_상권중심_레이어스택_53개상권.html의 자동 판정(3-5 작업대 · 3-6 유형별) · 작성 2026-10-10 · 갱신 2026-10-11(시뮬레이션·적용) · 근거 = 저장소 데이터로 직접 돌린 실험 9개 + 시뮬레이션 + 논문</p>
+
+<div class="note" style="border-color:#1f7a4d"><b>2026-10-11 갱신 — 시뮬레이션으로 검증해 적용</b> 아래 방법들을 지금 엔진과 같은 데이터·같은 붓스트랩에 돌려, 미리 정한 기준을 넘은 <b>5가지만</b> 문서에 반영했다: R2 우연 검정(무작위 3곳 묶음의 거짓 공통점 3.47 → 0.07개) · R4 상관 묶음 합치기 · R1 확신도('최고/최저' 재현율 69% → 97%) · D2 주말/평일 생활인구 비 · X3 '가장 크게 갈리는 판'. 나머지는 보류했다. <b>3절의 'T5 첫 공통점(2년 내 신규 비중)'은 철회한다</b> — 그 지표는 같은 상권을 둘로 나눠 재면 순위가 잘 맞지 않는다(신뢰도 0.56). 표는 5절, 문서 반영은 본 문서 3-8.</div>
+
+<div class="note"><b>한 줄 답</b> — 지금 판정은 「53곳 중앙보다 높다/낮다」를 지표마다 따로 세는 방식이라, <b>① 우연과 실력을 구별하지 못하고 ② 같은 신호를 여러 번 세며 ③ 시간 정보가 없다.</b> 실험으로 확인한 개선 순서는
+<b>신뢰성</b>(확신도·우연 검정·중복 제거) → <b>자세함</b>(개·폐업 이력과 24시간 리듬이라는, 저장소에 이미 있는데 안 쓰던 시간 축) → <b>차별화</b>(프로필 쌍둥이·형태 유형·「왜 다른가」 분해) → <b>활용</b>(PPPP 행동 문장·질문형 프리셋·내보내기)이다.</div>
+
+<h2>1. 지금 판정의 약점 — 실험으로 잰 것</h2>
+
+<h3>① 「53곳 1위·최고」가 동전 던지기에 가깝다 <small>(실험 E3 · 붓스트랩 400회)</small></h3>
+<p>300m 안 건물을 다시 뽑아(붓스트랩) 지표를 400번 다시 계산하면, 지금 문서가 「53곳 1위」라고 쓰는 상권이 실제로 1위로 남는 비율은 아래와 같다. 값 하나는 점 하나가 아니라 구간이다.</p>
+<div class="tw"><table><thead><tr><th>지표(300m)</th><th>값의 흔들림(90% 구간 반폭, 중앙)</th><th>지금 1위</th><th>다시 뽑아도 1위</th><th>지금 최하위</th><th>다시 뽑아도 최하위</th><th>순위 흔들림(90% 폭, 중앙)</th></tr></thead><tbody><tr><td>평균 층수</td><td class='n'>±7%</td><td>선릉</td><td class='n'><span class="bar"><i style="width:45px;background:#b42335"></i></span> 50%</td><td>삼청동·북촌</td><td class='n'>74%</td><td class='n'>7계단</td></tr><tr><td>바닥 점유율</td><td class='n'>±12%</td><td>충무로</td><td class='n'><span class="bar"><i style="width:41px;background:#b42335"></i></span> 46%</td><td>경희대</td><td class='n'>80%</td><td class='n'>10계단</td></tr><tr><td>영업 점포 밀도</td><td class='n'>±14%</td><td>뱅뱅사거리</td><td class='n'><span class="bar"><i style="width:42px;background:#b42335"></i></span> 47%</td><td>안암·고려대</td><td class='n'>100%</td><td class='n'>8계단</td></tr><tr><td>빈 호실 비율</td><td class='n'>±26%</td><td>익선동</td><td class='n'><span class="bar"><i style="width:82px;background:#1f7a4d"></i></span> 91%</td><td>공덕역</td><td class='n'>27%</td><td class='n'>19계단</td></tr><tr><td>빈 상업층</td><td class='n'>±14%</td><td>노량진</td><td class='n'><span class="bar"><i style="width:84px;background:#1f7a4d"></i></span> 93%</td><td>문래동 창작촌</td><td class='n'>45%</td><td class='n'>16계단</td></tr></tbody></table></div>
+<p class="muted">평균 층수·바닥 점유율·영업 점포 밀도의 1위는 절반 확률로만 유지된다. 순위는 중앙 상권 기준으로 7~19계단을 오간다. 「1위」를 단정하지 말고 「1~3위권(확신도 50%)」처럼 확신도를 붙여야 한다. Goldstein & Spiegelhalter(1996)의 순위표 비판과 같은 결론이다.</p>
+
+<h3>② 유형의 「공통점」 대부분이 무작위 묶음과 구별되지 않는다 <small>(실험 E4 · 순열 검정 4,000회 + 거짓 발견률 10%)</small></h3>
+<p>같은 수의 상권을 53곳에서 무작위로 뽑아 중앙값을 낸 분포와 비교했다. 지표 26개를 한꺼번에 시험하므로 거짓 발견률(Benjamini–Hochberg)로 보정했다.</p>
+<div class="tw"><table><thead><tr><th>유형</th><th>곳</th><th>지금 문서의 공통점 문장</th><th>우연보다 확실한 지표</th><th>내용</th></tr></thead><tbody><tr><td>T3 도심 재생·한옥 골목</td><td class='n'>6</td><td class='n'>6</td><td class='n'><b>7</b></td><td>최근접역 거리 높다 · 평균 층수 낮다 · 바닥 점유율 높다 · 빈 층 중 2층↑ 낮다 · 야간 비중 낮다 · 점심 비중 높다 · 1층 임대료 높다</td></tr><tr><td>T5 트렌드 골목·감성</td><td class='n'>8</td><td class='n'>2</td><td class='n'><b>0</b></td><td><span class=muted>없음 — 가장 가까운 것: 5분 보행 도달(p=0.011), 출구 밀도(p=0.019), 빈 상업층(p=0.021)</span></td></tr><tr><td>T6 대학가·청년·수험</td><td class='n'>12</td><td class='n'>0</td><td class='n'><b>0</b></td><td><span class=muted>없음 — 가장 가까운 것: 최근접역 거리(p=0.046), 업종 혼합도(p=0.060), 유동 밀도(p=0.071)</span></td></tr><tr><td>T7 오피스·업무 배후</td><td class='n'>11</td><td class='n'>4</td><td class='n'><b>5</b></td><td>평균 층수 높다 · 바닥 점유율 높다 · 용적(FSI) 높다 · 6층↑ 비중 높다 · 점심 비중 높다</td></tr><tr><td>T9 지역 중심 번화가</td><td class='n'>16</td><td class='n'>3</td><td class='n'><b>0</b></td><td><span class=muted>없음 — 가장 가까운 것: 대표 공실률(p=0.004), 점심 비중(p=0.029), 1층 임대료(p=0.059)</span></td></tr></tbody></table></div>
+<p class="muted">T3(낮은 층수·높은 임대료·주중 점심형)와 T7(고층·고밀·점심형)만 통계적으로 확실한 성격이 있다. T5·T9의 공통점 문장(「8곳 중 6곳이 임대료가 높다」 등)은 무작위 묶음에서도 그만큼 나온다. 지금 엔진은 이 둘을 구별하지 않는다.</p>
+
+<h3>③ 같은 신호를 여러 번 센다 <small>(실험 E1 · 순위상관 |ρ| ≥ 0.7)</small></h3>
+<p>지표 26개 중 서로 거의 같은 순위를 내는 묶음이 6개라, 실질 정보는 <b>18개</b>다: 〔도로 밀도 = 보행 교차점 밀도〕 · 〔골목 비중 = 간선 비중〕 · 〔평균 층수 = 6층↑ 비중〕 · 〔바닥 점유율 = 용적(FSI) = 영업 점포 밀도〕 · 〔빈 호실 비율 = 빈 상업층 = 대표 공실률〕 · 〔야간 비중 = 점심 비중〕. 그래서 「바닥 점유율·용적·영업 점포 밀도가 모두 높다」는 세 문장이 사실상 한 문장이다. OECD/JRC 합성지표 핸드북도 지표를 고르고 묶는 단계를 먼저 두고, 그 선택이 결과를 흔드는지 민감도로 확인하라고 한다.</p>
+
+<h3>④ 치우친 분포에 평균·표준편차를 쓴다 <small>(실험 E2)</small></h3>
+<div class="tw"><table><thead><tr><th>지표</th><th>왜도</th><th>표준편차 기준 극값(|z|≥2)</th><th>MAD 기준 극값(≥2.5)</th><th>표준편차÷MAD</th></tr></thead><tbody><tr><td>공원 비중</td><td class='n'>2.61</td><td class='n'>4</td><td class='n'>8</td><td class='n'>4.5</td></tr><tr><td>빈 호실 비율</td><td class='n'>1.98</td><td class='n'>4</td><td class='n'>5</td><td class='n'>1.98</td></tr><tr><td>5분 보행 도달</td><td class='n'>-1.41</td><td class='n'>2</td><td class='n'>2</td><td class='n'>1.15</td></tr><tr><td>용적(FSI)</td><td class='n'>1.38</td><td class='n'>4</td><td class='n'>4</td><td class='n'>1.24</td></tr><tr><td>보행 교차점 밀도</td><td class='n'>1.37</td><td class='n'>2</td><td class='n'>2</td><td class='n'>1.15</td></tr><tr><td>빈 상업층</td><td class='n'>1.31</td><td class='n'>4</td><td class='n'>3</td><td class='n'>1.1</td></tr><tr><td>점포 중심 어긋남</td><td class='n'>1.15</td><td class='n'>3</td><td class='n'>4</td><td class='n'>1.41</td></tr><tr><td>영업 점포 밀도</td><td class='n'>0.98</td><td class='n'>3</td><td class='n'>3</td><td class='n'>1.04</td></tr></tbody></table></div>
+<p class="muted">공원 비중·빈 호실 비율처럼 한쪽으로 긴 분포는 극단 몇 곳이 표준편차를 키운다. 그 바람에 나머지의 차이가 묻히거나 거꾸로 부풀려진다. 중앙값·MAD(Leys 외 2013)나 백분위 순위로 바꾸면 판정이 분포 모양에 덜 흔들린다.</p>
+
+<h3>⑤ 지금 유형(T1~T10)은 레이어 지표로는 갈리지 않는다 <small>(실험 E5 · 실루엣)</small></h3>
+<p>레이어 지표 14개 공간에서 유형별 실루엣 평균은 <b>-0.006</b>로 0에 가깝다. 같은 유형끼리가 다른 유형보다 더 닮지 않았다는 뜻이다. 다른 유형에 더 가까운 상권: 논현동(T7→T6) · 문래동 창작촌(T3→T5) · 남부터미널(T7→T6) · 미아사거리(T9→T6) · 망원동·망리단길(T5→T6) · 장안동(T9→T6) · 연남동(T5→T6) · 연희동(T5→T6). 유형은 업종·임대료로 만든 것이라, 공간·형태 비교의 기준으로 쓰면 '공통점 없음'이 자주 나온다(T6).</p>
+
+<h3>⑥ 시간·리듬 정보를 쓰지 않는다 <small>(실험 E7 · E8)</small></h3>
+<p>저장소에 이미 <b>인허가 점포 개·폐업 이력 195,253건(53곳 전부, 1998~2026-08)</b>과 <b>24시간·평일/주말 유동(46곳, 2026-07)</b>이 있다. 지금 판정은 둘 다 안 쓴다. 개·폐업에서 뽑은 회전율·생존율·업력·신규 비중은 대표 공실률과 순위상관이 0.04·-0.1·-0.13·-0.27으로 거의 겹치지 않는 <b>새 정보</b>다. 24시간 유동의 야간 비중은 TRDAR 야간 비중과 순위상관 <b>0.77</b>로, 원천이 달라도 같은 방향이라 교차 검증도 된다.</p>
+
+<h2>2. 개선 방법 — 4축 15가지</h2>
+<div class="grid">
+<div class="card"><h4><span class="tag r">신뢰성</span>R1 확신도 붙이기</h4>값마다 붓스트랩 90% 구간, 순위마다 순위 구간. 「1위」 대신 「1~3위권 · 확신도 47%」. 확신도 80% 미만은 '극값' 문장에서 뺀다. <small>근거: E3 · Goldstein & Spiegelhalter 1996</small></div>
+<div class="card"><h4><span class="tag r">신뢰성</span>R2 우연 검정 + 거짓 발견률</h4>고른 상권 묶음(유형이든 사용자 선택이든)의 공통점을 같은 크기 무작위 묶음과 비교해 p값을 내고, 지표 여러 개를 BH로 보정. 통과한 것만 「공통점」, 나머지는 「경향(확실하지 않음)」. <small>근거: E4 · Benjamini & Hochberg 1995 · KPI 규칙(베이스라인 대비)</small></div>
+<div class="card"><h4><span class="tag r">신뢰성</span>R3 강건 척도</h4>z를 중앙값·MAD로 바꾸고 백분위 순위를 함께 표기. 극값 판정은 |강건 z| ≥ 2.5. <small>근거: E2 · Leys 외 2013</small></div>
+<div class="card"><h4><span class="tag r">신뢰성</span>R4 지표 묶음(중복 제거)</h4>상관 묶음 6개를 한 '차원'으로 합쳐 문장 하나로 말한다(예: 「고밀(바닥 점유·용적·점포 밀도)」). 실질 지표 18개. <small>근거: E1 · OECD/JRC 핸드북</small></div>
+<div class="card"><h4><span class="tag r">신뢰성</span>R5 작은 표본 보정·표시</h4>TRDAR 영역 1곳·정밀 근거 2% 같은 상권은 값을 전체 쪽으로 당겨(경험적 베이즈 축소) 표시하고, 표본 수 n을 문장에 붙인다. <small>근거: 3-7 검증의 '주의' 항목 · Goldstein & Spiegelhalter의 축소 추정</small></div>
+<div class="card"><h4><span class="tag d">자세함</span>D1 시간 축(개·폐업)</h4>새 판: 연간 회전율 · 3년 생존율 · 폐업 점포 업력 · 2년 내 신규 비중. 공실률과 거의 독립(ρ ≈ 0). 공실이 같아도 「안정형(을지로 생존 최고)」과 「회전형(신촌 회전 최고)」이 갈린다. <small>근거: E7 · 공실·회전·업종 구성을 함께 보라는 high street 활력 연구</small></div>
+<div class="card"><h4><span class="tag d">자세함</span>D2 24시간 리듬</h4>평일·주말 시간대 곡선, 주말÷평일 비, 피크 시각. 「주중형(을지로·충무로·익선·역삼)」 대 「주말형(이태원·신림·망원·불광)」이 새로 갈린다. <small>근거: E8 · 행정동 단위라는 한계 표시</small></div>
+<div class="card"><h4><span class="tag d">자세함</span>D3 중심↔외곽 분해</h4>문장마다 0~250 / 250~500m 중 어디서 차이가 나는지 덧붙인다(데이터 있음). 예: 「안암의 점포 밀도가 낮은 건 중심 250m 안이 비어서다(외곽 쏠림형)」. <small>근거: 지금 고리 프로파일</small></div>
+<div class="card"><h4><span class="tag d">자세함</span>D4 층·업종 세로 분해</h4>빈 층이 몇 층에 몰리는지(1층·2~3층·4층↑), 어떤 업종이 빠지고 들어왔는지(개·폐업 이력의 업종). <small>근거: Gold 층별 상업·영업층, building_history 업종</small></div>
+<div class="card"><h4><span class="tag x">차별화</span>X1 프로필 쌍둥이</h4>지표 공간에서 가장 닮은 상권. 53곳 중 35곳의 쌍둥이가 다른 유형이고 지리 최근접과 같은 경우는 3곳뿐 — 지도로는 안 보이는 정보다. 예: 사당역 ↔ 대림역 · 수유 ↔ 연신내 · 천호 ↔ 대림역 · 화곡 ↔ 군자역. <small>근거: E6</small></div>
+<div class="card"><h4><span class="tag x">차별화</span>X2 데이터 기반 형태 유형</h4>레이어 지표로 군집을 따로 만들어 기존 유형(업종 기반)과 교차표로 보인다. 「업종은 대학가인데 형태는 오피스형」 같은 이중 정체성. <small>근거: E5 · Vickers & Rees 2007(OAC) · Dolega 외 2019</small></div>
+<div class="card"><h4><span class="tag x">차별화</span>X3 「왜 다른가」 분해</h4>두 상권(또는 상권과 묶음)의 거리를 판별로 쪼개 기여도 순으로 보인다. 「홍대와 경희대의 차이는 70%가 ⑤ 상업 상태와 ② 보행에서 나온다」. 특이점 = 묶음 중심에서 가장 먼 상권 + 그 이유. <small>근거: E5의 표준화 공간</small></div>
+<div class="card"><h4><span class="tag x">차별화</span>X4 비교 기준 고르기</h4>53곳 전체 / 같은 유형 / 프로필 쌍둥이 / 지리 이웃 중 무엇에 대어 볼지 사용자가 고른다. 같은 값이 기준에 따라 '평범'도 '특이'도 된다. <small>근거: 순위표 비판(기준 설정의 중요성)</small></div>
+<div class="card"><h4><span class="tag u">활용</span>U1 PPPP 행동 문장</h4>판정 뒤에 「그래서」를 붙인다 — Page(어느 층이 비었나) · Posting(임대료·생존율로 본 가격대 위험) · Program(주말형·신규 진입이 많은 곳 = 팝업 검증에 유리). 예비창업자·프랜차이즈·자산운용·지자체 시점별로. <small>근거: CLAUDE.md PPPP</small></div>
+<div class="card"><h4><span class="tag u">활용</span>U2 질문형 프리셋·내보내기</h4>「팝업 검증에 맞는 곳」(신규 비중↑·주말형·임대료 중간) 같은 질문으로 상권을 고르고, 선택 결과를 CSV/JSON·인쇄용 비교 보고서·링크(지금 해시 상태)로 내보낸다. 분기 스냅숏 비교는 데이터가 쌓이면 추가(LSTM 예측은 KPI 게이트가 닫힌 뒤에만 연동).</div>
+</div>
+
+<h2>3. 시험해 본 결과 — 시간 축을 넣으면 판정이 어떻게 바뀌나</h2>
+<p>유형별 중앙값과, 무작위 묶음과의 순열 검정 결과다(<b style="color:#b42335">●</b> p&lt;0.01 · <b style="color:#d98a12">○</b> p&lt;0.05).</p>
+<div class="tw"><table><thead><tr><th>새 지표(300m · 인허가 업종)</th><th>T3<br><small>도심 재생·한옥 골목</small></th><th>T5<br><small>트렌드 골목·감성</small></th><th>T6<br><small>대학가·청년·수험</small></th><th>T7<br><small>오피스·업무 배후</small></th><th>T9<br><small>지역 중심 번화가</small></th></tr></thead><tbody><tr><td>연간 회전율 <small>%</small></td><td class='n'>7.4</td><td class='n'>13.4</td><td class='n'>10.3</td><td class='n'>10.0</td><td class='n'>10.1</td></tr><tr><td>3년 생존율 <small>%</small></td><td class='n'><b style='color:#d98a12'>○</b> 77.4</td><td class='n'>66.2</td><td class='n'>65.7</td><td class='n'>65.5</td><td class='n'>60.8</td></tr><tr><td>폐업 점포 업력 <small>년</small></td><td class='n'>5.3</td><td class='n'>3.1</td><td class='n'>4.5</td><td class='n'>4.2</td><td class='n'>4.3</td></tr><tr><td>2년 내 신규 비중 <small>%</small></td><td class='n'>14.0</td><td class='n'><b style='color:#b42335'>●</b> 22.2</td><td class='n'>17.1</td><td class='n'>15.8</td><td class='n'>14.3</td></tr><tr><td>주말÷평일 유동 <small>배</small></td><td class='n'><b style='color:#b42335'>●</b> 0.70</td><td class='n'>1.03</td><td class='n'>0.96</td><td class='n'><b style='color:#d98a12'>○</b> 0.78</td><td class='n'>1.05</td></tr></tbody></table></div>
+<ul>
+<li><b>T5 트렌드 골목</b>: 지금은 확실한 공통점이 0개다. 「2년 내 신규 점포 비중」이 무작위 묶음보다 확실히 높다(22%, p=0.0005) → 처음으로 근거 있는 공통점이 생긴다. 회전율이 높고 업력이 짧은 것(p≈0.06)도 같은 방향이다.</li>
+<li><b>T3 도심 재생</b>: 주말÷평일 유동 0.70으로 가장 확실한 '주중형'(p=0.0005)이고, 3년 생존율도 높다(77%, p≈0.05). 저층 골목이지만 회전이 낮은 안정 상권이다.</li>
+<li><b>T7 오피스</b>도 주말형이 아니다(0.78, p=0.01). <b>T6 대학가</b>는 시간 축으로도 묶이지 않는다. 대학가는 하나의 성격이 아니라는 지금 결론이 새 축에서도 유지된다.</li>
+<li>개별 극단: 회전율 최고 신촌 · 최저 익선 / 3년 생존 최고 을지로 · 최저 신촌 / 신규 비중 최고 연남 · 최저 혜화.</li>
+</ul>
+<p class="muted">주의: 인허가(localdata) 이력은 음식·이미용·숙박 등 인허가 업종만 담는다(소매·사무 제외). 24시간 유동은 행정동 단위 집계라 상권 내부 분포가 아니다.</p>
+<div class="note" style="border-color:#b42335"><b>정정(2026-10-11)</b> 위 개·폐업 지표 넷(회전율·3년 생존·업력·신규 비중)은 같은 상권의 필지를 무작위로 반씩 나눠 다시 계산하면 두 반쪽의 상권 순위가 잘 맞지 않았다(스피어먼-브라운 신뢰도 0.24~0.64, 500m로 넓혀도 0.67 이하 · 기준 0.7). 유형 중앙값의 차이가 p값으로는 작아 보여도, 상권 하나하나의 값이 그만큼 흔들리면 '그 상권의 성격'으로 말할 수 없다. 그래서 <b>T5의 '2년 내 신규 비중' 공통점과 T3의 '3년 생존율' 결론은 철회</b>하고 문서에 넣지 않았다. 주말/평일 비는 행정동(28일)과 집계구 500m 원(7일) 두 원천의 순위가 0.88 일치해 합격했고, 문서에서 T3·T7의 공통점(주중형)으로 확인됐다.</div>
+
+<h2>4. 적용 순서 제안</h2>
+<div class="tw"><table><thead><tr><th>단계</th><th>내용</th><th>바뀌는 것</th><th>예상 작업</th></tr></thead><tbody>
+<tr><td><b>1. 신뢰성</b></td><td>R1 확신도 · R2 우연 검정+FDR · R3 강건 척도 · R4 지표 묶음 · R5 표본 표시</td><td>모든 문장에 확신도·n·「확실/경향」 구분. 우연과 구별 안 되는 공통점·흔들리는 1위 문장이 빠진다(T5·T9의 현재 공통점 문장 포함)</td><td>약 2~3시간</td></tr>
+<tr><td><b>2. 자세함</b></td><td>D1 개·폐업 판(⑨) · D2 24시간 리듬 · D3 중심↔외곽 이유 · D4 층·업종 세로</td><td>공실이 같아도 '안정형/회전형', '주중형/주말형'이 갈린다. T5에 근거 있는 공통점이 생긴다</td><td>약 3~4시간</td></tr>
+<tr><td><b>3. 차별화</b></td><td>X1 쌍둥이 · X2 형태 유형 · X3 「왜 다른가」 · X4 비교 기준</td><td>지도로 안 보이는 닮음과 차이의 이유를 보인다</td><td>약 3시간</td></tr>
+<tr><td><b>4. 활용</b></td><td>U1 PPPP 행동 문장 · U2 질문형 프리셋·내보내기</td><td>판정이 의사결정 문장(어디에 무엇을 어떤 가격대로 검증할지)으로 끝난다</td><td>약 3시간</td></tr>
+</tbody></table></div>
+<p class="muted">하지 말아야 할 것: 임계값만으로 '달성/특이'를 말하기(KPI 규칙 1) · 확신도 없는 순위 단정(규칙 2) · 아직 '실력'이 확정되지 않은 LSTM 예측을 사실처럼 판정에 섞기.</p>
+
+<h2>5. 시뮬레이션 결과 (2026-10-11) — 무엇을 적용했나</h2>
+<p>지금 판정 엔진을 Python으로 그대로 옮긴 V0와 개선안을 같은 데이터 · 같은 건물 붓스트랩 100회 · 같은 무작위 묶음(3·5·8·12곳 각 150개)에 돌렸다. 합격 기준은 돌리기 전에 고정했고, 적용 여부는 그 기준을 옮긴 코드가 정했다.</p>
+<div class="tw"><table><thead><tr><th>축</th><th>방법</th><th>합격 기준</th><th>결과</th><th>판정</th></tr></thead><tbody><tr><td>신뢰성</td><td>공통점 순열 검정 + BH-FDR</td><td>무작위 묶음 거짓 공통점 50% 이상 감소 · T3·T7 공통점 3개 이상 유지</td><td>거짓 공통점 2.56 → 0.07개(−97%) · T3 4개 · T7 3개(묶음 합치기 후 문장 3·2개) · 유형 구성원 1곳 빼도 유지 63% → 95%</td><td><b style="color:#1f7a4d">적용</b></td></tr><tr><td>신뢰성</td><td>상관 묶음 합치기</td><td>상위 6문장의 서로 다른 지표 묶음 비율 증가</td><td>묶음 다양성 0.824 → 0.907</td><td><b style="color:#1f7a4d">적용</b></td></tr><tr><td>신뢰성</td><td>1위·순위 확신도(붓스트랩)</td><td>&#x27;53곳 최고/최저&#x27; 문장의 실제 재현율 ≥ 0.8</td><td>재현율 0.69(문장 33개) → 0.97(문장 26개)</td><td><b style="color:#1f7a4d">적용</b></td></tr><tr><td>신뢰성</td><td>강건한 척도(순위 z · MAD z)</td><td>문장 안정성(붓스트랩) 향상 + 거짓 공통점 증가 없음</td><td>안정성 SD 0.861 · 순위 z 0.852 · MAD z 0.842</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>신뢰성</td><td>작은 표본 보정(경험적 베이즈)</td><td>반반 검증 오차 5% 이상 감소</td><td>오차 변화 평균 +0.8% · 나빠진 지표 7/10(act, floors, fsi, gsi, tall, vacr, vfl)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>주말/평일 생활인구(행정동)</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 0.881 (두 원천 순위 일치(집계구 범위 무관)) · 최대 |ρ| 0.67(lunch) · 46곳</td><td><b style="color:#1f7a4d">적용</b></td></tr><tr><td>자세함</td><td>연간 회전율</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 300m 0.50 · 500m 0.66(필지 반반 → 스피어먼-브라운, 기준 0.7)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>2년 내 신규 비중</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 300m 0.56 · 500m 0.67(필지 반반 → 스피어먼-브라운, 기준 0.7)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>2년 순증</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 300m 0.64 · 500m 0.58(필지 반반 → 스피어먼-브라운, 기준 0.7)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>3년 생존율</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 300m 0.26 · 500m 0.35(필지 반반 → 스피어먼-브라운, 기준 0.7)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>폐업 점포 업력</td><td>신뢰도 ≥ 0.7 · 기존 지표와 |ρ| &lt; 0.7 · 45곳 이상</td><td>신뢰도 300m 0.24 · 500m 0.38(필지 반반 → 스피어먼-브라운, 기준 0.7)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>차이의 중심/외곽 귀속</td><td>귀속 안정성 ≥ 0.75</td><td>안정성 0.708 · 80% 이상 유지 문장 비율 0.282 · 문장 39개(중심 21 · 고르게 7 · 외곽 11)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>자세함</td><td>업종 흐름(2년 개업−폐업)</td><td>1위 순유입 업종 반반 일치 ≥ 0.6</td><td>1위 일치 0.243 · 1위 순유출 일치 0.172 · 업종 벡터 반반 ρ 0.123</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>차별화</td><td>가장 크게 갈리는 판</td><td>귀속 안정성 ≥ 0.75</td><td>안정성 0.84 · 80% 이상 0.681</td><td><b style="color:#1f7a4d">적용</b></td></tr><tr><td>차별화</td><td>프로필 쌍둥이</td><td>쌍둥이 예측 오차 ≤ 같은 유형·지리 이웃의 90% · 쌍둥이 유지율 중앙 ≥ 0.6</td><td>외부 지표 예측 오차(순위 z) 쌍둥이1 0.988 · 쌍둥이3 0.883 · 같은 유형 0.781 · 지리 이웃 0.972 · 53곳 중앙 0.792 · 유지율 중앙 0.71 (순위 z 거리)</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>차별화</td><td>형태 군집(와드)</td><td>실루엣 ≥ 0.25 · 붓스트랩 ARI ≥ 0.6</td><td>최고 실루엣 0.137(k=2) · ARI 0.472 · 지금 유형 실루엣 -0.005</td><td><b style="color:#9a6700">보류</b></td></tr><tr><td>차별화</td><td>비교 기준 고르기</td><td>-</td><td>화면 기능 — 무엇이 &#x27;더 나은 판정&#x27;인지 데이터로 잴 기준이 없다</td><td><span class="muted">대상 아님</span></td></tr><tr><td>활용</td><td>PPPP 행동 문장</td><td>-</td><td>결과(실제 입점·폐업)와 대조할 표본이 없어 효과를 잴 수 없다</td><td><span class="muted">대상 아님</span></td></tr><tr><td>활용</td><td>질문형 프리셋·내보내기</td><td>-</td><td>화면 기능 — 판정 품질과 무관</td><td><span class="muted">대상 아님</span></td></tr></tbody></table></div>
+<p class="muted">기각에서 알게 된 것 — 강건 척도(순위 z·MAD z)와 작은 표본 보정은 문장 안정성·오차를 줄이지 못했다. 프로필 쌍둥이는 쓰지 않은 지표를 맞히는 힘이 같은 유형 중앙값보다 약했고(오차 0.88 대 0.78), 형태 군집은 실루엣 0.14로 구조가 약했다. 중심/외곽 귀속(안정성 0.71)과 업종 흐름(1위 일치 0.24)은 재표본에 흔들렸다. 대가로, 적용본의 공통점 목록은 재표본 안정성이 0.86 → 0.66으로 내려갔다(기준선 근처 p가 공통점과 경향 사이를 오감). 문서 3-7에서 화면 문장 108건을 원자료·독립 난수 p·시뮬레이션 판정과 다시 대조해 모두 일치했다.</p>
+
+<h2>근거 자료</h2>
+<ul class="muted" style="font-size:13.5px">
+<li>Goldstein & Spiegelhalter(1996) League tables and their limitations, JRSS A 159(3) — <a href="https://www.bristol.ac.uk/media-library/sites/cmm/migrated/documents/limitations-of-league-tables.pdf">PDF</a> · <a href="https://ideas.repec.org/a/bla/jorssa/v159y1996i3p385-409.html">초록</a></li>
+<li>Benjamini & Hochberg(1995) Controlling the false discovery rate, JRSS B 57 — <a href="https://www.dcscience.net/Benjamini-Hochberg-1995-FDR.pdf">PDF</a></li>
+<li>OECD/JRC(2008) Handbook on Constructing Composite Indicators — <a href="https://knowledge4policy.ec.europa.eu/sites/default/files/jrc47008_handbook_final.pdf">PDF</a></li>
+<li>Leys 외(2013) Detecting outliers: use absolute deviation around the median, JESP 49(4) — <a href="https://orbilu.uni.lu/handle/10993/59204">ORBilu</a></li>
+<li>Vickers & Rees(2007) Creating the UK National Statistics 2001 output area classification, JRSS A 170(2) — <a href="https://etheses.whiterose.ac.uk/id/eprint/15/1/d.vickers_thesis_complete_text.pdf">학위논문</a></li>
+<li>Dolega 외(2019/2021) Beyond retail: new ways of classifying UK shopping and consumption spaces, EPB — <a href="https://livrepository.liverpool.ac.uk/id/eprint/3043520">리버풀대</a></li>
+<li>공실·회전·업종 구성을 함께 보는 high street 활력 연구 — <a href="https://openresearch.lsbu.ac.uk/item/9399y">Measures of Revolution on the Local High Street(LSBU)</a> · <a href="https://blogs.lse.ac.uk/usappblog/2016/12/10/retail-churn-can-bring-both-volatility-and-vitality-to-a-neighborhood/">Meltzer, Retail churn(LSE)</a></li>
+<li>실험 원자료: 저장소 Gold(건물·층별 공실·building_history·page_footfall_hourly·TRDAR) · 실험 스크립트 research_exp.py · 시뮬레이션 sim_prep.py · sim_eval.py · sim_apply.py(스크래치패드). 2026-10-11 시뮬레이션 합격 방법만 문서에 반영했다(3-8).</li>
+</ul>
+</div></body></html>

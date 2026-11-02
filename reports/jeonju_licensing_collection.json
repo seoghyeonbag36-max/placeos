@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "codes": [
+    "4641000"
+  ],
+  "rows": 25559,
+  "source": "https://apis.data.go.kr/1741000/general_restaurants/info",
+  "industry": "일반음식점",
+  "note": "개방자치단체 코드 합집합을 각각 한 번 수집. 전체 영업·폐업 상태 포함"
+}

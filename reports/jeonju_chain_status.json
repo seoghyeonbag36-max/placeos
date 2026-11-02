@@ -1,0 +1,327 @@
+[
+  {
+    "slug": "jj-east",
+    "done": 8,
+    "total": 9,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "전주 전주동부 · city=jeonju · r=425m/425m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 685 · 건물 309 · 건물당 2.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,946동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "276동 · expos_units=4 floor_ouln=186 no_com_floor=8 no_ledger=19 non_commercial=59",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 491동 · 대표공실 20.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 20.9% vs 앵커 27.99% = -7.09%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "'jeonju' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다 (measured_pages.SERVED_CITIES={anyang, bucheon, goyang, gwangju, hwaseong, paju, seongnam, seoul, suwon, uijeongbu})",
+        "next": ""
+      }
+    ],
+    "blocked": [],
+    "serving_paused": true,
+    "next_stage": "",
+    "next": ""
+  },
+  {
+    "slug": "jj-west",
+    "done": 7,
+    "total": 9,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "전주 전주서부 · city=jeonju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,532 · 건물 673 · 건물당 2.3",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,387동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "627동 · expos_units=59 floor_approx=1 floor_ouln=155 no_com_floor=5 no_ledger=4 non_commercial=403",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 97.3% · floor_approx 1동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 282동 · 대표공실 28.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 28.3% vs 앵커 3.12% = +25.18%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "'jeonju' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다 (measured_pages.SERVED_CITIES={anyang, bucheon, goyang, gwangju, hwaseong, paju, seongnam, seoul, suwon, uijeongbu})",
+        "next": ""
+      }
+    ],
+    "blocked": [],
+    "serving_paused": true,
+    "next_stage": "",
+    "next": ""
+  },
+  {
+    "slug": "jj-newtown",
+    "done": 8,
+    "total": 9,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "전주 전주서부신시가지 · city=jeonju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,062 · 건물 665 · 건물당 3.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "498동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "600동 · expos_units=88 floor_ouln=171 no_com_floor=5 no_ledger=6 non_commercial=330",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 71동 · 대표공실 13.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 13.7% vs 앵커 17.02% = -3.32%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "'jeonju' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다 (measured_pages.SERVED_CITIES={anyang, bucheon, goyang, gwangju, hwaseong, paju, seongnam, seoul, suwon, uijeongbu})",
+        "next": ""
+      }
+    ],
+    "blocked": [],
+    "serving_paused": true,
+    "next_stage": "",
+    "next": ""
+  },
+  {
+    "slug": "jj-hanok",
+    "done": 8,
+    "total": 9,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "전주 전주한옥마을 · city=jeonju · r=425m/425m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 664 · 건물 443 · 건물당 1.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,489동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "395동 · expos_units=6 floor_ouln=179 no_com_floor=9 no_ledger=16 non_commercial=185",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 427동 · 대표공실 8.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 8.5% vs 앵커 31.24% = -22.74%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "'jeonju' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다 (measured_pages.SERVED_CITIES={anyang, bucheon, goyang, gwangju, hwaseong, paju, seongnam, seoul, suwon, uijeongbu})",
+        "next": ""
+      }
+    ],
+    "blocked": [],
+    "serving_paused": true,
+    "next_stage": "",
+    "next": ""
+  },
+  {
+    "slug": "jj-songcheon",
+    "done": 8,
+    "total": 9,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "전주 송천동 · city=jeonju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 730 · 건물 335 · 건물당 2.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,303동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "312동 · expos_units=32 floor_ouln=146 no_ledger=11 non_commercial=123",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 264동 · 대표공실 20.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 20.9% vs 앵커 18.05% = +2.85%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "'jeonju' 는 서빙 대상 도시가 아니다 — 제품 판단으로 뺐다 (measured_pages.SERVED_CITIES={anyang, bucheon, goyang, gwangju, hwaseong, paju, seongnam, seoul, suwon, uijeongbu})",
+        "next": ""
+      }
+    ],
+    "blocked": [],
+    "serving_paused": true,
+    "next_stage": "",
+    "next": ""
+  }
+]

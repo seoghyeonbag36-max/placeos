@@ -406,6 +406,15 @@ GWANGJU_HUBS: dict[str, PageHub] = {
     "gj-cheomdan1": PageHub("gj-cheomdan1", "광주 첨단1지구", 126.842364, 35.219527, 500, 700, city="gwangju"),  # 광산구 · 점포 1,577 · 건물 315 · 1차 통과
 }
 
+# 전주 후보 5곳 — V-World 시설 중심 조사 반경. Gold 검증 전에는 서빙하지 않는다.
+JEONJU_HUBS: dict[str, PageHub] = {
+    "jj-east": PageHub("jj-east", "전주 전주동부", 127.14782445148437, 35.824307653725654, 425, 425, city="jeonju"),
+    "jj-west": PageHub("jj-west", "전주 전주서부", 127.11530577621733, 35.83102037671569, 500, 700, city="jeonju"),
+    "jj-newtown": PageHub("jj-newtown", "전주 전주서부신시가지", 127.10152249976325, 35.81772020277232, 500, 700, city="jeonju"),
+    "jj-hanok": PageHub("jj-hanok", "전주 전주한옥마을", 127.15366129982053, 35.818290201122394, 425, 425, city="jeonju"),
+    "jj-songcheon": PageHub("jj-songcheon", "전주 송천동", 127.1210250001584, 35.85713199864467, 500, 700, city="jeonju"),
+}
+
 # 거점 id 별칭 → 정규 slug (프론트/레거시 경로 호환).
 ALIASES: dict[str, str] = {
     "gangnam-garosugil": "garosugil",
@@ -421,7 +430,7 @@ ALIASES: dict[str, str] = {
 # 그래서 **이름을 대고 부를 때만** 잡히게 한다.
 ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS,
                                 **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS,
-                                **GWANGJU_HUBS}
+                                **GWANGJU_HUBS, **JEONJU_HUBS}
 
 # ── 기본 순회 집합 (2026-09-03) ──────────────────────────────────────────────
 # 위 주석은 "`HUBS`(서울 54)가 기본 순회 집합"이라고 적었는데, 서울 2차 12거점이
