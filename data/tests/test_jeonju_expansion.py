@@ -26,11 +26,11 @@ def test_cached_store_city_and_unique_ids_are_checked():
         validate_stores([{**good, 'lnoAdr': '전북특별자치도 익산시'}])
 
 
-def test_all_five_rone_candidates_registered_but_not_served_early():
+def test_all_five_verified_rone_hubs_are_public():
     assert {DISTRICT_RONE[s] for s in JEONJU_HUBS} == {
         '전북>전주동부', '전북>전주서부', '전북>전주서부신시가지',
         '전북>전주한옥마을', '전북>송천동'}
-    assert not set(JEONJU_HUBS) & set(ACTIVE_HUBS)
+    assert set(JEONJU_HUBS) <= set(ACTIVE_HUBS)
     assert all(h.city == 'jeonju' for h in JEONJU_HUBS.values())
 
 

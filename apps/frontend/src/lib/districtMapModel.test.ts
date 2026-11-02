@@ -14,9 +14,10 @@ function fit(model_covered: boolean, districts: IndustryFitRow[]): IndustryFit {
 }
 
 describe("districtMapModel", () => {
-  it("묶음은 서울·광주 외에 전부 경기다", () => {
+  it("서울·광주·전주를 분리하고 경기 도시는 경기로 묶는다", () => {
     expect(groupOf({ city: "seoul" })).toBe("seoul");
     expect(groupOf({ city: "gwangju" })).toBe("gwangju");
+    expect(groupOf({ city: "jeonju" })).toBe("jeonju");
     expect(groupOf({ city: "suwon" })).toBe("gyeonggi");
   });
 

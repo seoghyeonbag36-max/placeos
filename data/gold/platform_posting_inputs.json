@@ -597,6 +597,30 @@
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
+    },
+    "jj-east": {
+      "rent_per_m2_krw_thousand": 12.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-west": {
+      "rent_per_m2_krw_thousand": 13.6,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-hanok": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-songcheon": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
     }
   },
   "seoul": {

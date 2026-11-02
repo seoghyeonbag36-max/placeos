@@ -406,7 +406,7 @@ GWANGJU_HUBS: dict[str, PageHub] = {
     "gj-cheomdan1": PageHub("gj-cheomdan1", "광주 첨단1지구", 126.842364, 35.219527, 500, 700, city="gwangju"),  # 광산구 · 점포 1,577 · 건물 315 · 1차 통과
 }
 
-# 전주 후보 5곳 — V-World 시설 중심 조사 반경. Gold 검증 전에는 서빙하지 않는다.
+# 전주 5곳 — V-World 시설 중심 조사 반경. Gold 검증 후 2026-11-03 사용자 지시로 공개.
 JEONJU_HUBS: dict[str, PageHub] = {
     "jj-east": PageHub("jj-east", "전주 전주동부", 127.14782445148437, 35.824307653725654, 425, 425, city="jeonju"),
     "jj-west": PageHub("jj-west", "전주 전주서부", 127.11530577621733, 35.83102037671569, 500, 700, city="jeonju"),
@@ -455,8 +455,9 @@ GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
     "byeongjeom",
 })
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
+# 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.
 ACTIVE_CITIES: frozenset[str] = frozenset({
-    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju", "hwaseong",
+    "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju", "hwaseong", "jeonju",
 })
 
 # 추후 확장 과제(`PageHub.deferred`) — 서빙 도시 안에 있어도 서빙·기본 순회에서 뺀다.

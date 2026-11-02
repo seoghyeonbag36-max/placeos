@@ -105,7 +105,7 @@ def test_only_served_cities_reach_the_api():
 
     # 2026-10-31 사용자 결정으로 광주(13곳 전부)와 화성(병점역 재판정 뒤)이 들어왔다.
     assert mp.SERVED_CITIES == frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
-                                          "gwangju", "hwaseong"}), (
+                                          "gwangju", "hwaseong", "jeonju"}), (
         f"서빙 도시가 바뀌었다: {sorted(mp.SERVED_CITIES)} — 의도한 변경인지 확인할 것")
 
     rows = svc.list_summaries()
@@ -129,6 +129,10 @@ def test_only_served_cities_reach_the_api():
     # 광주는 13곳 전부 서빙한다 — 한 곳이라도 빠지면 Gold 가 사라졌거나 표기가 붙은 것이다.
     gj_served = {s for s in ph.GWANGJU_HUBS if s in ids}
     assert gj_served == set(ph.GWANGJU_HUBS), f"광주 서빙 누락: {sorted(set(ph.GWANGJU_HUBS) - gj_served)}"
+
+    # 2026-11-03 사용자 결정: 수집·Gold 검증을 마친 전주 5곳도 모두 공개한다.
+    assert set(ph.JEONJU_HUBS) <= ids
+    assert all(r["vacancy_source"] == "gold" for r in rows if r["id"] in ph.JEONJU_HUBS)
 
 
 def test_deferred_marks_only_new_expansion_and_known_kinds():

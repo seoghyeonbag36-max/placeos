@@ -97,8 +97,9 @@ _PAGE_HUBS = _REPO / "data" / "config" / "page_hubs.py"
 # → docs/decision-goyang-paju-corridor-2026-10-26.md
 # 2026-10-31 광주(13곳) 서빙 — page_hubs.ACTIVE_CITIES 와 함께 바꿨다.
 # 2026-10-31 화성(병점역 1곳 — 화성의 다른 거점은 GYEONGGI_BATCH3_SERVED_HUBS 밖이라 그대로 꺼져 있다).
+# 2026-11-03 사용자 결정: 전주 5곳 수집·Gold 검증 완료 후 화면에 모두 공개한다.
 SERVED_CITIES: frozenset[str] = frozenset({"seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu",
-                                          "gwangju", "hwaseong"})
+                                          "gwangju", "hwaseong", "jeonju"})
 
 
 def _load_hubs() -> dict:

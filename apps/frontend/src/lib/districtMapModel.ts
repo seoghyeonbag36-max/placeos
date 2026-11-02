@@ -5,15 +5,15 @@
 import { colors } from "@/design/tokens/colors";
 import type { DistrictSummary, HubOutline, IndustryFit, IndustryFitRow } from "@/lib/api";
 
-export type RankGroupKey = "seoul" | "gyeonggi" | "gwangju";
+export type RankGroupKey = "seoul" | "gyeonggi" | "gwangju" | "jeonju";
 export const RANK_GROUPS: { key: RankGroupKey; name: string }[] = [
-  { key: "seoul", name: "서울" }, { key: "gyeonggi", name: "경기" }, { key: "gwangju", name: "광주" },
+  { key: "seoul", name: "서울" }, { key: "gyeonggi", name: "경기" }, { key: "gwangju", name: "광주" }, { key: "jeonju", name: "전주" },
 ];
 export type ColorMode = "type" | "fit" | "vacancy";
 
-/** 순위 묶음은 시도 단위다(business_fit `_region`). 경기 안 도시 슬러그는 늘어나므로 나머지를 경기로 읽는다 */
+/** 순위 묶음은 시도 단위다(business_fit `_region`). 전북의 서빙 도시는 현재 전주다. */
 export function groupOf(d: Pick<DistrictSummary, "city">): RankGroupKey {
-  return d.city === "seoul" ? "seoul" : d.city === "gwangju" ? "gwangju" : "gyeonggi";
+  return d.city === "seoul" ? "seoul" : d.city === "gwangju" ? "gwangju" : d.city === "jeonju" ? "jeonju" : "gyeonggi";
 }
 export const groupName = (key: RankGroupKey) => RANK_GROUPS.find((g) => g.key === key)?.name ?? key;
 
