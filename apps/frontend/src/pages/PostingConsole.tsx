@@ -4,7 +4,7 @@ import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import AreaBepPlanner from "@/components/AreaBepPlanner";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import {
-  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPostings, listDistricts, recommendIndustry, simulateRevenue,
+  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPostings, getBuildingTwin, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
 import type {
   DistrictSummary, IndustryRec, Posting, SavedResult, SimulateResult, TierScenario,
@@ -68,7 +68,7 @@ interface PostingConsoleProps {
 interface Calculation {
   result: SimulateResult;
   input: { district_id: string; unit_id: string; industry_type?: string; strategy?: string; prem?: number;
-    industry_detail_key?: string; operating_inputs?: Record<string, number> };
+    industry_detail_key?: string; operating_inputs?: Record<string, number>; area_py_override?: number };
 }
 
 export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest }: PostingConsoleProps = {}) {
@@ -95,6 +95,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [detailKey, setDetailKey] = useState(industryRequest ? "" : defaultDetailKey ?? "");
   const [operating, setOperating] = useState<Record<string, string>>({});
   const [prem, setPrem] = useState("");
+  const [areaInput, setAreaInput] = useState("");
   const [strategy, setStrategy] = useState("");
   const [recs, setRecs] = useState<IndustryRec[] | null>(null);
 
@@ -110,11 +111,17 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [err, setErr] = useState<string | null>(null);
 
   const unit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+  const areaOverride = areaInput.trim() === "" ? undefined : Number(areaInput);
+  const resolved = calculation?.result.resolved_inputs;
+  const effectiveUnit = unit && resolved
+    ? { ...unit, area: resolved.area_py, rent: resolved.rent_manwon,
+      inputs_source: calculation.result.inputs_source ?? unit.inputs_source } : unit;
   const [inventoryScope, setInventoryScope] = useState({ districtId, selection });
   if (inventoryScope.districtId !== districtId || inventoryScope.selection !== selection) {
     setInventoryScope({ districtId, selection });
     setUnits([]); setUnitsFor(null); setUnitId(""); setRecs(null); setErr(null);
     setOperating({}); setCalculation(null); setPrevious(null); setBusy(false);
+    setAreaInput("");
   }
   const [recommendedUnit, setRecommendedUnit] = useState(unit);
   if (recommendedUnit !== unit) {
@@ -162,6 +169,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     setIndustry(baseIndustry); setPrem(""); setStrategy(""); setUnitId(id);
     setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
     setHandoffNote("");
+    setAreaInput("");
   }
 
   // 자리 목록 — 실측 공실 인벤토리(services/vacant_inventory)에서 온다
@@ -169,14 +177,28 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     let live = true;
     lastCalculation.current = null; requestSerial.current += 1;
     getPostings(districtId)
-      .then((p) => {
+      .then(async (p) => {
+        if (selection?.unitId && districtId === selection.districtId) {
+          const twin = await getBuildingTwin(selection.buildingId, districtId);
+          if (!live) return;
+          const floor = twin?.floors.find((f) => f.unit_id === selection.unitId);
+          if (floor && floor.area_m2 != null && floor.area_m2 > 0 && floor.rent_est_manwon != null) {
+            const selectedFloor: Posting = {
+              id: selection.unitId, n: `${selection.buildingName} ${floor.label}`, grp: "층 매물",
+              lat: twin!.lat, lng: twin!.lng, area: Math.round(floor.area_m2 / 3.305785 * 10) / 10, rent: floor.rent_est_manwon,
+              prem: 0, floor: floor.label, was: "", foot: "", scenarios: {},
+              inputs_source: { area: floor.area_source ?? "대장 층별개요", rent: "rone", prem: "absent", foot: "none" },
+            };
+            p = [selectedFloor, ...p.filter((u) => u.id !== selectedFloor.id)];
+          }
+        }
         if (!live) return;
         setUnits(p);
         setUnitsFor(districtId);
         if (selection && districtId === selection.districtId) {
           // build_vacant_units.py의 id=f"vu-{p.get('id')}" 계약을 응답 목록에서 검증한다.
           // 이름·좌표로 추측하거나 층 표본을 ROI 유닛으로 바꾸지 않는다.
-          const match = p.find((u) => u.id === `vu-${selection.buildingId}`);
+          const match = p.find((u) => u.id === (selection.unitId ?? `vu-${selection.buildingId}`));
           setUnitId(match?.id ?? "");
           setHandoffNote(match ? `${selection.buildingName}의 입점 계산 유닛을 확인했습니다.`
             : `${selection.buildingName}과 일치하는 입점 계산 유닛이 없습니다. 계산할 자리를 직접 선택해 주세요.`);
@@ -212,12 +234,16 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     if (!opts.quiet) setErr(null);
     try {
       const parsed = prem.trim() === "" ? undefined : Math.max(0, Number(prem));
+      if (areaOverride !== undefined && (!Number.isFinite(areaOverride) || areaOverride <= 0 || areaOverride > 3000)) {
+        throw new Error("내부면적은 0 초과 3,000평 이하로 입력하세요.");
+      }
       const input: Calculation["input"] = {
         district_id: districtId,
         unit_id: unitId,
         industry_type: industry.trim() || undefined,
         strategy: strategy || undefined,
         prem: Number.isFinite(parsed as number) ? (parsed as number) : undefined,
+        ...(areaOverride !== undefined ? { area_py_override: areaOverride } : {}),
       };
       if (detailKey) {
         input.industry_detail_key = detailKey;
@@ -265,7 +291,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // Posting → Program 인계 값. 업종은 **계산에 쓴 업종**을 먼저, 없으면 자리의 직전 업종.
   // 전략명은 계산했고 회수되는 전략이 있을 때만 — 없는 추천을 지어내지 않는다.
   function makeProgram() {
-    if (!unit || !onMakeProgram) return;
+    if (!unit || !onMakeProgram || busy || changedInput) return;
     const used = calculation?.input.unit_id === unit.id ? calculation : null;
     const entries = used ? Object.entries(used.result.scenarios) : [];
     // 자료 부족 전략(실측 재료 없음 · 2026-10-28 (b))은 숫자가 없어 후보가 아니다
@@ -273,17 +299,20 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     const best = viable.find(([, t]) => t.recommended)
       ?? [...viable].sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
     onMakeProgram({
-      districtId, unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
-      area: unit.area, floor: unit.floor, rent: unit.rent,
+      districtId, districtName: districts.find((d) => d.id === districtId)?.name,
+      unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
+      area: effectiveUnit!.area, floor: unit.floor, rent: effectiveUnit!.rent,
       industry: used?.result.industry_type || used?.input.industry_type || unit.was?.trim() || null,
       strategy: best ? (TIER_LABEL[best[0]]?.name ?? best[1].name) : null,
+      calculation: used ? { input: used.input, result: used.result } : undefined,
     });
   }
 
   const tiers = result ? Object.entries(result.scenarios) : [];
   const changedInput = calculation && (calculation.input.industry_type !== (industry.trim() || undefined)
     || calculation.input.strategy !== (strategy || undefined)
-    || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem)));
+    || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem))
+    || calculation.input.area_py_override !== areaOverride);
 
   return (
     <div className="postconsole"><div className="wrap">
@@ -365,7 +394,14 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             )}
           </label>
 
-          {unit && !detailKey && <AreaBepPlanner key={`${districtId}:${unit.id}`} unit={unit} />}
+          {unit && <label className="field">
+            <span className="flabel">확인한 내부면적 (평 · 선택)</span>
+            <input type="number" min="0.01" max="3000" step="any" value={areaInput}
+              onChange={(e) => { setAreaInput(e.target.value); clearCalculation(); }} placeholder="계약서·도면으로 확인한 면적" />
+            <span className="fhint">사용자 입력 · 비우면 원천 면적 사용. 변경하면 임대 추정과 비용을 다시 계산합니다. 도면만으로 면적을 자동 판독하지 않습니다.</span>
+          </label>}
+          {areaInput.trim() && !resolved && <p className="fhint">면적 변경 후 시뮬레이션을 실행하면 같은 임대 추정값으로 BEP를 계산합니다.</p>}
+          {effectiveUnit && (!areaInput.trim() || resolved) && !detailKey && <AreaBepPlanner key={`${districtId}:${unit!.id}`} unit={effectiveUnit} />}
           <IndustryDetailSelect value={detailKey} onChange={(key, option) => {
             setDetailKey(key); setOperating({}); clearCalculation();
             if (option) setIndustry(option.label);
@@ -406,7 +442,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         {/* ── 결과 ── */}
         <div className="results">
           {onMakeProgram && (
-            <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit}
+            <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
               onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
           )}
           <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
@@ -701,7 +737,7 @@ function srcLabel(v: string | undefined): string {
   return ({
     rone: "실측", flpop: "실측", "flpop+seed": "실측+예시",
     "flpop+jipgyegu": "실측",
-    seed: "예시", absent: "전제(0)", contract: "직접 입력", none: "자료 없음(보정 안 함)",
+    seed: "예시", absent: "전제(0)", contract: "직접 입력", user_input: "사용자 입력", none: "자료 없음(보정 안 함)",
     bldg: "실측", "gold-ledger": "실측", "bldg+split": "실측 면적·분할 추정",
   } as Record<string, string>)[v ?? ""] ?? (v ?? "미상");
 }

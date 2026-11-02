@@ -44,6 +44,10 @@ def _detect_env() -> str:
 
 
 class Settings(BaseSettings):
+    # 인테리어 참고 이미지 — 명시적으로 활성화한 서버에서만 외부 유료 호출.
+    interior_images_enabled: bool = False
+    openai_api_key: str = ""
+    interior_image_model: str = "gpt-image-2.5-flare"
     # 뒤에 오는 파일이 우선한다 — 백엔드 전용 .env 가 data/.env 를 덮는다.
     # 없는 파일은 조용히 건너뛴다(배포판에는 data/.env 가 올라가지 않는다).
     model_config = SettingsConfigDict(
@@ -72,6 +76,9 @@ class Settings(BaseSettings):
     # 공실까지의 도보시간(TMAP 보행자 경로). 비우면 도보시간만 "준비 중"으로 빠지고
     # 역·정류장·주차장 위치와 직선거리는 그대로 나온다. 브라우저로 보내지 않는다.
     tmap_app_key: str = ""
+    # 출발지→상권 대중교통 소요(ODsay). 차량은 KAKAO_MOBILITY_API_KEY(카카오모빌리티 길찾기 권한이 필요하다).
+    # 미설정 수단은 수치를 돌려주지 않는다(`not_configured`). 브라우저로 보내지 않는다.
+    odsay_api_key: str = ""
     # 프로세스별 외부 호출 상한(24시간). 인스턴스 수만큼 늘고 재시작 시 초기화된다.
     # 한 번의 교통 접근성 조회는 최대 8회(카카오 2 + TMAP 6)를 쓴다.
     travel_daily_cap_per_instance: int = Field(default=1000, ge=0)

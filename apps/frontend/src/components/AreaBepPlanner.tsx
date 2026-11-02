@@ -20,11 +20,11 @@ export default function AreaBepPlanner({ unit }: { unit: Posting }) {
   const result = complete ? calculateAreaBep({ area: unit.area, rent: unit.rent,
     ...Object.fromEntries(FIELDS.map((f) => [f.key, Number(values[f.key])])),
   } as AreaBepInputs) : null;
-  const source = (value?: string) => value === "seed" ? "seed · 예시값" : value || "출처 미제공";
+  const source = (value?: string) => value === "seed" ? "seed · 예시값" : value === "user_input" ? "사용자 직접 입력" : value || "출처 미제공";
   const number = (v: number) => v.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
   return <details className="area-bep">
     <summary>면적으로 운영 규모 잡기 · BEP 계산</summary>
-    <p>{unit.area}평 · 월 임대료 {unit.rent}만원</p>
+    <p>{number(unit.area)}평 · 월 임대료 {number(unit.rent)}만원</p>
     <p>면적 출처: {source(unit.inputs_source?.area)} · 임대료 출처: {source(unit.inputs_source?.rent)}</p>
     <p>배치안을 정하지 못했다면 사용 면적과 좌석·설비 간격을 바꿔 비교하세요. 건물 평균 면적일 수 있으므로 계약 면적을 확인하세요.</p>
     <div className="area-bep-fields">{FIELDS.map((f) => <label key={f.key} htmlFor={`${id}-${f.key}`}>

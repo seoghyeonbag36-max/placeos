@@ -115,8 +115,16 @@ apps/frontend/tsconfig.tsbuildinfo
 !data/gold/page_footfall_jipgyegu.json
 # 예외: Page 다거점 red dot 실데이터 — 각 거점 page_building_master.geojson 만 추적.
 # building_vacancy.json·대장 원본·parquet 등 중간·원본 산출물은 계속 제외.
+# 예외: 리뉴얼 전역 Gold — 외곽선·체인 추정·동시 입지·R-ONE 시계열(각 3MB 이하). 재생성은 각 빌더 머리말
+!data/gold/platform_hub_outlines.json
+!data/gold/platform_store_brands.json
+!data/gold/platform_industry_colocation.json
+!data/gold/platform_rone_history.json
 !data/gold/*/
 data/gold/*/*
+# 예외: 리뉴얼 거점별 Gold(gz) — 점포 요약(합 15MB 이하)·전 층(합 25MB 이하). test_renewal_gold 가 예산을 잰다
+!data/gold/*/stores_lite.json.gz
+!data/gold/*/building_floors.json.gz
 !data/gold/*/page_building_master.geojson
 !data/gold/*/building_history.json
 # 예외: 커버리지 리포트(거점당 ~600B) — 관리자 API 가 디스크에서 읽으므로 배포에 필요.
@@ -278,3 +286,6 @@ exports/
 
 # 독립 작업용 로컬 git worktree는 중첩 저장소로 커밋하지 않는다.
 .codex-worktrees/
+
+# 외부 API 실호출 검증의 로컬 계정 DB는 배포하지 않는다.
+.qa/renewal-live.sqlite3*

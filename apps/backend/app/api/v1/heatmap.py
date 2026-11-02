@@ -1,12 +1,27 @@
 """공실 히트맵 엔드포인트 — 100m 그리드 + 건물 폴리곤(Page)."""
-from fastapi import APIRouter, HTTPException
+from typing import Literal
+
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.district import VacancyHeatmap
+from app.schemas.renewal import HourlyProfile
 from app.services import building_vacancy as bv
 from app.services import districts as svc
 from app.services import footfall_layer, rent_layer
 
 router = APIRouter()
+
+
+@router.get("/hourly-profile", response_model=HourlyProfile)
+async def hourly_profile(
+    district: str = Query(..., min_length=1, max_length=40),
+    daytype: Literal["weekday", "weekend"] = "weekday",
+) -> dict:
+    """상권 합계 24시간 유동 곡선. 서울 전용 소스라 서울 밖은 404 다."""
+    out = footfall_layer.hourly_profile(district, daytype)
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"no hourly footfall for district: {district}")
+    return out
 
 
 @router.get("/buildings")

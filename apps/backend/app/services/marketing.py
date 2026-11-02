@@ -747,6 +747,27 @@ def _context_mtime(district_id: str) -> float:
     return base + events.source_mtime()
 
 
+def _marketing_base(district_id: str) -> dict | None:
+    """행사·온라인 콘텐츠의 바탕. 서빙 목록(`PAGES`)에 있으면 시드 없는 거점도 빈 바탕으로 선다.
+
+    종전에는 시드(`DISTRICTS`)로 먼저 걸러, 서빙 117곳 중 시드 밖 63곳(행사 Gold 가 있는 서울 27곳 포함)이 404 였다.
+    """
+    base = svc.get_marketing(district_id)
+    if base is not None:
+        return base
+    if svc.get_district(district_id) is None:
+        return None
+    return {"district_id": district_id, "events": [], "online_contents": []}
+
+
+def _events_unavailable_note(district_id: str) -> str | None:
+    """이 거점의 도시에 문화행사 원천이 없으면 그 사유. 있으면 None."""
+    d = svc.get_district(district_id)
+    if not d or svc.page_city(d).has_city_events:
+        return None
+    return f"행사 자료는 서울만 있어요 — {svc.page_city(d).short} 상권은 수집하지 않았어요."
+
+
 def get_district_events(district_id: str) -> dict | None:
     """상권 행사만 — **LLM 을 부르지 않는** 조회(2026-09-13).
 
@@ -755,13 +776,17 @@ def get_district_events(district_id: str) -> dict | None:
     돈다(거점마다 1회, 인스턴스가 새로 뜨면 다시). 지도를 옮길 때마다 크레딧을 쓰는 화면이
     되므로 행사 경로만 떼어 낸다. 출처 규칙은 아래 함수와 같다 — 적재됐는데 0건이면 빈 목록.
     """
-    base = svc.get_marketing(district_id)
+    base = _marketing_base(district_id)
     if base is None:
         return None
+    no_city = _events_unavailable_note(district_id)
+    if no_city:
+        return {"district_id": district_id, "events": [], "events_source": "none", "events_note": no_city}
     real_events = events.for_district(district_id)
     if real_events is None:
-        return {"district_id": district_id, "events": base["events"], "events_source": "seed"}
-    return {"district_id": district_id, "events": real_events, "events_source": "seoul-open-data"}
+        return {"district_id": district_id, "events": base["events"],
+                "events_source": "seed" if base["events"] else "none", "events_note": None}
+    return {"district_id": district_id, "events": real_events, "events_source": "seoul-open-data", "events_note": None}
 
 
 def get_district_marketing(district_id: str, *, allow_llm: bool = False) -> dict | None:
@@ -778,15 +803,18 @@ def get_district_marketing(district_id: str, *, allow_llm: bool = False) -> dict
       관여하지 않는다 — 좌표·일정이 붙은 실물이라 지어내면 없는 행사를 지도에 찍게 된다.
       Gold 미적재면 시드로 폴백하되 events_source 로 출처를 밝힌다.
     """
-    base = svc.get_marketing(district_id)
+    base = _marketing_base(district_id)
     if base is None:
         return None
 
+    no_city = _events_unavailable_note(district_id)
     # 행사: 서울열린데이터광장 문화행사 실데이터. Gold 미적재면 시드로 폴백하되
     # 출처를 밝힌다. 적재됐는데 그 거점에 예정 행사가 없으면 **빈 목록 그대로** —
     # 시드로 채우면 지어낸 행사를 지도에 다시 찍는 셈이다.
     real_events = events.for_district(district_id)
-    if real_events is None:
+    if no_city:
+        base = {**base, "events": [], "events_source": "none", "events_note": no_city}
+    elif real_events is None:
         base = {**base, "events_source": "seed"}
     else:
         base = {**base, "events": real_events, "events_source": "seoul-open-data"}

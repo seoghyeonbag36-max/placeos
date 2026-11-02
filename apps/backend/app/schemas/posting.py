@@ -26,6 +26,14 @@ class SimulateRequest(BaseModel):
     prem: int | None = None
     industry_detail_key: str | None = Field(default=None, max_length=100)
     operating_inputs: dict[str, Any] | None = None
+    # 사용자가 계약서·도면으로 넣은 내부면적(평). 주면 `inputs_source["area"]="user_input"`.
+    area_py_override: float | None = Field(default=None, gt=0, le=3000, allow_inf_nan=False)
+
+
+class ResolvedPostingInputs(BaseModel):
+    area_py: float
+    rent_manwon: float
+    floor: str
 
 
 class SimulateResult(BaseModel):
@@ -49,3 +57,8 @@ class SimulateResult(BaseModel):
     calculation_status: str = "calculated"
     unavailable_reason: str | None = None
     economics: dict[str, Any] | None = None
+
+
+class SimulateResultWithInputs(SimulateResult):
+    """층 매물·내부면적 계산에서만 돌려주는 입력값. 기존 건물 응답의 키 집합은 보존한다."""
+    resolved_inputs: ResolvedPostingInputs

@@ -284,10 +284,12 @@ def test_invalid_destination_rejected_before_lookup(point):
     assert travel._calls == 0
 
 
-def test_previous_origin_based_endpoints_are_gone():
+def test_origin_based_endpoints_coexist_with_access():
+    """2026-11-02 출발지 소요를 되살렸다(메모 1-4). `/access` 를 대신하지 않고 나란히 있다."""
     client = TestClient(app)
-    assert client.post("/api/v1/travel/times", json={}).status_code in (404, 405)
-    assert client.post("/api/v1/travel/addresses", json={}).status_code in (404, 405)
+    assert client.post("/api/v1/travel/times", json={}).status_code == 422
+    assert client.post("/api/v1/travel/addresses", json={}).status_code == 422
+    assert client.post("/api/v1/travel/access", json={}).status_code == 422
 
 
 def test_response_models_reject_numbers_on_failed_states():

@@ -1,0 +1,4 @@
+.evid { display: inline-block; font-size: 12px; font-weight: 700; line-height: 1.3; border-radius: 4px; padding: 0 4px; white-space: nowrap; font-style: normal; }
+.evid-real { color: var(--source-real); background: var(--source-real-soft); border: 1px solid var(--source-real-line); }
+.evid-stat { color: var(--text-secondary); background: var(--surface-sunken); border: 1px solid var(--line); }
+.evid-soft { color: var(--caution-ink); background: var(--caution-soft); border: 1px solid var(--caution-line); }

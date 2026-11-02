@@ -246,8 +246,10 @@ class DistrictEvents(BaseModel):
     """GET /marketing/events — 상권 행사만(LLM 없이). Program 지도의 오프라인 홍보 장소."""
     district_id: str
     events: list[MarketingEvent]
-    # "seoul-open-data"(실데이터) | "seed"(Gold 미적재 폴백). 실데이터인데 0건이면 예정 행사가 없다.
+    # "seoul-open-data"(실데이터) | "seed"(Gold 미적재 폴백) | "none"(이 도시에 원천 없음).
+    # 실데이터인데 0건이면 예정 행사가 없다.
     events_source: str = "seed"
+    events_note: str | None = None
 
 
 class Marketing(BaseModel):
@@ -256,7 +258,9 @@ class Marketing(BaseModel):
     online_contents: list[str]
     # 행사 출처: "seoul-open-data"(실데이터) | "seed"(Gold 미적재 폴백).
     # 실데이터인데 목록이 비어 있으면 그 거점에 예정 공공 문화행사가 없다는 뜻이다.
+    # "none" 은 이 도시에 원천이 없다는 뜻이고 사유는 events_note 에 있다.
     events_source: str = "seed"
+    events_note: str | None = None
     # 온라인 콘텐츠의 출처 — "llm"(Gold 컨텍스트 기반 생성) | "seed"(시드 폴백).
     # 기본값을 둬 기존 소비자(프론트·테스트)와 호환된다.
     source: str = "seed"

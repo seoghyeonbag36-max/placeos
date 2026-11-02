@@ -78,6 +78,14 @@ def unit(district_id: str | None, unit_id: str | None) -> dict | None:
     아무 뜻이 없는데, 첫 번째를 대표로 삼으면 그 무의미한 순서가 화면의 기본값이 된다.
     공실률이 높은 자리가 이 제품이 다루려는 자리에 가장 가깝다.
     """
+    if unit_id and unit_id.startswith("vfu-"):
+        from app.services import floor_vacancy
+
+        floor = next((row for row in (floor_vacancy.load(district_id) or {}).get("units", [])
+                      if row.get("id") == unit_id), None)
+        if floor is None:
+            return None
+        return {**floor, "floor": floor.get("floor_label"), "_floor_unit": True}
     us = units(district_id)
     if not us:
         return None
@@ -114,7 +122,9 @@ def site_context(district_id: str | None, unit_id: str | None = None) -> str | N
         return None
     bits: list[str] = [f"유닛 {u.get('id')}"]
     if u.get("area"):
-        bits.append(f"전용면적 약 {u['area']}평(건물 상업면적 ÷ 호실 수)")
+        basis = "대장 층별개요 · 층 전체 면적" if u.get("_floor_unit") else "건물 상업면적 ÷ 호실 수"
+        label = "면적 약" if u.get("_floor_unit") else "전용면적 약"
+        bits.append(f"{label} {u['area']}평({basis})")
     if u.get("floor"):
         bits.append(f"{u['floor']}")
     if (was := (u.get("was") or "").strip()):
@@ -130,6 +140,8 @@ def site_context(district_id: str | None, unit_id: str | None = None) -> str | N
              " · ".join(bits)]
     if u.get("n"):
         lines.append(f"소재: {u['n']}")
-    if (note := provenance(district_id).get("site_note")):
+    if u.get("_floor_unit"):
+        lines.append("※ 자리 데이터의 한계: Gold 층 매물 · 상가정보 점포 대조 · 현장 미확인. 호실 내부 도면과 실제 임대 가능 여부는 미확인.")
+    elif (note := provenance(district_id).get("site_note")):
         lines.append(f"※ 자리 데이터의 한계: {note}")
     return "\n".join(lines)

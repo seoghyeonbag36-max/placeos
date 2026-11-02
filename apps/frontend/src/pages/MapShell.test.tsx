@@ -47,6 +47,21 @@ const YEONNAM_BUILDINGS = buildings([
 let naver: NaverStub;
 let api: FetchStub;
 
+function mountClassified() {
+  const fc = buildings([
+    { id: "c0", name: "근거없음", status: "empty" }, { id: "c1", name: "확정", status: "partial" },
+    { id: "c2", name: "의심", status: "high" }, { id: "c3", name: "만실", status: "full" },
+  ]);
+  const cls = ["unknown", "confirmed", "probable", "full"] as const;
+  fc.features.forEach((f, i) => { f.properties.vac_class = cls[i]; });
+  api = installFetchStub([
+    { match: /\/api\/v1\/commercial-districts$/, body: HUBS },
+    { match: /\/api\/v1\/heatmap\/rent\?district=/, body: rentHeatmap("garosugil") },
+    { match: /\/api\/v1\/heatmap\/buildings\?district=/, body: fc },
+  ]);
+  renderOnMap(<MapShell />);
+}
+
 /** `withBuildings: false` 면 /heatmap/buildings 가 404 → 화면이 로컬 샘플로 폴백한다. */
 function mount(opts: { withBuildings?: boolean; rent?: RentHeatmap; onReview?: (selection: { districtId: string; buildingId: string; buildingName: string }) => void } = {}) {
   const routes: Route[] = [
@@ -167,6 +182,43 @@ describe("MapShell — API 경로", () => {
     // 유동·밀도는 그 레이어를 눌렀을 때만 — 거점 전환마다 3번씩 부를 이유가 없다.
     expect(api.count(/\/heatmap\/footfall/)).toBe(0);
     expect(api.count(/\/heatmap\/density/)).toBe(0);
+  });
+
+  it("24시간 곡선·임대 추이는 그 레이어를 눌러야 부르고, 평일·주말이 질의를 바꾼다", async () => {
+    mount();
+    await waitFor(() => expect(api.count(/\/heatmap\/buildings/)).toBe(1));
+    expect(api.count(/hourly-profile/)).toBe(0);
+    expect(api.count(/rent-history/)).toBe(0);
+    const layers = screen.getByRole("group", { name: "지도 데이터 레이어" });
+    fireEvent.click(within(layers).getByRole("button", { name: "유동인구" }));
+    await waitFor(() => expect(api.count(/hourly-profile\?district=garosugil&daytype=weekday/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "주말" }));
+    await waitFor(() => expect(api.count(/hourly-profile\?district=garosugil&daytype=weekend/)).toBe(1));
+    await waitFor(() => expect(api.count(/\/heatmap\/footfall\?.*daytype=weekend/)).toBe(1));
+    // 라우트 없음 = 404 = 서울 밖 — 칸을 지우지 않고 사유를 적는다.
+    expect(await screen.findByText("서울만 제공")).toBeTruthy();
+    fireEvent.click(within(layers).getByRole("button", { name: "임대시세" }));
+    await waitFor(() => expect(api.count(/rent-history/)).toBe(1));
+  });
+
+  it("3분류가 오면 필터·범례·점이 3분류를 따르고, 자료 없음은 공실 점으로 찍지 않는다", async () => {
+    mountClassified();
+    await screen.findByRole("option", { name: "공실확정" });
+    const options = within(screen.getByRole("combobox", { name: "공실 상태 필터" })).getAllByRole("option").map((o) => o.textContent);
+    expect(options).toEqual(["전체 상태", "공실확정", "공실의심", "만실", "자료 없음"]);
+    await waitFor(() => expect(naver.live().filter((m) => m.kind === "Marker")).toHaveLength(2));
+    // 근거 없는 건물은 status 가 empty 라도 목록 맨 뒤다.
+    const names = screen.getAllByRole("button", { pressed: false }).map((b) => b.querySelector(".b-name")?.textContent).filter(Boolean);
+    expect(names).toEqual(["확정", "의심", "만실", "근거없음"]);
+    fireEvent.change(screen.getByRole("combobox", { name: "공실 상태 필터" }), { target: { value: "unknown" } });
+    expect(await screen.findByText("1", { selector: "strong" })).toBeTruthy();
+  });
+
+  it("3D 트윈은 건물 상세에서 눌러야 받는다 — 첫 렌더에 트윈 fetch 가 없다", async () => {
+    mount();
+    fireEvent.click(await screen.findByRole("button", { name: /^가로수 A 카페/, pressed: false }));
+    expect(await screen.findByRole("button", { name: "3D 트윈으로 보기" })).toBeTruthy();
+    expect(api.count(/\/twin/)).toBe(0);
   });
 
   it("유동인구 레이어를 눌러야 그때 시간대 질의가 나간다", async () => {
