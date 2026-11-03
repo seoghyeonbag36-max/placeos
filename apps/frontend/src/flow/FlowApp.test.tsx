@@ -244,6 +244,22 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     await waitFor(() => expect(window.location.hash).toBe("#/district/jj-east"));
   });
 
+  it.each(["paju", "goyang", "seoul", "suwon", "gwangju", "jeonju"])("상권 소개의 손님 흐름 링크는 파주·고양에만 표시한다: %s", async (city) => {
+    stub([{ match: /\/commercial-districts$/, body: [district("test-hub", { city })] }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/district/test-hub");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { level: 1, name: "test-hub을 한눈에 볼게요" });
+    const link = screen.queryByRole("button", { name: "파주·고양·서울 손님 흐름에서 보기" });
+    expect(!!link).toBe(city === "paju" || city === "goyang");
+    expect(screen.getByRole("button", { name: "지도에서 자세히" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "이 상권 네 단계로 따져 보기" })).toBeTruthy();
+    if (link) {
+      fireEvent.click(link);
+      await waitFor(() => expect(window.location.hash).toBe("#/corridor/paju-goyang-seoul"));
+    }
+  });
+
   it("F-06 모델 밖 업종은 순위 대신 「상권 순위를 아직 못 드려요」와 「상권 직접 고르기」", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "bar" }));
