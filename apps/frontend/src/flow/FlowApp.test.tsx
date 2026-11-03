@@ -174,11 +174,11 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     open("/districts");
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 2, name: "서울" })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "고양·파주" })).toBeTruthy();
     const seoul = within(screen.getByRole("list", { name: "서울 카페·디저트 상권 순위" }));
-    const gg = within(screen.getByRole("list", { name: "고양·파주 카페·디저트 상권 순위" }));
     expect(seoul.getByText("성수동 카페거리")).toBeTruthy();
     expect(seoul.queryByText("금촌")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "경기" }));
+    const gg = within(screen.getByRole("list", { name: "고양·파주 카페·디저트 상권 순위" }));
     expect(gg.getByText("금촌")).toBeTruthy();
     expect(screen.getByText("순위는 서울 · 고양·파주 묶음마다 따로 매겨요 — 서울 점수와 고양·파주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
   });
@@ -201,20 +201,47 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     open("/districts");
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 2, name: "서울" })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "경기" })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "광주" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { level: 2, name: "경기" })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "광주" })).toBeNull();
     expect(screen.queryByRole("heading", { level: 2, name: "경기·광주" })).toBeNull();
     // 같은 잣대라도 다른 묶음의 줄을 끌어오지 않는다 — 잣대로 가르면 두 목록에 넷이 다 들어간다
+    fireEvent.click(screen.getByRole("button", { name: "경기" }));
     const gg = within(screen.getByRole("list", { name: "경기 카페·디저트 상권 순위" }));
-    const gj = within(screen.getByRole("list", { name: "광주 카페·디저트 상권 순위" }));
     expect(gg.getByText("밤가시마을")).toBeTruthy();
     expect(gg.queryByText("광주 금남로/충장로")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "광주" }));
+    const gj = within(screen.getByRole("list", { name: "광주 카페·디저트 상권 순위" }));
     expect(gj.getByText("광주 금남로/충장로")).toBeTruthy();
     expect(gj.queryByText("밤가시마을")).toBeNull();
     expect(screen.getByText("순위는 서울 · 경기 · 광주 묶음마다 따로 매겨요 — 서울 점수와 경기 · 광주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "왜 이 순서인가요?" }));
     expect(await screen.findByText(/경기 · 광주는 같은 모델이라 점수는 견줄 수 있지만, 순위는 지역마다 따로 세워요\./)).toBeTruthy();
     expect(screen.getByText("광주 평균 입지 점수 14점 · 순위를 매긴 상권 1곳")).toBeTruthy();
+  });
+
+  it("R1 네 지역 중 전주를 선택하면 점수가 없는 공개 상권도 순위 없이 고를 수 있다", async () => {
+    stub([
+      { match: /\/commercial-districts$/, body: [district("seongsu"), district("jj-east", { name: "전주동부", city: "jeonju", gu: "전주" })] },
+      { match: /\/ai\/industry-fit\?industry=cafe$/, body: {
+        industry: INDUSTRIES[0], model_covered: true, ranked_n: 1, seoul_fit: 0.3,
+        districts: [fitRow("seongsu", "성수동 카페거리", 1),
+          { ...fitRow("jj-east", "전주동부", 1), fit: null, fit_rank: null, gu: "전주" }], source: "출처", note: "",
+      } },
+    ]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe" }));
+    open("/districts");
+    render(<FlowApp token={null} />);
+    const picker = await screen.findByRole("group", { name: "상권 지역 선택" });
+    expect(within(picker).getAllByRole("button").map((b) => b.textContent)).toEqual(["서울", "경기", "광주", "전주"]);
+    expect(screen.queryByText("전주동부")).toBeNull();
+    fireEvent.click(within(picker).getByRole("button", { name: "전주" }));
+    const jj = await screen.findByRole("list", { name: "전주 공개 상권" });
+    expect(within(jj).getByText("전주동부")).toBeTruthy();
+    expect(screen.queryByText("성수동 카페거리")).toBeNull();
+    expect(screen.getByText("전주 · 입지 순위 미제공")).toBeTruthy();
+    expect(within(picker).getByRole("button", { name: "전주" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(within(jj).getByRole("button"));
+    await waitFor(() => expect(window.location.hash).toBe("#/district/jj-east"));
   });
 
   it("F-06 모델 밖 업종은 순위 대신 「상권 순위를 아직 못 드려요」와 「상권 직접 고르기」", async () => {
