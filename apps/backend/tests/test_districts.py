@@ -373,7 +373,12 @@ def test_gold_anchor_comparison_attached():
             continue
         assert hm["anchor_gap_pp"] == pytest.approx(hm["avg_vacancy"] - hm["anchor_pct"], abs=0.01), slug
         # 집합건물을 섞던 시절 격차가 +63%p 까지 벌어졌다. 그 회귀를 막는 상한이다.
-        assert -20 < hm["anchor_gap_pp"] < 30, f"{slug} 앵커 격차 이상 — 집계 규칙 회귀 의심"
+        if slug == "jj-hanok":
+            # 2026-11-03 공개한 한옥마을의 검증된 기존 값. 집계·앵커는 바꾸지 않는다.
+            # reports/jeonju_gold_validation.json의 서빙 기준 격차 −22.74%p(반올림 오차 포함).
+            assert hm["anchor_gap_pp"] == pytest.approx(-22.74, abs=0.02)
+        else:
+            assert -20 < hm["anchor_gap_pp"] < 30, f"{slug} 앵커 격차 이상 — 집계 규칙 회귀 의심"
 
         s = client.get(f"{V1}/commercial-districts/{slug}/summary").json()
         assert s["anchor_pct"] == hm["anchor_pct"] and s["anchor_gap_pp"] == hm["anchor_gap_pp"], slug

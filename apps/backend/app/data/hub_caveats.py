@@ -75,6 +75,7 @@ SMALL_SAMPLE: frozenset[str] = frozenset({
     "daehwa", "gj-eoryong", "haengsin", "bamgasi", "baekseok", "doksan", "unjeong", "gj-ilgok", "wondang",
     "yadang", "byeongjeom", "gj-geumho", "gj-bongseon", "dangsan", "moran", "sinheung", "jangan", "munsan",
     "gj-wolsan",                                                    # 11-01 — 문구가 없던 19곳
+    "jj-west", "jj-newtown", "jj-songcheon",                        # 11-03 — 같은 표본 크기 기준 적용
     "garak", "yeongtong", "yeouido",                                # 11-01 — 계획상가 문구 뒤에 잇는다
 })
 

@@ -142,6 +142,23 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     for track in ("Posting", "Program"):
         short = [g for g in gates[track] if not g["observe"] and g["value"] < 1.0]
         for g in short:
+            if g["name"] in {"상권 콘텐츠 컨텍스트", "검색 트렌드 라벨 (HA 안전장치)"}:
+                # 2026-11-03 전주 공개: 점포 업종만 수집됐고 블로그·검색 트렌드는 없다.
+                # 진행률 게이트는 낮은 채 보존한다. 기존 거점 누락까지 허용하지 않는다.
+                import csv
+                from data.config.page_hubs import JEONJU_HUBS
+                required_kind = "blog_keyword" if g["name"] == "상권 콘텐츠 컨텍스트" else "trend"
+                missing = set()
+                for slug in ACTIVE_HUBS:
+                    path = ROOT / "data/gold" / slug / "program_content_context.csv"
+                    with path.open(encoding="utf-8-sig", newline="") as f:
+                        kinds = {r["kind"].split(":")[0] for r in csv.DictReader(f)}
+                    if required_kind not in kinds:
+                        assert "category" in kinds, slug
+                        missing.add(slug)
+                assert missing == set(JEONJU_HUBS)
+                assert g["value"] == round((len(ACTIVE_HUBS) - len(missing)) / len(ACTIVE_HUBS), 3)
+                continue
             assert g["name"] in seoul_only, f"{track}: 서울 전용 소스 밖의 게이트가 미달이다 — {g['name']}"
             m = re.search(seoul_only[g["name"]], g["detail"])
             assert m, f"{g['name']}: 상세에서 n/N 을 못 읽었다 — {g['detail'][:80]}"

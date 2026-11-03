@@ -118,7 +118,7 @@
     }
   },
   "coverage": {
-    "served": 117,
+    "served": 122,
     "full": 79,
     "missing_tiers": {
       "garak": [
@@ -164,7 +164,12 @@
       "gj-wolsan",
       "gj-ilgok",
       "gj-chonnam",
-      "gj-cheomdan1"
+      "gj-cheomdan1",
+      "jj-east",
+      "jj-west",
+      "jj-newtown",
+      "jj-hanok",
+      "jj-songcheon"
     ]
   },
   "districts": {
