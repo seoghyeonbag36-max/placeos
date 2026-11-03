@@ -544,7 +544,9 @@ export function District({ id }: { id: string }) {
       {/* PPPP 지도 탐색으로 — 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙) */}
       <div className="fl-actions">
         <TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton>
-        <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주·고양·서울 손님 흐름에서 보기</TextButton>
+        {(d?.city === "paju" || d?.city === "goyang") && (
+          <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주·고양·서울 손님 흐름에서 보기</TextButton>
+        )}
       </div>
     </FlowScreen>
   );
