@@ -1,0 +1,60 @@
+{
+ "slug": "gyomun",
+ "built_at": "2026-11-03T13:42:25+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 134,
+  "knn_vs_pnu_compared": 134,
+  "knn_vs_pnu_agree_pct": 98.5
+ },
+ "dropped_spillover": [
+  {
+   "n": "수택1동",
+   "buildings": 3,
+   "stores": 244,
+   "capacity": 9,
+   "active": 4
+  }
+ ],
+ "residual": {
+  "buildings": 3,
+  "capacity": 9,
+  "active": 4
+ },
+ "zones": [
+  {
+   "n": "교문1동",
+   "grp": "교문동",
+   "lat": 37.599242,
+   "lng": 127.133863,
+   "stores": 924,
+   "buildings": 104,
+   "capacity": 250,
+   "active": 222,
+   "vacancy_rate": 11.2,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "인창동",
+   "grp": "인창동",
+   "lat": 37.602787,
+   "lng": 127.133024,
+   "stores": 314,
+   "buildings": 27,
+   "capacity": 60,
+   "active": 46,
+   "vacancy_rate": 23.33,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  }
+ ]
+}

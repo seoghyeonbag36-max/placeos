@@ -272,7 +272,7 @@ def test_unserved_batch_hub_in_served_city_is_paused(tmp_path, monkeypatch):
 
 
 def test_batch_unserved_reads_the_real_lists():
-    assert chain._batch_unserved("bongdam") is True          # 화성 — 서빙 목록 밖
+    assert chain._batch_unserved("bongdam") is False         # 2026-11-03 실측 검증 뒤 추가 서빙
     assert chain._batch_unserved("byeongjeom") is False      # 화성 — 10-31 재판정 뒤 서빙
     assert chain._batch_unserved("garosugil") is False       # 배치 밖 — 판단 대상이 아니다
 

@@ -77,6 +77,10 @@ SMALL_SAMPLE: frozenset[str] = frozenset({
     "gj-wolsan",                                                    # 11-01 — 문구가 없던 19곳
     "jj-west", "jj-newtown", "jj-songcheon",                        # 11-03 — 같은 표본 크기 기준 적용
     "garak", "yeongtong", "yeouido",                                # 11-01 — 계획상가 문구 뒤에 잇는다
+    # 2026-11-03 경기 36곳 추가: 시작점 기준선 이하인 20곳에 같은 문구를 단다.
+    "bongdam", "cheolsan", "deokjeong", "giheung", "gwangnam", "gyomun", "jeongja", "jukjeon", "maetan",
+    "myeonghak", "osan", "pyeongtaekcity", "sinjungdong", "songnae", "songtan", "songu", "suji", "sujin",
+    "taepyeong", "yatap",
 })
 
 # 표본이 작은 까닭이 거점마다 다르면 한 문장을 더한다 — 사실만 적고 수는 적지 않는다(수는 집계에서 읽는다).
