@@ -453,11 +453,20 @@ GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
     # 2026-10-31 재판정 뒤 서빙(사용자 지시) — 「+33.6%p」는 집합건물을 섞은 calibration.primary 값이었다.
     # 서빙 대표값 기준은 9.5% vs R-ONE 13.11% = −3.6%p(크기 맞춤 −5.5%p) → docs/decision-gwangju-serve-2026-10-31.md §2
     "byeongjeom",
+    # 2026-11-03: 서울과 같은 실측 기준으로 재검증한 경기 36곳 추가. 기존 122곳은 전부 유지한다.
+    # 근거: reports/regional_hub_candidates_2026-11-03.json · tests/test_gg3_serving.py
+    "pyeongtaekst", "pyeongtaekcity", "songtan", "guri", "giheung", "suji", "gimnyangjang",
+    "bongdam", "osan", "icheon", "yeoju", "pocheon", "songu", "dongducheon", "deokjeong",
+    "hanam", "gyeongan", "gwangnam", "cheolsan", "sincheonst", "anseong", "songnae", "yeokgok",
+    "sinjungdong", "myeonghak", "sujin", "taepyeong", "yatap", "jeongja", "skku", "maetan",
+    "ganeung", "osanst", "gyomun", "gwangmyeongsa", "jukjeon",
 })
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 # 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.
 ACTIVE_CITIES: frozenset[str] = frozenset({
     "seoul", "goyang", "paju", "suwon", "seongnam", "bucheon", "anyang", "uijeongbu", "gwangju", "hwaseong", "jeonju",
+    "pyeongtaek", "guri", "yongin", "osan", "icheon", "yeoju", "pocheon", "dongducheon", "yangju",
+    "hanam", "gwangju-gg", "gwangmyeong", "siheung", "anseong",
 })
 
 # 추후 확장 과제(`PageHub.deferred`) — 서빙 도시 안에 있어도 서빙·기본 순회에서 뺀다.

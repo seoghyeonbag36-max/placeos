@@ -30,6 +30,10 @@ from data.pipelines.build_stores_lite import (
 GOLD = Path(__file__).resolve().parents[1] / "gold"
 MB = 1_000_000
 HUBS = list(ACTIVE_HUBS)
+# R-ONE 소규모 임대 표본이 없는 상권과 그 앵커를 공유하는 거점. 값은 null로 남긴다.
+# 2026-11-03 공개 36곳 중 5곳도 같은 원천 결측이다(중대형 공실 앵커는 있다).
+NO_RENT_HUBS = {"ajou", "yeongtong", "dandae", "gj-eoryong", "gj-usan", "gj-ilgok", "jj-newtown",
+                "pyeongtaekcity", "gwangnam", "yatap", "jeongja", "maetan"}
 
 
 def _json(name: str) -> dict:
@@ -259,7 +263,7 @@ def test_rone_history_gold():
     assert set(doc["hubs"]) == set(HUBS)
     assert doc["floor_factor"] == posting["floor_factor"]
     no_rent = {s for s, h in doc["hubs"].items() if not h["rent_per_m2"]}
-    assert no_rent == {"ajou", "yeongtong", "dandae", "gj-eoryong", "gj-usan", "gj-ilgok", "jj-newtown"}
+    assert no_rent == NO_RENT_HUBS
     for slug, h in doc["hubs"].items():
         for key in ("rent_per_m2", "vacancy_mid_pct", "vacancy_small_pct"):
             assert h[key] is None or len(h[key]) == len(doc["quarters"])
@@ -278,7 +282,7 @@ def test_rone_history_matches_posting_inputs_without_fallback():
         latest = next(v for v in reversed(h["rent_per_m2"]) if v is not None)
         assert latest == pytest.approx(posting[slug]["rent_per_m2_krw_thousand"], abs=0.011), slug
         compared += 1
-    assert compared == len(HUBS) - 7
+    assert compared == len(HUBS) - len(NO_RENT_HUBS)
 
 
 # ── 유형 라벨 ────────────────────────────────────────────────────────────

@@ -1,0 +1,100 @@
+{
+ "slug": "hanam",
+ "built_at": "2026-11-03T13:42:26+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 280,
+  "knn_vs_pnu_compared": 280,
+  "knn_vs_pnu_agree_pct": 97.1
+ },
+ "dropped_spillover": [],
+ "residual": {
+  "buildings": 0,
+  "capacity": 0,
+  "active": 0
+ },
+ "zones": [
+  {
+   "n": "신장1동",
+   "grp": "신장동",
+   "lat": 37.538864,
+   "lng": 127.206388,
+   "stores": 746,
+   "buildings": 107,
+   "capacity": 226,
+   "active": 197,
+   "vacancy_rate": 12.83,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "덕풍2동",
+   "grp": "덕풍동",
+   "lat": 37.541453,
+   "lng": 127.200526,
+   "stores": 559,
+   "buildings": 95,
+   "capacity": 191,
+   "active": 159,
+   "vacancy_rate": 16.75,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "덕풍3동",
+   "grp": "덕풍동",
+   "lat": 37.54028,
+   "lng": 127.20357,
+   "stores": 411,
+   "buildings": 49,
+   "capacity": 123,
+   "active": 105,
+   "vacancy_rate": 14.63,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "덕풍1동",
+   "grp": "덕풍동",
+   "lat": 37.538009,
+   "lng": 127.203697,
+   "stores": 175,
+   "buildings": 20,
+   "capacity": 47,
+   "active": 42,
+   "vacancy_rate": 10.64,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  },
+  {
+   "n": "신장2동",
+   "grp": "신장동",
+   "lat": 37.54083,
+   "lng": 127.208712,
+   "stores": 183,
+   "buildings": 9,
+   "capacity": 46,
+   "active": 37,
+   "vacancy_rate": 19.57,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z5"
+  }
+ ]
+}

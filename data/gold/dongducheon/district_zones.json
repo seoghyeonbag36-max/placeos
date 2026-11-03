@@ -1,0 +1,84 @@
+{
+ "slug": "dongducheon",
+ "built_at": "2026-11-03T13:42:23+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 298,
+  "knn_vs_pnu_compared": 298,
+  "knn_vs_pnu_agree_pct": 98.0
+ },
+ "dropped_spillover": [],
+ "residual": {
+  "buildings": 0,
+  "capacity": 0,
+  "active": 0
+ },
+ "zones": [
+  {
+   "n": "생연2동",
+   "grp": "생연동",
+   "lat": 37.90228,
+   "lng": 127.052749,
+   "stores": 612,
+   "buildings": 152,
+   "capacity": 256,
+   "active": 211,
+   "vacancy_rate": 17.58,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "중앙동",
+   "grp": "생연동",
+   "lat": 37.905409,
+   "lng": 127.053813,
+   "stores": 426,
+   "buildings": 84,
+   "capacity": 189,
+   "active": 150,
+   "vacancy_rate": 20.63,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "불현동",
+   "grp": "생연동",
+   "lat": 37.899527,
+   "lng": 127.059416,
+   "stores": 300,
+   "buildings": 48,
+   "capacity": 61,
+   "active": 57,
+   "vacancy_rate": 6.56,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "생연1동",
+   "grp": "생연동",
+   "lat": 37.904013,
+   "lng": 127.058802,
+   "stores": 69,
+   "buildings": 14,
+   "capacity": 20,
+   "active": 19,
+   "vacancy_rate": 5.0,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  }
+ ]
+}
