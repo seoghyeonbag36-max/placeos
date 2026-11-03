@@ -8,6 +8,7 @@ import type { BusinessGoal } from "@/lib/businessProfile";
 import { CORRIDOR_ID, type DistrictSummary, type IndustryFitRow } from "@/lib/api";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import { fitGroups, rankText } from "@/lib/fitGroups";
+import { groupName, groupOf, RANK_GROUPS } from "@/lib/districtMapModel";
 import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
@@ -218,6 +219,8 @@ export function Districts() {
   const ind = industryOf(state.industryKey, state.customIndustry, list.status === "ready" ? list.data : null);
   const ranked = hasRanking(ind);
   const fit = useLoad(ok && ranked && ind ? `fit:${ind.key}` : null, () => data.industryFit(ind!.key));
+  const publicDistricts = useLoad(ok ? "districts" : null, data.districts);
+  const [region, setRegion] = useState<string | null>(null);
   const [why, setWhy] = useState(false);
   // 비교 모드(2026-10-24 · R1-c) — 행을 누르면 R2 로 가는 대신 나란히 볼 상권에 담는다. 「그만두기」로 원래 목록에 돌아온다
   const [picked, setPicked] = useState<string[] | null>(null);
@@ -257,6 +260,23 @@ export function Districts() {
   if (fit.status !== "ready" || !ind) return null;
   // 순위는 묶음(잣대 × 시도)마다 따로다(2026-10-27 · 11-01) — 서울 · 경기 · 광주를 한 줄에 섞지 않고 묶음별 목록으로 세운다
   const groups = fitGroups(fit.data);
+  // 순위 모델이 없는 지역도 공개 상권은 보여 준다. 점수·순위를 대신 만들지 않는다.
+  const known = publicDistricts.status === "ready" ? publicDistricts.data : [];
+  const regionOf = (r: IndustryFitRow | undefined) => {
+    if (!r) return "서울";
+    const d = known.find((d) => d.id === r.district_id);
+    return d ? groupName(groupOf(d)) : r.rank_group_name === "서울" ? "서울"
+      : r.rank_group_name === "광주" ? "광주" : r.rank_group_name === "전주" || r.gu === "전주" ? "전주" : "경기";
+  };
+  const activeRegion = region ?? (state.goal === "move"
+    ? regionOf(fit.data.districts.find((r) => r.district_id === state.homeDistrictId) ?? fit.data.districts[0]) : "서울");
+  const regionalTops = groups.map((g) => ({ g, top: g.rows.filter((r) => regionOf(r) === activeRegion).slice(0, 5) }))
+    .filter(({ top }) => top.length > 0);
+  const unranked = fit.data.districts.filter((r) => r.fit_rank == null && regionOf(r) === activeRegion);
+  const regionPicker = <div className="fl-region-picker" role="group" aria-label="상권 지역 선택">
+    {RANK_GROUPS.map(({ name }) => <button key={name} type="button" aria-pressed={activeRegion === name}
+      onClick={() => setRegion(name)}>{name}</button>)}
+  </div>;
   const multi = groups.length > 1;
   const rows = groups.flatMap((g) => g.rows);
   const home = state.goal === "move" ? rows.find((r) => r.district_id === state.homeDistrictId) : undefined;
@@ -295,9 +315,10 @@ export function Districts() {
           primary={{ label: picked.length >= 2 ? `${picked.length}곳 나란히 보기` : `${2 - picked.length}곳 더 골라 주세요`,
             disabled: picked.length < 2, onClick: () => go(comparePath(picked)) }}
           secondary={{ label: "그만두기", onClick: () => setPicked(null) }} />}>
+        {regionPicker}
         <RowList label="나란히 볼 상권">
           {home && !homeInTop && line(home, true)}
-          {top.map((r) => line(r, r.district_id === home?.district_id))}
+          {regionalTops.flatMap(({ top }) => top).concat(unranked).map((r) => line(r, r.district_id === home?.district_id))}
         </RowList>
         {full && <p className="fl-note" role="status">{COMPARE_MAX}곳까지 나란히 볼 수 있어요. 다른 상권을 담으려면 하나를 빼 주세요.</p>}
         {rulerShort && <p className="fl-note">{rulerShort}</p>}
@@ -306,9 +327,11 @@ export function Districts() {
   }
   return (
     <FlowScreen wide back={state.goal === "start" ? "/industry" : "/home-district"} right={<CloseButton />} caption={caption}
-      title={`${ind.label} 입지 점수가 높은 상권이에요`}
-      sub={`비슷한 자리에 ${iga(ind.label)} 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.`}>
-      {tops.map(({ g, top: groupTop }) => (
+      title={regionalTops.length ? `${ind.label} 입지 점수가 높은 상권이에요` : `${activeRegion}에서 살펴볼 상권이에요`}
+      sub={regionalTops.length ? `비슷한 자리에 ${iga(ind.label)} 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.`
+        : "입지 점수를 계산할 모델 자료가 없어 순위 없이 보여 드려요. 빈 자리와 월세는 확인할 수 있어요."}>
+      {regionPicker}
+      {regionalTops.map(({ g, top: groupTop }) => (
         <section key={g.key || "all"} aria-label={multi ? `${g.name} 상권` : undefined}>
           {multi && <h2 className="fl-h2">{g.name}</h2>}
           <RowList label={`${multi ? `${g.name} ` : ""}${ind.label} 상권 순위`}>
@@ -319,6 +342,15 @@ export function Districts() {
           </RowList>
         </section>
       ))}
+      {unranked.length > 0 && <section aria-label={`${activeRegion} 공개 상권`}>
+        <h2 className="fl-h2">{activeRegion} · 입지 순위 미제공</h2>
+        <RowList label={`${activeRegion} 공개 상권`}>
+          {unranked.map((r) => <RankLine key={r.district_id} row={r} onPick={() => pick(r.district_id)} />)}
+        </RowList>
+      </section>}
+      {!regionalTops.length && !unranked.length && <p className="fl-note" role="status">
+        {publicDistricts.status === "loading" ? "지역별 상권을 불러오는 중이에요." : "이 지역에 공개된 상권 자료가 없어요."}
+      </p>}
       {rulerShort && <p className="fl-note">{rulerShort}</p>}
       {home && (
         <p className="fl-note">{homeInTop ? `지금 내 상권 ${home.name}은 ${rankText(home, multi)}예요.`

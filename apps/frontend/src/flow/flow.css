@@ -124,6 +124,10 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 /* ── 칩 · 정렬(Montage Filter button · TDS 메뉴) ── */
 .fl-chips { display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .fl-chips::-webkit-scrollbar { display: none; }
+.fl-region-picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); margin: var(--sp-5) 0; }
+.fl-region-picker button { min-height: 44px; border: 1px solid var(--grey-200); border-radius: var(--radius-md); background: var(--grey-100); color: var(--grey-700); font: inherit; font-weight: var(--fw-semibold); cursor: pointer; }
+.fl-region-picker button[aria-pressed="true"] { color: var(--primary); background: var(--primary-soft); border-color: var(--primary); }
+.fl-region-picker button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .fl-chip { flex: none; height: 36px; padding: 0 14px; border: 1px solid var(--grey-200); border-radius: var(--radius-pill);
   background: var(--surface); font: inherit; font-size: .875rem; font-weight: var(--fw-semibold); color: var(--grey-800); cursor: pointer; }
 .fl-chip.is-on { background: var(--grey-900); border-color: var(--grey-900); color: #fff; }
