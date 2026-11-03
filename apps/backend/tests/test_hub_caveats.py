@@ -205,12 +205,12 @@ def test_partition_sentence_only_where_the_hub_is_split():
 
 
 def test_small_sample_hubs_are_still_small():
-    """서빙 상권의 하위 25% 안이어야 「표본 소형」이 참이다 — 벗어나면 문구를 뗄지 사람이 다시 정한다."""
-    counts = sorted(r["building_count"] for r in svc.list_summaries() if r.get("building_count"))
-    p25 = counts[len(counts) // 4]
+    """11-01 확정한 시작점 기준선 이하인지 본다. 공개 모집단 변화로 기존 문구를 떼지 않는다."""
+    # 하위 25%는 10-31 두 곳을 설명한 관측이다. 11-01 공개 규칙은 시작점 중 큰 쪽의 실측 지번 수다.
+    ceiling = max(_summary(s)["building_count"] for s in _ORIGINS)
     for slug in hc.SMALL_SAMPLE:
         n = _summary(slug)["building_count"]
-        assert n <= p25, f"{slug}: 건물 {n}동 > 서빙 하위 25%({p25}동) — 「표본 소형」을 계속 달지 다시 정할 것"
+        assert n <= ceiling, f"{slug}: 건물 {n}동 > 시작점 기준선({ceiling}동) — 「표본 소형」을 계속 달지 다시 정할 것"
 
 
 def test_every_small_hub_carries_the_notice():

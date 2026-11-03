@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import csv
 import sys
 from pathlib import Path
 
@@ -31,6 +32,9 @@ def run() -> None:
     from data.pipelines import build_posting_inputs as posting
     from data.pipelines import build_rone_history as history
     from data.pipelines import build_stores_lite as stores
+    from data.pipelines import build_gold as program
+    from data.pipelines import build_posting_revenue as revenue
+    from data.config.store_taxonomy import is_storefront
 
     report = json.loads((ROOT / 'reports/regional_hub_candidates_2026-11-03.json').read_text(encoding='utf-8'))
     added = report['added_ids']
@@ -43,6 +47,16 @@ def run() -> None:
             target.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding='utf-8')
         if not (GOLD / slug / floors.NAME).exists():
             floors.run([slug])
+        context = GOLD / slug / 'program_content_context.csv'
+        if not context.exists():
+            places = [r for r in (load_latest(slug, 'stores_raw.json') or []) if is_storefront(r)]
+            rows = program._program_context_rows([], places, None, set())
+            if not rows:
+                raise ValueError(f'{slug}: 업종 구성 원본 부족')
+            with context.open('w', encoding='utf-8-sig', newline='') as stream:
+                writer = csv.DictWriter(stream, fieldnames=['kind', 'key', 'value'])
+                writer.writeheader()
+                writer.writerows(rows)
     # 이미 공개 중인 점포 요약·브랜드·동시 입지 파일은 재생성하지 않는다.
     rows_by_hub, dates, unique = {}, {}, {}
     for slug in stores.ACTIVE_HUBS:
@@ -74,6 +88,11 @@ def run() -> None:
     if doc['quarters'] != original['quarters']:
         raise ValueError('분기 축이 달라 기존 시계열을 보존한 추가 불가')
     extend(GOLD / history.OUT, 'hubs', {s: doc['hubs'][s] for s in added})
+    # 서울 매출값을 다른 지역에 복제하지 않는다. 공개 모집단에 관한 커버리지 메타데이터만 갱신한다.
+    path = GOLD / 'platform_posting_revenue.json'
+    doc = json.loads(path.read_text(encoding='utf-8'))
+    doc['coverage'] = revenue._coverage(doc['districts'])
+    path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'추가 {len(added)}곳: 구역·층별개요·점포요약·외곽선·R-ONE·임대 입력 완료')
 
 

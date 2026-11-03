@@ -241,10 +241,12 @@ def write_markdown(report: dict) -> None:
         '- `python scripts/audit_regional_hub_candidates.py --probe` — 캐시 원본의 건수·고유 키·지표를 확인하며 재사용. 키·원본이 없는 환경에서는 조사 재현이 실패한다. 원본을 지어내지 않는다.',
         '- 기계 판독 근거: `reports/regional_hub_candidates_2026-11-03.json`(기존 122개 ID, 추가 36개 ID, 등록 후보 47개 체인, 신규 411개 주소 묶음, 상가정보 조회 227개 및 원본 경로·해시, 600m 묶음 전체).',
         '- Backend 기존 검증 22개 통과: `test_gg3_serving.py`, `test_active_cities_match_serving.py`, `test_city_registry.py`, `test_landing_facts.py`.',
-        '- 구역·층별개요·점포요약과 외곽선·임대·R-ONE 시계열도 추가 거점으로 확장했다. 기존 거점 항목은 그대로 보존했다. 새 36곳 중 평택시청·광주 광남동·야탑역·정자역·매탄동 5곳은 소규모 임대 표본이 없어 임대료를 비워 두었다.',
+        '- 구역·층별개요·점포요약·Program 업종 컨텍스트와 외곽선·임대·R-ONE 시계열도 추가 거점으로 확장했다. 기존 거점 항목은 그대로 보존했다. 새 36곳 중 평택시청·광주 광남동·야탑역·정자역·매탄동 5곳은 소규모 임대 표본이 없어 임대료를 비워 두었다.',
+        '- 추가 36곳의 Program CSV에는 실제 점포 업종 집계만 실었다. 미수집 블로그·검색 트렌드는 비워 두고 진행률 검사에도 결손으로 남겼다. 서울 전용 매출값은 보존하고 매출 산출물의 공개 모집단 커버리지 메타데이터만 갱신했다.',
+        '- 시작점 두 곳 중 큰 쪽의 대표 지번 수 이하인 새 경기 20곳에는 11-01 확정 규칙대로 「표본 소형」 문구를 붙였다. 기존 문구를 유지하고, 하위 25%라는 과거 관측을 고정하던 검사도 실제 확정 기준선 검사로 맞췄다.',
         '- Data 915개 통과: `test_regional_hub_candidates.py`, `test_chain_status.py`, `test_jeonju_expansion.py`, `test_district_zones.py`, `test_renewal_gold.py`. 임대 결측 고정 목록에 이번에 공개한 원천 결측 5곳을 추가했다.',
         '- Frontend 타입 검사·Vite 프로덕션 빌드 통과. PPPP 가드 9개 통과. `scripts/pppp_screens_check.py`: 22개 통과·실패 0·종료코드 0.',
-        '- 추가 36곳의 핵심 Gold 216개 파일은 이미 Git 추적 중이다. 신규 보조 Gold 108개(구역·점포요약·층별개요)는 기존 .gitignore 예외의 적용 대상이다.', '']
+        '- 추가 36곳의 핵심 Gold 216개 파일은 이미 Git 추적 중이다. 신규 보조 Gold 144개(구역·점포요약·층별개요·Program 업종 컨텍스트)는 기존 .gitignore 예외의 적용 대상이다.', '']
     (ROOT / 'docs/regional-hub-candidates-2026-11-03.md').write_text('\n'.join(lines), encoding='utf-8')
 
 
