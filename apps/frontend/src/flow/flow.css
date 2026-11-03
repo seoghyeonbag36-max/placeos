@@ -210,6 +210,8 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-details { border-top: 1px solid var(--grey-100); padding-top: var(--sp-2); }
 .fl-details summary { min-height: 44px; display: flex; align-items: center; font-size: .9375rem; font-weight: var(--fw-semibold); color: var(--grey-700); cursor: pointer; }
 .fl-details-body { display: grid; gap: var(--sp-2); padding-bottom: var(--sp-2); }
+/* 접힌 상세는 배치에서도 뺀다. Chrome의 Range 측정에 숨은 본문이 남아 하단 영역과 겹쳐 잡히는 것을 막는다. */
+.fl-details:not([open]) > .fl-details-body { display: none; }
 .fl-details-body select { height: 36px; margin-left: var(--sp-2); border: 1px solid var(--grey-200); border-radius: var(--radius-md); font: inherit; }
 .fl-inline-field { font-size: .9375rem; color: var(--grey-800); }
 .fl-draft { width: 100%; padding: var(--sp-3); border: 1px solid var(--grey-200); border-radius: var(--radius-md); font: inherit; font-size: .875rem; resize: vertical; }
