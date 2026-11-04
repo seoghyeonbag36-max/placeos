@@ -115,6 +115,7 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     ]);
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Platform" }));
+    fireEvent.click(await screen.findByRole("button", { name: "추천과 상세 근거" }, TAB_LOAD));
     const title = await screen.findByText("어느 자리에 어떤 업소가 들어오면 좋나", {}, TAB_LOAD);
     fireEvent.click(title.closest("summary")!);
     fireEvent.click(screen.getByRole("button", { name: "검토 건물 자리 Page에서 이 건물 보기" }));
@@ -129,6 +130,7 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "계산 결과" }));
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
     await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);
@@ -140,12 +142,47 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
 });
 
 describe("App — Page에서 입점 검토", () => {
+  it("주소의 Posting 대상이 바뀌면 이전 건물의 유닛과 계산을 재사용하지 않는다", async () => {
+    const api = mount(true);
+    fireEvent.click(screen.getByRole("button", { name: "Page" }));
+    fireEvent.click(await screen.findByRole("button", { name: /^검토 건물 카페/ }, FIRST_LOAD));
+    fireEvent.click(screen.getByRole("button", { name: "이 자리 비용 확인 →" }));
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    window.history.pushState(null, "", "#/explore?track=posting&district=garosugil&building=missing");
+    fireEvent(window, new PopStateEvent("popstate"));
+    await screen.findByText(/일치하는 입점 계산 유닛이 없습니다/);
+    expect((screen.getByRole("button", { name: "시뮬레이션" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(api.count(/simulate-revenue$/)).toBe(1);
+  });
+
+  it("다음 단계로 같은 지도와 상권을 이어가고, 브라우저 뒤로가기·앞으로가기로 단계를 복원한다", async () => {
+    mount(true);
+    const next = await screen.findByRole("button", { name: "이 상권에서 빈 자리 찾기 →" }, FIRST_LOAD);
+    const map = naver.map();
+    fireEvent.click(next);
+    await screen.findByRole("button", { name: /^검토 건물 카페/ }, FIRST_LOAD);
+    expect(window.location.hash).toContain("track=page&district=garosugil");
+    expect((screen.getByRole("button", { name: "이 자리 비용 확인 →" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: /^검토 건물 카페/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 자리 비용 확인 →" }));
+    await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
+    expect(window.location.hash).toContain("track=posting&district=garosugil&building=g1");
+    window.history.back();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Page" }).getAttribute("aria-current")).toBe("page"));
+    expect(document.querySelector(".b-detail .b-name")!.textContent).toBe("검토 건물");
+    window.history.forward();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Posting" }).getAttribute("aria-current")).toBe("page"));
+    expect(naver.map()).toBe(map);
+  });
+
   it("검증된 건물 유닛을 인계하고 Page 후보·검색·단일 지도를 보존한다", async () => {
     const api = mount(true);
     fireEvent.click(screen.getByRole("button", { name: "Page" }));
     fireEvent.click(await screen.findByRole("button", { name: "검토 건물 후보 저장" }, FIRST_LOAD));
+    const districtRequests = api.count(/commercial-districts$/);
     fireEvent.change(screen.getByRole("textbox", { name: "건물 검색" }), { target: { value: "검토" } });
     fireEvent.click(screen.getByRole("button", { name: /^검토 건물 카페/ }));
+    expect(api.count(/commercial-districts$/)).toBe(districtRequests);
     const map = naver.map();
     fireEvent.click(screen.getByRole("button", { name: "이 건물로 입점 검토 →" }));
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));

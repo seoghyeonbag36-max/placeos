@@ -15,7 +15,8 @@ import type { NaverOverlay, NaverListener, NaverBounds } from "@/lib/naverTypes"
 //   하나만 만들어 들고 있고(설계서 §10-1), 여기서는 그 위에 오버레이만 그린다.
 //   그전에는 탭을 옮길 때마다 지도가 죽고 다시 태어나 사용자가 맞춘 카메라가 날아갔다.
 //   이 컴포넌트의 루트는 이제 MapHost 안을 채우는 절대배치 레이어다(MapShell.css 참조).
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type ReactNode } from "react";
+import { ExploreStepFooter } from "@/components/ExploreStep";
 import CandidateCompare from "@/components/CandidateCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
@@ -193,6 +194,8 @@ const floorOrder = (label: string) => (label.startsWith("B") ? -Number(label.sli
 const quarterText = (q?: string | null) => (q && q.length >= 5 ? `${q.slice(2, 4)}년 ${q.slice(4)}분기` : "기준 분기 미상");
 
 interface MapShellProps {
+  stepHeader?: ReactNode;
+  onPreviousStep?: () => void;
   workspace?: PageWorkspace;
   onWorkspaceChange?: Dispatch<SetStateAction<PageWorkspace>>;
   onReview?: (selection: BuildingSelection) => void;
@@ -200,7 +203,7 @@ interface MapShellProps {
   myIndustry?: IndustryOption | null;
 }
 
-export default function MapShell({ workspace: externalWorkspace, onWorkspaceChange, onReview, myIndustry }: MapShellProps = {}) {
+export default function MapShell({ workspace: externalWorkspace, onWorkspaceChange, onReview, myIndustry, stepHeader, onPreviousStep }: MapShellProps = {}) {
   const [localWorkspace, setLocalWorkspace] = useState(createPageWorkspace);
   const workspace = externalWorkspace ?? localWorkspace;
   const setWorkspace = onWorkspaceChange ?? setLocalWorkspace;
@@ -303,6 +306,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 건물 폴리곤이 있는 거점만 고른다 — vacancy_source === "gold" 가 곧 "Gold 마스터 보유"다.
   // 합성 거점을 열면 /heatmap/buildings 가 404 라 빈 지도가 된다.
   const [hubs, setHubs] = useState<DistrictSummary[]>([]);
+  const [hubListStatus, setHubListStatus] = useState<"loading" | "ready" | "failed">("loading");
   const savedIds = workspace.savedIds[districtId] ?? EMPTY_IDS;
   const saved = src === "api" ? buildings.filter((b) => savedIds.includes(b.id)) : [];
   const hasClass = useMemo(() => buildings.some((b) => b.vacClass), [buildings]);
@@ -339,11 +343,12 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
         if (!alive) return;
         const gold = all.filter((d) => d.vacancy_source === "gold");
         setHubs(gold);
+        setHubListStatus("ready");
         // 기본 거점이 아직 Gold 가 아니면 첫 실측 거점으로 떨어진다
         if (gold.length) setWorkspace((w) => gold.some((d) => d.id === w.districtId)
           ? w : { ...w, districtId: gold[0].id, query: "", status: "all", selectedId: null });
       })
-      .catch(() => { /* 목록 실패 시 기본 거점 단독으로 계속 */ });
+      .catch(() => { if (alive) setHubListStatus("failed"); });
     return () => { alive = false; };
   }, [setWorkspace]);
 
@@ -724,14 +729,11 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
 
       {/* 상단: 거점 선택 + 검색 + 레이어 토글 */}
       <div className="overlay overlay-top">
-        {hubs.length > 0 && (
-          <>
             <DistrictPicker className="hub-select" districts={hubs}
               ariaLabel="상권 선택"
+              emptyLabel={hubListStatus === "loading" ? "선택한 상권 확인 중…" : hubListStatus === "failed" ? "상권 목록 조회 실패" : "상권 목록 없음"}
               value={districtId} onChange={setDistrictId} />
             <CaveatNote district={hubs.find((h) => h.id === districtId)} />
-          </>
-        )}
         <input className="search" aria-label="건물 검색" placeholder={`건물 검색 (${hub?.name ?? "가로수길"})`} value={q} onChange={(e) => setQ(e.target.value)} />
         <div className="seg" role="group" aria-label="지도 데이터 레이어">
           {LAYERS.map((l) => (
@@ -751,6 +753,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
       {/* 좌측 리스트 패널 (모바일: 하단 시트) */}
       <div id="page-side-panel" hidden={!panelOpen}
         className={"overlay side-panel" + (selected ? " has-selection" : "")}>
+        {stepHeader}
+        <div className="page-panel-scroll">
         <div className="sp-head">
           <button className="sp-collapse" onClick={() => setPanelOpen(false)}
             aria-expanded aria-controls="page-side-panel" aria-label="건물 목록 접기"
@@ -983,6 +987,10 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           <div><strong>저장한 후보 {saved.length}/3</strong><span>현재 상권 · 이번 작업 동안 유지</span></div>
           <button type="button" disabled={saved.length === 0} onClick={() => setCompareOpen(true)}>후보 비교</button>
         </div>
+        </div>
+        {onPreviousStep && <ExploreStepFooter onPrevious={onPreviousStep}
+          onNext={() => { if (selected) review(selected); }}
+          nextLabel="이 자리 비용 확인" disabled={!selected || src !== "api" || !currentInventory} />}
       </div>
 
       {compareOpen && <CandidateCompare districtName={hub?.name ?? districtId}

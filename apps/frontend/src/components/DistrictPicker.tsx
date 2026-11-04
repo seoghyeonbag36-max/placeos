@@ -49,10 +49,12 @@ export interface DistrictPickerProps {
   suffix?: (d: DistrictSummary) => string;
   disabled?: boolean;
   ariaLabel?: string;
+  /** 목록을 받기 전에도 이미 전달받은 선택 id를 유지한다. 상권 자료를 합성하지 않는다. */
+  emptyLabel?: string;
 }
 
 export default function DistrictPicker({
-  districts, value, onChange, className, suffix, disabled, ariaLabel,
+  districts, value, onChange, className, suffix, disabled, ariaLabel, emptyLabel = "상권 목록 없음",
 }: DistrictPickerProps) {
   const byCity = new Map<string, DistrictSummary[]>();
   for (const d of districts) {
@@ -83,9 +85,10 @@ export default function DistrictPicker({
       aria-label={ariaLabel}
       className={className}
       value={value}
-      disabled={disabled}
+      disabled={disabled || districts.length === 0}
       onChange={(e) => onChange(e.target.value)}
     >
+      {districts.length === 0 && <option value={value}>{emptyLabel}</option>}
       {cities.map((city) => {
         const rows = byCity.get(city)!;
         // 도시가 하나뿐이면 묶음 라벨이 소음이다 — 그때는 평평하게 그린다.

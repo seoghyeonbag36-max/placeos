@@ -18,6 +18,7 @@ import Verdict, { type Ground } from "@/components/Verdict";
 import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult, IndustryCompetitionPanel } from "@/components/IndustryDetailFields";
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
+import ConsolePages from "@/components/ConsolePages";
 
 /**
  * Posting 콘솔 — "이 자리에 들어가면 얼마가 남나"에 답하는 화면.
@@ -52,6 +53,9 @@ const TIER_LABEL: Record<string, { name: string; sub: string }> = {
 const won = (v: number) => `${Math.round(v).toLocaleString()}만원`;
 
 interface PostingConsoleProps {
+  guided?: boolean;
+  drafts?: Map<string, PostingDraft>;
+  draftKey?: string;
   selection?: BuildingSelection & { requestId: number };
   /** 네 트랙이 공유하는 상권(App). 주면 제어 모드 — 상권을 바꾸면 `onDistrictChange` 로 올린다.
    *  안 주면 종전대로 화면이 스스로 상권을 든다(단독 렌더·테스트). */
@@ -71,13 +75,31 @@ interface Calculation {
     industry_detail_key?: string; operating_inputs?: Record<string, number>; area_py_override?: number };
 }
 
-export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest }: PostingConsoleProps = {}) {
-  return <PostingSession key={`${selection ? `${selection.districtId}:${selection.buildingId}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}|${defaultIndustry ?? ""}|${defaultDetailKey ?? ""}`}
+/** 계정·작업공간 수명을 넘기지 않는 입력 초안. 출처와 서버 계산 결과를 그대로 보관한다. */
+export interface PostingDraft {
+  unitId: string;
+  industry: string;
+  detailKey: string;
+  operating: Record<string, string>;
+  prem: string;
+  areaInput: string;
+  strategy: string;
+  calculation: Calculation | null;
+  previous: Calculation | null;
+  page: string;
+}
+
+export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest, guided, drafts }: PostingConsoleProps = {}) {
+  const draftKey = `${districtId ?? DEFAULT_DISTRICT}|${selection ? `${selection.districtId}:${selection.buildingId}:${selection.unitId ?? ""}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}|${defaultIndustry ?? ""}|${defaultDetailKey ?? ""}`;
+  return <PostingSession key={draftKey} guided={guided} drafts={drafts} draftKey={draftKey}
     selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram}
     defaultIndustry={defaultIndustry} defaultDetailKey={defaultDetailKey} industryRequest={industryRequest} />;
 }
 
-function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest }: PostingConsoleProps) {
+function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
+  const [draft] = useState(() => drafts?.get(draftKey));
+  const [page, setPage] = useState(draft?.page ?? "input");
+  const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
   const [ownDistrict, setOwnDistrict] = useState(selection?.districtId ?? sharedDistrict ?? DEFAULT_DISTRICT);
   const controlled = sharedDistrict !== undefined && onDistrictChange !== undefined;
@@ -87,21 +109,21 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리 목록이 **도착한** 상권. 0곳과 불러오는 중을 가르는 데 쓴다(화면설계서 2판 상태표) —
   // 종전에는 0곳인 상권에서 결론이 영원히 "불러오는 중이다"로 남았다.
   const [unitsFor, setUnitsFor] = useState<string | null>(null);
-  const [unitId, setUnitId] = useState<string>("");
+  const [unitId, setUnitId] = useState<string>(draft?.unitId ?? "");
   // 업종칸의 기본값(화면설계서 3판 Posting 구성요소 2) — Platform 인계 업종 → 「내 사업」 입력어 → 빈칸.
   const baseIndustry = industryRequest?.input ?? defaultIndustry ?? "";
   const baseSource = industryRequest ? "Platform 에서 고른 업종으로 채웠습니다" : defaultIndustry ? "내 사업 기준으로 채웠습니다" : "";
-  const [industry, setIndustry] = useState(baseIndustry);
-  const [detailKey, setDetailKey] = useState(industryRequest ? "" : defaultDetailKey ?? "");
-  const [operating, setOperating] = useState<Record<string, string>>({});
-  const [prem, setPrem] = useState("");
-  const [areaInput, setAreaInput] = useState("");
-  const [strategy, setStrategy] = useState("");
+  const [industry, setIndustry] = useState(draft?.industry ?? baseIndustry);
+  const [detailKey, setDetailKey] = useState(draft?.detailKey ?? (industryRequest ? "" : defaultDetailKey ?? ""));
+  const [operating, setOperating] = useState<Record<string, string>>(draft?.operating ?? {});
+  const [prem, setPrem] = useState(draft?.prem ?? "");
+  const [areaInput, setAreaInput] = useState(draft?.areaInput ?? "");
+  const [strategy, setStrategy] = useState(draft?.strategy ?? "");
   const [recs, setRecs] = useState<IndustryRec[] | null>(null);
 
-  const [calculation, setCalculation] = useState<Calculation | null>(null);
-  const [previous, setPrevious] = useState<Calculation | null>(null);
-  const lastCalculation = useRef<Calculation | null>(null);
+  const [calculation, setCalculation] = useState<Calculation | null>(draft?.calculation ?? null);
+  const [previous, setPrevious] = useState<Calculation | null>(draft?.previous ?? null);
+  const lastCalculation = useRef<Calculation | null>(draft?.calculation ?? null);
   const requestSerial = useRef(0);
   const [handoffNote, setHandoffNote] = useState("");
   // 저장한 결과 목록을 다시 받게 하는 신호(「결과 저장」 성공 때 올린다)
@@ -109,6 +131,10 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const result = calculation?.result ?? null;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    drafts?.set(draftKey, { unitId, industry, detailKey, operating, prem, areaInput, strategy, calculation, previous, page });
+  }, [drafts, draftKey, unitId, industry, detailKey, operating, prem, areaInput, strategy, calculation, previous, page]);
 
   const unit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
   const areaOverride = areaInput.trim() === "" ? undefined : Number(areaInput);
@@ -175,7 +201,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리 목록 — 실측 공실 인벤토리(services/vacant_inventory)에서 온다
   useEffect(() => {
     let live = true;
-    lastCalculation.current = null; requestSerial.current += 1;
+    lastCalculation.current = draft?.calculation ?? null; requestSerial.current += 1;
     getPostings(districtId)
       .then(async (p) => {
         if (selection?.unitId && districtId === selection.districtId) {
@@ -199,14 +225,20 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           // build_vacant_units.py의 id=f"vu-{p.get('id')}" 계약을 응답 목록에서 검증한다.
           // 이름·좌표로 추측하거나 층 표본을 ROI 유닛으로 바꾸지 않는다.
           const match = p.find((u) => u.id === (selection.unitId ?? `vu-${selection.buildingId}`));
-          setUnitId(match?.id ?? "");
+          const restoredUnit = draft && p.find((u) => u.id === draft.unitId);
+          setUnitId(restoredUnit?.id ?? match?.id ?? "");
           setHandoffNote(match ? `${selection.buildingName}의 입점 계산 유닛을 확인했습니다.`
             : `${selection.buildingName}과 일치하는 입점 계산 유닛이 없습니다. 계산할 자리를 직접 선택해 주세요.`);
-        } else setUnitId(p[0]?.id ?? "");
+        } else setUnitId(draft && p.some((u) => u.id === draft.unitId) ? draft.unitId : p[0]?.id ?? "");
+        if (draft && !p.some((u) => u.id === draft.unitId)) {
+          restored.current = false;
+          lastCalculation.current = null;
+          setCalculation(null); setPrevious(null); setPage("input");
+        }
       })
       .catch((e) => { if (live) setErr(String(e)); });
     return () => { live = false; };
-  }, [districtId, selection]);
+  }, [districtId, selection, draft]);
 
   // 자리를 고르면 그 좌표로 GNN 업종 추천을 물어 온다 — 업종 입력의 출발점이다.
   // (Platform 이 자리마다 답하는 것과 같은 질의다. 여기서는 그 답을 비용 계산에 넘긴다.)
@@ -222,10 +254,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리가 정해지면 우선 **입력 없이** 한 번 돌려 빈 화면을 만들지 않는다.
   // 이때 prem 은 보내지 않으므로 결과가 `absent`(0 전제)로 온다 — 그 사실은 화면이 밝힌다.
   useEffect(() => {
-    if (!unitId) return;
+    if (!unitId || unitsFor !== districtId) return;
+    if (restored.current) { restored.current = false; return; }
     run({ quiet: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unitId]);
+  }, [unitId, unitsFor]);
 
   async function run(opts: { quiet?: boolean } = {}) {
     if (!unit || !unitId) return;
@@ -264,6 +297,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       const next = { result: r, input };
       lastCalculation.current = next;
       setCalculation(next);
+      if (!opts.quiet) setPage("result");
     } catch (e) {
       if (serial !== requestSerial.current) return;
       setErr(String(e));
@@ -316,18 +350,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   return (
     <div className="postconsole"><div className="wrap">
-      {/* 2026-09-13: 손으로 짠 `.hd` 헤더를 공용 `Verdict` 로 바꿨다.
-          같은 모양(eyebrow · 4P 전환 · 질문 h1 · 설명)을 갖고 있었지만 **결론 문장과
-          근거 줄, 출처 줄이 없었다** — Platform·Program 은 이미 Verdict 를 쓰는데
-          Posting 만 질문을 던지고 답을 안 했다. 네 트랙이 같은 자리에서 같은 모양으로
-          답해야 한다는 것이 Verdict 를 만든 이유다(components/Verdict.tsx).
-          근거: design/references/INDEX.md §2-1(Placer.ai — 결론 → 차트 → 원자료). */}
-      <Verdict
-        eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
-        question="어떤 비용과 전략으로 입점할까요?"
-        verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
-      />
-
       {err && (
         <div className="err">
           <strong>계산에 실패했습니다.</strong>
@@ -337,10 +359,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </div>
       )}
 
-      {unit && <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
-        destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} />}
-
-      <div className="cols">
+      <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} pages={[
+        { id: "input", label: "자리와 비용 조건", description: "확인한 조건을 입력한 뒤 계산 결과를 확인하세요.", content: <>
         {/* ── 입력 ── */}
         <form className="panel" onSubmit={(e) => { e.preventDefault(); run(); }}>
           <div className="ptitle">1. 자리와 업종 선택</div>
@@ -438,9 +458,15 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             {busy ? "계산 중…" : "시뮬레이션"}
           </Button>
         </form>
-
+        </> },
+        { id: "result", label: "계산 결과", description: "계산에 사용한 조건과 출처를 확인하고, 검증 단계로 이어가세요.", content: <>
         {/* ── 결과 ── */}
         <div className="results">
+          <Verdict
+            eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
+            question="어떤 비용과 전략으로 입점할까요?"
+            verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
+          />
           {onMakeProgram && (
             <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
               onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
@@ -520,7 +546,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
         </div>
-      </div>
+        </> },
+        { id: "access", label: "찾아오는 길", description: "검토하는 자리 주변의 교통과 접근성을 확인하세요.", content:
+          unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
+            destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} /> : <p>자리를 먼저 선택해 주세요.</p> },
+      ]} />
     </div></div>
   );
 }

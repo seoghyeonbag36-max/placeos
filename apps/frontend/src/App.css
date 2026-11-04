@@ -96,3 +96,12 @@
   box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
   font-size: 13px; color: var(--muted);
 }
+
+/* 휴대폰의 다음 단계 버튼 위에 의견 보내기 버튼이 겹치지 않게 지도 쪽으로 옮긴다. */
+@media (max-width: 768px) {
+  body:has(.appshell .trackmap-panel:not([hidden]) > .explore-step-header,
+    .appshell .side-panel:not([hidden]) > .explore-step-header)
+    .visitor-feedback:not(:has(.visitor-feedback-panel)) {
+    bottom: calc(72dvh + var(--sp-3));
+  }
+}

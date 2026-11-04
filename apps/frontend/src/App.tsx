@@ -5,7 +5,10 @@ import SocialCallback from "@/pages/SocialCallback";
 import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
 import { IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import ConsolePages from "@/components/ConsolePages";
+import { ExploreStepHeader, ExploreStepFooter } from "@/components/ExploreStep";
+import type { PostingDraft } from "@/pages/PostingConsole";
 import type { TrackKey } from "@/design/tokens/colors";
 import PageDashboard from "@/pages/PageDashboard";
 import AdminCoverage from "@/pages/AdminCoverage";
@@ -17,9 +20,9 @@ import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { Button } from "@/design/components/Button";
 import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
 import { businessChipText, customWorkIndustry, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
-import { createPageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
+import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
 import FlowApp from "@/flow/FlowApp";
-import { isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
+import { explorePath, isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
 import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
 import { clearPlan } from "@/flow/plan";
 import "./App.css";
@@ -141,7 +144,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // 「내 사업」 카드는 이 위에 펴진다. 「시작」이 가는 곳도 Platform 이라(startBusiness) 이제
   // 같은 화면이고, 「그냥 둘러보기」는 카드만 걷고 Platform 에 남는다(그전에는 Page 지도).
   // 흐름이 트랙을 실어 왔으면 그 트랙으로 연다 — 레일 넷은 그대로이고 첫 화면만 다르다.
-  const [view, setView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
+  const [view, updateView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
+  // 입력 초안은 이번 작업 동안만 보관한다. 지도 표식은 비활성 트랙과 함께 해제한다.
+  const [postingDrafts] = useState(() => new Map<string, PostingDraft>());
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
   // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
@@ -164,17 +169,40 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     const name = at && at.buildingId === target.building && at.name ? at.name : "고른 건물";
     return { districtId, buildingId: target.building, buildingName: name, requestId: 1 };
   });
+  const pageWorkspaceRef = useRef(pageWorkspace);
+  useLayoutEffect(() => { pageWorkspaceRef.current = pageWorkspace; }, [pageWorkspace]);
+  const setView = useCallback((next: View, selection?: Partial<BuildingSelection>) => {
+    updateView(next);
+    const track = NAV.find((item) => item.key === next)!.track as ExploreTrack;
+    const postingTarget = next === "posting" ? postingSelection : undefined;
+    const path = explorePath({ track, district: selection?.districtId ?? postingTarget?.districtId ?? pageWorkspace.districtId,
+      building: selection?.buildingId ?? postingTarget?.buildingId ?? pageWorkspace.selectedId });
+    if (window.location.hash !== `#${path}`) {
+      window.history.pushState(null, "", `#${path}`);
+    }
+  }, [pageWorkspace.districtId, pageWorkspace.selectedId, postingSelection]);
   const reviewBuilding = (selection: BuildingSelection) => {
-    setPostingSelection((previous) => ({ ...selection, requestId: (previous?.requestId ?? 0) + 1 }));
-    setView("posting");
+    setPostingSelection((previous) => previous?.districtId === selection.districtId
+      && previous.buildingId === selection.buildingId && previous.unitId === selection.unitId
+      ? previous : { ...selection, requestId: (previous?.requestId ?? 0) + 1 });
+    setView("posting", selection);
   };
+  // Posting → Program 인계는 상권 변경 시 함께 비운다.
+  const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
   // 네 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
   const setDistrictId = useCallback((id: string) => {
+    if (id !== districtId) {
+      postingDrafts.clear();
+      setPostingSelection(undefined);
+      setProgramHandoff(undefined);
+    }
     setPageWorkspace((w) => (w.districtId === id ? w
       : { ...w, districtId: id, query: "", status: "all", selectedId: null }));
-  }, []);
+    const route = parseExplore(window.location.hash);
+    if (route && route.district !== id) window.history.replaceState(null, "", `#${explorePath({ track: route.track, district: id })}`);
+  }, [districtId, postingDrafts]);
   // ── 트랙 간 인계(화면설계서 2판 인계 표) ─────────────────────────────────────
   // Platform → Page: 그 건물을 Page 에서 연다. 상권·선택 건물은 Page 작업공간 하나에 쓰고,
   // 검색어·상태 필터는 비운다 — 조건에 걸려 넘겨받은 건물이 목록에서 안 보이면 안 된다.
@@ -182,18 +210,28 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     setPageWorkspace((w) => ({
       ...w, districtId: selection.districtId, selectedId: selection.buildingId, query: "", status: "all",
     }));
-    setView("map");
-  }, []);
+    setView("map", selection);
+  }, [setView]);
   // Posting → Program: 인계마다 requestId 를 올려 Program 을 새로 마운트한다(초기값으로만 채운다).
-  const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
   const makeProgram = useCallback((handoff: ProgramHandoff) => {
     setProgramHandoff((prev) => ({ ...handoff, requestId: (prev?.requestId ?? 0) + 1 }));
-    setView("program");
-  }, []);
+    setView("program", postingSelection);
+  }, [setView, postingSelection]);
   // 「비우기」 등으로 안내를 걷으면 표시만 끈다. key(requestId)는 그대로 둬 지금 화면을 다시 마운트하지 않는다.
   const dismissArrival = useCallback(() => {
     setProgramHandoff((h) => (h && !h.dismissed ? { ...h, dismissed: true } : h));
   }, []);
+  // 핸들러 수명을 고정한다. 입력·건물 선택마다 목록 조회 이펙트를 재시작하지 않는다.
+  const changePageWorkspace = useCallback((update: React.SetStateAction<PageWorkspace>) => {
+    const next = typeof update === "function" ? update(pageWorkspaceRef.current) : update;
+    pageWorkspaceRef.current = next;
+    if (next.districtId !== districtId) setDistrictId(next.districtId);
+    setPageWorkspace(next);
+    const route = parseExplore(window.location.hash);
+    if (route?.track === "page") window.history.replaceState(null, "", `#${explorePath({
+      track: "page", district: next.districtId, building: next.selectedId,
+    })}`);
+  }, [districtId, setDistrictId]);
 
   // ── 「내 사업」(화면설계서 3판 공통 프레임) ───────────────────────────────────
   const [business, setBusiness] = useState<BusinessState>(initialBusiness);
@@ -233,8 +271,8 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     setBizOpen(false);
     if (next.homeDistrictId) setDistrictId(next.homeDistrictId);
     setBizAnnounce(`${businessChipText(state, Array.isArray(industries) ? industries : null, bizDistricts)}로 설정됨`);
-    setView("platform");
-  }, [industries, bizDistricts, setDistrictId, token]);
+    setView("platform", next.homeDistrictId ? { districtId: next.homeDistrictId } : undefined);
+  }, [industries, bizDistricts, setDistrictId, setView, token]);
   const browse = useCallback(async () => {
     const state: BusinessState = { status: "browsing" };
     if (token) {
@@ -268,7 +306,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       setBusiness(next);
       if (token) saveBusinessWorkspace(token, next).catch(() => { /* 위 주석 */ });
     }
-  }, [industryList, profile, token]);
+  }, [industryList, profile, setView, token]);
   useEffect(() => {
     const t = window.setTimeout(() => {
       // 실패해도 조용히 넘어간다 — 그 탭을 누를 때 lazy 가 다시 받는다.
@@ -289,10 +327,27 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   }, []);
 
   useEffect(() => {
-    const onHash = () => setHash(window.location.hash);
+    const onHash = () => {
+      setHash(window.location.hash);
+      const next = parseExplore(window.location.hash);
+      if (!next) return;
+      updateView(next.track ? TRACK_VIEW[next.track] : "platform");
+      if (next.district && next.district !== districtId) setDistrictId(next.district);
+      if (next.track === "posting" && next.district && next.building) {
+        const { district: selectedDistrict, building } = next;
+        setPostingSelection((previous) => previous?.districtId === selectedDistrict && previous.buildingId === building
+          ? previous : { districtId: selectedDistrict, buildingId: building, buildingName: "고른 건물",
+            requestId: (previous?.requestId ?? 0) + 1 });
+      }
+      if (next.district) setPageWorkspace((w) => ({ ...w, districtId: next.district!,
+        ...(w.districtId !== next.district ? { query: "", status: "all" as const, selectedId: null } : {}),
+        ...(next.building ? { selectedId: next.building } : {}),
+      }));
+    };
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+    window.addEventListener("popstate", onHash);
+    return () => { window.removeEventListener("hashchange", onHash); window.removeEventListener("popstate", onHash); };
+  }, [districtId, setDistrictId]);
   // 레일에서 열 때만 기록을 남긴다(휴대폰 뒤로가기가 창을 닫게). 창 안에서 화면을 옮기거나
   // 닫을 때는 기록을 바꿔치기만 한다 — 가입→로그인→키를 오간 만큼 뒤로가기를 누르게 하지 않는다.
   const openAccount = useCallback(() => {
@@ -361,37 +416,45 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       <MapHost active>
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
-            <TrackMapFrame track="platform" label="상권 정체성">
-              <PlatformConsole districtId={districtId} onDistrictChange={setDistrictId} onOpenInPage={openInPage}
+            <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" />}
+              footer={<ExploreStepFooter onNext={() => setView("map")} nextLabel="이 상권에서 빈 자리 찾기" />}>
+              <PlatformConsole guided districtId={districtId} onDistrictChange={setDistrictId} onOpenInPage={openInPage}
                 business={profile} industries={Array.isArray(industries) ? industries : null}
                 onOpenBusiness={() => setBizOpen(true)} onTryIndustry={tryIndustry} onOpenPage={() => { setPageWorkspace((w) => ({ ...w, query: "", status: "all", openTwin: true })); setView("map"); }} />
             </TrackMapFrame>
           )}
-          {view === "map" && <MapShell workspace={pageWorkspace} onWorkspaceChange={setPageWorkspace} onReview={reviewBuilding}
-            myIndustry={myIndustry} />}
+          {view === "map" && <MapShell workspace={pageWorkspace} onWorkspaceChange={changePageWorkspace} onReview={reviewBuilding}
+            myIndustry={myIndustry} stepHeader={<ExploreStepHeader track="page" />} onPreviousStep={() => setView("platform")} />}
           {view === "posting" && (
-            <TrackMapFrame track="posting" label="입점 계산">
+            <TrackMapFrame track="posting" label="입점 계산" header={<ExploreStepHeader track="posting" />}
+              footer={<ExploreStepFooter onPrevious={() => setView("map")} />}>
               {customIndustry ? <div className="fitcard"><h2>{customIndustry} · 입점 비용 검토</h2>
                 <p>이 업종의 매출·순익·회수기간 자동 계산은 미지원입니다. ‘입점 준비’에서 직접 확인한 계약 금액을 비교하세요.</p>
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
-              </div> : <PostingConsole selection={postingSelection} districtId={districtId} onDistrictChange={setDistrictId}
+              </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
                 onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
           )}
           {view === "program" && (
-            <TrackMapFrame track="program" label="오프라인 캠페인">
+            <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" />}
+              footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
+              <ConsolePages key={programHandoff?.requestId ?? "direct"} label="검증과 실행" pages={[
+                { id: "campaign", label: "캠페인 운영", description: "준비한 캠페인을 실행하고 참여와 결과를 기록하세요.", content:
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
+                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} /> },
+                { id: "plan", label: "검증 계획", description: "아이템과 가설을 정하고, 작게 확인할 계획을 세우세요.", content:
               <ValidationStudio key={`brief-${programHandoff?.requestId ?? "direct"}`} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} />
+                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} /> },
+                { id: "space", label: "공간 준비", description: "선택한 자리의 공간 구성과 준비할 내용을 확인하세요.", content:
               <InteriorPlanner key={`interior-${districtId}-${programHandoff?.requestId ?? "direct"}`}
                 handoff={programHandoff?.districtId === districtId ? programHandoff : undefined}
-                district={districtId} industry={customIndustry ?? workIndustry?.input} />
+                district={districtId} industry={customIndustry ?? workIndustry?.input} /> },
+              ]} />
             </TrackMapFrame>
           )}
         </Suspense>
