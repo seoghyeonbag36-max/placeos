@@ -138,10 +138,12 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     for (const name of ["서울", "경기", "광주", "전주"]) expect(screen.getByRole("radio", { name })).toBeTruthy();
     pick("서울");
     await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    expect(window.location.hash).toBe("#/districts");
     expect(await screen.findByText("성수동 카페거리")).toBeTruthy();
     expect(screen.queryByText("광주 공개 상권")).toBeNull();
     fireEvent.click(screen.getByText("성수동 카페거리"));
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
+    expect(window.location.hash).toBe("#/industry");
     fireEvent.click(await screen.findByRole("radio", { name: /카페·디저트/ }));
     await screen.findByRole("heading", { name: "성수동 카페거리는 카페 중심 상권이에요" });
     expect(window.location.hash).toBe("#/district/seongsu");
@@ -158,11 +160,13 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
     await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    expect(window.location.hash).toBe("#/districts");
     fireEvent.click(screen.getByText("가로수길"));
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
     expect(screen.getByRole("radio", { name: /술집/ }).getAttribute("aria-checked")).toBe("false");
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
     await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    expect(window.location.hash).toBe("#/districts");
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
     await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
     expect(screen.getByRole("radio", { name: "서울" }).getAttribute("aria-checked")).toBe("true");
@@ -190,7 +194,8 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     open("/industry");
     render(<FlowApp token={null} />);
     await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
-    expect(window.location.hash).toBe("#/startup-district");
+    expect(window.location.hash).toBe("#/districts");
+    expect(window.location.hash).toBe("#/districts");
   });
 
   it("순위 미지원 업종도 선택한 지역 안에서 공개 상권을 직접 고른다", async () => {
