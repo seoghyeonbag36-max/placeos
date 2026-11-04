@@ -26,6 +26,8 @@
 /* `hidden` 만으로는 안 닫힌다 — 위 display:flex 가 UA 의 [hidden] 보다 특정도가 높다. */
 .trackmap-panel[hidden] { display: none; }
 .trackmap-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.trackmap-panel > .explore-step-header, .trackmap-panel > .explore-step-footer { flex-shrink: 0; }
+.trackmap-panel:has(> .explore-step-header) { background: var(--surface-subtle); }
 
 .trackmap-collapse {
   position: absolute; top: 8px; right: 8px; z-index: 2;
@@ -72,7 +74,7 @@
 @media (max-width: 768px) {
   /* 모바일: 하단 바텀시트 — Page(MapShell R4)와 같은 형태 언어 */
   .trackmap-panel {
-    top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 58dvh;
+    top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 72dvh;
     border: 0; border-top: 3px solid var(--tm-accent);
     border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
     box-shadow: var(--shadow-sheet);

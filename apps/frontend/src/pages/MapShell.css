@@ -100,6 +100,10 @@
   background: var(--surface-sunken); color: var(--text-secondary); font-size: 11px; font-weight: 700;
 }
 .mapshell .side-panel .sp-list { flex: 1; overflow-y: auto; }
+.mapshell .page-panel-scroll { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.mapshell .page-panel-scroll > .sp-list { flex: none; overflow: visible; }
+.mapshell .side-panel > .explore-step-header, .mapshell .side-panel > .explore-step-footer { flex-shrink: 0; }
+.mapshell .side-panel:has(> .explore-step-header) { width: min(440px, calc(100% - 24px)); }
 
 .mapshell .b-item {
   display: flex; align-items: center; gap: 10px; width: 100%;
@@ -165,6 +169,10 @@
   }
   .mapshell .legend { bottom: calc(44vh + 12px); }
   .mapshell .time-bar { bottom: calc(44vh + 12px); }
+}
+
+@media (max-width: 768px) {
+  .mapshell .side-panel:has(> .explore-step-header) { width: auto; height: 72dvh; }
 }
 
 /* ── 층 스택·거리뷰 상세 ── */

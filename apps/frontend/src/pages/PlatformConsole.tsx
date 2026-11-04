@@ -32,6 +32,7 @@ import { boundaryBadge, computeHubBoundary, EMPTY_BOUNDARY, type HubBoundary } f
 import type { BuildingSelection } from "@/lib/workspaceState";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./PlatformConsole.css";
+import ConsolePages from "@/components/ConsolePages";
 
 /**
  * 고객용 상권 분석 — 상권 요약, 공간 후보, 공실 전망과 추천 업종을 보여준다.
@@ -78,7 +79,8 @@ function approxVacancyPct(fc: VacancyForecast | null, hub?: DistrictSummary): nu
 const dirMark = (d: string) => (d === "up" ? "▲" : d === "down" ? "▼" : "—");
 
 export default function PlatformConsole({ districtId: sharedDistrict, onDistrictChange, onOpenInPage,
-  business = null, industries = null, onOpenBusiness, onTryIndustry, onOpenPage }: {
+  business = null, industries = null, onOpenBusiness, onTryIndustry, onOpenPage, guided = false }: {
+  guided?: boolean;
   /** 네 트랙이 공유하는 상권(App). 주면 제어 모드, 안 주면 화면이 스스로 든다(단독 렌더·테스트). */
   districtId?: string;
   onDistrictChange?: (id: string) => void;
@@ -95,6 +97,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   onOpenPage?: () => void;
 } = {}) {
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
+  const [districtsLoaded, setDistrictsLoaded] = useState(false);
   const [ownDistrict, setOwnDistrict] = useState(sharedDistrict ?? DEFAULT_DISTRICT);
   const controlled = sharedDistrict !== undefined && onDistrictChange !== undefined;
   const districtId = controlled ? sharedDistrict : ownDistrict;
@@ -143,6 +146,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
       .then((all) => {
         if (!live) return;
         setDistricts(all);
+        setDistrictsLoaded(true);
         if (all.length && !all.some((d) => d.id === districtId)) setDistrictId(all[0].id);
       })
       .catch((e) => live && setListErr(String(e)));
@@ -284,13 +288,10 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
   return (
     <div className="platconsole"><div className="wrap">
+      <ConsolePages enabled={guided} label="상권 살펴보기" pages={[
+        { id: "summary", label: "상권 요약", description: "내 업종과 상권의 특징을 먼저 확인하세요.", content: <>
       <IndustryFitCard business={business} industries={industries} districtId={districtId} districts={districts}
         onDistrictChange={setDistrictId} onOpenBusiness={onOpenBusiness} onTryIndustry={onTryIndustry} />
-      <Verdict
-        eyebrow="PlaceOS · Platform" conversion="PLACE ▶ PLATFORM"
-        question="이 상권은 어떤 곳인가요?"
-        verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
-      />
 
       {listErr && (
         <div className="err">
@@ -303,6 +304,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         <label className="pk">
           <span>상권</span>
           <DistrictPicker districts={districts} value={districtId}
+            emptyLabel={listErr ? "상권 목록 조회 실패" : districtsLoaded ? "상권 목록 없음" : "선택한 상권 확인 중…"}
             onChange={setDistrictId} suffix={(d) => d.gu} />
         </label>
         {hub && (
@@ -346,12 +348,23 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           onClose={() => setComparingDistricts(false)} />
       )}
 
-      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
-        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
+        </> },
+        { id: "identity", label: "상권 특징", description: "상권의 특징과 실측 현황을 확인하세요.", content: <>
+      <Verdict
+        eyebrow="PlaceOS · Platform" conversion="PLACE ▶ PLATFORM"
+        question="이 상권은 어떤 곳인가요?"
+        verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
+      />
       {hub && <DistrictBrief hub={hub} districts={districts} outline={outlines?.hubs.find((o) => o.id === districtId)}
         identity={prof?.district_id === districtId ? prof.identity : null} fitForRent={fit}
         picked={pickedHere} pickDisabled={!pickedHere && districtPicks.length >= COMPARE_MAX} onTogglePick={togglePick}
         onOpenPage={onOpenPage} />}
+        </> },
+        { id: "compare", label: "다른 상권 비교", description: "상권의 분포와 내 업종의 적합도를 비교하세요.", content: <>
+      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
+        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
+        </> },
+        { id: "access", label: "접근성과 주변 가게", description: "찾아오는 길과 참고할 주변 가게를 확인하세요.", content: <>
       {hub && <TravelTimePanel key={`travel:${districtId}`} destinations={travelDestinations} />}
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
@@ -361,6 +374,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           ? business.targetIndustryDetailKey ?? business.targetIndustryKey ?? ""
           : business?.industryDetailKey ?? business?.industryKey ?? "")}
         anchor={benchmarkAnchor} radiusM={matchRadius} onResult={setBenchmark} />
+        </> },
+        { id: "evidence", label: "추천과 상세 근거", description: "자리별 추천과 분석의 근거·한계를 살펴보세요.", content: <>
 
       {profErr && (
         <div className="err">
@@ -402,6 +417,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
       </Fold>
 
       <SentimentSection zones={zones} hub={hub} />
+        </> },
+      ]} />
     </div></div>
   );
 }

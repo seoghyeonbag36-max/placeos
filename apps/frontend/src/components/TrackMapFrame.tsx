@@ -24,11 +24,13 @@ import type { TrackKey } from "@/design/tokens/colors";
 import { isEditableTarget } from "@/lib/keyboard";
 import "./TrackMapFrame.css";
 
-export default function TrackMapFrame({ track, label, children }: {
+export default function TrackMapFrame({ track, label, children, header, footer }: {
   track: TrackKey;
   /** 접었을 때 펴기 버튼에 뜨는 이름 — "상권 정체성" 처럼 이 패널이 무엇인지 */
   label: string;
   children: ReactNode;
+  header?: ReactNode;
+  footer?: ReactNode;
 }) {
   const [open, setOpen] = useState(true);
   const panelId = `track-panel-${track}`;
@@ -68,7 +70,9 @@ export default function TrackMapFrame({ track, label, children }: {
         <button ref={collapseRef} type="button" className="trackmap-collapse" onClick={() => setOpen(false)}
           aria-expanded aria-controls={panelId} aria-label={`${label} 접기`}
           title="패널을 접고 지도를 넓게 본다">‹</button>
+        {header}
         <div className="trackmap-scroll">{children}</div>
+        {footer}
       </aside>
     </div>
   );
