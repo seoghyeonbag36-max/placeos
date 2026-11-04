@@ -65,7 +65,7 @@ export function StartupRegion() {
     caption="상권 찾기 · 새 가게" title="어느 지역에서 창업하시나요?" sub={state.startupOrder === "region" ? "지역을 고른 다음 그 안의 상권을 선택해요." : "선택한 업종으로 살펴볼 지역을 골라 주세요."}>
     <ChoiceList tiles label="창업 지역" value={state.startupRegion ?? null}
       options={RANK_GROUPS.map(({ name }) => ({ value: name, title: name }))}
-      onChoose={(region) => { update((s) => setStartupRegion(s, region)); go(state.startupOrder === "region" ? "/startup-district" : "/districts"); }} />
+      onChoose={(region) => { update((s) => setStartupRegion(s, region)); go("/districts"); }} />
   </FlowScreen>;
 }
 
@@ -94,7 +94,7 @@ export function Industry() {
   const list = useIndustries();
   const ok = useNeed(!!state.goal, "/start");
   const regionFirst = state.goal === "start" && state.startupOrder === "region";
-  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/startup-district" : "/startup-region");
+  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/districts" : "/startup-region");
   if (!ok || !districtOk || !state.goal) return null;
   const goal = state.goal;
   const next = (key: string) => {
@@ -113,11 +113,11 @@ export function Industry() {
     }
   };
   return (
-    <FlowScreen back={goal === "start" && state.startupOrder ? (state.startupOrder === "region" ? "/startup-district" : "/startup-order") : "/start"} caption={`상권 찾기 · ${GOAL_LABEL[goal]}`} title={INDUSTRY_Q[goal]}
+    <FlowScreen back={goal === "start" && state.startupOrder ? (state.startupOrder === "region" ? "/districts" : "/startup-order") : "/start"} caption={`상권 찾기 · ${GOAL_LABEL[goal]}`} title={INDUSTRY_Q[goal]}
       sub={regionFirst ? "고른 상권에서 시작할 업종을 선택해요. 다음으로 이 상권의 결과를 보여 드려요." : goal === "pivot" ? "지금 업종을 기준으로 이 상권에 맞는 업종을 견줘 드려요." : "업종에 맞는 상권부터 보여 드려요."}>
       {list.status === "loading" && <SkeletonRows n={4} label="업종 목록을 불러오는 중" />}
       {list.status === "error" && <LoadError what="업종 목록" error={list.error} onRetry={list.retry}
-        other={{ label: regionFirst ? "상권 다시 고르기" : "상권부터 고르기", onClick: () => go(regionFirst ? "/startup-district" : "/district-search") }} />}
+        other={{ label: regionFirst ? "상권 다시 고르기" : "상권부터 고르기", onClick: () => go(regionFirst ? "/districts" : "/district-search") }} />}
       {list.status === "ready" && (
         <ChoiceList tiles label="업종" value={state.industryKey} onChoose={next}
           options={[...list.data.map((o) => ({
@@ -137,7 +137,7 @@ export function IndustryOther() {
   const [text, setText] = useState(state.industryKey === "other" ? state.customIndustry ?? "" : "");
   const ok = useNeed(!!state.goal, "/start");
   const regionFirst = state.goal === "start" && state.startupOrder === "region";
-  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/startup-district" : "/startup-region");
+  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/districts" : "/startup-region");
   if (!ok || !districtOk || !state.goal) return null;
   const goal = state.goal;
   const value = text.trim();
@@ -252,7 +252,13 @@ function PickLine({ row, on, disabled, pinned, onToggle }: { row: IndustryFitRow
   );
 }
 
+/** 지역별 창업은 같은 상권 목록 주소에서 업종보다 먼저 상권을 고른다. */
 export function Districts() {
+  const { state } = useFlow();
+  return state.goal === "start" && state.startupOrder === "region" ? <StartupDistrict /> : <DistrictRankings />;
+}
+
+function DistrictRankings() {
   const { state, update } = useFlow();
   const data = useFlowData();
   const list = useIndustries();
