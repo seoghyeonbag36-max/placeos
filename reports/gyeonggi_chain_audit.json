@@ -1,0 +1,4202 @@
+[
+  {
+    "id": "hwajeong",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "화정 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,873 · 건물 372 · 건물당 7.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "761동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "337/340동 받음 — 3동 남음(쿼터 소진·중단으로 잘렸다) · expos_units=79 floor_approx=2 floor_ouln=59 no_ledger=15 non_commercial=182 rate_limited=3",
+        "next": "python -m data.collectors.building_vacancy hwajeong   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 96.5% · floor_approx 2동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 391동 · 대표공실 7.5% · 정밀커버리지 98.2%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 7.5% vs 앵커 11.92% = -4.42%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units hwajeong"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "ilsan",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "일산 라페스타 · city=goyang · r=250m/350m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,058 · 건물 61 · 건물당 33.7 (>10.0 계획상가 밀집 · 예외 승인: 계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다. 공실률은 일반건축물 표본에만 근거하므로 다른 거점과 직접 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "83동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "60동 · expos_units=44 floor_approx=2 floor_ouln=10 no_ledger=2 non_commercial=2",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 96.4% · floor_approx 2동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 60동 · 대표공실 15.2% · 정밀커버리지 97.9%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.2% vs 앵커 20.58% = -5.38%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units ilsan"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "westerndom",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "일산 웨스턴돔 · city=goyang · r=250m/350m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,967 · 건물 42 · 건물당 46.8 (>10.0 계획상가 밀집 · 예외 승인: 계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다. 공실률은 일반건축물 표본에만 근거하므로 다른 거점과 직접 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "68동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "42동 · expos_units=32 floor_ouln=8 no_ledger=1 non_commercial=1",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 58동 · 대표공실 28.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 28.9% vs 앵커 20.58% = +8.32%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units westerndom"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "geumchon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "금촌 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,509 · 건물 897 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,250동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "831동 · expos_units=56 floor_ouln=556 no_com_floor=27 no_ledger=42 non_commercial=150",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.8%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 933동 · 대표공실 15.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.9% vs 앵커 18.27% = -2.37%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "unjeong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "운정 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 738 · 건물 184 · 건물당 4.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "802동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "140동 · expos_units=22 floor_approx=1 floor_ouln=70 no_com_floor=7 no_ledger=4 non_commercial=36",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 92.0% · floor_approx 1동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 196동 · 대표공실 9.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.8% vs 앵커 18.27% = -8.47%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "yadang",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "야당 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,755 · 건물 224 · 건물당 7.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "645동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "206동 · expos_units=52 floor_ouln=108 no_com_floor=3 no_ledger=6 non_commercial=37",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 311동 · 대표공실 15.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.0% vs 앵커 18.27% = -3.27%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "tanhyeon",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "탄현 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,439 · 건물 306 · 건물당 4.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "973동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "295동 · expos_units=71 floor_approx=9 floor_ouln=126 no_ledger=31 non_commercial=58",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 95.6% · floor_approx 9동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 412동 · 대표공실 11.1% · 정밀커버리지 94.9%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 11.1% vs 앵커 20.58% = -9.48%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "bamgasi",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "밤가시마을 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,334 · 건물 650 · 건물당 2.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,512동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "589동 · expos_units=26 floor_ouln=28 non_commercial=535",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 182동 · 대표공실 28.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 28.3% vs 앵커 20.58% = +7.72%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "wondang",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "원당역 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 950 · 건물 229 · 건물당 4.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "966동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "223동 · expos_units=36 floor_ouln=132 no_com_floor=1 no_ledger=16 non_commercial=38",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 99.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 268동 · 대표공실 18.4% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 18.4% vs 앵커 11.92% = +6.48%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "baekseok",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "백석역 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,206 · 건물 538 · 건물당 4.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "648동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "499동 · expos_units=43 floor_ouln=36 no_com_floor=4 no_ledger=4 non_commercial=412",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 158동 · 대표공실 19.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 19.8% vs 앵커 11.92% = +7.88%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "daehwa",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "대화역 · city=goyang · r=350m/450m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 768 · 건물 144 · 건물당 5.3",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "357동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "134동 · expos_units=25 floor_ouln=12 no_com_floor=8 no_ledger=1 non_commercial=88",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 82.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 86동 · 대표공실 26.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 26.2% vs 앵커 20.58% = +5.62%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "haengsin",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "행신역 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,009 · 건물 186 · 건물당 5.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "563동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "176동 · expos_units=38 floor_ouln=24 no_ledger=9 non_commercial=105",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 184동 · 대표공실 6.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 6.7% vs 앵커 11.92% = -5.22%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "munsan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "문산역 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,047 · 건물 348 · 건물당 3.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,053동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "333동 · expos_units=20 floor_ouln=203 no_ledger=45 non_commercial=65",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 372동 · 대표공실 12.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 12.3% vs 앵커 18.27% = -5.97%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "madu",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "마두역 · city=goyang · r=250m/350m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,249 · 건물 54 · 건물당 23.1 (>10.0 계획상가 밀집 · 예외 승인: 계획상가 밀집 — 건물당 점포 17.1개(기준 10 초과). 공실률은 일반건축물만 세므로 이 거점 상업 재고의 일부에만 근거한다. 다른 거점과 공실률을 직접 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "140동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy madu   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs madu && python -m data.pipelines.build_page_master madu"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units madu"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "juyeop",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "주엽역 · city=goyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,373 · 건물 106 · 건물당 22.4 (>10.0 계획상가 밀집 · 예외 승인: 계획상가 밀집 — 건물당 점포 22.4개(기준 10 초과). 공실률은 일반건축물만 세므로 이 거점 상업 재고의 일부에만 근거한다. 다른 거점과 공실률을 직접 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "675동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy juyeop   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs juyeop && python -m data.pipelines.build_page_master juyeop"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units juyeop"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "mokdong",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "운정 목동 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,211 · 건물 118 · 건물당 10.3 (>10.0 계획상가 밀집 · 예외 승인: 계획상가 밀집 — 건물당 점포 10.2개(기준 10 초과). 공실률은 일반건축물만 세므로 이 거점 상업 재고의 일부에만 근거한다. 다른 거점과 공실률을 직접 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "146동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy mokdong   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs mokdong && python -m data.pipelines.build_page_master mokdong"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units mokdong"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(계획상가) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "kintex",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "킨텍스 · city=goyang · r=350m/450m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 353 · 건물 100 · 건물당 3.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "180동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy kintex   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs kintex && python -m data.pipelines.build_page_master kintex"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units kintex"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(단일시설) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "starfield",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "스타필드 고양 · city=goyang · r=300m/400m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 716 · 건물 33 · 건물당 21.7 (>10.0 계획상가 밀집 · 예외 승인: 단일시설 상권 — 점포의 79.9%가 상위 10개 지번에 몰려 있다. 공실률이 시설 한 채에 좌우되므로 가두 상권과 같은 축에 놓고 비교하지 말 것.)",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "637동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy starfield   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs starfield && python -m data.pipelines.build_page_master starfield"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units starfield"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(단일시설) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "samsong",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "삼송역 · city=goyang · r=300m/400m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 593 · 건물 135 · 건물당 4.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "618동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy samsong   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs samsong && python -m data.pipelines.build_page_master samsong"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units samsong"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(단일시설) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "pajuoutlet",
+    "active": false,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "파주 프리미엄아울렛 · city=paju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 289 · 건물 57 · 건물당 5.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "158동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "todo",
+        "evidence": "gold building_vacancy.json 없음",
+        "next": "python -m data.collectors.building_vacancy pajuoutlet   # 쿼터: scripts/quota_preflight.py"
+      },
+      {
+        "stage": "정밀분모",
+        "status": "todo",
+        "evidence": "대장 선행",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "todo",
+        "evidence": "coverage.json / page_building_master.geojson 없음",
+        "next": "python -m data.pipelines.build_building_attrs pajuoutlet && python -m data.pipelines.build_page_master pajuoutlet"
+      },
+      {
+        "stage": "앵커",
+        "status": "todo",
+        "evidence": "calibration.json 없음",
+        "next": "python -m data.pipelines.calibrate_vacancy"
+      },
+      {
+        "stage": "공실유닛",
+        "status": "todo",
+        "evidence": "없음 — 미실행이거나 후보 0(파이프라인은 0유닛이면 파일을 안 쓴다)",
+        "next": "python -m data.pipelines.build_vacant_units pajuoutlet"
+      },
+      {
+        "stage": "서빙등재",
+        "status": "paused",
+        "evidence": "추후 확장 과제(단일시설) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred) · Gold 도 아직 안 섰다",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "suwonst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "수원역 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,741 · 건물 604 · 건물당 4.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,882동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "567동 · expos_units=41 floor_ouln=344 no_com_floor=43 no_ledger=31 non_commercial=108",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 90.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 618동 · 대표공실 9.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.5% vs 앵커 13.38% = -3.88%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "ingye",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "인계동 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 3,702 · 건물 738 · 건물당 5.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "968동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "691동 · expos_units=116 floor_ouln=395 no_com_floor=59 no_ledger=41 non_commercial=80",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 89.6%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 619동 · 대표공실 9.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.7% vs 앵커 13.54% = -3.84%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "paldalmun",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "팔달문 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,130 · 건물 860 · 건물당 2.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,618동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "810동 · expos_units=40 floor_ouln=522 no_com_floor=56 no_ledger=50 non_commercial=142",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 90.9%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 799동 · 대표공실 18.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 18.5% vs 앵커 24.5% = -6.0%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "pajang",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "수원 파장동 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,190 · 건물 543 · 건물당 2.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,890동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "472동 · expos_units=32 floor_ouln=241 no_com_floor=11 no_ledger=5 non_commercial=183",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 363동 · 대표공실 14.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 14.9% vs 앵커 19.03% = -4.13%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "ajou",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "아주대삼거리 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,188 · 건물 770 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,896동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "697동 · expos_units=48 floor_ouln=267 no_com_floor=12 no_ledger=10 non_commercial=360",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 522동 · 대표공실 13.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 13.2% vs 앵커 11.96% = +1.24%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "yeongtong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "영통역 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,701 · 건물 346 · 건물당 7.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "570동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "334동 · expos_units=56 floor_ouln=82 no_com_floor=3 no_ledger=4 non_commercial=189",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.9%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 239동 · 대표공실 13.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 13.9% vs 앵커 9.42% = +4.48%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "moran",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "모란 · city=seongnam · r=250m/300m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,001 · 건물 262 · 건물당 3.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "654동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "246동 · expos_units=13 floor_ouln=146 no_com_floor=17 no_ledger=14 non_commercial=56",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 90.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 206동 · 대표공실 14.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 14.8% vs 앵커 6.07% = +8.73%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "sinheung",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "성남 신흥역 · city=seongnam · r=250m/350m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 882 · 건물 366 · 건물당 2.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,566동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "332동 · expos_units=9 floor_ouln=154 no_com_floor=17 no_ledger=93 non_commercial=59",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 90.6%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 551동 · 대표공실 18.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 18.7% vs 앵커 12.08% = +6.62%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "dandae",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "단대오거리 · city=seongnam · r=350m/450m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,258 · 건물 460 · 건물당 2.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,352동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "418동 · expos_units=16 floor_ouln=248 no_com_floor=7 no_ledger=5 non_commercial=142",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 344동 · 대표공실 29.1% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 29.1% vs 앵커 7.28% = +21.82%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "bucheonst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "부천역 · city=bucheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 4,209 · 건물 1,324 · 건물당 3.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,658동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "1,213동 · expos_units=136 floor_ouln=710 no_com_floor=63 no_ledger=55 non_commercial=249",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 93.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 943동 · 대표공실 20.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 20.2% vs 앵커 17.35% = +2.85%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "anyangst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "안양역 · city=anyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 3,077 · 건물 751 · 건물당 4.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,140동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "724동 · expos_units=81 floor_ouln=495 no_com_floor=14 no_ledger=52 non_commercial=82",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.6%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 638동 · 대표공실 17.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 17.7% vs 앵커 18.27% = -0.57%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "indeogwon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "인덕원 · city=anyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,544 · 건물 440 · 건물당 5.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,003동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "399동 · expos_units=54 floor_ouln=220 no_com_floor=3 no_ledger=16 non_commercial=106",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.9%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 359동 · 대표공실 11.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 11.2% vs 앵커 5.38% = +5.82%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "uijeongbust",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "의정부역 · city=uijeongbu · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 5,267 · 건물 1,418 · 건물당 3.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,705동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "1,349동 · expos_units=100 floor_ouln=938 no_com_floor=62 no_ledger=27 non_commercial=222",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 94.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 1217동 · 대표공실 22.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 22.3% vs 앵커 12.52% = +9.78%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "pyeongtaekst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "평택역 · city=pyeongtaek · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,905 · 건물 1,036 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,803동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "951동 · expos_units=36 floor_ouln=610 no_com_floor=33 no_ledger=79 non_commercial=193",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 787동 · 대표공실 10.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 10.7% vs 앵커 10.9% = -0.2%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "pyeongtaekcity",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "평택시청 · city=pyeongtaek · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,388 · 건물 459 · 건물당 3.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "784동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "430동 · expos_units=34 floor_ouln=172 no_com_floor=7 no_jibun=1 no_ledger=10 non_commercial=206",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 328동 · 대표공실 16.1% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.1% vs 앵커 13.59% = +2.51%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "songtan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "송탄(신장·지산·서정) · city=pyeongtaek · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,512 · 건물 485 · 건물당 3.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,173동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "447동 · expos_units=48 floor_ouln=216 no_com_floor=12 no_ledger=27 non_commercial=144",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.7%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 358동 · 대표공실 10.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 10.8% vs 앵커 11.77% = -0.97%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "guri",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "구리역 · city=guri · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,881 · 건물 618 · 건물당 4.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,613동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "591동 · expos_units=58 floor_ouln=324 no_com_floor=19 no_ledger=19 non_commercial=171",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 592동 · 대표공실 15.1% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.1% vs 앵커 28.15% = -13.05%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "giheung",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "기흥역 · city=yongin · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,586 · 건물 226 · 건물당 7.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "482동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "211동 · expos_units=38 floor_ouln=99 no_com_floor=1 no_ledger=10 non_commercial=63",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 99.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 212동 · 대표공실 20.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 20.0% vs 앵커 17.16% = +2.84%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "suji",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "수지구청 · city=yongin · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,335 · 건물 410 · 건물당 5.7",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "752동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "375동 · expos_units=52 floor_ouln=144 no_com_floor=3 no_ledger=10 non_commercial=166",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.5%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 263동 · 대표공실 11.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 11.5% vs 앵커 5.12% = +6.38%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "gimnyangjang",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "김량장동 · city=yongin · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,001 · 건물 581 · 건물당 3.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,204동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "550동 · expos_units=33 floor_ouln=380 no_com_floor=18 no_ledger=42 non_commercial=77",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.8%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 659동 · 대표공실 10.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 10.0% vs 앵커 9.24% = +0.76%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "byeongjeom",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "병점역 · city=hwaseong · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,469 · 건물 274 · 건물당 5.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "851동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "247동 · expos_units=50 floor_ouln=137 no_com_floor=8 no_ledger=6 non_commercial=46",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.9%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 264동 · 대표공실 9.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.5% vs 앵커 13.11% = -3.61%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "bongdam",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "화성 봉담읍 · city=hwaseong · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,137 · 건물 354 · 건물당 3.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "986동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "334동 · expos_units=21 floor_ouln=115 no_ledger=6 non_commercial=192",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 288동 · 대표공실 15.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.0% vs 앵커 9.77% = +5.23%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "osan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "오산시청 · city=osan · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,258 · 건물 347 · 건물당 3.6",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "865동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "327동 · expos_units=48 floor_ouln=203 no_com_floor=4 no_ledger=12 non_commercial=60",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 234동 · 대표공실 16.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.5% vs 앵커 4.13% = +12.37%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "icheon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "이천종합터미널 · city=icheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,696 · 건물 946 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,017동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "891동 · expos_units=44 floor_ouln=558 no_com_floor=29 no_ledger=48 non_commercial=212",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 95.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 992동 · 대표공실 9.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.8% vs 앵커 12.41% = -2.61%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "yeoju",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "여주시청 · city=yeoju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,332 · 건물 587 · 건물당 2.3",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,646동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "546동 · expos_units=11 floor_ouln=396 no_com_floor=8 no_ledger=42 non_commercial=89",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 668동 · 대표공실 12.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 12.5% vs 앵커 6.86% = +5.64%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "pocheon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "포천터미널 · city=pocheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,155 · 건물 563 · 건물당 2.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,043동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "518동 · expos_units=11 floor_ouln=348 no_com_floor=14 no_ledger=50 non_commercial=95",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 698동 · 대표공실 15.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.8% vs 앵커 13.04% = +2.76%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "songu",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "포천 송우리 · city=pocheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,345 · 건물 354 · 건물당 3.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "751동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "345동 · expos_units=24 floor_ouln=191 no_com_floor=15 no_ledger=27 non_commercial=88",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 93.5%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 335동 · 대표공실 10.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 10.2% vs 앵커 9.97% = +0.23%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "dongducheon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "동두천중앙역 · city=dongducheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,407 · 건물 709 · 건물당 2.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "2,339동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "651동 · expos_units=14 floor_ouln=427 no_com_floor=26 no_ledger=44 non_commercial=140",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 94.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 778동 · 대표공실 16.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.9% vs 앵커 19.54% = -2.64%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "deokjeong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "덕정역 · city=yangju · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 578 · 건물 241 · 건물당 2.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "998동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "224동 · expos_units=8 floor_ouln=156 no_com_floor=5 no_ledger=12 non_commercial=43",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 305동 · 대표공실 11.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 11.9% vs 앵커 12.33% = -0.43%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "hanam",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "하남 원도심 · city=hanam · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,074 · 건물 810 · 건물당 2.6",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "3,024동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "719동 · expos_units=39 floor_ouln=345 no_com_floor=8 no_ledger=24 non_commercial=303",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 643동 · 대표공실 14.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 14.7% vs 앵커 9.78% = +4.92%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "gyeongan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "경기광주 경안동 · city=gwangju-gg · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,352 · 건물 673 · 건물당 3.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,455동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "635동 · expos_units=26 floor_ouln=390 no_com_floor=7 no_ledger=47 non_commercial=165",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 464동 · 대표공실 12.4% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 12.4% vs 앵커 3.78% = +8.62%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "gwangnam",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "광주 광남동 · city=gwangju-gg · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 728 · 건물 220 · 건물당 3.3",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "547동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "205동 · expos_units=16 floor_ouln=133 no_com_floor=2 no_ledger=9 non_commercial=45",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.7%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 198동 · 대표공실 9.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 9.7% vs 앵커 5.59% = +4.11%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "cheolsan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "철산역 · city=gwangmyeong · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,820 · 건물 279 · 건물당 6.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "842동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "244동 · expos_units=49 floor_ouln=77 no_com_floor=1 no_ledger=65 non_commercial=52",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 99.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 219동 · 대표공실 13.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 13.2% vs 앵커 10.25% = +2.95%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "sincheonst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "시흥 신천역 · city=siheung · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,766 · 건물 926 · 건물당 3.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,953동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "855동 · expos_units=99 floor_ouln=475 no_com_floor=11 no_ledger=24 non_commercial=246",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.1%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 772동 · 대표공실 20.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 20.9% vs 앵커 12.38% = +8.52%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "anseong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "안성 서인사거리 · city=anseong · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,112 · 건물 996 · 건물당 2.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "3,162동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "923동 · expos_units=21 floor_ouln=563 no_com_floor=19 no_ledger=87 non_commercial=233",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.8%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 913동 · 대표공실 16.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.9% vs 앵커 23.09% = -6.19%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "songnae",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "송내역 · city=bucheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,354 · 건물 399 · 건물당 5.9",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "907동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "359동 · expos_units=82 floor_ouln=118 no_ledger=18 non_commercial=141",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 263동 · 대표공실 18.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 18.3% vs 앵커 17.35% = +0.95%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "yeokgok",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "역곡역 · city=bucheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,009 · 건물 636 · 건물당 3.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,884동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "596동 · expos_units=152 floor_ouln=261 no_com_floor=14 no_ledger=20 non_commercial=149",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.7%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 623동 · 대표공실 17.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 17.0% vs 앵커 17.35% = -0.35%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "sinjungdong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "신중동역 · city=bucheon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 4,181 · 건물 581 · 건물당 7.2",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,034동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "541동 · expos_units=178 floor_ouln=161 no_com_floor=2 no_ledger=12 non_commercial=188",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 99.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 344동 · 대표공실 12.9% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 12.9% vs 앵커 17.35% = -4.45%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "myeonghak",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "명학역 · city=anyang · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,475 · 건물 491 · 건물당 3.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,332동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "437동 · expos_units=37 floor_ouln=193 no_com_floor=19 no_ledger=36 non_commercial=152",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 92.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 275동 · 대표공실 16.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.3% vs 앵커 18.27% = -1.97%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "sujin",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "수진역 · city=seongnam · r=250m/350m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,134 · 건물 330 · 건물당 3.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "922동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "300동 · expos_units=27 floor_ouln=93 no_com_floor=7 no_ledger=65 non_commercial=108",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 94.5%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 155동 · 대표공실 27.3% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 27.3% vs 앵커 12.08% = +15.22%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "taepyeong",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "태평역 · city=seongnam · r=250m/300m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 684 · 건물 279 · 건물당 2.5",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,009동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "253동 · expos_units=21 floor_ouln=138 no_com_floor=5 no_ledger=6 non_commercial=83",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 231동 · 대표공실 19.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 19.7% vs 앵커 12.08% = +7.62%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "yatap",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "야탑역 · city=seongnam · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,911 · 건물 396 · 건물당 7.4",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "681동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "360동 · expos_units=55 floor_ouln=66 no_com_floor=1 no_ledger=6 non_commercial=232",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 99.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 225동 · 대표공실 15.2% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.2% vs 앵커 1.44% = +13.76%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "jeongja",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "정자역 · city=seongnam · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,788 · 건물 310 · 건물당 9.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "443동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "295동 · expos_units=67 floor_ouln=60 no_com_floor=2 no_ledger=6 non_commercial=160",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.4%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 162동 · 대표공실 13.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 13.5% vs 앵커 1.44% = +12.06%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "skku",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "성균관대역 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,638 · 건물 551 · 건물당 3.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,693동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "494동 · expos_units=46 floor_ouln=211 no_com_floor=8 no_ledger=4 non_commercial=225",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 97.0%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 470동 · 대표공실 8.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 8.5% vs 앵커 19.03% = -10.53%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "maetan",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "매탄동 · city=suwon · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,022 · 건물 369 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "849동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "350동 · expos_units=20 floor_approx=2 floor_ouln=48 no_ledger=4 non_commercial=276",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "partial",
+        "evidence": "floor_ouln+expos 97.1% · floor_approx 2동 잔여 (임계 충족 — 잔여는 판정완료일 수 있다)",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 182동 · 대표공실 4.3% · 정밀커버리지 97.4%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 4.3% vs 앵커 9.42% = -5.12%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "ganeung",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "가능역 · city=uijeongbu · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,742 · 건물 885 · 건물당 2.0",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "3,238동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "789동 · expos_units=39 floor_ouln=384 no_com_floor=6 no_ledger=15 non_commercial=345",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 98.6%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 536동 · 대표공실 26.8% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 26.8% vs 앵커 12.52% = +14.28%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "osanst",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "오산역 · city=osan · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,311 · 건물 746 · 건물당 3.1",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,659동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "698동 · expos_units=39 floor_ouln=458 no_com_floor=48 no_ledger=27 non_commercial=126",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 91.2%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 654동 · 대표공실 16.5% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.5% vs 앵커 4.13% = +12.37%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "gyomun",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "구리 교문사거리 · city=guri · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 1,484 · 건물 527 · 건물당 2.8",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "1,605동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "460동 · expos_units=31 floor_ouln=205 no_com_floor=19 no_ledger=23 non_commercial=182",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 92.5%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 403동 · 대표공실 14.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 14.7% vs 앵커 28.15% = -13.45%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "gwangmyeongsa",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "광명사거리역 · city=gwangmyeong · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,577 · 건물 895 · 건물당 2.9",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "3,654동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "815동 · expos_units=51 floor_ouln=417 no_com_floor=18 no_ledger=100 non_commercial=229",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 96.3%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 653동 · 대표공실 16.0% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 16.0% vs 앵커 10.25% = +5.75%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  },
+  {
+    "id": "jukjeon",
+    "active": true,
+    "stages": [
+      {
+        "stage": "등록",
+        "status": "ok",
+        "evidence": "죽전역 · city=yongin · r=500m/700m",
+        "next": ""
+      },
+      {
+        "stage": "점포",
+        "status": "ok",
+        "evidence": "점포 2,157 · 건물 388 · 건물당 5.6",
+        "next": ""
+      },
+      {
+        "stage": "폴리곤",
+        "status": "ok",
+        "evidence": "566동",
+        "next": ""
+      },
+      {
+        "stage": "대장",
+        "status": "ok",
+        "evidence": "367동 · expos_units=43 floor_ouln=99 no_com_floor=11 no_ledger=14 non_commercial=200",
+        "next": ""
+      },
+      {
+        "stage": "정밀분모",
+        "status": "ok",
+        "evidence": "floor_approx 잔여 0 · 정밀 92.8%",
+        "next": ""
+      },
+      {
+        "stage": "Page마스터",
+        "status": "ok",
+        "evidence": "Tier1(대장) · 노출 132동 · 대표공실 15.7% · 정밀커버리지 100.0%",
+        "next": ""
+      },
+      {
+        "stage": "앵커",
+        "status": "ok",
+        "evidence": "대표 15.7% vs 앵커 5.12% = +10.58%p",
+        "next": ""
+      },
+      {
+        "stage": "공실유닛",
+        "status": "ok",
+        "evidence": "vacant_units.json 있음",
+        "next": ""
+      },
+      {
+        "stage": "서빙등재",
+        "status": "ok",
+        "evidence": "거점 목록(services.districts.PAGES)에 있음",
+        "next": ""
+      }
+    ]
+  }
+]

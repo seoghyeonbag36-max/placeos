@@ -270,6 +270,7 @@ function DistrictRankings() {
   const publicDistricts = useLoad(ok ? "districts" : null, data.districts);
   const [region, setRegion] = useState<string | null>(state.goal === "start" ? state.startupRegion ?? null : null);
   const [why, setWhy] = useState(false);
+  const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
   // 비교 모드(2026-10-24 · R1-c) — 행을 누르면 R2 로 가는 대신 나란히 볼 상권에 담는다. 「그만두기」로 원래 목록에 돌아온다
   const [picked, setPicked] = useState<string[] | null>(null);
   if (!ok) return null;
@@ -318,9 +319,12 @@ function DistrictRankings() {
   };
   const activeRegion = region ?? (state.goal === "move"
     ? regionOf(fit.data.districts.find((r) => r.district_id === state.homeDistrictId) ?? fit.data.districts[0]) : "서울");
-  const regionalTops = groups.map((g) => ({ g, top: g.rows.filter((r) => regionOf(r) === activeRegion).slice(0, 5) }))
+  const regionalTops = groups.map((g) => ({ g, top: g.rows.filter((r) => regionOf(r) === activeRegion)
+    .slice(0, expandedRegion === activeRegion ? undefined : 5) }))
     .filter(({ top }) => top.length > 0);
   const unranked = fit.data.districts.filter((r) => r.fit_rank == null && regionOf(r) === activeRegion);
+  const scope = fit.data.ranking_scopes?.find((s) => s.name === activeRegion);
+  const regionalCount = groups.reduce((n, g) => n + g.rows.filter((r) => regionOf(r) === activeRegion).length, 0);
   const regionPicker = <div className="fl-region-picker" role="group" aria-label="상권 지역 선택">
     {RANK_GROUPS.map(({ name }) => <button key={name} type="button" aria-pressed={activeRegion === name}
       onClick={() => { setRegion(name); if (state.goal === "start") update((s) => ({ ...s, startupRegion: name })); }}>{name}</button>)}
@@ -379,6 +383,12 @@ function DistrictRankings() {
       sub={regionalTops.length ? `비슷한 자리에 ${iga(ind.label)} 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.`
         : "입지 점수를 계산할 모델 자료가 없어 순위 없이 보여 드려요. 빈 자리와 월세는 확인할 수 있어요."}>
       {regionPicker}
+      {scope && <p className="fl-note" role="status">
+        {activeRegion} 공개 상권 {scope.public_n}곳 중 {scope.ranked_n}곳을 비교했어요.
+        {scope.unranked_n > 0 && ` ${scope.unranked_n}곳은 모델 자료가 없어 순위를 제공하지 않아요.`}
+        {scope.ranked_cities.length > 0 && ` 비교 지역: ${scope.ranked_cities.join(" · ")}.`}
+        {" 지역 전체 상권의 전수 순위는 아니에요."}
+      </p>}
       {regionalTops.map(({ g, top: groupTop }) => (
         <section key={g.key || "all"} aria-label={multi ? `${g.name} 상권` : undefined}>
           {multi && <h2 className="fl-h2">{g.name}</h2>}
@@ -390,6 +400,9 @@ function DistrictRankings() {
           </RowList>
         </section>
       ))}
+      {regionalCount > 5 && <TextButton onClick={() => setExpandedRegion(expandedRegion === activeRegion ? null : activeRegion)}>
+        {expandedRegion === activeRegion ? "상위 5곳만 보기" : `${activeRegion} 순위 ${regionalCount}곳 모두 보기`}
+      </TextButton>}
       {unranked.length > 0 && <section aria-label={`${activeRegion} 공개 상권`}>
         <h2 className="fl-h2">{activeRegion} · 입지 순위 미제공</h2>
         <RowList label={`${activeRegion} 공개 상권`}>
