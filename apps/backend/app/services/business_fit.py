@@ -276,6 +276,27 @@ def _served() -> list[dict]:
     return districts_svc.PAGES
 
 
+def _ranking_scopes(rows: list[dict], pages: dict[str, dict]) -> list[dict]:
+    """공개 모집단과 실제 모델 커버리지를 시도별로 밝힌다. 시도 전수 조사로 부르지 않는다."""
+    scopes: dict[str, list[dict]] = {}
+    for row in rows:
+        scopes.setdefault(_region(pages[row["district_id"]]), []).append(row)
+    result = []
+    for region, members in scopes.items():
+        public_cities = {districts_svc.page_city(pages[r["district_id"]]).id for r in members}
+        ranked = [r for r in members if r["fit_rank"] is not None]
+        ranked_cities = {districts_svc.page_city(pages[r["district_id"]]).id for r in ranked}
+        city_names = lambda ids: [city.short for cid, city in cities.CITIES.items() if cid in ids]
+        result.append({
+            "region": region, "name": "경기" if region == "경기도" else _group_name([pages[r["district_id"]] for r in members]),
+            "scope": "served_hubs", "region_census": False,
+            "public_n": len(members), "ranked_n": len(ranked), "unranked_n": len(members) - len(ranked),
+            "public_cities": city_names(public_cities), "ranked_cities": city_names(ranked_cities),
+            "unranked_ids": [r["district_id"] for r in members if r["fit_rank"] is None],
+        })
+    return result
+
+
 def fit_by_district(key: str) -> dict | None:
     """업종 하나로 서빙 상권 전체를 견준다. 모르는 업종이면 None."""
     item = get(key)
@@ -353,6 +374,7 @@ def _fit_by_district(item: dict) -> dict:
         "seoul_fit": base["mean_fit"] if base else None,
         "fit_model": default,
         "rank_groups": groups,
+        "ranking_scopes": _ranking_scopes(rows, pages),
         "ranked_n": sum(g["ranked_n"] for g in groups),
         "districts": rows,
         "source": SOURCE + ("" if len(groups) < 2 else

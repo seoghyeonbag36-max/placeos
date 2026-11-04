@@ -9,6 +9,7 @@ venv/
 .mlruns/
 # 세부 업종 입지 피처 실험의 팔×시드 노드별 예측 덤프(재생성 가능, 대용량)
 ml/artifacts/_detail_features_runs/
+ml/artifacts/gyeonggi_candidate/
 mlruns/
 
 # Node
@@ -162,6 +163,12 @@ data/gold/*/*
 # 소스는 gold/*/page_building_master.geojson(추적 중)이므로 재생성은 가능하지만,
 # 재생성 없이 학습을 돌리면 '조용히 이전 피처'가 되는 게 문제다.
 !data/gold/features/page_building.parquet
+# 경기 재학습의 고정 Gold 입력과 수집 완료 조사 후보 근거를 보존한다.
+!data/gold/gyeonggi_ranking_20261104/
+!data/gold/gyeonggi_ranking_20261104/manifest.json
+!data/gold/gyeonggi_ranking_20261104/*.parquet
+!data/gold/research-f32a4fa91c43/
+!data/gold/research-f32a4fa91c43/collected_ledger_evidence.json.gz
 # 예외: 행정동 24시간 생활인구 피처(136행 ~20KB) — train_gnn._adong_hour_block 이
 # `--adong` 으로 읽는다. 08-24 실측에서 off-prior 를 못 올려 **기본 off** 이고 서빙에도
 # 안 쓰이지만, 빠지면 음성결과를 재현할 수 없다. 안 올랐다는 사실 자체가 산출물이라

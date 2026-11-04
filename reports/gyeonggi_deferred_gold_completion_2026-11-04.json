@@ -1,0 +1,14 @@
+{
+  "ilsan": {
+    "public": false,
+    "path": "data\\gold\\ilsan\\vacant_units.json",
+    "sha256": "2814cacac12881cb3b21f1edc8753fd19fc04bfc44316a5e771b01f046f7204c",
+    "units": 0
+  },
+  "westerndom": {
+    "public": false,
+    "path": "data\\gold\\westerndom\\vacant_units.json",
+    "sha256": "2814cacac12881cb3b21f1edc8753fd19fc04bfc44316a5e771b01f046f7204c",
+    "units": 0
+  }
+}

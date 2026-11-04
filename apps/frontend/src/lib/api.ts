@@ -914,6 +914,9 @@ export interface IndustryFitRow {
 export interface RankGroup { key?: string; fit_model: string; name: string; ranked_n: number; mean_fit: number }
 
 export interface IndustryFit {
+  ranking_scopes?: { region: string; name: string; scope: "served_hubs"; region_census: false;
+    public_n: number; ranked_n: number; unranked_n: number; public_cities: string[];
+    ranked_cities: string[]; unranked_ids: string[] }[];
   industry: IndustryOption;
   /** 서빙 모델 어휘 안 업종인가. false 면 순위·적합도가 전부 null 이다(가나다순) */
   model_covered: boolean;
