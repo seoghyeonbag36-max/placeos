@@ -55,6 +55,8 @@ export interface SpaceAt { buildingId: string | null; name: string; lat: number;
 
 export interface FlowState {
   v: 1;
+  startupOrder?: "region" | "industry" | null;
+  startupRegion?: string | null;
   goal: BusinessGoal | null;
   /** `GET /ai/industries` 의 key. 바꾸기면 **지금** 업종 */
   industryKey: string | null;
@@ -96,7 +98,7 @@ export const emptyCosts = (): CostAnswers => ({
 });
 
 export const emptyFlow = (): FlowState => ({
-  v: 1, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
+  v: 1, startupOrder: null, startupRegion: null, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
   districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, spaceAt: null, premium: null, tier: null,
   costs: emptyCosts(), spaceBrowse: emptySpaceBrowse(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
 });
@@ -124,6 +126,8 @@ export function loadFlow(): FlowState {
     const premium = v?.premium;
     return {
       ...base,
+      startupOrder: ["region", "industry"].includes(v?.startupOrder) ? v.startupOrder : null,
+      startupRegion: ["서울", "경기", "광주", "전주"].includes(v?.startupRegion) ? v.startupRegion : null,
       goal: isGoal(v?.goal) ? v.goal : null,
       industryKey: str(v?.industryKey),
       customIndustry: str(v?.customIndustry),
@@ -180,7 +184,18 @@ const clearValidateOn = (s: FlowState): FlowState => ({ ...s, mode: null, item: 
 
 export function setGoal(s: FlowState, goal: BusinessGoal): FlowState {
   if (s.goal === goal) return s;
-  return clearValidateOn(clearDistrictOn({ ...s, goal, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null }));
+  return clearValidateOn(clearDistrictOn({ ...s, goal, startupOrder: null, startupRegion: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null }));
+}
+
+/** 선택 순서와 지역을 바꾸면 뒤의 답을 비운다. */
+export function setStartupOrder(s: FlowState, startupOrder: "region" | "industry"): FlowState {
+  if (s.startupOrder === startupOrder) return s;
+  return { ...emptyFlow(), goal: "start", startupOrder, lastPath: s.lastPath };
+}
+export function setStartupRegion(s: FlowState, startupRegion: string): FlowState {
+  if (s.startupRegion === startupRegion) return s;
+  const next = clearValidateOn(clearDistrictOn({ ...s, startupRegion }));
+  return s.startupOrder === "region" ? { ...next, industryKey: null, customIndustry: null } : next;
 }
 
 export function setIndustry(s: FlowState, industryKey: string, customIndustry: string | null = null): FlowState {
