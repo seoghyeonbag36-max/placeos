@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 
 export type RouteName =
-  | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
+  | "startup-order" | "startup-region" | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
   | "home" | "me" | "explore" | "compare" | "corridor";
@@ -18,6 +18,7 @@ export interface Route { name: RouteName; param: string | null; path: string }
 /* 「/explore」는 흐름 화면이 아니라 PPPP 지도 탐색이다(App.tsx 가 먼저 가른다). 흐름 안에 지도를 따로 두어 그 자리를
    대신하지 않는다 — 10-18 의 /spaces/map · /space/…/map 은 그래서 10-21 에 걷었다(PPPP 화면 보존 규칙). */
 const SIMPLE: Record<string, RouteName> = {
+  "/startup-order": "startup-order", "/startup-region": "startup-region",
   "/start": "start", "/industry": "industry", "/industry/other": "industry-other", "/home-district": "home-district",
   "/districts": "districts", "/industries": "industries", "/pivot-next": "pivot-next", "/district-search": "district-search",
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
