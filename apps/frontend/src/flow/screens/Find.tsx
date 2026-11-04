@@ -13,7 +13,7 @@ import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
 import { comparePath, corridorPath, explorePath, go } from "../route";
-import { setDistrict, setGoal, setHomeDistrict, setIndustry, setStartupOrder, setStartupRegion } from "../state";
+import { setDistrict, setGoal, setHomeDistrict, setIndustry, setStartupOrder, setStartupRegion, setStartupDistrict } from "../state";
 import {
   Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet,
   SkeletonRows, TextButton, WarnLine,
@@ -50,7 +50,7 @@ export function StartupOrder() {
   if (!ok) return null;
   return <FlowScreen back="/start" caption="상권 찾기 · 새 가게" title="무엇부터 정해 볼까요?" sub="먼저 정하고 싶은 조건을 골라 주세요.">
     <ChoiceList label="창업 탐색 방식" value={state.startupOrder ?? null} options={[
-      { value: "region", title: "지역별 창업", desc: "지역을 먼저 고르고, 그곳에서 할 업종을 골라요" },
+      { value: "region", title: "지역별 창업", desc: "지역과 상권을 먼저 고르고, 그곳에서 할 업종을 골라요" },
       { value: "industry", title: "업종별 창업", desc: "업종을 먼저 고르고, 가게를 열 지역을 골라요" },
     ]} onChoose={(order) => { update((s) => setStartupOrder(s, order)); go(order === "region" ? "/startup-region" : "/industry"); }} />
   </FlowScreen>;
@@ -62,10 +62,23 @@ export function StartupRegion() {
   const industryOk = useNeed(state.startupOrder !== "industry" || !!state.industryKey, "/industry");
   if (!ok || !industryOk) return null;
   return <FlowScreen back={state.startupOrder === "region" ? "/startup-order" : "/industry"}
-    caption="상권 찾기 · 새 가게" title="어느 지역에서 창업하시나요?" sub={state.startupOrder === "region" ? "지역을 고른 다음 업종을 선택해요." : "선택한 업종으로 살펴볼 지역을 골라 주세요."}>
+    caption="상권 찾기 · 새 가게" title="어느 지역에서 창업하시나요?" sub={state.startupOrder === "region" ? "지역을 고른 다음 그 안의 상권을 선택해요." : "선택한 업종으로 살펴볼 지역을 골라 주세요."}>
     <ChoiceList tiles label="창업 지역" value={state.startupRegion ?? null}
       options={RANK_GROUPS.map(({ name }) => ({ value: name, title: name }))}
-      onChoose={(region) => { update((s) => setStartupRegion(s, region)); go(state.startupOrder === "region" ? "/industry" : "/districts"); }} />
+      onChoose={(region) => { update((s) => setStartupRegion(s, region)); go(state.startupOrder === "region" ? "/startup-district" : "/districts"); }} />
+  </FlowScreen>;
+}
+
+export function StartupDistrict() {
+  const { state, update } = useFlow();
+  const ok = useNeed(state.goal === "start" && state.startupOrder === "region" && !!state.startupRegion, "/startup-region");
+  if (!ok) return null;
+  return <FlowScreen back="/startup-region" caption={`지역별 창업 · ${state.startupRegion}`}
+    title={`${state.startupRegion}의 어느 상권에서 창업하시나요?`} sub="공개된 상권 중 한 곳을 고른 다음 업종을 선택해요.">
+    <DistrictPickList region={state.startupRegion} emptyHint="다른 검색어를 입력하거나 지역을 다시 골라 주세요." onPick={(d) => {
+      update((s) => setStartupDistrict(s, d.id));
+      go("/industry");
+    }} />
   </FlowScreen>;
 }
 
@@ -80,35 +93,37 @@ export function Industry() {
   const data = useFlowData();
   const list = useIndustries();
   const ok = useNeed(!!state.goal, "/start");
-  if (!ok || !state.goal) return null;
+  const regionFirst = state.goal === "start" && state.startupOrder === "region";
+  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/startup-district" : "/startup-region");
+  if (!ok || !districtOk || !state.goal) return null;
   const goal = state.goal;
   const next = (key: string) => {
     if (key === "other") { go("/industry/other"); return; }
     update((s) => setIndustry(s, key));
     if (goal === "start") {
       // 미리 받기 — R1 이 열릴 때 이미 와 있게(No More Loading)
-      if (list.status === "ready" && hasRanking(list.data.find((o) => o.key === key))) {
+      if (!regionFirst && list.status === "ready" && hasRanking(list.data.find((o) => o.key === key))) {
         data.prefetch(() => data.industryFit(key));
       }
       data.prefetch(data.districts);
-      go(state.startupOrder === "industry" ? "/startup-region" : "/districts");
+      go(regionFirst ? `/district/${encodeURIComponent(state.districtId!)}` : state.startupOrder === "industry" ? "/startup-region" : "/districts");
     } else {
       data.prefetch(data.districts);
       go("/home-district");
     }
   };
   return (
-    <FlowScreen back={goal === "start" && state.startupOrder ? (state.startupOrder === "region" ? "/startup-region" : "/startup-order") : "/start"} caption={`상권 찾기 · ${GOAL_LABEL[goal]}`} title={INDUSTRY_Q[goal]}
-      sub={goal === "pivot" ? "지금 업종을 기준으로 이 상권에 맞는 업종을 견줘 드려요." : "업종에 맞는 상권부터 보여 드려요."}>
+    <FlowScreen back={goal === "start" && state.startupOrder ? (state.startupOrder === "region" ? "/startup-district" : "/startup-order") : "/start"} caption={`상권 찾기 · ${GOAL_LABEL[goal]}`} title={INDUSTRY_Q[goal]}
+      sub={regionFirst ? "고른 상권에서 시작할 업종을 선택해요. 다음으로 이 상권의 결과를 보여 드려요." : goal === "pivot" ? "지금 업종을 기준으로 이 상권에 맞는 업종을 견줘 드려요." : "업종에 맞는 상권부터 보여 드려요."}>
       {list.status === "loading" && <SkeletonRows n={4} label="업종 목록을 불러오는 중" />}
       {list.status === "error" && <LoadError what="업종 목록" error={list.error} onRetry={list.retry}
-        other={{ label: "상권부터 고르기", onClick: () => go("/district-search") }} />}
+        other={{ label: regionFirst ? "상권 다시 고르기" : "상권부터 고르기", onClick: () => go(regionFirst ? "/startup-district" : "/district-search") }} />}
       {list.status === "ready" && (
         <ChoiceList tiles label="업종" value={state.industryKey} onChoose={next}
           options={[...list.data.map((o) => ({
             value: o.key,
             title: <><span className="fl-tile-emoji" aria-hidden="true">{INDUSTRY_EMOJI[o.key] ?? "🏬"}</span>{o.label}</>,
-            desc: goal !== "pivot" && !hasRanking(o) ? "상권은 직접 골라요" : undefined,
+            desc: !regionFirst && goal !== "pivot" && !hasRanking(o) ? "상권은 직접 골라요" : undefined,
           })), { value: "other", title: <><span className="fl-tile-emoji" aria-hidden="true">✏️</span>기타 · 직접 적기</> }]} />
       )}
     </FlowScreen>
@@ -121,13 +136,15 @@ export function IndustryOther() {
   const { state, update } = useFlow();
   const [text, setText] = useState(state.industryKey === "other" ? state.customIndustry ?? "" : "");
   const ok = useNeed(!!state.goal, "/start");
-  if (!ok || !state.goal) return null;
+  const regionFirst = state.goal === "start" && state.startupOrder === "region";
+  const districtOk = useNeed(!regionFirst || (!!state.startupRegion && !!state.districtId), state.startupRegion ? "/startup-district" : "/startup-region");
+  if (!ok || !districtOk || !state.goal) return null;
   const goal = state.goal;
   const value = text.trim();
   const submit = () => {
     if (!value) return;
     update((s) => setIndustry(s, "other", value.slice(0, 120)));
-    go(goal === "start" ? (state.startupOrder === "industry" ? "/startup-region" : "/districts") : "/home-district");
+    go(regionFirst ? `/district/${encodeURIComponent(state.districtId!)}` : goal === "start" ? (state.startupOrder === "industry" ? "/startup-region" : "/districts") : "/home-district");
   };
   return (
     <FlowScreen back="/industry" caption={`상권 찾기 · ${GOAL_LABEL[goal]}`} title="어떤 가게인지 적어 주세요"
@@ -561,7 +578,7 @@ export function District({ id }: { id: string }) {
   // ⛔ 이 버튼도 PPPP 화면 입구다 — 다른 곳으로 돌리지 않는다(PPPP 화면 보존 규칙 · 가드 src/ppppScreens.test.tsx).
   const openPppp = () => go(explorePath({ track: "platform", district: id }));
   return (
-    <FlowScreen back="/districts" right={<CloseButton />} caption={`상권${d ? ` · ${d.gu}` : ""}`} title={loading ? `${name}을 살펴보고 있어요` : title}
+    <FlowScreen back={state.goal === "start" && state.startupOrder === "region" ? (state.industryKey === "other" ? "/industry/other" : "/industry") : "/districts"} right={<CloseButton />} caption={`상권${d ? ` · ${d.gu}` : ""}`} title={loading ? `${name}을 살펴보고 있어요` : title}
       cta={<BottomCTA note={PPPP_STEPS} primary={{ label: PPPP_CTA, onClick: openPppp }} />}>
       {d?.caveat && <WarnLine>{d.caveat}</WarnLine>}
       {loading ? <SkeletonRows n={4} label="상권 소개를 불러오는 중" /> : (

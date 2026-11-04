@@ -201,8 +201,16 @@ export function setStartupRegion(s: FlowState, startupRegion: string): FlowState
 export function setIndustry(s: FlowState, industryKey: string, customIndustry: string | null = null): FlowState {
   if (s.industryKey === industryKey && s.customIndustry === customIndustry) return s;
   const keepHome = s.goal !== "start";
-  return clearValidateOn(clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
+  const next = clearValidateOn(clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
     homeDistrictId: keepHome ? s.homeDistrictId : null }));
+  // 지역별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
+  return s.goal === "start" && s.startupOrder === "region" ? { ...next, districtId: s.districtId } : next;
+}
+
+/** 지역별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
+export function setStartupDistrict(s: FlowState, id: string): FlowState {
+  if (s.districtId === id) return s;
+  return clearValidateOn({ ...setDistrict(s, id), industryKey: null, customIndustry: null, targetIndustryKey: null });
 }
 
 export function setHomeDistrict(s: FlowState, id: string): FlowState {

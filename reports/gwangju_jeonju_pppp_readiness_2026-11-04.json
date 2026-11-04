@@ -1,0 +1,2641 @@
+{
+  "checked_at": "2026-11-04T22:10:50.992312+09:00",
+  "scope": "기존 광주 13·전주 5. 신규 조사 후보는 포함하지 않음",
+  "gold_action": "기존 산출물 검증. 전주 서부는 신규 실응답 1동 반영 후 기존 파이프라인으로 갱신",
+  "repair_evidence": {
+    "hub": "jj-west",
+    "pnu": "5211112900108570003",
+    "endpoint": "getBrFlrOulnInfo",
+    "raw_marker": "data/bronze/regional_research_ledgers/2026-11-03/floors/5211112900108570003/complete.json",
+    "previous_gold_backup": "data/silver/regional_pppp_backups/2026-11-04/jj-west"
+  },
+  "deployment_verified": false,
+  "hubs": [
+    {
+      "id": "gj-chungjang",
+      "name": "광주 금남로/충장로",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "bd8a8593cddb79c9ef845b04f70da77833558bcb68432205aad46b95c40c8972",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "fdbf9aec32d06cef0efab958c4e6c297156fdb999137e99300240a75a7e8dacf",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "6d6b7f956cb6920cab5bd2504e8cbdd6d5f771eed10fb283bc5ace09bfeded47",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "6f1ec978ef8a59bb9cdbf4f8c0676982214881484fc5f372a84c5a5beb6e9dbf",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "518f06e74da824fb95db97e2894bbfcf50508ec939f78e4aafd022d2fc6da4dd",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "11e1664c40e2c545544b10b260a9da779bb39e5bb0dc9f25a5aad8b5611ccfa6",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "f4aaba0c3ff6373ef6fb0e8dc1747beb6ffd78f793d32d795a76692d63c79599",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "f00cabea2de8ca742f09520833da15f747c1b4a337a044307576a8d8b8bb6a90",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "830097e027585611712c03909ba55661f04a24079d6fadc73018a1883d53edc7",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "76618220d1afae55e2ed7e494f3625b4f547e90c53db93a0d50e485149506fff",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-chungjang",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 금남로/충장로 · city=gwangju · r=500m/659m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 3,365 · 건물 1,380 · 건물당 2.4",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "2,581동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "1,202동 · expos_units=39 floor_ouln=932 no_com_floor=25 no_ledger=55 non_commercial=151",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 97.5%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 1357동 · 대표공실 23.8% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 23.8% vs 앵커 26.5% = -2.7%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 26.5,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 금남로/충장로"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-geumho",
+      "name": "광주 금호지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "fb3451713423aa4b2adb96783f805fc27ca9e3317cfdc2b61b043a10a0c01f63",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "73d08762f41fc61b6d673b42dfe32c1f42b04f93f357e90eaa527bc01ef243ec",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "1884d7f03ee4c5c551a06a494361045e18a2f59acaacd3a24f72dcc271f0b5c5",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "9ead41e64129b8bf5b56a2dcb72a8c074668ad640a7015a27529898769424c6e",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "7c18b13600c58a96aac8c0260c69c12c5819520e03553b988e83ea71f22d9d81",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "5c7c0e849c26cd4be03d34ce150dbcd6d9d4bee61c698ecb59ad034d1c9cb833",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "d59aabd74cfaad596471c13fcfeeff4faea36416b73550ae05b8d308edd307ef",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "0913c39758d4160f86d3b2c07caa55623148b1bea5a97574e08a8d810b76679c",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "adf17556d51f8dd6d4086687a99809052a75c644807c9dbb5c17f3aef3fc8b3a",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "68e2f103bd289622bacbf598b480bf148235bcc35830cb9c373016232d369e4c",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-geumho",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 금호지구 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,134 · 건물 387 · 건물당 2.9",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "700동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "371동 · expos_units=34 floor_ouln=151 no_com_floor=6 no_ledger=3 non_commercial=177",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 96.9%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 252동 · 대표공실 15.9% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 15.9% vs 앵커 13.8% = +2.1%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 13.8,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 4,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 금호지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-bongseon",
+      "name": "광주 봉선동",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "408dafa8bd0eb6b0dedd523ab5729f177aec45828b644d902ffa1d9af49ba55f",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "a161990a0293a95b2858a78eea8da920cdd280989c7237faaaf739241ac2647f",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "62335115e31cc0752f5e8acb0594d6eac0b9444529a24d9ba9cdf3463ba860cb",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "436ff2299528c89804d23172f4da3b3585d60e3752f25cf9aca62b747447c6c6",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "e9ef0542e368f196459175ebaccf9981673f6c2cf0993fde8deba817c88c5dcc",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "4c98f447aff3b2c61a44dd500b27a2cd8c9ed75fe64715f0229ea49fa6053ce5",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "0ef2d40b64bf0d3d3ad062aff0f1c8709ef88569876dd59681dbde59e1f5f7ee",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "3565340d335308d8bd8d64a021264c0a4bba05fd64b31e96d4ecc82dc244efa1",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "7b19344609c78aaeee1dde35d6e1c6afb3575268faf2f32c9e44a1d2aed099bb",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "5fc75eb9e054abbafc4a9f299dac717870643bbfc9671da4192198760fb9a667",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-bongseon",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 봉선동 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,213 · 건물 351 · 건물당 3.5",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "607동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "336동 · expos_units=52 floor_ouln=169 no_ledger=7 non_commercial=108",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 292동 · 대표공실 21.6% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 21.6% vs 앵커 9.39% = +12.21%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 9.39,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 봉선동"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-sangmu",
+      "name": "광주 상무지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "1cded7ac041141d9d638bcab15e4b63488411f2f9a050ebf110f0d4a1abbf810",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "c320e9d0a55bda42245b94678df3a2829cc6c822c7ba9f7438566480b8e9524e",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "239f7fd4a9aa25083af87c9f7085ca1efff8fb4be58223fac8432bd6aa578308",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "8d594fa624a23bc5eabaeae995c6f437f4c01d037dca10dc614c07fd88e589b3",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "a52cbaff2575234998a61babbb8203fe0dd06a749d7ad538ad7eb71d93d975f9",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "9203e4029429f3f580702942da2780ad917b17ca9a45dd44e60b4fbbb7547fd9",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "61a6f9ac4dc22c79d86a2ae236eceb1bd711483f02c1212276f2ec0c30ee6041",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "23711c90ab9fb26e84abef0d7d96b3dbe3fa95b61ea466de4d2e1b027de36fa5",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "f608a81b3d77e30486f4fd57bcb174031753539ca50875f77fa589423f93caca",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "a6e2bab6ecf298cc7df60505b92870c8e0a68a0759dd5e3694a50fb74d6306f5",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-sangmu",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 상무지구 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,938 · 건물 419 · 건물당 4.6",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "868동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "399동 · expos_units=48 floor_ouln=250 no_com_floor=14 no_ledger=24 non_commercial=63",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 95.5%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 381동 · 대표공실 13.5% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 13.5% vs 앵커 17.76% = -4.26%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 17.76,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 8,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 상무지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-songjeong",
+      "name": "광주 송정동지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "fb4ca58bedecb58f40744c8088c56de838827a55faeac73a69db90bb1fece00b",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "dfdeb129587a650d8ca25f6331ad23c7c1a42af9faad1e7f22b119975be67bc8",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "1dd4cf9f342ca287bb6631af2579487e9d9e6177e9d7dca367c8f478025eddf5",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "ae12c00f89e69ef490b3ccfe59a0c264ff51361d11d3910c6593316c930a8eb9",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "ceaa16a77b894beb5305af879c904b7b9567c05cde8056d35a559f0a96af5afe",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "79872ecb2945ca4018c08cc37e43468fa0c2fc74b53fae31c5f463bf255b1f92",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "bdc12c5afa66c7767968d0117bbfd063e17118a12e94888c2963245c921a4a65",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "0e157d8d1a30816c49a3b356471552725467c4a06e259fd5efbf82ff5a8487a3",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "191079360dae10ba989e15459c1060c08276c3b36533ab612cb49c936a233fb5",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "459f7607ba15e4653cd894799cad6b6f014677d05449e7e1d32e0339a22a43bf",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-songjeong",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 송정동지구 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 949 · 건물 505 · 건물당 1.9",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "1,769동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "475동 · expos_units=10 floor_ouln=312 no_com_floor=9 no_ledger=38 non_commercial=106",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 97.3%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 532동 · 대표공실 18.6% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 18.6% vs 앵커 4.1% = +14.5%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 4.1,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 8,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 송정동지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-yangsan",
+      "name": "광주 양산지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "e5d19c8124166047557595f4cfec125aab7b5d8658276828be412abaa5381cf3",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "ac1e9eeb079a0341347d341c6b9e1b8e751dd42d8cbbc9362a1633d0bfbb86e4",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "94d9d398714600ce10ade2085b0d209adcd55a617a7d8b9de419d462420580fc",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "e3e371f9decc54a3f89ec7fa21e8da240c2ae686b4a7999e7f722a28768b85dd",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "59093bb39c97bf83e1c4bfb58570426ae0735542373b03f8fb6907634d0fc770",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "938c0c108e13aa8c13c11a7738b2f452480a80a85ca2d3ac702760e2425c0456",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "58c8409ec0fc26b425ae603cbe38d9aa8f0a5df2d46676493814e9390e5e7b8b",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "db8f1c251c494ceeba899d76712671031a95fc82e6db4e20ce132b728685f78a",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "cd789bebbcd0c16a9b9ea2a80440775955f9069abf69b65e1b74ae489afac45d",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "e74cb02042d5a7279d36bc1f50063af037519c1482e9ee6aeca35bfccb33cc05",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-yangsan",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 양산지구 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,150 · 건물 422 · 건물당 2.7",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "876동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "394동 · expos_units=27 floor_ouln=269 no_com_floor=3 no_ledger=6 non_commercial=89",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 99.0%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 302동 · 대표공실 9.5% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 9.5% vs 앵커 2.5% = +7.0%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 2.5,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 2,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 양산지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-eoryong",
+      "name": "광주 어룡동",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "b81caeef972a4dfa35842f0afd6d9858881e9479156d9514ae3b2a459fce2017",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "34cc994f09053c14a10fe361d67563c1947d58620428ed7c17b5eaa1dbabc731",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "aeebc65e842b204d3e747b10d00cfbea6adb0f4be9b1f86e7f36d2038ec3ecf8",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "5f46856d0094343cff3f598012f641144dd55c5220aff11607ea4e9cff617dac",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "75304d4febcf7a8d6207b4a82885abc5898f38951536a4b034f77678d5189308",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "142fd8b6f0a518a5f921a3a6972fb62ffbd158b97faedbd2f577c25d5f8c7e58",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "2eeec6696d49c075584d85eed6689c336ab2d759bead41b3de8b52cc0ed3d881",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "1e1c8dea1bfa7827327293b615907c50e4a381daf6710d1e73940a54c4223401",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "e1f26fca22da13252c92e75dc9e025ddfbad8633141653eb025e4d38adbce351",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "360152ca4c56377c1fc46c234d0b32b10519b3179ec297823dcd11fd24ce7f71",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-eoryong",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 어룡동 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 318 · 건물 101 · 건물당 3.1",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "466동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "97동 · expos_units=10 floor_ouln=18 no_com_floor=1 no_ledger=3 non_commercial=65",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 96.6%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 54동 · 대표공실 13.6% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 13.6% vs 앵커 24.82% = -11.22%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 24.82,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 0,
+        "rent_available": false,
+        "calculation_status": null,
+        "unavailable_reason": null
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 어룡동"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-yongbong",
+      "name": "광주 용봉동",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "fae17e6b86bb68f7c842590aaeca7a7a85dee7cbe0994a5d7fb652d17ea33bc6",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "1da9b98abf9d08d77fbd80083492af7100c2b06188c59a89fb06f0256db1386a",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "77a45dd79021f5d7ddc5fd573565a482ac745217e9c047cafaad655be3f8c06a",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "58f92580bc7d103c2ce675abfc373174308dae420a85e2d5f96f95b02c8869e1",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "dab4f73eede81e342f3d7eea7f6c35984b25c80ce34d9ab9773cb9060f3d51b1",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "1162b79ca987aefcbb37beabf0fa4e0f1426952d326b529a9117059e81e1ab02",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "c1bab85f8d8d309ecc127ac175655ee65fedada8973edb579dcdc62330a274cc",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "e1b8fdf43bf19bc9728de2174e4f85f7b039ba611b57a267073a01e5a0ed67b0",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "1c9b5ad9e0f7596711cae4a8ce0f3b7fd8105001461da0c51ef986ab1408e83e",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "86232016963ea5f64976e5da6efaa9257545ef73bdf6e9b68c286f08ef8156f1",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-yongbong",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 용봉동 · city=gwangju · r=350m/495m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 585 · 건물 324 · 건물당 1.8",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "1,034동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "290동 · expos_units=6 floor_ouln=185 no_com_floor=10 no_ledger=3 non_commercial=86",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 95.0%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 332동 · 대표공실 15.6% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 15.6% vs 앵커 12.27% = +3.33%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 12.27,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 2,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 용봉동"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-usan",
+      "name": "광주 우산동",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "023a39bb9d2f3badfe4c2452fe33c5834cd8b27d96b46242def0c6d147faae47",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "e130e50555114dfa8ac719802ac2314fb5bf9674e2870d68d2ef40d65b6cccef",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "4c1f673ce01e496cbee8581b325ff70cf36ef2a302e7f03d483f210b53d7b922",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "961ef80609807273aab0703248a3c17ba4b5a96ab28495e4d63462940b5d765b",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "01650736429374807d869cfccf3e1fd8051aa8c13656a27cdd54f04abb080692",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "1b3225ccc6de6ba8c5088f9425d21e3f708133d72c5af5ce16f1928cbb5444b9",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "5260582bdf116106652c36b5b86dc64954853736bacf87a70206d850c8da58d2",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "1f538db8361b93af7777f9fa21013c5e58e80dc47898227e0e3045caaa62ae1e",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "3bae54eb7b8b4cebf4fe0e420073938a84cd43413c96d291f61efe30040356b8",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "944906ff44f5acfb8d991a7f9b84559795726b99727bec3aee4f454664549363",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-usan",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 우산동 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 958 · 건물 286 · 건물당 3.3",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "751동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "269동 · expos_units=23 floor_ouln=164 no_com_floor=24 no_ledger=4 non_commercial=54",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 88.6%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 341동 · 대표공실 15.9% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 15.9% vs 앵커 4.04% = +11.86%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 4.04,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 8,
+        "rent_available": false,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "이 상권은 R-ONE 임대 표본이 없어 계산하지 않습니다. 이웃 값으로 채우지 않습니다."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 우산동"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-wolsan",
+      "name": "광주 월산동지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "c54f020096b268bffbf71c259978bf47d80fb1cc4173ddf1a53f413f871c8afe",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "664894096afd11e7de931ec8d4dee8ce48f8324fbfa93a940366c4e7929359e7",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "543789675d74ba364129411fe4d0187c403c2cc3aee3b341f9b168c9fd238cf1",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "aa160a03ae5fcf66c848daddb4260f6f16e8cf8731b9d969a7d46ac0f09965a1",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "d3a0b2e6cd4c75ea82e15c251295255958f1d038a612cf0b288130bfc5613d3a",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "6a638bd326e11438af2fb6eddb6236d073de843dcc1cab1f0d7b317d0fbf00f6",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "0bc969e9aa42705062a3868a11aea220712e30d2acbbb2d699f4f9140b97c799",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "5ab44f2d21638201aab4adf7afd035967f345ed4a3dc3ee0d7ff3a8c93a3adfb",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "130690d7745eee00d25667a3356ac8005c78b82674390b912e356917a3e15f9f",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "5701b5cf71321493e789f1f96aaa248265123ba01e80c8a2ee4202fe10a6ab3d",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-wolsan",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 월산동지구 · city=gwangju · r=500m/659m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 797 · 건물 462 · 건물당 1.7",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "4,167동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "386동 · expos_units=15 floor_ouln=225 no_com_floor=9 no_ledger=20 non_commercial=117",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 96.4%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 580동 · 대표공실 29.4% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 29.4% vs 앵커 25.81% = +3.59%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 25.81,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 월산동지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-ilgok",
+      "name": "광주 일곡동",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "966dd5b44380d80154bcd4909f2f1e7e24724c716c1a23d441cc0ff479d34217",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "9353e1bbe6c90b38bba1e64f2adbecb4b8aabdc4c85fcd4989c906b66f89aaaa",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "a7844c77e14fd0e1f1a0fbb21aa13b11371d83502e3594035cde47526de5b1c9",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "ef21e4c1735443a139fabfcd2f21dc8a097e705bda43f38fdc1d3db97fa027de",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "bed9158980f156f1f1630d0acfdd3908c84f9130a1dba06d85998fca888f8a85",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "ba771a4bff0454d227a6acc7f7440f30f2c0a2f29c4311d1c0dd7b35a880cf13",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "b5c9b50dd5d0f5f4292948e369a6e1934d14a60052eba59c7536604c3301a9d9",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "b1fd632c6b6f2c65ffa24ac92559d9fb0d11b19d35b2321f2fa499342b72a363",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "0d76ceb239d05090a7bb496ebb77714bd4faa4b0079898c5cc9cb0d24c8693db",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "a023d6c7ff2ac3331cd75ec73985e657df8df5f7b7915f2020300f56918ba1f6",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-ilgok",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 일곡동 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,074 · 건물 440 · 건물당 2.4",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "773동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "402동 · expos_units=35 floor_ouln=83 no_com_floor=1 no_ledger=1 non_commercial=282",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 99.2%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 206동 · 대표공실 11.8% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 11.8% vs 앵커 3.26% = +8.54%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 3.26,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 2,
+        "rent_available": false,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "이 상권은 R-ONE 임대 표본이 없어 계산하지 않습니다. 이웃 값으로 채우지 않습니다."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 일곡동"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-chonnam",
+      "name": "광주 전남대",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "73d5f958fd510cede272a594025c12ef05d9cdebdfe89737c1728571934ce209",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "433df947855d72a8a6f452840a13c43c2ebb298f02d6731db1911820ec790be9",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "0af48f5156c2e4e3a5cef316474e29c5828d8c7cb3c7e7e39589940b514a4978",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "6895752486749d7cd077f54fa3f632f0de12b255ace852611be2eb45429ba3f7",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "82f510c6bdd85ed6a4cd0cece289f5db06585cbf39236b88913c17d34a4d89bd",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "4b752c255a135dfdb9d00b68411d97fd7ed6a8978d16e248cd4c08d56c4f1166",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "135693a7c408536702af25ed983ebebbb14d011ed8d31ec89cf8e546d344624d",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "8cbf419a589bbc55b8dc33c7a9cbfcb4865ee6133a06a5a0f16810dfed4a2706",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "1343420d1c6560c18e969ad65451ce64029a2dedc7c319299e81dbc47d577afd",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "224c7798be6b1c8b9b2b45a9beb1f46568e70044aac9d4c444d2b030c5077637",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-chonnam",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 전남대 · city=gwangju · r=350m/495m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 194 · 건물 110 · 건물당 1.8",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "175동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "102동 · expos_units=1 floor_ouln=74 no_com_floor=7 non_commercial=20",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 91.5%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 107동 · 대표공실 32.3% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 32.3% vs 앵커 39.54% = -7.24%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 39.54,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 전남대"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "gj-cheomdan1",
+      "name": "광주 첨단1지구",
+      "city": "gwangju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "4d38cfb26708f6b6687dc0db3e99ad571f8bc1a34931d3e7ef0d933918209dc1",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "34cad327c868762d224c2b142449bd6660d419fc51bc6e01586a3cbf7da4cf47",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "6e578ac1b00ecc1babae0f94c11bddd68bc047c9d2322ef8b274ddecfb0ada96",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "20149d579c82aff3c9b91378a925e33dd0bf9976747c8f14dac0acd31b9af40b",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "b35762ea1c103fa13c55fe366daa7658ef73b4b14b69285f6dd1ae1872be04f7",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "4c92a25f7ac792fe7b968bad237e2af03ff68784b708682acb80287be27adb81",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "44dc41b5c66924f0471bc40a68484d461c6f6e1fe8619e954b98b44a4bfe85a5",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "49fc2f3f87f5c0cca61ead24186cfde3fee05632c5eb0e074c7c86bcab631d03",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "1568fa65198b50baef5ffc11e11f75832c405a79c3bf33053d4be2e4e5913132",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "e7fd9854805138a2b1bcda625375f8259e6da635e171430fee1e8eba11fd4b90",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "gj-cheomdan1",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "광주 첨단1지구 · city=gwangju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,577 · 건물 327 · 건물당 4.8",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "804동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "315동 · expos_units=66 floor_ouln=195 no_com_floor=18 no_ledger=7 non_commercial=29",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 93.5%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 566동 · 대표공실 14.5% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 14.5% vs 앵커 11.14% = +3.36%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 11.14,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": true,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "광주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 105,
+        "context_kinds": [
+          "blog_keyword",
+          "category",
+          "trend:광주 첨단1지구"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "jj-east",
+      "name": "전주 전주동부",
+      "city": "jeonju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "40eee1d669861c2bc2bf36cb0167c9c262bf3c87b05c07a8fb52286ee4908c8b",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "42d6916d9c323e1b8cf5f8271e76b9c6c99b722de5655a9ada43e6b868172089",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "334266f425abca1a5bd2395321176748804fd26976359fca44f7d7e0d841a040",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "b5ea213675b0765fefee7fc1e8ea13517aec42e8bc6eccee7d7aa8324e30152c",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "e4086881af093ba9337a065348e7bca2a2b427bfb35ae5aacf30594d7ed72b20",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "b26622d3fed29e2381d8be67cca358f91a61098e6c3bb0f58db47806e86d196b",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "0c65680a9606bfd747f1ca64ac2b40f8d8fa2558ce4de2a6e585dd9ecdbacc31",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "a71c0ef2dda5bb19fd53fafb0ab3af7be3db243d3f7d6a34b4c57cd0f3883fd6",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "03e41ceb38c6f49a21b7cd66c4a74a70d621be0140b08b7835d0a588cef22e49",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "87c5eded84c8a1925b563f789ed375c077dfee60cea9dccfd797c456cefc4b97",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "jj-east",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "전주 전주동부 · city=jeonju · r=425m/425m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 685 · 건물 309 · 건물당 2.2",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "1,946동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "276동 · expos_units=4 floor_ouln=186 no_com_floor=8 no_ledger=19 non_commercial=59",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 96.0%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 491동 · 대표공실 20.9% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 20.9% vs 앵커 27.99% = -7.09%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 27.99,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": false,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 11,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "전주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 30,
+        "context_kinds": [
+          "category"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "jj-west",
+      "name": "전주 전주서부",
+      "city": "jeonju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "53baa1d432382078e86d9690d5b78cf8b38f1165b02ae7ce4db9155e824fcbbd",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "11e10fae2049e1b3b18b72935c35ada69969b513509623558153bc00081a6e76",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "165ad6691ce26f9098ba357013f301725d1a7716ed5a31a49bdf335330bbaf81",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "e1edbc08c943c063044b11196dc27de7b58cdcb2b54095b889661591b3534be0",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "a99230b47de1eaf45226469369537459dbebbbcb551319f5a20b55c9fdd724fd",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "505d0db0cbc35440feae962be0da9944157f47d8b3badc01a61f56c5bc5db299",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "dbc05c5912dff019f18c06325809da16bdc7fefc3aad081bd71850fb8f25c803",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "3246c2b7d258571ca193f3b84a81fd413580f2c4100db13c62a662f53ad1e6cc",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "b15cb29eb9d37e6eb249338543fcba0733216a46da8de1a579fe17e36e19b128",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "f7d22f65cacf9a4442c0a171113465129c248676e3bdc5ac84ab226e79059087",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "jj-west",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "전주 전주서부 · city=jeonju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 1,532 · 건물 673 · 건물당 2.3",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "1,387동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "627동 · expos_units=59 floor_ouln=156 no_com_floor=5 no_ledger=4 non_commercial=403",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 97.7%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 282동 · 대표공실 28.3% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 28.3% vs 앵커 3.12% = +25.18%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 3.12,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": false,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 12,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "전주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 30,
+        "context_kinds": [
+          "category"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "jj-newtown",
+      "name": "전주 전주서부신시가지",
+      "city": "jeonju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "e76b45b96479997a8ed52f533ef3f2954f7e964f3d36c2c31d170f22b091c3fc",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "575a8dae3f3851b37a7c8ac3f9d66316d1adea2adff3f1e97ea2fd9d66d35b66",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "188acf4886e59cc24c65bb6b7bfb6d8b82c9d3e4eb5e04dded39dfdb30c23d8d",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "e9cf7e5dad429593d2931e1fe8d095be900cf9f544e8eb5158d9958e12cb88d5",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "545ab972b1b73f23e2a2d10d0501f7a76e2fcb8ddec12c1f53c4da4507e749e2",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "ce076f92909e5d9757c65247e39d8d9eefd5b53a8d929cec9174b8949b059976",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "a966de90172738870bdd90fa780e6e7b1df000f8f102c2673998afef20a0b561",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "ec984c8619e19e79f838a047b87c775af658254633001017d27020c6f8a2a1cf",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "6188b7f3a262ef7a5bccda5fb8e9e49236d568a9d54f0970a860aef8a414ba5f",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "119dd585fd327a4b3ab52a9d6f4e6b4f73fa672ac95316f76b740c69a86318b8",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "jj-newtown",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "전주 전주서부신시가지 · city=jeonju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 2,062 · 건물 665 · 건물당 3.1",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "498동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "600동 · expos_units=88 floor_ouln=171 no_com_floor=5 no_ledger=6 non_commercial=330",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 98.1%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 71동 · 대표공실 13.7% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 13.7% vs 앵커 17.02% = -3.32%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 17.02,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": false,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 2,
+        "rent_available": false,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "이 상권은 R-ONE 임대 표본이 없어 계산하지 않습니다. 이웃 값으로 채우지 않습니다."
+      },
+      "program": {
+        "context_rows": 30,
+        "context_kinds": [
+          "category"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "jj-hanok",
+      "name": "전주 전주한옥마을",
+      "city": "jeonju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "e644f2d8910efa53497a90f83f929e8e96e79dc7d4e57eb97a72b974c8429dba",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "0e83dc59797c4fcdde4e1ca581070594187360ab7806f3c4e20eb88047dc44a0",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "363988a66cbc75cf346705c6c94bdc95a6b61e9bc760f6f5a96ce13546d7a560",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "a7bb1c311ded37f2b771fbb9fa56670f10616bb834281301139e149459dedb5f",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "bdffd905d99948cc1f72d68c69fbfac49fe9a6cad5cf1727d260e3e2d5cacdd7",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "417d3151497a0e326fcb7ee42f41279b9f380f669c1e8cd906ea7ef7d7892aee",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "7572e05b97ca9f5d9a65703c69384cba4a0971e29aa805580144a66b3bd19a96",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "ba8ae792c4c494f51937365a30115fe9323cb5eea055eb0b1192293171e0f584",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "586c08cf4e97f2beecc210ee1959be378d4cb6bf35125e6ae7470a6eb1018727",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "056913f2bc2e697d0ec6e32f9b83107e4e3bb4b234ff079c51f5373b18ede6f1",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "jj-hanok",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "전주 전주한옥마을 · city=jeonju · r=425m/425m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 664 · 건물 443 · 건물당 1.5",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "2,489동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "395동 · expos_units=6 floor_ouln=179 no_com_floor=9 no_ledger=16 non_commercial=185",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 95.4%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 427동 · 대표공실 8.5% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 8.5% vs 앵커 31.24% = -22.74%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 31.24,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": false,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 3,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "전주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 30,
+        "context_kinds": [
+          "category"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    },
+    {
+      "id": "jj-songcheon",
+      "name": "전주 송천동",
+      "city": "jeonju",
+      "artifacts": {
+        "coverage.json": {
+          "sha256": "87d5b5b7baf01efad5a6a3b74084f18dc5f32b503e0bc2ccef7577cf84684398",
+          "tracked": true
+        },
+        "calibration.json": {
+          "sha256": "abea0551b8fbafea94f1dd325b4498ca2b345f48be7e968602385e13f5ebdf53",
+          "tracked": true
+        },
+        "page_building_master.geojson": {
+          "sha256": "7ea358879d884a1c2f2fc4fffd756022bf4e7adfed5107df1d95b7f6c94303e2",
+          "tracked": true
+        },
+        "vacant_units.json": {
+          "sha256": "f1e45f45fbd4da77cb87292ccd963291a34c8af7036e7f38688794cc5bdc1644",
+          "tracked": true
+        },
+        "vacant_floor_units.json": {
+          "sha256": "eb4fae81056b1b88379977abc3e7bed6eca1cabceeb633e370e5fcaf13e46687",
+          "tracked": true
+        },
+        "building_history.json": {
+          "sha256": "6523de0c168f6fbe4db8b75b1d62a8b0df92b22651fd322c08b6dd5da361cd1e",
+          "tracked": true
+        },
+        "building_floors.json.gz": {
+          "sha256": "07d2d31fee4e7d0c479283d1e85851e670d1e4a814221673940785f7dca3d7be",
+          "tracked": true
+        },
+        "stores_lite.json.gz": {
+          "sha256": "8bc00187d4604e756fc68a2213796cca7528d3c8a66b35a0c7e9034b26c0a3d1",
+          "tracked": true
+        },
+        "district_zones.json": {
+          "sha256": "b4504b2c9e1e4edbb7886dd2f74669cb713d1baa5f04b4a277aef3c2d23e025d",
+          "tracked": true
+        },
+        "program_content_context.csv": {
+          "sha256": "f91526bc2262898381977823e5c6fe19625d147407e4762f67d93ddf7fef0351",
+          "tracked": true
+        }
+      },
+      "chain_complete": true,
+      "chain": {
+        "slug": "jj-songcheon",
+        "done": 9,
+        "total": 9,
+        "stages": [
+          {
+            "stage": "등록",
+            "status": "ok",
+            "evidence": "전주 송천동 · city=jeonju · r=500m/700m",
+            "next": ""
+          },
+          {
+            "stage": "점포",
+            "status": "ok",
+            "evidence": "점포 730 · 건물 335 · 건물당 2.2",
+            "next": ""
+          },
+          {
+            "stage": "폴리곤",
+            "status": "ok",
+            "evidence": "1,303동",
+            "next": ""
+          },
+          {
+            "stage": "대장",
+            "status": "ok",
+            "evidence": "312동 · expos_units=32 floor_ouln=146 no_ledger=11 non_commercial=123",
+            "next": ""
+          },
+          {
+            "stage": "정밀분모",
+            "status": "ok",
+            "evidence": "floor_approx 잔여 0 · 정밀 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "Page마스터",
+            "status": "ok",
+            "evidence": "Tier1(대장) · 노출 264동 · 대표공실 20.9% · 정밀커버리지 100.0%",
+            "next": ""
+          },
+          {
+            "stage": "앵커",
+            "status": "ok",
+            "evidence": "대표 20.9% vs 앵커 18.05% = +2.85%p",
+            "next": ""
+          },
+          {
+            "stage": "공실유닛",
+            "status": "ok",
+            "evidence": "vacant_units.json 있음",
+            "next": ""
+          },
+          {
+            "stage": "서빙등재",
+            "status": "ok",
+            "evidence": "거점 목록(services.districts.PAGES)에 있음",
+            "next": ""
+          }
+        ],
+        "blocked": [],
+        "serving_paused": false,
+        "next_stage": "",
+        "next": ""
+      },
+      "tier": "Tier1(대장)",
+      "reference_coverage_pct": 100.0,
+      "anchor_pct": 18.05,
+      "anchor_is_fallback": false,
+      "platform": {
+        "identity_available": true,
+        "gnn_available": false,
+        "forecast_available": false
+      },
+      "page": {
+        "vacancy_source": "gold"
+      },
+      "posting": {
+        "gold_units": 6,
+        "rent_available": true,
+        "calculation_status": "unavailable",
+        "unavailable_reason": "전주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요. 실측 재료가 없는 자리를 손으로 적은 계수로 채우면 회수기간이 실제보다 짧게 나와요."
+      },
+      "program": {
+        "context_rows": 30,
+        "context_kinds": [
+          "category"
+        ],
+        "site_source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+        "events_source": "none",
+        "live_llm_verified": false
+      }
+    }
+  ],
+  "summary": {
+    "hubs": 18,
+    "chain_complete": 18,
+    "tracked_runtime_artifacts": 180,
+    "building_units": 128,
+    "residual_chain": [],
+    "missing_rent": [
+      "gj-eoryong",
+      "gj-usan",
+      "gj-ilgok",
+      "jj-newtown"
+    ],
+    "missing_gnn": [
+      "jj-east",
+      "jj-west",
+      "jj-newtown",
+      "jj-hanok",
+      "jj-songcheon"
+    ],
+    "missing_forecast": [
+      "gj-chungjang",
+      "gj-geumho",
+      "gj-bongseon",
+      "gj-sangmu",
+      "gj-songjeong",
+      "gj-yangsan",
+      "gj-eoryong",
+      "gj-yongbong",
+      "gj-usan",
+      "gj-wolsan",
+      "gj-ilgok",
+      "gj-chonnam",
+      "gj-cheomdan1",
+      "jj-east",
+      "jj-west",
+      "jj-newtown",
+      "jj-hanok",
+      "jj-songcheon"
+    ]
+  },
+  "validation": {
+    "data_tests": {
+      "passed": 432
+    },
+    "backend_tests": {
+      "passed": 132
+    },
+    "frontend_pppp_guard": {
+      "passed": 9
+    },
+    "live_llm_verified": false,
+    "screen_checks": [
+      {
+        "region": "gwangju",
+        "district": "gj-chungjang",
+        "passed": 22,
+        "failed": 0,
+        "api_5xx": 0,
+        "console_errors": 18,
+        "evidence": "reports/pppp_screens_gwangju_2026-11-04/result.json"
+      },
+      {
+        "region": "jeonju",
+        "district": "jj-west",
+        "passed": 22,
+        "failed": 0,
+        "api_5xx": 0,
+        "console_errors": 13,
+        "evidence": "reports/pppp_screens_jeonju_2026-11-04/result.json"
+      }
+    ],
+    "console_note": "??? ??? 44? ?? ??. ?? ?? ???? ???? /api/v1/ai/predict-vacancy 404 ??: ??? ??? ?? ??? ???? 5xx? ??.",
+    "commands": [
+      "python -m pytest data/tests/test_jeonju_expansion.py data/tests/test_gwangju_collection.py data/tests/test_gwangju_capacity.py data/tests/test_gwangju_licensing_hubs.py data/tests/test_regional_hub_candidates.py data/tests/test_renewal_gold.py -q",
+      "cd apps/backend: python -m pytest tests/test_gwangju_jeonju_pppp.py tests/test_payback_no_revenue_city.py tests/test_posting_marketing.py tests/test_posting_copilot.py tests/test_program_site.py tests/test_platform_profile.py tests/test_gold_shipping.py -q",
+      "cd apps/frontend: node node_modules/vitest/vitest.mjs run src/ppppScreens.test.tsx",
+      "python scripts/pppp_screens_check.py --district gj-chungjang --out reports/pppp_screens_gwangju_2026-11-04",
+      "python scripts/pppp_screens_check.py --district jj-west --out reports/pppp_screens_jeonju_2026-11-04"
+    ]
+  }
+}

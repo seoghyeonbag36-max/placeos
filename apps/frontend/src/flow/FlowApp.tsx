@@ -23,7 +23,7 @@ import { Sheet, Toast, type ToastMsg } from "./ui";
 import { BudgetCheck, Budget, Contract, Fitout, Payback, Premium } from "./screens/Cost";
 import { Compare } from "./screens/Compare";
 import { Corridor } from "./screens/Corridor";
-import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion } from "./screens/Find";
+import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion, StartupDistrict } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
 import { Item, Period, Plan, TestBudgetQ, ValidateMode } from "./screens/Validate";
@@ -38,6 +38,7 @@ function Screen({ route }: { route: Route }) {
   switch (route.name) {
     case "startup-order": return <StartupOrder />;
     case "startup-region": return <StartupRegion />;
+    case "startup-district": return <StartupDistrict />;
     case "start": return <Start />;
     case "industry": return <Industry />;
     case "industry-other": return <IndustryOther />;

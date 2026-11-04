@@ -131,7 +131,7 @@ function NodeSheet({ node, byId, districts, industryOn, onClose }: {
   const flows: CorridorPair[] = (node.segment === "seoul" ? node.top_origins : node.top_destinations) ?? [];
   return (
     <Sheet open onClose={onClose} title={node.name}>
-      <dl className="fl-facts-list">
+      <dl className="fl-facts-list fl-cor-facts">
         <div><dt>어디서 오나요</dt><dd>{shares(node.inflow_share, sourceLabel)}</dd></div>
         <div><dt>무엇 하러 오나요</dt><dd>{shares(node.purpose_group_share, (k) => GROUP_LABEL[k] ?? k)}
           <span className="fl-dd-sub">「기타」에 비업무 방문 대부분이 들어가요 — 쇼핑으로 바꿔 부르지 않아요.</span></dd></div>

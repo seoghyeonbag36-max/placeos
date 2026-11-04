@@ -1,5 +1,5 @@
 """공식 API 응답은 mock이다. 서명 state·HTTP 교환·DB 가입과 파기는 실제 코드를 탄다."""
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlsplit
 from datetime import datetime, timedelta, timezone
 
 import httpx
@@ -93,6 +93,22 @@ def test_naver_login_creates_user_with_verified_identity(social):
 
 def test_kakao_login_creates_user_with_verified_identity(social):
     _assert_new_identity(social, "kakao")
+
+
+@pytest.mark.parametrize("provider", ["naver", "kakao"])
+def test_social_start_requests_email_consent_only_for_kakao(social, provider):
+    client, _, _, _ = social
+    result = client.post(f"{V1}/social/{provider}/start", json={})
+    assert result.status_code == 200
+    body = result.json()
+    query = parse_qs(urlsplit(body["authorization_url"]).query)
+    if provider == "kakao":
+        assert query["scope"] == ["account_email"]
+    else:
+        assert "scope" not in query
+    assert query["state"] == [body["state"]]
+    assert query["redirect_uri"] == [f"https://placeos.co.kr/?social={provider}"]
+    social_auth.validate_state(provider, body["state"], body["verifier"])
 
 
 @pytest.mark.parametrize("provider", ["naver", "kakao"])

@@ -101,6 +101,21 @@ def simulate(district_id: str, unit_id: str | None = None,
     계산하고 `inputs_source["prem"]` 이 어느 쪽인지 밝힌다(2026-08-24 결정).
     반환: SimulateResult 스키마 dict. 거점/유닛을 찾지 못하면 None.
     """
+    # 임대 표본 부재는 자리 부재가 아니다. Gold에 있는 자리를 404로 숨기거나
+    # 임대료 0으로 계산하지 않고, 기존 계산 불가 계약으로 사유를 돌려준다.
+    rent_inputs = posting_inputs.for_district(district_id)
+    if district_id in svc.PAGES_BY_ID and not (rent_inputs or {}).get("rent_per_m2_krw_thousand"):
+        raw_units = vacant_inventory.units(district_id)
+        if unit_id and unit_id.startswith("vfu-"):
+            raw = _floor_unit_raw(district_id, unit_id)
+        elif unit_id:
+            raw = next((u for u in raw_units if u["id"] == unit_id), None)
+        else:
+            raw = next(iter(raw_units), None)
+        if raw is not None:
+            return {"district_id": district_id, "unit_id": raw["id"], "industry_type": industry_type,
+                    "scenarios": {}, "source": "unavailable", "calculation_status": "unavailable",
+                    "unavailable_reason": "이 상권은 R-ONE 임대 표본이 없어 계산하지 않습니다. 이웃 값으로 채우지 않습니다."}
     is_floor_unit = bool(unit_id and unit_id.startswith("vfu-"))
     unit = None
     if is_floor_unit or area_py_override is not None:

@@ -182,7 +182,7 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-keys.is-rows dt { font-size: .9375rem; }
 .fl-keys.is-rows dd { font-size: 1.0625rem; text-align: right; }
 .fl-facts-list { margin: 0; display: grid; }
-.fl-facts-list div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-4); padding: 14px 0; border-bottom: 1px solid var(--grey-100); }
+.fl-facts-list > div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-4); padding: 14px 0; border-bottom: 1px solid var(--grey-100); }
 .fl-facts-list dt { font-size: .9375rem; color: var(--grey-600); }
 .fl-facts-list dd { margin: 0; font-size: 1rem; font-weight: var(--fw-bold); color: var(--grey-900); text-align: right; }
 .fl-dd-sub { display: block; font-size: .8125rem; font-weight: 400; color: var(--grey-600); }
@@ -371,7 +371,15 @@ button.fl-row-btn:disabled { cursor: not-allowed; opacity: .55; }
 }
 
 /* ── 상권 흐름(파주 → 고양 → 서울 · 2026-10-26) ──────────────────────────────── */
-.fl-cor-hours { margin: var(--sp-2) 0 0; }
+/* 마디 상세는 항목마다 같은 본문 시작선을 쓴다. 행 스타일이 내부 차트에 번지지 않게 한다. */
+.fl-cor-facts > div { grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); align-items: baseline; padding: var(--sp-4) 0; }
+.fl-cor-facts dt, .fl-cor-facts dd { line-height: 1.6; overflow-wrap: anywhere; word-break: keep-all; }
+.fl-cor-facts dd { min-width: 0; text-align: left; }
+.fl-cor-facts .fl-dd-sub { margin-top: var(--sp-1); line-height: 1.6; }
+@media (max-width: 600px) {
+  .fl-cor-facts > div { grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
+}
+.fl-cor-hours { margin: var(--sp-3) 0 0; }
 .fl-cor-bars { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); align-items: end; gap: 2px; height: 48px; }
 .fl-cor-bars span { display: block; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--grey-300); }
 .fl-cor-bars span.is-peak { background: var(--primary); }
