@@ -34,7 +34,7 @@ function Walk({ walk, straight }: { walk: WalkTime | null; straight: number }) {
   </>;
 }
 
-function Place({ place }: { place: AccessPlace }) {
+function Place({ place, showWalking }: { place: AccessPlace; showWalking: boolean }) {
   return <li className="transit-place">
     <strong>{place.name}</strong>
     {place.detail && <span>{place.detail}</span>}
@@ -42,24 +42,27 @@ function Place({ place }: { place: AccessPlace }) {
       일평균 승하차 {place.daily_riders.toLocaleString("ko-KR")}명
       {place.route_count != null && ` · ${place.route_count}개 노선`}
     </span>}
-    {place.kind !== "parking" ? <Walk walk={place.walk} straight={place.straight_meters} />
-      : <span>직선 {meters(place.straight_meters)}</span>}
+    {place.kind === "bus_stop" && <span>{place.route_numbers?.length
+      ? `버스 ${place.route_numbers.join(" · ")}${place.routes_as_of ? ` (${place.routes_as_of} 기준)` : ""}`
+      : "버스 번호 자료 없음"}</span>}
+    {showWalking && (place.kind !== "parking" ? <Walk walk={place.walk} straight={place.straight_meters} />
+      : <span>직선 {meters(place.straight_meters)}</span>)}
     {place.place_url && <a href={place.place_url} target="_blank" rel="noopener noreferrer">카카오맵</a>}
   </li>;
 }
 
-function Group({ title, group }: { title: string; group: AccessGroup }) {
+function Group({ title, group, showWalking }: { title: string; group: AccessGroup; showWalking: boolean }) {
   return <section className="transit-group" aria-label={title}>
     <h4>{title}</h4>
     {group.status === "ok"
-      ? <ul>{group.items.map((place, index) => <Place key={`${place.name}:${index}`} place={place} />)}</ul>
+      ? <ul>{group.items.map((place, index) => <Place key={`${place.name}:${index}`} place={place} showWalking={showWalking} />)}</ul>
       : <p>{GROUP_MESSAGES[group.status](group.radius_meters)}</p>}
   </section>;
 }
 
 /** 목적지 변경 시 부모 key 로 초기화하고, 진행 중 응답은 취소·폐기한다. 펼칠 때 한 번 조회한다. */
-export default function TransitAccessPanel({ destination, destinationName }: {
-  destination: TravelPoint; destinationName: string;
+export default function TransitAccessPanel({ destination, destinationName, showWalking = true }: {
+  destination: TravelPoint; destinationName: string; showWalking?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -97,21 +100,21 @@ export default function TransitAccessPanel({ destination, destinationName }: {
     <details open={expanded}>
       <summary onClick={(event) => { event.preventDefault(); toggle(); }}>주변 지하철·버스·주차장</summary>
       {expanded && <>
-        <p>공실: {destinationName}</p>
+        <p>기준 위치: {destinationName}</p>
         {busy && <p role="status">주변 교통 정보를 불러오는 중…</p>}
         {error && <>
           <p role="alert">{error}</p>
           <Button type="button" variant="ghost" onClick={() => void load()} disabled={busy}>다시 조회</Button>
         </>}
         {data && <div className="transit-results">
-          <Group title="지하철역에서 걸어서" group={data.subway} />
-          <Group title="많이 이용하는 버스정류장에서 걸어서" group={data.bus_stops} />
-          <Group title="인근 주차장" group={data.parking} />
+          <Group title={showWalking ? "지하철역에서 걸어서" : "주변 지하철역"} group={data.subway} showWalking={showWalking} />
+          <Group title={showWalking ? "많이 이용하는 버스정류장에서 걸어서" : "많이 이용하는 버스정류장 · 버스 번호"} group={data.bus_stops} showWalking={showWalking} />
+          <Group title="인근 주차장" group={data.parking} showWalking={showWalking} />
           <small>조회: {new Date(data.queried_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (한국시간)</small>
         </div>}
         <p className="transit-note">
-          도보시간은 TMAP 보행자 경로의 예상값이며 신호·경사·혼잡은 반영되지 않습니다. 역과 정류장은
-          대표 좌표 기준이라 출입구·출구까지의 거리는 포함하지 않습니다.
+          {showWalking ? "도보시간은 TMAP 보행자 경로의 예상값이며 신호·경사·혼잡은 반영되지 않습니다. 역과 정류장은 대표 좌표 기준이라 출입구·출구까지의 거리는 포함하지 않습니다."
+            : "정류장에서 건물까지의 도보시간은 Page에서 건물을 선택한 뒤 확인하세요."}
           {busWindow && ` 버스 이용량은 ${busWindow.start}~${busWindow.end} 일평균 교통카드 승하차이며 정류소 이용량이지 점포 방문자 수가 아닙니다.`}
           {" "}주차장은 위치만 안내하며 빈자리·요금은 제공하지 않습니다.
         </p>

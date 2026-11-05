@@ -100,6 +100,8 @@ class AccessPlace(BaseModel):
     # 버스만: 정류소 일평균 승차+하차 인원(교통카드 · 모든 노선 합)과 지나는 노선 수.
     daily_riders: int | None = Field(default=None, ge=0)
     route_count: int | None = Field(default=None, ge=0)
+    route_numbers: list[str] = Field(default_factory=list)
+    routes_as_of: str | None = None
     source: Literal["kakao_local", "seoul_open_data"]
     place_url: str | None = None
 

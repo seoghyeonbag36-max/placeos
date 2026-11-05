@@ -68,6 +68,7 @@ def isolated(monkeypatch, tmp_path):
     write_gold(gold, BUS_ROWS)
     monkeypatch.setattr(bus_stops, "_SRC", gold)
     bus_stops._load.cache_clear()
+    bus_stops.route_numbers.cache_clear()
     original = httpx.AsyncClient
 
     def install(handler):
@@ -80,6 +81,7 @@ def isolated(monkeypatch, tmp_path):
     install(blocked)
     yield install
     bus_stops._load.cache_clear()
+    bus_stops.route_numbers.cache_clear()
 
 
 def respond(request):
@@ -163,6 +165,17 @@ def test_missing_local_key_only_drops_kakao_groups(isolated, monkeypatch):
     assert result.subway.status == "not_configured" and result.parking.status == "not_configured"
     assert result.subway.items == [] and result.parking.items == []
     assert result.bus_stops.status == "ok" and len(result.bus_stops.items) == 3
+
+
+def test_bus_route_numbers_preserve_source_and_missing_state(isolated):
+    path = bus_stops._SRC.with_name("page_bus_routes.json")
+    path.write_text(json.dumps({"as_of": "2026-10-10", "routes": {"2": ["171", "7016"]}}), encoding="utf-8")
+    bus_stops.route_numbers.cache_clear()
+    isolated(respond)
+    items = run().bus_stops.items
+    assert items[0].route_numbers == ["171", "7016"]
+    assert items[0].routes_as_of == "2026-10-10"
+    assert items[1].route_numbers == []
 
 
 def test_legacy_kakao_key_name_is_used_when_rest_key_empty(isolated, monkeypatch):

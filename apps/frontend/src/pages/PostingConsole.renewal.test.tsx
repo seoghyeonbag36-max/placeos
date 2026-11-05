@@ -7,7 +7,7 @@ import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 
 afterEach(cleanup);
 
-it("Page에서 고른 층 id를 그대로 계산하고 내부면적 변경값과 결과를 Program으로 넘긴다", async () => {
+it("Page에서 고른 층의 원천 면적을 계산과 Program에 사용하고 내부면적 입력은 받지 않는다", async () => {
   const makeProgram = vi.fn();
   const unit = postings("garosugil", 1)[0];
   const api = installFetchStub([
@@ -25,12 +25,10 @@ it("Page에서 고른 층 id를 그대로 계산하고 내부면적 변경값과
   render(<PostingConsole selection={{ districtId: "garosugil", buildingId: "b1", buildingName: "합성 건물", unitId: "vfu-test", requestId: 1 }} onMakeProgram={makeProgram} />);
   await screen.findByText("전제(0)");
   expect(api.matching(/simulate-revenue$/)[0].body).toMatchObject({ unit_id: "vfu-test" });
-  fireEvent.change(screen.getByPlaceholderText("계약서·도면으로 확인한 면적"), { target: { value: "12" } });
-  fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
-  await screen.findByText("사용자 입력");
-  expect(api.matching(/simulate-revenue$/)[1].body).toMatchObject({ unit_id: "vfu-test", area_py_override: 12 });
+  expect(screen.queryByPlaceholderText("계약서·도면으로 확인한 면적")).toBeNull();
+  expect(api.matching(/simulate-revenue$/)[0].body).not.toHaveProperty("area_py_override");
   fireEvent.click(screen.getByRole("button", { name: /검증 program 만들기/ }));
   await waitFor(() => expect(makeProgram).toHaveBeenCalledTimes(1));
-  expect(makeProgram.mock.calls[0][0]).toMatchObject({ unitId: "vfu-test", floor: "3F", area: 12,
-    calculation: { input: { area_py_override: 12 }, result: { unit_id: "vfu-test" } } });
+  expect(makeProgram.mock.calls[0][0]).toMatchObject({ unitId: "vfu-test", floor: "3F", area: 20,
+    calculation: { result: { unit_id: "vfu-test" } } });
 });

@@ -901,6 +901,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <button className="save-candidate" type="button" aria-label={`${b.name} 후보 ${savedIds.includes(b.id) ? "해제" : "저장"}`}
               aria-pressed={savedIds.includes(b.id)} disabled={src !== "api" || (!savedIds.includes(b.id) && savedIds.length >= 3)}
               onClick={() => toggleSaved(b.id)}>{savedIds.includes(b.id) ? "♥ 저장됨" : "♡ 후보 저장"}</button>
+            {src === "api" && <button type="button" className="b-twin" aria-label={`${b.name} 3D 트윈으로 보기`}
+              onClick={() => { focus(b); setTwin3dOpen(true); }}>3D 트윈으로 보기</button>}
             </div>
           ))}
         </div>

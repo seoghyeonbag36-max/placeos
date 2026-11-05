@@ -59,6 +59,8 @@ export interface AccessPlace {
   /** 버스만: 정류소 일평균 승차+하차(교통카드 · 지나는 모든 노선 합) */
   daily_riders: number | null;
   route_count: number | null;
+  route_numbers?: string[];
+  routes_as_of?: string | null;
   source: "kakao_local" | "seoul_open_data";
   place_url: string | null;
 }

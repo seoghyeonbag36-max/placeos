@@ -16,6 +16,15 @@ _SRC = Path(__file__).resolve().parents[4] / "data" / "gold" / "page_bus_stops.j
 _EARTH_M = 6_371_000.0
 
 
+@lru_cache(maxsize=1)
+def route_numbers() -> dict[str, Any]:
+    """원본에서 보존한 번호만 읽는다. 없으면 번호 자료 없음으로 남긴다."""
+    try:
+        return json.loads(_SRC.with_name("page_bus_routes.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
 def haversine_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dp, dl = p2 - p1, math.radians(lng2 - lng1)
@@ -65,7 +74,10 @@ def busiest_within(lat: float, lng: float, radius_m: int, limit: int) -> list[di
             continue
         distance = haversine_m(lat, lng, stop["lat"], stop["lng"])
         if distance <= radius_m:
-            hits.append({**stop, "straight_meters": distance})
+            routes = route_numbers()
+            hits.append({**stop, "straight_meters": distance,
+                         "route_numbers": routes.get("routes", {}).get(stop["stop_id"], []),
+                         "routes_as_of": routes.get("as_of")})
     # 이용량이 같으면 가까운 쪽을 앞에 둔다.
     hits.sort(key=lambda s: (-s["daily_total"], s["straight_meters"]))
     return hits[:limit]
