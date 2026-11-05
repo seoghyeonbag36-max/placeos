@@ -1,0 +1,145 @@
+{
+  "regions": {
+    "경기": {
+      "pnus": 11164,
+      "legacy": 41,
+      "expos": {
+        "completed": 275,
+        "pages": 2528,
+        "calls_per_pnu": 9.192727272727273
+      },
+      "floors": {
+        "completed": 276,
+        "pages": 334,
+        "calls_per_pnu": 1.210144927536232
+      }
+    },
+    "광주": {
+      "pnus": 16783,
+      "legacy": 13,
+      "expos": {
+        "completed": 699,
+        "pages": 943,
+        "calls_per_pnu": 1.3490701001430616
+      },
+      "floors": {
+        "completed": 705,
+        "pages": 708,
+        "calls_per_pnu": 1.004255319148936
+      }
+    },
+    "전주": {
+      "pnus": 9606,
+      "legacy": 0,
+      "expos": {
+        "completed": 775,
+        "pages": 1130,
+        "calls_per_pnu": 1.4580645161290322
+      },
+      "floors": {
+        "completed": 775,
+        "pages": 784,
+        "calls_per_pnu": 1.0116129032258065
+      }
+    }
+  },
+  "sample_priority": {
+    "광주": {
+      "candidates": [
+        {
+          "label": "전남광주통합특별시 동구 계림동",
+          "pnus": 870
+        },
+        {
+          "label": "전남광주통합특별시 동구 지산동",
+          "pnus": 878
+        },
+        {
+          "label": "전남광주통합특별시 북구 우산동",
+          "pnus": 845
+        },
+        {
+          "label": "전남광주통합특별시 서구 쌍촌동",
+          "pnus": 705
+        },
+        {
+          "label": "전남광주통합특별시 동구 산수동",
+          "pnus": 802
+        },
+        {
+          "label": "전남광주통합특별시 북구 유동",
+          "pnus": 683
+        }
+      ],
+      "unique_pnus": 4293,
+      "all_member_pnus": 4293,
+      "expos_done": 708,
+      "floors_done": 705,
+      "last_queue_index": 34803
+    },
+    "전주": {
+      "candidates": [
+        {
+          "label": "전주시 완산구 중앙동4가",
+          "pnus": 1046
+        },
+        {
+          "label": "전주시 완산구 중화산동2가",
+          "pnus": 775
+        }
+      ],
+      "unique_pnus": 1821,
+      "all_member_pnus": 2080,
+      "expos_done": 775,
+      "floors_done": 775,
+      "last_queue_index": 29723
+    }
+  },
+  "checked_at": "2026-11-04T18:58:29+09:00",
+  "planning_rule": {
+    "source": "docs/finding-gyeonggi59-candidates-2026-10-28.md",
+    "anchor_multiplier": 1.47,
+    "gyeonggi_anchors": 40,
+    "gyeonggi_target": 59,
+    "note": "Planning target, not a guarantee of Gold eligibility."
+  },
+  "quota_assumption": {
+    "calls_per_day_per_operation": 10000,
+    "source": "scripts/collect_regional_research_ledgers.py::DAILY_GUARD",
+    "expos_remaining_today_guard": 5752,
+    "floors_remaining_today_guard": 8192
+  },
+  "throughput_observed": {
+    "recent_10_minutes_pnus_per_hour": 3048,
+    "recent_20_minutes_pnus_per_hour": 3180,
+    "recent_30_minutes_pnus_per_hour": 3154,
+    "source": "Bronze complete.json completed_at timestamps, measured at 2026-11-04T18:55+09:00"
+  },
+  "targets": {
+    "광주": {
+      "current_served": 13,
+      "rone_anchors": 13,
+      "planning_target": 19,
+      "planned_additional": 6,
+      "example_priority_pnus": 4293,
+      "estimated_remaining_expos_calls": 4837,
+      "estimated_remaining_floor_calls": 3604
+    },
+    "전주": {
+      "current_served": 5,
+      "rone_anchors": 5,
+      "planning_target": 7,
+      "planned_additional": 2,
+      "example_priority_pnus": 1821,
+      "estimated_remaining_expos_calls": 1526,
+      "estimated_remaining_floor_calls": 1059
+    }
+  },
+  "conditions": [
+    "Candidate examples are not selected or registered hubs. Boundaries and shared anchors remain unverified.",
+    "The 1-2 calendar day estimate applies only if the example eight locations are prioritized; the running 227-location queue was not reordered.",
+    "Expected active collection time is roughly 2-4 hours with continuous AC/network and no extra competing API traffic. This is an estimate, not a measured completion time.",
+    "Gold promotion and public-serving validation are excluded from collection ETA.",
+    "The broader 117 Gwangju and 49 Jeonju exploratory clusters are not confirmed additions."
+  ]
+}

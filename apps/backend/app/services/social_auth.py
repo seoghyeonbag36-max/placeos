@@ -69,6 +69,10 @@ def start(provider: str, org_name: str | None) -> dict[str, str]:
     host = "https://nid.naver.com/oauth2.0/authorize" if provider == "naver" else "https://kauth.kakao.com/oauth/authorize"
     params = {"response_type": "code", "client_id": client_id,
               "redirect_uri": redirect, "state": state}
+    if provider == "kakao":
+        # 가입에 필요한 이메일은 이전에 동의를 건너뛰었어도 추가 동의를 요청한다.
+        # 카카오 앱의 동의항목에서도 account_email 사용 설정이 필요하다.
+        params["scope"] = "account_email"
     return {"authorization_url": host + "?" + urlencode(params), "state": state, "verifier": verifier}
 
 
