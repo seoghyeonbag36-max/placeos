@@ -178,3 +178,63 @@ def test_new_api_pages_are_losslessly_compressed(isolated, monkeypatch):
     path = isolated / result['pages'][0]['path']
     assert path.name.endswith('.json.gz')
     assert runner.read(path) == payload
+
+
+def test_sequence_waits_for_gold_without_unpausing_gyeonggi(isolated, monkeypatch):
+    monkeypatch.setattr(runner, 'gold_scope_ready', lambda *_: (False, 'GOLD_LOCATION_INCOMPLETE'))
+    state = dict(sequence=dict(enabled=True, phase='gwangju_jeonju'), paused_pnu_prefixes=['41'])
+    assert runner.advance_sequence({}, state) == 'waiting'
+    assert state['paused_pnu_prefixes'] == ['41']
+    assert state['sequence']['phase'] == 'gwangju_jeonju'
+    assert state['sequence']['wait_reason'] == 'GOLD_LOCATION_INCOMPLETE'
+
+
+def test_sequence_resumes_only_missing_gyeonggi_without_resetting_quota(isolated, monkeypatch):
+    monkeypatch.setattr(runner, 'gold_scope_ready', lambda *_: (True, ''))
+    runner.atomic_json(isolated / 'reports/regional_research_gold.json', {'status': 'checked'})
+    gj, gg = '2911111111111111111', '4111111111111111111'
+    plan = dict(targets=[dict(pnu=gj), dict(pnu=gg)])
+    state = dict(sequence=dict(enabled=True, phase='gwangju_jeonju'), paused_pnu_prefixes=['41'],
+        paused_regions=['경기'], unique_pnus=2, failures={},
+        done={'expos': {gj: {}, gg: {}}, 'floors': {gj: {}}},
+        endpoints={e: dict(day=runner.now().date().isoformat(), calls_today=9999,
+                          completed=2 if e == 'expos' else 1) for e in runner.ENDPOINTS})
+    assert runner.advance_sequence(plan, state) == 'advanced'
+    assert state['sequence']['phase'] == 'gyeonggi'
+    assert not state['paused_pnu_prefixes']
+    assert all(r['calls_today'] == 9999 for r in state['endpoints'].values())
+    called = []
+    monkeypatch.setattr(runner, 'ac_connected', lambda: True)
+    monkeypatch.setattr(runner, 'collect_target', lambda key, pnu, ep, state: called.append((pnu, ep)))
+    runner.collect_pass(plan, state, 'test')
+    assert called == [(gg, 'floors')]
+    assert gj in state['done']['expos'] and gj in state['done']['floors']
+    assert runner.advance_sequence(plan, state) == 'complete'
+    assert state['status'] == 'sequence_complete'
+
+
+def test_gold_handoff_verifies_gold_and_silver_hashes(isolated):
+    root = isolated
+    plan = {'locations': [dict(id='research-one', pnus=['2911111111111111111'], unresolved=[])]}
+    state = dict(plan_sha256='plan-hash', paused_pnu_prefixes=['41'])
+    silver = root / 'data/silver/evidence.json'
+    runner.atomic_json(silver, {'observation': 1})
+    folder = root / 'data/gold/regional_research_ledgers/research-one/hash'
+    evidence, context = folder / 'ledger_evidence.json.gz', folder / 'program_content_context.csv'
+    import gzip
+    runner.atomic_bytes(evidence, gzip.compress(json.dumps(dict(candidate_id='research-one', silver=dict(
+        path=silver.relative_to(root).as_posix(), sha256=runner.fingerprint(silver)))).encode()))
+    runner.atomic_bytes(context, b'kind,key,value\r\n')
+    report = root / 'reports/regional_research_gold.json'
+    runner.atomic_json(report, dict(status='checked', plan_sha256='plan-hash', locations=[dict(
+        id='research-one', status='ledger_gold_complete', artifacts=[dict(
+            path=p.relative_to(root).as_posix(), sha256=runner.fingerprint(p)) for p in (evidence, context)])]))
+    assert runner.gold_scope_ready(plan, state) == (True, '')
+    context.write_bytes(b'tampered')
+    assert runner.gold_scope_ready(plan, state) == (False, 'GOLD_ARTIFACT_HASH_MISMATCH')
+
+
+def test_unresolved_pnu_is_not_sequence_success(isolated):
+    runner.atomic_json(isolated / 'reports/regional_research_gold.json', dict(status='checked'))
+    plan = {'locations': [dict(id='research-one', pnus=['4111111111111111111'], unresolved=['missing'])]}
+    assert runner.gold_scope_ready(plan, dict(paused_pnu_prefixes=[])) == (False, 'UNRESOLVED_PNU')

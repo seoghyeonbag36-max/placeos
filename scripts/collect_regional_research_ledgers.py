@@ -423,6 +423,77 @@ def acquire_lock():
     return stream
 
 
+def gold_scope_ready(plan: dict, state: dict) -> tuple[bool, str]:
+    """현재 수집 범위의 대장 Gold·Program 파일까지 검증한 뒤에만 다음 지역을 연다."""
+    report_path = ROOT / 'reports/regional_research_gold.json'
+    if not report_path.exists():
+        return False, 'GOLD_REPORT_MISSING'
+    paused = tuple(state.get('paused_pnu_prefixes', []))
+    locations = [loc for loc in plan['locations'] if not paused or
+                 (loc['pnus'] and not any(p.startswith(paused) for p in loc['pnus']))]
+    if any(loc['unresolved'] for loc in locations):
+        return False, 'UNRESOLVED_PNU'
+    try:
+        report = read(report_path)
+        if report.get('status') != 'checked' or report.get('plan_sha256') != state['plan_sha256']:
+            return False, 'GOLD_REPORT_NOT_CURRENT'
+        entries = {loc['id']: loc for loc in report['locations']}
+        if len(entries) != len(report['locations']):
+            return False, 'DUPLICATE_GOLD_LOCATION'
+        for loc in locations:
+            entry = entries.get(loc['id'], {})
+            if entry.get('status') != 'ledger_gold_complete':
+                return False, 'GOLD_LOCATION_INCOMPLETE'
+            artifacts = entry.get('artifacts', [])
+            if {Path(a['path']).name for a in artifacts} != {'ledger_evidence.json.gz', 'program_content_context.csv'}:
+                return False, 'GOLD_ARTIFACT_MISSING'
+            for artifact in artifacts:
+                path = (ROOT / artifact['path']).resolve()
+                if not path.is_relative_to((ROOT / 'data/gold/regional_research_ledgers').resolve()):
+                    return False, 'GOLD_PATH_ESCAPE'
+                if fingerprint(path) != artifact['sha256']:
+                    return False, 'GOLD_ARTIFACT_HASH_MISMATCH'
+                if path.name == 'ledger_evidence.json.gz':
+                    doc = read(path)
+                    silver = (ROOT / doc['silver']['path']).resolve()
+                    if (doc['candidate_id'] != loc['id'] or not silver.is_relative_to((ROOT / 'data/silver').resolve())
+                            or fingerprint(silver) != doc['silver']['sha256']):
+                        return False, 'SILVER_ARTIFACT_MISMATCH'
+        return True, ''
+    except (OSError, ValueError, KeyError, TypeError):
+        return False, 'GOLD_VALIDATION_FAILED'
+
+
+def advance_sequence(plan: dict, state: dict) -> str:
+    """원본 완주 뒤 호출한다. 경기 자동 재개 시 기존 완료분과 일일 쿼터는 보존한다."""
+    sequence = state.get('sequence') or {}
+    if not sequence.get('enabled'):
+        return 'disabled'
+    if sequence.get('phase') not in ('gwangju_jeonju', 'gyeonggi'):
+        state['status'] = 'waiting_gold'
+        sequence['wait_reason'] = 'INVALID_SEQUENCE_PHASE'
+        return 'waiting'
+    ready, reason = gold_scope_ready(plan, state)
+    if not ready:
+        state['status'] = 'waiting_gold'
+        sequence['wait_reason'] = reason
+        return 'waiting'
+    sequence.pop('wait_reason', None)
+    if sequence['phase'] == 'gwangju_jeonju':
+        sequence.update(phase='gyeonggi', handoff_at=now().isoformat(),
+                        handoff_gold_sha256=fingerprint(ROOT / 'reports/regional_research_gold.json'))
+        state['paused_pnu_prefixes'] = [p for p in state.get('paused_pnu_prefixes', []) if p != '41']
+        state['paused_regions'] = [r for r in state.get('paused_regions', []) if r != '경기']
+        state['active_regions'] = ['광주', '전주', '경기']
+        state['status'] = 'gyeonggi_resuming'
+        state.pop('current', None)
+        say('광주·전주 원본·대장 Gold·산출물 검증 완료 — 경기 미수집분 자동 재개')
+        return 'advanced'
+    sequence.update(phase='complete', completed_at=now().isoformat())
+    state['status'] = 'sequence_complete'
+    return 'complete'
+
+
 def worker(once: bool = False) -> int:
     lock = acquire_lock()
     if lock is None:
@@ -433,7 +504,9 @@ def worker(once: bool = False) -> int:
         state = read(STATE) if STATE.exists() else initial_state(plan)
         if state['plan_sha256'] != fingerprint(PLAN):
             raise ValueError('작업표 변경 — 기존 상태와 자동 병합하지 않음')
-        if state.get('status') in ('raw_complete', 'raw_complete_with_unresolved'):
+        if state.get('status') == 'sequence_complete' or (
+                state.get('status') in ('raw_complete', 'raw_complete_with_unresolved') and
+                not (state.get('sequence') or {}).get('enabled')):
             return 0
         state['pid'] = os.getpid()
         state['failures'] = read(FAILURES) if FAILURES.exists() else {}
@@ -452,6 +525,16 @@ def worker(once: bool = False) -> int:
                 e: sum(t['pnu'] in state['done'][e] for t in selected) for e in ENDPOINTS}
             complete = all(state['active_completed'][e] == len(selected) for e in ENDPOINTS)
             if complete:
+                transition = advance_sequence(plan, state)
+                if transition != 'disabled':
+                    save_state(state)
+                    if transition == 'advanced':
+                        continue
+                    if transition == 'complete' or once:
+                        return 0
+                    keep_awake(False)
+                    time.sleep(30)
+                    continue
                 state['status'] = ('selected_scope_raw_complete' if state.get('paused_pnu_prefixes') else
                     'raw_complete_with_unresolved' if plan['unresolved'] else 'raw_complete')
                 save_state(state)
