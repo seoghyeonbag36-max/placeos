@@ -17,7 +17,7 @@
 .dcmp-label { font-size: .8125rem; font-weight: var(--fw-semibold); color: var(--grey-700); }
 .dcmp-label > span:first-child { display: block; }
 .dcmp-src { display: inline-flex; align-items: center; height: 22px; margin-top: var(--sp-1); padding: 0 var(--sp-2); border-radius: 6px;
-  font-size: .6875rem; font-weight: var(--fw-bold); white-space: nowrap; }
+  font-size: var(--fs-caption); font-weight: var(--fw-bold); white-space: nowrap; }
 .dcmp-src.is-model { background: var(--primary-soft); color: var(--primary-pressed); }
 .dcmp-src.is-obs { background: var(--grey-100); color: var(--grey-700); }
 .dcmp-src.is-real { background: var(--source-real-soft); color: var(--source-real); }

@@ -47,11 +47,11 @@ export function mapLabelHTML({ text, sub, color, active = false, hot = false, da
   const subColor = active ? "rgba(255,255,255,.85)" : "#6B7280";
   return (
     `<div style="position:relative;transform:translate(-50%,-100%);display:inline-flex;flex-direction:column;align-items:center;`
-    + `font-family:Pretendard,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;cursor:pointer;white-space:nowrap">`
+    + `font-family:var(--font-sans);cursor:pointer;white-space:nowrap">`
     + `<div style="display:flex;align-items:baseline;gap:4px;padding:3px 7px;border-radius:8px;background:${bg};color:${fg};`
     + `border:${hot ? 2 : 1.5}px ${dashed ? "dashed" : "solid"} ${border};`
-    + `box-shadow:0 1px 4px rgba(11,27,51,.28);font-size:12px;font-weight:700;line-height:1.25;font-variant-numeric:tabular-nums">`
-    + `${escapeHTML(text)}${sub ? `<span style="font-size:10.5px;font-weight:600;color:${subColor}">${escapeHTML(sub)}</span>` : ""}</div>`
+    + `box-shadow:0 1px 4px rgba(11,27,51,.28);font-size:var(--fs-caption);font-weight:700;line-height:var(--lh-caption);font-variant-numeric:tabular-nums">`
+    + `${escapeHTML(text)}${sub ? `<span style="font-size:var(--fs-caption);font-weight:600;color:${subColor}">${escapeHTML(sub)}</span>` : ""}</div>`
     + `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${border};margin-top:-1px"></div>`
     + `</div>`
   );

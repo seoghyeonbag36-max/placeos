@@ -161,7 +161,7 @@ function fromGeoJSON(fc: GeoJSONFC): Building[] {
 // 같은 역할: 화면에서 출처와 해상도를 숨기지 않는다.
 const TRDAR_BADGE: React.CSSProperties = {
   color: "#3730a3", background: "#eef2ff", border: "1px solid #c7d2fe",
-  borderRadius: 5, padding: "1px 5px", fontSize: 10, fontWeight: 700,
+  borderRadius: 5, padding: "1px 5px", fontSize: "var(--fs-caption)", fontWeight: 700,
 };
 const DENSITY_COLORS = ["#EEF2FF", "#C7D2FE", "#A5B4FC", "#818CF8", "#4F46E5"];
 function rampColor(v: number, min: number, max: number, ramp: string[]) {

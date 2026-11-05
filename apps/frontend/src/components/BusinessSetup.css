@@ -64,7 +64,7 @@
 .biz-ind-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .biz-ind { padding: 8px 6px; text-align: center; align-content: center; min-height: 48px; }
 .biz-ind b { font-size: 13px; font-weight: var(--fw-semibold, 600); }
-.biz-ind small { font-size: 10.5px; color: var(--muted); }
+.biz-ind small { font-size: var(--fs-caption); color: var(--muted); }
 .biz-inds[disabled] { opacity: .7; }
 .biz-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
 .biz-error { margin: 0; font-size: 12.5px; color: #B42318; }

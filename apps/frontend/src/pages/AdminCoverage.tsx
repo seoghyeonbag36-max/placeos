@@ -204,7 +204,7 @@ function Tile({ label, value, warn }: { label: string; value: string; warn?: boo
     <div style={{ padding: "10px 14px", borderRadius: 10, minWidth: 120,
                   border: "1px solid " + (warn ? "#fecaca" : "#e5e7eb"),
                   background: warn ? "#fef2f2" : "#fafbfc" }}>
-      <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: "var(--fs-caption)", color: "#6b7280", marginBottom: 3 }}>{label}</div>
       <div style={{ fontSize: 17, fontWeight: 700, color: warn ? "#b91c1c" : "#111" }}>{value}</div>
     </div>
   );

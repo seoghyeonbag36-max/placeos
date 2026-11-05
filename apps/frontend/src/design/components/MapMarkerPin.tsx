@@ -23,7 +23,7 @@ export function MapMarkerPin({ level = 0, label }: { level?: VacancyLevel; label
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center",
       filter: "drop-shadow(0 2px 6px rgba(0,0,0,.25))" }}>
       <div style={{ background: c, borderRadius: 999, height: 24, padding: "0 8px",
-        display: "flex", alignItems: "center", color: "#fff", fontSize: 11, fontWeight: 600 }}>
+        display: "flex", alignItems: "center", color: "#fff", fontSize: "var(--fs-caption)", fontWeight: 600 }}>
         {label ?? ""}
       </div>
       <div style={{ width: 0, height: 0, borderLeft: "6px solid transparent",

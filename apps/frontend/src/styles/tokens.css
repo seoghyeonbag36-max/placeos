@@ -111,6 +111,7 @@
      800·900→700) 화면은 같아 보이지만 코드가 거짓말을 하게 된다.
      새로 적을 때는 이 세 개 중 하나를 --fw-* 로 쓴다. */
   --font-sans: "Pretendard", -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+  --ls-heading: -.02em; --ls-label: .02em;
   --fw-regular: 400; --fw-semibold: 600; --fw-bold: 700;
 
   /* ── 타입스케일 5단 (2026-09-06 고정) ──────────────────────────────────────
@@ -128,9 +129,9 @@
   --fs-display: 30px; --lh-display: 1.2;    /* 대형 KPI 수치 */
   /* 좌측 내비 레일 폭 — App.css 의 레일과 MapShell 의 좌측 오프셋이 같이 쓴다.
      여기가 단일 출처다(두 곳에 숫자를 적으면 지도가 레일 밑으로 파고든다). */
-  --rail-w: 64px;
+  --rail-w: 72px;
 }
-@media (max-width: 768px) { :root { --rail-w: 52px; } }
+@media (max-width: 768px) { :root { --rail-w: 64px; } }
 /* UA 기본 body 여백(8px)을 지우지 않으면 100dvh 레이아웃이 뷰포트를 넘겨
    창 스크롤바가 하나 더 생긴다(2026-07-24 스크롤바 2개 증상의 원인). */
 html, body { margin: 0; padding: 0; }
@@ -138,6 +139,11 @@ html, body { margin: 0; padding: 0; }
 html { scrollbar-gutter: stable; }
 /* 스크롤은 문서(창) 한 곳에서만 일어난다 — App 은 내부 overflow 컨테이너를 두지 않는다. */
 html, body { font-family: var(--font-sans); color: var(--ink); background: #eef1f4; }
+/* 입력·버튼의 UA 기본 Arial 대신 본문 글꼴과 행간을 상속한다.
+   화면별 크기·굵기 선언은 이 낮은 우선순위의 기본값보다 우선한다. */
+:where(button, input, select, textarea) { font: inherit; letter-spacing: inherit; }
+:where(h1, h2, h3) { letter-spacing: var(--ls-heading); }
+:where(small) { font-size: var(--fs-caption); line-height: var(--lh-caption); }
 /* 본문 기준값은 body 에만 건다 — html 에 px 을 박으면 rem 의 기준(사용자 브라우저
    글꼴 크기 설정)까지 덮어써 버린다. 여기가 15px/1.5 의 단일 출처다. */
 body {

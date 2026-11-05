@@ -7,14 +7,14 @@
  padding:15px 18px 13px;margin-bottom:14px;color:var(--vink)}
 .verdict *{box-sizing:border-box}
 
-.verdict .vey{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-subtle);text-transform:uppercase}
+.verdict .vey{font-size: var(--fs-caption);font-weight:700;letter-spacing: var(--ls-label);color:var(--text-subtle);text-transform:uppercase}
 .verdict .vconv{margin-left:8px;padding:1px 7px;border-radius:99px;
- border:1px solid rgba(43,200,217,.45);color:#2BC8D9;font-size:10px;letter-spacing:.8px;text-transform:none}
-.verdict .vq{font-size:27px;font-weight:800;margin:6px 0 0;letter-spacing:-.5px;line-height:1.25}
+ border:1px solid rgba(43,200,217,.45);color:#2BC8D9;font-size: var(--fs-caption);letter-spacing: var(--ls-label);text-transform:none}
+.verdict .vq{font-size:27px;font-weight: var(--fw-bold);margin:6px 0 0;letter-spacing: var(--ls-heading);line-height:1.25}
 
 /* 결론 — 이 화면에서 가장 굵은 한 문장. 스크롤 없이 보여야 한다. */
 .verdict .vone{font-size:15.5px;font-weight:700;line-height:1.55;margin:9px 0 0;color:var(--ui-navy-deep)}
-.verdict .vone b{font-weight:800}
+.verdict .vone b{font-weight: var(--fw-bold)}
 /* 재지 않은 값은 결론 자리에서도 숫자꼴을 쓰지 않는다 — 전역 .value-absent 규칙(tokens.css) */
 
 /* 근거 3줄 — 이름 / 값 / 출처. 출처는 값에 붙어 다닌다. */
@@ -22,14 +22,14 @@
 .verdict .vgrounds li{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;
  align-items:baseline;padding:6px 0;border-top:1px solid #f1f3f6}
 .verdict .vgrounds li:first-child{border-top:0}
-.verdict .gl{font-size:11px;font-weight:800;color:var(--vsub);letter-spacing:-.2px}
+.verdict .gl{font-size: var(--fs-caption);font-weight: var(--fw-bold);color:var(--vsub);letter-spacing: var(--ls-heading)}
 .verdict .gv{font-size:12.5px;line-height:1.6;font-variant-numeric:tabular-nums}
-.verdict .gv b{font-weight:800;color:var(--ui-navy-deep)}
+.verdict .gv b{font-weight: var(--fw-bold);color:var(--ui-navy-deep)}
 /* 검색 트렌드 방향 — 상승은 붉게, 하락은 파랗게(PlatformConsole .trdir 과 같은 축) */
 .verdict .gv .tr-up{color:var(--danger)}
 .verdict .gv .tr-down{color:var(--ui-blue)}
 .verdict .gv .tr-flat{color:var(--text-tertiary)}
-.verdict .gs{grid-column:2;font-size:10px;color:var(--text-subtle);line-height:1.5;margin-top:2px}
+.verdict .gs{grid-column:2;font-size: var(--fs-caption);color:var(--text-subtle);line-height:1.5;margin-top:2px}
 
 @media (max-width:620px){
  .verdict .vgrounds li{grid-template-columns:minmax(0,1fr);gap:2px}
@@ -38,18 +38,18 @@
 
 /* 출처 줄 — 아래 상세를 전부 접어도 남는다 */
 .verdict .vsrc{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
- margin-top:11px;padding-top:10px;border-top:1px solid var(--vline);font-size:10px;line-height:1.5}
-.verdict .vsrc b{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:var(--text-subtle)}
+ margin-top:11px;padding-top:10px;border-top:1px solid var(--vline);font-size: var(--fs-caption);line-height:1.5}
+.verdict .vsrc b{font-size: var(--fs-caption);font-weight: var(--fw-bold);letter-spacing: var(--ls-label);color:var(--text-subtle)}
 .verdict .vsrc span{color:var(--text-secondary);background:#f4f6f9;border:1px solid #e8ecf1;border-radius:5px;padding:2px 7px}
 
 .verdict .vmore>summary,.verdict .vnote>summary{
- font-size:10.5px;font-weight:700;color:var(--text-subtle);cursor:pointer;padding:6px 0 0;list-style:none}
+ font-size: var(--fs-caption);font-weight:700;color:var(--text-subtle);cursor:pointer;padding:6px 0 0;list-style:none}
 .verdict .vmore>summary::-webkit-details-marker,
 .verdict .vnote>summary::-webkit-details-marker{display:none}
 .verdict .vmore>summary::before,.verdict .vnote>summary::before{content:"▸ "}
 .verdict .vmore[open]>summary::before,.verdict .vnote[open]>summary::before{content:"▾ "}
 .verdict .vmore>summary:hover,.verdict .vnote>summary:hover{color:var(--vblue)}
-.verdict .vnote>div{font-size:11.5px;color:var(--vsub);line-height:1.65;max-width:860px;margin-top:5px}
+.verdict .vnote>div{font-size: var(--fs-caption);color:var(--vsub);line-height:1.65;max-width:860px;margin-top:5px}
 .verdict .vnote>div b{color:var(--vink)}
 
 /* ── 접는 상세 ─────────────────────────────────────────────────────────
@@ -59,10 +59,10 @@
  padding:12px 16px;cursor:pointer;list-style:none;user-select:none}
 .vfold>summary::-webkit-details-marker{display:none}
 .vfold>summary:hover .ft{color:var(--ui-blue)}
-.vfold .ft{font-size:14.5px;font-weight:800;letter-spacing:-.3px;color:var(--ink-alt)}
-.vfold .fb{font-size:9.5px;font-weight:800;letter-spacing:.3px;border-radius:5px;padding:2px 6px;
+.vfold .ft{font-size:14.5px;font-weight: var(--fw-bold);letter-spacing: var(--ls-heading);color:var(--ink-alt)}
+.vfold .fb{font-size: var(--fs-caption);font-weight: var(--fw-bold);letter-spacing: var(--ls-label);border-radius:5px;padding:2px 6px;
  color:var(--text-secondary);background:var(--surface-sunken);border:1px solid #e2e8f0}
-.vfold .fs{font-size:11px;font-weight:700;color:var(--text-subtle);line-height:1.5;font-variant-numeric:tabular-nums}
+.vfold .fs{font-size: var(--fs-caption);font-weight:700;color:var(--text-subtle);line-height:1.5;font-variant-numeric:tabular-nums}
 .vfold .fs b{color:var(--text-secondary)}
 /* 여닫이 표식 — 오른쪽 끝에 붙는다 */
 .vfold .fx{margin-left:auto;flex:0 0 auto;align-self:center;
