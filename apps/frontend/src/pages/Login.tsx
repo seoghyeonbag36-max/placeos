@@ -49,13 +49,14 @@ export default function Login({ go, googleClientId, socialProviders }: AccountSc
       <h2 id={ACCOUNT_TITLE_ID}>로그인</h2>
       <p className="acct-lede">로그인하면 내 창업 사업 정보를 저장하고 이어서 작업할 수 있습니다.</p>
 
-      <SocialSignIn providers={socialProviders} />
       {googleClientId && (
         <>
           <GoogleSignIn clientId={googleClientId} onSignedIn={() => go("account")} />
           <p className="acct-divider">또는 이메일·비밀번호로 가입한 계정</p>
         </>
       )}
+
+      <SocialSignIn providers={socialProviders} />
 
       {/* method="post" — 스크립트가 죽어 브라우저 기본 제출로 떨어져도 비밀번호가 URL 에 실리지 않게 한다 */}
       <form className="acct-form" method="post" noValidate onSubmit={submit}>

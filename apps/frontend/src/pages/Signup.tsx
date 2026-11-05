@@ -122,10 +122,11 @@ export default function Signup({ go, googleClientId, socialProviders }: AccountS
       </p>
 
       {hasProvider && orgField}
+      {googleClientId && <GoogleSignIn clientId={googleClientId} orgName={orgName} onSignedIn={() => go("account")} />}
       <SocialSignIn providers={socialProviders} orgName={orgName} />
       {hasProvider ? (
         <>
-          {googleClientId && <GoogleSignIn clientId={googleClientId} orgName={orgName} onSignedIn={() => go("account")} />}
+
           <details className="acct-alt">
             <summary>{socialEnabled ? "이메일·비밀번호로 가입" : "구글 계정 없이 이메일·비밀번호로 가입"}</summary>
             {passwordForm}

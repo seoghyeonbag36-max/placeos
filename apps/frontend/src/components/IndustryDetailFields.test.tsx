@@ -82,7 +82,7 @@ it("숙박 운영 입력을 API로 보내고 결과 출처를 표시하며 수�
   await screen.findByText(/필요한 입력:/);
   expect(screen.queryByText("세 전략 모두 회수되지 않는다")).toBeNull();
   for (const [label, value] of [["객실 수", "10"], ["객실 점유율", "0.5"], ["영업일", "30"], ["객실 단가", "10"]]) {
-    fireEvent.change(screen.getByRole("spinbutton", { name: new RegExp(label) }), { target: { value } });
+    fireEvent.change(screen.getByRole("spinbutton", { name: new RegExp(`^${label}`) }), { target: { value } });
   }
   fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
   await screen.findByText("1.1개월");

@@ -125,6 +125,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [previous, setPrevious] = useState<Calculation | null>(draft?.previous ?? null);
   const lastCalculation = useRef<Calculation | null>(draft?.calculation ?? null);
   const requestSerial = useRef(0);
+  const programRequest = useRef(0);
+  useEffect(() => () => { programRequest.current += 1; }, [districtId, unitId]);
   const [handoffNote, setHandoffNote] = useState("");
   // 저장한 결과 목록을 다시 받게 하는 신호(「결과 저장」 성공 때 올린다)
   const [savedTick, setSavedTick] = useState(0);
@@ -324,16 +326,27 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   // Posting → Program 인계 값. 업종은 **계산에 쓴 업종**을 먼저, 없으면 자리의 직전 업종.
   // 전략명은 계산했고 회수되는 전략이 있을 때만 — 없는 추천을 지어내지 않는다.
-  function makeProgram() {
+  async function makeProgram() {
     if (!unit || !onMakeProgram || busy || changedInput) return;
+    const request = ++programRequest.current;
     const used = calculation?.input.unit_id === unit.id ? calculation : null;
     const entries = used ? Object.entries(used.result.scenarios) : [];
     // 자료 부족 전략(실측 재료 없음 · 2026-10-28 (b))은 숫자가 없어 후보가 아니다
     const viable = entries.flatMap(([k, t]) => (tierAvailable(t) && t.viable ? [[k, t] as const] : []));
     const best = viable.find(([, t]) => t.recommended)
       ?? [...viable].sort((a, b) => a[1].roi_months - b[1].roi_months)[0];
+    const buildingId = selection?.districtId === districtId && (unit.id === selection.unitId || unit.id === `vu-${selection.buildingId}`)
+      ? selection.buildingId : unit.id.startsWith("vu-") ? unit.id.slice(3) : null;
+    let address: string | null = null;
+    if (buildingId) {
+      setHandoffNote("선택 건물의 주소를 확인하는 중입니다…");
+      try { address = (await getBuildingTwin(buildingId, districtId))?.road_addr ?? null; }
+      catch { /* 주소를 확인하지 못하면 직접 입력으로 남긴다. */ }
+    }
+    if (request !== programRequest.current) return;
     onMakeProgram({
       districtId, districtName: districts.find((d) => d.id === districtId)?.name,
+      address, inputsSource: effectiveUnit!.inputs_source,
       unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
       area: effectiveUnit!.area, floor: unit.floor, rent: effectiveUnit!.rent,
       industry: used?.result.industry_type || used?.input.industry_type || unit.was?.trim() || null,
@@ -421,7 +434,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             <span className="fhint">사용자 입력 · 비우면 원천 면적 사용. 변경하면 임대 추정과 비용을 다시 계산합니다. 도면만으로 면적을 자동 판독하지 않습니다.</span>
           </label>}
           {areaInput.trim() && !resolved && <p className="fhint">면적 변경 후 시뮬레이션을 실행하면 같은 임대 추정값으로 BEP를 계산합니다.</p>}
-          {effectiveUnit && (!areaInput.trim() || resolved) && !detailKey && <AreaBepPlanner key={`${districtId}:${unit!.id}`} unit={effectiveUnit} />}
+          {effectiveUnit && (!areaInput.trim() || resolved) && <AreaBepPlanner key={`${districtId}:${unit!.id}`} unit={effectiveUnit} operating={operating} industry={industry} />}
           <IndustryDetailSelect value={detailKey} onChange={(key, option) => {
             setDetailKey(key); setOperating({}); clearCalculation();
             if (option) setIndustry(option.label);

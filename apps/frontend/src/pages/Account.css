@@ -202,3 +202,8 @@
 .ds-btn.acct-social-kakao, .ds-btn.acct-social-kakao:hover { background: var(--kakao-yellow); color: var(--kakao-ink); border-color: var(--kakao-yellow); }
 .acct-social-button:disabled { opacity: 1; cursor: not-allowed; }
 .acct-social-note { margin: 0; }
+
+/* GIS 공식 버튼의 최대 폭에 모든 소셜 로그인 수단을 맞춘다. */
+.acct-google,.acct-form[aria-label="네이버·카카오 로그인"]{width:100%;max-width:400px;margin-left:auto;margin-right:auto}
+.acct-google-slot{display:flex;justify-content:center;min-height:44px}
+.acct-form[aria-label="네이버·카카오 로그인"] .acct-social-button{min-height:44px;padding-top:var(--sp-2);padding-bottom:var(--sp-2)}

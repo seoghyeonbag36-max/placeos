@@ -39,6 +39,8 @@ export interface ProgramHandoff {
   districtName?: string;
   unitId: string;
   unitName: string;
+  address?: string | null;
+  inputsSource?: Record<string, string> | null;
   lat: number;
   lng: number;
   /** 평 */

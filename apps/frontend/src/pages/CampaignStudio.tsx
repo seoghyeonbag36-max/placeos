@@ -1,3 +1,4 @@
+import PpppReport from "@/components/PpppReport";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ApiError, commandCampaign, createCampaign, getDistrictEvents, listCampaigns, type MarketingEvent } from "@/lib/api";
 import type { Campaign, CampaignAction, CampaignConditions, CampaignEvidence, CampaignRun } from "@/lib/campaign";
@@ -145,9 +146,9 @@ function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: C
           onClick={() => { setSelectedId(c.id); setError(""); setNotice(""); }}>{c.conditions.store_name} · {GOALS[c.conditions.goal]}</Button>)}
       </nav>}
       {!loading && !selected && <Card><h2>1. 매장 운영 여건</h2><p>입력값은 점주 제공 정보로 저장합니다. 비어 있는 실적은 추정하지 않습니다.</p>
-        {handoff && <p>Posting에서 가져온 업종과 자리 이름을 확인하세요. 실제 영업 매장의 주소를 입력해야 합니다.</p>}
+        {handoff && <p>Posting에서 가져온 업종과 자리 이름을 확인하세요. 선택 건물의 주소를 가져왔습니다. 실제 영업 주소와 일치하는지 확인하세요. 주소가 없으면 실제 영업 매장의 주소를 입력해야 합니다.</p>}
         <EntryForm title="운영 여건 입력" busy={busy} submit="캠페인 저장·실행안 보기" fields={[
-          { name: "store_name", label: "매장명" }, { name: "address", label: "실제 영업 주소" },
+          { name: "store_name", label: "매장명" }, { name: "address", label: "실제 영업 주소", value: handoff?.address ?? "" },
           { name: "category", label: "업종", value: handoff?.industry ?? defaultCategory },
           { name: "goal", label: "이번 목표", options: GOALS }, { name: "target_customer", label: "목표 고객" },
           { name: "time_window", label: "목표 요일·시간대" }, { name: "capacity", label: "추가 수용 인원·주문 수", type: "number", min: 1 },
@@ -157,6 +158,9 @@ function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: C
         ]} save={v => save(() => createCampaign(token, { ...v, capacity: Number(v.capacity), budget_krw: Number(v.budget_krw),
           district_id: handoff?.districtId ?? mapDistrictId ?? null } as CampaignConditions))} />
       </Card>}
+      {selected && <PpppReport key={selected.id}
+        handoff={selected.conditions.district_id === handoff?.districtId && selected.conditions.address === handoff?.address ? handoff : undefined}
+        campaign={selected} />}
       {selected && <CampaignDetail key={selected.id} campaign={selected} busy={busy} command={command} />}
     </>}
   </div>;

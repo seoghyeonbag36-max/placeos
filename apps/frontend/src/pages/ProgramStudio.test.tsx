@@ -135,7 +135,7 @@ describe("ProgramStudio — 검증 브리프", () => {
   });
 
   it("예시 채우기는 Posting에서 넘긴 검증 자리·주소·전략을 유지한다", async () => {
-    const handoff: ProgramHandoff = { districtId: "yeonnam", unitId: "vu-y1", unitName: "연남동 검증 자리",
+    const handoff: ProgramHandoff = { districtId: "yeonnam", unitId: "vu-y1", unitName: "연남동 검증 자리", address: "테스트 연남로 10",
       lat: 37.56, lng: 126.92, area: 20, floor: "1F", rent: 300, industry: "의류", strategy: "가성비" };
     const api = mount({ props: { handoff }, routes: [{ match: /\/commercial-districts$/, body: [district("yeonnam", { name: "연남동" })] }] });
     await waitFor(() => expect((screen.getByRole("combobox", { name: "상권" }) as HTMLSelectElement).disabled).toBe(false));
@@ -143,7 +143,7 @@ describe("ProgramStudio — 검증 브리프", () => {
     await editor();
     expect(screen.getByText("검증할 자리", { selector: "b" })).toBeTruthy();
     expect(api.matching(/\/marketing\/generate$/)[0].body).toMatchObject({
-      district_id: "yeonnam", category: "의류", address: "연남동 검증 자리", unit_id: "vu-y1", tier: "가성비",
+      district_id: "yeonnam", category: "의류", address: "테스트 연남로 10", unit_id: "vu-y1", tier: "가성비",
     });
   });
 
@@ -205,7 +205,7 @@ describe("ProgramStudio — 검증 브리프", () => {
 
   it("Posting 에서 넘어온 자리는 같은 거점일 때만 unit_id·tier 로 싣고, 거점을 바꾸면 안내와 함께 걷는다", async () => {
     const handoff: ProgramHandoff = {
-      districtId: "garosugil", unitId: "vu-g1", unitName: "가로수길 1번 자리", lat: 37.52, lng: 127.02,
+      districtId: "garosugil", unitId: "vu-g1", unitName: "가로수길 1번 자리", address: "테스트 가로수길 10", lat: 37.52, lng: 127.02,
       area: 20, floor: "1F", rent: 350, industry: "카페", strategy: "가성비",
     };
     const api = mount({
@@ -220,7 +220,7 @@ describe("ProgramStudio — 검증 브리프", () => {
     fireEvent.click(submitButton());
     await editor();
     expect(api.matching(/\/marketing\/generate$/)[0].body).toMatchObject({
-      district_id: "garosugil", unit_id: "vu-g1", tier: "가성비", category: "카페", address: "가로수길 1번 자리",
+      district_id: "garosugil", unit_id: "vu-g1", tier: "가성비", category: "카페", address: "테스트 가로수길 10",
     });
 
     const hub = document.querySelector(".progstudio form select") as HTMLSelectElement;

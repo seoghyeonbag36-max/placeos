@@ -13,6 +13,22 @@ def _item(key: str, parent: str, label: str, family: str,
 
 
 DETAILS = [
+    # 선택·운영 계산용 분류. 원천 분류 대응 검증 전 경쟁점 집계는 비워 둔다.
+    _item("restaurant_korean", "restaurant", "한식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_japanese", "restaurant", "일식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_chinese", "restaurant", "중식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_western", "restaurant", "양식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_snack", "restaurant", "분식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_chicken", "restaurant", "치킨", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_fastfood", "restaurant", "피자·패스트푸드", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_other", "restaurant", "기타 음식점", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("cafe_coffee", "cafe", "커피·음료", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("cafe_bakery", "cafe", "제과·베이커리", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_grocery", "retail", "식료품·편의점", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_flower", "retail", "꽃·화원", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_pet", "retail", "반려동물 용품", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("service_laundry", "service", "세탁", "appointments", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("service_repair", "service", "수리·수선", "appointments", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
     _item("bar_cooking", "bar", "요리 주점", "seats", ("요리 주점",), "야간·주말 소비, 좌석 회전율, 주류·식재료 원가"),
     _item("bar_beer", "bar", "생맥주 전문점", "seats", ("생맥주 전문",), "야간 소비, 좌석 회전율, 객단가"),
     _item("bar_entertainment", "bar", "유흥 주점", "seats", ("일반 유흥 주점", "무도 유흥 주점"), "영업 형태·입점 가능 여부, 인력·시설 비용"),

@@ -13,9 +13,10 @@ const FIELDS = [
   { key: "dailyTurns", label: "좌석·설비당 하루 판매 가능 건수", unit: "건", min: 0 },
 ] as const;
 
-export default function AreaBepPlanner({ unit }: { unit: Posting }) {
+export default function AreaBepPlanner({ unit, operating = {}, industry }: { unit: Posting; operating?: Record<string, string>; industry?: string }) {
   const id = useId();
   const [values, setValues] = useState<Record<string, string>>({});
+  const [example, setExample] = useState(false);
   const complete = FIELDS.every((f) => values[f.key]?.trim());
   const result = complete ? calculateAreaBep({ area: unit.area, rent: unit.rent,
     ...Object.fromEntries(FIELDS.map((f) => [f.key, Number(values[f.key])])),
@@ -27,6 +28,21 @@ export default function AreaBepPlanner({ unit }: { unit: Posting }) {
     <p>{number(unit.area)}평 · 월 임대료 {number(unit.rent)}만원</p>
     <p>면적 출처: {source(unit.inputs_source?.area)} · 임대료 출처: {source(unit.inputs_source?.rent)}</p>
     <p>배치안을 정하지 못했다면 사용 면적과 좌석·설비 간격을 바꿔 비교하세요. 건물 평균 면적일 수 있으므로 계약 면적을 확인하세요.</p>
+    <button type="button" onClick={() => {
+      // TODO: 업종별 검증 자료가 확보되면 가정 대신 출처가 있는 참고값을 연결한다.
+      const prior = (key: string, fallback: string, factor = 1) => {
+        const raw = operating[key];
+        return raw?.trim() && Number.isFinite(Number(raw)) ? String(Number(raw) * factor) : fallback;
+      };
+      const capacity = Number(operating.capacity);
+      const sample = { usablePercent: "70", areaPerCapacity: capacity > 0 ? String(unit.area * .7 / capacity) : "1.5",
+        otherFixedCost: prior("fixed_cost", "500"), variablePercent: prior("variable_cost_rate", "35", 100),
+        priceWon: prior("price", "15000", 10000), days: prior("days", "26"),
+        dailyTurns: operating.cycles && operating.utilization ? String(Number(operating.cycles) * Number(operating.utilization)) : "2" };
+      setValues(v => ({ ...sample, ...Object.fromEntries(Object.entries(v).filter(([, value]) => value.trim())) }));
+      setExample(true);
+    }}>이전 입력·선택 자리로 예시 작성</button>
+    {example && <p role="status">{industry || "선택 업종"} · 선택 자리의 면적·임대료와 이전 운영 입력을 사용했습니다. 미입력 조건은 가정 예시(seed: 사용 비율 70%, 좌석당 1.5평, 고정비 500만원, 변동비 35%, 객단가 15,000원, 26일, 하루 2건)입니다. 기존 입력은 유지합니다. 확인 후 수정하세요.</p>}
     <div className="area-bep-fields">{FIELDS.map((f) => <label key={f.key} htmlFor={`${id}-${f.key}`}>
       <span>{f.label} <small>{f.unit}</small></span>
       <input id={`${id}-${f.key}`} aria-label={f.label} type="number" min={f.min}
@@ -48,6 +64,6 @@ export default function AreaBepPlanner({ unit }: { unit: Posting }) {
       <p>{result.feasible ? "입력한 배치·판매 조건 안에서 손익분기 판매량을 감당할 수 있습니다." : "면적·판매 조건으로는 손익분기 판매량을 감당하기 어렵습니다. 배치·객단가·비용 조건을 다시 비교하세요."}</p>
       <p>BEP = (임대료 + 기타 고정비) ÷ (1 − 변동비율). 초기 투자금 회수는 별도입니다.</p>
     </section>}
-    <p>운영 조건 출처: 사용자 직접 입력 · 결과: 조건부 계산. 실제 배치 가능 여부와 고객 수요는 별도 확인이 필요합니다.</p>
+    <p>운영 조건 출처: {example ? "이전 입력 + 가정 예시(seed)" : "사용자 직접 입력"} · 결과: 조건부 계산. 실제 배치 가능 여부와 고객 수요는 별도 확인이 필요합니다.</p>
   </details>;
 }
