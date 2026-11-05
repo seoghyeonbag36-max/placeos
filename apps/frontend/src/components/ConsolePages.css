@@ -3,6 +3,6 @@
 .console-pages-nav button { min-height: 40px; padding: var(--sp-2) var(--sp-3); border: 0; border-radius: var(--radius-pill); background: var(--bg); color: var(--sub); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .console-pages-nav button[aria-current] { background: var(--tm-soft, var(--primary-soft)); color: var(--tm-accent, var(--primary)); }
 .console-pages-heading { padding: var(--sp-4) var(--sp-3) var(--sp-2); }
-.console-pages-heading h2 { margin: 0 0 var(--sp-2); font-size: 20px; letter-spacing: -.5px; }
+.console-pages-heading h2 { margin: 0 0 var(--sp-2); font-size: 20px; letter-spacing: var(--ls-heading); }
 .console-pages-heading p { margin: 0; color: var(--sub); font-size: 13px; line-height: 1.6; }
 .console-pages > section[hidden] { display: none; }

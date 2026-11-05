@@ -6,7 +6,7 @@
 .plp-bar { fill: var(--line); }
 .plp-bar.is-peak { fill: var(--muted); }
 .plp-bar.is-now { fill: var(--track-page); }
-.plp-axis { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+.plp-axis { fill: var(--muted); font-size: var(--fs-caption); text-anchor: middle; }
 .plp-spark { margin-top: var(--sp-2); }
 .plp-spark-head, .plp-spark-foot { display: flex; justify-content: space-between; gap: var(--sp-2); }
 .plp-spark-foot { color: var(--muted); }

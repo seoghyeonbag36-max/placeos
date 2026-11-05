@@ -789,7 +789,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
           <div className="kwcloud">
             {keywords.words.map((w) => (
               <span key={w.word} className="kwc"
-                style={{ fontSize: `${11 + (w.n / maxKw) * 7}px`, opacity: 0.55 + (w.n / maxKw) * 0.45 }}>
+                style={{ fontSize: `${12 + (w.n / maxKw) * 7}px`, opacity: 0.55 + (w.n / maxKw) * 0.45 }}>
                 {w.word}<i>{w.n}</i>
               </span>
             ))}

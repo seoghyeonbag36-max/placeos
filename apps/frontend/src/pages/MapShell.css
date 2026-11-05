@@ -69,7 +69,7 @@
   background: rgba(255,255,255,.94); padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--line); border-radius: 10px;
   box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
-  font-size: 11px; color: var(--muted);
+  font-size: var(--fs-caption); color: var(--muted);
 }
 .mapshell .legend .chip { display: inline-flex; align-items: center; gap: 5px; }
 .mapshell .legend .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
@@ -91,13 +91,13 @@
 }
 .mapshell .side-panel .sp-title { font-size: 15px; font-weight: 700; }
 /* 4P 전환 라벨 — Page 트랙이 무엇의 디지털 전환인지 화면에서 밝힌다(2026-09-05 재정의). */
-.mapshell .side-panel .sp-track { font-size: 10px; font-weight: 700; letter-spacing: .9px;
+.mapshell .side-panel .sp-track { font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--ls-label);
   color: #2BC8D9; margin-bottom: 2px; }
 .mapshell .side-panel .sp-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 /* R-ONE 앵커 대조 — 판정이 아니라 참고 지표라 중립색(PageDashboard .anchorchip 과 동일 규칙) */
 .mapshell .side-panel .sp-anchor {
   display: inline-block; margin-top: 6px; padding: 1px 6px; border-radius: 5px;
-  background: var(--surface-sunken); color: var(--text-secondary); font-size: 11px; font-weight: 700;
+  background: var(--surface-sunken); color: var(--text-secondary); font-size: var(--fs-caption); font-weight: 700;
 }
 .mapshell .side-panel .sp-list { flex: 1; overflow-y: auto; }
 .mapshell .page-panel-scroll { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
@@ -114,7 +114,7 @@
 .mapshell .b-item.active { background: var(--brand-soft); }
 .mapshell .b-dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
 .mapshell .b-name { font-size: 13px; font-weight: 700; color: var(--ink); }
-.mapshell .b-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.mapshell .b-meta { font-size: var(--fs-caption); color: var(--muted); margin-top: 1px; }
 .mapshell .b-vac { margin-left: auto; font-size: 13px; font-weight: 700; }
 
 /* 선택 건물 상세 (패널 하단) */
@@ -132,16 +132,16 @@
   font-size: 12px; font-weight: 700; color: var(--ink);
 }
 .mapshell .b-rec-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--ls-label);
   padding: 1px 6px; border-radius: 999px;
   background: var(--brand-soft); color: var(--brand-pressed);
 }
 /* 성능을 정직하게 — Top-3 만 보면 과대평가된다(베이스라인 0.89, lift +3.1%) */
 /* 3판 — 「내 사업」 업종 표식 */
 .mapshell .b-rec .row.is-mine { font-weight: 700; color: var(--track-page); }
-.mapshell .b-rec-mine { font-style: normal; font-size: 10.5px; font-weight: 700; margin-left: 6px; padding: 0 5px; border-radius: 4px; background: var(--track-page-soft); color: var(--track-page); }
+.mapshell .b-rec-mine { font-style: normal; font-size: var(--fs-caption); font-weight: 700; margin-left: 6px; padding: 0 5px; border-radius: 4px; background: var(--track-page-soft); color: var(--track-page); }
 .mapshell .b-rec-note {
-  margin-top: var(--sp-2); font-size: 11px; line-height: 1.5;
+  margin-top: var(--sp-2); font-size: var(--fs-caption); line-height: 1.5;
   color: var(--muted);
 }
 .mapshell .b-twin {
@@ -246,10 +246,12 @@
   .mapshell .has-selection .b-detail { max-height: none; flex: 1; }
   /* 모바일 칩은 max-width 45% · top 8 — 첫 줄 오른쪽을 그만큼 비운다 */
   .mapshell .overlay-top { gap: var(--sp-2); right: calc(45% + 16px); }
-  .mapshell .overlay-top .hub-select { max-width: 45%; flex: 1; }
-  .mapshell .overlay-top .search { min-width: 0; width: 0; flex: 1; }
-  .mapshell .seg { flex: 1 0 100%; }
-  .mapshell .seg button { padding: 0 var(--sp-2); flex: 1; font-size: var(--fs-caption); }
+  /* 상권명과 검색 문구가 반쪽 칸에서 잘리지 않게 각각 한 줄을 쓴다.
+     레이어는 가로로 스크롤해 모든 이름을 읽고 선택할 수 있다. */
+  .mapshell .overlay-top .hub-select { max-width: 100%; min-width: 0; flex: 1 0 100%; box-sizing: border-box; }
+  .mapshell .overlay-top .search { min-width: 0; width: 100%; flex: 1 0 100%; box-sizing: border-box; }
+  .mapshell .seg { flex: 1 0 100%; min-width: 0; overflow-x: auto; }
+  .mapshell .seg button { padding: 0 var(--sp-2); flex: 1 0 auto; font-size: var(--fs-caption); }
   .mapshell .legend { bottom: calc(52dvh + var(--sp-3)); left: var(--sp-3); right: var(--sp-3); flex-wrap: wrap; gap: var(--sp-2); font-size: var(--fs-caption); }
   .mapshell .time-bar { bottom: calc(52dvh + 76px); }
   .mapshell .time-bar input { width: 120px; }
@@ -374,7 +376,7 @@
   padding: var(--sp-1) 0; border-radius: var(--radius-md);
   background: var(--surface); border: 1px solid var(--source-real-line);
 }
-.mapshell .rent-floor span { font-size: 10.5px; color: var(--muted); }
+.mapshell .rent-floor span { font-size: var(--fs-caption); color: var(--muted); }
 .mapshell .rent-floor b { font-size: 13px; color: var(--source-real); font-variant-numeric: tabular-nums; }
 .mapshell .rent-summary-foot { margin: var(--sp-2) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--muted); }
 .mapshell .rent-summary-foot b { color: var(--ink); }
@@ -386,7 +388,7 @@
 /* 상세 — 층마다 월 얼마 */
 .mapshell .b-rentbox { margin-top: var(--sp-3); padding-top: 10px; border-top: 1px dashed var(--line); }
 .mapshell .b-rent-badge {
-  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px;
+  font-size: var(--fs-caption); font-weight: 700; padding: 1px 6px; border-radius: 999px;
   background: var(--source-real-soft); color: var(--source-real);
 }
 .mapshell .b-rent-table { width: 100%; margin-top: var(--sp-2); border-collapse: collapse; font-size: var(--fs-caption); }
@@ -396,7 +398,7 @@
 .mapshell .b-rent-table td b { color: var(--source-real); }
 /* 추정 공실(probable)은 흐리게 + 라벨 — 확정과 같은 모양이면 추정이 실측처럼 읽힌다. */
 .mapshell .b-rent-table tr.is-probable td { color: var(--muted); }
-.mapshell .b-rent-table tr.is-probable i { font-style: normal; font-size: 10px; color: var(--caution-ink); }
+.mapshell .b-rent-table tr.is-probable i { font-style: normal; font-size: var(--fs-caption); color: var(--caution-ink); }
 .mapshell .legend .note b { color: var(--source-real); }
 @media (max-width: 768px) {
   .mapshell .rent-summary { padding: var(--sp-2) var(--sp-3); }
@@ -404,7 +406,7 @@
 }
 
 /* 범례의 R-ONE 배지 — 인라인 hex 를 토큰 클래스로 옮겼다(2026-09-13, 화면설계서 2판 §토큰). */
-.mapshell .src-badge-real { color: var(--source-real); background: var(--source-real-soft); border: 1px solid var(--source-real-line); border-radius: 5px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
+.mapshell .src-badge-real { color: var(--source-real); background: var(--source-real-soft); border: 1px solid var(--source-real-line); border-radius: 5px; padding: 1px 5px; font-size: var(--fs-caption); font-weight: 700; }
 
 /* 인계받은 건물을 못 찾았을 때의 안내(2026-09-13, 화면설계서 2판 인계 표). */
 .mapshell .handoff-miss {
@@ -425,6 +427,17 @@
 .mapshell .b-detail { padding: var(--sp-4); }
 .mapshell .b-detail .row { font-size: var(--fs-caption); margin-top: var(--sp-2); }
 .mapshell .legend { gap: var(--sp-2); }
+@media (min-width: 769px) {
+  .mapshell .legend { right: calc(var(--sp-3) + var(--sp-7) + var(--sp-8)); }
+}
+@media (max-width: 768px) {
+  /* 현재 시트는 72dvh다. 예전 52dvh 기준 범례가 본문 위에 겹치던 것을 바로잡는다. */
+  .mapshell .legend { bottom: calc(72dvh + var(--sp-3)); }
+  body:has(.mapshell) .visitor-feedback:not(:has(.visitor-feedback-panel)) {
+    top: calc(2 * var(--workspace-control-height, 40px) + 3 * var(--sp-2));
+    height: max-content; bottom: auto;
+  }
+}
 
 /* §4 3분류 · 평일/주말 · 3D 입구 */
 .mapshell .b-road { font-size: var(--fs-caption); color: var(--muted); overflow-wrap: anywhere; }

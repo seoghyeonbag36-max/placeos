@@ -41,7 +41,7 @@
 .lp-hero { padding-block: var(--sp-6) var(--sp-7); }
 .lp-hero-grid { display: grid; gap: var(--sp-6); align-items: center; }
 .lp-eyebrow { margin-bottom: var(--sp-3) !important; color: var(--text-secondary); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-bold); }
-.lp-hero h1 { font-size: clamp(var(--fs-display), 7vw, 44px); line-height: var(--lh-display); font-weight: var(--fw-bold); }
+.lp-hero h1 { font-size: clamp(var(--fs-display), 7vw, 44px); line-height: var(--lh-title); font-weight: var(--fw-bold); text-wrap: balance; }
 .lp-lede { margin-top: var(--sp-5) !important; max-width: 34em; font-size: var(--fs-body); line-height: 1.7; color: var(--ink); }
 .lp-cta-row { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-6); }
 .lp-cta-center { justify-content: center; }

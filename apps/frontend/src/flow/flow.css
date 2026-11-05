@@ -163,7 +163,7 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-stack-floor.is-unknown { background: var(--grey-300); }
 .fl-stack-floor.is-noncom, .fl-legend i.is-noncom { background: var(--surface); box-shadow: inset 0 0 0 1px var(--grey-300); }
 .fl-stack-floor.is-here { outline: 2px solid var(--grey-900); outline-offset: 1px; }
-.fl-stack-more, .fl-stack-basement { font-size: .6875rem; font-weight: var(--fw-semibold); color: var(--grey-700); text-align: center; }
+.fl-stack-more, .fl-stack-basement { font-size: .75rem; font-weight: var(--fw-semibold); color: var(--grey-700); text-align: center; }
 .fl-stack.is-big { width: 120px; }
 .fl-stack.is-big .fl-stack-floor { height: 24px; font-size: .75rem; font-weight: var(--fw-semibold); line-height: 24px; padding-left: var(--sp-2); color: var(--grey-900); }
 .fl-stack.is-big .fl-stack-floor.is-vacant { color: #fff; }
@@ -254,7 +254,7 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-step-main { display: grid; gap: 1px; min-width: 0; }
 .fl-step-main b { font-size: 1rem; color: var(--grey-900); }
 .fl-step-main span { font-size: .875rem; color: var(--grey-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fl-step-main small { font-size: .6875rem; letter-spacing: .06em; color: var(--grey-600); }
+.fl-step-main small { font-size: .75rem; letter-spacing: var(--ls-label); color: var(--grey-600); }
 .fl-step-go { font-size: .875rem; font-weight: var(--fw-semibold); color: var(--primary); }
 /* 홈의 지도 미리보기(2026-10-24) — 정지 지도 + 「지도에서 이어 보기」 + 트랙 칩 넷. 카드가 지도 탐색으로 가는 입구다 */
 .fl-mapcard { border: 1px solid var(--grey-200); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
@@ -270,7 +270,7 @@ button.fl-row-btn:hover { background: var(--grey-50); }
   background: var(--grey-50); color: var(--grey-900); text-decoration: none; }
 .fl-mapcard-track:hover { background: var(--grey-100); }
 .fl-mapcard-track b { font-size: .9375rem; }
-.fl-mapcard-track small { font-size: .6875rem; letter-spacing: .06em; color: var(--grey-600); }
+.fl-mapcard-track small { font-size: .75rem; letter-spacing: var(--ls-label); color: var(--grey-600); }
 @media (min-width: 768px) {
   .fl-mapcard-tracks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

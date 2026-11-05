@@ -1,11 +1,11 @@
 .explore-step-header { padding: var(--sp-4); padding-right: 44px; background: var(--surface); border-bottom: 1px solid var(--line); }
-.explore-step-header .explore-step-count { color: var(--tm-accent, var(--track-page)); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin: 0 0 var(--sp-3); }
-.explore-step-header ol { display: flex; gap: var(--sp-3); list-style: none; padding: 0; margin: 0 0 var(--sp-4); }
+.explore-step-header .explore-step-count { color: var(--tm-accent, var(--track-page)); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--ls-label); margin: 0 0 var(--sp-3); }
+.explore-step-header ol { display: flex; flex-wrap: wrap; gap: var(--sp-3); list-style: none; padding: 0; margin: 0 0 var(--sp-4); }
 .explore-step-header li { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--sub); white-space: nowrap; }
 .explore-step-header li span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--bg); font-weight: 600; }
 .explore-step-header li[aria-current] { color: var(--tm-accent, var(--track-page)); font-weight: 700; }
 .explore-step-header li[aria-current] span { background: var(--tm-accent, var(--track-page)); color: var(--on-accent); }
-.explore-step-header h1 { margin: 0 0 var(--sp-2); font-size: 23px; line-height: 1.4; letter-spacing: -.7px; }
+.explore-step-header h1 { margin: 0 0 var(--sp-2); font-size: var(--fs-title); line-height: 1.4; letter-spacing: var(--ls-heading); }
 .explore-step-header > p:last-child { margin: 0; font-size: 13px; line-height: 1.6; color: var(--sub); }
 .explore-step-footer { display: flex; gap: var(--sp-2); padding: var(--sp-3); border-top: 1px solid var(--line); background: var(--surface); }
 .explore-step-footer button { min-height: 44px; padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--ink); background: var(--surface); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -14,6 +14,6 @@
 @media (max-width: 768px) {
   .explore-step-header { padding: var(--sp-3); padding-right: 40px; }
   .explore-step-header ol { gap: var(--sp-2); margin-bottom: var(--sp-2); }
-  .explore-step-header h1 { font-size: 20px; }
+  .explore-step-header h1 { font-size: var(--fs-heading); }
   .explore-step-header > p:last-child { display: none; }
 }

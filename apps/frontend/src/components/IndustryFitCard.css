@@ -21,7 +21,7 @@
 .fitcard-empty button:hover, .fit-table button:hover, .fit-link:hover { background: var(--track-platform); color: var(--on-accent); }
 .fitcard :is(button):focus-visible { outline: 2px solid var(--track-platform); outline-offset: 2px; }
 
-.fit-eyebrow { font-size: 11px; font-weight: var(--fw-bold, 700); letter-spacing: .04em; color: var(--track-platform); }
+.fit-eyebrow { font-size: var(--fs-caption); font-weight: var(--fw-bold, 700); letter-spacing: .04em; color: var(--track-platform); }
 .fitcard h2 { margin: 0; font-size: 17px; line-height: 1.4; font-weight: var(--fw-bold, 700); text-wrap: balance; overflow-wrap: anywhere; }
 .fitcard h2 b { color: var(--track-platform); }
 .fit-sub { font-weight: var(--fw-semibold, 600); }
@@ -31,7 +31,7 @@
 .fit-err { color: #B42318; }
 .fit-loading { color: var(--muted); }
 .fit-note { margin: 0; font-size: var(--fs-caption, 12px); line-height: var(--lh-caption, 1.45); color: var(--muted); }
-.fit-src { margin: 0; font-size: 11px; color: var(--muted); }
+.fit-src { margin: 0; font-size: var(--fs-caption); color: var(--muted); }
 .fit-source-disclosure { min-width: 0; }
 .fit-source-toggle {
   display: inline-flex; align-items: center; gap: var(--sp-2);
@@ -57,21 +57,21 @@
 /* 뷰포트 대신 카드의 실제 가용 폭을 기준으로 지표를 배치한다. */
 .fit-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; }
 .fit-facts > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: var(--sp-2); min-width: 0; }
-.fit-facts dt { font-size: 11px; color: var(--muted); }
+.fit-facts dt { font-size: var(--fs-caption); color: var(--muted); }
 .fit-facts dd { margin: 0; font-size: 13px; font-weight: var(--fw-bold, 700); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.fit-facts dd small { display: block; font-size: 10.5px; font-weight: var(--fw-regular, 400); color: var(--muted); }
+.fit-facts dd small { display: block; font-size: var(--fs-caption); font-weight: var(--fw-regular, 400); color: var(--muted); }
 
 .fit-table-wrap { min-width: 0; max-width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
 .fit-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .fit-table caption { text-align: left; padding: 8px 10px 4px; font-size: 12px; font-weight: var(--fw-semibold, 600); color: var(--muted); }
 .fit-table th, .fit-table td { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: middle; }
-.fit-table thead th { font-size: 11px; font-weight: var(--fw-semibold, 600); color: var(--muted); white-space: nowrap; }
+.fit-table thead th { font-size: var(--fs-caption); font-weight: var(--fw-semibold, 600); color: var(--muted); white-space: nowrap; }
 .fit-table tbody th { min-width: 6em; font-weight: var(--fw-semibold, 600); word-break: keep-all; }
-.fit-table tbody th small { display: block; font-size: 10.5px; font-weight: var(--fw-regular, 400); color: var(--muted); }
+.fit-table tbody th small { display: block; font-size: var(--fs-caption); font-weight: var(--fw-regular, 400); color: var(--muted); }
 .fit-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fit-table tr.is-current { background: color-mix(in srgb, var(--track-platform) 7%, var(--surface)); }
-.fit-tag { display: inline-block; white-space: nowrap; font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: var(--fw-bold, 700); background: var(--track-platform); color: var(--on-accent); }
-.fit-here { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.fit-tag { display: inline-block; white-space: nowrap; font-style: normal; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: var(--fs-caption); font-weight: var(--fw-bold, 700); background: var(--track-platform); color: var(--on-accent); }
+.fit-here { font-size: var(--fs-caption); color: var(--muted); white-space: nowrap; }
 
 @media (max-width: 560px) {
   .fitcard { padding: var(--sp-3); }

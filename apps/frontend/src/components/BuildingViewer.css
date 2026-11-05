@@ -9,7 +9,7 @@
 .bviewer-street h3 { margin-top: 0; }
 .bviewer-street dt { color: var(--text-secondary); }
 .bviewer-street dd { margin: 4px 0 12px; }
-.bviewer-legend { font-size: 11.5px; line-height: 1.6; color: var(--text-secondary); }
+.bviewer-legend { font-size: var(--fs-caption); line-height: 1.6; color: var(--text-secondary); }
 /* 외부 지도 링크(2026-10-05) — 거리뷰가 안 떠도 그 자리를 볼 길. 키가 필요 없다(lib/externalMap.ts) */
 .bviewer-links { margin: 0; font-size: 12px; color: var(--text-secondary); }
 .bviewer-links a { color: var(--brand-pressed); font-weight: 600; text-underline-offset: 2px; }
@@ -19,9 +19,9 @@
    (길이로 뭔가를 말하면 면적으로 오독된다 — 여기 실린 값은 상태뿐이다). */
 .fstack { display: flex; flex-direction: column; gap: 3px; }
 .fstack-row { display: flex; align-items: center; gap: 6px; }
-.fstack-no { font-size: 10.5px; font-weight: 700; color: var(--text-secondary); width: 30px; text-align: right; flex-shrink: 0; }
+.fstack-no { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); width: 30px; text-align: right; flex-shrink: 0; }
 .fstack-bar { height: 15px; flex: 1; border-radius: 3px; }
-.fstack-lb { font-size: 10px; color: #7b8aa0; width: 38px; flex-shrink: 0; }
+.fstack-lb { font-size: var(--fs-caption); color: #7b8aa0; width: 38px; flex-shrink: 0; }
 /* 비상업 층은 분모 밖이라 눈에 덜 걸리게 — 색만으로는 "빈 층"으로 읽힌다. */
 .fstack-row.noncom .fstack-bar { opacity: .5; }
 .fstack-row.noncom .fstack-no,
