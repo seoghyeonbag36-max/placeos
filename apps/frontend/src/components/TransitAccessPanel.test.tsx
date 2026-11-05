@@ -31,6 +31,18 @@ function panel(key = "first") {
 }
 
 describe("주변 교통 접근성", () => {
+  it("Platform에서는 버스 번호와 기준일을 보이고 건물 도보시간은 Page로 안내한다", async () => {
+    const response = structuredClone(RESPONSE);
+    response.bus_stops.items[0].route_numbers = ["171", "7016"];
+    response.bus_stops.items[0].routes_as_of = "2026-10-10";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ok(response)));
+    render(<TransitAccessPanel destination={destination} destinationName="상권 중심" showWalking={false} />);
+    fireEvent.click(screen.getByText(OPEN));
+    expect(await screen.findByText("버스 171 · 7016 (2026-10-10 기준)")).toBeTruthy();
+    expect(screen.queryByText(/도보 약/)).toBeNull();
+    expect(screen.queryByText("직선 410m")).toBeNull();
+    expect(screen.getByText(/Page에서 건물을 선택/)).toBeTruthy();
+  });
   it("펼치기 전에는 조회하지 않고 펼치면 한 번 조회한다", async () => {
     const fetch = vi.fn().mockResolvedValue(ok(RESPONSE));
     vi.stubGlobal("fetch", fetch);

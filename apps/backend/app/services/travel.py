@@ -191,7 +191,8 @@ async def _bus(client: httpx.AsyncClient, destination: TravelPoint) -> AccessGro
     items = [
         AccessPlace(kind="bus_stop", name=s["name"] or "이름 없는 정류장", point=point,
                     straight_meters=s["straight_meters"], walk=walk, daily_riders=s["daily_total"],
-                    route_count=s["routes"], source="seoul_open_data")
+                    route_count=s["routes"], route_numbers=s.get("route_numbers", []),
+                    routes_as_of=s.get("routes_as_of"), source="seoul_open_data")
         for s, point, walk in zip(stops, points, walks)
     ]
     return _group("ok", BUS_RADIUS_M, items)

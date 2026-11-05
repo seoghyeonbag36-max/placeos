@@ -82,7 +82,6 @@ export interface PostingDraft {
   detailKey: string;
   operating: Record<string, string>;
   prem: string;
-  areaInput: string;
   strategy: string;
   calculation: Calculation | null;
   previous: Calculation | null;
@@ -117,7 +116,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [detailKey, setDetailKey] = useState(draft?.detailKey ?? (industryRequest ? "" : defaultDetailKey ?? ""));
   const [operating, setOperating] = useState<Record<string, string>>(draft?.operating ?? {});
   const [prem, setPrem] = useState(draft?.prem ?? "");
-  const [areaInput, setAreaInput] = useState(draft?.areaInput ?? "");
   const [strategy, setStrategy] = useState(draft?.strategy ?? "");
   const [recs, setRecs] = useState<IndustryRec[] | null>(null);
 
@@ -135,11 +133,10 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    drafts?.set(draftKey, { unitId, industry, detailKey, operating, prem, areaInput, strategy, calculation, previous, page });
-  }, [drafts, draftKey, unitId, industry, detailKey, operating, prem, areaInput, strategy, calculation, previous, page]);
+    drafts?.set(draftKey, { unitId, industry, detailKey, operating, prem, strategy, calculation, previous, page });
+  }, [drafts, draftKey, unitId, industry, detailKey, operating, prem, strategy, calculation, previous, page]);
 
   const unit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
-  const areaOverride = areaInput.trim() === "" ? undefined : Number(areaInput);
   const resolved = calculation?.result.resolved_inputs;
   const effectiveUnit = unit && resolved
     ? { ...unit, area: resolved.area_py, rent: resolved.rent_manwon,
@@ -149,7 +146,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     setInventoryScope({ districtId, selection });
     setUnits([]); setUnitsFor(null); setUnitId(""); setRecs(null); setErr(null);
     setOperating({}); setCalculation(null); setPrevious(null); setBusy(false);
-    setAreaInput("");
   }
   const [recommendedUnit, setRecommendedUnit] = useState(unit);
   if (recommendedUnit !== unit) {
@@ -197,7 +193,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     setIndustry(baseIndustry); setPrem(""); setStrategy(""); setUnitId(id);
     setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
     setHandoffNote("");
-    setAreaInput("");
   }
 
   // 자리 목록 — 실측 공실 인벤토리(services/vacant_inventory)에서 온다
@@ -269,16 +264,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     if (!opts.quiet) setErr(null);
     try {
       const parsed = prem.trim() === "" ? undefined : Math.max(0, Number(prem));
-      if (areaOverride !== undefined && (!Number.isFinite(areaOverride) || areaOverride <= 0 || areaOverride > 3000)) {
-        throw new Error("내부면적은 0 초과 3,000평 이하로 입력하세요.");
-      }
       const input: Calculation["input"] = {
         district_id: districtId,
         unit_id: unitId,
         industry_type: industry.trim() || undefined,
         strategy: strategy || undefined,
         prem: Number.isFinite(parsed as number) ? (parsed as number) : undefined,
-        ...(areaOverride !== undefined ? { area_py_override: areaOverride } : {}),
       };
       if (detailKey) {
         input.industry_detail_key = detailKey;
@@ -359,7 +350,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const changedInput = calculation && (calculation.input.industry_type !== (industry.trim() || undefined)
     || calculation.input.strategy !== (strategy || undefined)
     || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem))
-    || calculation.input.area_py_override !== areaOverride);
+    || calculation.input.area_py_override !== undefined);
 
   return (
     <div className="postconsole"><div className="wrap">
@@ -427,14 +418,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             )}
           </label>
 
-          {unit && <label className="field">
-            <span className="flabel">확인한 내부면적 (평 · 선택)</span>
-            <input type="number" min="0.01" max="3000" step="any" value={areaInput}
-              onChange={(e) => { setAreaInput(e.target.value); clearCalculation(); }} placeholder="계약서·도면으로 확인한 면적" />
-            <span className="fhint">사용자 입력 · 비우면 원천 면적 사용. 변경하면 임대 추정과 비용을 다시 계산합니다. 도면만으로 면적을 자동 판독하지 않습니다.</span>
-          </label>}
-          {areaInput.trim() && !resolved && <p className="fhint">면적 변경 후 시뮬레이션을 실행하면 같은 임대 추정값으로 BEP를 계산합니다.</p>}
-          {effectiveUnit && (!areaInput.trim() || resolved) && <AreaBepPlanner key={`${districtId}:${unit!.id}`} unit={effectiveUnit} operating={operating} industry={industry} />}
+          {effectiveUnit && <AreaBepPlanner key={`${districtId}:${unit!.id}`} unit={effectiveUnit} operating={operating} industry={industry} />}
           <IndustryDetailSelect value={detailKey} onChange={(key, option) => {
             setDetailKey(key); setOperating({}); clearCalculation();
             if (option) setIndustry(option.label);
@@ -562,7 +546,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </> },
         { id: "access", label: "찾아오는 길", description: "검토하는 자리 주변의 교통과 접근성을 확인하세요.", content:
           unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
-            destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} /> : <p>자리를 먼저 선택해 주세요.</p> },
+            destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} showWalking={false} /> : <p>자리를 먼저 선택해 주세요.</p> },
       ]} />
     </div></div>
   );

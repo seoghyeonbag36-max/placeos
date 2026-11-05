@@ -361,7 +361,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         </> },
         { id: "access", label: "접근성과 주변 가게", description: "찾아오는 길과 참고할 주변 가게를 확인하세요.", content: <>
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
-        destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
+        destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} showWalking={false} />}
       <BenchmarkExplorer key={`${districtId}:${pickedIndustry}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
         districtId={districtId}
         defaultIndustry={pickedIndustry ?? (business?.goal === "pivot"
