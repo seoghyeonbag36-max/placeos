@@ -28,6 +28,16 @@ beforeEach(() => saveToken("test-token"));
 afterEach(() => clearToken());
 
 describe("CampaignStudio — 실행과 투자 증거", () => {
+  it("선택 건물의 실제 주소를 채우며 자리 이름을 주소로 대체하지 않는다", async () => {
+    installFetchStub([{ match: /program\/campaigns$/, body: [] }]);
+    render(<CampaignStudio handoff={{ districtId: "test", unitId: "vu-test", unitName: "테스트 건물",
+      address: "테스트로 10", lat: 37, lng: 127, area: 30, floor: "1F", rent: 200,
+      industry: "한식", strategy: null }} />);
+    const address = await screen.findByRole("textbox", { name: "실제 영업 주소 *" });
+    expect((address as HTMLInputElement).value).toBe("테스트로 10");
+    fireEvent.change(address, { target: { value: "확인한 주소 20" } });
+    expect((address as HTMLInputElement).value).toBe("확인한 주소 20");
+  });
   it("로그인 전에는 개인 캠페인을 요청하지 않는다", () => {
     clearToken(); const api = installFetchStub([]); render(<CampaignStudio />);
     expect(screen.getByText("캠페인을 저장하려면 로그인하세요.")).toBeTruthy();

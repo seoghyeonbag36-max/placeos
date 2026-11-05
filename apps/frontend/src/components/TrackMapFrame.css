@@ -83,3 +83,7 @@
   .trackmap-panel .postconsole .tiers { grid-template-columns: minmax(0, 1fr); }
   .trackmap-panel .verdict .vgrounds li { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* 레일 패널에서는 두 그룹이 나란하므로 세로 목록용 위 여백을 제거한다. */
+.trackmap-panel .progstudio .draft-channel-group + .draft-channel-group{margin-top:0}
+@media(max-width:420px){.trackmap-panel .progstudio .draft-channels{grid-template-columns:minmax(0,1fr)}}

@@ -71,6 +71,6 @@ export async function renderGoogleButton(
   const width = Math.round(Math.min(400, Math.max(200, el.clientWidth || 320)));
   id.renderButton(el, {
     type: "standard", theme: "outline", size: "large", text: "continue_with",
-    shape: "rectangular", logo_alignment: "left", locale: "ko", width,
+    shape: "pill", logo_alignment: "left", locale: "ko", width,
   });
 }

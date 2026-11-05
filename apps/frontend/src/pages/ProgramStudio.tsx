@@ -1,3 +1,4 @@
+import PpppReport from "@/components/PpppReport";
 import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CaveatNote } from "@/components/DistrictPicker";
@@ -107,7 +108,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 } = {}) {
   const baseStage = stageOf(businessGoal);
   const [form, setForm] = useState<FormState>(() => handoff
-    ? { ...emptyForm(baseStage), districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.unitName }
+    ? { ...emptyForm(baseStage), districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.address ?? "" }
     : { ...emptyForm(baseStage), category: defaultCategory ?? "" });
   // 「검증할 자리」 안내·지도 핀. 비우기나 거점 변경에서 걷는다 —
   // 폼은 다른 상권이 됐는데 안내와 unit_id 만 남으면 엉뚱한 자리를 검증 무대로 싣는다.
@@ -406,7 +407,10 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
           {busy && <div className="empty">생성 중… {elapsed}초</div>}
 
-          {result && !busy && <Result key={resultVersion} r={result} />}
+          {result && !busy && <>
+            <Result key={resultVersion} r={result} />
+            <PpppReport key={resultVersion} handoff={handoff} plan={result} />
+          </>}
           {/* 결과 저장(2026-10-06) — 기각 조건이 든 판정표를 4주 뒤에도 볼 수 있게 본인 계정에 남긴다. 고른 것만 남긴다. */}
           {result && !busy && (
             <SaveResultButton onSaved={() => setSavedTick((n) => n + 1)}

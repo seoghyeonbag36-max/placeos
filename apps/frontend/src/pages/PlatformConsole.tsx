@@ -4,7 +4,6 @@ import PlatformComparison from "@/components/PlatformComparison";
 import DistrictCompareDialog from "@/components/DistrictCompareDialog";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
-import TravelTimePanel, { type TravelDestination } from "@/components/TravelTimePanel";
 import DistrictMapExplorer from "@/components/DistrictMapExplorer";
 import DistrictBrief from "@/components/DistrictBrief";
 import { distanceM } from "@/lib/districtMapModel";
@@ -280,11 +279,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     count: (site: OpeningSite) => site.lat == null || site.lng == null ? 0
       : benchmarkHere.places.filter((p) => distanceM({ lat: site.lat as number, lng: site.lng as number }, p) <= matchRadius).length,
   } : null), [benchmarkHere, matchRadius]);
-  const travelDestinations: TravelDestination[] = hub ? [
-    { id: "center", label: `${hub.name} 중심`, point: { lat: hub.center[0], lng: hub.center[1] } },
-    ...(firstSite?.lat != null && firstSite.lng != null
-      ? [{ id: firstSite.unit_id, label: firstSite.name, point: { lat: firstSite.lat, lng: firstSite.lng } }] : []),
-  ] : [];
+
 
   return (
     <div className="platconsole"><div className="wrap">
@@ -365,7 +360,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
         </> },
         { id: "access", label: "접근성과 주변 가게", description: "찾아오는 길과 참고할 주변 가게를 확인하세요.", content: <>
-      {hub && <TravelTimePanel key={`travel:${districtId}`} destinations={travelDestinations} />}
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
         destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} />}
       <BenchmarkExplorer key={`${districtId}:${pickedIndustry}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}

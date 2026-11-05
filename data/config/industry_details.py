@@ -43,6 +43,22 @@ DETAILS = [
     _item("culture_performance", "culture", "공연장", "tickets", (), "KOPIS 시설·공연 연결, 좌석·회차·유료 관객·제작비"),
     _item("culture_exhibition", "culture", "전시장·팝업 대관", "rental", (), "시설 목록, 대관 가능일·계약 단가, 설치·운영비"),
     _item("culture_gallery", "culture", "갤러리·작품 판매", "commission", (), "갤러리 목록, 작품 판매액·판매 수수료·전시 비용"),
+    # 선택·운영 계산용 분류. 원천 분류 대응 검증 전 경쟁점 집계는 비워 둔다.
+    _item("restaurant_korean", "restaurant", "한식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_japanese", "restaurant", "일식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_chinese", "restaurant", "중식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_western", "restaurant", "양식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_snack", "restaurant", "분식", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_chicken", "restaurant", "치킨", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_fastfood", "restaurant", "피자·패스트푸드", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("restaurant_other", "restaurant", "기타 음식점", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("cafe_coffee", "cafe", "커피·음료", "seats", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("cafe_bakery", "cafe", "제과·베이커리", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_grocery", "retail", "식료품·편의점", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_flower", "retail", "꽃·화원", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("retail_pet", "retail", "반려동물 용품", "retail", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("service_laundry", "service", "세탁", "appointments", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
+    _item("service_repair", "service", "수리·수선", "appointments", (), "운영 수용량·판매 단가·이용률·원가를 확인하세요"),
 ]
 BY_KEY = {i["key"]: i for i in DETAILS}
 BY_SOURCE = {name: i["key"] for i in DETAILS for name in i["source_names"]}

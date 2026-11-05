@@ -200,3 +200,11 @@
 
 /* 네 가지 검증 방식은 좁은 패널에서도 두 칸으로 읽는다. */
 .progstudio .seg.seg4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* 그룹 제목과 카드의 시작선을 같은 행에 맞춘다. */
+.progstudio .draft-channels{align-items:start}
+.progstudio .draft-channel-group{min-width:0;margin:0}
+.progstudio .draft-channel-group h3{min-height:calc(2 * var(--fs-caption) * var(--lh-caption));align-items:start;line-height:var(--lh-caption)}
+.progstudio .draft-channel-group h3 span{flex-shrink:0}
+.progstudio .draft-channel{min-height:6em}
+@media(max-width:420px){.progstudio .draft-channels{grid-template-columns:1fr}}

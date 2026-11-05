@@ -2,7 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { getIndustryCompetition, listIndustryDetails, type IndustryCompetition, type IndustryDetail, type IndustryEconomics } from "@/lib/api";
 import "./IndustryDetailFields.css";
 
-const PARENTS: Record<string, string> = { bar: "술집", beauty: "미용·네일", fashion: "옷·잡화", education: "학원·교육", fitness: "운동·여가", lodging: "숙박", culture: "전시·공연" };
+const PARENTS: Record<string, string> = { restaurant: "식당", cafe: "카페·제과", retail: "생활 소매", service: "생활 서비스", bar: "술집", beauty: "미용·네일", fashion: "옷·잡화", education: "학원·교육", fitness: "운동·여가", lodging: "숙박", culture: "전시·공연" };
 
 export function IndustryDetailSelect({ value, parent, onChange }: {
   value: string; parent?: string; onChange: (key: string, option?: IndustryDetail) => void;

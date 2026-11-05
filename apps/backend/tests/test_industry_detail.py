@@ -68,7 +68,7 @@ def test_missing_unit_does_not_calculate_another_unit(monkeypatch):
 
 def test_detail_api_exposes_inputs_and_does_not_invent_recommendations(monkeypatch):
     options = client.get("/api/v1/ai/industry-details").json()["details"]
-    assert {i["parent"] for i in options} == {"bar", "beauty", "fashion", "education", "fitness", "lodging", "culture"}
+    assert {i["parent"] for i in options} == {"bar", "beauty", "fashion", "education", "fitness", "lodging", "culture", "restaurant", "cafe", "retail", "service"}
     assert all(not i["recommendation_available"] and i["fields"] for i in options)
     monkeypatch.setattr(detail, "_competition", lambda: {})
     out = client.get("/api/v1/ai/industry-competition?district_id=garosugil&detail_key=beauty_nail").json()

@@ -1,0 +1,8 @@
+.pppp-report-tool{margin:var(--sp-5) 0;padding:var(--sp-4);border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);min-width:0}
+.pppp-report-actions{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-3) 0}
+.pppp-report-tool button{font:inherit;padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);cursor:pointer}
+.pppp-report{line-height:var(--lh-body);overflow-wrap:anywhere}
+.pppp-report section{margin:var(--sp-5) 0}
+.pppp-report dt{font-weight:var(--fw-semibold)}
+.pppp-report dd{margin:0 0 var(--sp-2)}
+.pppp-report pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--fs-caption);max-height:30em;overflow:auto}
