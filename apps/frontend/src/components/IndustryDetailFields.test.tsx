@@ -65,6 +65,26 @@ it("평균 없는 업종은 자동 채우기를 비활성화하고 다른 업종
   expect(screen.getByText(/검증된 평균 자료가 없어/)).toBeTruthy();
 });
 
+it("한식 평균이 연결되면 버튼으로 빈칸을 채우고 입력한 좌석 수를 유지한다", async () => {
+  // 클릭 동작용 합성 응답. 원문 수치·환산은 백엔드 계약 테스트에서 검증한다.
+  const korean: IndustryDetail = { ...benchmarkOption, key: "restaurant_korean", parent: "restaurant", label: "한식",
+    family: "seats", fields: option.fields.map((f) => ({ ...f,
+      label: ({ capacity: "좌석 수", utilization: "좌석 이용률", days: "월 영업일", price: "고객 1인당 객단가" } as Record<string, string>)[f.key],
+    })),
+    benchmark: { ...benchmarkOption.benchmark!,
+      source: { ...benchmarkOption.benchmark!.source!, category: "한식", category_match: "exact_category" },
+    },
+  };
+  installFetchStub([{ match: /\/ai\/industry-details$/, body: { details: [korean] } }]);
+  render(<OperatingHarness detailKey="restaurant_korean" />);
+  const button = await screen.findByRole("button", { name: "업종 평균으로 빈칸 채우기" });
+  expect((button as HTMLButtonElement).disabled).toBe(false);
+  fireEvent.click(button);
+  expect((screen.getByRole("spinbutton", { name: /좌석 수/ }) as HTMLInputElement).value).toBe("7");
+  expect((screen.getByRole("spinbutton", { name: /고객 1인당 객단가/ }) as HTMLInputElement).value).toBe("10");
+  expect((screen.getByRole("spinbutton", { name: /좌석 이용률/ }) as HTMLInputElement).value).toBe("");
+});
+
 it("숙박 운영 입력을 API로 보내고 결과 출처를 표시하며 수정 시 이전 계산을 걷는다", async () => {
   const api = installFetchStub([
     { match: /\/ai\/industry-details$/, body: { details: [option] } },

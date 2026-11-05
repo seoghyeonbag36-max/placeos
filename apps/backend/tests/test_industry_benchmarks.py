@@ -29,10 +29,30 @@ def test_beer_uses_its_own_statistics_without_cost_fallback():
     assert out["monthly_revenue"] is None
 
 
+def test_korean_uses_verified_statistics_and_keeps_missing_inputs():
+    row = next(i for i in industry_detail.options() if i["key"] == "restaurant_korean")["benchmark"]
+    assert row["source"]["category"] == "한식"
+    assert row["source"]["category_match"] == "exact_category"
+    assert row["source"]["sample_n"] == 1091
+    assert row["values"]["capacity"]["original_value"] == 47.1
+    assert row["values"]["capacity"]["value"] == 47
+    assert row["values"]["days"]["original_value"] == 27.4
+    assert row["values"]["days"]["value"] == 27
+    assert row["values"]["price"]["original_value"] == 15438.7
+    assert row["values"]["price"]["value"] == 1.54387
+    assert [(v["table"], v["page"]) for v in row["values"].values()] == [
+        ("표 29", 57), ("표 25", 49), ("표 67", 133),
+    ]
+    assert set(row["unavailable"]) == {"cycles", "utilization", "variable_cost_rate", "rent", "fixed_cost", "investment"}
+    out = industry_detail.calculate("restaurant_korean", {k: v["value"] for k, v in row["values"].items()})
+    assert out["status"] == "needs_inputs"
+    assert out["monthly_revenue"] is None
+
+
 def test_unsupported_industries_do_not_receive_bar_averages():
     for option in industry_detail.options():
         row = option["benchmark"]
         assert set(row["values"]) | set(row["unavailable"]) == {f["key"] for f in option["fields"]}
-        if option["key"] not in ("bar_cooking", "bar_beer"):
+        if option["key"] not in ("bar_cooking", "bar_beer", "restaurant_korean"):
             assert row["source"] is None
             assert row["values"] == {}
