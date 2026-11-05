@@ -117,25 +117,16 @@ export default function Landing() {
         <section className="lp-hero" aria-labelledby="lp-h1">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <p className="lp-eyebrow">창업자 전용 부동산 앱</p>
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다.</h1>
               <p className="lp-lede">
-                {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
+                창업자 전용 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
                 고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
               </p>
               <div className="lp-cta-row">
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
                 <a className="lp-btn lp-btn-ghost" href="#login">이미 계정이 있어요</a>
               </div>
-              <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용 · 로그인 없이 끝까지, 저장할 때만 가입</p>
-              <div className="lp-quick" aria-labelledby="lp-quick-title">
-                <h2 id="lp-quick-title">주요 이용 순서</h2>
-                <ol className="lp-quick-steps">
-                  {QUICK_STEPS.map((step) => <li key={step.title}>
-                    <h3>{step.title}</h3><p>{step.body}</p>
-                  </li>)}
-                </ol>
-              </div>
+              <p className="lp-fine"><span>시범 운영 중</span><span>지금은 결제 없이 사용</span><span>로그인 없이 끝까지, 저장할 때만 가입</span></p>
             </div>
             <figure className="lp-hero-art">
               <img src={illustration} width={800} height={800}
@@ -145,12 +136,20 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-results">
+        <section className="lp-section lp-overview" aria-labelledby="lp-results">
           <div className="lp-wrap">
             <h2 id="lp-results">살펴보고 얻는 것</h2>
             <ul className="lp-results">
               <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
             </ul>
+            <div className="lp-quick" aria-labelledby="lp-quick-title">
+              <h2 id="lp-quick-title">주요 이용 순서</h2>
+              <ol className="lp-quick-steps">
+                {QUICK_STEPS.map((step) => <li key={step.title}>
+                  <h3>{step.title}</h3><p>{step.body}</p>
+                </li>)}
+              </ol>
+            </div>
             <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분을 위한 서비스입니다.</p>
           </div>
         </section>
@@ -222,17 +221,17 @@ export default function Landing() {
             <div className="lp-cta-row lp-cta-center">
               <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
             </div>
-            <p className="lp-fine">시범 운영 중 · 지금은 결제 없이 사용</p>
+            <p className="lp-fine"><span>시범 운영 중</span><span>지금은 결제 없이 사용</span></p>
           </div>
         </section>
       </main>
 
       <footer className="lp-foot">
         <div className="lp-wrap lp-foot-row">
-          <p>PlaceOS · 시범 운영 중</p>
+          <p>PlaceOS <span className="lp-foot-status">시범 운영 중</span></p>
           <p>
             <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>
-            {" · "}
+            {" "}
             <a href="mailto:seoghyeonbag36@gmail.com">문의</a>
           </p>
         </div>

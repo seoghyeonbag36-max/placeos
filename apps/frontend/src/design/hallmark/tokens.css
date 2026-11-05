@@ -1,0 +1,11 @@
+﻿/* 랜딩 전용 토큰. 기존 브랜드·서체·간격을 참조한다. */
+.lp {
+ --color-paper: var(--surface); --color-paper-2: var(--surface-subtle); --color-paper-3: var(--primary-soft);
+ --color-ink: var(--ink); --color-ink-2: var(--sub); --color-muted: var(--sub); --color-rule: var(--line);
+ --color-accent: var(--primary); --color-accent-pressed: var(--primary-pressed); --color-accent-ink: var(--on-accent); --color-focus: var(--primary-pressed);
+ --font-display: var(--font-sans); --font-body: var(--font-sans);
+ --space-xs: var(--sp-2); --space-sm: var(--sp-3); --space-md: var(--sp-4); --space-lg: var(--sp-5); --space-xl: var(--sp-6); --space-2xl: var(--sp-7); --space-3xl: var(--sp-8); --space-4xl: calc(var(--sp-8) + var(--sp-6));
+ --text-sm: .875rem; --text-md: 1rem; --text-lead: 1.125rem; --text-title: var(--fs-title); --text-section: clamp(1.875rem, 3vw, 2.75rem); --text-display: clamp(2rem, 4.1vw, 3.5rem);
+ --container: 1200px; --gutter: var(--sp-6); --gap-columns: var(--sp-7); --radius-control: var(--radius-md); --radius-card: var(--radius-lg);
+}
+@media (max-width: 639px) { .lp { --gutter: var(--sp-5); } }

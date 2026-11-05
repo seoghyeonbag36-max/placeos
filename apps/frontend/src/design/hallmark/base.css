@@ -1,0 +1,12 @@
+/* Hallmark · base for PlaceOS landing · genre: modern-minimal · theme: brand · v2.0.0 */
+html:has(.lp), body:has(.lp) { overflow-x: clip; }
+.lp, .lp *, .lp *::before, .lp *::after { box-sizing: border-box; }
+.lp { font-family: var(--font-body); font-size: var(--text-md); line-height: 1.65; caret-color: var(--color-accent); }
+.lp ::selection { background: var(--color-paper-3); color: var(--color-ink); }
+.lp :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+.lp :is(h1, h2, h3) { font-family: var(--font-display); font-synthesis: none; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+.lp p { text-wrap: pretty; }
+.lp img { display: block; max-width: 100%; height: auto; }
+@media (prefers-reduced-motion: reduce) { .lp *, .lp *::before, .lp *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+html:has(.lp) { scrollbar-color: var(--sub) var(--surface); }
