@@ -21,6 +21,7 @@ describe("네이버·카카오 로그인", () => {
     await screen.findByRole("button", { name: "네이버로 계속하기" });
     expect(screen.getByRole("button", { name: "카카오로 계속하기" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
+    await screen.findByRole("heading", { name: "회원가입" });
     expect(await screen.findByRole("button", { name: "네이버로 계속하기" })).toBeTruthy();
     expect(screen.getByText("이메일·비밀번호로 가입").closest("details")?.open).toBe(false);
   });
@@ -28,11 +29,12 @@ describe("네이버·카카오 로그인", () => {
   it("미설정이어도 두 버튼을 표시하되 로그인 시도를 막는다", async () => {
     installFetchStub([{ match: /\/auth\/providers$/, body: { google_client_id: null, naver_enabled: false, kakao_enabled: false } }]);
     render(<Home />);
-    await screen.findByLabelText("이메일");
+    await screen.findByRole("button", { name: "네이버로 계속하기" });
     expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/준비 중인 로그인 수단은 아직 사용할 수 없습니다/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
+    await screen.findByRole("heading", { name: "회원가입" });
     expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
   });

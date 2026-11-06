@@ -62,57 +62,13 @@ it("서버 로그아웃이 실패하면 완료한 것으로 표시하지 않는�
 });
 
 describe("Login — #login", () => {
-  it("성공하면 토큰을 세션에 두고 키 화면으로 간다 · 비밀번호는 POST 본문에만 실린다", async () => {
-    const api = installFetchStub([{ match: /\/auth\/login$/, body: { access_token: TOKEN, token_type: "bearer" } }]);
-    const go = vi.fn();
-    render(<Login go={go} />);
-    type("이메일", " ops@example.com ");
-    type("비밀번호", "pw-12345678");
-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
-
-    await waitFor(() => expect(go).toHaveBeenCalledWith("account"));
-    const [call] = api.calls;
-    expect(call.method).toBe("POST");
-    expect(call.url).toBe("/api/v1/auth/login");
-    expect(call.body).toEqual({ email: "ops@example.com", password: "pw-12345678" });
-    expect(call.headers.Authorization).toBeUndefined();
-    expect(loadToken()).toBe(TOKEN);
-    expect(window.localStorage.length).toBe(0);
-  });
-
-  it("401 이면 이메일과 비밀번호 중 어느 쪽이 틀렸는지 가르지 않는다", async () => {
-    installFetchStub([{ match: /\/auth\/login$/, status: 401, body: { detail: "이메일 또는 비밀번호가 올바르지 않습니다" } }]);
-    const go = vi.fn();
-    render(<Login go={go} />);
-    type("이메일", "ops@example.com");
-    type("비밀번호", "wrong-password");
-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("이메일 또는 비밀번호가 올바르지 않습니다.");
-    expect(go).not.toHaveBeenCalled();
-    expect(loadToken()).toBeNull();
-  });
-
-  it("429 면 비밀번호가 틀렸다고 하지 않고 잠시 막혔다고 말한다 (서버 요청량 제어 · 2026-10-06)", async () => {
-    installFetchStub([{ match: /\/auth\/login$/, status: 429, body: { detail: "로그인 시도가 너무 많습니다" } }]);
-    const go = vi.fn();
-    render(<Login go={go} />);
-    type("이메일", "ops@example.com");
-    type("비밀번호", "hunter2hunter");
-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("시도가 너무 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도해 주세요.");
-    expect(go).not.toHaveBeenCalled();
-    expect(loadToken()).toBeNull();
-  });
-
-  it("서버에 닿지 못하면 네트워크 문구를 띄운다", async () => {
-    vi.stubGlobal("fetch", () => Promise.reject(new TypeError("Failed to fetch")));
+  it("이메일 로그인 폼과 제출 버튼을 표시하지 않는다", () => {
+    const api = installFetchStub([]);
     render(<Login go={vi.fn()} />);
-    type("이메일", "ops@example.com");
-    type("비밀번호", "pw-12345678");
-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("서버에 연결하지 못했습니다");
+    expect(screen.queryByLabelText("이메일")).toBeNull();
+    expect(screen.queryByLabelText("비밀번호")).toBeNull();
+    expect(screen.queryByRole("button", { name: "로그인" })).toBeNull();
+    expect(api.calls).toHaveLength(0);
   });
 });
 
@@ -161,7 +117,7 @@ describe("Signup — #signup", () => {
     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
 
     const alert = await screen.findByRole("alert");
-    expect(alert.textContent).toContain("이미 가입된 이메일입니다. 이 이메일로 로그인해 주세요.");
+    expect(alert.textContent).toContain("이미 가입된 이메일입니다. 같은 이메일의 소셜 계정으로 로그인해 주세요.");
     fireEvent.click(within(alert).getByRole("button", { name: "로그인으로" }));
     expect(go).toHaveBeenCalledWith("login");
   });

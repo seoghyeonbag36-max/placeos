@@ -28,7 +28,7 @@ import { clearPlan, loadPlan, modeTitle } from "../plan";
 let providersOnce: Promise<AuthProviders> | null = null;
 const providers = () => (providersOnce ??= getAuthProviders().catch((e) => { providersOnce = null; throw e; }));
 
-export function LoginPanel({ reason, onEmail }: { reason: LoginReason; onEmail: () => void }) {
+export function LoginPanel({ reason }: { reason: LoginReason }) {
   const [p, setP] = useState<AuthProviders | null | "error">(null);
   useEffect(() => {
     let alive = true;
@@ -41,7 +41,6 @@ export function LoginPanel({ reason, onEmail }: { reason: LoginReason; onEmail: 
       <ul className="fl-benefits">{LOGIN_BENEFITS[reason].lines.map((l) => <li key={l}>{l}</li>)}</ul>
       {ready?.google_client_id && <GoogleSignIn clientId={ready.google_client_id} onSignedIn={() => { /* 토큰이 바뀌면 FlowApp 이 이어서 한다 */ }} />}
       <SocialSignIn providers={ready} />
-      <button type="button" className="fl-btn fl-btn-weak fl-email" onClick={onEmail}>이메일로 로그인</button>
       <PrivacyNote />
     </div>
   );
@@ -274,7 +273,7 @@ export function Me() {
   if (!token) {
     return (
       <FlowScreen hub tab="me" title="로그인하면 저장한 것을 어디서나 봐요">
-        <LoginPanel reason="login" onEmail={() => openAccount("login")} />
+        <LoginPanel reason="login" />
         <div className="fl-actions"><TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton></div>
       </FlowScreen>
     );
