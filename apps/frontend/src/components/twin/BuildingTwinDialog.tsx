@@ -13,7 +13,9 @@ import { addStop, hasStop, removeStop } from "@/lib/journeyState";
 import { isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
 import FloorPlan from "./FloorPlan";
 import HistoryTimeline from "./HistoryTimeline";
+import RoadCheckSection from "./RoadCheckSection";
 import type { TwinMode, TwinSceneHandle } from "./TwinScene";
+import type { RoadLayerStats } from "./twinRoads";
 import "./BuildingTwinDialog.css";
 
 const MODES: { key: TwinMode; label: string }[] = [
@@ -130,6 +132,8 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   const [mode, setMode] = useState<TwinMode>("exterior");
   const [neighbors, setNeighbors] = useState(true);
   const [labels, setLabels] = useState(true);
+  const [roadsOn, setRoadsOn] = useState(true);
+  const [roadStats, setRoadStats] = useState<RoadLayerStats | null>(null);
   const [flat, setFlat] = useState(false);   // WebGL 실패 → 2D
   const [live, setLive] = useState("");
   const hostRef = useRef<HTMLDivElement>(null);
@@ -181,12 +185,14 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   const modeRef = useRef(mode);
   const neighborsRef = useRef(neighbors);
   const labelsRef = useRef(labels);
+  const roadsOnRef = useRef(roadsOn);
   useEffect(() => {
     selectRef.current = select;
     selectedLvRef.current = selectedLv;
     modeRef.current = mode;
     neighborsRef.current = neighbors;
     labelsRef.current = labels;
+    roadsOnRef.current = roadsOn;
   });
 
   // 장면 — 응답이 오면 한 번 만들고, 언마운트 때 전부 해제한다. 3D 코드는 여기서만 받는다.
@@ -217,6 +223,8 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
         handle.setMode(modeRef.current);
         handle.setNeighbors(neighborsRef.current);
         handle.setLabels(labelsRef.current);
+        handle.setRoads(roadsOnRef.current);
+        setRoadStats(handle.roadStats);
       } catch {
         setFlat(true);
       }
@@ -225,12 +233,14 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
       alive = false;
       handleRef.current?.dispose();
       handleRef.current = null;
+      setRoadStats(null);
       delete host.dataset.ready;
     };
   }, [twin, flat]);
   useEffect(() => { handleRef.current?.setMode(mode); }, [mode]);
   useEffect(() => { handleRef.current?.setNeighbors(neighbors); }, [neighbors]);
   useEffect(() => { handleRef.current?.setLabels(labels); }, [labels]);
+  useEffect(() => { handleRef.current?.setRoads(roadsOn); }, [roadsOn]);
 
   const onViewKey = (e: React.KeyboardEvent) => {
     if (handleRef.current?.handleKey(e.key)) e.preventDefault();
@@ -294,6 +304,9 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                   {twin.lot_buildings && twin.lot_buildings > 1 ? <><dt>같은 지번</dt><dd>건물 {twin.lot_buildings}동</dd></> : null}
                 </dl>
               </section>
+              <RoadCheckSection name={title ?? "건물"} lat={twin.lat} lng={twin.lng} check={twin.road_check} source={twin.roads_source}
+                roadCount={twin.roads?.length ?? 0} stats={flat ? null : roadStats} sceneOff={flat}
+                roadsOn={roadsOn} onToggle={setRoadsOn} error={twin.roads_error} />
               <section className="twin3d-sec" aria-label="공실률 기준별 표">
                 <h4>공실률은 기준마다 다릅니다</h4>
                 {twin.range.min === null
@@ -353,6 +366,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
               <div className="twin3d-legend">
                 {LEGEND.map((k) => <span key={k} title={TWIN_STATUS[k].rule}><i style={{ background: TWIN_STATUS[k].color }} />{TWIN_STATUS[k].label}</span>)}
                 <em>형상: V-World 외곽선 · 층수: 대장 · 창호·내부는 실측 아님</em>
+                {!flat && (twin.roads?.length ?? 0) > 0 && <em className="twin3d-osm">도로: © OpenStreetMap 기여자 (ODbL) · 폭은 추정</em>}
               </div>
               <div className="sr-only" aria-live="polite">{live}</div>
             </div>

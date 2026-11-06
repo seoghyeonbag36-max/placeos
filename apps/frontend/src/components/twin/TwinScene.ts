@@ -4,6 +4,7 @@
  * 그리는 것은 실측뿐이다: 외곽선(V-World)을 층마다 압출하고 층수는 대장을 쓴다. 주변 건물도 실측 외곽선·층수다.
  * 창호·외장 텍스처는 쓰지 않는다 — 실측이 아니므로 단색 + 층선이다. 장면은 진북 고정(-z = 북)이다.
  * 렌더는 온디맨드다: 변화가 있을 때만 프레임을 돈다(`data-renders` 로 횟수를 잴 수 있다).
+ * 주변 도로(2026-11-06)는 OSM 중심선이다 — 위치는 OSM, 폭·차로·횡단보도는 도로 등급 추정이다(`twinRoads.ts`).
  */
 import {
   BufferGeometry, Color, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
@@ -13,6 +14,7 @@ import {
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
+import { createRoadLayer, type RoadLayerStats } from "./twinRoads";
 import { adjacentLevel, boundsOf, explodeOffset, isVacantStatus, nudgeOrbit, ringToLocal, stackFloors, startCamera,
   TWIN_STATUS, type Point } from "@/lib/twinGeometry";
 
@@ -31,6 +33,10 @@ export interface TwinSceneCallbacks {
 export interface TwinSceneHandle {
   setMode(mode: TwinMode): void;
   setNeighbors(on: boolean): void;
+  /** 주변 도로 층 켜고 끄기 */
+  setRoads(on: boolean): void;
+  /** 그린 도로 구간 · 교차로 · 횡단보도 · 이름 라벨 수 */
+  roadStats: RoadLayerStats;
   setLabels(on: boolean): void;
   selectFloor(lv: number | null, focus?: boolean): void;
   resetView(): void;
@@ -126,6 +132,18 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     neighbors.add(new LineSegments(track(new EdgesGeometry(g, 30)), nbLine));
   }
   scene.add(neighbors);
+
+  // ── 주변 도로 — OSM 중심선(위치) · 폭은 등급 추정. 이름 라벨은 층 라벨과 같은 CSS2D 다 ──────────
+  const roadLayer = createRoadLayer(twin.roads ?? [], twin.lat, twin.lng, {
+    addressRoad: twin.road_check?.name,
+    makeLabel: (text, kind) => {
+      const tagEl = document.createElement("div");
+      tagEl.className = kind === "address" ? "twin3d-road-label is-address" : "twin3d-road-label";
+      tagEl.textContent = text;
+      return new CSS2DObject(tagEl);
+    },
+  });
+  scene.add(roadLayer.group);
 
   // ── 층 — 같은 층고는 형상을 공유한다 ─────────────────────────────────────────
   const slab = 0.14;   // 층 사이 틈이 곧 층선이다
@@ -342,6 +360,8 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       }
     },
     setNeighbors(on) { neighbors.visible = on; request(); },
+    setRoads(on) { roadLayer.group.visible = on; request(); },
+    roadStats: roadLayer.stats,
     setLabels(on) { labelsOn = on; applyVisuals(); },
     selectFloor(lv, focus = false) {
       selected = lv;
@@ -368,6 +388,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       return true;
     },
     dispose() {
+      roadLayer.dispose();   // 도로 라벨(CSS2D)을 하나씩 떼어 HTML 도 지운다 · 도로 형상·재질 해제
       disposed = true;
       if (raf) cancelAnimationFrame(raf);
       if (hoverRaf) cancelAnimationFrame(hoverRaf);

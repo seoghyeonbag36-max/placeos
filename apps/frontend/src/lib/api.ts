@@ -1600,6 +1600,11 @@ export interface TwinFloor {
 export interface TwinVacancyStat {
   basis: string; label: string; vacant: number; total: number; rate_pct: number | null; note: string;
 }
+/** 트윈 주변 도로 한 구간(OSM · 폭은 도로 등급 추정) — 서버 services/twin_roads.py */
+export interface TwinRoad { n: string; c: string; w: number; sw: number; ow: number; line: [number, number][] }
+/** 도로명주소의 도로가 건물 바로 앞인지(외곽선 → 도로 가장자리 거리 12m 이내면 ok) */
+export interface TwinRoadCheck { name: string | null; gap_m: number | null; ok: boolean; found: boolean }
+export interface TwinRoadsSource { by: string; license: string; license_url: string; via: string; radius_m: number }
 export interface BuildingTwin {
   id: string | null; name: string | null; road_addr: string | null; lat: number; lng: number;
   ring: [number, number][];
@@ -1622,6 +1627,11 @@ export interface BuildingTwin {
     summary: { total: number; closed: number; last_closed: string | null; note: string } | null;
   };
   notes: string[];
+  /** 주변 실제 도로(2026-11-06). 타일을 못 받으면 [] + roads_error — 옛 응답에는 없다 */
+  roads?: TwinRoad[];
+  roads_source?: TwinRoadsSource | null;
+  road_check?: TwinRoadCheck | null;
+  roads_error?: string | null;
 }
 export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
   getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);

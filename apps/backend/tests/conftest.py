@@ -37,6 +37,22 @@ def _no_network_llm(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_network_tiles(monkeypatch):
+    """트윈 도로 타일(tiles.openfreemap.org)을 기본 스위트에서 치지 않는다 (2026-11-06).
+
+    `/buildings/{id}/twin` 은 응답마다 `services/twin_roads` 로 타일을 받는다. 막지 않으면 트윈을 부르는 테스트가
+    네트워크 상태에 따라 느려지거나(타임아웃 5초) 결과가 흔들린다. 타일이 필요한 시험은 tests/fixtures/twin_roads 의
+    실제 타일을 `fetch=` 로 넘긴다. 실패 뒤 대기(back-off) 상태도 테스트마다 비운다.
+    """
+    from app.services import twin_roads
+
+    def _offline(x: int, y: int, z: int = twin_roads.Z) -> bytes:
+        raise OSError("tests: tile network disabled")
+    monkeypatch.setattr(twin_roads, "fetch_tile", _offline)
+    monkeypatch.setattr(twin_roads, "_last_fail", 0.0)
+
+
+@pytest.fixture(autouse=True)
 def _fresh_rate_limits():
     """요청량 카운터(services/rate_limit)를 테스트마다 비운다.
 
