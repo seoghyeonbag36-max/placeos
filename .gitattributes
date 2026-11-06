@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# 검증 산출물은 CSV 줄바꿈까지 원본 해시와 같게 보존한다.
+data/gold/regional_research_ledgers/** -text
+data/silver/regional_research_ledgers/normalized/** -text

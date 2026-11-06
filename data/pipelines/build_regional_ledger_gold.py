@@ -38,7 +38,7 @@ def bronze_path(relative: str) -> Path:
     return path
 
 
-def verified_rows(pnu: str, endpoint: str, marker: dict) -> list[dict]:
+def verified_rows(pnu: str, endpoint: str, marker: dict, cache=None) -> list[dict]:
     """완료 표식만 믿지 않고 페이지 해시·헤더·전체 건수·중복을 재검증한다."""
     if (marker.get('complete') is not True or marker.get('pnu') != pnu or
             marker.get('endpoint') != endpoint or type(marker.get('total')) is not int or
@@ -48,7 +48,7 @@ def verified_rows(pnu: str, endpoint: str, marker: dict) -> list[dict]:
     rows, identities = [], set()
     for page in marker['pages']:
         path = bronze_path(page['path'])
-        if source.fingerprint(path) != page['sha256']:
+        if (cache.fingerprint(path) if cache else source.fingerprint(path)) != page['sha256']:
             raise ValueError('LEDGER_PAGE_HASH_MISMATCH')
         total, items = source.parse_page(source.read(path))
         if total != marker['total']:
@@ -80,7 +80,16 @@ def json_gz(value: dict) -> bytes:
         separators=(',', ':')).encode('utf-8'), mtime=0)
 
 
-def run(plan: dict, paused_prefixes: list[str]) -> dict:
+def run(plan: dict, paused_prefixes: list[str], force_verify: bool = False) -> dict:
+    """마무리 공개 검증은 force_verify로 파일 메타데이터 캐시도 우회한다."""
+    if force_verify:
+        return _run(plan, paused_prefixes, None)
+    from data.validation.verified_file_cache import VerifiedFileCache
+    with VerifiedFileCache(source.ROOT / 'data/silver/regional_research_ledgers/verified_files.sqlite3') as cache:
+        return _run(plan, paused_prefixes, cache)
+
+
+def _run(plan: dict, paused_prefixes: list[str], cache) -> dict:
     """위치별 두 대장이 전량 완주한 경우에만 Silver와 Gold를 만든다. 네트워크 호출 없음."""
     excluded = tuple(paused_prefixes)
     locations = [loc for loc in plan['locations'] if loc['pnus'] and
@@ -89,6 +98,10 @@ def run(plan: dict, paused_prefixes: list[str]) -> dict:
     markers = {e: {p.parent.name: p for p in (source.RAW / e).glob('*/complete.json')}
                for e in source.ENDPOINTS}
     legacy_data, normalized = {}, {}
+    checksum = cache.fingerprint if cache else source.fingerprint
+    previous = source.read(REPORT) if REPORT.exists() else {}
+    previous_locations = {r['id']: r for r in previous.get('locations', [])}
+    reused = 0
     result = dict(schema_version=VERSION, checked_at=source.now().isoformat(),
         plan_sha256=source.fingerprint(source.PLAN), paused_pnu_prefixes=paused_prefixes,
         scope='탐색 위치의 검증된 대장 관측 Gold. 서비스용 Page Gold·거점 등록과 별개',
@@ -101,17 +114,44 @@ def run(plan: dict, paused_prefixes: list[str]) -> dict:
             entry.update(status='waiting_raw', missing=missing, unresolved=len(loc['unresolved']))
             result['locations'].append(entry)
             continue
+        old = previous_locations.get(loc['id'], {})
+        if (cache and old.get('status') == 'ledger_gold_complete' and old.get('verification_inputs')
+                and old.get('stores_sha256') == loc['source_sha256'] and old.get('pipeline_version') == VERSION
+                and old.get('pnus_digest') == digest(sorted(loc['pnus']))):
+            dependency_file = source.ROOT / old['verification_inputs']['path']
+            if checksum(dependency_file) != old['verification_inputs']['sha256']:
+                raise ValueError('VERIFICATION_INPUTS_HASH_MISMATCH')
+            dependencies = source.read(dependency_file)['dependencies']
+            unchanged = True
+            for path, sha in dependencies.items():
+                if checksum(bronze_path(path)) != sha:
+                    unchanged = False
+                    break
+            if unchanged:
+                for artifact in old['artifacts']:
+                    path = source.ROOT / artifact['path']
+                    if checksum(path) != artifact['sha256']:
+                        raise ValueError('EXISTING_ARTIFACT_MISMATCH')
+                    if path.name == 'ledger_evidence.json.gz':
+                        doc = source.read(path)
+                        if checksum(source.ROOT / doc['silver']['path']) != doc['silver']['sha256']:
+                            raise ValueError('SILVER_ARTIFACT_HASH_MISMATCH')
+                result['locations'].append(old)
+                reused += 1
+                continue
+            # 갱신된 원천은 아래의 전체 검증으로 다시 정제한다. 이전 Gold는 불변 경로에 보존한다.
         source_refs, observations = {}, []
+        dependencies = {}
         for pnu in loc['pnus']:
             if pnu not in normalized:
-                rows, refs = {}, {}
+                rows, refs, pnu_dependencies = {}, {}, {}
                 for endpoint in source.ENDPOINTS:
                     if endpoint == 'expos' and pnu in plan['legacy_expos']:
                         old = plan['legacy_expos'][pnu]
                         path = bronze_path(old['source'])
                         expected = plan['legacy_sources'][old['source']]
                         if old['source'] not in legacy_data:
-                            if source.fingerprint(path) != expected:
+                            if checksum(path) != expected:
                                 raise ValueError('LEGACY_SOURCE_HASH_MISMATCH')
                             legacy_data[old['source']] = source.read(path)
                         raw = legacy_data[old['source']][pnu]
@@ -122,19 +162,24 @@ def run(plan: dict, paused_prefixes: list[str]) -> dict:
                             raise ValueError('INCOMPLETE_LEGACY_LEDGER')
                         rows[endpoint] = items
                         refs[endpoint] = dict(source=old['source'], sha256=expected, kind='legacy_bronze')
+                        pnu_dependencies[old['source']] = expected
                     else:
                         path = markers[endpoint][pnu]
-                        rows[endpoint] = verified_rows(pnu, endpoint, source.read(path))
+                        marker = source.read(path)
+                        rows[endpoint] = verified_rows(pnu, endpoint, marker, cache)
                         refs[endpoint] = dict(marker=path.relative_to(source.ROOT).as_posix(),
-                                              sha256=source.fingerprint(path), kind='api_pages')
+                                              sha256=checksum(path), kind='api_pages')
+                        pnu_dependencies[path.relative_to(source.ROOT).as_posix()] = checksum(path)
+                        pnu_dependencies.update({p['path']: p['sha256'] for p in marker['pages']})
                 normalized[pnu] = (dict(pnu=pnu, expos_rows=len(rows['expos']),
                     floor_rows=len(rows['floors']), commercial_expos_units=len(expos_units(rows['expos'])),
-                    commercial_ground_floor_numbers=sorted(commercial_floor_nos(rows['floors']))), refs)
-            observation, refs = normalized[pnu]
+                    commercial_ground_floor_numbers=sorted(commercial_floor_nos(rows['floors']))), refs, pnu_dependencies)
+            observation, refs, pnu_dependencies = normalized[pnu]
             observations.append(observation)
             source_refs[pnu] = refs
+            dependencies.update(pnu_dependencies)
         stores_path = bronze_path(loc['source'])
-        if source.fingerprint(stores_path) != loc['source_sha256']:
+        if checksum(stores_path) != loc['source_sha256']:
             raise ValueError('STORE_SOURCE_HASH_MISMATCH')
         stores = source.read(stores_path)
         ids = [row.get('bizesId') for row in stores]
@@ -166,15 +211,24 @@ def run(plan: dict, paused_prefixes: list[str]) -> dict:
         writer.writerows(('category', key, value) for key, value in cats.most_common(30))
         context_path = folder / 'program_content_context.csv'
         immutable(context_path, stream.getvalue().encode('utf-8-sig'))
+        dependencies[loc['source']] = loc['source_sha256']
+        dependency_file = silver_path.with_name(fingerprint + '.verification.json.gz')
+        immutable(dependency_file, json_gz(dict(dependencies=dependencies)))
         entry.update(status='ledger_gold_complete', serving_eligible=False,
             page_gold_status=gold['page_gold_status'], source_digest=fingerprint,
             silver=silver_path.relative_to(source.ROOT).as_posix(),
+            stores_sha256=loc['source_sha256'], pipeline_version=VERSION,
+            pnus_digest=digest(sorted(loc['pnus'])),
+            verification_inputs=dict(path=dependency_file.relative_to(source.ROOT).as_posix(),
+                                     sha256=source.fingerprint(dependency_file)),
             artifacts=[dict(path=p.relative_to(source.ROOT).as_posix(), sha256=source.fingerprint(p))
                        for p in (gold_path, context_path)])
         result['locations'].append(entry)
     counts = Counter(r['status'] for r in result['locations'])
     result['summary'] = dict(locations=len(locations), ledger_gold_complete=counts['ledger_gold_complete'],
         waiting_raw=counts['waiting_raw'], serving_promoted=0,
-        page_gold_pending=len(locations), normalized_unique_pnus=len(normalized))
+        page_gold_pending=len(locations), normalized_unique_pnus=len({p for loc in locations
+            if any(r['id'] == loc['id'] and r['status'] == 'ledger_gold_complete' for r in result['locations'])
+            for p in loc['pnus']}), reused_verified_locations=reused)
     source.atomic_json(REPORT, result)
     return result
