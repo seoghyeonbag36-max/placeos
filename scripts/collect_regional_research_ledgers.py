@@ -35,6 +35,8 @@ STATE = ROOT / 'reports/regional_research_ledger_collection.json'
 LOG = ROOT / 'data/logs/regional-research-ledgers.log'
 LOCK = ROOT / 'data/logs/regional-research-ledgers.lock'
 FAILURES = ROOT / 'data/silver/regional_research_ledgers/failures.json'
+GOLD_REPORT = ROOT / 'reports/regional_research_gold.json'
+AUTOMATION = ROOT / 'reports/regional_research_automation.json'
 ENDPOINTS = {'expos': 'getBrExposPubuseAreaInfo', 'floors': 'getBrFlrOulnInfo'}
 DAILY_GUARD = 10000
 
@@ -425,7 +427,7 @@ def acquire_lock():
 
 def gold_scope_ready(plan: dict, state: dict) -> tuple[bool, str]:
     """현재 수집 범위의 대장 Gold·Program 파일까지 검증한 뒤에만 다음 지역을 연다."""
-    report_path = ROOT / 'reports/regional_research_gold.json'
+    report_path = GOLD_REPORT if GOLD_REPORT.is_relative_to(ROOT) else ROOT / 'reports/regional_research_gold.json'
     if not report_path.exists():
         return False, 'GOLD_REPORT_MISSING'
     paused = tuple(state.get('paused_pnu_prefixes', []))
@@ -480,6 +482,15 @@ def advance_sequence(plan: dict, state: dict) -> str:
         return 'waiting'
     sequence.pop('wait_reason', None)
     if sequence['phase'] == 'gwangju_jeonju':
+        config_path = AUTOMATION if AUTOMATION.is_relative_to(ROOT) else ROOT / 'reports/regional_research_automation.json'
+        config = read(config_path) if config_path.exists() else {}
+        if config.get('next_region') == 'busan':
+            sequence.update(phase='busan', handoff_at=now().isoformat(),
+                            handoff_gold_sha256=fingerprint(ROOT / 'reports/regional_research_gold.json'))
+            state['status'] = 'busan_queued'
+            state.pop('current', None)
+            say('광주·전주 원본·대장 Gold·산출물 검증 완료 — 부산 자동 수집 대기 작업으로 인계')
+            return 'complete'
         sequence.update(phase='gyeonggi', handoff_at=now().isoformat(),
                         handoff_gold_sha256=fingerprint(ROOT / 'reports/regional_research_gold.json'))
         state['paused_pnu_prefixes'] = [p for p in state.get('paused_pnu_prefixes', []) if p != '41']
@@ -504,7 +515,7 @@ def worker(once: bool = False) -> int:
         state = read(STATE) if STATE.exists() else initial_state(plan)
         if state['plan_sha256'] != fingerprint(PLAN):
             raise ValueError('작업표 변경 — 기존 상태와 자동 병합하지 않음')
-        if state.get('status') == 'sequence_complete' or (
+        if state.get('status') in ('sequence_complete', 'busan_queued') or (
                 state.get('status') in ('raw_complete', 'raw_complete_with_unresolved') and
                 not (state.get('sequence') or {}).get('enabled')):
             return 0
