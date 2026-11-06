@@ -35,7 +35,7 @@ export function loginErrorText(err: unknown): string {
 /** 가입 실패. 409 는 화면이 「로그인으로」 버튼을 같이 띄운다(isAlreadyRegistered). */
 export function signupErrorText(err: unknown): string {
   if (err instanceof ApiError) {
-    if (err.status === 409) return "이미 가입된 이메일입니다. 이 이메일로 로그인해 주세요.";
+    if (err.status === 409) return "이미 가입된 이메일입니다. 같은 이메일의 소셜 계정으로 로그인해 주세요.";
     if (err.status === 422) {
       return "입력값을 서버가 받지 않았습니다. 이메일 형식, 비밀번호 8자 이상, 조직 이름(1~200자)을 확인해 주세요.";
     }
@@ -63,7 +63,7 @@ export function apiKeyErrorText(err: unknown, action: "불러오지" | "발급�
 export function googleErrorText(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.status === 401) return "구글 로그인을 확인하지 못했습니다. 다시 시도해 주세요.";
-    if (err.status === 404) return "지금은 구글 로그인을 쓸 수 없습니다. 이메일로 로그인해 주세요.";
+    if (err.status === 404) return "지금은 구글 로그인을 쓸 수 없습니다. 다른 로그인 수단을 이용해 주세요.";
     if (err.status === 503) return "구글 인증 서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.";
   }
   return common(err, "구글로 로그인하지");

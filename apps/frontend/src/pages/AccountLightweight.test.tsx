@@ -2,7 +2,7 @@
  * 가벼운 대안 먼저(2026-10-05) — 계정 화면 회귀 그물. docs/decision-lightweight-first-2026-10-05.md §1·§2.
  *
  * 잡는 회귀:
- *   - 구글 로그인이 꺼져 있는데(서버 설정 없음·서버 다운) 버튼 자리가 생기거나, 이메일 폼이 사라지는 것
+ *   - 구글 로그인이 꺼져 있는데(서버 설정 없음·서버 다운) 버튼 자리가 생기거나, 이메일 로그인 폼이 다시 나타나는 것
  *   - 구글 ID 토큰 말고 다른 것(비밀번호·토큰 헤더)이 /auth/google 에 실리는 것
  *   - 구글 스크립트가 막혔을 때 아무 말 없이 버튼만 사라지는 것
  *   - 가입 화면에 무엇을 받는지(수집 안내)가 빠지는 것
@@ -45,17 +45,17 @@ describe("첫 화면(Home) — 구글 로그인 켜짐 여부는 서버가 정�
     const api = installFetchStub([{ match: /\/auth\/providers$/, body: { google_client_id: CLIENT_ID } }]);
     render(<Home />);
     expect(await screen.findByText("Google 계정으로 계속하기")).toBeTruthy();
-    expect(screen.getByLabelText("비밀번호")).toBeTruthy();   // 기존 비밀번호 계정은 계속 들어온다
+    expect(screen.queryByLabelText("비밀번호")).toBeNull();
     expect(api.urls()).toEqual(["GET /api/v1/auth/providers"]);
   });
 
-  it("못 물어보면(404·서버 다운) 이메일 폼만 — 들어올 길이 사라지지 않는다", async () => {
+  it("못 물어보면(404·서버 다운) 이메일 폼을 대신 표시하지 않는다", async () => {
     const api = installFetchStub([]);
     render(<Home />);
     await waitFor(() => expect(api.count(/\/auth\/providers$/)).toBe(1));
     expect(screen.queryByText("Google 계정으로 계속하기")).toBeNull();
-    expect(screen.getByLabelText("이메일")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "로그인" })).toBeTruthy();
+    expect(screen.queryByLabelText("이메일")).toBeNull();
+    expect(screen.queryByRole("button", { name: "로그인" })).toBeNull();
   });
 });
 
@@ -84,12 +84,12 @@ describe("Login — 구글로 계속하기", () => {
     expect(loadToken()).toBeNull();
   });
 
-  it("구글 스크립트가 막히면 말하고, 이메일 폼은 그대로 쓴다", async () => {
+  it("구글 스크립트가 막히면 재시도를 안내하고 이메일 폼은 표시하지 않는다", async () => {
     gis.fail = true;
     installFetchStub([]);
     render(<Login go={vi.fn()} googleClientId={CLIENT_ID} />);
-    expect((await screen.findByText(/구글 로그인 버튼을 불러오지 못했습니다/)).textContent).toContain("이메일로 계속");
-    expect(screen.getByLabelText("비밀번호")).toBeTruthy();
+    expect((await screen.findByText(/구글 로그인 버튼을 불러오지 못했습니다/)).textContent).toContain("다시 시도하거나 다른 로그인 수단");
+    expect(screen.queryByLabelText("비밀번호")).toBeNull();
   });
 
   it("처음 온 사람도 여기서 가입되므로 수집 안내를 같이 띄운다", () => {
