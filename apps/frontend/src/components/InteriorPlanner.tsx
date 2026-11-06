@@ -56,10 +56,11 @@ export default function InteriorPlanner({ handoff, district, industry }: {
     reader.onerror = () => setError("이미지를 읽지 못했습니다.");
     reader.readAsDataURL(file);
   }
-  async function generate() {
+  /** consentNow — 동의 체크 직후엔 state 가 아직 false 라 체크 값을 직접 넘긴다 */
+  async function generate(consentNow = consent) {
     const token = loadToken();
     if (!token) { setError("이미지를 생성하려면 로그인하세요. 지시문 저장은 로그인 없이 할 수 있습니다."); return; }
-    if (!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consent || pending.current) return;
+    if (!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consentNow || pending.current) return;
     if (request.links.length > 5 || request.links.some((url) => { try { return !["http:", "https:"].includes(new URL(url).protocol); } catch { return true; } })) {
       setError("참고 링크는 http·https 주소로 최대 5개 입력하세요."); return;
     }
@@ -98,9 +99,15 @@ export default function InteriorPlanner({ handoff, district, industry }: {
         <img src={`data:${r.mime};base64,${r.data}`} alt={`사용자 제공 ${r.kind === "plan" ? "도면" : "참고 사진"}`} />
         <figcaption>사용자 제공 · {r.name} <button type="button" onClick={() => setReferences((old) => old.filter((x) => x.kind !== r.kind))}>제거</button></figcaption>
       </figure>)}</div>
-      <label className="interior-consent"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />이미지 생성 시 입력 내용·사진을 외부 AI(OpenAI)에 전송하는 데 동의합니다. 생성 비용은 서비스 설정에 따릅니다.</label>
+      <label className="interior-consent"><input type="checkbox" checked={consent} onChange={(e) => {
+        const checked = e.target.checked;
+        setConsent(checked);
+        // 동의하면 버튼 없이 바로 한 장 만든다(2026-11-06 사용자 결정). 조건을 바꿔도 자동으로 다시 만들지 않는다 —
+        // 생성마다 공급자 비용이 든다. 다시 만들기는 버튼으로.
+        if (checked && !result) void generate(true);
+      }} />이미지 생성에 입력 내용·사진을 외부 AI(OpenAI)로 보내는 데 동의합니다. 동의하면 바로 참고 이미지를 만듭니다. 생성 비용은 서비스 설정에 따릅니다.</label>
       <div className="interior-actions">
-        <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consent} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : "AI 참고 이미지 생성"}</button>
+        <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consent} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
         <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief, posting: handoff?.calculation ?? null }, null, 2))}>생성 지시문·비용 결과 저장</button>
         <a href="https://www.canva.com/ai/" target="_blank" rel="noopener noreferrer">Canva에서 직접 만들기 ↗</a>
       </div>

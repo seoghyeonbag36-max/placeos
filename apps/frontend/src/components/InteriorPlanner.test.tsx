@@ -8,7 +8,7 @@ import { installFetchStub } from "@/test/fetchStub";
 
 afterEach(() => { cleanup(); clearToken(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
-it("동의 전 생성 호출이 없고 명시한 조건만 인증 요청으로 보낸다", async () => {
+it("동의 전 생성 호출이 없고, 동의하면 버튼 없이 바로 명시한 조건만 인증 요청으로 보낸다", async () => {
   saveToken("test-only-token");
   const api = installFetchStub([{ match: /^\/api\/v1\/ai\/interior-preview$/, body: {
     source: "ai_generated", image_data_url: "data:image/png;base64,dGVzdA==", model: "test-only", note: "AI 생성 참고 이미지 · 실측 아님",
@@ -19,8 +19,13 @@ it("동의 전 생성 호출이 없고 명시한 조건만 인증 요청으로 �
   expect(generate.disabled).toBe(true);
   expect(api.calls).toHaveLength(0);
   fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(generate);
   await screen.findByAltText("AI 생성 인테리어 참고 이미지 · 실측·시공안 아님");
+  expect(api.matching(/interior-preview$/)).toHaveLength(1);
+  // 다시 만들기는 버튼으로만 — 동의를 껐다 켜도 결과가 있으면 자동으로 또 부르지 않는다
+  fireEvent.click(screen.getByRole("checkbox")); fireEvent.click(screen.getByRole("checkbox"));
+  expect(api.matching(/interior-preview$/)).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", { name: "다시 만들기" }));
+  await waitFor(() => expect(api.matching(/interior-preview$/)).toHaveLength(2));
   expect(api.matching(/interior-preview$/)[0].body).toMatchObject({ district: "garosugil", industry: "카페", style: "따뜻함", consent: true, references: [] });
   expect(api.matching(/interior-preview$/)[0].body).not.toHaveProperty("area_py");
   expect(api.matching(/interior-preview$/)[0].url).toBe("/api/v1/ai/interior-preview");
@@ -32,7 +37,6 @@ it("미설정·실패 시 이미지를 만들지 않고 지시문을 보존한�
   render(<InteriorPlanner district="garosugil" industry="카페" />);
   fireEvent.click(screen.getByRole("button", { name: "깔끔함" }));
   fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "AI 참고 이미지 생성" }));
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("쓸 수 없습니다"));
   expect(screen.queryByRole("img")).toBeNull();
   expect((screen.getByLabelText("분위기·색감") as HTMLInputElement).value).toBe("깔끔함");
@@ -43,8 +47,7 @@ it("미설정·실패 시 이미지를 만들지 않고 지시문을 보존한�
 function start() {
   render(<InteriorPlanner district="garosugil" industry="카페" />);
   fireEvent.click(screen.getByRole("button", { name: "깔끔함" }));
-  fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "AI 참고 이미지 생성" }));
+  fireEvent.click(screen.getByRole("checkbox"));  // 동의 = 바로 생성
 }
 
 it.each([
@@ -115,4 +118,26 @@ it("생성 중에는 버튼이 잠겨 두 번째 요청이 나가지 않는다",
   const busy = await screen.findByRole("button", { name: "이미지 생성 중…" }) as HTMLButtonElement;
   fireEvent.click(busy);
   expect(calls).toBe(1);
+});
+
+it("조건을 다 채우기 전에 동의하면 자동 생성하지 않고 버튼으로 만든다", async () => {
+  saveToken("test-only-token");
+  const api = installFetchStub([{ match: /\/interior-preview$/, body: {
+    source: "ai_generated", image_data_url: "data:image/png;base64,dGVzdA==", model: "test-only", note: "n",
+  } }]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(api.matching(/interior-preview$/)).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("button", { name: "AI 참고 이미지 생성" }));
+  await screen.findByAltText("AI 생성 인테리어 참고 이미지 · 실측·시공안 아님");
+});
+
+it("로그인하지 않았으면 동의해도 공급자를 부르지 않고 로그인 안내를 보인다", async () => {
+  const api = installFetchStub([]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("로그인하세요"));
+  expect(api.matching(/interior-preview$/)).toHaveLength(0);
 });
