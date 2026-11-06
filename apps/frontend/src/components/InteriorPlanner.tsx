@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { generateInterior, tierAvailable, type InteriorImage } from "@/lib/api";
+import { generateInterior, interiorErrorMessage, tierAvailable, type InteriorImage } from "@/lib/api";
 import { loadToken } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import "./InteriorPlanner.css";
@@ -65,7 +65,7 @@ export default function InteriorPlanner({ handoff, district, industry }: {
     }
     pending.current = true; setBusy(true); setError("");
     try { setResult({ image: await generateInterior(token, request), prompt: brief }); }
-    catch { setError("이미지를 생성하지 못했습니다. 서버의 생성 기능 설정·로그인·공급자 상태를 확인하세요. 지시문은 저장할 수 있습니다."); }
+    catch (err) { setError(interiorErrorMessage(err)); }
     finally { pending.current = false; setBusy(false); }
   }
   return <section className="interior-planner" aria-label="인테리어 참고안">

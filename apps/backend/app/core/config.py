@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     interior_images_enabled: bool = False
     openai_api_key: str = ""
     interior_image_model: str = "gpt-image-2.5-flare"
+    # 공급자 호출 전체 상한(초). Firebase Hosting 이 60초에 끊으므로 그보다 짧게 — 55 넘게 주면 55로 자른다.
+    interior_image_timeout_s: float = 50.0
     # 뒤에 오는 파일이 우선한다 — 백엔드 전용 .env 가 data/.env 를 덮는다.
     # 없는 파일은 조용히 건너뛴다(배포판에는 data/.env 가 올라가지 않는다).
     model_config = SettingsConfigDict(
