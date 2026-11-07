@@ -263,3 +263,42 @@ it("한도 429 는 서버 문구를 그대로 싣는다 — 「요청이 몰려 
   expect(screen.getByRole("alert").textContent).not.toContain("몰려");
   expect(interiorErrorMessage(new ApiError(429, null, "t"))).toContain("잠시 뒤");
 });
+
+// ── 생성 버튼이 잠긴 이유 (2026-11-07 「AI 이미지 생성칸이 안 눌린다」 제보) ─────────────────────────────
+function reasonsOf(): string[] {
+  const box = screen.queryByText("지금 AI 이미지를 만들 수 없는 이유")?.closest(".interior-why");
+  return box ? [...box.querySelectorAll("li")].map((li) => li.textContent ?? "") : [];
+}
+
+it("잠긴 버튼 옆에 무엇이 빠졌는지 보이고, 채우면 그 줄이 사라진다", async () => {
+  saveToken("test-only-token");
+  installFetchStub([
+    { match: QUOTA, body: { enabled: true, limit: 5, used: 0, remaining: 5, resets_at: "2026-11-08T00:00:00+09:00" } },
+  ]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  await screen.findByText(/오늘 남은 이미지 생성 5\/5회/);
+  const button = screen.getByRole("button", { name: "AI 참고 이미지 생성" }) as HTMLButtonElement;
+  expect(button.disabled).toBe(true);
+  expect(reasonsOf()).toEqual(["분위기·색감 키워드나 인테리어 콘셉트를 하나 이상 고르세요.", "위의 외부 AI(OpenAI) 전송 동의에 체크하세요."]);
+  expect(button.getAttribute("aria-describedby")).toBe(screen.getByText("지금 AI 이미지를 만들 수 없는 이유").closest(".interior-why")!.id);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  expect(reasonsOf()).toEqual(["위의 외부 AI(OpenAI) 전송 동의에 체크하세요."]);
+});
+
+it("서버에서 생성이 꺼져 있으면 그것을 잠긴 이유로 적는다 — 조건을 다 채워도 버튼은 잠겨 있다", async () => {
+  saveToken("test-only-token");
+  installFetchStub([
+    { match: QUOTA, body: { enabled: false, limit: 5, used: 0, remaining: 5, resets_at: "2026-11-08T00:00:00+09:00" } },
+  ]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  await screen.findByText(/아직 이미지 생성이 설정되지 않았습니다/);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(reasonsOf()).toEqual(["서버에서 이미지 생성이 꺼져 있습니다(운영자 설정 필요) — 생성 지시문 저장은 됩니다."]);
+  expect((screen.getByRole("button", { name: "AI 참고 이미지 생성" }) as HTMLButtonElement).disabled).toBe(true);
+});
+
+it("로그인하지 않았으면 로그인이 필요하다고 미리 알린다(버튼은 잠그지 않는다)", () => {
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  expect(reasonsOf()).toContain("로그인해야 이미지를 만들 수 있습니다.");
+});

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { generateInterior, getInteriorQuota, interiorErrorMessage, tierAvailable, type InteriorImage } from "@/lib/api";
 import { EXTRA_MAX, INTERIOR_KEYWORD_GROUPS, MAX_KEYWORDS, composeStyle } from "@/lib/interiorKeywords";
 import { loadToken } from "@/lib/session";
@@ -58,6 +58,19 @@ export default function InteriorPlanner({ handoff, district, industry }: {
   const brief = `AI 인테리어 참고안 · 실측 도면·시공안 아님\n상권: ${ownDistrict}\n업종: ${ownIndustry}\n자리: ${handoff?.unitName ?? "미선택"}\n면적: ${handoff?.area ?? "미확인"}평\n전략: ${strategy}\n분위기: ${style}\n보존할 구조·운영 제약: ${constraints || "미입력"}\n참고 링크(원문 미확인): ${links || "없음"}\n사용자 참고 이미지: ${references.map((r) => `${r.kind} ${r.name}`).join(", ") || "없음"}\n도면의 벽·기둥·출입구를 보존하고, 확인되지 않은 치수·수요·매출·법규 적합성을 주장하지 말 것.`;
   // 서버가 미설정이라고 답했거나 오늘 몫을 다 썼으면 생성을 부르지 않는다 — 지시문 저장은 그대로 열어 둔다.
   const blocked = quota !== null && (!quota.enabled || quota.remaining <= 0);
+  // 생성 버튼이 잠긴 이유를 버튼 옆에 그대로 보인다(2026-11-07 「AI 이미지 생성칸이 안 눌린다」 제보) —
+  // 잠긴 버튼만 보이면 고장으로 읽힌다. 이 목록이 비어야 버튼이 열린다(아래 disabled 와 같은 조건).
+  const lockReasons = [
+    ...(!ownDistrict.trim() ? ["상권을 입력하세요."] : []),
+    ...(!ownIndustry.trim() ? ["디자인할 업종을 입력하세요."] : []),
+    ...(!effectiveStyle.trim() ? ["분위기·색감 키워드나 인테리어 콘셉트를 하나 이상 고르세요."] : []),
+    ...(!consent ? ["위의 외부 AI(OpenAI) 전송 동의에 체크하세요."] : []),
+    ...(quota && !quota.enabled ? ["서버에서 이미지 생성이 꺼져 있습니다(운영자 설정 필요) — 생성 지시문 저장은 됩니다."] : []),
+    ...(quota && quota.enabled && quota.remaining <= 0 ? ["오늘 생성 한도를 다 썼습니다(한국 시간 0시 초기화)."] : []),
+  ];
+  // 로그인은 버튼을 잠그지 않는다 — 누르면 로그인 안내가 뜬다(기존 동작). 다만 미리 알린다.
+  const reasons = [...lockReasons, ...(loadToken() ? [] : ["로그인해야 이미지를 만들 수 있습니다."])];
+  const reasonsId = useId();
 
   function refreshQuota() {
     const token = loadToken();
@@ -183,10 +196,15 @@ export default function InteriorPlanner({ handoff, district, industry }: {
             setSaved("인테리어 조건을 이 브라우저에 저장했습니다. 검증 리포트에 포함됩니다.");
           } catch { setSaved("저장하지 못했습니다. 브라우저 저장 공간을 확인하세요."); }
         }}>리포트에 인테리어 조건 저장</button>
-        <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !effectiveStyle.trim() || !consent || blocked} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
+        <button type="button" disabled={lockReasons.length > 0} aria-describedby={reasons.length && !busy ? reasonsId : undefined}
+          onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
         <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief: `${brief}\n${designBrief}`, design, posting: handoff?.calculation ?? null }, null, 2))}>생성 지시문·비용 결과 저장</button>
         <a href="https://www.canva.com/ai/" target="_blank" rel="noopener noreferrer">Canva에서 직접 만들기 ↗</a>
       </div>
+      {!busy && reasons.length > 0 && <div className="interior-why" id={reasonsId}>
+        <b>지금 AI 이미지를 만들 수 없는 이유</b>
+        <ul>{reasons.map((r) => <li key={r}>{r}</li>)}</ul>
+      </div>}
     </fieldset>
     {error && <p role="alert">{error}</p>}
     {saved && <p role="status">{saved}</p>}
