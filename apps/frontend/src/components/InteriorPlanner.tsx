@@ -4,6 +4,8 @@ import { EXTRA_MAX, INTERIOR_KEYWORD_GROUPS, MAX_KEYWORDS, composeStyle } from "
 import { loadToken } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import "./InteriorPlanner.css";
+import InteriorDesignControls from "./InteriorDesignControls";
+import { defaultInteriorDesign, interiorDesignBrief } from "./interiorDesign";
 
 type Strategy = "고급화" | "가성비" | "기능중심";
 type Reference = { kind: "plan" | "photo"; mime: string; data: string; name: string };
@@ -27,6 +29,9 @@ export default function InteriorPlanner({ handoff, district, industry }: {
   const [category, setCategory] = useState("all");
   const [extra, setExtra] = useState("");
   const style = composeStyle(keywords, extra);
+  const [design, setDesign] = useState(defaultInteriorDesign);
+  const designBrief = interiorDesignBrief(design);
+  const effectiveStyle = [style, design.concept].filter(Boolean).join(" · ");
   const [strategy, setStrategy] = useState<Strategy>(
     STRATEGIES.find(([, label]) => label === handoff?.strategy)?.[1] ?? "가성비");
   const [constraints, setConstraints] = useState("");
@@ -45,9 +50,9 @@ export default function InteriorPlanner({ handoff, district, industry }: {
   const [ownIndustry, setOwnIndustry] = useState(selectedIndustry);
   const scenarios = handoff?.calculation?.result.scenarios;
   const request = {
-    district: ownDistrict, industry: ownIndustry, style, strategy,
+    district: ownDistrict, industry: ownIndustry, style: effectiveStyle, strategy,
     ...(handoff?.area ? { area_py: handoff.area } : {}),
-    constraints, links: links.split("\n").map((s) => s.trim()).filter(Boolean),
+    constraints: [constraints, designBrief].filter(Boolean).join("\n"), links: links.split("\n").map((s) => s.trim()).filter(Boolean),
     references: references.map(({ kind, mime, data }) => ({ kind, mime, data })), consent: true as const,
   };
   const brief = `AI 인테리어 참고안 · 실측 도면·시공안 아님\n상권: ${ownDistrict}\n업종: ${ownIndustry}\n자리: ${handoff?.unitName ?? "미선택"}\n면적: ${handoff?.area ?? "미확인"}평\n전략: ${strategy}\n분위기: ${style}\n보존할 구조·운영 제약: ${constraints || "미입력"}\n참고 링크(원문 미확인): ${links || "없음"}\n사용자 참고 이미지: ${references.map((r) => `${r.kind} ${r.name}`).join(", ") || "없음"}\n도면의 벽·기둥·출입구를 보존하고, 확인되지 않은 치수·수요·매출·법규 적합성을 주장하지 말 것.`;
@@ -92,14 +97,17 @@ export default function InteriorPlanner({ handoff, district, industry }: {
   async function generate(consentNow = consent) {
     const token = loadToken();
     if (!token) { setError("이미지를 생성하려면 로그인하세요. 지시문 저장은 로그인 없이 할 수 있습니다."); return; }
-    if (!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consentNow || pending.current || blocked) return;
+    if (!ownDistrict.trim() || !ownIndustry.trim() || !effectiveStyle.trim() || !consentNow || pending.current || blocked) return;
+    if (request.constraints.length > 1500 || effectiveStyle.length > 500) {
+      setError("선택한 디자인과 직접 입력한 조건이 너무 깁니다. 구조·운영 제약이나 분위기를 줄여주세요. 지시문은 저장할 수 있습니다."); return;
+    }
     if (request.links.length > 5 || request.links.some((url) => { try { return !["http:", "https:"].includes(new URL(url).protocol); } catch { return true; } })) {
       setError("참고 링크는 http·https 주소로 최대 5개 입력하세요."); return;
     }
     pending.current = true; setBusy(true); setError("");
     try {
       const image = await generateInterior(token, request);
-      setResult({ image, prompt: brief });
+      setResult({ image, prompt: `${brief}\n${designBrief}` });
       if (image.daily_limit != null && image.remaining_today != null) {
         setQuota({ enabled: true, limit: image.daily_limit, remaining: image.remaining_today });
       }
@@ -121,6 +129,7 @@ export default function InteriorPlanner({ handoff, district, industry }: {
       })}</tbody></table></div>}
     <fieldset disabled={busy}>
       <legend>사용자 조건</legend>
+      <InteriorDesignControls value={design} onChange={setDesign} />
       <div className="interior-fields">
         <label>상권<input value={ownDistrict} maxLength={100} onChange={(e) => setOwnDistrict(e.target.value)} /></label>
         <label>디자인할 업종<input value={ownIndustry} maxLength={100} onChange={(e) => setOwnIndustry(e.target.value)} /></label>
@@ -170,12 +179,12 @@ export default function InteriorPlanner({ handoff, district, industry }: {
       <div className="interior-actions">
         <button type="button" onClick={() => {
           try {
-            localStorage.setItem(`placeos.interior-brief.${handoff?.districtId ?? district ?? ""}`, JSON.stringify({ brief, unitId: handoff?.unitId ?? null }));
+            localStorage.setItem(`placeos.interior-brief.${handoff?.districtId ?? district ?? ""}`, JSON.stringify({ brief: `${brief}\n${designBrief}`, design, source: "user_input", unitId: handoff?.unitId ?? null }));
             setSaved("인테리어 조건을 이 브라우저에 저장했습니다. 검증 리포트에 포함됩니다.");
           } catch { setSaved("저장하지 못했습니다. 브라우저 저장 공간을 확인하세요."); }
         }}>리포트에 인테리어 조건 저장</button>
-        <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consent || blocked} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
-        <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief, posting: handoff?.calculation ?? null }, null, 2))}>생성 지시문·비용 결과 저장</button>
+        <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !effectiveStyle.trim() || !consent || blocked} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
+        <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief: `${brief}\n${designBrief}`, design, posting: handoff?.calculation ?? null }, null, 2))}>생성 지시문·비용 결과 저장</button>
         <a href="https://www.canva.com/ai/" target="_blank" rel="noopener noreferrer">Canva에서 직접 만들기 ↗</a>
       </div>
     </fieldset>
