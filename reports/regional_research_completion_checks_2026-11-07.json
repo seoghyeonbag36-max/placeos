@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-11-07T12:35:45+09:00",
+  "status": "waiting_for_collection",
+  "source": "건축HUB 원본·소상공인 상가정보 원본",
+  "seed": false,
+  "plan_sha256": "dc59c5c987a27f70389bd88bb73874b540b7701b74655a388603cfbd45a7d370",
+  "full_uncached_validation": {
+    "exit_code": 0,
+    "locations": 206,
+    "ledger_gold_complete": 42,
+    "waiting_raw": 164,
+    "normalized_unique_pnus": 14814,
+    "serving_promoted": 0,
+    "page_gold_pending": 206
+  },
+  "tests": {
+    "passed": 49,
+    "files": [
+      "data/tests/test_regional_research_ledgers.py",
+      "data/tests/test_regional_ledger_gold.py",
+      "data/tests/test_regional_research_release.py",
+      "data/tests/test_busan_research.py",
+      "data/tests/test_verified_file_cache.py",
+      "data/tests/test_regional_hub_candidates.py"
+    ]
+  },
+  "active_unique_pnus": 28273,
+  "active_completed": {"expos": 20548, "floors": 28273},
+  "remaining": {"expos": 7725, "floors": 0},
+  "scope_ready": false,
+  "scope_reason": "GOLD_LOCATION_INCOMPLETE",
+  "ac_connected_at_check": false,
+  "retry_after": "2026-11-08T00:05:00+09:00",
+  "sequence": ["gwangju_jeonju", "busan"],
+  "gyeonggi": "paused",
+  "second_stage": {
+    "task": "서빙 거점 Posting·Program 입력 결손 해소",
+    "status": "waiting_for_first_stage"
+  },
+  "note": "검증 시점의 기록이다. 대장 관측 Gold 완료는 서비스용 Page Gold·상권 등록 완료가 아니다."
+}
