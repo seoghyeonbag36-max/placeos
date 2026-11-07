@@ -25,7 +25,7 @@ def test_events_route_does_not_call_llm(monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["district_id"] == "garosugil"
-    assert body["events_source"] in ("seoul-open-data", "seed")
+    assert body["events_source"] in ("seoul-open-data", "public-open-data", "seed")
     assert isinstance(body["events"], list)
     assert "online_contents" not in body
 

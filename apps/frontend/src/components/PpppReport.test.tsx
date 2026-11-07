@@ -21,3 +21,22 @@ it("선택 자리와 계산 출처를 보고서에 담고 없는 성과를 만�
   expect(print).toHaveBeenCalledOnce();
   popup.mockRestore();
 });
+
+it("(2026-11-07 Program 리뉴얼) 네트워킹 메모와 담은 지원 공고를 사용자 입력·원문 확인 전제로 싣는다", () => {
+  localStorage.setItem("placeos.program.network.test", JSON.stringify({ checked: ["상인회나 상점가 모임이 있나요?"], memo: "월 회비 있음" }));
+  localStorage.setItem("placeos.program.support.test", JSON.stringify([
+    { id: "ks-1", title: "예비창업 사업화 지원", source_label: "K-Startup", org: "창업진흥원", end: "2026-11-30", url: "https://www.k-startup.go.kr/x" },
+  ]));
+  try {
+    render(<PpppReport districtId="test" />);
+    fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
+    const article = screen.getByRole("article", { name: "PPPP 보고서 미리보기" });
+    expect(article.textContent).toContain("확인함 · 상인회나 상점가 모임이 있나요?");
+    expect(article.textContent).toContain("월 회비 있음");
+    expect(article.textContent).toContain("들은 말은 확인된 사실이 아닙니다");
+    expect(article.textContent).toContain("예비창업 사업화 지원 · K-Startup · 창업진흥원");
+    expect(article.textContent).toContain("자격·선정·금액은 원문에서 확인합니다");
+  } finally {
+    localStorage.clear();
+  }
+});

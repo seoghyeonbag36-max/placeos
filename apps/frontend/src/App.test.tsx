@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { WorkspaceApp } from "@/App";
 import { saveToken, clearToken } from "@/lib/session";
 const App = () => <WorkspaceApp token="jwt.test.token" initialBusiness={{ status: "browsing" }} />;
@@ -133,6 +133,12 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     // 계산 결과는 「자리와 비용 조건」 화면 바로 아래에 나온다(2026-11-07 — 별도 「계산 결과」 탭 없음)
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
+    // 2026-11-07 리뉴얼 — 인계는 그 버튼이 약속한 「가설 검증」부터 연다. 캠페인 폼은 「오프라인 마케팅 솔루션」에 있고
+    // 같은 인계를 받아 업종을 채운다(탭을 옮겨도 인계가 사라지지 않는다).
+    const program = await screen.findByRole("navigation", { name: "Program 네 기능" }, TAB_LOAD);
+    expect(within(program).getByRole("button", { name: "가설 검증" }).getAttribute("aria-current")).toBe("page");
+    expect(api.count(/program\/campaigns$/)).toBe(0);   // 원장은 그 탭을 열 때 부른다
+    fireEvent.click(within(program).getByRole("button", { name: "오프라인 마케팅 솔루션" }));
     await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);
     expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("카페");
     expect((screen.getByRole("textbox", { name: "실제 영업 주소 *" }) as HTMLInputElement).value).toBe("");

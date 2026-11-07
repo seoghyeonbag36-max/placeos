@@ -25,10 +25,10 @@ try:
 except ImportError:  # pragma: no cover
     requests = None
 
+from data.collectors import naver_api
 from data.config.seoul_districts import DISTRICTS
 
 _IG_GRAPH = "https://graph.facebook.com/v19.0"
-_NAVER_BLOG = "https://openapi.naver.com/v1/search/blog.json"
 
 
 def _normalize(raw: dict[str, float]) -> dict[str, float]:
@@ -53,11 +53,16 @@ def _ig_hashtag_count(tag: str, token: str, ig_user: str) -> int:
         return 0
 
 
-def _naver_blog_total(query: str, cid: str, secret: str) -> int:
-    """네이버 블로그 검색 결과 총건수(보조 SNS 신호). 실패 시 0."""
+def _naver_blog_total(query: str, cid: str = "", secret: str = "") -> int:
+    """네이버 블로그 검색 결과 총건수(보조 SNS 신호). 실패 시 0.
+
+    주소·헤더는 naver_api 가 고른다(HUB 키가 있으면 HUB — 2026-11-08). cid·secret 인자는 옛 호출부 호환용이다.
+    """
+    req = naver_api.search_request("blog")
+    if req is None:
+        return 0
     try:
-        r = requests.get(_NAVER_BLOG, headers={"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": secret},
-                        params={"query": query, "display": 1}, timeout=20)
+        r = requests.get(req[0], headers=req[1], params={"query": query, "display": 1}, timeout=20)
         return int(r.json().get("total", 0))
     except Exception:
         return 0
@@ -66,8 +71,9 @@ def _naver_blog_total(query: str, cid: str, secret: str) -> int:
 def fetch_sns_mentions() -> dict[str, float]:
     """구별 SNS 업로드 강도(해시태그 게시물 + 블로그 언급)를 0~100 정규화 반환."""
     token, ig_user = os.getenv("INSTAGRAM_ACCESS_TOKEN"), os.getenv("IG_USER_ID")
-    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
-    if requests is None or not ((token and ig_user) or (cid and secret)):
+    cid, secret = os.getenv("NAVER_CLIENT_ID", ""), os.getenv("NAVER_CLIENT_SECRET", "")
+    has_naver = naver_api.search_request("blog") is not None
+    if requests is None or not ((token and ig_user) or has_naver):
         return _proxy_fallback()
 
     raw: dict[str, float] = {}

@@ -7,7 +7,6 @@ import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
 import { IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import ConsolePages from "@/components/ConsolePages";
 import { ExploreStepHeader, ExploreStepFooter } from "@/components/ExploreStep";
 import type { PostingDraft } from "@/pages/PostingConsole";
 import type { TrackKey } from "@/design/tokens/colors";
@@ -38,9 +37,8 @@ const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
 const ProgramStudio = lazy(loadProgram);
-const ValidationStudio = lazy(() => import("@/pages/ProgramStudio"));
-const EventLinkPlanner = lazy(() => import("@/components/EventLinkPlanner"));
-const PpppReport = lazy(() => import("@/components/PpppReport"));
+// 검증 계획(ProgramStudio)·행사 연계·결과 리포트는 2026-11-07 리뉴얼로 Program 허브(pages/CampaignStudio) 안의
+// 「오프라인 마케팅 솔루션」·「가설 검증」 탭으로 옮겼다 — App 은 Program 레일에서 그 모듈 하나만 그린다(PPPP 가드).
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -65,7 +63,7 @@ const PRELOAD_DELAY_MS = 1500;
  *   Platform → PlatformConsole  (상권 정체성 + 자리별 업종)
  *   Page     → MapShell         (공실 히트맵 4레이어 + 2D 층 스택·거리뷰)
  *   Posting  → PostingConsole   (3-Tier 비용-효용 + 권리금 입력 계약)
- *   Program  → CampaignStudio   (오프라인 캠페인 실행·재참여·재결제 기록)
+ *   Program  → CampaignStudio   (Program 허브 — 네트워킹·지원 프로그램·오프라인 마케팅 솔루션·가설 검증, 2026-11-07)
  *
  * 2026-08-29: 상단 네비바를 **좌측 아이콘 레일**로 옮겼다(네이버지도식).
  *
@@ -443,24 +441,17 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
           )}
+          {/* 패널 이름표는 「오프라인 캠페인」 그대로다 — 사용자 결정(2026-11-08: 「오프라인 캠페인은 오프라인 캠페인으로」).
+              실화면 검사(scripts/pppp_screens_check.py P2)가 Program 화면을 이 이름으로 찾는다 → docs/feature-program.md §0-W */}
           {view === "program" && (
             <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" />}
               footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
-              <ConsolePages key={programHandoff?.requestId ?? "direct"} label="검증과 실행" pages={[
-                { id: "campaign", label: "캠페인 운영", description: "준비한 캠페인을 실행하고 참여와 결과를 기록하세요.", content:
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} /> },
-                { id: "plan", label: "검증 계획", description: "아이템과 가설을 정하고, 작게 확인할 계획을 세우세요.", content:
-              <ValidationStudio key={`brief-${programHandoff?.requestId ?? "direct"}`} mapDistrictId={districtId}
-                handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} /> },
-                { id: "events", label: "온 · 오프라인 행사 연계", description: "상권 행사와 온라인 홍보·방문 혜택을 함께 계획하세요.", content:
-                  <EventLinkPlanner key={districtId} districtId={districtId} /> },
-                { id: "report", label: "검증 리포트", description: "Platform·Page·Posting·Program의 결과와 보완 사항을 종합해 확인하세요.", content:
-                  <PpppReport key={`${districtId}:${programHandoff?.requestId ?? "direct"}`} districtId={districtId}
-                    handoff={reportHandoff?.districtId === districtId ? reportHandoff : programHandoff?.districtId === districtId ? programHandoff : undefined} /> },
-              ]} />
+                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal}
+                industryKey={customIndustry ? undefined : workIndustry?.key}
+                industryLabel={customIndustry ?? workIndustry?.label}
+                reportHandoff={reportHandoff?.districtId === districtId ? reportHandoff : undefined} />
             </TrackMapFrame>
           )}
         </Suspense>

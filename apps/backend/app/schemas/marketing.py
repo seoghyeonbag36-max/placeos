@@ -78,6 +78,12 @@ class ProgramBrief(BaseModel):
     budget_krw_max: int | None = Field(default=None, gt=0)
     differentiators: list[str] = Field(default_factory=list, max_length=8)  # 차별점 — 기업 주장
     tier: str | None = None          # Posting 3-Tier 선택(premium/value/factory)
+    # (2026-11-07 리뉴얼 · 가설 검증) 목표선을 지어내지 않고 Posting 에서 끌어낸다.
+    # 화면이 Posting 세부 업종 계산(월 손익분기 매출 ÷ (단가 × 영업일))으로 채운다 — 창업자가 넣은 조건의 결과다.
+    break_even_daily: int | None = Field(default=None, gt=0, le=1_000_000)   # 하루 손익분기 건수
+    break_even_basis: str | None = Field(default=None, max_length=200)      # 그 계산 근거 한 줄
+    # 기각선 — 목표선의 몇 %. **창업자가 시작 전에 고른 값**이다(도출값이 아니다). 없으면 판정을 보류한다.
+    reject_ratio: int | None = Field(default=None, ge=10, le=100)
 
     @model_validator(mode="after")
     def _budget_band_is_complete(self) -> "ProgramBrief":

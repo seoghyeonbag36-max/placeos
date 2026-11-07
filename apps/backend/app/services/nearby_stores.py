@@ -171,6 +171,21 @@ def _colocated_top(slug: str, industry: str | None, detail_key: str | None) -> t
     return ((scope.get("industries") or {}).get(industry) or {}).get("top") or [], False
 
 
+def colocated_top(district_id: str, industry: str | None) -> list[dict]:
+    """함께 모이는 업종 상위(관측 lift) — Program 네트워킹·실행 카드가 「보완 업종 이웃」으로 쓴다.
+
+    도시 범위 Gold 라 그 도시가 이 업종을 못 재면 빈 목록이다. 관측일 뿐 인과·매출 효과가 아니다
+    (platform_industry_colocation.json 의 note).
+    """
+    top, _ = _colocated_top(district_id, industry, None)
+    return [{"key": t.get("key"), "label": t.get("label"), "lift": t.get("lift"), "n_both": t.get("n_both")}
+            for t in top]
+
+
+def colocation_note() -> str | None:
+    return _coloc_doc(_stamp(_COLOC)).get("note")
+
+
 @lru_cache(maxsize=32)
 def _relations(slug: str, mtime: float, industry: str | None, detail_key: str | None) -> tuple:
     """행마다 관계 코드. 같은 거점·업종에는 다시 계산하지 않는다."""

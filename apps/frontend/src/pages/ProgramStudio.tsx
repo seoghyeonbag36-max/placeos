@@ -7,7 +7,7 @@ import { caveatKind, MARK } from "@/lib/districtCaveat";
 import LoginHint from "@/components/LoginHint";
 import SavedResults, { SaveResultButton } from "@/components/SavedResults";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
-import { generateProgram, getDistrictEvents, listDistricts, MODE_LABEL, STAGE_LABEL, VALIDATION_MODES } from "@/lib/api";
+import { generateProgram, getDistrictEvents, isRealEventsSource, listDistricts, MODE_LABEL, STAGE_LABEL, VALIDATION_MODES } from "@/lib/api";
 import type {
   ChannelPlan, DistrictSummary, FounderStage, MarketingEvent, ProgramBriefInput, ProgramPlan,
   ValidationMode, ValidationSignal,
@@ -21,6 +21,7 @@ import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMa
 import { useSignedIn } from "@/hooks/useSignedIn";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import type { BusinessGoal } from "@/lib/businessProfile";
+import { breakEvenDaily } from "@/lib/breakEven";
 import "./ProgramStudio.css";
 
 /**
@@ -154,8 +155,16 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const halfBudget = (budgetMin === undefined) !== (budgetMax === undefined);
   // 인계된 자리는 **같은 거점일 때만** 싣는다. 거점을 바꿨는데 unit_id 가 남으면 다른 상권의 공실을 인용한다.
   const siteUnitId = arrival && arrival.districtId === form.districtId ? arrival.unitId : undefined;
+  // 목표선(2026-11-07 리뉴얼) — 같은 거점으로 넘어온 Posting 계산에서만 끌어낸다. 지어낸 기본값은 없다.
+  const breakEven = useMemo(() => breakEvenDaily(siteUnitId ? arrival?.calculation?.result.economics : null),
+    [arrival, siteUnitId]);
+  const [rejectRatio, setRejectRatio] = useState("");
+  const ratioNumber = Number(rejectRatio.trim());
+  const rejectRatioValue = rejectRatio.trim() && Number.isInteger(ratioNumber) && ratioNumber >= 10 && ratioNumber <= 100
+    ? ratioNumber : undefined;
+  const badRatio = rejectRatio.trim() !== "" && rejectRatioValue === undefined;
 
-  const canSubmit = form.item.trim() !== "" && form.category.trim() !== "" && !halfBudget && !busy;
+  const canSubmit = form.item.trim() !== "" && form.category.trim() !== "" && !halfBudget && !badRatio && !busy;
 
   const hub = (districts ?? []).find((d) => d.id === form.districtId);
   useReportCapture("program", (form.districtId || mapDistrictId) && form.item.trim() ? {
@@ -239,6 +248,9 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
       budget_krw_max: budgetMax,
       differentiators: differentiators.length ? differentiators : undefined,
       tier: arrival?.strategy ?? undefined,
+      break_even_daily: breakEven?.count,
+      break_even_basis: breakEven ? `${breakEven.unit} · ${breakEven.basis}` : undefined,
+      reject_ratio: breakEven ? rejectRatioValue : undefined,
     };
     try {
       const generated = await generateProgram(brief);
@@ -392,6 +404,19 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
             </Field>
           </Fold>
 
+          {/* 판정 기준 — 목표선은 Posting 손익분기에서만, 기각선은 창업자가 시작 전에 고른다(2026-11-07 리뉴얼) */}
+          <div className="be-target" role="group" aria-label="판정 기준">
+            {breakEven ? <>
+              <p><b>목표선</b> 하루 {breakEven.unit} {breakEven.count.toLocaleString("ko-KR")}건 — Posting 손익분기({breakEven.basis})</p>
+              <Field label="기각선(목표선의 %)" hint="시작 전에 고르는 값이다 — 결과를 보고 기준을 맞추지 않기 위해. 비우면 판정을 보류한다.">
+                <input inputMode="numeric" aria-label="기각선(목표선의 %)" value={rejectRatio}
+                  onChange={(e) => { setRejectRatio(e.target.value); discardResult(); }} placeholder="예: 80" />
+              </Field>
+              {badRatio && <div className="warn">기각선은 10~100 사이 정수로 넣는다.</div>}
+            </> : <p className="muted">목표선은 지어내지 않습니다 — Posting에서 세부 업종 운영 계산(단가·영업일·비용)을 하고
+              「이 자리로 검증 program 만들기」로 오면 하루 손익분기 건수가 목표선이 됩니다.</p>}
+          </div>
+
           <Button type="submit" className="primary" disabled={!canSubmit}>
             {busy ? `생성 중… ${elapsed}초` : "검증 program 생성"}
           </Button>
@@ -492,7 +517,7 @@ function useProgramMap({ districtId, districts, arrival, eventId, onPickEvent }:
 
   const markers = useMemo<MapMarkerItem[]>(() => {
     const out: MapMarkerItem[] = [];
-    const seed = current?.source !== "seoul-open-data";
+    const seed = !isRealEventsSource(current?.source);
     for (const e of split.upcoming) {
       const on = e.id === eventId;
       out.push({
@@ -539,7 +564,7 @@ function OfflinePlaces({ data, selectedId, onSelect }: {
 }) {
   const { events, ended, source } = data;
   const selected = events.find((e) => e.id === selectedId) ?? null;
-  const seed = source !== "seoul-open-data";
+  const seed = !isRealEventsSource(source);
   return (
     <section className="offline-places" aria-label="오프라인 연계 후보">
       <div className="op-head">

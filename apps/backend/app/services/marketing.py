@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import csv
+import math
 import re
 import time
 from pathlib import Path
@@ -40,13 +41,31 @@ _MODE_SIGNAL = {
     "actual_open": ("월 손익·손익분기 달성", "POS 실매출과 임대료·인건비·재료비를 같은 기간으로 기록",
                     "직접 입력한 비용 기준 손익분기 매출 이상(비용 미입력 시 목표 미설정)",
                     "실매출이 손익분기 매출 미만이면 비용·가격·운영 조건을 재검토한다"),
-    "popup": ("일 방문객 수", "입장 카운터(또는 결제 건수) 일별 기록",
-              "일 60명", "기간 누적이 목표선의 70% 미만이면 이 상권 가설을 기각한다"),
-    "soft_open": ("객단가·좌석 회전", "POS 영수증 건당 금액과 시간대별 테이블 회전 기록",
-                  "객단가 12,000원 · 피크 회전 2.0회", "둘 중 하나라도 70% 미만이면 운영안을 고친다"),
+    # 2026-11-07 리뉴얼 — 팝업·가오픈·MVP 의 목표선을 **지어내지 않는다**. 예전 고정값(「일 60명」·「객단가
+    # 12,000원」·「전환율 8%」·「70%/4% 미만 기각」)은 그 자리의 본전과 무관한 숫자였다(KPI 규칙 1 — 임계값을
+    # 발명하지 않는다). 팝업·가오픈은 Posting 하루 손익분기 건수(브리프 break_even_daily)에서 끌어내고,
+    # 없으면 「목표선 미정 — 정하기 전에는 판정하지 않는다」로 둔다(_break_even_target).
+    "popup": ("하루 결제 건수", "결제 건수(POS·간편결제) 일별 기록 — 입장 카운터를 함께 둔다", None, None),
+    "soft_open": ("하루 결제 건수·객단가", "POS 영수증 건수·건당 금액과 시간대별 회전 기록", None, None),
     "mvp": ("사전 예약·사전주문 전환율", "신청 폼 유입 대비 결제·예약 완료 비율",
-            "전환율 8%", "전환율이 4% 미만이면 아이템 가설을 기각한다"),
+            "목표 전환율 — 시작 전에 정한다(이 화면은 값을 지어내지 않는다)",
+            "시작 전에 정한 목표선과 기각선으로 판정한다 — 기준을 정하기 전에는 판정하지 않는다"),
 }
+
+
+def _break_even_target(brief: dict) -> tuple[str, str]:
+    """팝업·가오픈의 (목표선, 기각 조건) — Posting 하루 손익분기에서만 숫자를 끌어낸다."""
+    n, r = brief.get("break_even_daily"), brief.get("reject_ratio")
+    if not n:
+        return ("목표선 미정 — Posting 세부 업종 계산(단가·영업일·비용)을 하면 하루 손익분기 건수가 목표선이 된다",
+                "목표선과 기각선을 시작 전에 정하기 전에는 판정하지 않는다(결과를 보고 기준을 맞추지 않기 위해)")
+    basis = f"Posting 손익분기 — {brief['break_even_basis']}" if brief.get("break_even_basis") else "Posting 손익분기"
+    goal = f"하루 결제 {int(n):,}건({basis})"
+    if r:
+        cut = math.ceil(int(n) * int(r) / 100)
+        return goal, (f"기간 하루 평균 결제가 {cut:,}건(목표선의 {int(r)}% — 시작 전에 고른 값) 미만이면 "
+                      "이 상권 가설을 기각한다")
+    return goal, "기각선 비율을 시작 전에 정한다(미정) — 정하기 전에는 판정하지 않는다"
 
 # 상권 컨텍스트 결합용 district_id → gold 슬러그 매핑.
 # 2026-08-01: 거점 id 와 gold 슬러그가 같은 54거점이 build_program13_context 로 모두
@@ -141,6 +160,8 @@ _SYSTEM_PROMPT = """너는 PlaceOS의 Program(검증 프로그램 설계) 생성
   결과를 보고 나서 성공이었다고 말을 맞추게 된다.
 - 목표선의 숫자는 상권 컨텍스트의 유동·업종 분포에서 끌어내고, 그 출처를 method 나
   target 에 밝힌다. 금액 목표를 적을 때는 브리프 예산 밖의 금액을 지어내지 않는다.
+- 브리프에 **Posting 하루 손익분기 건수**가 있으면 결제 건수 목표선은 그 값을 쓰고 출처를
+  「Posting 손익분기」로 밝힌다. 브리프에 기각선 비율이 있으면 그 비율로 기각 조건을 쓴다.
 
 한국어로 작성한다."""
 
@@ -409,8 +430,13 @@ def _events_context(district_id: str | None, gap_band: str | None = None) -> str
         items.append(f"{e.get('n')}({when} · {where})")
 
     head = "상권 행사(공공 문화행사 실데이터, 걸어갈 거리 안)"
+    # 전국 행사 Gold(문화포털·TourAPI)에는 시각(tm)이 없다 — 모르는 시각을 「안 열린다」로 단정하지 않는다.
+    untimed = [e for e in walkable if not e.get("tm")]
     if hit:
         head += f" — 아래는 **빈 시간대({_TMZON_LABEL.get(gap_band, gap_band)})에 열리는** 행사다"
+    elif gap_band and untimed:
+        head += (f" — 빈 시간대({_TMZON_LABEL.get(gap_band, gap_band)})에 열리는지 확인된 행사는 없다"
+                 f"(시각 정보가 없는 행사 {len(untimed)}건은 판단에서 뺐다). 시간대를 맞춰 연계했다고 쓰지 말 것")
     elif gap_band:
         head += (f" — 빈 시간대({_TMZON_LABEL.get(gap_band, gap_band)})에 열리는 행사는 없다. "
                  "시간대를 맞춰 연계했다고 쓰지 말 것")
@@ -627,10 +653,14 @@ def _rule_stub(brief: dict, findings: list | None = None) -> dict:
             rationale="정식 영업을 위한 자리 사용 조건을 사전에 확인한다",
         )
     name, method, goal, decision = _MODE_SIGNAL.get(mode, _MODE_SIGNAL["popup"])
+    if mode in ("popup", "soft_open"):
+        goal, decision = _break_even_target(brief)
     signals = [
         {"name": name, "method": method, "target": goal, "decision": decision},
         {"name": "가설 확인 응답", "method": "현장 설문 1문항 — 브리프의 가설을 그대로 묻는다",
-         "target": "응답 50건", "decision": "긍정 응답이 절반 미만이면 가설을 다시 세운다"},
+         # 응답 수·긍정 비율도 지어내지 않는다(예전 「응답 50건」·「절반 미만」 — 11-08 같은 원칙으로 걷어냄)
+         "target": "응답 수와 긍정 비율 — 시작 전에 정한다(이 화면은 값을 지어내지 않는다)",
+         "decision": "시작 전에 정한 긍정 비율에 못 미치면 가설을 다시 세운다 — 기준을 정하기 전에는 판정하지 않는다"},
     ]
     return {
         **_identity(brief),
@@ -761,11 +791,24 @@ def _marketing_base(district_id: str) -> dict | None:
 
 
 def _events_unavailable_note(district_id: str) -> str | None:
-    """이 거점의 도시에 문화행사 원천이 없으면 그 사유. 있으면 None."""
+    """이 거점에 행사 원천이 없으면 그 사유. 있으면 None.
+
+    2026-11-07 부터 전국 행사 Gold(문화포털·TourAPI)가 서울 밖 거점도 덮는다 — 덮으면 원천이 있다.
+    """
     d = svc.get_district(district_id)
-    if not d or svc.page_city(d).has_city_events:
+    if not d or svc.page_city(d).has_city_events or events.national_covers(district_id):
         return None
     return f"행사 자료는 서울만 있어요 — {svc.page_city(d).short} 상권은 수집하지 않았어요."
+
+
+def _real_events_source(district_id: str) -> str:
+    """실데이터 행사의 출처 표기.
+
+    "seoul-open-data"  서울 문화행사 Gold 만 이 거점을 덮는다(전국 Gold 미적재)
+    "public-open-data" 전국 행사 Gold(문화포털·TourAPI)가 이 거점을 덮는다 — 서울 거점은 두 원천을 합친다
+    행사마다 `src` 로 어느 원천인지 다시 밝힌다(services/events.SRC_LABEL).
+    """
+    return "public-open-data" if events.national_covers(district_id) else "seoul-open-data"
 
 
 def get_district_events(district_id: str) -> dict | None:
@@ -786,7 +829,8 @@ def get_district_events(district_id: str) -> dict | None:
     if real_events is None:
         return {"district_id": district_id, "events": base["events"],
                 "events_source": "seed" if base["events"] else "none", "events_note": None}
-    return {"district_id": district_id, "events": real_events, "events_source": "seoul-open-data", "events_note": None}
+    return {"district_id": district_id, "events": real_events,
+            "events_source": _real_events_source(district_id), "events_note": None}
 
 
 def get_district_marketing(district_id: str, *, allow_llm: bool = False) -> dict | None:
@@ -817,7 +861,7 @@ def get_district_marketing(district_id: str, *, allow_llm: bool = False) -> dict
     elif real_events is None:
         base = {**base, "events_source": "seed"}
     else:
-        base = {**base, "events": real_events, "events_source": "seoul-open-data"}
+        base = {**base, "events": real_events, "events_source": _real_events_source(district_id)}
 
     ctx = _district_context(district_id)
     if allow_llm and settings.llm_api_key and ctx:

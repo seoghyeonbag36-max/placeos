@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends
 
 from app.api.deps import track_access
 from app.api.v1 import (
-    admin, ai, auth, benchmark, buildings, campaigns, corridors, districts, feedback, founder, heatmap, marketing, metrics, travel,
-    visitor_feedback,
+    admin, ai, auth, benchmark, buildings, campaigns, corridors, districts, feedback, founder, heatmap, marketing, metrics, program,
+    travel, visitor_feedback,
 )
 
 # 분석 API 공통 — 자격증명이 오면 신원을 밝히고 사용량을 남긴다(익명은 그대로 통과).
@@ -13,6 +13,8 @@ _tracked = [Depends(track_access)]
 
 api_router = APIRouter()
 api_router.include_router(campaigns.router, prefix="/program/campaigns", tags=["program"])
+# Program 리뉴얼(2026-11-07) — 지원 프로그램·네트워킹·실행 카드. 공개 분석 API 라 계측을 건다.
+api_router.include_router(program.router, prefix="/program", tags=["program"], dependencies=_tracked)
 api_router.include_router(founder.router, prefix="/founder", tags=["founder"], dependencies=_tracked)
 api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmark"], dependencies=_tracked)
 api_router.include_router(travel.router, prefix="/travel", tags=["travel"], dependencies=_tracked)

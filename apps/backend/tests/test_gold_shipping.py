@@ -39,6 +39,8 @@ _SHIPPED = [
     "platform_industry_floor_fit.json",
     "platform_vacancy_forecast.json",
     "platform_events.json",
+    # 2026-11-07 추가 — services/events 가 서울 문화행사와 합쳐 서빙하는 전국 행사(문화포털·TourAPI).
+    "platform_events_national.json",
     "platform_page_footfall.json",
     "page_footfall_hourly.json",
     # 2026-08-25 추가 — posting_inputs._unit_jipgyegu_flpop 이 읽는다.

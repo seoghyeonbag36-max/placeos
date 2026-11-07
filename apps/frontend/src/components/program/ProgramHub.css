@@ -1,0 +1,31 @@
+/* Program 허브(2026-11-07 리뉴얼) — 네 기능 탭 안의 패널. 토큰만 쓴다(src/styles/tokens.css). */
+.program-hub > header p { overflow-wrap: anywhere; }
+.program-panel { display: grid; gap: var(--sp-3); min-width: 0; }
+.program-panel h3 { margin: var(--sp-3) 0 0; font-size: var(--fs-heading); }
+.program-panel h4 { margin: 0; font-size: var(--fs-body); }
+.program-panel-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--sp-3); }
+.program-inline { display: inline-grid; gap: var(--sp-1); font-size: var(--fs-caption); color: var(--muted); }
+.program-inline select { min-width: 10rem; }
+.program-note { margin: 0; color: var(--muted); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.program-sources { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; font-size: var(--fs-caption); }
+.program-sources li { padding: var(--sp-1) var(--sp-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.program-sources li[data-status="no_key"], .program-sources li[data-status="error"] { border-color: var(--caution-line); background: var(--caution-soft); color: var(--caution-ink); }
+.program-list, .program-cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.program-item, .program-card { display: grid; gap: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); min-width: 0; }
+.program-item p, .program-card p { margin: 0; overflow-wrap: anywhere; }
+.program-item-meta { color: var(--track-program); font-size: var(--fs-caption); font-weight: var(--fw-semibold); }
+.program-summary { color: var(--ink-alt); }
+.program-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.program-chips span, .program-chip-inline { display: inline-block; padding: 0 var(--sp-2); border-radius: var(--radius-md); background: var(--surface-sunken); font-size: var(--fs-caption); color: var(--ink-alt); margin-right: var(--sp-1); }
+.program-item button { justify-self: start; padding: var(--sp-1) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.program-item button[aria-pressed="true"] { border-color: var(--track-program); color: var(--track-program); font-weight: var(--fw-semibold); }
+.program-card dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-1) var(--sp-3); margin: 0; }
+.program-card dt { color: var(--muted); font-size: var(--fs-caption); }
+.program-card dd { margin: 0; overflow-wrap: anywhere; }
+.program-questions { display: grid; gap: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); min-width: 0; }
+.program-questions label { display: flex; gap: var(--sp-2); align-items: flex-start; }
+.program-questions label:last-child { display: grid; }
+.program-questions input[type="checkbox"] { width: auto; margin-top: 0.2em; }
+.program-directory { display: grid; gap: var(--sp-1); margin: 0; padding-left: var(--sp-4); }
+.be-target { display: grid; gap: var(--sp-2); padding: var(--sp-3); border: 1px dashed var(--line); border-radius: var(--radius-md); }
+.be-target p { margin: 0; }

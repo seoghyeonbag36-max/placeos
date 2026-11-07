@@ -165,6 +165,12 @@ def brief_context(brief: dict | None) -> str | None:
                      + " · ".join(str(x) for x in b["differentiators"][:8]))
     if b.get("tier"):
         lines.append(f"- Posting 3-Tier 선택: {b['tier']}")
+    if b.get("break_even_daily"):
+        lines.append(f"- Posting 계산 하루 손익분기: {int(b['break_even_daily']):,}건"
+                     + (f" ({b['break_even_basis']})" if b.get("break_even_basis") else "")
+                     + " — 결제 건수 목표선은 이 값에서 끌어낸다(창업자가 넣은 비용·단가 조건의 결과)")
+    if b.get("reject_ratio"):
+        lines.append(f"- 기각선: 목표선의 {int(b['reject_ratio'])}% (창업자가 시작 전에 고른 값)")
 
     if b.get("mode") == "actual_open":
         lines.append("- 실제 창업: 정식 개업 후 실매출·실비용으로 손익을 검증하는 계획이다. "

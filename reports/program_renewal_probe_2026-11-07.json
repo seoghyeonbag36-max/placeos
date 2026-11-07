@@ -1,0 +1,182 @@
+{
+  "as_of": "2026-11-07",
+  "root": "given --root",
+  "served_hubs": 158,
+  "served_hubs_by_sido": {
+    "서울특별시": 81,
+    "경기도": 59,
+    "전남광주통합특별시": 13,
+    "전북특별자치도": 5
+  },
+  "events": {
+    "source": "서울열린데이터광장 문화행사(culturalEventInfo)",
+    "as_of": "2026-10-11",
+    "hubs_with_events": {
+      "서울특별시": 75
+    },
+    "hubs_loaded_zero": {
+      "서울특별시": 6
+    },
+    "hubs_not_in_gold": {
+      "경기도": 59,
+      "전남광주통합특별시": 13,
+      "전북특별자치도": 5
+    },
+    "walkable_m": 500,
+    "hubs_event_within_walkable": {
+      "서울특별시": 33
+    },
+    "events_total_served": 749,
+    "events_ended_by_as_of": 498,
+    "events_ended_share": 0.665,
+    "hubs_every_event_ended": 19
+  },
+  "live_probes": [
+    {
+      "probe": "K-Startup 공고 · 키 없이",
+      "url": "https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01",
+      "http": 401,
+      "result": "SERVICE_KEY_IS_NULL"
+    },
+    {
+      "probe": "K-Startup 없는 오퍼레이션 · 키 없이(대조)",
+      "url": "https://apis.data.go.kr/B552735/kisedKstartupService01/getNoSuchOperation01",
+      "http": 400,
+      "result": "NO_OPENAPI_SERVICE_ERROR"
+    },
+    {
+      "probe": "K-Startup 공고 · 공용 키",
+      "url": "https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01",
+      "http": 403,
+      "result": "SERVICE_KEY_IS_NOT_REGISTERED_ERROR"
+    },
+    {
+      "probe": "정부24 공공서비스(혜택) 목록 · 공용 키",
+      "url": "https://api.odcloud.kr/api/gov24/v3/serviceList",
+      "http": 401,
+      "result": "유효하지 않은 인증키 입니다."
+    },
+    {
+      "probe": "기업마당 지원사업 · 키 없이",
+      "url": "https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do",
+      "http": 200,
+      "result": "인증키를 입력해주세요."
+    },
+    {
+      "probe": "TourAPI 축제 · 공용 키",
+      "url": "https://apis.data.go.kr/B551011/KorService2/searchFestival2",
+      "http": 200,
+      "result": "totalCount=130",
+      "by_sido": {
+        "서울특별시": 33,
+        "경기도": 21,
+        "부산광역시": 14,
+        "전남광주통합특별시": 11,
+        "경상남도": 9,
+        "경상북도": 9,
+        "충청남도": 7,
+        "제주특별자치도": 4,
+        "강원특별자치도": 4,
+        "인천광역시": 4,
+        "충청북도": 3,
+        "대전광역시": 3,
+        "울산광역시": 3,
+        "전북특별자치도": 2,
+        "세종특별자치시": 2,
+        "대구광역시": 1
+      },
+      "fields": [
+        "addr1",
+        "addr2",
+        "areacode",
+        "cat1",
+        "cat2",
+        "cat3",
+        "contentid",
+        "contenttypeid",
+        "cpyrhtDivCd",
+        "createdtime",
+        "eventenddate",
+        "eventstartdate",
+        "festivaltype",
+        "firstimage",
+        "firstimage2",
+        "lDongRegnCd",
+        "lDongSignguCd",
+        "lclsSystm1",
+        "lclsSystm2",
+        "lclsSystm3",
+        "mapx",
+        "mapy",
+        "mlevel",
+        "modifiedtime",
+        "progresstype",
+        "sigungucode",
+        "tel",
+        "title",
+        "zipcode"
+      ],
+      "hub_proximity": {
+        "within_1000m": {
+          "서울특별시": 14,
+          "경기도": 5,
+          "전남광주통합특별시": 3,
+          "전북특별자치도": 2
+        },
+        "within_3000m": {
+          "서울특별시": 45,
+          "경기도": 11,
+          "전남광주통합특별시": 8,
+          "전북특별자치도": 2
+        }
+      }
+    },
+    {
+      "probe": "문화포털 기간별 문화정보 · 공용 키",
+      "url": "https://apis.data.go.kr/B553457/cultureinfo/period2",
+      "http": 200,
+      "result": "totalCount=1181"
+    },
+    {
+      "probe": "문화포털 전량 · 시도·거점 근접",
+      "total": 1181,
+      "with_coords": 1038,
+      "by_area": {
+        "서울특별시": 551,
+        "경기도": 171,
+        "부산": 66,
+        "광주": 52,
+        "대구": 44,
+        "강원특별자치도": 43,
+        "인천": 33,
+        "전북특별자치도": 29,
+        "대전": 28,
+        "경상남도": 25,
+        "충청북도": 24,
+        "충청남도": 23,
+        "경상북도": 19,
+        "울산": 19,
+        "제주특별자치도": 18,
+        "전남광주통합": 17,
+        "세종": 11,
+        "": 5,
+        "서울시": 2,
+        "전국": 1
+      },
+      "hub_proximity": {
+        "within_1000m": {
+          "서울특별시": 63,
+          "경기도": 27,
+          "전남광주통합특별시": 3,
+          "전북특별자치도": 4
+        },
+        "within_3000m": {
+          "서울특별시": 81,
+          "경기도": 49,
+          "전남광주통합특별시": 12,
+          "전북특별자치도": 5
+        }
+      }
+    }
+  ]
+}

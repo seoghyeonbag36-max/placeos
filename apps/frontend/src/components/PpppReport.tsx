@@ -7,6 +7,7 @@ import type { PpppReportData } from "@/lib/ppppReportTypes";
 import { summarizePpppReport } from "@/lib/ppppReportSummary";
 import "./PpppReport.css";
 import { readEventLink, type EventLink } from "@/lib/eventLink";
+import { readNetworkNotes, readSavedSupport, type NetworkNotes, type SavedSupport } from "@/lib/programSaved";
 
 /** 현재 작업의 입력과 결과만 모은다. 빈 단계는 평가 점수로 대체하지 않는다. */
 export default function PpppReport({ handoff: suppliedHandoff, campaign: suppliedCampaign, plan: suppliedPlan, districtId }: {
@@ -28,6 +29,9 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
   const [snapshot, setSnapshot] = useState<PpppReportData | null>(null);
   const [eventLink, setEventLink] = useState<EventLink | null>(null);
   const [interiorBrief, setInteriorBrief] = useState<string | null>(null);
+  // Program 리뉴얼(2026-11-07) — 네트워킹 메모·담은 지원 공고(이 브라우저에만 있다 · lib/programSaved)
+  const [savedSupport, setSavedSupport] = useState<SavedSupport[]>([]);
+  const [networkNotes, setNetworkNotes] = useState<NetworkNotes | null>(null);
   const report = useRef<HTMLElement>(null);
   const missing = "자료 미입력 · 판단 보류";
   const data = snapshot ?? currentData;
@@ -44,6 +48,8 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
     setSnapshot(currentData);
     const district = scope;
     setEventLink(district ? readEventLink(district) : null);
+    setSavedSupport(district ? readSavedSupport(district) : []);
+    setNetworkNotes(district ? readNetworkNotes(district) : null);
     setInteriorBrief(null);
     try {
       const saved = JSON.parse(localStorage.getItem(`placeos.interior-brief.${district ?? ""}`) ?? "null");
@@ -161,6 +167,20 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
             <dl>{Object.entries({ 행사명: eventLink.name, 일정: eventLink.when, 출처: eventLink.evidence, 온라인: eventLink.online, 오프라인: eventLink.offline }).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value || missing}</dd></div>)}</dl></> : <p>{missing}</p>}
         </section>
         <section><h2>6. Posting · 인테리어 조건</h2><p>출처: 사용자 입력 · 설계·시공 검증 전</p>{interiorBrief ? <pre>{interiorBrief}</pre> : <p>{missing}</p>}</section>
+        <section><h2>7. Program · 네트워킹 — 계약 전에 물어본 것</h2>
+          {networkNotes && (networkNotes.checked.length > 0 || networkNotes.memo) ? <>
+            <p>출처: 사용자 입력 · 이 브라우저에 저장한 메모 · 들은 말은 확인된 사실이 아닙니다.</p>
+            {networkNotes.checked.length > 0 && <ul>{networkNotes.checked.map((q) => <li key={q}>확인함 · {q}</li>)}</ul>}
+            {networkNotes.memo && <pre>{networkNotes.memo}</pre>}
+          </> : <p>{missing}</p>}
+        </section>
+        <section><h2>8. Program · 담은 지원 공고</h2>
+          {savedSupport.length > 0 ? <>
+            <p>출처: 공고 원천(K-Startup · 정부24 · 기업마당) · 조건이 맞을 수 있는 공고이며 자격·선정·금액은 원문에서 확인합니다.</p>
+            <ul>{savedSupport.map((it) => <li key={it.id}>{it.title} · {it.source_label}{it.org ? ` · ${it.org}` : ""}
+              {" "}· 신청 {it.end ? `~ ${it.end}` : it.deadline_text ?? "기한 원문 확인"}{it.url && /^https?:\/\//i.test(it.url) ? ` · ${it.url}` : ""}</li>)}</ul>
+          </> : <p>{missing}</p>}
+        </section>
         <section><h2>추가 확인 사항</h2>{summary.issues.length > 0 && <ul>{summary.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}<p>미입력 자료와 증빙을 보완하고 계약 면적·임대 조건·운영 비용을 확인하세요. 검증 계획과 실제 실행 성과는 별도로 판단합니다.</p></section>
       </article>
     </>}

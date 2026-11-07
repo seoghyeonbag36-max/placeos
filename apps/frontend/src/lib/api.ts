@@ -313,15 +313,31 @@ export interface MarketingEvent {
   category?: string | null; place?: string | null; org?: string | null;
   fee?: string | null; target?: string | null; link?: string | null;
   distance_m?: number | null;
+  /** 원천(2026-11-07) — "seoul-culture"(서울 문화행사) | "culture-portal"(문화포털) | "tourapi"(관광공사 축제) */
+  src?: string | null;
 }
+
+/** 행사가 실데이터인가 — 서울 문화행사("seoul-open-data") 또는 전국 행사 Gold 가 덮는 거점("public-open-data", 2026-11-07).
+ *  예전 화면은 "seoul-open-data" 만 실데이터로 봤다 — 전국 Gold 가 들어오면 서울 거점의 행사까지 사라졌을 것이다. */
+export const isRealEventsSource = (source?: string | null): boolean =>
+  source === "seoul-open-data" || source === "public-open-data";
+
+export const EVENT_SRC_LABEL: Record<string, string> = {
+  "seoul-culture": "서울 문화행사", "culture-portal": "문화포털", tourapi: "한국관광공사 축제",
+};
+
+/** 실데이터 행사 목록의 출처 문구 — 원천 이름을 겹치지 않게 잇는다. */
+export const eventsSourceLabel = (events: MarketingEvent[]): string =>
+  [...new Set(events.map((e) => EVENT_SRC_LABEL[e.src ?? ""] ?? "공공 행사 자료"))].join(" · ") || "공공 행사 자료";
 
 /** 상권 마케팅 — GET /marketing/{id} */
 export interface Marketing {
   district_id: string; events: MarketingEvent[]; online_contents: string[];
   /** 온라인 콘텐츠 출처 — "llm"(Gold 컨텍스트 기반 생성) | "seed"(폴백) */
   source?: string;
-  /** 행사 출처 — "seoul-open-data"(실데이터) | "seed". 실데이터인데 0건이면
-   *  그 거점에 예정된 공공 문화행사가 없다는 뜻이다(시드로 채우지 않는다). */
+  /** 행사 출처 — "seoul-open-data"(서울 문화행사) | "public-open-data"(전국 행사 Gold 가 덮음, 2026-11-07)
+   *  | "seed" | "none". 실데이터인데 0건이면 그 거점에 예정 공공 행사가 없다(시드로 채우지 않는다).
+   *  끝난 행사는 서버가 오늘 기준으로 뺀다. 실데이터 여부는 `isRealEventsSource` 로 판정한다. */
   events_source?: string;
   /** `events_source === "none"` 의 사유(이 도시에 행사 원천이 없다). */
   events_note?: string | null;
@@ -1057,6 +1073,11 @@ export interface ProgramBriefInput {
   /** 차별점 — 창업자 주장이지 확인된 사실이 아니다. 이게 통하는지가 검증 대상이다 */
   differentiators?: string[];
   tier?: string;
+  /** (2026-11-07) Posting 세부 업종 계산에서 끌어낸 하루 손익분기 건수 — 목표선을 지어내지 않고 여기서 끌어낸다 */
+  break_even_daily?: number;
+  break_even_basis?: string;
+  /** 기각선 — 목표선의 몇 %(10~100). 창업자가 시작 전에 고른 값이다 */
+  reject_ratio?: number;
 }
 
 /** 제안 1건 — 채널·실행안·근거. 근거 없는 제안은 만들지 않는 것이 Program 의 원칙이다.
@@ -1773,3 +1794,63 @@ export const getDistrictReport = (id: string, params: {
   industry?: string | null; unit_id?: string | null; building_id?: string | null;
 } = {}, signal?: AbortSignal) =>
   getOptional<DistrictReport>(`/commercial-districts/${encodeURIComponent(id)}/report${query(params)}`, signal);
+
+
+/* ===== Program 리뉴얼(2026-11-07) — 지원 프로그램 · 네트워킹 · 오프라인 마케팅 실행 카드 =====
+ * 셋 다 공개 분석 API(로그인 없이 열린다)이고 LLM 을 부르지 않는다. 원천마다 상태(ok · no_key · error)를 밝힌다 —
+ * 키가 없거나 원천이 실패하면 그 원천만 비고, 지난 목록을 최신처럼 보이지 않는다. */
+export type ProgramStage = "pre_founder" | "founder";
+export const stageForGoal = (goal?: string | null): ProgramStage | undefined =>
+  goal === "start" ? "pre_founder" : goal === "pivot" || goal === "move" ? "founder" : undefined;
+
+export interface ProgramSourceStatus {
+  id: string; name: string; status: "ok" | "no_key" | "error"; count: number;
+  fetched_at?: string | null; note?: string | null;
+}
+export interface ProgramRegion { sido: string; local?: string | null; label: string }
+
+export interface SupportItem {
+  source: "kstartup" | "gov24" | "bizinfo"; source_label: string; id: string; title: string;
+  org?: string | null; region?: string | null; category?: string | null; target?: string | null;
+  start?: string | null; end?: string | null;
+  /** 정부24처럼 신청기한이 자유 문구인 원천 — 날짜로 읽지 않고 원문 그대로 */
+  deadline_text?: string | null;
+  url?: string | null; apply_url?: string | null; summary?: string | null;
+  /** 맞춘 이유(지역·단계·업종 언급) — 자격 판정이 아니다 */
+  matched: string[];
+}
+export interface SupportPrograms {
+  district_id: string; region: ProgramRegion; stage?: ProgramStage | null; industry?: string | null;
+  items: SupportItem[]; total: number; sources: ProgramSourceStatus[]; note: string;
+}
+
+export interface NetworkEvent {
+  source: "kstartup" | "bizinfo_event"; source_label: string; id: string; title: string;
+  kind?: string | null; org?: string | null; area?: string | null; start?: string | null; end?: string | null;
+  period_text?: string | null; apply_period?: string | null; url?: string | null; summary?: string | null;
+  matched: string[];
+}
+export interface ProgramNetwork {
+  district_id: string; region: ProgramRegion; industry?: string | null;
+  events: NetworkEvent[]; total_events: number; sources: ProgramSourceStatus[];
+  complements: { key?: string | null; label?: string | null; lift?: number | null; n_both?: number | null }[];
+  complements_note?: string | null; questions: string[];
+  directory: { name: string; url: string; role: string }[]; note: string;
+}
+
+export interface ExecutionCard {
+  kind: "event" | "time" | "neighbor" | "own"; title: string; when: string; where: string; who: string;
+  what: string; measure: string; basis: { label: string; value: string }[]; caveat?: string | null; link?: string | null;
+}
+export interface ExecutionPlan {
+  district_id: string; mode: ValidationMode; cards: ExecutionCard[]; events_source: string; notes: string[]; note: string;
+}
+
+export const getSupportPrograms = (districtId: string, opts: { stage?: ProgramStage; industry?: string } = {}) =>
+  getJSON<SupportPrograms>(`/program/support${query({ district_id: districtId, stage: opts.stage, industry: opts.industry })}`);
+export const getProgramNetwork = (districtId: string,
+  opts: { industry?: string; industryLabel?: string; stage?: ProgramStage } = {}) =>
+  getJSON<ProgramNetwork>(`/program/network${query({ district_id: districtId, industry: opts.industry,
+    industry_label: opts.industryLabel, stage: opts.stage })}`);
+export const getExecutionPlan = (districtId: string, opts: { industry?: string; mode?: ValidationMode } = {}) =>
+  getJSON<ExecutionPlan>(`/program/plan${query({ district_id: districtId, industry: opts.industry, mode: opts.mode })}`);

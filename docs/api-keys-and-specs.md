@@ -150,6 +150,21 @@
 - [developers.naver.com](https://developers.naver.com) > 애플리케이션 등록 > **검색 API + 데이터랩(검색어트렌드)** 사용 설정 → Client ID/Secret.
 - 헤더 `X-Naver-Client-Id` / `X-Naver-Client-Secret`로 호출.
 
+### 5-C. NAVER API HUB `NAVER_HUB_CLIENT_ID` / `NAVER_HUB_CLIENT_SECRET` (검색 이관 — 2026-11-08 실측)
+- 네이버 검색 API 가 NAVER API HUB 로 옮겨 간다(공식 이관 가이드 · 2차 출처: 기존 키는 2027-06-30 까지). 기존 개발자센터
+  키로는 HUB 를 못 부르고, **주소와 헤더가 바뀐다** — `https://naverapihub.apigw.ntruss.com` · `X-NCP-APIGW-API-KEY-ID` /
+  `X-NCP-APIGW-API-KEY`.
+- 수집기 공통 진입점 `data/collectors/naver_api.py` — HUB 키가 있고 그 검색 종류가 HUB 에서 열려 있으면 HUB 로, 아니면 옛 키로 부른다.
+  옛 `NAVER_CLIENT_*` 는 기한까지 **그대로 둔다**(데이터랩이 아직 옛 길이다).
+- 2026-11-08 1콜 실측(키 값 출력 없음 · `scripts/check_api_keys.py` 5-C):
+
+  | 경로 | HTTP | 판단 |
+  |---|---|---|
+  | `/search/v1/blog` | 200 | HUB 사용 |
+  | `/search/v1/cafearticle` | 200 | HUB 사용 |
+  | `/search/v1/news` | 401 | 이 앱에 뉴스 검색을 켜지 않았다 — 옛 키로 부른다(콘솔에서 켜면 `naver_api._HUB_SEARCH` 에 더한다) |
+  | 데이터랩 후보 경로 | 404 | HUB 경로 미확인 — 옛 키(`openapi.naver.com/v1/datalab`)로 부른다 |
+
 ---
 
 ## 6. 건물 footprint 폴리곤 — GIS건물통합정보 / V-World
@@ -197,11 +212,18 @@ VWORLD_API_KEY=                  # 건물 폴리곤 V-World WFS/데이터API (§
 KAKAO_REST_API_KEY=              # [B·Program/Posting] 카카오 로컬 (장소·카테고리)
 NAVER_CLIENT_ID=                 # [B·Program] 검색(블로그·지역)+데이터랩 — 선택→필수 승격
 NAVER_CLIENT_SECRET=
+NAVER_HUB_CLIENT_ID=             # [Program 2026-11-07] NAVER API HUB(§5-C) — 블로그·카페 검색은 이 키가 먼저
+NAVER_HUB_CLIENT_SECRET=
+BIZINFO_SUPPORT_API_KEY=         # [Program] 기업마당 지원사업정보(§8-G) — 행사정보와 키가 따로다
+BIZINFO_EVENT_API_KEY=           # [Program] 기업마당 행사정보(§8-G)
 INSTAGRAM_ACCESS_TOKEN=          # [B·Program] 보류 (비즈니스 계정+앱 검수 필요)
 IG_USER_ID=
 
-# apps/backend/.env
+# apps/backend/.env   (백엔드는 data/.env 를 먼저, 이 파일을 다음에 읽는다 — core/config.py env_file)
 LLM_API_KEY=                     # [B·Program] Anthropic Claude 권장 (console.anthropic.com)
+DATA_GO_KR_SERVICE_KEY=          # [Program 2026-11-07] 서버가 K-Startup·정부24 혜택을 요청 때 부른다(§8-G)
+BIZINFO_SUPPORT_API_KEY=         # [Program] 기업마당 지원사업정보
+BIZINFO_EVENT_API_KEY=           # [Program] 기업마당 행사정보
 NAVER_MAPS_KEY_ID=               # NCP REST (Geocoding)
 NAVER_MAPS_CLIENT_SECRET=
 INTERIOR_IMAGES_ENABLED=false    # [Posting 인테리어] true + OPENAI_API_KEY 가 있어야 참고 이미지 생성(§8-E-2)
@@ -235,6 +257,10 @@ INTERIOR_IMAGES_DAILY_LIMIT_PER_USER=5
 | Program | 블로그 리뷰·검색 트렌드 | 네이버 검색+데이터랩(§5-B) | `NAVER_CLIENT_ID/SECRET` | **○** |
 | Program·Posting | 장소·카테고리·좌표 크로스체크 | 카카오 로컬 | `KAKAO_REST_API_KEY` | **○** |
 | Program | 인스타그램 해시태그·리뷰 | Meta Graph API / 크롤러 | `INSTAGRAM_ACCESS_TOKEN` | △ 보류 |
+| Program(2026-11-07) | 지원 공고(K-Startup 모집 중 · 정부24 혜택) | data.go.kr 15125364 · 15113968 | `DATA_GO_KR_SERVICE_KEY` (기존 · **backend 에도**) | ✕(활용신청 완료) |
+| Program(2026-11-07) | 지원사업 공고 · 창업 행사(교육·세미나·전시회) | 기업마당 지원사업정보 · 행사정보 | `BIZINFO_SUPPORT_API_KEY` · `BIZINFO_EVENT_API_KEY` | **○**(둘 따로) |
+| Program(2026-11-07) | 전국 행사(서울 밖 지역 콘텐츠) | 문화포털 B553457 · TourAPI KorService2 | `DATA_GO_KR_SERVICE_KEY` (기존) | ✕ |
+| Program(2026-11-07) | 블로그·카페 검색(HUB 이관) | NAVER API HUB(§5-C) | `NAVER_HUB_CLIENT_ID/SECRET` | **○** |
 
 > ⚠️ **서울 한정 주의**: 생활인구(§2)·상권분석서비스(§8-A)는 서울시만 제공. 거점을 서울 외 지역으로 확장하면 해당 지자체 공공데이터 + 소상공인 상권정보로 대체 설계가 필요하다. PoC 거점(신사동 가로수길)은 문제 없음.
 
@@ -347,6 +373,27 @@ INTERIOR_IMAGES_DAILY_LIMIT_PER_USER=5
   `gcloud run services update spaceos --region us-central1 --update-env-vars INTERIOR_IMAGES_ENABLED=true --update-secrets OPENAI_API_KEY=openai-api-key:latest`
   (시크릿을 안 쓰면 `--update-env-vars INTERIOR_IMAGES_ENABLED=true,OPENAI_API_KEY=…`).
 - gpt-image 계열은 OpenAI **조직 인증**(Verify Organization)이 끝나야 403 이 풀린다. 크레딧이 없으면 503(「크레딧 소진」).
+
+### 8-G. Program 리뉴얼 원천 — 지원 공고 · 창업 행사 · 전국 행사 (2026-11-07)
+Program 네 기능(docs/feature-program.md §0-W)이 쓴다. 지원 공고·창업 행사는 **서버가 요청 때 부르고** 프로세스 메모리에
+캐시한다(성공 6시간 · 실패 5분 — `app/services/program_sources.py`). 키가 없으면 그 원천은 `no_key` 로 보이고(공개 문구에는
+변수 이름을 싣지 않는다), 화면은 원문 포털 링크를 남긴다.
+
+| 원천 id | 무엇 | 호출 | 변수 | 비고 |
+|---|---|---|---|---|
+| `kstartup` | K-Startup 사업공고(창업진흥원 · 15125364) | `apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01` · `cond[rcrt_prgs_yn::EQ]=Y` | `DATA_GO_KR_SERVICE_KEY` | 11-07 모집 중 213건 · 상세는 `bizpbanc-ongoing.do?schM=view&pbancSn=` |
+| `gov24` | 정부24 공공서비스(혜택)(15113968) | `api.odcloud.kr/api/gov24/v3/serviceList` · `cond[사용자구분::LIKE]=소상공인` | `DATA_GO_KR_SERVICE_KEY` | 11-07 369건(전체 10,942) |
+| `bizinfo` | 기업마당 지원사업정보 | `www.bizinfo.go.kr/uss/rss/bizinfoApi.do` · `crtfcKey` · `hashtags`(지역) | `BIZINFO_SUPPORT_API_KEY` | 신청서의 시스템 IP 조건 — Cloud Run 은 고정 출구 IP 가 기본이 아니다 |
+| `bizinfo_event` | 기업마당 행사정보 | `www.bizinfo.go.kr/uss/rss/bizinfoEventApi.do` · 같은 인자 | `BIZINFO_EVENT_API_KEY` | 키가 지원사업정보와 **따로**다 · 좌표 없음 · 기간 `eventBeginEndDe` · 개최지 `areaNm` |
+| (수집) | 문화포털 기간별 문화정보 | `apis.data.go.kr/B553457/cultureinfo/period2` · 쪽 인자 `numOfrows`·`PageNo`(대소문자 그대로) | `DATA_GO_KR_SERVICE_KEY` | `data/collectors/culture_portal.py` → `build_national_events` |
+| (수집) | TourAPI 축제·행사 | `apis.data.go.kr/B551011/KorService2/searchFestival2` · `eventStartDate`(진행 중 포함) | `DATA_GO_KR_SERVICE_KEY` | `data/collectors/tourapi_festivals.py` |
+
+- ⚠ 기업마당 `hashtags` 는 **지역 필터가 아니다**(11-08 실측 — 대부분의 공고가 17개 시도를 다 단다). 지역은 지원사업이면
+  소관기관 `jrsdInsttNm`, 행사면 개최지 `areaNm` 로 가른다(`program_support.sido_of_org` · `area_scope`).
+- `.env` 에 **줄 끝 주석을 달지 않는다** — 수집기 로더(`data/run_collection._env_value`)는 따옴표 없는 값의 ` #…` 를 이제 떼지만,
+  로더마다 줄 끝 주석을 다루는 방식이 다를 수 있어 한 줄에 값만 둔다. 키 값은 대화·로그·커밋에 붙이지 않는다.
+- 프로덕션(Cloud Run)에는 사람이 넣는다 — `--update-env-vars`(또는 `--update-secrets`)만 · `--set-env-vars` 금지(기존 값이 날아간다).
+  넣기 전까지 프로덕션의 지원 프로그램·네트워킹 원천은 `no_key` 다.
 
 ### 8-F. 인스타그램·구글 — 보류/선택
 - **인스타그램 Graph API**: 해시태그 검색에 비즈니스 계정 + 앱 검수 필요, 주 30개 해시태그 제한 → PoC 단계에서는 보류하고 [data/crawlers](../data/README.md)의 Playwright 크롤러로 대체. `.env` 슬롯(`INSTAGRAM_ACCESS_TOKEN`)만 유지.

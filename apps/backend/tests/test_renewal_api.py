@@ -335,17 +335,29 @@ def test_simulate_floor_unit_unknown_is_404():
 
 # ── 행사 ────────────────────────────────────────────────────────────────
 def test_events_all_served_hubs_answer():
-    """시드 문지기가 다시 서면 서빙 거점이 조용히 404 가 된다(63곳 실측 · 2026-11-02)."""
-    events_doc = json.loads((GOLD / "platform_events.json").read_text(encoding="utf-8"))["districts"]
+    """시드 문지기가 다시 서면 서빙 거점이 조용히 404 가 된다(63곳 실측 · 2026-11-02).
+
+    2026-11-07 계약 변경 — ① 끝난 행사는 서빙 시점(오늘)에 빠진다(10-11 적재본은 11-07 에 66.5% 가 끝나
+    있었다) ② 전국 행사 Gold(문화포털·TourAPI)가 덮는 거점은 서울 밖이어도 행사를 싣고 출처가
+    "public-open-data" 다. 그래서 「Gold 건수 그대로」 대신 「끝난 행사 0 · 서울 행사는 Gold 에 있는 것만」을 본다.
+    """
+    from app.services import events as ev
+
+    seoul_doc = json.loads((GOLD / "platform_events.json").read_text(encoding="utf-8"))["districts"]
+    today = ev.today_kst()
     assert len(SERVED) >= 117
     for hub in SERVED:
         r = client.get(f"{API}/marketing/events", params={"district_id": hub})
         assert r.status_code == 200, hub
         body = r.json()
         d = svc.get_district(hub)
-        if svc.page_city(d).has_city_events:
-            assert body["events_source"] == "seoul-open-data", hub
-            assert len(body["events"]) == len(events_doc.get(hub, [])), hub
+        covered = ev.national_covers(hub)
+        if svc.page_city(d).has_city_events or covered:
+            assert body["events_source"] == ("public-open-data" if covered else "seoul-open-data"), hub
+            assert body["events_note"] is None, hub
+            assert not any(ev.is_ended(e, today) for e in body["events"]), f"{hub}: 끝난 행사가 서빙됐다"
+            seoul_ids = {e["id"] for e in seoul_doc.get(hub, [])}
+            assert all(e["id"] in seoul_ids for e in body["events"] if e.get("src") == ev.SRC_SEOUL), hub
         else:
             assert body["events"] == [] and body["events_note"] and body["events_source"] == "none", hub
         assert client.get(f"{API}/marketing/{hub}").status_code == 200, hub
@@ -375,10 +387,17 @@ def test_report_small_clean_and_every_section_present(hub):
 
 
 def test_report_seoul_only_sections_explain_themselves():
+    from app.services import events as ev
+
     fid = floor_vacancy.load("suwonst")["units"][0]["id"]
     body = client.get(f"{API}/commercial-districts/suwonst/report", params={"unit_id": fid}).json()
-    for name in ("population", "sales", "openclose", "events"):
+    for name in ("population", "sales", "openclose"):
         assert body[name]["status"] == "unavailable" and "서울만" in body[name]["note"], name
+    # 행사는 2026-11-07 부터 전국 행사 Gold 가 서울 밖도 덮는다 — 덮으면 싣고, 아니면 종전대로 「서울만」
+    if ev.national_covers("suwonst"):
+        assert body["events"]["status"] == "ok" and "서울 문화행사" not in (body["events"]["source"] or "")
+    else:
+        assert body["events"]["status"] == "unavailable" and "서울만" in body["events"]["note"]
     assert body["posting"]["status"] == "unavailable" and body["posting"]["note"]
 
 
