@@ -1548,7 +1548,10 @@ def program_track(total: int) -> Track:
         "지역 행사 커버리지 (오늘 기준)", (s_hit + o_hit) / n if n else 0.0,
         f"끝나지 않은 행사가 1건 이상 실린 거점 — 서울 {s_hit}/{s_n} · 서울 밖 {o_hit}/{o_n}"
         "(서울 문화행사 Gold 반경 + 전국 Gold 거점 중심 3km). 11-07 전에는 서울 밖이 0 이었다. "
-        "⚠ 이 값은 날이 갈수록 떨어진다(행사가 끝나면 빠진다) — 떨어지면 행사 수집기와 build_national_events 를 다시 돌린다",
+        "⚠ **관측 전용 — 진행률 평균에 넣지 않는다.** 행사는 끝나면 서빙에서 빠지므로 이 값은 날이 갈수록 떨어지는 스냅샷이다"
+        "(배선이 후퇴해서가 아니다). 진행률 게이트로 세면 같은 코드가 날짜만 바뀌어도 내려가 계약 테스트가 날짜에 따라 깨진다. "
+        "떨어지면 행사 수집기(서울 문화행사 · culture_portal · tourapi_festivals)와 build_national_events 를 다시 돌릴 때다",
+        observe=True,
     ))
     return t
 
