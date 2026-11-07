@@ -20,13 +20,27 @@ router = APIRouter()
 async def interior_preview(
     req: InteriorRequest, current: CurrentUser = Depends(get_current_user),
 ) -> dict:
-    """인증·명시적 동의 후 참고 이미지 한 장. 미설정·공급자 실패는 이미지 없이 실패한다."""
+    """인증·명시적 동의 후 참고 이미지 한 장. 미설정·공급자 실패는 이미지 없이 실패한다.
+
+    상태 코드: 422 첨부·입력 · 안전 정책 / 403 공급자 권한 / 413 첨부 용량 / 429 공급자 혼잡 /
+    502 공급자 오류 / 503 미설정·키 거부·크레딧 소진 / 504 시간 초과(Hosting 60초보다 먼저).
+    공급자 401 은 503 으로 바꾼다 — 화면이 401 을 로그인 만료로 읽기 때문이다(services/interior).
+    """
     if not settings.interior_images_enabled or not settings.openai_api_key:
-        raise HTTPException(503, "이미지 생성이 설정되지 않았습니다. 생성 지시문을 저장해 사용할 수 있습니다.")
+        interior_svc.log.warning("interior_preview outcome=error reason=not_configured status=503 enabled=%s key_set=%s",
+                                 settings.interior_images_enabled, bool(settings.openai_api_key))
+        raise HTTPException(503, "이미지 생성이 서버에 설정되지 않았습니다. 생성 지시문을 저장해 사용할 수 있습니다.")
     try:
-        return await interior_svc.generate(req)
+        files = interior_svc.reference_files(req)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    try:
+        return await interior_svc.generate(req, files)
+    except interior_svc.ProviderError as exc:
+        raise HTTPException(exc.status, exc.detail) from exc
     except Exception as exc:
-        raise HTTPException(502, "이미지를 생성하지 못했습니다. 입력과 공급자 상태를 확인하세요.") from exc
+        interior_svc.log.exception("interior_preview outcome=error reason=unexpected:%s", type(exc).__name__)
+        raise HTTPException(502, "이미지를 생성하지 못했습니다. 잠시 뒤 다시 시도하세요.") from exc
 
 
 class VacancyRequest(BaseModel):
