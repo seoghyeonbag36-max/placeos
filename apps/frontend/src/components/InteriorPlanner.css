@@ -37,3 +37,6 @@
 .interior-chips button[aria-pressed=true]::before { content: "✓ "; }
 .interior-selected { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .interior-quota { padding: var(--sp-2); border-radius: var(--radius-sm); background: var(--bg); }
+/* 생성 버튼이 잠긴 이유(2026-11-07) — 잠긴 버튼만 보이면 고장으로 읽힌다 */
+.interior-why { margin-top: var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.interior-why ul { margin: var(--sp-1) 0 0; padding-left: 1.2em; }
