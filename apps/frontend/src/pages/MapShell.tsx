@@ -21,6 +21,7 @@ import CandidateCompare from "@/components/CandidateCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
+import { useReportCapture } from "@/lib/ppppReportContext";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import { useMapHost } from "@/components/mapHostContext";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
@@ -38,6 +39,7 @@ import "./MapShell.css";
 
 // 층 근거·공실 이력을 끌고 들어오므로 눌렀을 때만 받는다.
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
+const FloorExplorer = lazy(() => import("@/components/twin/FloorExplorer"));
 // 3D 트윈 — 대화상자 청크와 three 청크는 눌렀을 때만 받는다(트랙 청크에 들어가면 1.5초 뒤 프리로드된다).
 const BuildingTwinDialog = lazy(() => import("@/components/twin/BuildingTwinDialog"));
 
@@ -309,6 +311,12 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [hubListStatus, setHubListStatus] = useState<"loading" | "ready" | "failed">("loading");
   const savedIds = workspace.savedIds[districtId] ?? EMPTY_IDS;
   const saved = src === "api" ? buildings.filter((b) => savedIds.includes(b.id)) : [];
+  useReportCapture("page", src === "api" && selected ? {
+    districtId, buildingId: selected.id, name: selected.name, address: selected.roadAddr ?? null,
+    status: selected.vacClass ? VAC_CLASS[selected.vacClass].label : STATUS[selected.status].label,
+    capacity: selected.capacity, active: selected.active, floors: selected.floors ?? null,
+    candidates: saved.map(b => ({ id: b.id, name: b.name, note: workspace.notes[`${districtId}:${b.id}`] ?? "" })),
+  } : null);
   const hasClass = useMemo(() => buildings.some((b) => b.vacClass), [buildings]);
   const filtered = useMemo(() => buildings.filter((b) => (!q.trim() || b.name.toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())
       || !!b.roadAddr?.includes(q.trim()))
@@ -976,6 +984,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             )}
 
             {src === "api" && <button className="b-twin b-twin-3d" onClick={() => setTwin3dOpen(true)}>3D 트윈으로 보기</button>}
+            {src === "api" && <Suspense fallback={<p>층·호실 자료 불러오는 중…</p>}><FloorExplorer key={`${districtId}:${selected.id}`} districtId={districtId} buildingId={selected.id} /></Suspense>}
             {src === "api" && <a className="b-twin" href={kakaoRoadviewUrl(selected.center)} target="_blank" rel="noopener noreferrer">거리뷰 · 층별 보기<span className="sr-only">(새 창)</span></a>}
             <button className="b-twin" onClick={() => setTwinOpen(true)}>층별 공실 · 공실 이력 보기</button>
             <button className="save-candidate detail-save" type="button" aria-pressed={savedIds.includes(selected.id)}

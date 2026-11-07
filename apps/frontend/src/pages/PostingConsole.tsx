@@ -1,3 +1,7 @@
+import NearbyCompetition from "@/components/NearbyCompetition";
+import InteriorPlanner from "@/components/InteriorPlanner";
+import PpppReport from "@/components/PpppReport";
+import { useReportCapture } from "@/lib/ppppReportContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
@@ -53,6 +57,7 @@ const TIER_LABEL: Record<string, { name: string; sub: string }> = {
 const won = (v: number) => `${Math.round(v).toLocaleString()}만원`;
 
 interface PostingConsoleProps {
+  onReportChange?: (handoff: ProgramHandoff | undefined) => void;
   guided?: boolean;
   drafts?: Map<string, PostingDraft>;
   draftKey?: string;
@@ -88,14 +93,14 @@ export interface PostingDraft {
   page: string;
 }
 
-export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest, guided, drafts }: PostingConsoleProps = {}) {
+export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided, drafts }: PostingConsoleProps = {}) {
   const draftKey = `${districtId ?? DEFAULT_DISTRICT}|${selection ? `${selection.districtId}:${selection.buildingId}:${selection.unitId ?? ""}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}|${defaultIndustry ?? ""}|${defaultDetailKey ?? ""}`;
   return <PostingSession key={draftKey} guided={guided} drafts={drafts} draftKey={draftKey}
-    selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram}
+    selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram} onReportChange={onReportChange}
     defaultIndustry={defaultIndustry} defaultDetailKey={defaultDetailKey} industryRequest={industryRequest} />;
 }
 
-function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
+function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
   const [page, setPage] = useState(draft?.page ?? "input");
   const restored = useRef(!!draft?.calculation);
@@ -304,16 +309,16 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 계산할 수 있는 자리를 지도에 **월임대료 칩**으로 건다. 드롭다운 한 줄로만 보이던 자리가
   // "어디에 있고 얼마인지"로 먼저 읽힌다. 칩을 누르면 드롭다운에서 고른 것과 똑같이 동작한다.
   // 금액은 목록의 `unit.rent`(R-ONE × 면적 × 층 계수) 그대로다 — 지도에서 따로 계산하지 않는다.
-  const markers = useMemo<MapMarkerItem[]>(() => units.map((u) => ({
+  const markers = useMemo<MapMarkerItem[]>(() => page === "nearby" ? [] : units.map((u) => ({
     id: u.id, lat: u.lat, lng: u.lng, zIndex: u.id === unitId ? 200 : 70,
     html: mapLabelHTML({
       text: `월 ${shortManwon(u.rent)}`, sub: `${u.area}평`,
       color: colors.track.posting.base, active: u.id === unitId,
     }),
-  })), [units, unitId]);
+  })), [units, unitId, page]);
   useMapMarkers(markers, chooseUnit);
   const hubCenter = districts.find((d) => d.id === districtId)?.center;
-  useFitMap(districtId, units, hubCenter ? { lat: hubCenter[0], lng: hubCenter[1] } : null);
+  useFitMap(page === "nearby" ? null : districtId, units, hubCenter ? { lat: hubCenter[0], lng: hubCenter[1] } : null);
 
   // Posting → Program 인계 값. 업종은 **계산에 쓴 업종**을 먼저, 없으면 자리의 직전 업종.
   // 전략명은 계산했고 회수되는 전략이 있을 때만 — 없는 추천을 지어내지 않는다.
@@ -336,6 +341,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     }
     if (request !== programRequest.current) return;
     onMakeProgram({
+      buildingId: buildingId ?? undefined,
       districtId, districtName: districts.find((d) => d.id === districtId)?.name,
       address, inputsSource: effectiveUnit!.inputs_source,
       unitId: unit.id, unitName: unit.n, lat: unit.lat, lng: unit.lng,
@@ -346,11 +352,26 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     });
   }
 
-  const tiers = result ? Object.entries(result.scenarios) : [];
   const changedInput = calculation && (calculation.input.industry_type !== (industry.trim() || undefined)
     || calculation.input.strategy !== (strategy || undefined)
     || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem))
     || calculation.input.area_py_override !== undefined);
+  const reportHandoff: ProgramHandoff | undefined = effectiveUnit ? {
+    buildingId: selection && (effectiveUnit.id === selection.unitId || effectiveUnit.id === `vu-${selection.buildingId}`)
+      ? selection.buildingId : effectiveUnit.id.startsWith("vu-") ? effectiveUnit.id.slice(3) : undefined,
+    districtId, districtName: districts.find(d => d.id === districtId)?.name,
+    unitId: effectiveUnit.id, unitName: effectiveUnit.n, lat: effectiveUnit.lat, lng: effectiveUnit.lng,
+    area: effectiveUnit.area, floor: effectiveUnit.floor, rent: effectiveUnit.rent,
+    industry: industry.trim() || null, strategy: strategy || null, inputsSource: effectiveUnit.inputs_source,
+    calculation: calculation && !changedInput ? { input: calculation.input, result: calculation.result } : undefined,
+  } : undefined;
+  const reportSnapshot = JSON.stringify(reportHandoff);
+  useReportCapture("posting", reportHandoff ?? null);
+  useEffect(() => {
+    onReportChange?.(reportSnapshot ? JSON.parse(reportSnapshot) as ProgramHandoff : undefined);
+  }, [onReportChange, reportSnapshot]);
+  const tiers = result ? Object.entries(result.scenarios) : [];
+
 
   return (
     <div className="postconsole"><div className="wrap">
@@ -456,6 +477,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           </Button>
         </form>
         </> },
+        { id: "nearby", label: "주변 업종 지도", description: "공실 주변 50~100m의 같은 업종과 체인점을 확인하세요.", content:
+          page === "nearby" && (unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>) },
+        { id: "interior", label: "상권 맞춤 인테리어", description: "자리와 비용 조건을 바탕으로 공간 참고안을 준비하세요.", content:
+          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
+        { id: "report", label: "검증 리포트", description: "현재 작성한 자리와 비용 결과를 출처와 함께 저장하세요.", content:
+          page === "report" && <PpppReport key={`${districtId}:${unitId}`} handoff={reportHandoff} districtId={districtId} /> },
         { id: "result", label: "계산 결과", description: "계산에 사용한 조건과 출처를 확인하고, 검증 단계로 이어가세요.", content: <>
         {/* ── 결과 ── */}
         <div className="results">

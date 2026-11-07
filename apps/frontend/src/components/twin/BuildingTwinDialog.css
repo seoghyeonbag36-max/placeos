@@ -64,7 +64,7 @@
 .twin3d-plan-floor { fill: var(--surface-sunken); stroke: none; }
 .twin3d-plan-cell { fill: var(--track-page-soft); stroke: var(--track-page); stroke-width: 1; stroke-dasharray: 3 2; }
 .twin3d-plan-rest { fill: var(--surface-muted); stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 2; }
-.twin3d-plan-text { fill: var(--ink); text-anchor: middle; dominant-baseline: middle; }
+.twin3d-plan-text { fill: var(--ink); text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
 .twin3d-plan-outline { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .twin3d-upload { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); }
 .twin3d-sliders { display: grid; gap: 4px; margin-top: var(--sp-2); }

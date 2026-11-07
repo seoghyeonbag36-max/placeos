@@ -29,6 +29,7 @@ export default function InteriorPlanner({ handoff, district, industry }: {
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState("");
   const [result, setResult] = useState<{ image: InteriorImage; prompt: string } | null>(null);
   const selectedDistrict = handoff?.districtName ?? handoff?.districtId ?? district ?? "";
   const selectedIndustry = handoff?.industry ?? industry ?? "";
@@ -107,12 +108,19 @@ export default function InteriorPlanner({ handoff, district, industry }: {
         if (checked && !result) void generate(true);
       }} />이미지 생성에 입력 내용·사진을 외부 AI(OpenAI)로 보내는 데 동의합니다. 동의하면 바로 참고 이미지를 만듭니다. 생성 비용은 서비스 설정에 따릅니다.</label>
       <div className="interior-actions">
+        <button type="button" onClick={() => {
+          try {
+            localStorage.setItem(`placeos.interior-brief.${handoff?.districtId ?? district ?? ""}`, JSON.stringify({ brief, unitId: handoff?.unitId ?? null }));
+            setSaved("인테리어 조건을 이 브라우저에 저장했습니다. 검증 리포트에 포함됩니다.");
+          } catch { setSaved("저장하지 못했습니다. 브라우저 저장 공간을 확인하세요."); }
+        }}>리포트에 인테리어 조건 저장</button>
         <button type="button" disabled={!ownDistrict.trim() || !ownIndustry.trim() || !style.trim() || !consent} onClick={() => { void generate(); }}>{busy ? "이미지 생성 중…" : result || error ? "다시 만들기" : "AI 참고 이미지 생성"}</button>
         <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief, posting: handoff?.calculation ?? null }, null, 2))}>생성 지시문·비용 결과 저장</button>
         <a href="https://www.canva.com/ai/" target="_blank" rel="noopener noreferrer">Canva에서 직접 만들기 ↗</a>
       </div>
     </fieldset>
     {error && <p role="alert">{error}</p>}
+    {saved && <p role="status">{saved}</p>}
     {result && <figure className="interior-result"><img src={result.image.image_data_url} alt="AI 생성 인테리어 참고 이미지 · 실측·시공안 아님" />
       <figcaption>{result.image.note} <a href={result.image.image_data_url} download="placeos-interior-ai.png">이미지 저장</a></figcaption>
       <details><summary>이 이미지 생성에 쓴 조건</summary><pre>{result.prompt}</pre></details>
