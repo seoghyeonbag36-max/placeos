@@ -1291,9 +1291,55 @@ def _literal_options(source: str, alias: str) -> set[str]:
     return set()
 
 
+# 행사 판정 실패를 삼키지 않기 위한 자리(`_KPI_ERROR` 와 같은 계열 · 2026-11-07).
+_EVENTS_ERROR: str = ""
+
+
+def _program_events() -> dict | None:
+    """오늘(KST) 기준으로 **서빙되는** 행사 — 거점별 1건 이상인 거점 수(서울 / 서울 밖)와, 서빙 목록에 남은
+    끝난 행사 수. 못 세면 None.
+
+    판정은 `events.for_district`(서빙 경로 그 자체)를 그대로 부른다 — 끝난 행사 필터를 여기 옮겨 적으면
+    한쪽만 고쳐졌을 때 조용히 어긋난다(`_foot_breakdown` 과 같은 이유). Gold JSON 만 읽는다(네트워크 없음).
+    ⚠ 이 값은 **날이 갈수록 떨어진다** — 행사 Gold 는 수집한 날의 스냅샷이고 끝난 행사는 서빙에서 빠진다.
+    떨어졌다면 수집기(서울 문화행사 · culture_portal · tourapi_festivals)와 build_national_events 를 다시 돌릴 때다.
+    """
+    global _EVENTS_ERROR
+    _EVENTS_ERROR = ""
+    try:
+        sys.path.insert(0, str(ROOT / "apps" / "backend"))
+        from app.services import districts as _d
+        from app.services import events as _ev
+
+        today = _ev.today_kst()
+        out: dict = {"today": today.isoformat(), "seoul": [0, 0], "other": [0, 0],
+                     "served": 0, "ended": 0, "unloaded": 0}
+        for d in getattr(_d, "PAGES", None) or _d.DISTRICTS:
+            rows = _ev.for_district(d["id"], today=today)
+            if rows is None:
+                out["unloaded"] += 1
+                rows = []
+            bucket = out["seoul"] if _d.page_city(d).id == "seoul" else out["other"]
+            bucket[1] += 1
+            bucket[0] += bool(rows)
+            out["served"] += len(rows)
+            out["ended"] += sum(1 for e in rows if _ev.is_ended(e, today))
+        return out
+    except Exception as exc:
+        _EVENTS_ERROR = _exc_line(exc)
+        print(f"⚠ 행사 서빙 판정 실패 — {_EVENTS_ERROR}", file=sys.stderr)
+        return None
+
+
+def _read(rel: str) -> str:
+    p = ROOT / rel
+    return p.read_text(encoding="utf-8") if p.exists() else ""
+
+
 def program_track(total: int) -> Track:
     """대상 재정의(2026-09-17) 기준 — 예비창업자와, 팝업스토어·가오픈·MVP 로 아이템을 검증하려는
-    기창업자.
+    기창업자. 2026-11-07 네 기능 리뉴얼(네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증)
+    게이트를 더했다(docs/feature-program.md §0-W).
 
     옛 정의(영업 중 점주의 홍보 · 08-29 상용 온보딩)로 재면 삭제된 경로를 세게 된다. 게이트는
     검증 브리프 입력 · 검증 지표 출력 · 미검증 경험 검사가 **코드에 배선됐는지**를 센다
@@ -1419,6 +1465,90 @@ def program_track(total: int) -> Track:
         evidence=("docs/feature-program.md §0-F · apps/backend/tests/"
                   "test_program_output_split.py · services/ha_guard.py · "
                   "③층은 2026-09-17 services/program_brief.py 로 대체"),
+    ))
+
+    # ── 2026-11-07 네 기능 리뉴얼 — 배선을 코드에서 센다(문구만 고쳐서는 안 올라가게) ──
+    hub_src = _read("apps/frontend/src/pages/CampaignStudio.tsx")
+    app_src = _read("apps/frontend/src/App.tsx")
+    hub_ok = (all(f'label: "{n}"' in hub_src for n in ("네트워킹", "지원 프로그램", "오프라인 마케팅 솔루션", "가설 검증"))
+              and "ConsolePages" in hub_src and "CampaignLedger" in hub_src
+              and 'import("@/pages/CampaignStudio")' in app_src)
+    t.gates.append(Gate(
+        "Program 네 기능 화면", 1.0 if hub_ok else 0.0,
+        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 네트워킹 · 지원 프로그램 · "
+        "오프라인 마케팅 솔루션 · 가설 검증 네 탭. 예전 네 장(캠페인 원장 · 검증 계획 · 행사 연계 · 검증 리포트)은 "
+        "지우지 않고 새 기능 아래로 옮겼다"
+        if hub_ok else "미배선 — 허브의 네 탭 · 캠페인 원장 · App 의 Program 모듈 중 하나 이상이 없다",
+    ))
+
+    sources_src = _read("apps/backend/app/services/program_sources.py")
+    router_src = _read("apps/backend/app/api/v1/router.py")
+    api_src = _read("apps/frontend/src/lib/api.ts")
+    support_ok = (all(f"def {fn}(" in sources_src for fn in ("kstartup_open", "gov24_smallbiz", "bizinfo"))
+                  and "def support_programs(" in _read("apps/backend/app/services/program_support.py")
+                  and "program.router" in router_src and "getSupportPrograms" in api_src)
+    t.gates.append(Gate(
+        "지원 프로그램 · 공고 원천 3종 배선", 1.0 if support_ok else 0.0,
+        "K-Startup(모집 중) · 정부24 혜택 · 기업마당 지원사업정보 → GET /program/support. **배선만 센다** — "
+        "이 스크립트는 네트워크를 타지 않아 키·응답 상태를 모른다. 지금 상태는 그 응답의 sources[].status"
+        "(ok · no_key · error)가 말한다. 프로덕션은 Cloud Run 에 키를 넣기 전까지 no_key 다"
+        if support_ok else "미배선 — 원천 클라이언트 · 매칭 서비스 · 라우터 · 화면 호출 중 하나 이상이 없다",
+    ))
+
+    net_schema = _read("apps/backend/app/schemas/program.py")
+    import re as _re
+    net_block = net_schema.split("class ProgramNetwork", 1)[0] if "class ProgramNetwork" in net_schema else ""
+    no_contact = bool(net_schema) and not _re.search(r"^\s+(phone|tel|email|contact)\w*\s*:", net_schema, _re.M)
+    net_ok = ("def network(" in _read("apps/backend/app/services/program_network.py")
+              and bool(net_block) and no_contact and "getProgramNetwork" in api_src)
+    t.gates.append(Gate(
+        "네트워킹 · 연락처 없음 계약", 1.0 if net_ok else 0.0,
+        "공식 행사·네트워크 공고 + 함께 모이는 업종 + 물어볼 질문 + 지원기관 → GET /program/network. 응답 스키마에 "
+        "연락처 필드가 없다(가게 연락처 수집·연락 대행 금지 — 정보통신망법 제50조). 사용자끼리 잇기는 파일럿 뒤(결정 D3)"
+        if net_ok else "미배선이거나 계약 위반 — 네트워킹 서비스·스키마·화면 호출이 없거나, 스키마에 연락처 필드가 있다",
+    ))
+
+    # 고정 목표선이 되살아났는지는 주석이 아니라 **값**으로 본다 — _MODE_SIGNAL 리터럴을 읽어 팝업·가오픈의
+    # 목표 칸이 비었는지(None) 확인한다(주석에 남긴 옛 문구 「일 60명」에 걸리지 않게).
+    def _mode_signal() -> dict:
+        for node in ast.parse(mkt_src).body:
+            if (isinstance(node, ast.Assign)
+                    and any(isinstance(x, ast.Name) and x.id == "_MODE_SIGNAL" for x in node.targets)):
+                try:
+                    return ast.literal_eval(node.value)
+                except ValueError:
+                    return {}
+        return {}
+    ms = _mode_signal()
+    no_fixed = bool(ms) and all(ms.get(m, (0, 0, "x"))[2] is None for m in ("popup", "soft_open"))
+    target_ok = ("def _break_even_target(" in mkt_src and "break_even_daily" in schema_src
+                 and "reject_ratio" in schema_src and "breakEvenDaily" in studio_src and no_fixed)
+    t.gates.append(Gate(
+        "가설 검증 · 목표선 = Posting 손익분기", 1.0 if target_ok else 0.0,
+        "팝업·가오픈 목표선은 Posting 하루 손익분기 건수에서만 나온다 · 기각선은 창업자가 시작 전에 고른 비율 · "
+        "인계가 없으면 「미정」(KPI 규칙 1 — 예전 「일 60명」·「전환율 8%」 같은 고정값을 지어내지 않는다)"
+        if target_ok else "미배선 — 손익분기 목표선 · 기각선 비율 · 화면 인계 중 하나 이상이 없거나 고정 목표선이 남아 있다",
+    ))
+
+    ev = _program_events()
+    if ev is None:
+        t.gates.append(Gate("행사 신선도 (끝난 행사 0건 서빙)", 0.0,
+                            f"판정 실패 — {_EVENTS_ERROR}. 이 0 은 판정 실패로 떨어진 값이라 인용하지 말 것"))
+        t.gates.append(Gate("지역 행사 커버리지 (오늘 기준)", 0.0, f"판정 실패 — {_EVENTS_ERROR}"))
+        return t
+    t.gates.append(Gate(
+        "행사 신선도 (끝난 행사 0건 서빙)", 1.0 if ev["ended"] == 0 else 0.0,
+        f"오늘 {ev['today']}(KST) 기준 서빙 행사 {ev['served']:,}건 중 끝난 행사 {ev['ended']}건. 11-07 에는 서빙 749건 중 "
+        "498건(66.5%)이 이미 끝난 채 「예정 행사」로 실렸다 — 서빙 시점 필터(events.for_district)로 막았다"
+        + (f" · ⚠ 두 Gold 모두 미적재로 본 거점 {ev['unloaded']}" if ev["unloaded"] else ""),
+    ))
+    (s_hit, s_n), (o_hit, o_n) = ev["seoul"], ev["other"]
+    n = s_n + o_n
+    t.gates.append(Gate(
+        "지역 행사 커버리지 (오늘 기준)", (s_hit + o_hit) / n if n else 0.0,
+        f"끝나지 않은 행사가 1건 이상 실린 거점 — 서울 {s_hit}/{s_n} · 서울 밖 {o_hit}/{o_n}"
+        "(서울 문화행사 Gold 반경 + 전국 Gold 거점 중심 3km). 11-07 전에는 서울 밖이 0 이었다. "
+        "⚠ 이 값은 날이 갈수록 떨어진다(행사가 끝나면 빠진다) — 떨어지면 행사 수집기와 build_national_events 를 다시 돌린다",
     ))
     return t
 

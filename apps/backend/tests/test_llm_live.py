@@ -170,6 +170,7 @@ def test_district_marketing_live_no_fallback(capsys, signed_in):
         f"상권 콘텐츠가 시드로 샜다 (source={body['source']}). 서비스 로그:\n{captured}"
     )
     assert body["online_contents"], "online_contents 비어 있음"
-    assert body.get("events_source") == "seoul-open-data", (
+    # 2026-11-07 — 전국 행사 Gold 가 적재되면 서울 거점도 "public-open-data" 다(두 원천 병합)
+    assert body.get("events_source") in ("seoul-open-data", "public-open-data"), (
         f"행사가 시드로 샜다 (events_source={body.get('events_source')})"
     )

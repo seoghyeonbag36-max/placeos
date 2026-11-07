@@ -1,6 +1,6 @@
 ---
 name: program
-description: PPPP 트랙 — Program(예비창업자·검증하려는 기창업자의 팝업스토어·가오픈·MVP 검증 program 자동 생성 + 상권 단위 콘텐츠). 검증 브리프·검증 지표·HA 가드를 다룰 때.
+description: PPPP 트랙 — Program(네 기능: 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증 — 예비창업자·검증하려는 기창업자 대상). 검증 브리프·판정표·지원 공고·행사·HA 가드를 다룰 때.
 ---
 
 # 트랙 컨텍스트: Program (Promotion ▶ Program)
@@ -8,11 +8,23 @@ description: PPPP 트랙 — Program(예비창업자·검증하려는 기창업�
 너는 지금 PlaceOS의 **Program 트랙** 담당이다. `CLAUDE.md` 규칙을 따른다.
 
 ## 먼저 읽기
-- docs/feature-program.md — **§0-V 가 정본**(2026-09-17 대상 재정의)
+- docs/feature-program.md — **§0-W 가 정본**(2026-11-07 네 기능 리뉴얼) · 대상은 §0-V(2026-09-17)를 그대로 잇는다
+- docs/renewal-program-2026-11-07.md — 리뉴얼 검증 보고서(결정 D1~D5 · 연동 소스 · 실측)
 
-## 트랙 정의 (2026-09-17 재정의)
-- 묻는 질문: **이 아이템이 이 platform 에서 통하는지, 온·오프라인에서 어떤 검증 program 으로 확인할 것인가?**
-- 대상:
+## 트랙 정의 (2026-11-07 리뉴얼 — 결정 D1)
+- 묻는 질문: 이 상권에서 **누구와 연결하고, 무엇을 지원받고, 어떻게 알리며**, 그 결과로 아이템이
+  **통하는지 어떤 기준으로 판정**할 것인가?
+- 네 기능(= Program 허브 `pages/CampaignStudio` 의 네 탭, 이 순서):
+  1. **네트워킹** — 공식 행사·네트워크 공고(K-Startup 「행사ㆍ네트워크」 · 기업마당 행사정보) · 지원기관 누리집 ·
+     방문형 이웃 가게(함께 모이는 업종 + 물어볼 질문). ⛔ 가게 연락처 수집·연락 대행 금지(정보통신망법 제50조) —
+     응답에 연락처 필드가 없음을 테스트가 잠근다. 사용자끼리 잇기(옵트인)는 파일럿 뒤(결정 D3)
+  2. **지원 프로그램** — K-Startup · 정부24 혜택 · 기업마당 지원사업정보의 **모집 중** 공고를 지역·단계·업종 문구로 맞춘다.
+     「조건이 맞을 수 있는 공고」다 — 자격 판정·선정 가능성·금액 추정을 하지 않는다. 지원금은 Posting 회수기간에 넣지 않는다
+  3. **오프라인 마케팅 솔루션** — 실행 카드(지역 행사 · 빈 시간대 · 이웃 업종 · 자체 접점 — 언제·어디서·누구와·무엇을·**측정**) +
+     행사 연계 계획(EventLinkPlanner) + 실행 기록(캠페인 원장 `components/program/CampaignLedger`). 예산·예상 유입은 내지 않는다
+  4. **가설 검증** — 검증 계획(ProgramStudio)·판정표 + 결과 리포트(PpppReport — 결정 D4). **목표선은 Posting 손익분기에서 유도**
+     (하루 결제 건수 = 손익분기 매출 ÷ 객단가 ÷ 영업일), 기각선 비율은 창업자가 시작 전에 고른 값(10~100%)이다. 인계가 없으면 목표선은 「미정」
+- 대상(09-17 재정의 그대로 · 결정 D2):
   1. **예비창업자** — 아직 가게가 없다. 자기 아이템이 통하는 상권을 찾는다.
   2. **기창업자** — 사업은 하지만 이 상권·이 아이템은 안 해 봤다. **팝업스토어·가오픈·MVP** 로 검증한다.
 - ⚠ **영업 중인 가게의 마케팅은 이 트랙이 아니다.** 리뷰·사진·메뉴 입력, 상호 검색, 블로그 스니펫
@@ -23,6 +35,11 @@ description: PPPP 트랙 — Program(예비창업자·검증하려는 기창업�
 - 윤리 기준(필수): **Humanistic Authority** — 균형(Balance)·공생(Symbiosis)·공감(Empathy).
 - ⛔ **이 트랙의 구현 화면(`CampaignStudio` · `#/explore` 레일 「Program」)은 절대 화면에서 빼지 않는다**(2026-10-21 사용자 확정
   PPPP 화면 보존 규칙). 흐름(5판)의 「작게 확인」 화면이 있어도 대신하지 않는다. 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
+
+- 네 탭 모두 **로그인 없이 열람**한다. 저장(캠페인 원장)·LLM 생성만 로그인. 담은 공고·네트워킹 메모는 이 브라우저에만
+  (`lib/programSaved` — 서버 저장 없음 · 개인정보 범위 그대로)
+- 원천이 비면 **왜 비었는지** 보인다(`ok` · `no_key` · `error` — `services/program_sources`). 실패를 지난 목록으로 덮지 않는다.
+  공개 응답에 환경변수 이름을 싣지 않는다(`NO_KEY_NOTE`)
 
 ## 입력 계약 — 세 층, 따로 싣는다
 | 층 | 출처 | 등급 |
@@ -37,17 +54,31 @@ description: PPPP 트랙 — Program(예비창업자·검증하려는 기창업�
   넓히면 검증 지표가 통째로 죽는다.
 - **금액은 브리프 예산 구간에서만.** `budget_share` 는 int 퍼센트(절대액이 구조적으로 못 들어간다).
 - **행사는 cite/propose/own 으로 가른다**(§0-F). 컨텍스트에 없는 행사를 cite 하면 폐기.
+- **끝난 행사는 서빙하지 않는다**(2026-11-07) — `events.for_district` 가 오늘(KST) 기준으로 거른다. 행사 원천은 서울 문화행사
+  Gold + 전국 Gold(`platform_events_national.json` — 문화포털·TourAPI · `build_national_events`). `events_source` 는
+  `seoul-open-data` | `public-open-data` | `seed` | `none` 이고, 프론트는 `isRealEventsSource` 로만 가른다(문자열 비교 금지)
+- **목표선을 지어내지 않는다** — 규칙 스텁의 팝업·가오픈 목표는 `_break_even_target`(Posting 손익분기) 에서만 나온다.
+  예전 고정값(「일 60명」·「전환율 8%」)을 되살리지 말 것(KPI 규칙 1)
 - 지표는 방식마다 다르다 — 기간 안에 잴 수 없는 지표(팝업에 재구매율)를 내지 않는다.
 - HA 검사에 넘기는 생성물은 조각을 **줄바꿈으로** 잇는다(공백이면 문장 단위 판정이 무력해진다).
 
 ## 화이트리스트 경로
 - BE: `apps/backend/app/services/{marketing,program_brief,program_site,ha_guard,events}.py`,
-  `app/schemas/marketing.py`, `app/api/v1/marketing.py`
-- FE: `apps/frontend/src/pages/ProgramStudio.tsx`(+`.css`·테스트), `src/lib/api.ts` 의 `generateProgram`
+  `app/services/{program_sources,program_support,program_network,program_plan}.py`(2026-11-07),
+  `app/schemas/{marketing,program}.py`, `app/api/v1/{marketing,program}.py`
+- FE: `apps/frontend/src/pages/CampaignStudio.tsx`(Program 허브 · 가드 대상 모듈 — 지우거나 갈아끼우지 말 것),
+  `src/components/program/*`(네 기능 패널 · 캠페인 원장), `src/pages/ProgramStudio.tsx`(+`.css`·테스트),
+  `src/lib/{breakEven,programSaved}.ts`, `src/lib/api.ts` 의 `generateProgram` · `getSupportPrograms` · `getProgramNetwork` · `getExecutionPlan`
 - 데이터: `data/gold/{거점}/program_content_context.csv`, `data/gold/{거점}/vacant_units.json`, 행사 Gold
-- 키: `.env` 의 `LLM_API_KEY` (git 커밋 금지)
+  (`platform_events.json` 서울 · `platform_events_national.json` 전국), `data/collectors/{culture_portal,tourapi_festivals,naver_api}.py`
+- 키: `.env` 의 `LLM_API_KEY` · `DATA_GO_KR_SERVICE_KEY` · `BIZINFO_SUPPORT_API_KEY` · `BIZINFO_EVENT_API_KEY` (git 커밋 금지 ·
+  `.env` 는 읽지 않는다 — 이름은 `.env.example` · `docs/api-keys-and-specs.md` §8)
 
 ## 실제 엔드포인트 (현 코드 기준)
+- GET  `/api/v1/program/network`        ← 네트워킹(행사·네트워크 공고 · 이웃 업종 · 질문 · 지원기관) — 연락처 없음
+- GET  `/api/v1/program/support`        ← 지원 프로그램(모집 중 공고 매칭 · 원천 상태)
+- GET  `/api/v1/program/plan`           ← 오프라인 마케팅 실행 카드(근거 있는 카드만 · 금액 없음)
+- GET/POST `/api/v1/program/campaigns`  ← 실행 기록(캠페인 원장 · 로그인)
 - POST `/api/v1/marketing/generate`     ← FE `generateProgram(brief)` — 검증 program (LLM · 스텁 폴백)
 - GET  `/api/v1/marketing/sites`        ← 거점 공실 유닛(①층 후보)
 - GET  `/api/v1/marketing/events`       ← 오프라인 연계 후보(행사, LLM 안 부름)

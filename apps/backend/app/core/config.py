@@ -130,6 +130,17 @@ class Settings(BaseSettings):
     # 카카오 Local 키는 Platform 벤치마킹 후보 탐색용으로 다시 읽는다.
     # Program 대상이 검증하려는 창업자로 바뀌면서 /marketing/places·/reviews는 삭제됐다.
     # 네이버 검색 키는 여전히 서버 설정에서 제외한다. → docs/feature-program.md §0-V
+    # (2026-11-07) Program 리뉴얼 — 「지원 프로그램」·「네트워킹」이 공고를 **서버에서** 부른다.
+    # 공고는 매일 바뀌어 Gold 스냅샷으로는 「모집 중」이 낡는다(스케줄러가 돌지 않는다).
+    # 셋 다 비면 해당 원천만 「지금 확인할 수 없음」으로 물러난다 — 기동은 막지 않는다.
+    #   data_go_kr_service_key   K-Startup 공고(15125364)·정부24 혜택(15113968) — 수집기와 같은 공용 키(디코딩 키)
+    #   bizinfo_support_api_key  기업마당 지원사업정보 API(bizinfoApi.do) 인증키
+    #   bizinfo_event_api_key    기업마당 행사정보 API(bizinfoEventApi.do) 인증키 — 지원사업정보와 키가 따로 나온다
+    # 로컬은 data/.env 하나면 된다(위 env_file 순서). 배포판에는 data/.env 가 없어 Cloud Run 에
+    # `--update-env-vars` 로 넣는다(--set-env-vars 금지) → docs/deploy-cloud-run.md
+    data_go_kr_service_key: str = ""
+    bizinfo_support_api_key: str = ""
+    bizinfo_event_api_key: str = ""
 
     @model_validator(mode="after")
     def _guard_prod_secrets(self) -> "Settings":

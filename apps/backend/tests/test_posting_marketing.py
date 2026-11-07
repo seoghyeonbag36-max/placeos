@@ -312,7 +312,7 @@ def test_district_marketing_served(monkeypatch):
     assert body["source"] == "seed"          # 온라인 콘텐츠는 LLM 키가 없어 시드
     assert body["online_contents"]
     # 행사는 별개 소스다 — 온라인 콘텐츠가 시드여도 행사는 실데이터일 수 있다
-    assert body["events_source"] in {"seoul-open-data", "seed"}
+    assert body["events_source"] in {"seoul-open-data", "public-open-data", "seed"}
 
     assert client.get(f"{V1}/marketing/nope").status_code == 404
 
@@ -329,10 +329,12 @@ def test_events_carry_real_fields_not_fabricated_metrics():
         pytest.skip("gold/platform_events.json 미적재 — build_events 실행 필요")
 
     body = client.get(f"{V1}/marketing/garosugil").json()
-    assert body["events_source"] == "seoul-open-data"
+    # 2026-11-07 — 전국 행사 Gold 가 적재되면 서울 거점도 두 원천을 합쳐 "public-open-data" 다
+    assert body["events_source"] in ("seoul-open-data", "public-open-data")
     for e in body["events"]:
         assert e["n"] and e["lat"] and e["lng"] and e["when"], "실물 행사의 필수 필드 누락"
-        assert e["place"], "장소가 없다 — 실데이터라면 있어야 한다"
+        if e.get("src") == ev.SRC_SEOUL:
+            assert e["place"], "장소가 없다 — 서울 문화행사 실데이터라면 있어야 한다"
         # 지어낸 값들은 넘어오면 안 된다
         assert e["k2"] is None, f"근거 없는 효과 지표가 실렸다: {e['k2']}"
         assert e["roles"] is None and e["ha"] is None
@@ -354,7 +356,7 @@ def test_district_marketing_llm_contents(monkeypatch, signed_in):
     assert body["source"] == "llm"
     assert body["online_contents"] == ["가로수길 팝업 지도 #가로수길 #팝업"]
     # 행사는 LLM 이 만들지 않는다 — 좌표·일정이 붙은 실물이라 별도 소스에서만 온다
-    assert body["events_source"] in {"seoul-open-data", "seed"}
+    assert body["events_source"] in {"seoul-open-data", "public-open-data", "seed"}
     assert all(e.get("lat") and e.get("lng") for e in body["events"])
 
 

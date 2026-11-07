@@ -152,6 +152,21 @@ if nid and nsec:
 else:
     report("네이버 개발자센터(검색)", False, "NAVER_CLIENT_ID/SECRET 미설정")
 
+# ── 5-C. NAVER API HUB (검색 — 2026-11-08 이관) ──────────────────────
+# 개발자센터 키로는 HUB 를 못 부른다(공식 이관 가이드). 11-08 실측으로 확인한 HUB 경로만 센다 —
+# 블로그·카페글 200 · 뉴스는 앱에서 켜야 한다 · 데이터랩 경로 미확인(data/collectors/naver_api.py).
+hid, hsec = data.get("NAVER_HUB_CLIENT_ID", ""), data.get("NAVER_HUB_CLIENT_SECRET", "")
+if hid and hsec:
+    hq = urllib.parse.quote("가로수길")
+    for kind, path in (("블로그", "/search/v1/blog"), ("카페글", "/search/v1/cafearticle")):
+        status, body = fetch(f"https://naverapihub.apigw.ntruss.com{path}?query={hq}&display=1",
+                             headers={"X-NCP-APIGW-API-KEY-ID": hid, "X-NCP-APIGW-API-KEY": hsec})
+        report(f"NAVER API HUB({kind})", status == 200,
+               "호출 성공" if status == 200 else f"HTTP {status}: {body[:120]}")
+else:
+    report("NAVER API HUB(검색)", False,
+           "NAVER_HUB_CLIENT_ID/SECRET 미설정 — 옛 개발자센터 키는 2027-06-30 까지(2차 출처)")
+
 # ── 5-B. 네이버 데이터랩 (검색어 트렌드) ───────────────────────────
 # 검색 API 와 **키는 같지만 앱 설정이 다르다** — 애플리케이션에 '데이터랩(검색어트렌드)'
 # 을 등록하지 않으면 검색은 200 인데 여기만 실패한다. 그래서 따로 센다.

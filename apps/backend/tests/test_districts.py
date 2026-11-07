@@ -506,7 +506,7 @@ def test_postings_and_marketing():
     body = r.json()
     # 행사는 서울 문화행사 실데이터다 — 건수는 수집 시점에 따라 변하므로 고정하지 않는다.
     # 실데이터일 때 0건은 정상(그 거점에 예정 공공 문화행사가 없을 수 있다).
-    assert body["events_source"] in {"seoul-open-data", "seed"}
+    assert body["events_source"] in {"seoul-open-data", "public-open-data", "seed"}
     if body["events_source"] == "seed":
         assert len(body["events"]) == 3      # 시드 폴백은 거점당 3건 고정
 

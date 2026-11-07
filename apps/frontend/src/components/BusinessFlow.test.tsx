@@ -25,8 +25,12 @@ afterEach(() => { cleanup(); removeNaverStub(); clearToken(); });
 
 const TAB_LOAD = { timeout: 20000 };
 
-/** Program 탭(CampaignStudio, 2026-10-14)은 로그인해야 폼을 연다. 업종 칸은 placeholder 가 없어 라벨로 찾는다. */
-const programCategory = async () => await screen.findByLabelText(/^업종/, undefined, TAB_LOAD) as HTMLInputElement;
+/** Program 탭(CampaignStudio, 2026-10-14)은 로그인해야 폼을 연다. 업종 칸은 placeholder 가 없어 라벨로 찾는다.
+ *  2026-11-07 리뉴얼 — 캠페인 폼(실행 기록)은 Program 네 기능 중 「오프라인 마케팅 솔루션」 안에 있다(첫 탭은 네트워킹). */
+const programCategory = async () => {
+  fireEvent.click(await screen.findByRole("button", { name: "오프라인 마케팅 솔루션" }, TAB_LOAD));
+  return await screen.findByLabelText(/^업종/, undefined, TAB_LOAD) as HTMLInputElement;
+};
 
 const INDUSTRIES: IndustryOption[] = [
   { key: "cafe", label: "카페·디저트", input: "카페", model_label: "카페" },

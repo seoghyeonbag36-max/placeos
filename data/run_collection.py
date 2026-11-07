@@ -10,12 +10,28 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from data.config.seoul_districts import DISTRICTS
 
 # .env 는 이 파일(run_collection.py)과 같은 data/ 폴더에 둔다 (cwd 무관).
 _ENV_PATH = Path(__file__).resolve().parent / ".env"
+
+
+def _env_value(raw: str) -> str:
+    """`KEY=값` 의 값 — 따옴표 값은 닫는 따옴표까지, 따옴표 없는 값은 공백 뒤 `#` 부터 주석으로 버린다.
+
+    2026-11-08 고침: 예전에는 `KEY=값  # 메모` 의 「# 메모」까지 값에 넣었고, 템플릿 줄 `KEY=   # 설명` 은
+    값 없는 줄인데도 KEY 를 「# 설명」으로 채웠다(.env.example 에서 줄을 복사해 키를 붙이면 키가 깨진다).
+    python-dotenv(백엔드 설정이 쓰는 파서)와 같은 규칙으로 맞췄다.
+    """
+    v = raw.strip()
+    if v[:1] in ("'", '"'):
+        end = v.find(v[0], 1)
+        return v[1:end] if end > 0 else v[1:]
+    v = re.split(r"\s+#", v, maxsplit=1)[0].strip()
+    return "" if v.startswith("#") else v
 
 
 def _load_env(path: Path = _ENV_PATH) -> None:
@@ -40,7 +56,7 @@ def _load_env(path: Path = _ENV_PATH) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        k, v = k.strip(), v.strip().strip('"').strip("'")
+        k, v = k.strip(), _env_value(v)
         if v:
             os.environ[k] = v  # .env 값이 우선
             loaded += 1

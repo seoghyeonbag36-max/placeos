@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getDistrictEvents, type MarketingEvent } from "@/lib/api";
+import { eventsSourceLabel, getDistrictEvents, isRealEventsSource, type MarketingEvent } from "@/lib/api";
 import "./RenewalTools.css";
 
 import { readEventLink, type EventLink } from "@/lib/eventLink";
@@ -12,8 +12,11 @@ export default function EventLinkPlanner({ districtId }: { districtId: string })
   useEffect(() => {
     let live = true;
     getDistrictEvents(districtId).then(r => { if (live) {
-      setEvents(r.events_source === "seoul-open-data" ? r.events : []);
-      setSource(r.events_source === "seoul-open-data" ? "서울 공개 문화행사" : r.events_note ?? "확인된 행사 원천 없음");
+      // 실데이터 = 서울 문화행사 또는 전국 행사 Gold(2026-11-07). 끝난 행사는 서버가 오늘 기준으로 뺐다.
+      const real = isRealEventsSource(r.events_source);
+      setEvents(real ? r.events : []);
+      setSource(real ? (r.events.length ? eventsSourceLabel(r.events) : "공공 행사 자료 · 오늘 기준 예정 행사 없음")
+        : r.events_note ?? "확인된 행사 원천 없음");
     } }).catch(() => { if (live) { setEvents([]); setSource("행사 자료를 불러오지 못했습니다."); } });
     return () => { live = false; };
   }, [districtId]);

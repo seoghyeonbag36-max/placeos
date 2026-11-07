@@ -5,7 +5,7 @@ import { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import {
   BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable,
   listDistricts, getDistrict, getPostings, getMarketing, getVacancyHeatmap, getBuildingVacancy,
-  getFloorVacancies,
+  getFloorVacancies, eventsSourceLabel, isRealEventsSource,
 } from "@/lib/api";
 import type {
   DistrictSummary, DistrictDetail, Posting, Marketing, TierScenario, VacancyHeatmap, GeoJSONFC,
@@ -796,15 +796,15 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           {marketing && (
             <>
               <h2 className="sec">상권 행사 · 콘텐츠 <small>
-                Program · {marketing.events_source === "seoul-open-data"
-                  ? "행사는 서울열린데이터광장 문화행사 실데이터"
+                Program · {isRealEventsSource(marketing.events_source)
+                  ? `행사는 ${eventsSourceLabel(marketing.events)} 실데이터`
                   : "행사는 시드"} · {marketingContentGold
                     ? "콘텐츠는 Gold 컨텍스트 기반 생성"
                     : "콘텐츠는 시드"}
               </small></h2>
               {/* 실데이터인데 0건이면 그 거점에 예정 공공 문화행사가 없는 것이다.
                   시드로 채우면 지어낸 행사를 지도에 다시 찍게 되므로 빈 상태를 보여준다. */}
-              {marketing.events_source === "seoul-open-data" && marketing.events.length === 0 && (
+              {isRealEventsSource(marketing.events_source) && marketing.events.length === 0 && (
                 <div className="loading">
                   예정된 공공 문화행사 없음 — 이 API 는 공공·문화시설 행사 중심이라
                   상업 상권의 팝업·마켓은 담기지 않는다

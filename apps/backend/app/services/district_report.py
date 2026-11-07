@@ -226,16 +226,21 @@ def _posting(d: dict, unit_id: str | None) -> dict:
 
 
 def _events(d: dict) -> dict:
-    if not svc.page_city(d).has_city_events:
+    # 2026-11-07 — 전국 행사 Gold(문화포털·TourAPI)가 덮는 서울 밖 거점도 행사를 싣는다.
+    if not svc.page_city(d).has_city_events and not events.national_covers(d["id"]):
         return _seoul_only(d)
     rows = events.for_district(d["id"])
     if rows is None:
         return _no("행사 자료가 적재되지 않았어요.")
-    keep = ("n", "category", "when", "place", "org", "fee", "target", "link", "lat", "lng", "distance_m")
-    data = events._load() or {}
-    return _ok("서울열린데이터광장 문화행사",
+    keep = ("n", "category", "when", "place", "org", "fee", "target", "link", "lat", "lng", "distance_m", "src")
+    used = {e.get("src") for e in rows}
+    metas = [m for m in events.sources_meta() if m["id"] in used] or events.sources_meta()
+    source = " · ".join(dict.fromkeys(m["name"] for m in metas)) or "공공 행사 자료"
+    as_of = max((m["as_of"] for m in metas if m.get("as_of")), default=None)
+    # 끝난 행사는 서빙 시점(오늘)에 빠진다 — 예전 안내 「수집 기준일 뒤에 끝난 행사가 섞여 있을 수 있어요」는 더는 맞지 않다.
+    return _ok(source,
                {"n": len(rows), "items": [{k: e.get(k) for k in keep} for e in rows[:_TOP_EVENTS]]},
-               as_of=data.get("as_of"), note="수집 기준일 뒤에 끝난 행사가 섞여 있을 수 있어요.")
+               as_of=as_of, note="오늘 기준으로 끝난 행사는 뺐어요. 일정·참가 조건은 원문에서 다시 확인하세요.")
 
 
 _SECTIONS = ("overview", "industry", "population", "sales", "openclose", "vacancy", "rent", "site", "competition",

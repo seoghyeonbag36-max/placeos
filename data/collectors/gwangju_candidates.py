@@ -115,12 +115,13 @@ def collect_blog(slug: str, anchor: str) -> int | None:
     cached = load_latest(slug, 'naver_blog_search_raw.json')
     if cached is not None:
         return len(cached.get('items', []))
-    if not os.getenv('NAVER_CLIENT_ID') or not os.getenv('NAVER_CLIENT_SECRET'):
+    from data.collectors import naver_api
+    req = naver_api.search_request('blog')   # HUB 키가 있으면 HUB(2026-11-08)
+    if req is None:
         return None
-    response = requests.get('https://openapi.naver.com/v1/search/blog.json', params={
+    response = requests.get(req[0], params={
         'query': '광주 ' + anchor.replace('/', ' ') + ' 상권', 'display': 100, 'sort': 'date',
-    }, headers={'X-Naver-Client-Id': os.environ['NAVER_CLIENT_ID'],
-                'X-Naver-Client-Secret': os.environ['NAVER_CLIENT_SECRET']}, timeout=30)
+    }, headers=req[1], timeout=30)
     if response.status_code != 200:
         raise RuntimeError(f'네이버 HTTP {response.status_code}')
     data = response.json()

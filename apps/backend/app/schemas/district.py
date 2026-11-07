@@ -240,14 +240,17 @@ class MarketingEvent(BaseModel):
     target: str | None = None
     link: str | None = None
     distance_m: int | None = None
+    # 원천(2026-11-07) — "seoul-culture"(서울 문화행사) | "culture-portal"(문화포털) | "tourapi"(관광공사 축제)
+    src: str | None = None
 
 
 class DistrictEvents(BaseModel):
     """GET /marketing/events — 상권 행사만(LLM 없이). Program 지도의 오프라인 홍보 장소."""
     district_id: str
     events: list[MarketingEvent]
-    # "seoul-open-data"(실데이터) | "seed"(Gold 미적재 폴백) | "none"(이 도시에 원천 없음).
-    # 실데이터인데 0건이면 예정 행사가 없다.
+    # "seoul-open-data"(서울 문화행사 실데이터) | "public-open-data"(전국 행사 Gold 가 덮음 — 2026-11-07)
+    # | "seed"(Gold 미적재 폴백) | "none"(이 거점에 원천 없음). 실데이터인데 0건이면 예정 행사가 없다.
+    # 끝난 행사는 서빙 시점(오늘, KST)에 빠진다(services/events).
     events_source: str = "seed"
     events_note: str | None = None
 

@@ -16,11 +16,11 @@ try:
 except ImportError:  # pragma: no cover
     requests = None
 
+from data.collectors import naver_api
 from data.collectors.common import load_env, save_json
 from data.config.garosugil import BLOG_KEYWORDS, SLUG, TREND_KEYWORD_GROUPS
 
-_BLOG_URL = "https://openapi.naver.com/v1/search/blog.json"
-_DATALAB_URL = "https://openapi.naver.com/v1/datalab/search"
+# 호출 주소·헤더는 data/collectors/naver_api.py 가 정한다(2026-11-08 NAVER API HUB 이관 — 블로그는 HUB, 데이터랩은 옛 방식).
 _DISPLAY = 100          # 요청당 최대
 _PAGES = 3              # 키워드당 300건 (start 상한 1000)
 
@@ -30,19 +30,18 @@ CITY_WORD: dict[str, str] = {"seoul": "서울", "goyang": "고양", "paju": "파
                              "bucheon": "부천", "anyang": "안양", "uijeongbu": "의정부", "gwangju": "광주", "hwaseong": "화성"}
 
 
-def _headers() -> dict[str, str] | None:
-    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
-    if not cid or not secret:
-        return None
-    return {"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": secret}
+def _blog_request() -> tuple[str, dict[str, str]] | None:
+    req = naver_api.search_request("blog")
+    return (req[0], req[1]) if req else None
 
 
 def collect_blog() -> list[dict]:
     """키워드별 최신 블로그 글 수집 → link 기준 중복 제거 → Bronze 저장."""
-    headers = _headers()
-    if headers is None or requests is None:
-        print("[naver_blog] NAVER_CLIENT_ID/SECRET 미설정(또는 requests 없음) — 건너뜀")
+    req = _blog_request()
+    if req is None or requests is None:
+        print("[naver_blog] 네이버 검색 키(NAVER_HUB_CLIENT_* 또는 NAVER_CLIENT_*) 미설정(또는 requests 없음) — 건너뜀")
         return []
+    blog_url, headers = req
 
     seen: dict[str, dict] = {}
     for kw in BLOG_KEYWORDS:
@@ -50,7 +49,7 @@ def collect_blog() -> list[dict]:
         for page in range(_PAGES):
             try:
                 resp = requests.get(
-                    _BLOG_URL, headers=headers,
+                    blog_url, headers=headers,
                     params={"query": kw, "display": _DISPLAY,
                             "start": page * _DISPLAY + 1, "sort": "date"},
                     timeout=15,
@@ -75,9 +74,10 @@ def collect_blog() -> list[dict]:
 
 def collect_trend() -> dict:
     """데이터랩 검색어 트렌드(최근 24개월·월 단위) → Bronze 저장."""
-    headers = _headers()
-    if headers is None or requests is None:
+    req = naver_api.datalab_request()
+    if req is None or requests is None:
         return {}
+    datalab_url, headers = req[0], req[1]
 
     end = datetime.date.today()
     start = end.replace(year=end.year - 2)
@@ -92,7 +92,7 @@ def collect_trend() -> dict:
     }
     try:
         resp = requests.post(
-            _DATALAB_URL, headers={**headers, "Content-Type": "application/json"},
+            datalab_url, headers=headers,
             json=body, timeout=15,
         )
         resp.raise_for_status()
@@ -127,10 +127,11 @@ def collect_platform13_blog(only: set[str] | None = None) -> list[dict]:
     from data.config.page_hubs import ALL_HUBS
     from data.config.platform_places import DISTRICT_PLACES
 
-    headers = _headers()
-    if headers is None or requests is None:
-        print("[naver_blog] NAVER_CLIENT_ID/SECRET 미설정(또는 requests 없음) — 건너뜀")
+    req = _blog_request()
+    if req is None or requests is None:
+        print("[naver_blog] 네이버 검색 키(NAVER_HUB_CLIENT_* 또는 NAVER_CLIENT_*) 미설정(또는 requests 없음) — 건너뜀")
         return []
+    blog_url, headers = req
 
     seen: dict[str, dict] = {}
     for did, (_lat, _lng, _radius, name) in DISTRICT_PLACES.items():
@@ -142,7 +143,7 @@ def collect_platform13_blog(only: set[str] | None = None) -> list[dict]:
             for page in range(2):
                 try:
                     resp = requests.get(
-                        _BLOG_URL, headers=headers,
+                        blog_url, headers=headers,
                         params={"query": kw, "display": _DISPLAY,
                                 "start": page * _DISPLAY + 1, "sort": "date"},
                         timeout=15,
