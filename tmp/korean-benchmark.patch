@@ -1,0 +1,79 @@
+diff --git a/apps/backend/app/services/industry_benchmarks.py b/apps/backend/app/services/industry_benchmarks.py
+index 09a556a..07c6445 100644
+--- a/apps/backend/app/services/industry_benchmarks.py
++++ b/apps/backend/app/services/industry_benchmarks.py
+@@ -9,6 +9,7 @@ SOURCE_TITLE = "2025 외식업체 경영실태 조사 통계보고서"
+ # 표 25(p.49), 표 29(p.57), 표 67(p.133)의 전국·전체 운영형태 평균.
+ # 요리 주점은 단독 집계가 없으므로 기타 주점업의 참고값임을 별도로 밝힌다.
+ ROWS = {
++    "restaurant_korean": ("한식", 1091, 47.1, 27.4, 15438.7, "exact_category"),
+     "bar_cooking": ("기타 주점업", 166, 29.7, 27.7, 21166.0, "broader_category"),
+     "bar_beer": ("생맥주 전문점", 76, 37.0, 27.9, 20029.7, "exact_category"),
+ }
+diff --git a/apps/backend/tests/test_industry_benchmarks.py b/apps/backend/tests/test_industry_benchmarks.py
+index 57eae32..262ddbf 100644
+--- a/apps/backend/tests/test_industry_benchmarks.py
++++ b/apps/backend/tests/test_industry_benchmarks.py
+@@ -29,10 +29,30 @@ def test_beer_uses_its_own_statistics_without_cost_fallback():
+     assert out["monthly_revenue"] is None
+ 
+ 
++def test_korean_uses_verified_statistics_and_keeps_missing_inputs():
++    row = next(i for i in industry_detail.options() if i["key"] == "restaurant_korean")["benchmark"]
++    assert row["source"]["category"] == "한식"
++    assert row["source"]["category_match"] == "exact_category"
++    assert row["source"]["sample_n"] == 1091
++    assert row["values"]["capacity"]["original_value"] == 47.1
++    assert row["values"]["capacity"]["value"] == 47
++    assert row["values"]["days"]["original_value"] == 27.4
++    assert row["values"]["days"]["value"] == 27
++    assert row["values"]["price"]["original_value"] == 15438.7
++    assert row["values"]["price"]["value"] == 1.54387
++    assert [(v["table"], v["page"]) for v in row["values"].values()] == [
++        ("표 29", 57), ("표 25", 49), ("표 67", 133),
++    ]
++    assert set(row["unavailable"]) == {"cycles", "utilization", "variable_cost_rate", "rent", "fixed_cost", "investment"}
++    out = industry_detail.calculate("restaurant_korean", {k: v["value"] for k, v in row["values"].items()})
++    assert out["status"] == "needs_inputs"
++    assert out["monthly_revenue"] is None
++
++
+ def test_unsupported_industries_do_not_receive_bar_averages():
+     for option in industry_detail.options():
+         row = option["benchmark"]
+         assert set(row["values"]) | set(row["unavailable"]) == {f["key"] for f in option["fields"]}
+-        if option["key"] not in ("bar_cooking", "bar_beer"):
++        if option["key"] not in ("bar_cooking", "bar_beer", "restaurant_korean"):
+             assert row["source"] is None
+             assert row["values"] == {}
+diff --git a/apps/frontend/src/components/IndustryDetailFields.test.tsx b/apps/frontend/src/components/IndustryDetailFields.test.tsx
+index 6df299d..1465069 100644
+--- a/apps/frontend/src/components/IndustryDetailFields.test.tsx
++++ b/apps/frontend/src/components/IndustryDetailFields.test.tsx
+@@ -65,6 +65,26 @@ it("평균 없는 업종은 자동 채우기를 비활성화하고 다른 업종
+   expect(screen.getByText(/검증된 평균 자료가 없어/)).toBeTruthy();
+ });
+ 
++it("한식 평균이 연결되면 버튼으로 빈칸을 채우고 입력한 좌석 수를 유지한다", async () => {
++  // 클릭 동작용 합성 응답. 원문 수치·환산은 백엔드 계약 테스트에서 검증한다.
++  const korean: IndustryDetail = { ...benchmarkOption, key: "restaurant_korean", parent: "restaurant", label: "한식",
++    family: "seats", fields: option.fields.map((f) => ({ ...f,
++      label: ({ capacity: "좌석 수", utilization: "좌석 이용률", days: "월 영업일", price: "고객 1인당 객단가" } as Record<string, string>)[f.key],
++    })),
++    benchmark: { ...benchmarkOption.benchmark!,
++      source: { ...benchmarkOption.benchmark!.source!, category: "한식", category_match: "exact_category" },
++    },
++  };
++  installFetchStub([{ match: /\/ai\/industry-details$/, body: { details: [korean] } }]);
++  render(<OperatingHarness detailKey="restaurant_korean" />);
++  const button = await screen.findByRole("button", { name: "업종 평균으로 빈칸 채우기" });
++  expect((button as HTMLButtonElement).disabled).toBe(false);
++  fireEvent.click(button);
++  expect((screen.getByRole("spinbutton", { name: /좌석 수/ }) as HTMLInputElement).value).toBe("7");
++  expect((screen.getByRole("spinbutton", { name: /고객 1인당 객단가/ }) as HTMLInputElement).value).toBe("10");
++  expect((screen.getByRole("spinbutton", { name: /좌석 이용률/ }) as HTMLInputElement).value).toBe("");
++});
++
+ it("숙박 운영 입력을 API로 보내고 결과 출처를 표시하며 수정 시 이전 계산을 걷는다", async () => {
+   const api = installFetchStub([
+     { match: /\/ai\/industry-details$/, body: { details: [option] } },
