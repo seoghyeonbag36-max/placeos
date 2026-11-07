@@ -8,3 +8,8 @@
 .renewal-tool button { padding: var(--sp-2); margin: var(--sp-1); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
 .renewal-tool button[aria-pressed=true] { border-color: var(--track-posting); background: var(--surface-2); }
 .renewal-tool a { display: inline-block; margin-inline: var(--sp-2); }
+/* 주변 업종 지도 조회 조건(2026-11-07) — 업종 · 반경 · 「조회」를 한 줄에. 좁은 화면에서는 위아래로 쌓인다 */
+.renewal-tool .nearby-query { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: var(--sp-2); align-items: end; }
+.renewal-tool .nearby-query label { margin-block: 0; }
+.renewal-tool .nearby-query button[type=submit] { margin: 0; padding-inline: var(--sp-4); border-color: var(--track-posting); font-weight: 600; text-align: center; }
+@media (max-width: 480px) { .renewal-tool .nearby-query { grid-template-columns: minmax(0, 1fr); } }

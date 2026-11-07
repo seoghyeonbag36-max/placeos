@@ -130,7 +130,7 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
-    fireEvent.click(screen.getByRole("button", { name: "계산 결과" }));
+    // 계산 결과는 「자리와 비용 조건」 화면 바로 아래에 나온다(2026-11-07 — 별도 「계산 결과」 탭 없음)
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
     await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);

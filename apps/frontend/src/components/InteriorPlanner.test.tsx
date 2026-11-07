@@ -17,7 +17,7 @@ it("동의 전 생성 호출이 없고, 동의하면 버튼 없이 바로 명시
   fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
   const generate = screen.getByRole("button", { name: "AI 참고 이미지 생성" }) as HTMLButtonElement;
   expect(generate.disabled).toBe(true);
-  expect(api.calls).toHaveLength(0);
+  expect(api.matching(/interior-preview$/)).toHaveLength(0);
   fireEvent.click(screen.getByRole("checkbox"));
   await screen.findByAltText("AI 생성 인테리어 참고 이미지 · 실측·시공안 아님");
   expect(api.matching(/interior-preview$/)).toHaveLength(1);
@@ -26,7 +26,7 @@ it("동의 전 생성 호출이 없고, 동의하면 버튼 없이 바로 명시
   expect(api.matching(/interior-preview$/)).toHaveLength(1);
   fireEvent.click(screen.getByRole("button", { name: "다시 만들기" }));
   await waitFor(() => expect(api.matching(/interior-preview$/)).toHaveLength(2));
-  expect(api.matching(/interior-preview$/)[0].body).toMatchObject({ district: "garosugil", industry: "카페", style: "따뜻함", consent: true, references: [] });
+  expect(api.matching(/interior-preview$/)[0].body).toMatchObject({ district: "garosugil", industry: "카페", style: "따뜻함(warm and cozy)", consent: true, references: [] });
   expect(api.matching(/interior-preview$/)[0].body).not.toHaveProperty("area_py");
   expect(api.matching(/interior-preview$/)[0].url).toBe("/api/v1/ai/interior-preview");
 });
@@ -39,7 +39,7 @@ it("미설정·실패 시 이미지를 만들지 않고 지시문을 보존한�
   fireEvent.click(screen.getByRole("checkbox"));
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("쓸 수 없습니다"));
   expect(screen.queryByRole("img")).toBeNull();
-  expect((screen.getByLabelText("분위기·색감") as HTMLInputElement).value).toBe("깔끔함");
+  expect(screen.getByRole("button", { name: "깔끔함" }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByRole("button", { name: "생성 지시문·비용 결과 저장" })).toBeTruthy();
 });
 
@@ -113,7 +113,8 @@ it("응답이 없으면 시간 제한에서 끊고 504 로 안내한다 · 진�
 it("생성 중에는 버튼이 잠겨 두 번째 요청이 나가지 않는다", async () => {
   saveToken("test-only-token");
   let calls = 0;
-  vi.stubGlobal("fetch", () => { calls += 1; return new Promise(() => {}); });
+  // 생성 요청만 센다 — 마운트 때의 한도 조회(GET …/quota)는 따로다
+  vi.stubGlobal("fetch", (url: string) => { if (String(url).endsWith("/interior-preview")) calls += 1; return new Promise(() => {}); });
   start();
   const busy = await screen.findByRole("button", { name: "이미지 생성 중…" }) as HTMLButtonElement;
   fireEvent.click(busy);
@@ -140,4 +141,93 @@ it("로그인하지 않았으면 동의해도 공급자를 부르지 않고 로�
   fireEvent.click(screen.getByRole("checkbox"));
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("로그인하세요"));
   expect(api.matching(/interior-preview$/)).toHaveLength(0);
+});
+
+// ── 분위기·색감 키워드 필터 (2026-11-07) ──────────────────────────────────────
+it("분류 필터로 키워드를 좁혀 여러 개 고르고, 고른 순서대로 한국어(English) 로 보낸다", async () => {
+  saveToken("test-only-token");
+  const api = installFetchStub([{ match: /\/interior-preview$/, body: {
+    source: "ai_generated", image_data_url: "data:image/png;base64,dGVzdA==", model: "test-only", note: "n",
+  } }]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  fireEvent.click(screen.getByRole("button", { name: "색감" }));
+  expect(screen.queryByRole("button", { name: "따뜻함" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "우드톤" }));
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "재팬디" }));
+  fireEvent.click(screen.getByRole("button", { name: "전체" }));
+  expect(screen.getByRole("button", { name: "우드톤" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText(/고른 키워드 2\/10: 우드톤, 재팬디/)).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("직접 추가할 키워드 (선택)"), { target: { value: "큰 창" } });
+  fireEvent.click(screen.getByRole("checkbox"));
+  await screen.findByAltText("AI 생성 인테리어 참고 이미지 · 실측·시공안 아님");
+  expect(api.matching(/interior-preview$/)[0].body).toMatchObject({ style: "우드톤(warm wood tones), 재팬디(Japandi), 큰 창" });
+  // 다시 누르면 빠진다
+  fireEvent.click(screen.getByRole("button", { name: "우드톤" }));
+  expect(screen.getByRole("button", { name: "우드톤" }).getAttribute("aria-pressed")).toBe("false");
+});
+
+it("키워드는 10개까지 — 다 고르면 나머지 칩이 잠기고 선택 초기화로 비운다", () => {
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  const chips = screen.getAllByRole("button").filter((b) => b.getAttribute("aria-pressed") === "false"
+    && b.closest(".interior-chips"));
+  chips.slice(0, 10).forEach((b) => fireEvent.click(b));
+  expect(screen.getByText(/고른 키워드 10\/10/)).toBeTruthy();
+  expect((chips[10] as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "선택 초기화" }));
+  expect(screen.getByText(/고른 키워드 0\/10/)).toBeTruthy();
+  expect((chips[10] as HTMLButtonElement).disabled).toBe(false);
+});
+
+// ── 하루 5회 생성 한도 (2026-11-07) ───────────────────────────────────────────
+const QUOTA = /\/interior-preview\/quota$/;
+
+it("오늘 남은 횟수를 보이고, 생성하면 서버가 센 남은 횟수로 바꾼다", async () => {
+  saveToken("test-only-token");
+  installFetchStub([
+    { match: QUOTA, body: { enabled: true, limit: 5, used: 0, remaining: 5, resets_at: "2026-11-08T00:00:00+09:00" } },
+    { match: /\/interior-preview$/, body: { source: "ai_generated", image_data_url: "data:image/png;base64,dGVzdA==",
+      model: "test-only", note: "n", daily_limit: 5, remaining_today: 4 } },
+  ]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  await screen.findByText(/오늘 남은 이미지 생성 5\/5회/);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  await screen.findByText(/오늘 남은 이미지 생성 4\/5회/);
+});
+
+it("오늘 몫을 다 썼으면 동의해도 생성을 부르지 않고 한도 안내를 보인다 · 지시문 저장은 열려 있다", async () => {
+  saveToken("test-only-token");
+  const api = installFetchStub([
+    { match: QUOTA, body: { enabled: true, limit: 5, used: 5, remaining: 0, resets_at: "2026-11-08T00:00:00+09:00" } },
+  ]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  await screen.findByText(/한도\(5회\)를 모두 사용했습니다/);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect((screen.getByRole("button", { name: "AI 참고 이미지 생성" }) as HTMLButtonElement).disabled).toBe(true);
+  expect(api.matching(/interior-preview$/)).toHaveLength(0);
+  expect((screen.getByRole("button", { name: "생성 지시문·비용 결과 저장" }) as HTMLButtonElement).disabled).toBe(false);
+});
+
+it("서버에 생성이 설정되지 않았으면 미리 알리고 생성을 부르지 않는다", async () => {
+  saveToken("test-only-token");
+  const api = installFetchStub([
+    { match: QUOTA, body: { enabled: false, limit: 5, used: 0, remaining: 5, resets_at: "2026-11-08T00:00:00+09:00" } },
+  ]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  await screen.findByText(/아직 이미지 생성이 설정되지 않았습니다/);
+  fireEvent.click(screen.getByRole("button", { name: "따뜻함" }));
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(api.matching(/interior-preview$/)).toHaveLength(0);
+});
+
+it("한도 429 는 서버 문구를 그대로 싣는다 — 「요청이 몰려 있습니다」로 바꾸지 않는다", async () => {
+  saveToken("test-only-token");
+  const detail = "오늘 이미지 생성 한도(5회)를 모두 사용했습니다. 내일 0시(한국 시간)에 다시 만들 수 있습니다.";
+  installFetchStub([{ match: /\/interior-preview$/, status: 429, body: { detail } }]);
+  start();
+  await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("한도(5회)"));
+  expect(screen.getByRole("alert").textContent).not.toContain("몰려");
+  expect(interiorErrorMessage(new ApiError(429, null, "t"))).toContain("잠시 뒤");
 });

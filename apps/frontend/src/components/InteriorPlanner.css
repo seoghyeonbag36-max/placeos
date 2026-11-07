@@ -18,3 +18,14 @@
 .interior-result img { max-width: 100%; height: auto; }
 .interior-planner pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .interior-fields { grid-template-columns: 1fr; } }
+/* 분위기·색감 키워드 필터(2026-11-07) — 분류 필터 → 키워드 칩(여러 개 선택) → 고른 키워드 요약 */
+.interior-keywords { margin-block: var(--sp-3); padding: var(--sp-3) !important; border: 1px solid var(--line) !important; border-radius: var(--radius-md); }
+.interior-keywords legend { padding-inline: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; }
+.interior-filter { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: var(--sp-2); }
+.interior-filter button[aria-pressed=true] { background: var(--track-program); border-color: var(--track-program); color: var(--surface); }
+.interior-keyword-group { margin-block: var(--sp-2); }
+.interior-planner .interior-keyword-title { margin: 0 0 var(--sp-1); font-weight: 600; color: var(--muted); }
+.interior-chips button[aria-pressed=true] { border-color: var(--track-program); background: var(--track-program-soft); font-weight: 600; }
+.interior-chips button[aria-pressed=true]::before { content: "✓ "; }
+.interior-selected { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.interior-quota { padding: var(--sp-2); border-radius: var(--radius-sm); background: var(--bg); }
