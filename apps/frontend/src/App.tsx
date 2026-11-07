@@ -1,4 +1,5 @@
 import VisitorFeedback from "@/components/VisitorFeedback";
+import PpppReportProvider from "@/components/PpppReportProvider";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -38,7 +39,8 @@ const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
 const ProgramStudio = lazy(loadProgram);
 const ValidationStudio = lazy(() => import("@/pages/ProgramStudio"));
-const InteriorPlanner = lazy(() => import("@/components/InteriorPlanner"));
+const EventLinkPlanner = lazy(() => import("@/components/EventLinkPlanner"));
+const PpppReport = lazy(() => import("@/components/PpppReport"));
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -189,6 +191,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   };
   // Posting → Program 인계는 상권 변경 시 함께 비운다.
   const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
+  const [reportHandoff, setReportHandoff] = useState<ProgramHandoff>();
   // 네 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
@@ -197,6 +200,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       postingDrafts.clear();
       setPostingSelection(undefined);
       setProgramHandoff(undefined);
+      setReportHandoff(undefined);
     }
     setPageWorkspace((w) => (w.districtId === id ? w
       : { ...w, districtId: id, query: "", status: "all", selectedId: null }));
@@ -414,6 +418,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       {/* 지도는 앱 수명 동안 **하나**다. 탭이 바뀌어도 언마운트하지 않고 오버레이만
           갈아끼운다 — 그래야 사용자가 맞춰 둔 중심·줌이 탭 왕복에도 남는다. */}
       <MapHost active>
+        <PpppReportProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
             <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" />}
@@ -433,7 +438,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
               </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} defaultIndustry={workIndustry?.input}
+                onMakeProgram={makeProgram} onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
@@ -450,16 +455,18 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
               <ValidationStudio key={`brief-${programHandoff?.requestId ?? "direct"}`} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
                 defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal} /> },
-                { id: "space", label: "공간 준비", description: "선택한 자리의 공간 구성과 준비할 내용을 확인하세요.", content:
-              <InteriorPlanner key={`interior-${districtId}-${programHandoff?.requestId ?? "direct"}`}
-                handoff={programHandoff?.districtId === districtId ? programHandoff : undefined}
-                district={districtId} industry={customIndustry ?? workIndustry?.input} /> },
+                { id: "events", label: "온 · 오프라인 행사 연계", description: "상권 행사와 온라인 홍보·방문 혜택을 함께 계획하세요.", content:
+                  <EventLinkPlanner key={districtId} districtId={districtId} /> },
+                { id: "report", label: "검증 리포트", description: "Platform·Page·Posting·Program의 결과와 보완 사항을 종합해 확인하세요.", content:
+                  <PpppReport key={`${districtId}:${programHandoff?.requestId ?? "direct"}`} districtId={districtId}
+                    handoff={reportHandoff?.districtId === districtId ? reportHandoff : programHandoff?.districtId === districtId ? programHandoff : undefined} /> },
               ]} />
             </TrackMapFrame>
           )}
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
+        </PpppReportProvider>
       </MapHost>
       <FounderPlanner selection={postingSelection} />
       {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}

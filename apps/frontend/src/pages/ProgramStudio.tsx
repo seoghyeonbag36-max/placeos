@@ -1,4 +1,5 @@
 import PpppReport from "@/components/PpppReport";
+import { useReportCapture } from "@/lib/ppppReportContext";
 import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CaveatNote } from "@/components/DistrictPicker";
@@ -157,6 +158,13 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const canSubmit = form.item.trim() !== "" && form.category.trim() !== "" && !halfBudget && !busy;
 
   const hub = (districts ?? []).find((d) => d.id === form.districtId);
+  useReportCapture("program", (form.districtId || mapDistrictId) && form.item.trim() ? {
+    districtId: form.districtId || mapDistrictId!, linkedDistrictId: form.districtId || null, unitId: siteUnitId,
+    item: form.item, category: form.category, hypothesis: form.hypothesis, targetCustomer: form.targetCustomer,
+    period: [form.startDate, form.runDays ? `${form.runDays}일` : ""].filter(Boolean).join(" · "),
+    budget: form.budgetMin || form.budgetMax ? `${form.budgetMin || "미입력"} ~ ${form.budgetMax || "미입력"}원` : "",
+    differentiators: form.differentiatorsText, plan: result,
+  } : null);
   const eventsDistrict = form.districtId || mapDistrictId || null;
   const [previousEventsDistrict, setPreviousEventsDistrict] = useState(eventsDistrict);
   if (previousEventsDistrict !== eventsDistrict) {
@@ -409,7 +417,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
           {result && !busy && <>
             <Result key={resultVersion} r={result} />
-            <PpppReport key={resultVersion} handoff={handoff} plan={result} />
+            <PpppReport key={resultVersion} handoff={handoff} plan={result} districtId={form.districtId || mapDistrictId} />
           </>}
           {/* 결과 저장(2026-10-06) — 기각 조건이 든 판정표를 4주 뒤에도 볼 수 있게 본인 계정에 남긴다. 고른 것만 남긴다. */}
           {result && !busy && (

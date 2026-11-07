@@ -32,6 +32,7 @@ import type { BuildingSelection } from "@/lib/workspaceState";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./PlatformConsole.css";
 import ConsolePages from "@/components/ConsolePages";
+import { useReportCapture } from "@/lib/ppppReportContext";
 
 /**
  * 고객용 상권 분석 — 상권 요약, 공간 후보, 공실 전망과 추천 업종을 보여준다.
@@ -259,6 +260,15 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prof, districtId, mySite?.label, rankingHere]);
   const sitesHere = openingsHere?.sites ?? null;
+  useReportCapture("platform", hub && (prof?.district_id === districtId || rec?.district_id === districtId || profErr || recErr) ? {
+    districtId, districtName: hub.name, industry: myIndustry?.label ?? null,
+    archetype: prof?.district_id === districtId ? prof.identity?.archetype ?? null : null,
+    archetypeRule: prof?.district_id === districtId ? prof.identity?.archetype_rule ?? null : null,
+    source: prof?.district_id === districtId ? prof.identity?.source ?? null : null,
+    recommendations: rec?.district_id === districtId && rec.model !== "gnn-stub" ? rec.recommendations : [],
+    recommendationSource: rec?.district_id === districtId ? rec.model : null,
+    candidates: selectedSiteIds.flatMap(id => { const site = sitesHere?.find(s => s.unit_id === id); return site ? [{ id, name: site.name }] : []; }),
+  } : null);
   const boundary = usePlatformMap({ districtId, sites: sitesHere, selectedIds: selectedSiteIds, onToggle: toggleSite, mySite });
   // 상권 비교의 업종 — 해 볼 업종(바꾸기면 바꿀 업종). 추천 모델 밖이면 입지 점수 줄을 빼고 그렇다고 적는다
   const workInd = findIndustry(industries, workIndustryKey(business));
@@ -336,6 +346,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           </>}
         </div>
       </div>
+      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
+        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
       {comparingDistricts && (
         <DistrictCompareDialog ids={districtPicks} districts={districts} industry={compareIndustry}
           unrankedIndustry={workInd && !compareIndustry ? workInd.label : null}
@@ -354,10 +366,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         identity={prof?.district_id === districtId ? prof.identity : null} fitForRent={fit}
         picked={pickedHere} pickDisabled={!pickedHere && districtPicks.length >= COMPARE_MAX} onTogglePick={togglePick}
         onOpenPage={onOpenPage} />}
-        </> },
-        { id: "compare", label: "다른 상권 비교", description: "상권의 분포와 내 업종의 적합도를 비교하세요.", content: <>
-      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
-        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
         </> },
         { id: "access", label: "접근성과 주변 가게", description: "찾아오는 길과 참고할 주변 가게를 확인하세요.", content: <>
       {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}

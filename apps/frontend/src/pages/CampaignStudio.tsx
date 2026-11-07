@@ -1,4 +1,5 @@
 import PpppReport from "@/components/PpppReport";
+import { useReportCapture } from "@/lib/ppppReportContext";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ApiError, commandCampaign, createCampaign, getDistrictEvents, listCampaigns, type MarketingEvent } from "@/lib/api";
 import type { Campaign, CampaignAction, CampaignConditions, CampaignEvidence, CampaignRun } from "@/lib/campaign";
@@ -104,6 +105,7 @@ function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: C
   const inFlight = useRef(false);
   const requestScope = useRef<{ active: boolean } | null>(null);
   const selected = items.find(c => c.id === selectedId);
+  useReportCapture("campaign", selected ?? null);
   useEffect(() => {
     const scope = { active: true };
     requestScope.current = scope;

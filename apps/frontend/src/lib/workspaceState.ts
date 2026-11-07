@@ -35,6 +35,7 @@ export interface BuildingSelection {
  * 전략명은 브리프의 `tier` 로 간다.
  */
 export interface ProgramHandoff {
+  buildingId?: string;
   districtId: string;
   districtName?: string;
   unitId: string;
