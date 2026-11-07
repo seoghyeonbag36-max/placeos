@@ -6,7 +6,7 @@ import { installFetchStub } from "@/test/fetchStub";
 import type { BuildingTwin } from "@/lib/api";
 import { JOURNEY_KEY, loadJourney } from "@/lib/journeyState";
 
-const handle = { setMode: vi.fn(), setNeighbors: vi.fn(), setLabels: vi.fn(), selectFloor: vi.fn(), resetView: vi.fn(), handleKey: vi.fn(() => true), dispose: vi.fn() };
+const handle = { setMode: vi.fn(), setNeighbors: vi.fn(), setRoads: vi.fn(), roadStats: { segments: 42, junctions: 7, crosswalks: 12, names: 9 }, setLabels: vi.fn(), selectFloor: vi.fn(), resetView: vi.fn(), handleKey: vi.fn(() => true), dispose: vi.fn() };
 const scene = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock("three", () => { throw new Error("three 를 불러오면 안 된다"); });
 vi.mock("@/components/twin/TwinScene", () => ({ createTwinScene: scene.create }));
@@ -126,5 +126,31 @@ describe("BuildingTwinDialog", () => {
     fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
     expect(screen.getByText("개략 배치 · 실측 도면 아님")).toBeTruthy();
     expect(screen.getByText("전유부 호실 1개", { exact: false })).toBeTruthy();
+  });
+
+  it("도로 · 위치 확인 — 주소 도로 판정 · 켜고 끄기 · 카카오 링크 · OSM 출처", async () => {
+    mount({
+      ...TWIN,
+      roads: [{ n: "테스트로", c: "minor", w: 8, sw: 1.2, ow: 0, line: [[37.52, 127.0198], [37.5203, 127.0198]] }],
+      roads_source: { by: "© OpenStreetMap 기여자", license: "ODbL", license_url: "https://www.openstreetmap.org/copyright", via: "OpenFreeMap 벡터 타일", radius_m: 300 },
+      road_check: { name: "테스트로", gap_m: 0.4, ok: true, found: true }, roads_error: null,
+    });
+    const sec = await screen.findByRole("region", { name: "도로 · 위치 확인" });
+    await waitFor(() => expect(handle.setRoads).toHaveBeenCalledWith(true));
+    expect(within(sec).getByText("✓ 건물 바로 앞")).toBeTruthy();
+    expect(within(sec).getByText(/42구간 · 교차로 7곳 · 횡단보도 12곳/)).toBeTruthy();
+    expect(within(sec).getByText(/© OpenStreetMap 기여자/)).toBeTruthy();
+    expect(screen.getByText("도로: © OpenStreetMap 기여자 (ODbL) · 폭은 추정")).toBeTruthy();
+    expect((within(sec).getByRole("link", { name: /카카오맵에서 위치 비교/ }) as HTMLAnchorElement).href).toContain("map.kakao.com/link/map/");
+    fireEvent.click(within(sec).getByRole("checkbox", { name: /3D에 도로 표시/ }));
+    expect(handle.setRoads).toHaveBeenLastCalledWith(false);
+  });
+
+  it("도로를 못 받으면 자료 없음이고 트윈은 그대로다", async () => {
+    mount({ ...TWIN, roads: [], roads_source: { by: "© OpenStreetMap 기여자", license: "ODbL", license_url: "https://www.openstreetmap.org/copyright", via: "OpenFreeMap 벡터 타일", radius_m: 300 }, road_check: null, roads_error: "OSError" });
+    const sec = await screen.findByRole("region", { name: "도로 · 위치 확인" });
+    expect(within(sec).getByText(/도로 형상을 불러오지 못했습니다/)).toBeTruthy();
+    expect(within(sec).queryByRole("checkbox")).toBeNull();
+    expect(screen.getByRole("heading", { name: "1F · 공실확정" })).toBeTruthy();
   });
 });

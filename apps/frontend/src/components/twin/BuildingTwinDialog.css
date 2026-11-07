@@ -97,3 +97,10 @@
   .twin3d-legend { left: var(--sp-2); right: var(--sp-2); bottom: var(--sp-2); }
   .twin3d-cta { position: static; }
 }
+/* 주변 도로(2026-11-06) — 도로 이름은 층 라벨보다 한 단계 옅게, 주소 도로만 진하게. 클릭은 통과시킨다. */
+.twin3d-road-label { pointer-events: none; padding: 2px 6px; font: inherit; font-size: 10px; font-weight: 600; line-height: 1.2; white-space: nowrap; color: var(--muted); background: rgba(255, 255, 255, .75); border-radius: 6px; }
+.twin3d-road-label.is-address { font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--line); }
+.twin3d-check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.twin3d-road-facts { margin: 0; padding-left: 1.1em; display: grid; gap: 2px; }
+.twin3d-ok { color: var(--source-real); }
+.twin3d-warn { color: var(--danger-text); }

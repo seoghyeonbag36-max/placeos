@@ -1,9 +1,10 @@
 """건물 관련 엔드포인트 — 공실 히스토리."""
 from fastapi import APIRouter, HTTPException, Query
+from starlette.concurrency import run_in_threadpool
 
 from app.schemas.building import BuildingHistory
 from app.schemas.renewal import BuildingTwin
-from app.services import building_twin
+from app.services import building_twin, twin_roads
 from app.services.building_history import get_history
 
 router = APIRouter()
@@ -28,10 +29,13 @@ async def get_building_twin(
     building_id: str,
     district: str = Query(..., min_length=1, max_length=40),
 ) -> dict:
-    """3D 트윈 입력 — 실측 외곽선 · 층별 상태(`/floor-vacancies` 와 같은 근거) · 주변 건물 · 기준별 공실률."""
+    """3D 트윈 입력 — 실측 외곽선 · 층별 상태(`/floor-vacancies` 와 같은 근거) · 주변 건물 · 기준별 공실률
+    · 주변 실제 도로(OSM · 폭은 추정). 도로를 못 받아도 트윈은 그대로 나간다(`roads_error`)."""
     out = building_twin.twin(district, building_id)
     if out is None:
         raise HTTPException(status_code=404, detail=f"unknown building: {building_id}")
+    # 타일 받기는 블로킹 네트워크 호출 — 이벤트 루프를 막지 않게 스레드풀에서 부른다.
+    out.update(await run_in_threadpool(twin_roads.roads_for_twin, out["lat"], out["lng"], out.get("ring"), out.get("road_addr")))
     return out
 
 

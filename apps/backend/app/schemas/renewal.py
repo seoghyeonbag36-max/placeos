@@ -159,6 +159,32 @@ class TwinHistory(BaseModel):
     summary: dict[str, Any] | None = None
 
 
+class TwinRoad(BaseModel):
+    """도로 중심선 한 구간(OSM). 폭은 등급 추정이다 — services/twin_roads.py."""
+    n: str                       # 도로 이름(없으면 "")
+    c: str                       # OSM 등급(primary · minor · service …)
+    w: float                     # 보도 포함 전체 폭(m) · 추정
+    sw: float                    # 한쪽 보도 폭(m) · 추정
+    ow: int                      # 일방통행 1
+    line: list[list[float]]      # [[위도, 경도], …]
+
+
+class TwinRoadCheck(BaseModel):
+    """도로명주소의 도로가 건물 바로 앞인지 — 외곽선에서 그 도로 가장자리까지 거리."""
+    name: str | None = None
+    gap_m: float | None = None
+    ok: bool
+    found: bool
+
+
+class TwinRoadsSource(BaseModel):
+    by: str
+    license: str
+    license_url: str
+    via: str
+    radius_m: float
+
+
 class BuildingTwin(BaseModel):
     id: str | None = None
     name: str | None = None
@@ -183,6 +209,11 @@ class BuildingTwin(BaseModel):
     range: TwinRange
     history: TwinHistory
     notes: list[str]
+    # 주변 실제 도로(2026-11-06) — 타일을 못 받으면 roads=[] · roads_error 에 사유. 트윈 본체와 무관하게 빈다.
+    roads: list[TwinRoad] = []
+    roads_source: TwinRoadsSource | None = None
+    road_check: TwinRoadCheck | None = None
+    roads_error: str | None = None
 
 
 class RelationCounts(BaseModel):

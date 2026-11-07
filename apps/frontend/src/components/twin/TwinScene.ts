@@ -4,15 +4,21 @@
  * 그리는 것은 실측뿐이다: 외곽선(V-World)을 층마다 압출하고 층수는 대장을 쓴다. 주변 건물도 실측 외곽선·층수다.
  * 창호·외장 텍스처는 쓰지 않는다 — 실측이 아니므로 단색 + 층선이다. 장면은 진북 고정(-z = 북)이다.
  * 렌더는 온디맨드다: 변화가 있을 때만 프레임을 돈다(`data-renders` 로 횟수를 잴 수 있다).
+ * 주변 도로(2026-11-06)는 OSM 중심선이다 — 위치는 OSM, 폭·차로·횡단보도는 도로 등급 추정이다(`twinRoads.ts`).
+ *
+ * 현실감(2026-11-07)은 **표현만** 바꾼다 — 하늘 그라데이션 · 먼 곳 안개 · 따뜻한 햇빛 · 주변 건물 벽/지붕 톤 · 접지 그늘.
+ * 주변 건물은 불투명하게 세우고, 카메라와 대상 건물 사이를 가리는 것만 반투명으로 비킨다. 형상·층수·높이는 그대로
+ * 실측이고, 창호·외장 텍스처와 해 그림자는 여전히 그리지 않는다(실측이 아니다).
  */
 import {
-  BufferGeometry, Color, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
+  Box3, BufferGeometry, CanvasTexture, Color, Fog, MeshBasicMaterial, Ray, SRGBColorSpace, Texture, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
   LineBasicMaterial, LineSegments, Material, Mesh, MeshStandardMaterial, Object3D, PerspectiveCamera, Raycaster, Scene,
   Shape, ShapeGeometry, Path, Spherical, Vector2, Vector3, WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
+import { createRoadLayer, type RoadLayerStats } from "./twinRoads";
 import { adjacentLevel, boundsOf, explodeOffset, isVacantStatus, nudgeOrbit, ringToLocal, stackFloors, startCamera,
   TWIN_STATUS, type Point } from "@/lib/twinGeometry";
 
@@ -31,6 +37,10 @@ export interface TwinSceneCallbacks {
 export interface TwinSceneHandle {
   setMode(mode: TwinMode): void;
   setNeighbors(on: boolean): void;
+  /** 주변 도로 층 켜고 끄기 */
+  setRoads(on: boolean): void;
+  /** 그린 도로 구간 · 교차로 · 횡단보도 · 이름 라벨 수 */
+  roadStats: RoadLayerStats;
   setLabels(on: boolean): void;
   selectFloor(lv: number | null, focus?: boolean): void;
   resetView(): void;
@@ -46,8 +56,11 @@ const MIN_POLAR = 0.12;
 const PICK_MIN_OPACITY = 0.5;   // 이보다 투명한 층은 클릭을 통과시킨다(시안 결함: 투명한 위층이 맞던 것)
 const INK = new Color("#1C2533");
 const EDGE = new Color("#5A6B85");
-const NEIGHBOR = "#D5DBE3";
-const GROUND = "#E9EDF2";
+const NB_WALL = "#E6E3DD";      // 주변 건물 벽 — 밝은 콘크리트 톤(실측 재질 아님 · 한 가지 색)
+const NB_ROOF = "#CBC7C0";      // 주변 건물 지붕
+const GROUND = "#ECEAE5";       // 지면(보도 블록 톤)
+const SKY_TOP = "#B9CEE6";
+const HORIZON = "#E8EDF2";      // 하늘 아래끝 = 안개 색 — 지면 끝이 하늘로 녹아든다
 const LABELS_ALL_MAX = 24;      // 이보다 높은 건물은 빈 층·선택 층에만 라벨을 단다
 
 const reducedMotion = () => !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -66,6 +79,30 @@ function extrude(shape: Shape, height: number): ExtrudeGeometry {
   return g;
 }
 
+/** 외곽선을 무게중심에서 바깥으로 약 `grow` m 넓힌다(접지 그늘용 근사 — 오목한 곳은 대충 맞는다). */
+function inflate(pts: Point[], grow: number): Point[] {
+  const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+  return pts.map(([x, y]) => {
+    const d = Math.hypot(x - cx, y - cy) || 1;
+    return [x + ((x - cx) / d) * grow, y + ((y - cy) / d) * grow] as Point;
+  });
+}
+
+/** 하늘 — 위는 옅은 파랑, 아래(지평선)는 안개 색. 세로 그라데이션 하나다. */
+function skyTexture(): Texture {
+  const c = document.createElement("canvas");
+  c.width = 2; c.height = 256;
+  const ctx = c.getContext("2d");
+  if (ctx) {
+    const g = ctx.createLinearGradient(0, 0, 0, 256);
+    g.addColorStop(0, SKY_TOP); g.addColorStop(0.62, HORIZON); g.addColorStop(1, HORIZON);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 2, 256);
+  }
+  const t = new CanvasTexture(c);
+  t.colorSpace = SRGBColorSpace;
+  return t;
+}
+
 export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSceneCallbacks): TwinSceneHandle {
   const renderer = new WebGLRenderer({ antialias: true });   // WebGL 이 없으면 여기서 던진다 → 호출자가 2D 로 내려간다
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -78,9 +115,10 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   el.appendChild(labelRenderer.domElement);
 
   const scene = new Scene();
-  scene.background = new Color("#F1F4F8");
-  scene.add(new HemisphereLight(0xffffff, 0xb8c0cc, 1.6));
-  const sun = new DirectionalLight(0xffffff, 1.5);
+  const sky = skyTexture();
+  scene.background = sky;
+  scene.add(new HemisphereLight(0xe4eeff, 0xd6cdbf, 1.45));
+  const sun = new DirectionalLight(0xfff3e2, 1.65);
   sun.position.set(60, 120, 40);   // 그림자는 쓰지 않는다 — 태양 위치를 잰 값이 아니므로
   scene.add(sun);
 
@@ -111,21 +149,56 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const ground = new Mesh(groundGeo, groundMat);
   ground.position.y = -0.02;
   scene.add(ground);
+  // 먼 곳 안개 — 지면 끝이 잘린 판처럼 보이지 않게. 대상 건물(층 재질)은 fog:false 라 멀리서도 색이 그대로다.
+  scene.fog = new Fog(HORIZON, Math.max(160, start.dist * 1.4), R * 0.92);
+
+  // 접지 그늘 — 외곽선을 조금씩 넓힌 옅은 판 두 겹. 해 위치와 무관한 부드러운 그늘이다(해 그림자는 그리지 않는다).
+  const aoMats = [0.11, 0.05].map((o) => trackM(new MeshBasicMaterial({ color: 0x1c2533, transparent: true, opacity: o, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -0.5, polygonOffsetUnits: -0.5 })));
+  const contactShadow = (pts: Point[], parent: Object3D) => {
+    [0.9, 2.2].forEach((grow, i) => {
+      const g = track(new ShapeGeometry(shapeOf(inflate(pts, grow))));
+      g.rotateX(-Math.PI / 2);
+      const m = new Mesh(g, aoMats[i]);
+      m.position.y = -0.012 + i * 0.001;
+      m.renderOrder = -1;
+      parent.add(m);
+    });
+  };
+  contactShadow(local, scene);
 
   // ── 주변 건물 — 실측 외곽선·층수. 층수를 모르면 납작한 발자국만(높이를 지어내지 않는다) ──
   const neighbors = new Group();
-  // 반투명 — 실측 높이를 눌러 줄이지 않고(시안은 눌렀다) 대상 건물이 비쳐 보이게 한다.
-  const nbMat = trackM(new MeshStandardMaterial({ color: NEIGHBOR, roughness: 1, transparent: true, opacity: 0.32, depthWrite: false }));
-  const nbLine = trackM(new LineBasicMaterial({ color: "#AEB7C4", transparent: true, opacity: 0.6 }));
+  // 불투명 벽 · 지붕(ExtrudeGeometry 그룹 0 = 위·아래 면, 1 = 옆면). 실측 높이를 눌러 줄이지 않고, 대상 건물을 가리는
+  // 것만 매 프레임 반투명 재질로 바꿔 비킨다(`updateOccluders`).
+  const nbSolid = [trackM(new MeshStandardMaterial({ color: NB_ROOF, roughness: 0.95 })), trackM(new MeshStandardMaterial({ color: NB_WALL, roughness: 0.9 }))];
+  const nbGhost = [NB_ROOF, NB_WALL].map((c) => trackM(new MeshStandardMaterial({ color: c, roughness: 1, transparent: true, opacity: 0.22, depthWrite: false })));
+  const nbLine = trackM(new LineBasicMaterial({ color: "#A39E96", transparent: true, opacity: 0.55 }));
+  const occluders: { mesh: Mesh; box: Box3; ghost: boolean }[] = [];
   for (const n of twin.neighbors) {
     const pts = ringToLocal(n.ring, twin.lat, twin.lng);
     if (pts.length < 3) continue;
     const h = n.height_m && n.height_m > 0 ? n.height_m : 0.4;
     const g = track(extrude(shapeOf(pts), h));
-    neighbors.add(new Mesh(g, nbMat));
+    const mesh = new Mesh(g, nbSolid);
+    neighbors.add(mesh);
     neighbors.add(new LineSegments(track(new EdgesGeometry(g, 30)), nbLine));
+    contactShadow(pts, neighbors);
+    if (h > 1) { g.computeBoundingBox(); occluders.push({ mesh, box: g.boundingBox!.clone(), ghost: false }); }
   }
   scene.add(neighbors);
+
+  // ── 주변 도로 — OSM 중심선(위치) · 폭은 등급 추정. 이름 라벨은 층 라벨과 같은 CSS2D 다 ──────────
+  const roadLayer = createRoadLayer(twin.roads ?? [], twin.lat, twin.lng, {
+    addressRoad: twin.road_check?.name,
+    makeLabel: (text, kind) => {
+      const tagEl = document.createElement("div");
+      tagEl.className = kind === "address" ? "twin3d-road-label is-address" : "twin3d-road-label";
+      tagEl.textContent = text;
+      return new CSS2DObject(tagEl);
+    },
+  });
+  scene.add(roadLayer.group);
 
   // ── 층 — 같은 층고는 형상을 공유한다 ─────────────────────────────────────────
   const slab = 0.14;   // 층 사이 틈이 곧 층선이다
@@ -147,7 +220,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       floorGeos.set(key, geo);
       floorEdges.set(key, edges);
     }
-    const mat = trackM(new MeshStandardMaterial({ color: TWIN_STATUS[floor.status].color, roughness: 0.85, metalness: 0, transparent: true, opacity: 1 }));
+    const mat = trackM(new MeshStandardMaterial({ color: TWIN_STATUS[floor.status].color, roughness: 0.8, metalness: 0, transparent: true, opacity: 1, fog: false }));
     const line = trackM(new LineBasicMaterial({ color: EDGE, transparent: true, opacity: 0.7 }));
     const mesh = new Mesh(geo, mat);
     mesh.userData.lv = s.lv;
@@ -208,12 +281,35 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       f.group.position.y = f.baseY + f.offset;
     }
     if (controls.update()) busy = true;
+    updateOccluders();
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
     renders += 1;
     el.dataset.renders = String(renders);
     cb.onAzimuth?.((controls.getAzimuthalAngle() * 180) / Math.PI);
     if (busy) request();
+  }
+
+  // 카메라 → 대상 건물(아래·가운데·위 세 점) 시선을 가리는 주변 건물만 반투명으로. 60동 × 3선이라 프레임마다 돌려도 가볍다.
+  const sight = new Ray();
+  const probe = new Vector3();
+  const hitAt = new Vector3();
+  function updateOccluders() {
+    if (!occluders.length || !neighbors.visible) return;
+    const top = Math.max(1, ...floorObjs.map((f) => f.baseY + f.offset + stack.floorH));
+    const ys = [Math.min(2, top * 0.2), top * 0.55, top * 0.95];
+    for (const o of occluders) {
+      let hide = false;
+      for (const y of ys) {
+        probe.set(0, y, 0);
+        sight.origin.copy(camera.position);
+        sight.direction.copy(probe).sub(camera.position);
+        const reach = sight.direction.length();
+        sight.direction.normalize();
+        if (sight.intersectBox(o.box, hitAt) && hitAt.distanceTo(camera.position) < reach - 0.5) { hide = true; break; }
+      }
+      if (hide !== o.ghost) { o.ghost = hide; o.mesh.material = hide ? nbGhost : nbSolid; }
+    }
   }
 
   function flyTo(toP: Vector3, toT: Vector3, ms: number) {
@@ -342,6 +438,8 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       }
     },
     setNeighbors(on) { neighbors.visible = on; request(); },
+    setRoads(on) { roadLayer.group.visible = on; request(); },
+    roadStats: roadLayer.stats,
     setLabels(on) { labelsOn = on; applyVisuals(); },
     selectFloor(lv, focus = false) {
       selected = lv;
@@ -368,6 +466,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       return true;
     },
     dispose() {
+      roadLayer.dispose();   // 도로 라벨(CSS2D)을 하나씩 떼어 HTML 도 지운다 · 도로 형상·재질 해제
       disposed = true;
       if (raf) cancelAnimationFrame(raf);
       if (hoverRaf) cancelAnimationFrame(hoverRaf);
@@ -385,6 +484,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       rm.forEach((o) => o.removeFromParent());
       geos.forEach((g) => g.dispose());
       mats.forEach((m) => m.dispose());
+      sky.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       dom.remove();
