@@ -1163,7 +1163,7 @@ export interface ApiKeyCreated extends ApiKeyInfo { key: string }
 async function accountRequest<T>(
   method: "GET" | "POST" | "DELETE",
   path: string,
-  opt: { body?: unknown; token?: string } = {},
+  opt: { body?: unknown; token?: string; signal?: AbortSignal } = {},
 ): Promise<T> {
   const headers: Record<string, string> = {};
   if (opt.body !== undefined) headers["Content-Type"] = "application/json";
@@ -1172,6 +1172,7 @@ async function accountRequest<T>(
   try {
     res = await fetch(`${BASE}${path}`, {
       method, headers, body: opt.body === undefined ? undefined : JSON.stringify(opt.body),
+      ...(opt.signal ? { signal: opt.signal } : {}),
     });
   } catch {
     throw new ApiError(0, null, `API ${path} unreachable`);
@@ -1636,13 +1637,63 @@ export interface BuildingTwin {
 export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
   getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);
 
-export interface InteriorImage { source: "ai_generated"; image_data_url: string; model: string; note: string }
+export interface InteriorImage {
+  source: "ai_generated"; image_data_url: string; model: string; note: string;
+  /** 하루 생성 한도와 이 생성까지 센 뒤 남은 횟수(services/interior_quota · 2026-11-07). 옛 서버는 싣지 않는다 */
+  daily_limit?: number | null; remaining_today?: number | null;
+}
+/** GET /ai/interior-preview/quota — 오늘(한국 시간) 남은 이미지 생성 횟수. enabled=false 면 서버에 생성이 설정되지 않았다. */
+export interface InteriorQuota { enabled: boolean; limit: number; used: number; remaining: number; resets_at: string }
+export const getInteriorQuota = (token: string, signal?: AbortSignal) =>
+  accountRequest<InteriorQuota>("GET", "/ai/interior-preview/quota", { token, signal });
 export async function generateInterior(token: string, body: {
   district: string; industry: string; style: string; strategy: "고급화" | "가성비" | "기능중심";
   area_py?: number; constraints: string; links: string[]; consent: true;
   references: { kind: "plan" | "photo"; mime: string; data: string }[];
-}): Promise<InteriorImage> {
-  return accountRequest<InteriorImage>("POST", "/ai/interior-preview", { token, body });
+}, timeoutMs = INTERIOR_TIMEOUT_MS): Promise<InteriorImage> {
+  // 서버는 공급자를 50초에 끊고, Firebase Hosting 은 60초에 504 를 낸다 — 그보다 조금 길게 기다린다.
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await accountRequest<InteriorImage>("POST", "/ai/interior-preview", { token, body, signal: ctrl.signal });
+  } catch (err) {
+    if (ctrl.signal.aborted) throw new ApiError(504, null, "API /ai/interior-preview timed out");
+    // 이 호출의 401 은 우리 로그인 토큰의 실패다(서버는 공급자 키 거부를 503 으로 바꾼다).
+    // 만료 토큰을 남기면 다시 로그인할 때까지 같은 실패가 반복된다 — analysisFetch 와 같이 치운다.
+    if (err instanceof ApiError && err.status === 401 && loadToken() === token) {
+      clearToken();
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
+    throw err;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+/** 인테리어 이미지 요청 시간 제한 — Hosting 60초 + 응답 여유 */
+export const INTERIOR_TIMEOUT_MS = 70_000;
+
+/** 인테리어 이미지 실패 → 사용자 문구. 서버 detail(한국어)이 있으면 함께 보인다. */
+export function interiorErrorMessage(err: unknown): string {
+  const status = err instanceof ApiError ? err.status : -1;
+  const detail = err instanceof ApiError ? err.detail : null;
+  const base: Record<number, string> = {
+    0: "서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+    401: "로그인이 만료되었습니다. 다시 로그인한 뒤 시도하세요.",
+    403: "이미지 공급자가 이 기능 사용을 허용하지 않았습니다(공급자 권한). 운영자 확인이 필요합니다.",
+    413: "첨부 이미지 용량이 너무 큽니다. 첨부를 줄이거나 더 작은 이미지로 다시 시도하세요.",
+    422: "입력이나 첨부 이미지를 처리하지 못했습니다. 내용을 확인하고 다시 시도하세요.",
+    429: "요청이 몰려 있습니다. 잠시 뒤 다시 시도하세요.",
+    502: "이미지 공급자가 응답하지 않았습니다. 잠시 뒤 다시 시도하세요.",
+    503: "지금은 이미지 생성을 쓸 수 없습니다(서버 설정 또는 공급자 상태).",
+    504: "이미지 생성이 60초를 넘어 중단됐습니다. 첨부를 줄이거나 다시 시도하세요.",
+  };
+  // 429 는 둘이다 — 오늘 생성 한도(하루 5회 · 2026-11-07)와 공급자 혼잡. 서버 문구가 어느 쪽인지 정확히 말하므로
+  // 문구가 있으면 그것을 그대로 싣는다(「요청이 몰려 있습니다」를 한도 소진에 붙이면 잠시 뒤 다시 누르게 된다).
+  const head = status === 429 && detail ? detail : base[status] ?? "이미지를 생성하지 못했습니다. 잠시 뒤 다시 시도하세요.";
+  // 401 은 서버 문구("인증 토큰이…")보다 할 일이 분명한 화면 문구만 보인다.
+  const tail = detail && status !== 401 && detail !== head ? ` (${detail})` : "";
+  return `${head}${tail} 지시문은 저장할 수 있습니다.`;
 }
 
 export interface RelationCounts { same: number; same_chain: number; similar: number; colocated: number; other: number; total: number }

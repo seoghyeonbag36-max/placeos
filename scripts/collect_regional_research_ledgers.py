@@ -19,6 +19,7 @@ import shutil
 import sys
 import time
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -35,6 +36,8 @@ STATE = ROOT / 'reports/regional_research_ledger_collection.json'
 LOG = ROOT / 'data/logs/regional-research-ledgers.log'
 LOCK = ROOT / 'data/logs/regional-research-ledgers.lock'
 FAILURES = ROOT / 'data/silver/regional_research_ledgers/failures.json'
+GOLD_REPORT = ROOT / 'reports/regional_research_gold.json'
+AUTOMATION = ROOT / 'reports/regional_research_automation.json'
 ENDPOINTS = {'expos': 'getBrExposPubuseAreaInfo', 'floors': 'getBrFlrOulnInfo'}
 DAILY_GUARD = 10000
 
@@ -261,6 +264,17 @@ def request_page(key: str, pnu: str, endpoint: str, page: int, state: dict) -> d
             if any(code in response.text for code in ('SERVICE_KEY_IS_NOT_REGISTERED_ERROR',
                     'SERVICE_ACCESS_DENIED_ERROR', 'INVALID_SERVICE_KEY')):
                 raise AuthError('GATEWAY_AUTH') from None
+            # 간헐적 비JSON 응답은 원문을 남겨 원인을 확인하고, 네트워크·5xx와 같은 한도 안에서 재시도한다.
+            body = response.content
+            diagnostic = ROOT / 'data/bronze/regional_research_diagnostics' / now().date().isoformat()
+            name = hashlib.sha256(body).hexdigest()
+            if not (diagnostic / (name + '.bin')).exists():
+                atomic_bytes(diagnostic / (name + '.bin'), body)
+                atomic_json(diagnostic / (name + '.json'), dict(sha256=name, http_status=response.status_code,
+                    content_type=response.headers.get('Content-Type'), endpoint=endpoint, pnu=pnu, page=page))
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
             raise CollectionError('NON_JSON') from None
         parse_page(payload)
         return payload
@@ -329,23 +343,56 @@ def initial_state(plan: dict) -> dict:
 def sync_existing(plan: dict, state: dict) -> None:
     """이미 검증 완료한 새 페이지와 원천 해시가 일치하는 기존 전유부 원본을 재사용한다."""
     state['done'] = {e: {} for e in ENDPOINTS}
+    from data.validation.verified_file_cache import VerifiedFileCache
+    cache = VerifiedFileCache(ROOT / 'data/silver/regional_research_ledgers/verified_files.sqlite3')
     sources = {}
     for path, sha in plan['legacy_sources'].items():
         p = ROOT / path
-        if p.exists() and fingerprint(p) == sha:
+        if p.exists() and cache.fingerprint(p) == sha:
             sources[path] = True
     for pnu, record in plan['legacy_expos'].items():
         if record['source'] in sources:
             state['done']['expos'].setdefault(pnu, dict(source_kind='legacy_bronze', **record))
-    for endpoint in ENDPOINTS:
-        for target in plan['targets']:
-            pnu = target['pnu']
-            path = completion(pnu, endpoint)
-            if pnu not in state['done'][endpoint] and path.exists():
-                done = read(path)
-                if done.get('complete') is True and done.get('received') == done.get('total') and all(
-                    (ROOT / p['path']).exists() and fingerprint(ROOT / p['path']) == p['sha256'] for p in done['pages']):
+    target_pnus = {target['pnu'] for target in plan['targets']}
+
+    def verify_marker(job: tuple[str, Path]) -> tuple[str, str, Path] | None:
+        endpoint, path = job
+        pnu = path.parent.name
+        try:
+            done = read(path)
+            if (done.get('complete') is not True or done.get('pnu') != pnu or done.get('endpoint') != endpoint
+                    or type(done.get('total')) is not int or done['total'] < 0
+                    or type(done.get('received')) is not int or done['received'] != done['total']
+                    or not done.get('pages')):
+                return None
+            for page in done['pages']:
+                raw = ROOT / page['path']
+                if cache.fingerprint(raw) != page['sha256']:
+                    return None
+            return endpoint, pnu, path
+        except (OSError, ValueError, KeyError, TypeError):
+            return None
+
+    # 미수집 지번까지 exists()로 훑지 않고 실제 완료 표식을 색인한다.
+    # 파일 I/O만 4개씩 검증한다. API 요청·쿼터 원장·완료 반영은 여전히 단일 스레드다.
+    jobs = [(e, p) for e in ENDPOINTS for p in (RAW / e).glob('*/complete.json')
+            if p.parent.name in target_pnus and p.parent.name not in state['done'][e]]
+    state['verification'] = dict(checked=0, total=len(jobs))
+    save_state(state)
+    try:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            for checked, result in enumerate(pool.map(verify_marker, jobs), 1):
+                if result is not None:
+                    endpoint, pnu, path = result
                     state['done'][endpoint][pnu] = dict(source_kind='api_pages', marker=path.relative_to(ROOT).as_posix())
+                if checked % 1000 == 0:
+                    cache.checkpoint()
+                    state['verification']['checked'] = checked
+                    save_state(state)
+    finally:
+        cache.close()
+    state.pop('verification', None)
+    for endpoint in ENDPOINTS:
         state['endpoints'][endpoint]['completed'] = len(state['done'][endpoint])
     state['endpoints']['expos']['legacy_reused'] = sum(
         r['source_kind'] == 'legacy_bronze' for r in state['done']['expos'].values())
@@ -370,6 +417,8 @@ def collect_pass(plan: dict, state: dict, key: str) -> None:
                 continue
             failure_key = endpoint + '/' + pnu
             prior = state['failures'].get(failure_key, {})
+            if prior.get('attempts', 0) >= 3 and prior.get('attempt_day') != now().date().isoformat():
+                prior = dict(attempts=0, total_attempts=prior.get('total_attempts', prior['attempts']))
             if prior.get('attempts', 0) >= 3:
                 continue
             if not ac_connected():
@@ -386,7 +435,9 @@ def collect_pass(plan: dict, state: dict, key: str) -> None:
             except AuthError as exc:
                 record['auth_error'] = str(exc)
             except CollectionError as exc:
-                state['failures'][failure_key] = dict(attempts=prior.get('attempts', 0) + 1, reason=str(exc))
+                state['failures'][failure_key] = dict(attempts=prior.get('attempts', 0) + 1,
+                    total_attempts=prior.get('total_attempts', prior.get('attempts', 0)) + 1,
+                    attempt_day=now().date().isoformat(), reason=str(exc))
                 atomic_json(FAILURES, state['failures'])
                 say(f'{endpoint} {pnu}: {str(exc)}')
                 record['consecutive_errors'] = record.get('consecutive_errors', 0) + 1
@@ -425,7 +476,7 @@ def acquire_lock():
 
 def gold_scope_ready(plan: dict, state: dict) -> tuple[bool, str]:
     """현재 수집 범위의 대장 Gold·Program 파일까지 검증한 뒤에만 다음 지역을 연다."""
-    report_path = ROOT / 'reports/regional_research_gold.json'
+    report_path = GOLD_REPORT if GOLD_REPORT.is_relative_to(ROOT) else ROOT / 'reports/regional_research_gold.json'
     if not report_path.exists():
         return False, 'GOLD_REPORT_MISSING'
     paused = tuple(state.get('paused_pnu_prefixes', []))
@@ -480,11 +531,20 @@ def advance_sequence(plan: dict, state: dict) -> str:
         return 'waiting'
     sequence.pop('wait_reason', None)
     if sequence['phase'] == 'gwangju_jeonju':
+        config_path = AUTOMATION if AUTOMATION.is_relative_to(ROOT) else ROOT / 'reports/regional_research_automation.json'
+        config = read(config_path) if config_path.exists() else {}
+        if config.get('next_region') == 'busan':
+            sequence.update(phase='busan', handoff_at=now().isoformat(),
+                            handoff_gold_sha256=fingerprint(ROOT / 'reports/regional_research_gold.json'))
+            state['status'] = 'busan_queued'
+            state.pop('current', None)
+            say('광주·전주 원본·대장 Gold·산출물 검증 완료 — 부산 자동 수집 대기 작업으로 인계')
+            return 'complete'
         sequence.update(phase='gyeonggi', handoff_at=now().isoformat(),
                         handoff_gold_sha256=fingerprint(ROOT / 'reports/regional_research_gold.json'))
         state['paused_pnu_prefixes'] = [p for p in state.get('paused_pnu_prefixes', []) if p != '41']
         state['paused_regions'] = [r for r in state.get('paused_regions', []) if r != '경기']
-        state['active_regions'] = ['광주', '전주', '경기']
+        state['active_regions'] = list(dict.fromkeys([*state.get('active_regions', ['광주', '전주']), '경기']))
         state['status'] = 'gyeonggi_resuming'
         state.pop('current', None)
         say('광주·전주 원본·대장 Gold·산출물 검증 완료 — 경기 미수집분 자동 재개')
@@ -504,13 +564,18 @@ def worker(once: bool = False) -> int:
         state = read(STATE) if STATE.exists() else initial_state(plan)
         if state['plan_sha256'] != fingerprint(PLAN):
             raise ValueError('작업표 변경 — 기존 상태와 자동 병합하지 않음')
-        if state.get('status') == 'sequence_complete' or (
+        if state.get('status') in ('sequence_complete', 'busan_queued') or (
                 state.get('status') in ('raw_complete', 'raw_complete_with_unresolved') and
                 not (state.get('sequence') or {}).get('enabled')):
             return 0
         state['pid'] = os.getpid()
         state['failures'] = read(FAILURES) if FAILURES.exists() else {}
+        state.update(status='verifying_existing', verification_started_at=now().isoformat())
+        state.pop('current', None)
+        save_state(state)
+        keep_awake(ac_connected())
         sync_existing(plan, state)
+        state['status'] = 'prepared'
         save_state(state)
         load_env()
         key = os.getenv('DATA_GO_KR_SERVICE_KEY')
@@ -585,4 +650,12 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    try:
+        exit_code = main()
+    except Exception as exc:
+        # pythonw에는 콘솔이 없다. 예외 메시지의 URL·키는 싣지 않고 종류와 코드 위치만 남긴다.
+        import traceback
+        frames = ' → '.join(f'{f.name}:{f.lineno}' for f in traceback.extract_tb(exc.__traceback__))
+        say(f'수집기 중단 {type(exc).__name__} ({frames})')
+        exit_code = 1
+    raise SystemExit(exit_code)

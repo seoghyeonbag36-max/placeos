@@ -57,7 +57,7 @@ function useOutlinePolygons(outlines: HubOutlines | null, painted: Map<string, s
       const shown = shownIds.has(id);
       poly.setOptions?.({
         fillColor: painted.get(id) ?? NO_VALUE_COLOR,
-        fillOpacity: on ? 0.22 : shown ? 0.42 : 0.12,
+        fillOpacity: on ? 0.48 : shown ? 0.35 : 0.12,
         strokeColor: on ? colors.track.platform.base : painted.get(id) ?? NO_VALUE_COLOR,
         strokeWeight: on ? 3 : 1, strokeOpacity: shown ? 0.9 : 0.4,
       });

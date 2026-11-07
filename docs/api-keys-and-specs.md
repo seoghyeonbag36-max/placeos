@@ -204,6 +204,9 @@ IG_USER_ID=
 LLM_API_KEY=                     # [B·Program] Anthropic Claude 권장 (console.anthropic.com)
 NAVER_MAPS_KEY_ID=               # NCP REST (Geocoding)
 NAVER_MAPS_CLIENT_SECRET=
+INTERIOR_IMAGES_ENABLED=false    # [Posting 인테리어] true + OPENAI_API_KEY 가 있어야 참고 이미지 생성(§8-E-2)
+OPENAI_API_KEY=
+INTERIOR_IMAGES_DAILY_LIMIT_PER_USER=5
 ```
 
 ### 우선순위 (크리티컬 패스)
@@ -329,6 +332,21 @@ NAVER_MAPS_CLIENT_SECRET=
     `data/config/store_taxonomy.py` · 가드 `data/tests/test_store_taxonomy.py`
 - ⚠ 무료 쿼터는 2026-07-21 부터 개발자 계정의 **첫 활성화 앱 1개**에만 제공된다.
   초과분은 건당 과금(2026-02-02~12-31 할인가 10원 · 정상가 50원).
+
+### 8-E-2. OpenAI 이미지 `OPENAI_API_KEY` — Posting 「상권 맞춤 인테리어」 참고 이미지 (backend · 유료)
+- 쓰는 곳: `POST /api/v1/ai/interior-preview`(services/interior) · 한도 조회 `GET /api/v1/ai/interior-preview/quota`.
+- 켜는 값 셋이 **모두** 있어야 생성된다. 하나라도 비면 화면에 「지금은 이미지 생성을 쓸 수 없습니다(서버 설정 또는 공급자 상태).
+  (이미지 생성이 서버에 설정되지 않았습니다…)」가 뜬다(503 · 2026-11-07 프로덕션에서 이 상태였다):
+  | 변수 | 값 | 비고 |
+  |---|---|---|
+  | `INTERIOR_IMAGES_ENABLED` | `true` | 기본 false — 명시적으로 켠 서버만 유료 호출 |
+  | `OPENAI_API_KEY` | platform.openai.com → API keys | 비밀값 — Secret Manager 권장 |
+  | `INTERIOR_IMAGE_MODEL` | 기본 `gpt-image-2.5-flare` | 공급자가 모르는 이름이면 503(「모델을 찾지 못했습니다」) |
+  | `INTERIOR_IMAGES_DAILY_LIMIT_PER_USER` | 기본 `5` | 사용자당 하루(KST 0시 초기화) 생성 횟수 · 성공만 센다 · `audit_log` 로 세서 인스턴스 수와 무관 |
+- 프로덕션 반영(Cloud Run — `--set-env-vars` 금지, 기존 값이 날아간다 · docs/deploy-cloud-run.md):
+  `gcloud run services update spaceos --region us-central1 --update-env-vars INTERIOR_IMAGES_ENABLED=true --update-secrets OPENAI_API_KEY=openai-api-key:latest`
+  (시크릿을 안 쓰면 `--update-env-vars INTERIOR_IMAGES_ENABLED=true,OPENAI_API_KEY=…`).
+- gpt-image 계열은 OpenAI **조직 인증**(Verify Organization)이 끝나야 403 이 풀린다. 크레딧이 없으면 503(「크레딧 소진」).
 
 ### 8-F. 인스타그램·구글 — 보류/선택
 - **인스타그램 Graph API**: 해시태그 검색에 비즈니스 계정 + 앱 검수 필요, 주 30개 해시태그 제한 → PoC 단계에서는 보류하고 [data/crawlers](../data/README.md)의 Playwright 크롤러로 대체. `.env` 슬롯(`INSTAGRAM_ACCESS_TOKEN`)만 유지.

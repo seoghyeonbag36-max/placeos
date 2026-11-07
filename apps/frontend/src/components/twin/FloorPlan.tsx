@@ -16,6 +16,8 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   const outline = useMemo(() => ringArea(pts), [pts]);
   const { cells, omitted } = useMemo(() => layoutUnits(b, floor.units ?? [], floor.area_m2), [b, floor.units, floor.area_m2]);
   const [overlays, setOverlays] = useState<Record<number, Overlay>>({});
+  const [selection, setSelection] = useState<{ lv: number; index: number } | null>(null);
+  const picked = selection?.lv === floor.lv ? floor.units?.[selection.index] : null;
   const overlay = overlays[floor.lv];
   const urls = useRef(new Set<string>());
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   return (
     <div className="twin3d-plan">
       <div className="twin3d-plan-head">
-        <b>{floor.label} 바닥</b>
+        <b>{floor.label} 개략 배치도</b>
         {cells.length > 0 && <span className="twin3d-tag">개략 배치 · 실측 도면 아님</span>}
       </div>
       <svg viewBox={`${b.minX - pad} ${-b.maxY - pad} ${b.w + pad * 2} ${b.h + pad * 2}`} role="img"
@@ -53,9 +55,16 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         <g clipPath={`url(#${clip})`}>
           {cells.map((c, i) => {
             const y = -(c.y + c.h);
+            const unitIndex = c.kind === "unit" ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
+            const active = selection?.lv === floor.lv && selection.index === unitIndex && unitIndex >= 0;
+            const choose = () => { if (unitIndex >= 0) setSelection({ lv: floor.lv, index: unitIndex }); };
             return (
               <g key={i}>
-                <rect x={c.x} y={y} width={c.w} height={c.h} className={c.kind === "unit" ? "twin3d-plan-cell" : "twin3d-plan-rest"} vectorEffect="non-scaling-stroke">
+                <rect x={c.x} y={y} width={c.w} height={c.h} className={c.kind === "unit" ? "twin3d-plan-cell" : "twin3d-plan-rest"} vectorEffect="non-scaling-stroke"
+                  role={unitIndex >= 0 ? "button" : undefined} tabIndex={unitIndex >= 0 ? 0 : undefined}
+                  aria-label={unitIndex >= 0 ? `${c.ho ?? "호수 미상"}호 개략 칸 선택` : undefined} aria-pressed={unitIndex >= 0 ? active : undefined}
+                  onClick={choose} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } }}
+                  style={active ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 } : undefined}>
                   <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · ${c.area.toFixed(1)}㎡(대장)` : `공용·기타 · ${c.area.toFixed(1)}㎡`}</title>
                 </rect>
                 {labelled && c.kind === "unit" && c.w > big * 0.09 && c.h > big * 0.05 && (
@@ -71,6 +80,9 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         </g>
         <path d={path} className="twin3d-plan-outline" vectorEffect="non-scaling-stroke" />
       </svg>
+      {!!floor.units?.length && <div className="twin3d-cta" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" className="twin3d-btn" key={index}
+        aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
+      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 대장 면적 {picked.area_m2 != null ? `${picked.area_m2}㎡` : "미제공"} · 호실별 공실·점포 이력 귀속 미확인</p>}
       <p className="twin3d-note">
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}

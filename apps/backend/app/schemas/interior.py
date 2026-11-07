@@ -27,3 +27,15 @@ class InteriorResult(BaseModel):
     image_data_url: str
     model: str
     note: str
+    # 하루 생성 한도(services/interior_quota) — 이 생성까지 센 뒤의 값
+    daily_limit: int | None = None
+    remaining_today: int | None = None
+
+
+class InteriorQuota(BaseModel):
+    """`GET /ai/interior-preview/quota` — 화면의 「오늘 남은 생성 n/5회」. enabled=False 면 서버에 생성이 설정되지 않았다."""
+    enabled: bool
+    limit: int
+    used: int
+    remaining: int
+    resets_at: str

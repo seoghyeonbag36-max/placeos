@@ -1,0 +1,15 @@
+.renewal-tool { padding: var(--sp-4); margin-block: var(--sp-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); overflow-wrap: anywhere; }
+.renewal-tool p, .renewal-tool label, .renewal-tool li { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.renewal-tool label { display: grid; gap: var(--sp-2); margin-block: var(--sp-3); }
+.renewal-tool textarea, .renewal-tool select { box-sizing: border-box; width: 100%; min-width: 0; padding: var(--sp-2); border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; background: var(--surface); color: var(--ink); }
+.renewal-tool textarea { min-height: 72px; resize: vertical; }
+.renewal-tool ul { list-style: none; padding: 0; max-height: 360px; overflow-y: auto; }
+.renewal-tool li { padding-block: var(--sp-2); border-bottom: 1px solid var(--line); }
+.renewal-tool button { padding: var(--sp-2); margin: var(--sp-1); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
+.renewal-tool button[aria-pressed=true] { border-color: var(--track-posting); background: var(--surface-2); }
+.renewal-tool a { display: inline-block; margin-inline: var(--sp-2); }
+/* 주변 업종 지도 조회 조건(2026-11-07) — 업종 · 반경 · 「조회」를 한 줄에. 좁은 화면에서는 위아래로 쌓인다 */
+.renewal-tool .nearby-query { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: var(--sp-2); align-items: end; }
+.renewal-tool .nearby-query label { margin-block: 0; }
+.renewal-tool .nearby-query button[type=submit] { margin: 0; padding-inline: var(--sp-4); border-color: var(--track-posting); font-weight: 600; text-align: center; }
+@media (max-width: 480px) { .renewal-tool .nearby-query { grid-template-columns: minmax(0, 1fr); } }

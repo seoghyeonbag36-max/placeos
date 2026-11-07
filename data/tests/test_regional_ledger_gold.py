@@ -128,3 +128,29 @@ def test_disk_guard_does_not_write_gold(inputs, monkeypatch):
     with pytest.raises(source.DiskWait):
         gold.run(plan, [])
     assert not gold.GOLD.exists()
+
+
+def test_verified_output_reuse_preserves_values_and_force_rechecks_raw(inputs, monkeypatch):
+    plan,_=inputs
+    first=gold.run(plan,[])
+    artifact=source.ROOT/first['locations'][0]['artifacts'][0]['path']
+    original=artifact.read_bytes()
+    second=gold.run(plan,[])
+    assert second['summary']['reused_verified_locations']==1
+    assert artifact.read_bytes()==original
+    third=gold.run(plan,[],force_verify=True)
+    assert third['summary']['reused_verified_locations']==0
+    assert artifact.read_bytes()==original
+
+
+def test_new_valid_completion_proof_creates_new_snapshot_without_overwriting(inputs):
+    plan,pnu=inputs
+    first=gold.run(plan,[])
+    old_path=source.ROOT/first['locations'][0]['artifacts'][0]['path']
+    original=old_path.read_bytes()
+    marker_path=source.completion(pnu,'floors')
+    marker=source.read(marker_path);marker['completed_at']='new verification'
+    source.atomic_json(marker_path,marker)
+    result=gold.run(plan,[])
+    assert result['locations'][0]['source_digest']!=first['locations'][0]['source_digest']
+    assert old_path.read_bytes()==original

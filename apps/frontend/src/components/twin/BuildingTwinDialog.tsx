@@ -12,6 +12,7 @@ import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, hasStop, removeStop } from "@/lib/journeyState";
 import { isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
 import FloorPlan from "./FloorPlan";
+import { useReportCapture } from "@/lib/ppppReportContext";
 import HistoryTimeline from "./HistoryTimeline";
 import RoadCheckSection from "./RoadCheckSection";
 import type { TwinMode, TwinSceneHandle } from "./TwinScene";
@@ -174,6 +175,10 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
 
   const floorByLv = useMemo(() => new Map(twin?.floors.map((f) => [f.lv, f]) ?? []), [twin]);
   const selected = selectedLv !== null ? floorByLv.get(selectedLv) ?? null : null;
+  useReportCapture("pageFloor", selected ? {
+    districtId, buildingId, label: selected.label, area: selected.area_m2, areaSource: selected.area_source,
+    status: TWIN_STATUS[selected.status].label, unitId: selected.unit_id,
+  } : null);
   const select = (lv: number, focus = true) => {
     setSelectedLv(lv);
     const f = floorByLv.get(lv);

@@ -1,0 +1,377 @@
+diff --git a/apps/frontend/src/AppAuth.test.tsx b/apps/frontend/src/AppAuth.test.tsx
+index c559584..1addd55 100644
+--- a/apps/frontend/src/AppAuth.test.tsx
++++ b/apps/frontend/src/AppAuth.test.tsx
+@@ -1,9 +1,9 @@
+-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
++import { act, render, screen, waitFor } from "@testing-library/react";
+ import { afterEach, beforeEach, expect, it, vi } from "vitest";
+ import App from "./App";
+ import { clearToken, saveToken, loadToken } from "@/lib/session";
+ import { installFetchStub } from "@/test/fetchStub";
+-import { getBusinessWorkspace, login, listIndustries, listDistricts } from "@/lib/api";
++import { getBusinessWorkspace, listIndustries, listDistricts } from "@/lib/api";
+ import type { BusinessState } from "@/lib/businessProfile";
+ 
+ vi.mock("@/lib/api", async (original) => ({
+@@ -55,17 +55,18 @@ afterEach(() => { clearToken(); window.location.hash = ""; });
+ const LANDING = { level: 1, name: /어느 건물 몇 층이 비었는지/ } as const;
+ const HOME = { name: /내 사업의 시작/ } as const;
+ 
+-it("홈페이지에서 로그인하면 서버의 개인 사업 정보를 불러온다", async () => {
+-  vi.mocked(login).mockResolvedValue({ access_token: "user-a", token_type: "bearer" });
++it("홈페이지에서 소셜 로그인 세션을 받으면 서버의 개인 사업 정보를 불러온다", async () => {
+   vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
+   window.location.hash = "#login";
+   render(<App />);
+   expect(screen.getByRole("heading", HOME)).toBeTruthy();
+-  fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "owner@example.com" } });
+-  fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "password123" } });
+-  fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+-  expect(await screen.findByLabelText("사업 이름 (선택)")).toBeTruthy();
+-  expect(getBusinessWorkspace).toHaveBeenCalledWith("user-a");
++  act(() => {
++    window.location.hash = "#/home";
++    window.dispatchEvent(new HashChangeEvent("hashchange"));
++    saveToken("user-a");
++  });
++  expect(await screen.findByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
++  await waitFor(() => expect(getBusinessWorkspace).toHaveBeenCalledWith("user-a"));
+ });
+ 
+ it("계정 전환 후 도착한 이전 계정의 응답은 화면에 남지 않는다", async () => {
+diff --git a/apps/frontend/src/components/GoogleSignIn.tsx b/apps/frontend/src/components/GoogleSignIn.tsx
+index aa8b1c5..f1568bb 100644
+--- a/apps/frontend/src/components/GoogleSignIn.tsx
++++ b/apps/frontend/src/components/GoogleSignIn.tsx
+@@ -5,7 +5,7 @@
+  * 처음 온 사람이면 서버가 가입(조직 생성)까지 한다 — 그래서 로그인 화면에서도 수집 안내
+  * (PrivacyNote)를 같이 띄운다.
+  *
+- * 스크립트를 못 받으면(광고 차단기·망) 조용히 사라지지 않고 이메일로 계속하라고 말한다 —
++ * 스크립트를 못 받으면(광고 차단기·망) 조용히 사라지지 않고 재시도를 안내한다 —
+  * 버튼 자리가 그냥 비어 있으면 "로그인이 고장 났다"로 읽힌다.
+  */
+ import { useEffect, useRef, useState } from "react";
+@@ -61,7 +61,7 @@ export default function GoogleSignIn({ clientId, orgName, onSignedIn }: {
+       {state === "pending" && <p className="acct-muted" role="status">구글 계정을 확인하는 중…</p>}
+       {state === "unavailable" && (
+         <p className="caveat-note acct-note" role="status">
+-          구글 로그인 버튼을 불러오지 못했습니다(광고 차단기·네트워크를 확인해 주세요). 아래 이메일로 계속할 수 있습니다.
++          구글 로그인 버튼을 불러오지 못했습니다(광고 차단기·네트워크를 확인해 주세요). 다시 시도하거나 다른 로그인 수단을 이용해 주세요.
+         </p>
+       )}
+       {error && <p className="caveat-note caveat-withheld acct-error" role="alert">{error}</p>}
+diff --git a/apps/frontend/src/flow/FlowApp.tsx b/apps/frontend/src/flow/FlowApp.tsx
+index adf3d2b..7f59537 100644
+--- a/apps/frontend/src/flow/FlowApp.tsx
++++ b/apps/frontend/src/flow/FlowApp.tsx
+@@ -180,7 +180,7 @@ export default function FlowApp({ token }: { token: string | null }) {
+             {route && !unknown && <Screen key={route.path} route={route} />}
+           </div>
+           <Sheet open={login !== null && !token} onClose={closeLogin} title={loginTitle(login ?? "login")}>
+-            <LoginPanel reason={login ?? "login"} onEmail={() => { setLogin(null); openAccount("login"); }} />
++            <LoginPanel reason={login ?? "login"} />
+           </Sheet>
+           <Toast msg={toastMsg} onDone={clearToast} />
+           {account && (
+diff --git a/apps/frontend/src/flow/screens/Hub.tsx b/apps/frontend/src/flow/screens/Hub.tsx
+index 4b774f7..6efb29c 100644
+--- a/apps/frontend/src/flow/screens/Hub.tsx
++++ b/apps/frontend/src/flow/screens/Hub.tsx
+@@ -28,7 +28,7 @@ import { clearPlan, loadPlan, modeTitle } from "../plan";
+ let providersOnce: Promise<AuthProviders> | null = null;
+ const providers = () => (providersOnce ??= getAuthProviders().catch((e) => { providersOnce = null; throw e; }));
+ 
+-export function LoginPanel({ reason, onEmail }: { reason: LoginReason; onEmail: () => void }) {
++export function LoginPanel({ reason }: { reason: LoginReason }) {
+   const [p, setP] = useState<AuthProviders | null | "error">(null);
+   useEffect(() => {
+     let alive = true;
+@@ -41,7 +41,6 @@ export function LoginPanel({ reason, onEmail }: { reason: LoginReason; onEmail:
+       <ul className="fl-benefits">{LOGIN_BENEFITS[reason].lines.map((l) => <li key={l}>{l}</li>)}</ul>
+       {ready?.google_client_id && <GoogleSignIn clientId={ready.google_client_id} onSignedIn={() => { /* 토큰이 바뀌면 FlowApp 이 이어서 한다 */ }} />}
+       <SocialSignIn providers={ready} />
+-      <button type="button" className="fl-btn fl-btn-weak fl-email" onClick={onEmail}>이메일로 로그인</button>
+       <PrivacyNote />
+     </div>
+   );
+@@ -274,7 +273,7 @@ export function Me() {
+   if (!token) {
+     return (
+       <FlowScreen hub tab="me" title="로그인하면 저장한 것을 어디서나 봐요">
+-        <LoginPanel reason="login" onEmail={() => openAccount("login")} />
++        <LoginPanel reason="login" />
+         <div className="fl-actions"><TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton></div>
+       </FlowScreen>
+     );
+diff --git a/apps/frontend/src/lib/authText.ts b/apps/frontend/src/lib/authText.ts
+index e29a4bb..93ae996 100644
+--- a/apps/frontend/src/lib/authText.ts
++++ b/apps/frontend/src/lib/authText.ts
+@@ -35,7 +35,7 @@ export function loginErrorText(err: unknown): string {
+ /** 가입 실패. 409 는 화면이 「로그인으로」 버튼을 같이 띄운다(isAlreadyRegistered). */
+ export function signupErrorText(err: unknown): string {
+   if (err instanceof ApiError) {
+-    if (err.status === 409) return "이미 가입된 이메일입니다. 이 이메일로 로그인해 주세요.";
++    if (err.status === 409) return "이미 가입된 이메일입니다. 같은 이메일의 소셜 계정으로 로그인해 주세요.";
+     if (err.status === 422) {
+       return "입력값을 서버가 받지 않았습니다. 이메일 형식, 비밀번호 8자 이상, 조직 이름(1~200자)을 확인해 주세요.";
+     }
+@@ -63,7 +63,7 @@ export function apiKeyErrorText(err: unknown, action: "불러오지" | "발급
+ export function googleErrorText(err: unknown): string {
+   if (err instanceof ApiError) {
+     if (err.status === 401) return "구글 로그인을 확인하지 못했습니다. 다시 시도해 주세요.";
+-    if (err.status === 404) return "지금은 구글 로그인을 쓸 수 없습니다. 이메일로 로그인해 주세요.";
++    if (err.status === 404) return "지금은 구글 로그인을 쓸 수 없습니다. 다른 로그인 수단을 이용해 주세요.";
+     if (err.status === 503) return "구글 인증 서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.";
+   }
+   return common(err, "구글로 로그인하지");
+diff --git a/apps/frontend/src/pages/Account.test.tsx b/apps/frontend/src/pages/Account.test.tsx
+index 81d1b4c..563c3e8 100644
+--- a/apps/frontend/src/pages/Account.test.tsx
++++ b/apps/frontend/src/pages/Account.test.tsx
+@@ -62,57 +62,13 @@ it("서버 로그아웃이 실패하면 완료한 것으로 표시하지 않는
+ });
+ 
+ describe("Login — #login", () => {
+-  it("성공하면 토큰을 세션에 두고 키 화면으로 간다 · 비밀번호는 POST 본문에만 실린다", async () => {
+-    const api = installFetchStub([{ match: /\/auth\/login$/, body: { access_token: TOKEN, token_type: "bearer" } }]);
+-    const go = vi.fn();
+-    render(<Login go={go} />);
+-    type("이메일", " ops@example.com ");
+-    type("비밀번호", "pw-12345678");
+-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+-
+-    await waitFor(() => expect(go).toHaveBeenCalledWith("account"));
+-    const [call] = api.calls;
+-    expect(call.method).toBe("POST");
+-    expect(call.url).toBe("/api/v1/auth/login");
+-    expect(call.body).toEqual({ email: "ops@example.com", password: "pw-12345678" });
+-    expect(call.headers.Authorization).toBeUndefined();
+-    expect(loadToken()).toBe(TOKEN);
+-    expect(window.localStorage.length).toBe(0);
+-  });
+-
+-  it("401 이면 이메일과 비밀번호 중 어느 쪽이 틀렸는지 가르지 않는다", async () => {
+-    installFetchStub([{ match: /\/auth\/login$/, status: 401, body: { detail: "이메일 또는 비밀번호가 올바르지 않습니다" } }]);
+-    const go = vi.fn();
+-    render(<Login go={go} />);
+-    type("이메일", "ops@example.com");
+-    type("비밀번호", "wrong-password");
+-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+-
+-    expect((await screen.findByRole("alert")).textContent).toBe("이메일 또는 비밀번호가 올바르지 않습니다.");
+-    expect(go).not.toHaveBeenCalled();
+-    expect(loadToken()).toBeNull();
+-  });
+-
+-  it("429 면 비밀번호가 틀렸다고 하지 않고 잠시 막혔다고 말한다 (서버 요청량 제어 · 2026-10-06)", async () => {
+-    installFetchStub([{ match: /\/auth\/login$/, status: 429, body: { detail: "로그인 시도가 너무 많습니다" } }]);
+-    const go = vi.fn();
+-    render(<Login go={go} />);
+-    type("이메일", "ops@example.com");
+-    type("비밀번호", "hunter2hunter");
+-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+-
+-    expect((await screen.findByRole("alert")).textContent).toBe("시도가 너무 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도해 주세요.");
+-    expect(go).not.toHaveBeenCalled();
+-    expect(loadToken()).toBeNull();
+-  });
+-
+-  it("서버에 닿지 못하면 네트워크 문구를 띄운다", async () => {
+-    vi.stubGlobal("fetch", () => Promise.reject(new TypeError("Failed to fetch")));
++  it("이메일 로그인 폼과 제출 버튼을 표시하지 않는다", () => {
++    const api = installFetchStub([]);
+     render(<Login go={vi.fn()} />);
+-    type("이메일", "ops@example.com");
+-    type("비밀번호", "pw-12345678");
+-    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+-    expect((await screen.findByRole("alert")).textContent).toContain("서버에 연결하지 못했습니다");
++    expect(screen.queryByLabelText("이메일")).toBeNull();
++    expect(screen.queryByLabelText("비밀번호")).toBeNull();
++    expect(screen.queryByRole("button", { name: "로그인" })).toBeNull();
++    expect(api.calls).toHaveLength(0);
+   });
+ });
+ 
+@@ -161,7 +117,7 @@ describe("Signup — #signup", () => {
+     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
+ 
+     const alert = await screen.findByRole("alert");
+-    expect(alert.textContent).toContain("이미 가입된 이메일입니다. 이 이메일로 로그인해 주세요.");
++    expect(alert.textContent).toContain("이미 가입된 이메일입니다. 같은 이메일의 소셜 계정으로 로그인해 주세요.");
+     fireEvent.click(within(alert).getByRole("button", { name: "로그인으로" }));
+     expect(go).toHaveBeenCalledWith("login");
+   });
+diff --git a/apps/frontend/src/pages/AccountLightweight.test.tsx b/apps/frontend/src/pages/AccountLightweight.test.tsx
+index 06c846a..a101994 100644
+--- a/apps/frontend/src/pages/AccountLightweight.test.tsx
++++ b/apps/frontend/src/pages/AccountLightweight.test.tsx
+@@ -2,7 +2,7 @@
+  * 가벼운 대안 먼저(2026-10-05) — 계정 화면 회귀 그물. docs/decision-lightweight-first-2026-10-05.md §1·§2.
+  *
+  * 잡는 회귀:
+- *   - 구글 로그인이 꺼져 있는데(서버 설정 없음·서버 다운) 버튼 자리가 생기거나, 이메일 폼이 사라지는 것
++ *   - 구글 로그인이 꺼져 있는데(서버 설정 없음·서버 다운) 버튼 자리가 생기거나, 이메일 로그인 폼이 다시 나타나는 것
+  *   - 구글 ID 토큰 말고 다른 것(비밀번호·토큰 헤더)이 /auth/google 에 실리는 것
+  *   - 구글 스크립트가 막혔을 때 아무 말 없이 버튼만 사라지는 것
+  *   - 가입 화면에 무엇을 받는지(수집 안내)가 빠지는 것
+@@ -45,17 +45,17 @@ describe("첫 화면(Home) — 구글 로그인 켜짐 여부는 서버가 정
+     const api = installFetchStub([{ match: /\/auth\/providers$/, body: { google_client_id: CLIENT_ID } }]);
+     render(<Home />);
+     expect(await screen.findByText("Google 계정으로 계속하기")).toBeTruthy();
+-    expect(screen.getByLabelText("비밀번호")).toBeTruthy();   // 기존 비밀번호 계정은 계속 들어온다
++    expect(screen.queryByLabelText("비밀번호")).toBeNull();
+     expect(api.urls()).toEqual(["GET /api/v1/auth/providers"]);
+   });
+ 
+-  it("못 물어보면(404·서버 다운) 이메일 폼만 — 들어올 길이 사라지지 않는다", async () => {
++  it("못 물어보면(404·서버 다운) 이메일 폼을 대신 표시하지 않는다", async () => {
+     const api = installFetchStub([]);
+     render(<Home />);
+     await waitFor(() => expect(api.count(/\/auth\/providers$/)).toBe(1));
+     expect(screen.queryByText("Google 계정으로 계속하기")).toBeNull();
+-    expect(screen.getByLabelText("이메일")).toBeTruthy();
+-    expect(screen.getByRole("button", { name: "로그인" })).toBeTruthy();
++    expect(screen.queryByLabelText("이메일")).toBeNull();
++    expect(screen.queryByRole("button", { name: "로그인" })).toBeNull();
+   });
+ });
+ 
+@@ -84,12 +84,12 @@ describe("Login — 구글로 계속하기", () => {
+     expect(loadToken()).toBeNull();
+   });
+ 
+-  it("구글 스크립트가 막히면 말하고, 이메일 폼은 그대로 쓴다", async () => {
++  it("구글 스크립트가 막히면 재시도를 안내하고 이메일 폼은 표시하지 않는다", async () => {
+     gis.fail = true;
+     installFetchStub([]);
+     render(<Login go={vi.fn()} googleClientId={CLIENT_ID} />);
+-    expect((await screen.findByText(/구글 로그인 버튼을 불러오지 못했습니다/)).textContent).toContain("이메일로 계속");
+-    expect(screen.getByLabelText("비밀번호")).toBeTruthy();
++    expect((await screen.findByText(/구글 로그인 버튼을 불러오지 못했습니다/)).textContent).toContain("다시 시도하거나 다른 로그인 수단");
++    expect(screen.queryByLabelText("비밀번호")).toBeNull();
+   });
+ 
+   it("처음 온 사람도 여기서 가입되므로 수집 안내를 같이 띄운다", () => {
+diff --git a/apps/frontend/src/pages/Login.tsx b/apps/frontend/src/pages/Login.tsx
+index a712e22..7bbdcab 100644
+--- a/apps/frontend/src/pages/Login.tsx
++++ b/apps/frontend/src/pages/Login.tsx
+@@ -1,86 +1,19 @@
+-/**
+- * 로그인 (#login) — B9 계정 화면 1/3.
+- * 계약: POST /api/v1/auth/login { email, password } → { access_token } · 401 불일치.
+- *
+- * 2026-10-05: 구글 로그인이 켜져 있으면(`googleClientId`) 구글 버튼을 **먼저** 그리고, 비밀번호 폼은
+- * 기존 계정용으로 아래에 둔다. 처음 온 사람이 여기서 구글을 누르면 서버가 가입까지 하므로 수집
+- * 안내도 같이 띄운다. 비밀번호 재설정은 만들지 않는다 — 잊었으면 같은 이메일의 구글 계정으로
+- * 들어오면 된다(docs/decision-lightweight-first-2026-10-05.md §1).
+- */
+-import { useState, type FormEvent } from "react";
+-import { Button } from "@/design/components/Button";
++/** 로그인 (#login) — 소셜 계정으로 계속한다. */
+ import { ACCOUNT_TITLE_ID, type AccountScreenProps } from "@/components/AccountDialog";
+ import GoogleSignIn from "@/components/GoogleSignIn";
+ import SocialSignIn from "@/components/SocialSignIn";
+ import PrivacyNote from "@/components/PrivacyNote";
+-import { login } from "@/lib/api";
+-import { loginErrorText } from "@/lib/authText";
+-import { saveToken } from "@/lib/session";
+ import "./Account.css";
+ 
+ export default function Login({ go, googleClientId, socialProviders }: AccountScreenProps) {
+-  const [email, setEmail] = useState("");
+-  const [password, setPassword] = useState("");
+-  const [pending, setPending] = useState(false);
+-  const [error, setError] = useState("");
+-
+-  async function submit(e: FormEvent) {
+-    e.preventDefault();
+-    if (pending) return;
+-    if (!email.trim() || !password) {
+-      setError("이메일과 비밀번호를 모두 적어 주세요.");
+-      return;
+-    }
+-    setPending(true);
+-    setError("");
+-    try {
+-      const token = await login({ email: email.trim(), password });
+-      saveToken(token.access_token);
+-      go("account");
+-    } catch (err) {
+-      setError(loginErrorText(err));
+-      setPending(false);
+-    }
+-  }
+-
+   return (
+     <div className="acct">
+       <p className="acct-eyebrow">PlaceOS 계정</p>
+       <h2 id={ACCOUNT_TITLE_ID}>로그인</h2>
+       <p className="acct-lede">로그인하면 내 창업 사업 정보를 저장하고 이어서 작업할 수 있습니다.</p>
+-
+-      {googleClientId && (
+-        <>
+-          <GoogleSignIn clientId={googleClientId} onSignedIn={() => go("account")} />
+-          <p className="acct-divider">또는 이메일·비밀번호로 가입한 계정</p>
+-        </>
+-      )}
+-
++      {googleClientId && <GoogleSignIn clientId={googleClientId} onSignedIn={() => go("account")} />}
+       <SocialSignIn providers={socialProviders} />
+-
+-      {/* method="post" — 스크립트가 죽어 브라우저 기본 제출로 떨어져도 비밀번호가 URL 에 실리지 않게 한다 */}
+-      <form className="acct-form" method="post" noValidate onSubmit={submit}>
+-        <label className="acct-field">
+-          <span>이메일</span>
+-          <input type="email" name="email" autoComplete="email" required value={email}
+-            onChange={(e) => setEmail(e.target.value)} />
+-        </label>
+-        <label className="acct-field">
+-          <span>비밀번호</span>
+-          <input type="password" name="password" autoComplete="current-password" required value={password}
+-            onChange={(e) => setPassword(e.target.value)} />
+-        </label>
+-        {error && <p className="caveat-note caveat-withheld acct-error" role="alert">{error}</p>}
+-        <Button type="submit" disabled={pending} aria-busy={pending}>{pending ? "로그인 중…" : "로그인"}</Button>
+-      </form>
+-
+-      {googleClientId && (
+-        <>
+-          <p className="acct-muted acct-hint">비밀번호를 잊었다면 같은 이메일의 구글 계정으로 계속하세요.</p>
+-          <PrivacyNote />
+-        </>
+-      )}
+-
++      <PrivacyNote />
+       <p className="acct-switch">
+         처음이신가요?{" "}
+         <button type="button" className="acct-link" onClick={() => go("signup")}>회원가입</button>
+diff --git a/apps/frontend/src/pages/SocialLogin.test.tsx b/apps/frontend/src/pages/SocialLogin.test.tsx
+index fc31c25..3822b2e 100644
+--- a/apps/frontend/src/pages/SocialLogin.test.tsx
++++ b/apps/frontend/src/pages/SocialLogin.test.tsx
+@@ -21,6 +21,7 @@ describe("네이버·카카오 로그인", () => {
+     await screen.findByRole("button", { name: "네이버로 계속하기" });
+     expect(screen.getByRole("button", { name: "카카오로 계속하기" })).toBeTruthy();
+     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
++    await screen.findByRole("heading", { name: "회원가입" });
+     expect(await screen.findByRole("button", { name: "네이버로 계속하기" })).toBeTruthy();
+     expect(screen.getByText("이메일·비밀번호로 가입").closest("details")?.open).toBe(false);
+   });
+@@ -28,11 +29,12 @@ describe("네이버·카카오 로그인", () => {
+   it("미설정이어도 두 버튼을 표시하되 로그인 시도를 막는다", async () => {
+     installFetchStub([{ match: /\/auth\/providers$/, body: { google_client_id: null, naver_enabled: false, kakao_enabled: false } }]);
+     render(<Home />);
+-    await screen.findByLabelText("이메일");
++    await screen.findByRole("button", { name: "네이버로 계속하기" });
+     expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+     expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+     expect(screen.getByText(/준비 중인 로그인 수단은 아직 사용할 수 없습니다/)).toBeTruthy();
+     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
++    await screen.findByRole("heading", { name: "회원가입" });
+     expect((screen.getByRole("button", { name: "네이버로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+     expect((screen.getByRole("button", { name: "카카오로 계속하기" }) as HTMLButtonElement).disabled).toBe(true);
+   });

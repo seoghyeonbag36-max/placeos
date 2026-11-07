@@ -297,3 +297,11 @@ exports/
 
 # 외부 API 실호출 검증의 로컬 계정 DB는 배포하지 않는다.
 .qa/renewal-live.sqlite3*
+
+# 완료된 배포용 로컬 worktree 사본은 중첩 저장소로 커밋하지 않는다.
+/tmp/busan-release/
+/tmp/district-caveat-release/
+/tmp/email-login-release/
+/tmp/korean-benchmark-release/
+# PR 본문 작성용 임시 파일은 실행 산출물이다.
+/tmp/release-snapshot-pr.md

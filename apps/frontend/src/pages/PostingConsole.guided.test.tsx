@@ -27,12 +27,32 @@ describe("단계형 비용 검토", () => {
     render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     await waitFor(() => expect([...drafts.values()][0].calculation).toBeNull());
     expect((screen.getByRole("button", { name: "시뮬레이션" }) as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "계산 결과" }));
     expect(screen.queryByText("전제(0)")).toBeNull();
     expect(emptyApi.count(/simulate-revenue$/)).toBe(0);
   });
 
-  it("계산한 뒤 결과 본문으로 이동하고 왕복·트랙 재진입에도 입력과 결과를 보존한다", async () => {
+  it("검증 리포트·계산 결과 탭이 없고, 계산 결과는 자리와 비용 조건 화면에 바로 나온다", async () => {
+    const api = installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    expect(screen.queryByRole("button", { name: "검증 리포트" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "계산 결과" })).toBeNull();
+    expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
+    expect(await screen.findByText("전제(0)")).toBeTruthy();
+  });
+
+  it("권리금을 바꾸면 버튼 없이 잠시 뒤 다시 계산하고 결과를 같은 화면에 갱신한다", async () => {
+    const api = installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "300" } });
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(2), { timeout: 3000 });
+    expect(api.matching(/simulate-revenue$/)[1].body).toMatchObject({ prem: 300 });
+    expect(await screen.findByText(/권리금 300만원/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
+  });
+
+  it("계산한 뒤 같은 화면에 결과를 그리고 왕복·트랙 재진입에도 입력과 결과를 보존한다", async () => {
     const api = installApi();
     const drafts = new Map<string, PostingDraft>();
     let view = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
@@ -40,16 +60,29 @@ describe("단계형 비용 검토", () => {
     expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기 →" })).toBeNull();
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "200" } });
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "계산 결과" }).getAttribute("aria-current")).toBe("page"));
-    expect(screen.getByText(/권리금 200만원/)).toBeTruthy();
+    expect(await screen.findByText(/권리금 200만원/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
+    fireEvent.click(screen.getByRole("button", { name: "찾아오는 길" }));
     fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     expect((screen.getByPlaceholderText("만원 — 비우면 0 전제") as HTMLInputElement).value).toBe("200");
     view.unmount();
     await act(async () => { view = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />); });
     await waitFor(() => expect(api.count(/postings$/)).toBe(2));
     expect((screen.getByPlaceholderText("만원 — 비우면 0 전제") as HTMLInputElement).value).toBe("200");
-    fireEvent.click(screen.getByRole("button", { name: "계산 결과" }));
     expect(screen.getByText(/권리금 200만원/)).toBeTruthy();
+    // 버튼으로 계산했으면 대기 중이던 자동 계산은 걷힌다 — 첫 자동 계산 1 + 버튼 1
     expect(api.count(/simulate-revenue$/)).toBe(2);
+  });
+
+  it("예전에 「계산 결과」 탭을 연 채 저장된 초안은 입력 화면으로 연다", async () => {
+    installApi();
+    const drafts = new Map<string, PostingDraft>();
+    const first = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
+    await waitFor(() => expect([...drafts.values()][0]?.calculation).toBeTruthy());
+    first.unmount();
+    const [key, saved] = [...drafts.entries()][0];
+    drafts.set(key, { ...saved, page: "result" });
+    render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
+    expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
   });
 });
