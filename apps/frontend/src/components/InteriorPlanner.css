@@ -17,6 +17,14 @@
 .interior-result { margin: var(--sp-3) 0; }
 .interior-result img { max-width: 100%; height: auto; }
 .interior-planner pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.interior-design-keywords, .interior-concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--sp-3); }
+.interior-design-keywords article, .interior-concepts button { padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.interior-design-keywords h4 { margin: 0; }
+.interior-concepts button { display: grid; gap: var(--sp-2); text-align: left; }
+.interior-design button[aria-pressed=true] { background: var(--track-posting); color: var(--surface); }
+.interior-design dl { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2); font-size: var(--fs-caption); }
+.interior-design dd { margin: 0; }
+.interior-strength { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 @media (max-width: 480px) { .interior-fields { grid-template-columns: 1fr; } }
 /* 분위기·색감 키워드 필터(2026-11-07) — 분류 필터 → 키워드 칩(여러 개 선택) → 고른 키워드 요약 */
 .interior-keywords { margin-block: var(--sp-3); padding: var(--sp-3) !important; border: 1px solid var(--line) !important; border-radius: var(--radius-md); }

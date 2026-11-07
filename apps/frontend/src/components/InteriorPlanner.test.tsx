@@ -1,12 +1,44 @@
 /** 공급자·이미지는 테스트용 합성 응답. 실호출이나 상권 적합성의 증거가 아니다. */
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import InteriorPlanner from "./InteriorPlanner";
 import { clearToken, loadToken, saveToken } from "@/lib/session";
 import { ApiError, SESSION_EXPIRED_EVENT, generateInterior, interiorErrorMessage } from "@/lib/api";
 import { installFetchStub } from "@/test/fetchStub";
 
 afterEach(() => { cleanup(); clearToken(); vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+it("선택한 콘셉트·키워드 강도·공사 조건을 실제 생성 요청과 리포트에 전달한다", async () => {
+  saveToken("test-only-token");
+  const api = installFetchStub([{ match: /\/interior-preview$/, body: {
+    source: "ai_generated", image_data_url: "data:image/png;base64,dGVzdA==", model: "test-only", note: "테스트 합성 응답",
+  } }]);
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  fireEvent.click(screen.getByRole("button", { name: /미니멀 갤러리 화이트/ }));
+  fireEvent.click(within(screen.getByRole("group", { name: "창가 자리 강도" })).getByRole("button", { name: "강" }));
+  fireEvent.change(screen.getByLabelText("공사 범위"), { target: { value: "부분 공사 · 바닥과 천장 유지" } });
+  fireEvent.click(screen.getByRole("button", { name: "리포트에 인테리어 조건 저장" }));
+  const saved = JSON.parse(localStorage.getItem("placeos.interior-brief.garosugil")!);
+  expect(saved.source).toBe("user_input");
+  expect(saved.brief).toContain("창가 자리 (강)");
+  fireEvent.click(screen.getByRole("checkbox"));
+  await screen.findByAltText("AI 생성 인테리어 참고 이미지 · 실측·시공안 아님");
+  const request = api.matching(/interior-preview$/)[0];
+  expect(request.body).toMatchObject({ style: "미니멀 갤러리" });
+  expect((request.body as { constraints: string }).constraints).toContain("부분 공사 · 바닥과 천장 유지");
+  expect((request.body as { constraints: string }).constraints).toContain("상권 분석·적합도 실측 아님");
+});
+
+it("충돌하는 바닥 소재를 알리고 초기화하면 선택을 지운다", () => {
+  render(<InteriorPlanner district="garosugil" industry="카페" />);
+  for (const name of ["노출 콘크리트", "우드톤"]) {
+    fireEvent.click(within(screen.getByRole("group", { name: `${name} 강도` })).getByRole("button", { name: "중" }));
+  }
+  expect(screen.getByText(/바닥 소재가 겹칩니다/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "디자인 설정 초기화" }));
+  expect(screen.queryByText(/바닥 소재가 겹칩니다/)).toBeNull();
+  expect(within(screen.getByRole("group", { name: "우드톤 강도" })).getByRole("button", { name: "끔" }).getAttribute("aria-pressed")).toBe("true");
+});
 
 it("동의 전 생성 호출이 없고, 동의하면 버튼 없이 바로 명시한 조건만 인증 요청으로 보낸다", async () => {
   saveToken("test-only-token");
