@@ -181,12 +181,15 @@ function DistrictPickList({ onPick, emptyHint, region }: { region?: string | nul
         <span className="sr-only">동네 이름으로 찾기</span>
         <input type="search" value={q} placeholder="동네 이름으로 찾기" onChange={(e) => setQ(e.target.value)} />
       </label>
+      {shown.some((d) => d.caveat) && (
+        <p className="fl-foot">* 공실률 비교 시 주의가 필요한 상권이에요. 자세한 이유는 상권 상세에서 확인해 주세요.</p>
+      )}
       {shown.length === 0 ? (
         <p className="fl-empty">{region ? `${region}에서 조건에 맞는 공개 상권이 없어요.` : `찾는 상권이 없어요. 지금은 ${cityNames(ds.data)} ${ds.data.length}개 상권이 있어요.`} {emptyHint}</p>
       ) : (
         <RowList label="상권">
           {shown.map((d) => (
-            <Row key={d.id} title={<>{d.name}{d.caveat ? <span className="fl-caveat-mark" title={d.caveat}> ▣</span> : null}</>}
+            <Row key={d.id} title={<>{d.name}{d.caveat ? <span className="fl-caveat-mark" title={d.caveat}>*</span> : null}</>}
               meta={`${d.gu}${d.vacancy_rate != null ? ` · 공실률 ${d.vacancy_rate}%` : ""}`} onClick={() => onPick(d)} />
           ))}
         </RowList>

@@ -238,3 +238,49 @@ def test_unresolved_pnu_is_not_sequence_success(isolated):
     runner.atomic_json(isolated / 'reports/regional_research_gold.json', dict(status='checked'))
     plan = {'locations': [dict(id='research-one', pnus=['4111111111111111111'], unresolved=['missing'])]}
     assert runner.gold_scope_ready(plan, dict(paused_pnu_prefixes=[])) == (False, 'UNRESOLVED_PNU')
+
+
+@pytest.mark.parametrize('damage', [None, 'page_hash', 'partial', 'wrong_pnu', 'empty_pages'])
+def test_indexed_startup_revalidates_every_completed_page(isolated, damage):
+    pnu = '2911111111111111111'
+    path = runner.RAW / 'expos' / pnu / 'page_00001.json'
+    runner.atomic_json(path, page(1, [dict(rnum=1)]))
+    marker = dict(pnu=pnu, endpoint='expos', complete=True, total=1, received=1,
+        pages=[dict(path=path.relative_to(isolated).as_posix(), sha256=runner.fingerprint(path))])
+    if damage == 'page_hash':
+        path.write_text('{}', encoding='utf-8')
+    elif damage == 'partial':
+        marker['received'] = 0
+    elif damage == 'wrong_pnu':
+        marker['pnu'] = 'wrong'
+    elif damage == 'empty_pages':
+        marker['pages'] = []
+    runner.atomic_json(runner.completion(pnu, 'expos'), marker)
+    plan = dict(targets=[dict(pnu=pnu), dict(pnu='4111111111111111111')], legacy_expos={}, legacy_sources={})
+    state = dict(done={}, endpoints={e: dict(day=runner.now().date().isoformat(),calls_today=123,completed=0)
+                                   for e in runner.ENDPOINTS})
+    runner.sync_existing(plan, state)
+    assert (pnu in state['done']['expos']) == (damage is None)
+    assert state['endpoints']['expos']['completed'] == int(damage is None)
+    assert state['endpoints']['floors']['completed'] == 0
+    assert all(record['calls_today'] == 123 for record in state['endpoints'].values())
+    assert 'verification' not in state
+
+
+def test_non_json_is_saved_and_retried_without_fake_empty_response(isolated,monkeypatch):
+    import requests
+    monkeypatch.setattr(runner,'ac_connected',lambda:True)
+    monkeypatch.setattr(runner.shutil,'disk_usage',lambda _:SimpleNamespace(free=10*1024**3))
+    class Response:
+        status_code=200
+        headers={'Content-Type':'text/html'}
+        content=b'<html>temporary upstream response</html>'
+        text=content.decode()
+        def json(self):raise ValueError('not JSON')
+    valid=SimpleNamespace(status_code=200,json=lambda:page(0,[]))
+    responses=iter([Response(),valid])
+    monkeypatch.setattr(requests,'get',lambda *args,**kwargs:next(responses))
+    state={'endpoints':{'expos':dict(day=runner.now().date().isoformat(),calls_today=0)}}
+    assert runner.parse_page(runner.request_page('test','2911111111111111111','expos',1,state))==(0,[])
+    assert state['endpoints']['expos']['calls_today']==2
+    assert list((isolated/'data/bronze/regional_research_diagnostics').rglob('*.bin'))[0].read_bytes()==Response.content

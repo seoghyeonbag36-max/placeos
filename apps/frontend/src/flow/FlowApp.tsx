@@ -180,7 +180,7 @@ export default function FlowApp({ token }: { token: string | null }) {
             {route && !unknown && <Screen key={route.path} route={route} />}
           </div>
           <Sheet open={login !== null && !token} onClose={closeLogin} title={loginTitle(login ?? "login")}>
-            <LoginPanel reason={login ?? "login"} onEmail={() => { setLogin(null); openAccount("login"); }} />
+            <LoginPanel reason={login ?? "login"} />
           </Sheet>
           <Toast msg={toastMsg} onDone={clearToast} />
           {account && (

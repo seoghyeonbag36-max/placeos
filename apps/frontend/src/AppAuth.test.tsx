@@ -1,9 +1,9 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
 import { clearToken, saveToken, loadToken } from "@/lib/session";
 import { installFetchStub } from "@/test/fetchStub";
-import { getBusinessWorkspace, login, listIndustries, listDistricts } from "@/lib/api";
+import { getBusinessWorkspace, listIndustries, listDistricts } from "@/lib/api";
 import type { BusinessState } from "@/lib/businessProfile";
 
 vi.mock("@/lib/api", async (original) => ({
@@ -55,17 +55,18 @@ afterEach(() => { clearToken(); window.location.hash = ""; });
 const LANDING = { level: 1, name: /어느 건물 몇 층이 비었는지/ } as const;
 const HOME = { name: /내 사업의 시작/ } as const;
 
-it("홈페이지에서 로그인하면 서버의 개인 사업 정보를 불러온다", async () => {
-  vi.mocked(login).mockResolvedValue({ access_token: "user-a", token_type: "bearer" });
+it("홈페이지에서 소셜 로그인 세션을 받으면 서버의 개인 사업 정보를 불러온다", async () => {
   vi.mocked(getBusinessWorkspace).mockResolvedValue({ status: "unset" });
   window.location.hash = "#login";
   render(<App />);
   expect(screen.getByRole("heading", HOME)).toBeTruthy();
-  fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "owner@example.com" } });
-  fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "password123" } });
-  fireEvent.click(screen.getByRole("button", { name: "로그인" }));
-  expect(await screen.findByLabelText("사업 이름 (선택)")).toBeTruthy();
-  expect(getBusinessWorkspace).toHaveBeenCalledWith("user-a");
+  act(() => {
+    window.location.hash = "#/home";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    saveToken("user-a");
+  });
+  expect(await screen.findByRole("heading", FLOW_FIRST_QUESTION)).toBeTruthy();
+  await waitFor(() => expect(getBusinessWorkspace).toHaveBeenCalledWith("user-a"));
 });
 
 it("계정 전환 후 도착한 이전 계정의 응답은 화면에 남지 않는다", async () => {

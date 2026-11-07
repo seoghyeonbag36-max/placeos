@@ -5,7 +5,7 @@
  * 처음 온 사람이면 서버가 가입(조직 생성)까지 한다 — 그래서 로그인 화면에서도 수집 안내
  * (PrivacyNote)를 같이 띄운다.
  *
- * 스크립트를 못 받으면(광고 차단기·망) 조용히 사라지지 않고 이메일로 계속하라고 말한다 —
+ * 스크립트를 못 받으면(광고 차단기·망) 조용히 사라지지 않고 재시도를 안내한다 —
  * 버튼 자리가 그냥 비어 있으면 "로그인이 고장 났다"로 읽힌다.
  */
 import { useEffect, useRef, useState } from "react";
@@ -61,7 +61,7 @@ export default function GoogleSignIn({ clientId, orgName, onSignedIn }: {
       {state === "pending" && <p className="acct-muted" role="status">구글 계정을 확인하는 중…</p>}
       {state === "unavailable" && (
         <p className="caveat-note acct-note" role="status">
-          구글 로그인 버튼을 불러오지 못했습니다(광고 차단기·네트워크를 확인해 주세요). 아래 이메일로 계속할 수 있습니다.
+          구글 로그인 버튼을 불러오지 못했습니다(광고 차단기·네트워크를 확인해 주세요). 다시 시도하거나 다른 로그인 수단을 이용해 주세요.
         </p>
       )}
       {error && <p className="caveat-note caveat-withheld acct-error" role="alert">{error}</p>}
