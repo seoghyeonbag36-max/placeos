@@ -1627,7 +1627,15 @@ export interface BuildingTwin {
 export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
   getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);
 
-export interface InteriorImage { source: "ai_generated"; image_data_url: string; model: string; note: string }
+export interface InteriorImage {
+  source: "ai_generated"; image_data_url: string; model: string; note: string;
+  /** 하루 생성 한도와 이 생성까지 센 뒤 남은 횟수(services/interior_quota · 2026-11-07). 옛 서버는 싣지 않는다 */
+  daily_limit?: number | null; remaining_today?: number | null;
+}
+/** GET /ai/interior-preview/quota — 오늘(한국 시간) 남은 이미지 생성 횟수. enabled=false 면 서버에 생성이 설정되지 않았다. */
+export interface InteriorQuota { enabled: boolean; limit: number; used: number; remaining: number; resets_at: string }
+export const getInteriorQuota = (token: string, signal?: AbortSignal) =>
+  accountRequest<InteriorQuota>("GET", "/ai/interior-preview/quota", { token, signal });
 export async function generateInterior(token: string, body: {
   district: string; industry: string; style: string; strategy: "고급화" | "가성비" | "기능중심";
   area_py?: number; constraints: string; links: string[]; consent: true;
@@ -1670,7 +1678,9 @@ export function interiorErrorMessage(err: unknown): string {
     503: "지금은 이미지 생성을 쓸 수 없습니다(서버 설정 또는 공급자 상태).",
     504: "이미지 생성이 60초를 넘어 중단됐습니다. 첨부를 줄이거나 다시 시도하세요.",
   };
-  const head = base[status] ?? "이미지를 생성하지 못했습니다. 잠시 뒤 다시 시도하세요.";
+  // 429 는 둘이다 — 오늘 생성 한도(하루 5회 · 2026-11-07)와 공급자 혼잡. 서버 문구가 어느 쪽인지 정확히 말하므로
+  // 문구가 있으면 그것을 그대로 싣는다(「요청이 몰려 있습니다」를 한도 소진에 붙이면 잠시 뒤 다시 누르게 된다).
+  const head = status === 429 && detail ? detail : base[status] ?? "이미지를 생성하지 못했습니다. 잠시 뒤 다시 시도하세요.";
   // 401 은 서버 문구("인증 토큰이…")보다 할 일이 분명한 화면 문구만 보인다.
   const tail = detail && status !== 401 && detail !== head ? ` (${detail})` : "";
   return `${head}${tail} 지시문은 저장할 수 있습니다.`;

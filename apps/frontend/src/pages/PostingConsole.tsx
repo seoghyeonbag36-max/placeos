@@ -1,6 +1,5 @@
 import NearbyCompetition from "@/components/NearbyCompetition";
 import InteriorPlanner from "@/components/InteriorPlanner";
-import PpppReport from "@/components/PpppReport";
 import { useReportCapture } from "@/lib/ppppReportContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
@@ -55,6 +54,10 @@ const TIER_LABEL: Record<string, { name: string; sub: string }> = {
 };
 
 const won = (v: number) => `${Math.round(v).toLocaleString()}만원`;
+/** 권리금·전략·업종을 바꾼 뒤 이 시간만큼 입력이 멈추면 다시 계산한다(2026-11-07 「계산 결과가 바로 나오게」). */
+const AUTO_RUN_MS = 600;
+/** 2026-11-07 에 빠진 탭(「검증 리포트」 · 「계산 결과」). 그 탭을 연 채 저장된 초안은 입력 탭으로 연다. */
+const RETIRED_PAGES = new Set(["report", "result"]);
 
 interface PostingConsoleProps {
   onReportChange?: (handoff: ProgramHandoff | undefined) => void;
@@ -102,7 +105,7 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
-  const [page, setPage] = useState(draft?.page ?? "input");
+  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
   const [ownDistrict, setOwnDistrict] = useState(selection?.districtId ?? sharedDistrict ?? DEFAULT_DISTRICT);
@@ -181,7 +184,24 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   useEffect(() => () => { requestSerial.current += 1; }, []);
 
+  // 입력을 바꾸면 잠시 뒤 스스로 다시 계산한다 — 결과는 입력 바로 아래에 있다(2026-11-07).
+  // 타이머는 최신 run 을 ref 로 부른다(닫힌 state 를 읽지 않게). 버튼으로 계산하거나 자리·상권을 바꾸면 대기 중인 자동 계산은 걷는다.
+  // 업종 세부 운영 조건(detailKey)은 여러 칸을 다 채워야 계산되므로 자동 계산하지 않고 버튼으로 계산한다.
+  const autoTimer = useRef<number | undefined>(undefined);
+  const runRef = useRef<(opts?: { quiet?: boolean }) => Promise<void>>(async () => {});
+  useEffect(() => { runRef.current = run; });
+  useEffect(() => () => window.clearTimeout(autoTimer.current), []);
+  function cancelAutoRun() {
+    window.clearTimeout(autoTimer.current);
+    autoTimer.current = undefined;
+  }
+  function scheduleRun() {
+    cancelAutoRun();
+    autoTimer.current = window.setTimeout(() => { autoTimer.current = undefined; void runRef.current({ quiet: true }); }, AUTO_RUN_MS);
+  }
+
   function clearCalculation() {
+    cancelAutoRun();
     requestSerial.current += 1;
     setCalculation(null); setPrevious(null); setBusy(false);
     lastCalculation.current = null;
@@ -264,6 +284,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   async function run(opts: { quiet?: boolean } = {}) {
     if (!unit || !unitId) return;
+    cancelAutoRun();
     const serial = ++requestSerial.current;
     setBusy(true);
     if (!opts.quiet) setErr(null);
@@ -295,7 +316,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       const next = { result: r, input };
       lastCalculation.current = next;
       setCalculation(next);
-      if (!opts.quiet) setPage("result");
+      // 결과는 입력 화면 바로 아래에 그린다 — 다른 탭으로 옮기지 않는다(2026-11-07).
     } catch (e) {
       if (serial !== requestSerial.current) return;
       setErr(String(e));
@@ -385,7 +406,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} pages={[
-        { id: "input", label: "자리와 비용 조건", description: "확인한 조건을 입력한 뒤 계산 결과를 확인하세요.", content: <>
+        { id: "input", label: "자리와 비용 조건", description: "조건을 입력하면 바로 아래에 계산 결과가 나옵니다.", content: <>
         {/* ── 입력 ── */}
         <form className="panel" onSubmit={(e) => { e.preventDefault(); run(); }}>
           <div className="ptitle">1. 자리와 업종 선택</div>
@@ -420,14 +441,14 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
           <label className="field">
             <span className="flabel">업종</span>
-            <input value={industry} onChange={(e) => { setIndustry(e.target.value); setDetailKey(""); setOperating({}); clearCalculation(); }}
+            <input value={industry} onChange={(e) => { setIndustry(e.target.value); setDetailKey(""); setOperating({}); clearCalculation(); scheduleRun(); }}
               placeholder="예: 카페 (비우면 자리 기본값)" />
             {recs && recs.length > 0 && (
               <span className="chips">
                 {recs.map((r) => (
                   <button type="button" key={r.industry}
                     className={"chip" + (industry === r.industry ? " on" : "")}
-                    onClick={() => { setIndustry(r.industry); setDetailKey(""); setOperating({}); clearCalculation(); }}>
+                    onClick={() => { setIndustry(r.industry); setDetailKey(""); setOperating({}); clearCalculation(); scheduleRun(); }}>
                     {r.industry} {Math.round(r.score * 100)}%
                   </button>
                 ))}
@@ -451,7 +472,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           <label className="field">
             <span className="flabel">권리금 <em>직접 입력</em></span>
             <input value={prem} inputMode="numeric"
-              onChange={(e) => setPrem(e.target.value.replace(/[^\d]/g, ""))}
+              onChange={(e) => { setPrem(e.target.value.replace(/[^\d]/g, "")); scheduleRun(); }}
               placeholder="만원 — 비우면 0 전제" />
             <span className="fhint">
               협의한 금액을 입력하세요. 비워 두면 <b>0원으로 가정</b>해 계산합니다.
@@ -461,7 +482,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           <details className="posting-advanced"><summary>세부 조건 · 전략 선택</summary>
           <label className="field">
             <span className="flabel">전략</span>
-            <select value={strategy} onChange={(e) => setStrategy(e.target.value)}>
+            <select value={strategy} onChange={(e) => { setStrategy(e.target.value); scheduleRun(); }}>
               <option value="">세 전략 비교</option>
               <option value="premium">고급화</option>
               <option value="value">가성비</option>
@@ -475,16 +496,10 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           <Button className="run" type="submit" disabled={busy || !unitId}>
             {busy ? "계산 중…" : "시뮬레이션"}
           </Button>
+          {!detailKey && <span className="fhint">권리금·전략·업종을 바꾸면 바로 다시 계산합니다.</span>}
         </form>
-        </> },
-        { id: "nearby", label: "주변 업종 지도", description: "공실 주변 50~100m의 같은 업종과 체인점을 확인하세요.", content:
-          page === "nearby" && (unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>) },
-        { id: "interior", label: "상권 맞춤 인테리어", description: "자리와 비용 조건을 바탕으로 공간 참고안을 준비하세요.", content:
-          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
-        { id: "report", label: "검증 리포트", description: "현재 작성한 자리와 비용 결과를 출처와 함께 저장하세요.", content:
-          page === "report" && <PpppReport key={`${districtId}:${unitId}`} handoff={reportHandoff} districtId={districtId} /> },
-        { id: "result", label: "계산 결과", description: "계산에 사용한 조건과 출처를 확인하고, 검증 단계로 이어가세요.", content: <>
-        {/* ── 결과 ── */}
+
+        {/* ── 결과 — 입력 바로 아래(2026-11-07 「자리와 비용 조건에 계산 결과가 바로 나오게」). 종전에는 별도 「계산 결과」 탭이었다 ── */}
         <div className="results">
           <Verdict
             eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
@@ -504,7 +519,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             <>
               {calculation && <div className="posting-input-summary">
                 계산에 사용한 입력: {calculation.input.industry_type || "자리 기본 업종"} · 권리금 {calculation.input.prem === undefined ? "미입력 · 0 전제" : won(calculation.input.prem)} · {TIER_LABEL[calculation.input.strategy ?? ""]?.name ?? "세 전략 비교"}
-                {changedInput && <strong role="status">입력이 변경되었습니다. 다시 계산하면 결과에 반영됩니다.</strong>}
+                {changedInput && <strong role="status">입력이 변경되었습니다. 곧 다시 계산합니다.</strong>}
               </div>}
               <div className="rhead">
                 <div className="rtitle">
@@ -571,6 +586,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
         </div>
         </> },
+        { id: "nearby", label: "주변 업종 지도", description: "업종을 확인하고 「조회」를 누르면 공실 주변 50~100m의 같은 업종과 체인점을 보여 줍니다.", content:
+          page === "nearby" && (unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>) },
+        { id: "interior", label: "상권 맞춤 인테리어", description: "자리와 비용 조건을 바탕으로 공간 참고안을 준비하세요.", content:
+          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
+        // 「검증 리포트」 탭은 Posting 에서 뺐다(2026-11-07 사용자 요청). 종합 리포트는 지도 탐색의 「검증 리포트」(App.tsx)와 Program 에 그대로 있다.
         { id: "access", label: "찾아오는 길", description: "검토하는 자리 주변의 교통과 접근성을 확인하세요.", content:
           unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
             destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} showWalking={false} /> : <p>자리를 먼저 선택해 주세요.</p> },

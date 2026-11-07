@@ -1,10 +1,13 @@
 """AI 추론 엔드포인트 — LSTM 공실 예측 / GNN 업종 추천 / 매출 시뮬레이션."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 from app.core.config import settings
+from app.core.db import get_db
 from app.core.security import CurrentUser, get_current_user
-from app.schemas.interior import InteriorRequest, InteriorResult
+from app.schemas.interior import InteriorQuota, InteriorRequest, InteriorResult
 from app.services import interior as interior_svc
+from app.services import interior_quota as quota_svc
 
 from app.schemas.posting import SimulateRequest, SimulateResult, SimulateResultWithInputs
 from app.services import business_fit as fit_svc
@@ -16,17 +19,31 @@ from app.services import vacancy_forecast as vacancy_svc
 router = APIRouter()
 
 
+def _images_configured() -> bool:
+    return bool(settings.interior_images_enabled and settings.openai_api_key)
+
+
+@router.get("/interior-preview/quota", response_model=InteriorQuota)
+async def interior_preview_quota(
+    current: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db),
+) -> dict:
+    """오늘(한국 시간) 남은 이미지 생성 횟수와, 서버에 생성이 설정돼 있는지. 공급자를 부르지 않는다."""
+    return {"enabled": _images_configured(), **quota_svc.status(db, current.user.id)}
+
+
 @router.post("/interior-preview", response_model=InteriorResult)
 async def interior_preview(
-    req: InteriorRequest, current: CurrentUser = Depends(get_current_user),
+    req: InteriorRequest, current: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db),
 ) -> dict:
     """인증·명시적 동의 후 참고 이미지 한 장. 미설정·공급자 실패는 이미지 없이 실패한다.
 
-    상태 코드: 422 첨부·입력 · 안전 정책 / 403 공급자 권한 / 413 첨부 용량 / 429 공급자 혼잡 /
+    상태 코드: 422 첨부·입력 · 안전 정책 / 403 공급자 권한 / 413 첨부 용량 /
+    429 오늘 생성 한도(사용자당 하루 5회 · services/interior_quota) 또는 공급자 혼잡 /
     502 공급자 오류 / 503 미설정·키 거부·크레딧 소진 / 504 시간 초과(Hosting 60초보다 먼저).
     공급자 401 은 503 으로 바꾼다 — 화면이 401 을 로그인 만료로 읽기 때문이다(services/interior).
+    한도는 성공한 생성만 센다 — 미설정·입력 오류·공급자 실패로는 하루 몫을 깎지 않는다.
     """
-    if not settings.interior_images_enabled or not settings.openai_api_key:
+    if not _images_configured():
         interior_svc.log.warning("interior_preview outcome=error reason=not_configured status=503 enabled=%s key_set=%s",
                                  settings.interior_images_enabled, bool(settings.openai_api_key))
         raise HTTPException(503, "이미지 생성이 서버에 설정되지 않았습니다. 생성 지시문을 저장해 사용할 수 있습니다.")
@@ -35,12 +52,21 @@ async def interior_preview(
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
     try:
-        return await interior_svc.generate(req, files)
+        slot = quota_svc.reserve(db, current.user.id, current.org.id)
+    except quota_svc.QuotaExceeded as exc:
+        interior_svc.log.warning("interior_preview outcome=error reason=daily_limit status=429 limit=%d", exc.limit)
+        raise HTTPException(429, exc.detail) from exc
+    try:
+        result = await interior_svc.generate(req, files)
     except interior_svc.ProviderError as exc:
+        quota_svc.release(db, slot)
         raise HTTPException(exc.status, exc.detail) from exc
     except Exception as exc:
+        quota_svc.release(db, slot)
         interior_svc.log.exception("interior_preview outcome=error reason=unexpected:%s", type(exc).__name__)
         raise HTTPException(502, "이미지를 생성하지 못했습니다. 잠시 뒤 다시 시도하세요.") from exc
+    quota = quota_svc.status(db, current.user.id)
+    return {**result, "daily_limit": quota["limit"], "remaining_today": quota["remaining"]}
 
 
 class VacancyRequest(BaseModel):

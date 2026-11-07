@@ -5,22 +5,53 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+from types import SimpleNamespace
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
 from app.main import app
 from app.core.config import settings
+from app.core.db import Base, get_db
 from app.core.security import get_current_user
 from app.schemas.interior import InteriorRequest
-from app.services import interior, program_site, floor_vacancy
+from app.services import interior, interior_quota, program_site, floor_vacancy
 
 BODY = {"district": "가로수길", "industry": "카페", "style": "따뜻함", "strategy": "가성비", "consent": True}
 PNG = b"\x89PNG\r\n\x1a\n" + b"test-only"
+# 테스트 전용 신원. 하루 한도(services/interior_quota)가 사용자 id 로 센다.
+USER = SimpleNamespace(user=SimpleNamespace(id="u-test-only"), org=SimpleNamespace(id="o-test-only"), role="admin")
 
 
 @pytest.fixture
-def client():
-    app.dependency_overrides[get_current_user] = lambda: object()
+def sessions():
+    """하루 한도를 세는 계정층 DB — SQLite 인메모리(conftest.signed_in 과 같은 방식)."""
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(bind=engine)
+    yield sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture
+def client(sessions):
+    def _db():
+        db = sessions()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    previous = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_current_user] = lambda: USER
+    app.dependency_overrides[get_db] = _db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.pop(get_current_user, None)
+    if previous is None:
+        app.dependency_overrides.pop(get_db, None)
+    else:
+        app.dependency_overrides[get_db] = previous
 
 
 def test_interior_requires_authentication():
@@ -204,3 +235,80 @@ def test_interior_two_max_references_reach_provider(client, monkeypatch):
     refs = [{"kind": "plan", "mime": "image/png", "data": data}, {"kind": "photo", "mime": "image/png", "data": data}]
     r = client.post(ENDPOINT, json={**BODY, "references": refs})
     assert r.status_code == 200 and seen and seen[0] > 6_000_000
+
+
+# ── 하루 생성 한도 (2026-11-07 · services/interior_quota) — 공급자는 MockTransport, 실호출·과금 없음 ──────
+QUOTA_ENDPOINT = "/api/v1/ai/interior-preview/quota"
+
+
+def _ok(calls):
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(200, json={"data": [{"b64_json": base64.b64encode(PNG).decode()}]})
+    return respond
+
+
+def test_interior_daily_limit_is_five_per_user_and_sixth_is_429(client, monkeypatch):
+    calls = []
+    _provider(monkeypatch, _ok(calls))
+    assert settings.interior_images_daily_limit_per_user == 5
+    remaining = []
+    for _ in range(5):
+        r = client.post(ENDPOINT, json=BODY)
+        assert r.status_code == 200, r.json()
+        remaining.append(r.json()["remaining_today"])
+        assert r.json()["daily_limit"] == 5
+    assert remaining == [4, 3, 2, 1, 0]
+    r = client.post(ENDPOINT, json=BODY)
+    assert r.status_code == 429 and "5회" in r.json()["detail"] and "0시" in r.json()["detail"]
+    assert len(calls) == 5  # 한도에 닿은 여섯 번째는 공급자를 부르지 않는다
+    q = client.get(QUOTA_ENDPOINT).json()
+    assert q["enabled"] is True and (q["limit"], q["used"], q["remaining"]) == (5, 5, 0)
+    assert q["resets_at"].endswith("+09:00")
+
+
+def test_interior_failed_generation_does_not_use_daily_quota(client, monkeypatch):
+    _provider(monkeypatch, _err(500, None, "server_error"))
+    for _ in range(6):
+        assert client.post(ENDPOINT, json=BODY).status_code == 502
+    assert client.get(QUOTA_ENDPOINT).json()["used"] == 0
+
+
+def test_interior_not_configured_does_not_use_quota_and_quota_says_disabled(client, monkeypatch):
+    monkeypatch.setattr(settings, "interior_images_enabled", False)
+    assert client.post(ENDPOINT, json=BODY).status_code == 503
+    q = client.get(QUOTA_ENDPOINT).json()
+    assert q["enabled"] is False and q["used"] == 0 and q["remaining"] == 5
+
+
+def test_interior_daily_limit_follows_setting(client, monkeypatch):
+    calls = []
+    _provider(monkeypatch, _ok(calls))
+    monkeypatch.setattr(settings, "interior_images_daily_limit_per_user", 2)
+    assert [client.post(ENDPOINT, json=BODY).status_code for _ in range(3)] == [200, 200, 429]
+    assert len(calls) == 2
+
+
+def test_interior_quota_requires_authentication():
+    with TestClient(app) as c:
+        assert c.get(QUOTA_ENDPOINT).status_code == 401
+
+
+def test_interior_quota_resets_at_kst_midnight_and_counts_per_user(sessions):
+    """한국 시간 0시 경계 — 전날 23:59(KST)의 5회는 다음 날 00:01(KST)에 세지 않는다. 다른 사용자 몫과 섞지 않는다."""
+    from datetime import datetime
+    db = sessions()
+    late = datetime(2026, 11, 6, 23, 59, tzinfo=interior_quota.KST)
+    for _ in range(5):
+        interior_quota.reserve(db, "u-a", None, now=late)
+    with pytest.raises(interior_quota.QuotaExceeded):
+        interior_quota.reserve(db, "u-a", None, now=late)
+    assert interior_quota.used_today(db, "u-b", now=late) == 0
+    morning = datetime(2026, 11, 7, 0, 1, tzinfo=interior_quota.KST)
+    assert interior_quota.used_today(db, "u-a", now=morning) == 0
+    status = interior_quota.status(db, "u-a", now=morning)
+    assert status["remaining"] == 5 and status["resets_at"] == "2026-11-08T00:00:00+09:00"
+    slot = interior_quota.reserve(db, "u-a", None, now=morning)
+    interior_quota.release(db, slot)
+    assert interior_quota.used_today(db, "u-a", now=morning) == 0
+    db.close()
