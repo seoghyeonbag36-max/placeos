@@ -10,7 +10,7 @@ import type { ViewerBuilding } from "@/components/buildingFloors";
 import { getBuildingTwin, type BuildingTwin, type TwinFloor } from "@/lib/api";
 import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, hasStop, removeStop } from "@/lib/journeyState";
-import { isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
+import { areaSummary, isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
 import FloorPlan from "./FloorPlan";
 import { useReportCapture } from "@/lib/ppppReportContext";
 import HistoryTimeline from "./HistoryTimeline";
@@ -46,7 +46,8 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
   const saved = hasStop(stopKey);
   const meta = TWIN_STATUS[floor.status];
   const vacant = isVacantStatus(floor.status);
-  const unitArea = Math.round((floor.units ?? []).reduce((s, u) => s + (u.area_m2 ?? 0), 0) * 10) / 10;
+  const areas = areaSummary(floor.units);
+  const unitArea = areas.excl;
   const toggleStop = () => {
     if (saved) removeStop(stopKey);
     else addStop({
@@ -73,6 +74,11 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
         <dd>{unitArea > 0
           ? <><b className="num">{unitArea.toLocaleString("ko-KR")}㎡</b> ({(unitArea / PY).toFixed(1)}평) <EvidenceBadge kind="실측" /><small> 전유부 {floor.units?.length ?? 0}호실 합</small></>
           : <><span className="value-absent">자료 없음</span><small> 전유부가 없는 층(일반건축물)이라 대장에 전용면적이 없습니다</small></>}</dd>
+        {areas.contract != null && <>
+          <dt>계약면적</dt>
+          <dd><b className="num">{areas.contract.toLocaleString("ko-KR")}㎡</b> ({(areas.contract / PY).toFixed(1)}평) <EvidenceBadge kind="계산" />
+            <small> 전용 + 공용 {areas.pub.toLocaleString("ko-KR")}㎡ · 전용률 {areas.ratio}%{areas.nPub < areas.n ? ` · ${areas.nPub}/${areas.n}호실 기준` : ""} · 전유공용면적</small></dd>
+        </>}
         <dt>층 바닥면적</dt>
         <dd>{floor.area_m2
           ? <><b className="num">{floor.area_m2.toLocaleString("ko-KR")}㎡</b> ({(floor.area_m2 / PY).toFixed(1)}평) <EvidenceBadge kind="실측" /><small> {floor.area_source ?? "대장 층별개요"} · 계단·화장실 등 공용 포함</small></>
@@ -97,12 +103,16 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
           <summary>전유부 호실 {floor.units.length}개 <EvidenceBadge kind="실측" /></summary>
           <p className="twin3d-note">호실별 공실은 모릅니다. 대장의 호수·면적·용도입니다.</p>
           <table>
-            <thead><tr><th scope="col">호</th><th scope="col">면적</th><th scope="col">용도</th></tr></thead>
+            <thead><tr><th scope="col">호</th><th scope="col">전용</th>{areas.nPub > 0 && <><th scope="col">공용</th><th scope="col">전용률</th></>}<th scope="col">용도</th></tr></thead>
             <tbody>
               {floor.units.map((u, i) => (
                 <tr key={`${u.ho ?? ""}-${i}`}>
                   <td>{u.ho ?? "미상"}</td>
                   <td className="num">{u.area_m2 != null ? `${u.area_m2.toLocaleString("ko-KR")}㎡` : "—"}</td>
+                  {areas.nPub > 0 && <>
+                    <td className="num">{u.pub_m2 ? `${u.pub_m2.toLocaleString("ko-KR")}㎡` : "—"}</td>
+                    <td className="num">{u.pub_m2 && u.area_m2 ? `${Math.round((u.area_m2 / (u.area_m2 + u.pub_m2)) * 100)}%` : "—"}</td>
+                  </>}
                   <td>{u.purps ?? "—"}</td>
                 </tr>
               ))}
@@ -128,16 +138,20 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
 
 /** 3D 화면 위 — 고른 층의 전용면적을 층 바닥면적과 따로 보인다(2026-11-08). */
 function FloorAreaBox({ floor }: { floor: TwinFloor }) {
-  const units = floor.units ?? [];
-  const excl = Math.round(units.reduce((s, u) => s + (u.area_m2 ?? 0), 0) * 10) / 10;
+  const a = areaSummary(floor.units);
+  const excl = a.excl;
   return (
     <div className="twin3d-area" role="status" aria-label={`${floor.label} 면적`}>
       <b><span className="twin3d-badge" style={{ background: TWIN_STATUS[floor.status].color }} aria-hidden /> {floor.label} · {TWIN_STATUS[floor.status].label}</b>
       <dl>
         <dt>전용면적</dt>
         <dd>{excl > 0
-          ? <><b className="num">{excl.toLocaleString("ko-KR")}㎡</b> · {(excl / PY).toFixed(1)}평 <small>전유부 {units.length}호실</small></>
+          ? <><b className="num">{excl.toLocaleString("ko-KR")}㎡</b> · {(excl / PY).toFixed(1)}평 <small>전유부 {a.n}호실</small></>
           : <><span className="value-absent">자료 없음</span> <small>전유부 없음</small></>}</dd>
+        {a.contract != null && <>
+          <dt>계약면적</dt>
+          <dd><span className="num">{a.contract.toLocaleString("ko-KR")}㎡</span> <small>전용률 {a.ratio}%</small></dd>
+        </>}
         <dt>층 바닥면적</dt>
         <dd>{floor.area_m2 ? <><span className="num">{floor.area_m2.toLocaleString("ko-KR")}㎡</span> <small>공용 포함</small></> : <span className="value-absent">자료 없음</span>}</dd>
       </dl>

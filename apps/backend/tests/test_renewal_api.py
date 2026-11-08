@@ -432,3 +432,23 @@ def test_address_get_validates_and_reports_unconfigured(monkeypatch):
     assert r.status_code == 200 and r.json() == {"status": "not_configured", "candidates": []}
     assert client.get(f"{API}/travel/addresses", params={"q": "x"}).status_code == 422
     assert client.get(f"{API}/travel/addresses", params={"q": "x" * 201}).status_code == 422
+
+
+def test_twin_units_carry_common_area_when_gold_has_it(monkeypatch):
+    """Gold 호실 행에 공용면적(pub_m2) 열이 있으면 트윈 응답의 호실에 실린다 — 없으면 None(2026-11-08)."""
+    from app.services import building_floors
+    pnu, bid = "1123010200107870000", "1123010200107870000-1"   # 청량리 동의보감타워 — 전유부 호실이 있는 지번
+    original = building_floors.load
+
+    def with_pub(district_id):
+        doc = original(district_id)
+        lot = doc["lots"][pnu]
+        return {**doc, "unit_fields": [*doc["unit_fields"], "pub_m2"],
+                "lots": {**doc["lots"], pnu: {**lot, "units": [[*r, 5.5] for r in lot["units"]]}}}
+
+    before = building_twin.twin("cheongnyangni", bid)
+    assert all(u["pub_m2"] is None for f in before["floors"] for u in (f["units"] or []))
+    monkeypatch.setattr(building_floors, "load", with_pub)
+    body = client.get(f"{API}/buildings/{bid}/twin", params={"district": "cheongnyangni"}).json()
+    units = [u for f in body["floors"] for u in (f["units"] or [])]
+    assert units and all(u["pub_m2"] == 5.5 for u in units)

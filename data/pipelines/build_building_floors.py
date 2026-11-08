@@ -30,7 +30,7 @@ from data.pipelines.build_vacant_floor_units import _load_floor_rows
 
 NAME = "building_floors.json.gz"
 FLOOR_FIELDS = ["dong", "kind", "no", "raw", "area_m2", "purps", "etc", "strct", "atch"]
-UNIT_FIELDS = ["flr", "kind", "no", "ho", "area_m2", "purps"]
+UNIT_FIELDS = ["flr", "kind", "no", "ho", "area_m2", "purps", "pub_m2"]   # pub_m2: 그 호의 공용면적 합(없으면 None · 2026-11-08)
 MAX_FLOOR_NO = 150      # 이보다 크면 호수 오기('101')다
 
 _KOREAN_NO = {"일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "육": 6, "칠": 7, "팔": 8, "구": 9, "십": 10}
@@ -153,7 +153,7 @@ def load_units(slug: str, keep: set[str]) -> dict[str, list[list]]:
     out: dict[str, list[list]] = {}
     for pnu, val in json.loads(path.read_text(encoding="utf-8")).get("pnu", {}).items():
         if pnu in keep:
-            out[pnu] = [[u.get("flr"), *parse_floor(u.get("flr")), u.get("ho"), u.get("area_m2"), u.get("purps")]
+            out[pnu] = [[u.get("flr"), *parse_floor(u.get("flr")), u.get("ho"), u.get("area_m2"), u.get("purps"), u.get("pub_m2")]
                         for u in val.get("units", [])]
     return out
 

@@ -183,4 +183,16 @@ describe("BuildingTwinDialog", () => {
     fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "B1 자료 없음" }));
     expect(document.querySelectorAll(".twin3d-plan-window").length).toBe(0);
   });
+
+  it("공용면적이 있으면 계약면적 · 전용률을 따로 보이고, 없으면 그 줄을 내지 않는다", async () => {
+    const withPub: BuildingTwin = { ...TWIN, floors: TWIN.floors.map((f) => f.lv === 2 ? { ...f, units: [{ ho: "201", area_m2: 40, purps: "음식점", pub_m2: 10 }] } : f) };
+    mount(withPub);
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    expect(screen.queryByText("계약면적")).toBeNull();          // 1F 은 전유부가 없다
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
+    const box = screen.getByRole("status", { name: "2F 면적" });
+    expect(within(box).getByText("50㎡")).toBeTruthy();           // 계약 = 전용 40 + 공용 10
+    expect(within(box).getByText("전용률 80%")).toBeTruthy();
+    expect(screen.getByText(/전용 \+ 공용 10㎡ · 전용률 80% · 전유공용면적/)).toBeTruthy();
+  });
 });

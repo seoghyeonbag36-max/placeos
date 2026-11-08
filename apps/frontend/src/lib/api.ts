@@ -1617,7 +1617,8 @@ export interface TwinFloor {
   rent_est_manwon: number | null; rent_per_pyeong: number | null;
   /** 층 매물 `vfu-` */
   unit_id: string | null;
-  units: { ho: string | null; area_m2: number | null; purps: string | null }[] | null;
+  /** 전유부 호실 — area_m2 = 전용면적, pub_m2 = 그 호의 공용면적 합(Gold 재빌드 전에는 없다 · 2026-11-08) */
+  units: { ho: string | null; area_m2: number | null; purps: string | null; pub_m2?: number | null }[] | null;
 }
 export interface TwinVacancyStat {
   basis: string; label: string; vacant: number; total: number; rate_pct: number | null; note: string;

@@ -119,8 +119,23 @@ def test_twin_survives_tile_outage():
     assert body["floors"] and body["ring"]
 
 
+def test_first_failure_is_retried(monkeypatch):
+    """새 인스턴스의 첫 연결이 늦어 첫 시도가 실패해도 한 번 더 시도해 도로를 돌려준다(2026-11-08 배포 직후 관측)."""
+    state = {"fail": True}
+
+    def flaky(x, y, z):
+        if state["fail"]:
+            state["fail"] = False
+            raise TimeoutError("cold start")
+        return fetch(x, y, z)
+    monkeypatch.setattr(T, "fetch_tile", flaky)
+    lat, lng, *_ = SITES['A']
+    b = T.roads_for_twin(lat, lng)
+    assert b["roads_error"] is None and len(b["roads"]) == 42
+
+
 def test_backoff_after_failure(monkeypatch):
-    """실패 직후에는 타일 서버를 다시 치지 않는다."""
+    """두 번 연달아 실패하면 잠시(_FAIL_BACKOFF_S) 타일 서버를 다시 치지 않는다."""
     calls = []
 
     def boom(x, y, z):
