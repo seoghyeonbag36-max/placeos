@@ -195,4 +195,15 @@ describe("BuildingTwinDialog", () => {
     expect(within(box).getByText("전용률 80%")).toBeTruthy();
     expect(screen.getByText(/전용 \+ 공용 10㎡ · 전용률 80% · 전유공용면적/)).toBeTruthy();
   });
+
+  it("일반건축물 층은 전용면적 추정을 「추정」과 근거와 함께 보인다", async () => {
+    const est = { m2: 95.6, low: 85.3, high: 101.8, ratio: 0.797, basis: "집합건물 상업층 33개 지번(3개 거점)의 대장 전유면적 ÷ 층 바닥면적 중앙값 79.7% · 가운데 절반 71~85% — 일반건축물 실측 아님" };
+    mount({ ...TWIN, floors: TWIN.floors.map((f) => f.lv === 1 ? { ...f, excl_est: est } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    const box = screen.getByRole("status", { name: "1F 면적" });
+    expect(within(box).getByText("약 95.6㎡")).toBeTruthy();
+    expect(within(box).getByText("추정 85.3~101.8㎡")).toBeTruthy();
+    expect(screen.getByText(/층 바닥면적 × 79\.7%로 추정했습니다/)).toBeTruthy();
+    expect(screen.getByText(/일반건축물 실측 아님/)).toBeTruthy();
+  });
 });

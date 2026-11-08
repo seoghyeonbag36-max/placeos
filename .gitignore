@@ -59,6 +59,8 @@ apps/frontend/tsconfig.tsbuildinfo
 !data/gold/garosugil/**
 # 예외: Platform LSTM 분기 예측(수 KB) — 백엔드 predict-vacancy 가 정적 서빙.
 !data/gold/platform_vacancy_forecast.json
+# 2026-11-08 — 일반건축물 전용면적 추정 근거(상업층 전용률). services/exclusive_estimate 가 읽는다.
+!data/gold/platform_exclusive_ratio.json
 # 예외: Platform GNN 업종 추천(~8.0MB, 40,388노드) — recommend-industry 가 정적 서빙.
 !data/gold/platform_industry_recommend.json
 # 예외: 층·용도별 업종 관측 분포(66거점 69,735건 조인) — services/industry_fit 이 읽어

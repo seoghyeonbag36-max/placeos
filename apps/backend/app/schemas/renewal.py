@@ -108,6 +108,15 @@ class TwinUnit(BaseModel):
     pub_m2: float | None = None       # 그 호의 공용면적 합(전유공용면적 공용 행) — 계약면적 = area_m2 + pub_m2
 
 
+class TwinExclEstimate(BaseModel):
+    """일반건축물 층 전용면적 추정 — 층 바닥면적 × 상업층 전용률. 실측 아님(services/exclusive_estimate)."""
+    m2: float
+    low: float
+    high: float
+    ratio: float
+    basis: str
+
+
 class TwinFloor(BaseModel):
     lv: int                             # 지하 음수
     label: str
@@ -120,6 +129,7 @@ class TwinFloor(BaseModel):
     rent_per_pyeong: float | None = None
     unit_id: str | None = None          # 층 매물 vfu-
     units: list[TwinUnit] | None = None
+    excl_est: TwinExclEstimate | None = None   # 전유부가 없는 층만 · 추정
 
 
 class TwinNeighbor(BaseModel):

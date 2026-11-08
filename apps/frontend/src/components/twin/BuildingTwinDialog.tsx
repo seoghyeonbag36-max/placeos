@@ -73,7 +73,10 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
         <dt>전용면적</dt>
         <dd>{unitArea > 0
           ? <><b className="num">{unitArea.toLocaleString("ko-KR")}㎡</b> ({(unitArea / PY).toFixed(1)}평) <EvidenceBadge kind="실측" /><small> 전유부 {floor.units?.length ?? 0}호실 합</small></>
-          : <><span className="value-absent">자료 없음</span><small> 전유부가 없는 층(일반건축물)이라 대장에 전용면적이 없습니다</small></>}</dd>
+          : floor.excl_est
+            ? <><b className="num">약 {floor.excl_est.m2.toLocaleString("ko-KR")}㎡</b> ({(floor.excl_est.m2 / PY).toFixed(1)}평 · {floor.excl_est.low.toLocaleString("ko-KR")}~{floor.excl_est.high.toLocaleString("ko-KR")}㎡) <EvidenceBadge kind="추정" />
+                <small> 일반건축물이라 대장에 전용면적이 없어 층 바닥면적 × {(floor.excl_est.ratio * 100).toFixed(1)}%로 추정했습니다. 근거: {floor.excl_est.basis}</small></>
+            : <><span className="value-absent">자료 없음</span><small> 전유부가 없는 층(일반건축물)이라 대장에 전용면적이 없습니다</small></>}</dd>
         {areas.contract != null && <>
           <dt>계약면적</dt>
           <dd><b className="num">{areas.contract.toLocaleString("ko-KR")}㎡</b> ({(areas.contract / PY).toFixed(1)}평) <EvidenceBadge kind="계산" />
@@ -147,7 +150,9 @@ function FloorAreaBox({ floor }: { floor: TwinFloor }) {
         <dt>전용면적</dt>
         <dd>{excl > 0
           ? <><b className="num">{excl.toLocaleString("ko-KR")}㎡</b> · {(excl / PY).toFixed(1)}평 <small>전유부 {a.n}호실</small></>
-          : <><span className="value-absent">자료 없음</span> <small>전유부 없음</small></>}</dd>
+          : floor.excl_est
+            ? <><b className="num">약 {floor.excl_est.m2.toLocaleString("ko-KR")}㎡</b> · {(floor.excl_est.m2 / PY).toFixed(1)}평 <small>추정 {floor.excl_est.low.toLocaleString("ko-KR")}~{floor.excl_est.high.toLocaleString("ko-KR")}㎡</small></>
+            : <><span className="value-absent">자료 없음</span> <small>전유부 없음</small></>}</dd>
         {a.contract != null && <>
           <dt>계약면적</dt>
           <dd><span className="num">{a.contract.toLocaleString("ko-KR")}㎡</span> <small>전용률 {a.ratio}%</small></dd>
