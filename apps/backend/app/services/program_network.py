@@ -93,7 +93,8 @@ def network(district_id: str, industry_key: str | None = None, industry_label: s
     items: list[dict] = []
     statuses: list[dict] = []
 
-    ks = src.kstartup_open()
+    # 두 원천을 동시에 부른다(program_sources.fetch_all)
+    ks, bz = src.fetch_all(src.kstartup_open, lambda: src.bizinfo("event", region.bizinfo_tag))
     got = []
     for r in ks.rows:
         if not is_network_category(clean(r.get("supt_biz_clsfc"))):
@@ -107,7 +108,6 @@ def network(district_id: str, industry_key: str | None = None, industry_label: s
     items += got
     statuses.append(src.status_of("kstartup", ks, len(got)))
 
-    bz = src.bizinfo("event", region.bizinfo_tag)
     got = [it for r in bz.rows if (it := bizinfo_event_item(r, region, terms, today))]
     items += got
     statuses.append(src.status_of("bizinfo_event", bz, len(got)))

@@ -44,11 +44,18 @@ Program 트랙은 계속 `pages/CampaignStudio` 를 그린다(⛔ PPPP 화면 �
 
 | 끝점 | 서비스 | 원천 | 비고 |
 |---|---|---|---|
-| `GET /api/v1/program/support?district_id&stage&industry` | `program_support` | `program_sources`(K-Startup · 정부24 · 기업마당 지원사업정보) | 요청 때 부르고 프로세스 캐시(성공 6시간 · 실패 5분 — 고른 값) |
+| `GET /api/v1/program/support?district_id&stage&industry` | `program_support` | `program_sources`(K-Startup · 정부24 · 기업마당 지원사업정보) | 요청 때 **동시에** 부르고 프로세스 캐시(성공 6시간 · 실패 5분 · 인스턴스 시작 3분 안의 전송 오류만 1분 — 고른 값) |
 | `GET /api/v1/program/network?district_id&industry&industry_label&stage` | `program_network` | K-Startup 「행사ㆍ네트워크」 · 기업마당 행사정보 · `nearby_stores.colocated_top` · 손으로 확인한 지원기관 목록 | 응답에 연락처 필드가 없다(테스트가 잠근다) |
 | `GET /api/v1/program/plan?district_id&industry&mode` | `program_plan` | 행사(`events.for_district`) · TRDAR 시간대 · 함께 모이는 업종 | 근거가 있는 카드만 · 금액 없음 |
 
 원천 상태는 `ok`(0건일 수 있다) · `no_key` · `error` 셋이고 화면이 그대로 보인다 — 실패를 지난 목록으로 덮지 않는다.
+
+**프로덕션 연결(2026-11-08).** 세 키를 Cloud Run 에 더해(`--update-env-vars` · 리비전 `spaceos-00231-2gw`) 네 원천이 `ok` 가 됐다
+(화곡: K-Startup 17 · 기업마당 행사 66 · 기업마당 28 · 정부24 90 — 그전은 넷 다 「연결 전」). 기업마당 신청서의 IP 조건은 Cloud Run
+고정 출구 IP 에서 통과했다. 대신 **새 인스턴스의 첫 연결이 멈추는** 출구 구성(Direct VPC egress + Cloud NAT)이라 첫 K-Startup 호출이
+20초 타임아웃으로 실패하고 그 실패가 5분 캐시됐다 → 전송 오류만 원천당 35초 안에서 최대 3번 · 인스턴스 시작 3분 안의 전송 오류는 1분만 캐시 · 원천 동시 호출 ·
+K-Startup 한 번에 받기(`perPage=1000`)로 바꿨다. 본문이 잘리면(`IncompleteRead`) 화면 전체가 500 이던 것도 그 원천만 `error` 로 고쳤다
+(`tests/test_program_sources_resilience.py` · docs/deploy-cloud-run.md §고정 출구 IP).
 
 **지역 판정과 순서(11-08 실측으로 고침).** 기업마당 `hashtags` 는 지역을 가르지 못한다 — #전북 응답 300건이 전부 「전북」을,
 256건이 「서울」을 달았고 서울시 「서울패션위크」 공고도 17개 시도를 다 단다. 그래서 지원사업은 **소관기관**(`jrsdInsttNm` —
@@ -89,8 +96,9 @@ Program 트랙은 계속 `pages/CampaignStudio` 를 그린다(⛔ PPPP 화면 �
 
 - 사용자끼리 잇는 3단계(옵트인 · 이메일 소개 · 처리방침 개정) — 결정 D3, 파일럿 뒤.
 - 전통시장·소진공 지원센터 디렉터리 Gold — 지금은 손으로 확인한 지원기관 누리집 목록(`program_network`)이다.
-- Cloud Run 환경변수(`DATA_GO_KR_SERVICE_KEY` · 기업마당 두 키 · NAVER HUB) — 사람 몫(`--update-env-vars` · 기업마당은 신청서 IP 조건 확인).
-  넣기 전까지 프로덕션의 지원 프로그램·네트워킹 원천은 `no_key` 로 보인다.
+- ~~Cloud Run 환경변수~~ — **2026-11-08 반영**(위 §서버 「프로덕션 연결」). NAVER HUB 키는 넣지 않는다 — 서버는 읽지 않고 수집기만 쓴다.
+- 외부 연결 시작 지연의 서비스 전체 대응(시작 프로브 · VPC 커넥터 · 출구 범위) — 계정 DB·LLM·교통도 같은 지연을 받는다. 사용자 결정 몫
+  (docs/deploy-cloud-run.md §고정 출구 IP).
 - 원문 링크 클릭 등 계측 — W4 「분석 접근」에 넣을지 먼저 정한다(10-19 피드백 오염 정정과 같은 문제).
 
 
