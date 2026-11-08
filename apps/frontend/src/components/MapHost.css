@@ -153,11 +153,8 @@
   .maphost.is-collapsed { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "map"; }
   .maphost.is-collapsed .mh-left, .maphost.is-collapsed .mh-right { display: none; }
 
-  /* 지도 셸 밖에 떠 있는 버튼이 칸을 가리지 않게 — 의견 보내기는 지도 칸 오른쪽 아래, 입점 준비는 머리 칸 오른쪽 위 */
-  body:has(.maphost:not(.is-collapsed):not(.mh-no-right)) .visitor-feedback:not(:has(.visitor-feedback-panel)) {
-    right: calc(var(--mh-right-w) + 3 * var(--mh-gap));
-    bottom: calc(2 * var(--mh-gap));
-  }
+  /* 지도 셸 밖에 떠 있는 버튼이 칸을 가리지 않게 — 입점 준비는 머리 칸 오른쪽 위.
+     의견 보내기는 여기서 뺐다: 레일 「계정」 바로 위로 옮겨 떠 있는 버튼이 없다(App.css 2026-11-08). */
   body:has(.maphost:not(.mh-no-head)) .founder-trigger {
     top: calc(2 * var(--mh-gap)); right: calc(2 * var(--mh-gap));
   }

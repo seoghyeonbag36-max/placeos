@@ -51,6 +51,16 @@ export function IconUser() {
   );
 }
 
+/* 의견 보내기 — 말풍선 + 글줄 둘 (2026-11-08: 레일 「계정」 위로 옮기며 더했다) */
+export function IconFeedback() {
+  return (
+    <svg {...SVG}>
+      <path d="M20 15a2 2 0 0 1-2 2H9l-4.5 3.5V6a2 2 0 0 1 2-2H18a2 2 0 0 1 2 2Z" />
+      <path d="M8.5 9h7M8.5 12.5h4.5" />
+    </svg>
+  );
+}
+
 /* Program — 검증 program 을 알린다는 뜻의 확성기 */
 export function IconMegaphone() {
   return (

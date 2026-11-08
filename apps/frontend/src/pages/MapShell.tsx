@@ -27,7 +27,7 @@ import { useMapHost } from "@/components/mapHostContext";
 import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
-import { isEditableTarget } from "@/lib/keyboard";
+import { feedbackPanelOpen, isEditableTarget } from "@/lib/keyboard";
 import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
   type DensityHeatmap, type DistrictSummary, type FootfallHeatmap, type GeoJSONFC, type IndustryRecommend,
   type IndustryOption, type RentHeatmap, type RentListing, type TrdarCell, type VacClass } from "@/lib/api";
@@ -705,7 +705,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // 입력칸(검색 등)에서 누른 Esc 는 아무것도 닫지 않는다 — 네 화면 공통 규칙(lib/keyboard).
-      if (e.key !== "Escape" || isEditableTarget(e.target)) return;
+      if (e.key !== "Escape" || isEditableTarget(e.target) || feedbackPanelOpen()) return;
       if (twin3dOpen) { setTwin3dOpen(false); return; }
       if (twinOpen) { setTwinOpen(false); return; }
       if (compareOpen) { setCompareOpen(false); return; }

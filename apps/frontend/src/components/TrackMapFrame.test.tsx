@@ -36,4 +36,16 @@ describe("TrackMapFrame — 접기·펴기와 키보드", () => {
     fireEvent.keyDown(document.body, { key: "Escape" });
     expect(screen.queryByRole("complementary", { name: "입점 계산" })).toBeNull();
   });
+
+  it("의견창이 열려 있는 동안 누른 Esc 는 의견창의 것이다 — 패널은 접지 않는다 (2026-11-08)", () => {
+    mount();
+    const feedback = document.body.appendChild(document.createElement("section"));
+    feedback.className = "visitor-feedback-panel";
+    fireEvent.keyDown(feedback, { key: "Escape" });
+    expect(screen.getByRole("complementary", { name: "입점 계산" })).toBeTruthy();
+
+    feedback.remove();  // 의견창이 닫히면 다시 접힌다
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    expect(screen.queryByRole("complementary", { name: "입점 계산" })).toBeNull();
+  });
 });

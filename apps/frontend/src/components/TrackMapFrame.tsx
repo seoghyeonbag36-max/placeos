@@ -28,7 +28,7 @@
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { TrackKey } from "@/design/tokens/colors";
-import { isEditableTarget } from "@/lib/keyboard";
+import { feedbackPanelOpen, isEditableTarget } from "@/lib/keyboard";
 import MapSlot from "./MapSlot";
 import { useMapLayout } from "./mapLayoutContext";
 import "./TrackMapFrame.css";
@@ -68,7 +68,7 @@ export default function TrackMapFrame({ track, label, children, header, footer }
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || !open) return;
       if (isEditableTarget(e.target)) return;
-      if (document.querySelector("dialog[open]")) return;
+      if (document.querySelector("dialog[open]") || feedbackPanelOpen()) return;
       toggle(false);
     };
     window.addEventListener("keydown", onKey);
