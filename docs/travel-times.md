@@ -82,6 +82,10 @@ Firebase 도메인을 등록해도 Cloud Run 호출을 허용하지 않는다. C
 근거: [Cloud Run 고정 송신 IP](https://docs.cloud.google.com/run/docs/configuring/static-outbound-ip),
 [Cloud NAT 요금](https://cloud.google.com/nat/pricing).
 
+⚠ 이 구성은 **새 인스턴스의 첫 외부 연결이 30초~1분 넘게 멈출 수 있다**(Google 문서 · 2026-11-07 계정 DB 504 ·
+11-08 Program K-Startup 20초 타임아웃 실측). 교통 호출도 콜드 스타트 직후에는 같은 지연을 받는다 →
+docs/deploy-cloud-run.md §고정 출구 IP.
+
 `ok` 이외에는 모든 교통 수치가 null이다. `not_configured`, `no_route`, `unsupported_route`,
 `upstream_error`, `quota_exceeded` 상태를 각 이동수단별로 표시하며 한쪽 실패로 다른 결과를 숨기지 않는다.
 

@@ -28,7 +28,8 @@
 > ② data.go.kr 15113968(정부24 공공서비스·혜택) — 완료. 승인 반영, 공용 키로 200(10,942건)
 > ③ 기업마당 — 완료(사용자 보고). 키 둘: 지원사업정보 → `BIZINFO_SUPPORT_API_KEY` · 행사정보 → `BIZINFO_EVENT_API_KEY`
 > ④ NAVER API HUB — 완료(사용자 보고). `NAVER_HUB_CLIENT_ID` · `NAVER_HUB_CLIENT_SECRET` — 옛 `NAVER_CLIENT_*` 는 그대로 둔다
-> ⑤ Cloud Run 환경변수 — 배포 때(`--update-env-vars`). 기업마당 두 키는 신청서에 적은 IP 가 고정 IP 일 때만 넣는다
+> ⑤ Cloud Run 환경변수 — **완료(2026-11-08 · 사용자 지시)**. 세 키를 `--update-env-vars` 로 더했고(NAVER HUB 는 서버가 안 읽어 뺐다),
+> 기업마당은 Cloud Run 고정 출구 IP(ODsay 용 Cloud NAT)에서 `ok` 였다 → docs/api-keys-and-specs.md §8-G
 
 | 결정 | 선택지 | 권고 |
 |---|---|---|
@@ -338,7 +339,7 @@
 | 항목 | 막는 것 | 메모 |
 |---|---|---|
 | 커밋·푸시·머지·배포 | 11-08 사용자 지시로 진행 | 새 Gold `data/gold/platform_events_national.json` 을 함께 넣어 위 테스트 1건이 통과한다 |
-| Cloud Run 환경변수 | 사람 몫(외부 서비스 설정) | `DATA_GO_KR_SERVICE_KEY` · `BIZINFO_SUPPORT_API_KEY` · `BIZINFO_EVENT_API_KEY` · `NAVER_HUB_CLIENT_ID/SECRET` — `--update-env-vars`(또는 `--update-secrets`)만. 넣기 전까지 프로덕션의 지원 프로그램·네트워킹 원천은 「연결 전」이다. 기업마당은 신청서의 IP 조건 — 로컬에서는 `ok` 였다 |
+| ~~Cloud Run 환경변수~~ | **완료(2026-11-08 · 사용자 지시)** | 세 키(`DATA_GO_KR_SERVICE_KEY` · `BIZINFO_SUPPORT_API_KEY` · `BIZINFO_EVENT_API_KEY`)를 `--update-env-vars` 로 더했다(리비전 `spaceos-00231-2gw`). 네 원천 `ok` · 기업마당 IP 조건 통과. NAVER HUB 는 서버가 읽지 않아 넣지 않았다. 새 인스턴스의 첫 연결 지연은 docs/deploy-cloud-run.md §고정 출구 IP |
 | ~~패널 이름표 「오프라인 캠페인」 → 「Program」(1-2)~~ | **결정 완료 — 바꾸지 않는다**(11-08 사용자: 「오프라인 캠페인은 오프라인 캠페인으로」) | 이름표는 그대로다. 실화면 검사 P2 의 기대값도 그대로 맞는다 |
 | 실행 뒤 기준 변경 불가(1-6) | **결정 완료 — 지금 상태 그대로 둔다**(11-08 사용자: 「3번은 그대로」) | 이번에는 만들지 않는다. 만들게 되면 판정표를 서버에 두는 안(계정층 새 표 → Neon 마이그레이션은 사람 몫 · 「시험 실행·판정 기록」 KPI 후보의 계측기)과 이 브라우저에만 두는 안(계측 불가) 중에서 고른다 |
 | 사용자끼리 잇기(3단계 · D3) | 파일럿 | 보고서 권고대로 보류 |

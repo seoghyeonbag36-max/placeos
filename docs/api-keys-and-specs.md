@@ -376,14 +376,14 @@ INTERIOR_IMAGES_DAILY_LIMIT_PER_USER=5
 
 ### 8-G. Program 리뉴얼 원천 — 지원 공고 · 창업 행사 · 전국 행사 (2026-11-07)
 Program 네 기능(docs/feature-program.md §0-W)이 쓴다. 지원 공고·창업 행사는 **서버가 요청 때 부르고** 프로세스 메모리에
-캐시한다(성공 6시간 · 실패 5분 — `app/services/program_sources.py`). 키가 없으면 그 원천은 `no_key` 로 보이고(공개 문구에는
-변수 이름을 싣지 않는다), 화면은 원문 포털 링크를 남긴다.
+캐시한다(성공 6시간 · 실패 5분 — 인스턴스 시작 3분 안의 전송 오류만 1분 · `app/services/program_sources.py`). 키가 없으면 그 원천은
+`no_key` 로 보이고(공개 문구에는 변수 이름을 싣지 않는다), 화면은 원문 포털 링크를 남긴다.
 
 | 원천 id | 무엇 | 호출 | 변수 | 비고 |
 |---|---|---|---|---|
-| `kstartup` | K-Startup 사업공고(창업진흥원 · 15125364) | `apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01` · `cond[rcrt_prgs_yn::EQ]=Y` | `DATA_GO_KR_SERVICE_KEY` | 11-07 모집 중 213건 · 상세는 `bizpbanc-ongoing.do?schM=view&pbancSn=` |
+| `kstartup` | K-Startup 사업공고(창업진흥원 · 15125364) | `apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01` · `cond[rcrt_prgs_yn::EQ]=Y` · `perPage=1000`(11-08 — 한 번에 212건 전부) | `DATA_GO_KR_SERVICE_KEY` | 11-07 모집 중 213건 · 상세는 `bizpbanc-ongoing.do?schM=view&pbancSn=` |
 | `gov24` | 정부24 공공서비스(혜택)(15113968) | `api.odcloud.kr/api/gov24/v3/serviceList` · `cond[사용자구분::LIKE]=소상공인` | `DATA_GO_KR_SERVICE_KEY` | 11-07 369건(전체 10,942) |
-| `bizinfo` | 기업마당 지원사업정보 | `www.bizinfo.go.kr/uss/rss/bizinfoApi.do` · `crtfcKey` · `hashtags`(지역) | `BIZINFO_SUPPORT_API_KEY` | 신청서의 시스템 IP 조건 — Cloud Run 은 고정 출구 IP 가 기본이 아니다 |
+| `bizinfo` | 기업마당 지원사업정보 | `www.bizinfo.go.kr/uss/rss/bizinfoApi.do` · `crtfcKey` · `hashtags`(지역) | `BIZINFO_SUPPORT_API_KEY` | 신청서의 시스템 IP 조건 — 프로덕션은 Cloud Run 고정 출구 IP(`34.122.121.96` · ODsay 때문에 만든 Cloud NAT — docs/travel-times.md)로 나가고, 11-08 그 경로에서 `ok` 였다 |
 | `bizinfo_event` | 기업마당 행사정보 | `www.bizinfo.go.kr/uss/rss/bizinfoEventApi.do` · 같은 인자 | `BIZINFO_EVENT_API_KEY` | 키가 지원사업정보와 **따로**다 · 좌표 없음 · 기간 `eventBeginEndDe` · 개최지 `areaNm` |
 | (수집) | 문화포털 기간별 문화정보 | `apis.data.go.kr/B553457/cultureinfo/period2` · 쪽 인자 `numOfrows`·`PageNo`(대소문자 그대로) | `DATA_GO_KR_SERVICE_KEY` | `data/collectors/culture_portal.py` → `build_national_events` |
 | (수집) | TourAPI 축제·행사 | `apis.data.go.kr/B551011/KorService2/searchFestival2` · `eventStartDate`(진행 중 포함) | `DATA_GO_KR_SERVICE_KEY` | `data/collectors/tourapi_festivals.py` |
@@ -392,8 +392,16 @@ Program 네 기능(docs/feature-program.md §0-W)이 쓴다. 지원 공고·창�
   소관기관 `jrsdInsttNm`, 행사면 개최지 `areaNm` 로 가른다(`program_support.sido_of_org` · `area_scope`).
 - `.env` 에 **줄 끝 주석을 달지 않는다** — 수집기 로더(`data/run_collection._env_value`)는 따옴표 없는 값의 ` #…` 를 이제 떼지만,
   로더마다 줄 끝 주석을 다루는 방식이 다를 수 있어 한 줄에 값만 둔다. 키 값은 대화·로그·커밋에 붙이지 않는다.
-- 프로덕션(Cloud Run)에는 사람이 넣는다 — `--update-env-vars`(또는 `--update-secrets`)만 · `--set-env-vars` 금지(기존 값이 날아간다).
-  넣기 전까지 프로덕션의 지원 프로그램·네트워킹 원천은 `no_key` 다.
+- 프로덕션(Cloud Run)에는 `--update-env-vars`(또는 `--update-secrets`)만 · `--set-env-vars` 금지(기존 값이 날아간다).
+  **2026-11-08 반영** — 세 키(`DATA_GO_KR_SERVICE_KEY` · `BIZINFO_SUPPORT_API_KEY` · `BIZINFO_EVENT_API_KEY`)를 로컬 설정에서 읽어
+  `--update-env-vars` 로 더했다(리비전 `spaceos-00231-2gw` · 기존 14개 그대로 · 사용자 지시로 실행). 화곡 실측: K-Startup 17 ·
+  기업마당 행사 66 · 기업마당 28 · 정부24 90 — 네 원천 `ok`. 그전(11-07~08 오전)은 네 원천 모두 `no_key`(「연결 전」)였다.
+  NAVER HUB 키는 Cloud Run 에 **넣지 않는다** — 서버(`apps/backend/app`)는 읽지 않고 수집기(`data/collectors/naver_api.py`)만 쓴다.
+- ⚠ **새 인스턴스의 첫 연결이 멈춘다** — 프로덕션은 Direct VPC egress + Cloud NAT 로 나가는데, 이 구성은 인스턴스 시작 직후
+  연결 수립이 30초~1분 넘게 늦어질 수 있다(Google 문서). 11-08 키를 넣은 새 리비전의 첫 K-Startup 호출이 연결 단계에서 20초를
+  다 쓰고 실패했고(`URLError` · 그때는 실패를 5분 캐시해 5분 내내 「지금 확인할 수 없음」), 5분 뒤 같은 호출은 3초에 성공했다.
+  그래서 소켓 한 동작 10초 · 전송 오류만 원천당 35초 안에서 최대 3번 · 인스턴스 시작 3분 안의 전송 오류는 1분만 캐시 · 원천 동시 호출로 바꿨다
+  (`program_sources._get` · `fetch_all` · `tests/test_program_sources_resilience.py`) → docs/deploy-cloud-run.md §고정 출구 IP
 
 ### 8-F. 인스타그램·구글 — 보류/선택
 - **인스타그램 Graph API**: 해시태그 검색에 비즈니스 계정 + 앱 검수 필요, 주 30개 해시태그 제한 → PoC 단계에서는 보류하고 [data/crawlers](../data/README.md)의 Playwright 크롤러로 대체. `.env` 슬롯(`INSTAGRAM_ACCESS_TOKEN`)만 유지.

@@ -309,18 +309,18 @@ def support_programs(district_id: str, stage: str | None = None, industry: str |
     items: list[dict] = []
     statuses: list[dict] = []
 
-    ks = src.kstartup_open()
+    # 세 원천을 동시에 부른다 — 응답 시간이 합이 아니라 가장 느린 하나다(program_sources.fetch_all)
+    ks, bz, gv = src.fetch_all(src.kstartup_open, lambda: src.bizinfo("support", region.bizinfo_tag),
+                               src.gov24_smallbiz)
     got = [it for r in ks.rows if not is_network_category(clean(r.get("supt_biz_clsfc")))
            if (it := kstartup_item(r, region, stage, terms, today))]
     items += got
     statuses.append(src.status_of("kstartup", ks, len(got)))
 
-    bz = src.bizinfo("support", region.bizinfo_tag)
     got = [it for r in bz.rows if (it := bizinfo_item(r, region, stage, terms, today))]
     items += got
     statuses.append(src.status_of("bizinfo", bz, len(got)))
 
-    gv = src.gov24_smallbiz()
     got = [it for r in gv.rows if (it := gov24_item(r, region, stage, terms))]
     items += got
     statuses.append(src.status_of("gov24", gv, len(got)))

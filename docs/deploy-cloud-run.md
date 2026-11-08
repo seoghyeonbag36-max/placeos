@@ -151,6 +151,33 @@ Cloud Run Always Free: 월 200만 요청 · 180,000 vCPU초 · 360,000 GiB초 ·
 ⚠ 무료 체험(90일/$300) 종료 시 결제계정이 **자동으로 닫힌다.** 그때 수동으로 유료 계정
 전환을 해야 Always Free 가 이어진다. 전환해도 한도 안에서는 $0 다.
 
+## 고정 출구 IP — 새 인스턴스의 첫 연결이 멈춘다 (2026-11-08)
+
+서비스 `spaceos` 는 **Direct VPC egress(`all-traffic`) + Cloud NAT** 로 나간다 — 네트워크 `placeos-egress` ·
+NAT `placeos-egress-nat` · 출구 IP `34.122.121.96`. ODsay 허용 IP 때문에 사용자 승인을 받아 만들었다
+(구성·비용은 docs/travel-times.md §Cloud Run 운영 연동). 그래서 **바깥으로 나가는 호출은 전부 이 IP 다** —
+계정 DB(Neon) · LLM · 교통(ODsay·카카오·TMAP) · Program 공고 원천(K-Startup · 정부24 · 기업마당).
+
+⚠ Google 문서([Direct VPC egress](https://docs.cloud.google.com/run/docs/configuring/vpc-direct-vpc)): 이 구성(Direct VPC
+egress + Cloud NAT)은 **인스턴스가 뜬 직후 연결 수립이 30초~1분 넘게 늦어질 수 있다.**
+이 서비스는 최소 인스턴스가 0 이라 한가하면 자주 새로 뜬다. 실측 두 건:
+
+| 날짜 | 인스턴스 시작 → 첫 외부 연결 | 결과 |
+|---|---|---|
+| 2026-11-07 | 07:15:08 → 캠페인 원장 `/program/campaigns`(Neon 연결) | 60초 시간 초과(504). 1분 뒤 같은 요청 0.16초 |
+| 2026-11-08 | 13:07:06 → `/program/network` 의 K-Startup | 연결 단계에서 20초 타임아웃(`URLError`). 5분 뒤 같은 호출 3초 |
+
+대응(11-08 · Program 공고 원천만): 소켓 한 동작 10초 · **전송 오류만** 원천당 35초 안에서 최대 3번 · 인스턴스 시작 3분 안의 전송 오류만 1분 캐시(그 밖은 5분) ·
+원천 동시 호출(`app/services/program_sources.py`). 같은 날 키 없이 us-central1 Cloud Build 에서 네 원천 주소를 불러 보니
+연결+TLS 0.5~1.2초로 바로 닿았다 — 해외 IP 차단이 아니라 이 출구 경로의 시작 지연이다.
+
+**고르지 않은 것(사용자 결정 몫)** — 모두 원천 하나가 아니라 서비스 전체에 걸린다:
+- 외부 연결을 확인하는 **시작 프로브**(Google 권고) — 연결이 열릴 때까지 인스턴스가 요청을 안 받는다. 대신 지도·랜딩처럼
+  외부 연결이 필요 없는 첫 화면도 그만큼 기다리고, 60초 컷(Hosting·Cloud Run)에 걸릴 수 있다.
+- **Serverless VPC Access 커넥터**로 바꾸기(Google 권고 — 시작이 빠르다) — 커넥터 인스턴스가 늘 떠 있어 월 비용이 붙는다.
+- `vpc-egress=private-ranges-only` — 공용 호출이 NAT 를 안 타 지연이 사라지지만 ODsay 허용 IP 가 깨진다.
+- 계정 DB 연결 시간 상한(`connect_timeout`) · LLM 호출 — 이번에 손대지 않았다(같은 지연을 받는다).
+
 ## 읽기 좋은 주소 — Firebase Hosting (2026-08-29 · 2026-09-13 개명)
 
 ### 2026-11-01 — 정식 주소 `placeos.co.kr` · Firebase 기본 주소 은퇴(사용자 결정)

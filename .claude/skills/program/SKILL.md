@@ -40,6 +40,9 @@ description: PPPP 트랙 — Program(네 기능: 네트워킹 · 지원 프로�
   (`lib/programSaved` — 서버 저장 없음 · 개인정보 범위 그대로)
 - 원천이 비면 **왜 비었는지** 보인다(`ok` · `no_key` · `error` — `services/program_sources`). 실패를 지난 목록으로 덮지 않는다.
   공개 응답에 환경변수 이름을 싣지 않는다(`NO_KEY_NOTE`)
+- 프로덕션 Cloud Run 에는 세 키가 들어가 있다(2026-11-08). 프로덕션은 Direct VPC egress + Cloud NAT 라 **새 인스턴스의 첫 연결이
+  멈출 수 있다** — 원천 호출은 `_get`(전송 오류만 예산 안에서 다시) · `fetch_all`(동시 호출)을 거친다. `_fetch_json` 을 직접 부르는
+  새 원천을 만들지 말 것(docs/deploy-cloud-run.md §고정 출구 IP)
 
 ## 입력 계약 — 세 층, 따로 싣는다
 | 층 | 출처 | 등급 |
