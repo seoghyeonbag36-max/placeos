@@ -18,14 +18,14 @@
 import {
   Box3, BufferGeometry, CanvasTexture, RepeatWrapping, Color, Fog, MeshBasicMaterial, Ray, SRGBColorSpace, Texture, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
   LineBasicMaterial, LineSegments, Material, Mesh, MeshStandardMaterial, Object3D, PerspectiveCamera, Raycaster, Scene,
-  Shape, ShapeGeometry, Path, Spherical, Vector2, Vector3, WebGLRenderer,
+  Shape, ShapeGeometry, Path, Spherical, Vector2, Vector3, WebGLRenderer, Float32BufferAttribute, type UVGenerator,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
 import { createRoadLayer, type RoadLayerStats } from "./twinRoads";
 import { adjacentLevel, boundsOf, explodeOffset, frontRoad, isVacantStatus, nudgeOrbit, planLayout, ringArea, ringToLocal, stackFloors,
-  startCamera, TWIN_STATUS, type Point } from "@/lib/twinGeometry";
+  startCamera, TWIN_STATUS, wallBays, WIN_GLASS_U, WIN_GLASS_V, windowSpans, type Point } from "@/lib/twinGeometry";
 
 export type TwinMode = "exterior" | "exploded" | "vacant";
 
@@ -110,8 +110,6 @@ function skyTexture(): Texture {
   return t;
 }
 
-const WIN_BAY_M = 3.0;           // 창 한 칸 폭(표현용)
-
 /**
  * 창 격자 텍스처 — 흰 바탕(벽·띠) + 회청색 유리 + 가운데 멀리언. 층 색과 곱해져 유리 외벽처럼 보인다.
  * `shop` 은 1층 상점 전면(바닥 가까이까지 내려온 통유리). 표현용 그림이다 — 실측 창호가 아니다.
@@ -122,18 +120,41 @@ function windowTexture(shop: boolean): Texture {
   const ctx = c.getContext("2d");
   if (ctx) {
     ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 64, 64);
-    const top = shop ? 5 : 9, bottom = shop ? 60 : 44;   // 캔버스 위 = 층 위
+    // 규칙은 lib/twinGeometry 의 WIN_* — 2D 개략 배치도 · 3D 개략 배치 유리와 같은 자리다. 캔버스 위 = 층 위.
+    const [v0, v1] = shop ? WIN_GLASS_V.shop : WIN_GLASS_V.normal;
+    const top = Math.round((1 - v1) * 64), bottom = Math.round((1 - v0) * 64);
+    const left = Math.round(WIN_GLASS_U[0] * 64), right = Math.round(WIN_GLASS_U[1] * 64);
     const g = ctx.createLinearGradient(0, top, 0, bottom);
     g.addColorStop(0, "#c9d3df"); g.addColorStop(0.55, "#8b98aa"); g.addColorStop(1, "#7d8b9e");
-    ctx.fillStyle = g; ctx.fillRect(5, top, 54, bottom - top);
+    ctx.fillStyle = g; ctx.fillRect(left, top, right - left, bottom - top);
     ctx.fillStyle = "#ffffff"; ctx.fillRect(31, top, 2, bottom - top);
-    if (!shop) { ctx.fillStyle = "#e4e8ee"; ctx.fillRect(5, bottom, 54, 2); }   // 창턱
+    if (!shop) { ctx.fillStyle = "#e4e8ee"; ctx.fillRect(left, bottom, right - left, 2); }   // 창턱
   }
   const t = new CanvasTexture(c);
   t.wrapS = t.wrapT = RepeatWrapping;
   t.colorSpace = SRGBColorSpace;
   t.anisotropy = 4;
   return t;
+}
+
+/**
+ * 층 압출 — 옆면 UV 를 「벽을 따라 센 창 칸 수(u) × 층 높이 비율(v)」로 준다. 그래서 텍스처 창이 `windowSpans` 와 같은 자리에 온
+ * 칸으로 놓이고(벽 끝에서 잘린 창이 없다), 층마다 위아래로 같은 줄에 선다. 짧은 벽(`wallBays`=0)은 창 없는 벽 띠(u=0.02)다.
+ */
+function extrudeFloor(shape: Shape, height: number): ExtrudeGeometry {
+  const depth = Math.max(height, 0.1);
+  const uv: UVGenerator = {
+    generateTopUV: (_g, v, a, b, c) => [a, b, c].map((i) => new Vector2(v[i * 3], v[i * 3 + 1])),
+    generateSideWallUV: (_g, v, a, b, c, d) => {
+      const n = wallBays(Math.hypot(v[b * 3] - v[a * 3], v[b * 3 + 1] - v[a * 3 + 1]));
+      const u = (end: boolean) => (n ? (end ? n : 0) : 0.02);
+      const h = (i: number) => v[i * 3 + 2] / depth;
+      return [new Vector2(u(false), h(a)), new Vector2(u(true), h(b)), new Vector2(u(true), h(c)), new Vector2(u(false), h(d))];
+    },
+  };
+  const g = new ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1, UVGenerator: uv });
+  g.rotateX(-Math.PI / 2);
+  return g;
 }
 
 export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSceneCallbacks): TwinSceneHandle {
@@ -242,12 +263,12 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const pos = local.reduce<Point>((best, p) => (p[0] - p[1] > best[0] - best[1] ? p : best), local[0] ?? [0, 0]);
   const tall = twin.floors.length > LABELS_ALL_MAX;
   const labelRoot: HTMLElement[] = [];
-  // 창 텍스처 — (상점 여부 × 층고)마다 하나. ExtrudeGeometry 옆면 UV 는 미터 단위라 반복값으로 칸 폭·층 높이를 맞춘다.
+  // 창 텍스처 — 상점(1층) · 일반 두 장. UV 가 이미 칸 수 × 층 높이 비율이라(extrudeFloor) 반복값은 1 이다.
   const winTex = new Map<string, Texture>();
-  const texOf = (shop: boolean, h: number) => {
-    const k = `${shop ? 1 : 0}:${Math.round(h * 100)}`;
+  const texOf = (shop: boolean) => {
+    const k = shop ? "shop" : "normal";
     let t = winTex.get(k);
-    if (!t) { t = windowTexture(shop); t.repeat.set(1 / WIN_BAY_M, 1 / h); winTex.set(k, t); }
+    if (!t) { t = windowTexture(shop); winTex.set(k, t); }
     return t;
   };
   for (const s of stack.floors) {
@@ -256,7 +277,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     let geo = floorGeos.get(key);
     let edges = floorEdges.get(key);
     if (!geo || !edges) {
-      geo = track(extrude(footprint, s.height - slab));
+      geo = track(extrudeFloor(footprint, s.height - slab));
       edges = track(new EdgesGeometry(geo, 30));
       floorGeos.set(key, geo);
       floorEdges.set(key, edges);
@@ -265,7 +286,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     // 그룹 0 = 바닥·천장(층 색), 1 = 옆면(층 색 × 창 텍스처). 지하는 창이 없다.
     const cap = trackM(new MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, transparent: true, opacity: 1, fog: false }));
     const mat = s.lv > 0
-      ? trackM(new MeshStandardMaterial({ color, map: texOf(s.lv === 1, s.height - slab), roughness: 0.45, metalness: 0.05, transparent: true, opacity: 1, fog: false }))
+      ? trackM(new MeshStandardMaterial({ color, map: texOf(s.lv === 1), roughness: 0.45, metalness: 0.05, transparent: true, opacity: 1, fog: false }))
       : cap;
     const line = trackM(new LineBasicMaterial({ color: EDGE, transparent: true, opacity: 0.7 }));
     const mesh = new Mesh(geo, [cap, mat]);
@@ -375,6 +396,12 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const planUnitMat = trackM(new MeshStandardMaterial({ color: "#EEF0FB", roughness: 0.7, transparent: true, opacity: 0.9, fog: false }));
   const planRestMat = trackM(new MeshStandardMaterial({ color: "#DCE1E8", roughness: 0.9, fog: false }));
   const planLine = trackM(new LineBasicMaterial({ color: "#4F46E5", transparent: true, opacity: 0.85 }));
+  // 열린 층의 창 — 벽이 반투명이라 텍스처 창이 안 보인다. 같은 자리(windowSpans)에 유리판과 창틀을 세운다(표현용 · 실측 아님).
+  const glassMat = trackM(new MeshStandardMaterial({ color: "#9FB3C8", roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.55,
+    side: DoubleSide, depthWrite: false, fog: false }));
+  const frameMat = trackM(new LineBasicMaterial({ color: "#475569" }));
+  const spans = windowSpans(local);
+  const ccw = local.reduce((t, p, i) => { const q = local[(i + 1) % local.length]; return t + p[0] * q[1] - q[0] * p[1]; }, 0) > 0;
   let plan: { lv: number; group: Group; geos: BufferGeometry[] } | null = null;
   function clearPlan() {
     if (!plan) return;
@@ -438,6 +465,25 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       t.center.set(0.5, 1);
       group.add(t);
     });
+    if (f.floor.lv > 0 && spans.length) {
+      const [v0, v1] = f.floor.lv === 1 ? WIN_GLASS_V.shop : WIN_GLASS_V.normal;
+      const hw = f.height - slab, y0 = hw * v0, y1 = hw * v1;
+      const quad: number[] = [], frame: number[] = [];
+      for (const w of spans) {
+        // 벽 바깥으로 5cm — 반투명 벽과 겹쳐 깜빡이지 않게
+        const dx = w.b[0] - w.a[0], dy = w.b[1] - w.a[1], L = Math.hypot(dx, dy) || 1;
+        const ox = ((ccw ? dy : -dy) / L) * 0.05, oy = ((ccw ? -dx : dx) / L) * 0.05;
+        const P = (p: Point, y: number) => [p[0] + ox, y, -(p[1] + oy)];
+        const [a0, b0, b1, a1] = [P(w.a, y0), P(w.b, y0), P(w.b, y1), P(w.a, y1)];
+        const [m0, m1] = [P(w.mid, y0), P(w.mid, y1)];
+        quad.push(...a0, ...b0, ...b1, ...a0, ...b1, ...a1);
+        frame.push(...a0, ...b0, ...b0, ...b1, ...b1, ...a1, ...a1, ...a0, ...m0, ...m1);
+      }
+      const gq = new BufferGeometry(); gq.setAttribute("position", new Float32BufferAttribute(quad, 3)); gq.computeVertexNormals();
+      const gf = new BufferGeometry(); gf.setAttribute("position", new Float32BufferAttribute(frame, 3));
+      geos.push(gq, gf);
+      group.add(new Mesh(gq, glassMat), new LineSegments(gf, frameMat));
+    }
     if (front) {
       const t = planTag(`▼ 전면 · ${front.name}`, "twin3d-front-label");
       t.position.set(front.edge[0] + front.dir[0] * 1.8, 0.3, -(front.edge[1] + front.dir[1] * 1.8));

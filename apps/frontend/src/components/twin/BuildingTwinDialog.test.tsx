@@ -174,4 +174,13 @@ describe("BuildingTwinDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "개략 배치" }));
     expect(handle.setPlan).toHaveBeenLastCalledWith(false);
   });
+
+  it("개략 배치도에 창을 표시한다 — 지상층만 · 표현용 표기", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    expect(document.querySelectorAll(".twin3d-plan-window").length).toBeGreaterThan(0);
+    expect(screen.getByText(/표현용 그림입니다\(실측 창호 아님\)/)).toBeTruthy();
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "B1 자료 없음" }));
+    expect(document.querySelectorAll(".twin3d-plan-window").length).toBe(0);
+  });
 });

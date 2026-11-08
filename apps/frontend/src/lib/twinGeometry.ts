@@ -148,6 +148,39 @@ export function layoutUnits(b: Pick<Bounds, "minX" | "minY" | "w" | "h">,
   return { cells, omitted };
 }
 
+/**
+ * 창 규칙(2026-11-08 · 표현용 — 실측 창호가 아니다). 3D 외벽 텍스처 · 3D 개략 배치의 유리 · 2D 개략 배치도가 모두 이 규칙을 쓴다.
+ * 벽(외곽선 변)마다 약 `WIN_BAY_M` 폭의 칸을 **온 칸으로** 나누고(칸 폭 = 변 길이 ÷ 칸 수), 칸마다 가운데 유리 하나.
+ * 변이 `WIN_MIN_WALL_M` 보다 짧으면 창이 없다. 칸이 변 양 끝에 꼭 맞으므로 변 방향과 무관하게 같은 자리에 놓인다.
+ */
+export const WIN_BAY_M = 3.0;
+export const WIN_MIN_WALL_M = 1.5;
+/** 칸 안 유리의 가로 범위(칸 폭 대비) — 양옆은 벽, 가운데 멀리언 */
+export const WIN_GLASS_U: [number, number] = [5 / 64, 59 / 64];
+/** 층 높이 대비 유리의 세로 범위(아래 → 위). `shop` 은 1층 상점 통유리 */
+export const WIN_GLASS_V = { normal: [20 / 64, 55 / 64] as [number, number], shop: [4 / 64, 59 / 64] as [number, number] };
+
+/** 길이 `len` m 인 벽의 창 칸 수 — 짧은 벽은 0 */
+export const wallBays = (len: number) => (len < WIN_MIN_WALL_M ? 0 : Math.max(1, Math.round(len / WIN_BAY_M)));
+
+export interface WindowSpan { a: Point; b: Point; mid: Point; edge: number }
+
+/** 외곽선 변마다 유리 구간(로컬 동·북 m). 2D 배치도의 창 기호와 3D 유리판이 이 구간을 그린다. */
+export function windowSpans(pts: readonly Point[]): WindowSpan[] {
+  const ring = pts.length > 2 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1] ? pts.slice(0, -1) : pts;
+  const out: WindowSpan[] = [];
+  ring.forEach((p, i) => {
+    const q = ring[(i + 1) % ring.length];
+    const len = Math.hypot(q[0] - p[0], q[1] - p[1]), n = wallBays(len);
+    const at = (t: number): Point => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+    for (let k = 0; k < n; k++) {
+      const t0 = (k + WIN_GLASS_U[0]) / n, t1 = (k + WIN_GLASS_U[1]) / n;
+      out.push({ a: at(t0), b: at(t1), mid: at((k + 0.5) / n), edge: i });
+    }
+  });
+  return out;
+}
+
 /** 외곽선을 볼록 다각형(사각형)으로 자른다 — Sutherland–Hodgman. 잘린 쪽이 오목해도 넓이는 맞다. */
 export function clipToConvex(subject: readonly Point[], clip: readonly Point[]): Point[] {
   let out: Point[] = [...subject];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentLevel, boundsOf, clipToConvex, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
+import { adjacentLevel, boundsOf, clipToConvex, wallBays, windowSpans, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
   stackFloors, startCamera, timelineScale, yearOf } from "@/lib/twinGeometry";
 
 describe("ringToLocal", () => {
@@ -162,5 +162,23 @@ describe("frontRoad — 주소 도로 쪽", () => {
   it("주소 도로를 못 찾으면 null — 지어내지 않는다", () => {
     expect(frontRoad(sq, roads, "다른길", lat0, lng0)).toBeNull();
     expect(frontRoad(sq, undefined, "테스트로", lat0, lng0)).toBeNull();
+  });
+});
+
+describe("windowSpans — 창 규칙(표현용)", () => {
+  it("벽마다 온 칸으로 나누고 칸마다 가운데 유리 하나 — 짧은 벽은 창이 없다", () => {
+    expect(wallBays(1.2)).toBe(0);
+    expect(wallBays(9)).toBe(3);
+    const box: [number, number][] = [[0, 0], [9, 0], [9, 1.2], [0, 1.2]];
+    const ws = windowSpans(box);
+    expect(ws).toHaveLength(6);                       // 긴 벽 두 개 × 3칸, 짧은 벽 1.2m 는 0
+    const first = ws.filter((w) => w.edge === 0)[0];
+    expect(first.a[0]).toBeCloseTo(3 * 5 / 64, 6);    // 칸 폭 3m 의 5/64 에서 유리 시작
+    expect(first.b[0]).toBeCloseTo(3 * 59 / 64, 6);
+  });
+  it("변 방향을 뒤집어도 같은 자리다(칸이 벽 양 끝에 꼭 맞는다)", () => {
+    const sq: [number, number][] = [[0, 0], [10, 0], [10, 7], [0, 7]];
+    const key = (ws: ReturnType<typeof windowSpans>) => ws.map((w) => [Math.min(w.a[0], w.b[0]), Math.min(w.a[1], w.b[1])].map((v) => v.toFixed(3)).join(",")).sort();
+    expect(key(windowSpans([...sq].reverse()))).toEqual(key(windowSpans(sq)));
   });
 });
