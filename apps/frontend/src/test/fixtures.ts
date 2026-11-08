@@ -30,10 +30,12 @@ export function district(id: string, over: Partial<DistrictSummary> = {}): Distr
   };
 }
 
-/** 100m 격자 셀 — `lat/lng` 는 남서 모서리, `c_*` 는 중심(hubBoundary 가 이 규약을 읽는다). */
+/** 100m 격자 셀 — `lat/lng` 는 남서 모서리, `c_*` 는 중심(hubBoundary 가 이 규약을 읽는다).
+ *  인덱스는 서버(`gold_vacancy.build_cells`) 규약 그대로 `i` = 위도(남→북) · `j` = 경도(서→동) 칸이다.
+ *  2026-11-08 까지 이 픽스처가 거꾸로(`i` = 경도) 만들어 축 뒤집힘 버그를 테스트가 못 봤다. */
 export function cell(i: number, j: number, over: Partial<HeatCell> = {}): HeatCell {
   const dlat = 0.0009, dlng = 0.00113;
-  const lat = 37.52 + j * dlat, lng = 127.02 + i * dlng;
+  const lat = 37.52 + i * dlat, lng = 127.02 + j * dlng;
   return {
     i, j, lat, lng, c_lat: lat + dlat / 2, c_lng: lng + dlng / 2,
     v: 10, stores: 20, vac_n: 2, dlat, dlng, capacity: 30, buildings: 5, ...over,

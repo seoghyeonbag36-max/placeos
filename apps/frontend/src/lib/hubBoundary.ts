@@ -14,9 +14,14 @@
  * 하필 제일 건강한 자리에 난다(2026-09-05 실측).
  *
  * ## 입력의 성질 (2026-09-05 실측)
- * - 셀은 정수 인덱스 `i,j` 의 균일 격자. `dlat 0.0009` · `dlng 0.00113`(100m)이
- *   66거점 전부에서 같다.
+ * - 셀은 균일 격자. `dlat 0.0009` · `dlng 0.00113`(100m)이 66거점 전부에서 같다.
  * - `lat/lng` 는 셀의 **남서 모서리**, `c_lat/c_lng` 는 중심(`c_lat − lat === dlat/2`).
+ *
+ * ⚠ **격자 좌표는 `lat/lng` 에서 구한다 — `i,j` 를 읽지 않는다** (2026-11-08).
+ *   서버(`gold_vacancy.build_cells`)의 `i` 는 **위도**(남→북)·`j` 는 **경도**(서→동) 인덱스다.
+ *   이 함수는 그때까지 `i` 를 경도·`j` 를 위도로 읽어, 경계가 대각선으로 뒤집힌 채 옮겨 그려졌다
+ *   (실셀과 정확히 같은 거점 0/158 · 왕십리 공실 점 242개 중 경계 안 4개). 축 규약에 기대지 않으면
+ *   같은 실수가 다시 날 자리가 없다. 파이프라인 `build_hub_outlines.outline` 도 같은 규칙이다.
  * - 셀이 한 덩어리라는 보장이 없다 — **42/66 거점이 조각 2개 이상**이고, 최대 조각
  *   비중이 30% 인 거점도 있다(yeouido 10조각·mullae 9조각). 조각을 감싸 하나로
  *   덮으면 **안 잰 곳을 잰 것처럼** 그리게 되므로, 조각은 조각대로 그리고 몇 조각인지
@@ -66,12 +71,18 @@ export function computeHubBoundary(cells: HeatCell[] | null | undefined): HubBou
   const { dlat, dlng } = cells[0];
   if (!dlat || !dlng) return EMPTY_BOUNDARY;
 
-  // 격자 원점. i=0,j=0 셀이 응답에 없을 수 있으므로(가로수길 j 는 −1 부터다) 역산한다.
-  const lat0 = cells[0].lat - cells[0].j * dlat;
-  const lng0 = cells[0].lng - cells[0].i * dlng;
+  // 격자 원점 — 모든 셀이 같은 격자 위에 있으므로 최소 위·경도가 곧 격자 꼭짓점이다.
+  let lat0 = Infinity, lng0 = Infinity;
+  for (const c of cells) {
+    if (c.lat < lat0) lat0 = c.lat;
+    if (c.lng < lng0) lng0 = c.lng;
+  }
+  // (x=경도 칸, y=위도 칸). 응답 좌표는 6자리 반올림이라 나눗셈을 정수로 반올림한다.
+  const xy = (c: HeatCell): [number, number] =>
+    [Math.round((c.lng - lng0) / dlng), Math.round((c.lat - lat0) / dlat)];
 
   const filled = new Set<string>();
-  for (const c of cells) filled.add(kx(c.i, c.j));
+  for (const c of cells) filled.add(kx(...xy(c)));
 
   // ── 4-이웃 연결요소 ──────────────────────────────────────────────────────
   // 8-이웃으로 묶으면 대각으로만 맞닿은 조각이 한 덩어리로 보여 조각 수가 줄어든다.
@@ -79,19 +90,20 @@ export function computeHubBoundary(cells: HeatCell[] | null | undefined): HubBou
   const seen = new Set<string>();
   const groups: Array<Array<[number, number]>> = [];
   for (const c of cells) {
-    const start = kx(c.i, c.j);
+    const [x0, y0] = xy(c);
+    const start = kx(x0, y0);
     if (seen.has(start)) continue;
     seen.add(start);
-    const stack: Array<[number, number]> = [[c.i, c.j]];
+    const stack: Array<[number, number]> = [[x0, y0]];
     const group: Array<[number, number]> = [];
     while (stack.length) {
-      const [i, j] = stack.pop()!;
-      group.push([i, j]);
-      for (const [di, dj] of NB) {
-        const nk = kx(i + di, j + dj);
+      const [x, y] = stack.pop()!;
+      group.push([x, y]);
+      for (const [dx, dy] of NB) {
+        const nk = kx(x + dx, y + dy);
         if (filled.has(nk) && !seen.has(nk)) {
           seen.add(nk);
-          stack.push([i + di, j + dj]);
+          stack.push([x + dx, y + dy]);
         }
       }
     }
@@ -227,7 +239,7 @@ function bboxOf(ring: Array<[number, number]>): BBox {
 const bboxContains = (o: BBox, h: BBox) =>
   o.minx <= h.minx && o.miny <= h.miny && o.maxx >= h.maxx && o.maxy >= h.maxy;
 
-/** 격자 꼭짓점 (x,y) → [lat, lng]. 셀 (i,j) 의 남서 모서리가 꼭짓점 (i,j) 다. */
+/** 격자 꼭짓점 (x=경도 칸, y=위도 칸) → [lat, lng]. 격자 셀 (x,y) 의 남서 모서리가 꼭짓점 (x,y) 다. */
 function toLatLng(
   [x, y]: [number, number], lat0: number, lng0: number, dlat: number, dlng: number,
 ): [number, number] {
