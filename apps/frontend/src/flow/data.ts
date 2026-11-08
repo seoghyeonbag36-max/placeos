@@ -8,9 +8,9 @@
  */
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
-  getCorridor, getDistrictIndustries, getFloorVacancies, getIndustryFit, getPlatformProfile, getPostings, getRentHeatmap,
+  getCorridor, getDistrictIndustries, getFloorVacancies, getHubOutlines, getIndustryFit, getPlatformProfile, getPostings, getRentHeatmap,
   listDistricts, listIndustries,
-  type Corridor, type DistrictIndustries, type DistrictSummary, type FloorVacancyList, type IndustryFit, type IndustryOption,
+  type Corridor, type DistrictIndustries, type DistrictSummary, type FloorVacancyList, type HubOutlines, type IndustryFit, type IndustryOption,
   type PlatformProfile, type Posting, type RentHeatmap,
 } from "@/lib/api";
 
@@ -32,6 +32,8 @@ export class FlowData {
   districts = () => this.get<DistrictSummary[]>("districts",
     () => listDistricts().then((all) => all.filter((d) => d.vacancy_source === "gold")));
   industryFit = (key: string) => this.get<IndustryFit>(`fit:${key}`, () => getIndustryFit(key));
+  /** 상권 외곽선(실측 범위 · 2026-11-08 상권 고르기 지도) — 없으면 null 이고, 지도는 상권 중심 점으로 물러난다 */
+  outlines = () => this.get<HubOutlines | null>("outlines", () => getHubOutlines());
   /** 층별 빈 자리 수만 — 목록은 1건만 받는다(`by_floor` 는 필터 전 전체다) */
   floorSummary = (id: string) => this.get<FloorVacancyList>(`fs:${id}`, () => getFloorVacancies(id, { limit: 1 }));
   /** 층별 빈 자리 전부 — 빈 자리 목록·상세가 조인한다. 상한은 서버 최대(2000) */

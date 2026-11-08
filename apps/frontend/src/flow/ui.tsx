@@ -14,7 +14,7 @@ export const IconBack = () => (
 export const IconHeart = ({ filled }: { filled?: boolean }) => (
   <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>
 );
-const IconChevron = () => (
+export const IconChevron = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
 
@@ -39,6 +39,8 @@ export interface FlowScreenProps {
   cta?: ReactNode;
   /** 목록·비교 화면(최대 960) — 질문 화면은 560 한 열 */
   wide?: boolean;
+  /** 지도와 목록을 나란히 놓는 화면(최대 1320 · 2026-11-08 상권 고르기 지도) — 좁은 화면에서는 지도 위 · 목록 아래 */
+  mapWide?: boolean;
   /** 허브 화면의 탭 */
   tab?: "home" | "explore" | "me";
   /** 허브 화면은 상단 바 대신 제목 바 */
@@ -46,7 +48,7 @@ export interface FlowScreenProps {
   children?: ReactNode;
 }
 
-export function FlowScreen({ back: backTo, right, caption, banner, title, titleLive, sub, cta, wide, tab, hub, children }: FlowScreenProps) {
+export function FlowScreen({ back: backTo, right, caption, banner, title, titleLive, sub, cta, wide, mapWide, tab, hub, children }: FlowScreenProps) {
   const h1 = useRef<HTMLHeadingElement>(null);
   // 화면이 바뀌면 새 질문에 포커스 — 스크린리더가 새 질문부터 읽는다(§9). 화면 맨 위로도 올린다.
   useEffect(() => {
@@ -64,7 +66,7 @@ export function FlowScreen({ back: backTo, right, caption, banner, title, titleL
     restored.current = true;
   });
   return (
-    <div className={"fl-screen" + (wide ? " is-wide" : "") + (cta ? " has-cta" : "") + (tab ? " has-tab" : "")}>
+    <div className={"fl-screen" + (wide ? " is-wide" : "") + (mapWide ? " is-mapwide" : "") + (cta ? " has-cta" : "") + (tab ? " has-tab" : "")}>
       {hub ? (
         <header className="fl-bar fl-hubbar">
           <span className="fl-wordmark" aria-hidden="true"><span className="fl-mark">P</span>PlaceOS</span>

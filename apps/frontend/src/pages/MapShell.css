@@ -447,3 +447,55 @@
 .mapshell .time-bar .daytype { display: inline-flex; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
 .mapshell .time-bar .daytype button { border: 0; background: var(--surface); font: inherit; font-size: var(--fs-caption); padding: 4px 10px; cursor: pointer; color: var(--ink); }
 .mapshell .time-bar .daytype button[aria-pressed="true"] { background: var(--track-page); color: var(--on-accent); }
+
+/* ── 칸 배치(2026-11-08) — 지도 탐색에서 목록은 왼쪽 칸, 상세는 오른쪽 칸(MapSlot .mapshell-slot) ──
+   겉 상자가 .mapshell 을 다시 달아 위의 `.mapshell …` 규칙이 그대로 걸린다. 지도 위 오버레이용 자리·폭·테두리는 칸이 대신한다. */
+.mapshell.mapshell-slot { position: relative; inset: auto; pointer-events: auto; }
+.mapshell-slot .side-panel {
+  position: relative; top: auto; left: auto; bottom: auto; width: auto;
+  border: 0; border-radius: 0; box-shadow: none; background: transparent;
+}
+.mapshell-slot .page-side-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) 0; }
+.mapshell-slot .page-side-tools .hub-select,
+.mapshell-slot .page-side-tools .search { flex: 1 1 100%; width: 100%; max-width: none; min-width: 0; box-sizing: border-box; }
+.mapshell-slot .page-side-tools > :not(.hub-select):not(.search) { flex: 1 1 100%; }
+.mapshell-slot .b-detail { border-top: 0; }
+.mapshell-slot .candidate-tray { flex-shrink: 0; }
+.page-detail-empty {
+  margin: var(--sp-4); padding: var(--sp-4); border: 1px dashed var(--line); border-radius: 12px;
+  background: var(--bg); color: var(--muted); font-size: 13px; line-height: 1.6;
+}
+.page-detail-empty strong { display: block; margin-bottom: var(--sp-1); color: var(--ink); font-size: 14px; }
+.mh-right > .mapshell-slot {
+  background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--track-page);
+  border-radius: 14px; box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08)); overflow: hidden;
+}
+/* 지도 위에는 레이어 토글만 남는다 — 오른쪽 위 「내 사업」 칩(BusinessSetup.css .biz-chip 최대 300px · 휴대폰 45%) 자리는 비우고,
+   좁은 지도 칸에서는 토글이 잘리지 않고 가로로 스크롤한다(2026-11-08 리뷰 — 칩이 「인구밀도」를 덮거나 58% 상한이 잘라 먹었다) */
+.mapshell.is-slotted .overlay-top { right: calc(min(300px, 45%) + 24px); max-width: none; }
+.mapshell.is-slotted .seg { min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.mapshell.is-slotted .seg button { flex: 0 0 auto; }
+/* 시간 막대 + 범례를 아래 한 묶음에 쌓는다 — 좁은 지도 칸에서 둘이 겹치지 않게(MapShell.tsx .overlay-bottom) */
+.mapshell .overlay-bottom { left: var(--sp-3); right: var(--sp-3); bottom: var(--sp-3); display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); pointer-events: none; }
+.mapshell .overlay-bottom > .overlay { position: static; inset: auto; transform: none; max-width: 100%; pointer-events: auto; }
+@media (min-width: 769px) { .mapshell .overlay-bottom { right: calc(var(--sp-3) + var(--sp-7) + var(--sp-8)); } }
+/* 층별 공실 · 공실 이력 창은 화면 전체에 — 오버레이 층이 지도 칸(휴대폰은 시트 위 띠)으로 줄어 창이 잘렸다 */
+.mapshell.is-slotted .twin-modal { position: fixed; inset: 0; }
+/* 오른쪽 칸 상세는 칸이 스크롤한다 — 예전 38dvh 상한 · 안쪽 스크롤을 걷는다 */
+.mapshell-slot .b-detail { max-height: none; overflow: visible; }
+@media (min-width: 1200px) {
+  .mh-left > .mapshell-slot, .mh-right > .mapshell-slot { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .mh-left > .mh-slot.mapshell-slot { overflow: hidden; }
+  .mapshell-slot .side-panel:not([hidden]) { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+}
+@media (max-width: 1199px) {
+  /* 칸이 지도 위 패널 하나에 쌓인다(MapHost.css) — 패널이 통째로 스크롤하므로 칸 안 스크롤·카드를 걷는다 */
+  .mapshell-slot .side-panel:not([hidden]) { display: block; height: auto; }
+  .mapshell-slot .page-panel-scroll { display: block; overflow: visible; }
+  .mh-right > .mapshell-slot { border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+  .mapshell-slot .candidate-tray { position: sticky; bottom: 0; z-index: 1; }
+}
+@media (max-width: 768px) {
+  /* 시트가 지도 아래를 덮는 대신 오버레이 층이 시트 위에서 끝난다(MapHost.css) — 범례·시간 막대는 그 바닥에 붙는다 */
+  .mapshell-slot .side-panel:not([hidden]) { height: auto; }
+}

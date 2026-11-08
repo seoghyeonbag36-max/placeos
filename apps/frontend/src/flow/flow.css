@@ -393,3 +393,53 @@ button.fl-row-btn:disabled { cursor: not-allowed; opacity: .55; }
 
 /* R5 — 고른(추천) 가격대 카드는 바탕이 primary-soft 라 같은 색 배지가 묻힌다 */
 .fl-choice.is-on .fl-badge.is-primary { background: var(--primary); color: #fff; }
+
+/* ── 상권 고르기 지도(2026-11-08) — #/districts · 목록(점 색) | 지도(같은 색 구역) ──────────────
+   상권마다 다른 색이다(lib/districtColors) — 구별용이지 순위가 아니다. 좁은 화면에서는 지도가 위, 목록이 아래다. */
+.fl-screen.is-mapwide { --col: 1320px; }
+.fl-dmap { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: var(--sp-4); align-items: stretch;
+  height: max(520px, calc(100dvh - 260px)); }
+.fl-dmap-side { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; min-height: 0; }
+.fl-dmap-count { margin: 0; font-size: .8125rem; color: var(--grey-600); }
+.fl-dmap-list { flex: 1; min-height: 0; margin: 0; padding: 0 var(--sp-1) 0 0; overflow-y: auto; overscroll-behavior: contain; }
+.fl-dmap-dot { flex: none; width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, .12); }
+.fl-dmap-list .fl-row.is-hot .fl-row-btn, .fl-dmap-list .fl-row.is-picked .fl-row-btn { background: var(--grey-50); }
+.fl-dmap-list .fl-row.is-picked .fl-row-title { color: var(--primary); }
+.fl-dmap-map { position: relative; min-height: 0; overflow: hidden; border: 1px solid var(--grey-200); border-radius: var(--radius-lg, 16px); background: #e9eef5; }
+.fl-dmap-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fl-dmap-hint { position: absolute; top: 12px; left: 50%; z-index: 2; transform: translateX(-50%); margin: 0; padding: 6px 14px;
+  border-radius: 999px; background: rgba(17, 24, 39, .78); color: #fff; font-size: .8125rem; white-space: nowrap; pointer-events: none; }
+.fl-dmap-note { position: absolute; top: 52px; left: 12px; z-index: 2; margin: 0; padding: 4px 10px; border-radius: 8px;
+  background: rgba(255, 255, 255, .94); color: var(--grey-600); font-size: .75rem; }
+.fl-dmap-card { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--grey-200); border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .18); }
+.fl-dmap-card-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.fl-dmap-card-main b { font-size: 1rem; color: var(--grey-900); }
+.fl-dmap-card-main span { font-size: .8125rem; color: var(--grey-600); }
+.fl-dmap-go { flex: none; min-height: 44px; padding: 0 var(--sp-4); border: 0; border-radius: var(--radius-md); background: var(--primary);
+  color: #fff; font: inherit; font-weight: var(--fw-semibold); cursor: pointer; }
+.fl-dmap-x { flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--grey-100); color: var(--grey-600); font: inherit; cursor: pointer; }
+.fl-dmap-go:focus-visible, .fl-dmap-x:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* 지도 위 이름표(네이버 마커 HTML) — 앵커가 0 이라 스스로 반만큼 비켜 좌표 한가운데에 선다 */
+.fl-dmap-label { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; transform: translate(-50%, -50%);
+  border: 1.5px solid var(--c); border-radius: 8px; background: rgba(255, 255, 255, .95); box-shadow: 0 2px 8px rgba(15, 23, 42, .14);
+  color: #0f172a; font: 600 12px/1.3 var(--font-sans, system-ui, sans-serif); white-space: nowrap; cursor: pointer; }
+.fl-dmap-label i { width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+/* 고른 · 가리킨 이름표 — 글자를 상권 색 위에 올리지 않는다(밝은 색은 흰 글자 대비 4.5:1 미달 · 2026-11-08 점검 48/81색).
+   흰 바탕 그대로, 색 테두리를 굵게 해 가리킨다 */
+.fl-dmap-label.is-on { border-width: 2.5px; box-shadow: 0 0 0 2px var(--c), 0 4px 12px rgba(15, 23, 42, .22); }
+@media (max-width: 900px) {
+  .fl-dmap { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .fl-dmap-map { order: -1; height: 46dvh; min-height: 280px; }
+  .fl-dmap-list { overflow: visible; }
+  .fl-dmap-card { flex-wrap: wrap; }
+  .fl-dmap-card-main { flex-basis: calc(100% - 60px); }
+  .fl-dmap-go { flex: 1; }
+}
+/* 상권 설명(서울 — 상권 유형 · 2026-11-08) — 그 상권 색을 옅게 깐 알약. 이름표 안에서는 이름 아래 작은 줄 */
+.fl-dmap-type { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--c, var(--grey-400)) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c, var(--grey-400)) 40%, transparent);
+  color: var(--grey-900); font-weight: var(--fw-semibold); font-size: .8125rem; line-height: 1.6; }
+.fl-dmap-label b { font-weight: 700; }
+.fl-dmap-label span { padding-left: 6px; margin-left: 2px; border-left: 1px solid rgba(15, 23, 42, .18); font-weight: 500; font-size: 11px; color: #475569; }

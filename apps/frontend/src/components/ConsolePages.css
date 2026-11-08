@@ -6,3 +6,22 @@
 .console-pages-heading h2 { margin: 0 0 var(--sp-2); font-size: 20px; letter-spacing: var(--ls-heading); }
 .console-pages-heading p { margin: 0; color: var(--sub); font-size: 13px; line-height: 1.6; }
 .console-pages > section[hidden] { display: none; }
+
+/* ── 칸 배치(2026-11-08) — 쪽 목록을 왼쪽 칸의 세로 메뉴로(navSlot) ──
+   쪽마다 이름 + 한 줄 설명. 지금 쪽은 트랙 색 띠로 표시한다. */
+.console-pages-side { display: flex; flex-direction: column; }
+.console-pages-side > header { padding: var(--sp-4) var(--sp-4) var(--sp-2); }
+.console-pages-side > header p { margin: 0; }
+.console-pages-side > header h2 { margin: 2px 0 var(--sp-2); font-size: var(--fs-heading, 20px); }
+.console-pages-side > header p:last-child { color: var(--sub); font-size: 13px; line-height: 1.6; }
+.console-pages-nav.is-side { flex-direction: column; overflow: visible; border-bottom: 0; background: transparent; padding: var(--sp-2) var(--sp-3) var(--sp-3); }
+.console-pages-nav.is-side button {
+  display: grid; gap: 2px; text-align: left; width: 100%; min-height: 56px;
+  padding: var(--sp-3); border-radius: var(--radius-md, 10px); border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink);
+}
+.console-pages-nav.is-side button b { font-size: 14px; }
+.console-pages-nav.is-side button small { font-size: 12px; font-weight: 400; line-height: 1.5; color: var(--sub); }
+.console-pages-nav.is-side button:hover { border-color: var(--tm-accent, var(--primary)); }
+.console-pages-nav.is-side button[aria-current] { background: var(--tm-soft, var(--primary-soft)); border-color: var(--tm-accent, var(--primary)); box-shadow: inset 3px 0 var(--tm-accent, var(--primary)); }
+.console-pages-nav.is-side button[aria-current] b { color: var(--tm-accent, var(--primary)); }

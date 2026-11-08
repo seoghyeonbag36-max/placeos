@@ -143,3 +143,8 @@
 .postconsole .trow.big span:last-child { font-size: var(--fs-heading); }
 .postconsole .fhint, .postconsole .posting-input-summary { font-size: var(--fs-caption); line-height: var(--lh-caption); }
 .postconsole .rhead { gap: var(--sp-3); flex-wrap: wrap; }
+
+/* ── 칸 배치(2026-11-08) — 입력 폼이 지도 탐색의 왼쪽 칸에 선다(MapSlot .posting-side) ──
+   겉 상자가 .postconsole 을 다시 달아 위 규칙이 그대로 걸린다. 콘솔 바탕·여백과 폼의 sticky·테두리는 칸이 대신한다. */
+.mh-slot.postconsole.posting-side { background: var(--surface); padding: 0; }
+.posting-side .panel { position: static; border: 0; border-radius: 0; background: transparent; }

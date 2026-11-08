@@ -22,6 +22,8 @@ import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult,
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
 import ConsolePages from "@/components/ConsolePages";
+import MapSlot from "@/components/MapSlot";
+import { useMapLayout } from "@/components/mapLayoutContext";
 
 /**
  * Posting 콘솔 — "이 자리에 들어가면 얼마가 남나"에 답하는 화면.
@@ -106,6 +108,7 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
   const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
+  const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
   const [ownDistrict, setOwnDistrict] = useState(selection?.districtId ?? sharedDistrict ?? DEFAULT_DISTRICT);
@@ -394,6 +397,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const tiers = result ? Object.entries(result.scenarios) : [];
 
 
+  // 지도 탐색의 칸 배치 안인가(MapHost) — 입력이 왼쪽 칸으로 가면 안내 문구도 그 자리를 가리킨다
+  const inSlots = layout !== null;
+
   return (
     <div className="postconsole"><div className="wrap">
       {err && (
@@ -406,8 +412,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} pages={[
-        { id: "input", label: "자리와 비용 조건", description: "조건을 입력하면 바로 아래에 계산 결과가 나옵니다.", content: <>
-        {/* ── 입력 ── */}
+        { id: "input", label: "자리와 비용 조건", description: inSlots
+          ? "자리와 비용 조건을 고르면 여기에 바로 계산 결과가 나옵니다."
+          : "조건을 입력하면 바로 아래에 계산 결과가 나옵니다.", content: <>
+        {/* ── 입력 ── 2026-11-08 칸 배치: 지도 탐색에서는 **왼쪽 칸**에 선다(결과는 오른쪽 칸 · 지도는 가운데).
+            다른 탭(주변 업종 · 인테리어 · 찾아오는 길)을 봐도 입력은 왼쪽에 그대로 남는다. 단독 렌더는 예전 자리(MapSlot). */}
+        <MapSlot name="left" className="postconsole posting-side" track="posting">
         <form className="panel" onSubmit={(e) => { e.preventDefault(); run(); }}>
           <div className="ptitle">1. 자리와 업종 선택</div>
           {handoffNote && <div className="posting-handoff" role="status">{handoffNote}</div>}
@@ -498,6 +508,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           </Button>
           {!detailKey && <span className="fhint">권리금·전략·업종을 바꾸면 바로 다시 계산합니다.</span>}
         </form>
+        </MapSlot>
 
         {/* ── 결과 — 입력 바로 아래(2026-11-07 「자리와 비용 조건에 계산 결과가 바로 나오게」). 종전에는 별도 「계산 결과」 탭이었다 ── */}
         <div className="results">

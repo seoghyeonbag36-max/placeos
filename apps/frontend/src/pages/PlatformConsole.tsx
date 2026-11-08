@@ -5,6 +5,7 @@ import DistrictCompareDialog from "@/components/DistrictCompareDialog";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import DistrictMapExplorer from "@/components/DistrictMapExplorer";
+import MapSlot from "@/components/MapSlot";
 import DistrictBrief from "@/components/DistrictBrief";
 import { distanceM } from "@/lib/districtMapModel";
 import { loadJourney, updateJourney } from "@/lib/journeyState";
@@ -346,8 +347,12 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           </>}
         </div>
       </div>
-      <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
-        outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
+      {/* 2026-11-08 칸 배치: 상권 지도(묶음 · 색칠 기준 · 상권 목록)는 지도 탐색의 **왼쪽 칸**에 선다 — 참고 시안 Case 1 의
+          왼쪽 상권 목록 자리. 단독 렌더(지도 셸 밖)에서는 예전처럼 이 자리에 그린다(MapSlot). */}
+      <MapSlot name="left" className="platform-side" track="platform">
+        <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
+          outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
+      </MapSlot>
       {comparingDistricts && (
         <DistrictCompareDialog ids={districtPicks} districts={districts} industry={compareIndustry}
           unrankedIndustry={workInd && !compareIndustry ? workInd.label : null}

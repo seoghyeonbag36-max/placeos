@@ -18,10 +18,19 @@
  * 콘솔의 본문 레이아웃(2단 그리드 등)은 뷰포트 폭 기준 미디어쿼리로 짜여 있어, 폭이
  * 좁은 패널 안에서는 그대로 두면 칸이 짓눌린다. 패널 안에서만 1단으로 접는 규칙은
  * TrackMapFrame.css 가 갖는다 — 콘솔 CSS 는 단독 화면(테스트·#board)용으로 그대로 둔다.
+ *
+ * ## 2026-11-08 칸 배치 — 지도를 가운데로
+ *
+ * 지도 셸(MapHost) 안이면 패널을 지도 위에 띄우지 않고 **칸에 꽂는다**: 머리(단계 · 질문)는 머리 칸, 이 패널은
+ * 오른쪽 칸. 콘솔은 「고르기」 덩어리(상권 목록 · 비용 입력 · 기능 메뉴)를 스스로 왼쪽 칸에 꽂는다(MapSlot).
+ * 접기는 좌우 칸을 함께 걷고 지도를 넓힌다(MapHost `is-collapsed`). 펴기 버튼은 지도 위에 남는다.
+ * 지도 셸 밖(단독 렌더 · 테스트)에서는 예전 그대로 한 패널이다.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { TrackKey } from "@/design/tokens/colors";
 import { isEditableTarget } from "@/lib/keyboard";
+import MapSlot from "./MapSlot";
+import { useMapLayout } from "./mapLayoutContext";
 import "./TrackMapFrame.css";
 
 export default function TrackMapFrame({ track, label, children, header, footer }: {
@@ -33,7 +42,15 @@ export default function TrackMapFrame({ track, label, children, header, footer }
   footer?: ReactNode;
 }) {
   const [open, setOpen] = useState(true);
+  const layout = useMapLayout();
   const panelId = `track-panel-${track}`;
+  // 칸 배치에서는 접기가 좌우 칸을 함께 걷는다. 화면을 떠나면(다른 트랙) 펴진 배치로 돌려놓는다.
+  const setCollapsed = layout?.setCollapsed;
+  useEffect(() => { setCollapsed?.(!open); }, [setCollapsed, open]);
+  useEffect(() => () => setCollapsed?.(false), [setCollapsed]);
+  // 접기 · 펴기는 칸 배치 상태도 **같은 이벤트에서** 바꾼다 — 효과로만 바꾸면 펴기 직후 포커스를 옮기는 순간 칸이 아직
+  // 숨어 있어(display:none) 포커스가 body 로 떨어졌다(C-03 · 2026-11-08 리뷰). 위 효과는 화면을 떠날 때의 안전망이다
+  const toggle = useCallback((next: boolean) => { setOpen(next); setCollapsed?.(!next); }, [setCollapsed]);
   const collapseRef = useRef<HTMLButtonElement>(null);
   const reopenRef = useRef<HTMLButtonElement>(null);
   // 접기·펴기 뒤 포커스를 **짝 버튼으로** 옮긴다(화면설계서 2판 C-03). 누른 버튼이 사라지면
@@ -52,28 +69,34 @@ export default function TrackMapFrame({ track, label, children, header, footer }
       if (e.key !== "Escape" || !open) return;
       if (isEditableTarget(e.target)) return;
       if (document.querySelector("dialog[open]")) return;
-      setOpen(false);
+      toggle(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, toggle]);
 
+  const panel = (
+    <aside id={panelId} className="trackmap-panel" hidden={!open} aria-label={label}>
+      <button ref={collapseRef} type="button" className="trackmap-collapse" onClick={() => toggle(false)}
+        aria-expanded aria-controls={panelId} aria-label={`${label} 접기`}
+        title={layout ? "양옆 칸을 접고 지도를 넓게 본다" : "패널을 접고 지도를 넓게 본다"}>‹</button>
+      {!layout && header}
+      <div className="trackmap-scroll">{children}</div>
+      {footer}
+    </aside>
+  );
   return (
     <div className="trackmap" data-track={track}>
       {!open && (
-        <button ref={reopenRef} type="button" className="trackmap-reopen" onClick={() => setOpen(true)}
+        <button ref={reopenRef} type="button" className="trackmap-reopen" onClick={() => toggle(true)}
           aria-expanded={false} aria-controls={panelId}>
           ☰ {label}
         </button>
       )}
-      <aside id={panelId} className="trackmap-panel" hidden={!open} aria-label={label}>
-        <button ref={collapseRef} type="button" className="trackmap-collapse" onClick={() => setOpen(false)}
-          aria-expanded aria-controls={panelId} aria-label={`${label} 접기`}
-          title="패널을 접고 지도를 넓게 본다">‹</button>
-        {header}
-        <div className="trackmap-scroll">{children}</div>
-        {footer}
-      </aside>
+      {layout ? <>
+        {header && <MapSlot name="head" className="trackmap-head" track={track}>{header}</MapSlot>}
+        <MapSlot name="right" className="trackmap-slot" track={track}>{panel}</MapSlot>
+      </> : panel}
     </div>
   );
 }

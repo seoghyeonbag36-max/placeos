@@ -1,26 +1,41 @@
-/* 공유 지도 셸 — **뷰포트 전체**를 지도가 쓴다(2026-09-12 「지도 전체화면」).
-   이 규칙은 종전 MapShell.css 의 `.mapshell` 에 있던 것을 그대로 옮긴 것이다
-   (2026-09-05 지도 셸 승격 — 설계서 §10-1).
-   층은 둘이다: 지도 캔버스(inset:0) 위에 오버레이 레이어(inset:0 0 0 --rail-w). */
+/* 공유 지도 셸(2026-09-05 지도 셸 승격 — 설계서 §10-1).
+
+   2026-11-08 칸 배치 — 「지도를 가운데, 기능을 양옆에」(사용자 피드백: 지도가 크고 기능이 작아 쓰기 불편하다).
+   넓은 화면(≥1200px)은 그리드다:
+       머리(단계 · 질문)
+       왼쪽(고르기) | 지도 | 오른쪽(답)
+   참고 시안 Renewal/PlaceOS 참고.html Case 1 의 `270px | 지도 | 390px` 배치를 따른다.
+   좁은 화면은 예전처럼 지도가 화면 전체이고, 칸 셋이 지도 위 패널 하나(태블릿 좌측 · 휴대폰 하단 시트)에 차례로 쌓인다.
+   칸은 MapHost 가 세우고 트랙 화면이 MapSlot(portal)으로 채운다 → components/mapLayoutContext.ts.
+
+   칸 폭은 :root 에 둔다 — 지도 셸 밖의 떠 있는 버튼(의견 보내기 · 입점 준비)도 칸을 피해야 해서다. */
+:root {
+  --mh-gap: 12px;
+  --mh-left-w: clamp(264px, 21vw, 340px);
+  --mh-right-w: clamp(380px, 33vw, 560px);
+  /* 좁은 화면의 패널 하나 — 예전 좌측 패널(최대 560px)보다 조금 좁다. 지도도 보여야 한다 */
+  --mh-panel-w: min(480px, calc(100vw - var(--rail-w, 0px) - 2 * var(--mh-gap)));
+  --mh-sheet-h: 72dvh;
+}
+
 .maphost {
   position: fixed;
-  /* 2026-09-12: 지도 캔버스는 **뷰포트 전체**다. 레일 아래까지 지도가 깔린다.
-     그전까지 여기서 `inset: 0 0 0 var(--rail-w)` 로 레일 폭(64px)만큼 잘라 냈다 —
-     레일이 지도 옆의 별도 열이라 지도가 화면을 다 쓰지 못했다.
-     지금 레일은 지도 옆이 아니라 지도 **위에** 뜬다(App.css `.is-map .rail`).
-     UI 가 레일 밑으로 숨는 문제는 아래 `.map-overlays` 가 대신 비켜서 막는다. */
+  /* 좁은 화면에서 지도 캔버스는 **뷰포트 전체**다(2026-09-12 「지도 전체화면」) — 레일 밑까지 지도가 깔린다.
+     UI 가 레일 밑으로 숨는 문제는 `.map-overlays` 와 `.mh-panel` 이 레일 폭만큼 비켜서 막는다. */
   inset: 0;
   overflow: hidden;
   font-family: var(--font-sans, system-ui, sans-serif);
   color: var(--ink);
 }
 
-/* ── 오버레이 레이어 ──
-   지도는 뷰포트 전체를 쓰지만 **UI 는 레일을 피한다**. 검색·목록·범례가
-   레일(64px) 밑으로 들어가면 눌리지 않는다. 지도 캔버스와 오버레이의 좌측
-   기준선이 여기서 갈린다 — 캔버스는 0, 오버레이는 --rail-w.
+/* 지도 칸 — 좁은 화면은 뷰포트 전체, 넓은 화면은 그리드 가운데 칸(아래 @media). */
+.maphost .map-frame { position: absolute; inset: 0; overflow: hidden; }
+
+/* ── 오버레이 층(지도 위 UI) ──
+   2026-11-08 부터 지도 칸 안에 있다. 넓은 화면에서는 지도 칸 = 보이는 지도라 inset 0 이고,
+   좁은 화면에서는 레일 · 패널을 비켜 **보이는 지도 영역**만 덮는다(아래 @media).
    pointer-events:none 이라 빈 자리는 지도 드래그가 그대로 통과한다
-   (자식이 각자 auto 로 되살린다 — .mapshell · .map-overlays > .overlay). */
+   (자식이 각자 auto 로 되살린다 — .mapshell · .trackmap 의 버튼). */
 .maphost .map-overlays {
   position: absolute;
   inset: 0 0 0 var(--rail-w, 0px);
@@ -41,7 +56,7 @@
   /* ⚠ inset:0 만으로 크기를 잡지 말 것. 네이버 지도 SDK 가 초기화하면서 컨테이너의
      position 을 relative 로 덮어쓰는데, 그러면 inset 이 사이징이 아니라 오프셋으로
      해석돼 높이가 0 으로 접힌다(2026-08-01 실측 — 지도가 아예 안 보였다).
-     width/height 100% 는 position 이 뭐가 되든 부모(.maphost)를 채운다. */
+     width/height 100% 는 position 이 뭐가 되든 부모(.map-frame)를 채운다. */
   width: 100%;
   height: 100%;
   background: #e9eef5; /* 지도 로드 전/실패 시 바탕 */
@@ -71,4 +86,86 @@
 .maphost .map-note code {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 6px; padding: 2px 6px; font-size: 12px;
+}
+
+/* ── 칸 ── 빈 칸은 그리지 않는다(MapHost 가 mh-no-* 클래스로도 알려 그리드를 고친다). */
+.maphost .mh-head:empty, .maphost .mh-left:empty, .maphost .mh-right:empty { display: none; }
+.maphost .mh-slot { min-width: 0; }
+
+/* 좁은 화면(<1200px): 칸 셋을 지도 위 패널 하나에 차례로 쌓는다 — 예전 좌측 패널 자리. 패널이 통째로 스크롤한다. */
+@media (max-width: 1199px) {
+  .maphost .mh-panel {
+    position: absolute; z-index: 6;   /* z 축: 지도 0 · 오버레이 5 · 패널 6 · 모달 20 */
+    top: var(--mh-gap); bottom: var(--mh-gap); left: calc(var(--rail-w, 0px) + var(--mh-gap));
+    width: var(--mh-panel-w);
+    display: flex; flex-direction: column;
+    overflow-y: auto; overscroll-behavior: contain;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
+  }
+  .maphost.mh-no-head.mh-no-left.mh-no-right .mh-panel,
+  .maphost.is-collapsed .mh-panel { display: none; }
+  /* 지도 위 UI 는 패널 오른쪽의 보이는 지도에 선다 — 패널 밑에 깔리면 눌리지 않는다 */
+  .maphost:not(.is-collapsed):not(.mh-no-head.mh-no-left.mh-no-right) .map-overlays {
+    left: calc(var(--rail-w, 0px) + var(--mh-panel-w) + 2 * var(--mh-gap));
+  }
+}
+@media (max-width: 768px) {
+  /* 휴대폰: 하단 시트 — 지도는 시트 위에 보인다 */
+  .maphost .mh-panel {
+    top: auto; left: var(--rail-w, 0px); right: 0; bottom: 0; width: auto; height: var(--mh-sheet-h);
+    border: 0; border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
+    box-shadow: var(--shadow-sheet);
+  }
+  .maphost:not(.is-collapsed):not(.mh-no-head.mh-no-left.mh-no-right) .map-overlays {
+    left: var(--rail-w, 0px); bottom: var(--mh-sheet-h);
+  }
+}
+
+/* 넓은 화면(≥1200px): 머리 / 왼쪽 · 지도 · 오른쪽. 칸이 각자 스크롤하고 지도는 가운데 카드다. */
+@media (min-width: 1200px) {
+  .maphost {
+    display: grid;
+    grid-template-columns: var(--mh-left-w) minmax(0, 1fr) var(--mh-right-w);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "head head head" "left map right";
+    column-gap: var(--mh-gap);
+    padding: var(--mh-gap) var(--mh-gap) var(--mh-gap) calc(var(--rail-w, 0px) + var(--mh-gap));
+    background: var(--bg);
+  }
+  .maphost .mh-panel { display: contents; }
+  .maphost .mh-head { grid-area: head; min-width: 0; padding-bottom: var(--mh-gap); }
+  .maphost .mh-left { grid-area: left; }
+  .maphost .mh-right { grid-area: right; }
+  .maphost .mh-left, .maphost .mh-right { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--mh-gap); }
+  .maphost .mh-left > .mh-slot, .maphost .mh-right > .mh-slot { min-height: 0; }
+  .maphost .map-frame {
+    position: relative; inset: auto; grid-area: map; min-width: 0; min-height: 0;
+    border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
+    background: #e9eef5;
+  }
+  /* 지도 칸이 곧 보이는 지도다 — 레일은 그리드 여백이 이미 비켰다 */
+  .maphost .map-overlays, .maphost .map-note { inset: 0; }
+  .maphost.mh-no-left { grid-template-columns: minmax(0, 1fr) var(--mh-right-w); grid-template-areas: "head head" "map right"; }
+  .maphost.mh-no-right { grid-template-columns: var(--mh-left-w) minmax(0, 1fr); grid-template-areas: "head head" "left map"; }
+  .maphost.mh-no-left.mh-no-right,
+  .maphost.is-collapsed { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "map"; }
+  .maphost.is-collapsed .mh-left, .maphost.is-collapsed .mh-right { display: none; }
+
+  /* 지도 셸 밖에 떠 있는 버튼이 칸을 가리지 않게 — 의견 보내기는 지도 칸 오른쪽 아래, 입점 준비는 머리 칸 오른쪽 위 */
+  body:has(.maphost:not(.is-collapsed):not(.mh-no-right)) .visitor-feedback:not(:has(.visitor-feedback-panel)) {
+    right: calc(var(--mh-right-w) + 3 * var(--mh-gap));
+    bottom: calc(2 * var(--mh-gap));
+  }
+  body:has(.maphost:not(.mh-no-head)) .founder-trigger {
+    top: calc(2 * var(--mh-gap)); right: calc(2 * var(--mh-gap));
+  }
+}
+/* 태블릿: 오버레이 층이 패널 오른쪽 지도로 줄어 첫 방문 「내 사업」 카드가 200px 대로 짓눌렸다 — 화면 기준으로 띄운다(2026-11-08 리뷰) */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .maphost .biz-card {
+    position: fixed; left: calc(50% + var(--rail-w, 0px) / 2);
+    width: min(520px, calc(100vw - var(--rail-w, 0px) - 24px)); max-height: calc(100dvh - 96px);
+  }
 }

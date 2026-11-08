@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import ConsolePages from "@/components/ConsolePages";
+import { useMapLayout } from "@/components/mapLayoutContext";
 import CampaignLedger from "@/components/program/CampaignLedger";
 import ExecutionCards from "@/components/program/ExecutionCards";
 import NetworkingPanel from "@/components/program/NetworkingPanel";
@@ -38,6 +39,7 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
 } = {}) {
   // Posting 「이 자리로 검증 program 만들기」로 오면 가설 검증부터 연다 — 그 버튼이 약속한 화면이다.
   const [tab, setTab] = useState<Tab>(handoff ? "hypothesis" : "network");
+  const inSlots = useMapLayout() !== null;
   const districtId = mapDistrictId ?? handoff?.districtId ?? null;
   const stage = stageForGoal(businessGoal);
   const needDistrict = (body: ReactNode) => districtId ? body
@@ -75,12 +77,19 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
       </Suspense> },
   ];
 
+  const intro = (title: ReactNode) => <header>
+    <p className="campaign-eyebrow">Promotion ▶ Program</p>
+    {title}
+    <p>이 상권에서 <b>누구와 연결하고, 무엇을 지원받고, 어떻게 알리며</b>, 그 결과로 아이템이 <b>통하는지 어떤 기준으로 판정</b>할 것인가?</p>
+  </header>;
+  // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
+  // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.
+  if (inSlots) return <div className="campaign-studio program-hub">
+    <ConsolePages label="Program 네 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)}
+      navSlot="left" navTrack="program" navIntro={intro(<h2>Program</h2>)} />
+  </div>;
   return <div className="campaign-studio program-hub">
-    <header>
-      <p className="campaign-eyebrow">Promotion ▶ Program</p>
-      <h1>Program</h1>
-      <p>이 상권에서 <b>누구와 연결하고, 무엇을 지원받고, 어떻게 알리며</b>, 그 결과로 아이템이 <b>통하는지 어떤 기준으로 판정</b>할 것인가?</p>
-    </header>
+    {intro(<h1>Program</h1>)}
     <ConsolePages label="Program 네 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)} />
   </div>;
 }

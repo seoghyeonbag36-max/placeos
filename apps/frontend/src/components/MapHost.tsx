@@ -25,11 +25,24 @@ import type { NaverMap } from "@/lib/naverTypes";
  * relative 로 덮어써서 inset 이 오프셋으로 해석되고 높이가 0 으로 접힌다
  * (2026-08-01 실측). `width/height:100%` 를 같이 준다.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { endTiming, startTiming } from "@/lib/clientTiming";
 import { loadNaverMaps, describeNaverMapError } from "@/lib/naverMap";
+import { MapLayoutCtx, type MapLayout, type MapSlotName } from "./mapLayoutContext";
 import "./MapHost.css";
+
+const SLOT_NAMES: MapSlotName[] = ["head", "left", "right"];
+
+/** 지도 캔버스 크기가 바뀌었다고 SDK 에 알린다 — 칸 배치에서는 지도가 가운데 칸이라 창 크기·접기마다 크기가 바뀐다.
+ *  SDK 판마다 이름이 달라 있는 것을 쓴다(autoResize → setSize → refresh). 없으면 아무것도 하지 않는다. */
+function resizeMap(map: NaverMap, el: HTMLElement): void {
+  const m = map as NaverMap & { autoResize?: () => void; setSize?: (size: unknown) => void };
+  if (typeof m.autoResize === "function") { m.autoResize(); return; }
+  const Size = (window.naver?.maps as unknown as { Size?: new (w: number, h: number) => unknown } | undefined)?.Size;
+  if (typeof m.setSize === "function" && Size) { m.setSize(new Size(el.clientWidth, el.clientHeight)); return; }
+  if (typeof m.refresh === "function") m.refresh();
+}
 
 /** 가로수길 코어 — 거점 목록이 오기 전 초기 중심(poc-building-vacancy.md §0.5). */
 const GAROSU = { lat: 37.5205, lng: 127.023 };
@@ -64,6 +77,45 @@ export default function MapHost({ active, children }: { active: boolean; childre
   const [everActive, setEverActive] = useState(active);
   if (active && !everActive) setEverActive(true);
 
+  // ── 칸 배치(2026-11-08) ── 머리 · 왼쪽 · 오른쪽 칸 요소를 세운 뒤에야 오버레이(트랙 화면)를 그린다.
+  //   먼저 그리면 MapSlot 이 첫 렌더에는 제자리에, 다음 렌더에는 칸으로 옮겨 그려 트랙 화면이 한 번 새로 마운트된다.
+  const headRef = useRef<HTMLDivElement>(null);
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const [slots, setSlots] = useState<Record<MapSlotName, HTMLElement> | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  // 칸마다 그려진 것이 있는가 — 빈 칸은 그리드에서 걷어 지도가 그 폭을 쓴다(Posting 처럼 왼쪽이 없는 화면 · 화면을 받는 중)
+  const [filled, setFilled] = useState<Record<MapSlotName, boolean>>({ head: false, left: false, right: false });
+  useLayoutEffect(() => {
+    const els = { head: headRef.current, left: leftRef.current, right: rightRef.current };
+    if (!els.head || !els.left || !els.right) return;
+    setSlots({ head: els.head, left: els.left, right: els.right });
+    const sync = () => setFilled((prev) => {
+      const next = { head: els.head!.childElementCount > 0, left: els.left!.childElementCount > 0, right: els.right!.childElementCount > 0 };
+      return SLOT_NAMES.every((k) => prev[k] === next[k]) ? prev : next;
+    });
+    sync();
+    if (typeof MutationObserver === "undefined") return;
+    const mo = new MutationObserver(sync);
+    for (const k of SLOT_NAMES) mo.observe(els[k]!, { childList: true });
+    return () => mo.disconnect();
+  }, []);
+  const layout = useMemo<MapLayout | null>(() => (slots ? { slots, setCollapsed } : null), [slots]);
+
+  // 지도 칸 크기가 바뀌면(창 크기 · 접기 · 칸이 차고 빔) SDK 에 알린다 — 그대로 두면 지도가 옛 크기로 잘리거나 빈다.
+  const frameRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!map || !frame || typeof ResizeObserver === "undefined") return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { if (elRef.current) resizeMap(map, elRef.current); });
+    });
+    ro.observe(frame);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [map]);
+
   // 지도 1회 초기화.
   //
   // 앱이 뜨자마자 만들지 않는다 — 지도 SDK 는 무거운데, 서울·Platform·Posting·Program
@@ -92,9 +144,20 @@ export default function MapHost({ active, children }: { active: boolean; childre
     return () => { alive = false; };
   }, [everActive]);
 
+  const cls = ["maphost", active ? "" : "is-hidden", collapsed ? "is-collapsed" : "",
+    ...SLOT_NAMES.map((k) => (filled[k] ? "" : `mh-no-${k}`))].filter(Boolean).join(" ");
   return (
     <MapHostCtx.Provider value={{ map, ready, error }}>
-      <div className={"maphost" + (active ? "" : " is-hidden")} aria-hidden={!active}>
+      <MapLayoutCtx.Provider value={layout}>
+      <div className={cls} aria-hidden={!active}>
+        {/* 칸 — 넓은 화면은 그리드(머리 / 왼쪽 · 지도 · 오른쪽), 좁은 화면은 지도 위 패널 하나(MapHost.css).
+            트랙 화면이 MapSlot 으로 채운다. React 는 이 세 div 에 자식을 그리지 않는다 — 안은 portal 몫이다. */}
+        <div className="mh-panel">
+          <div ref={headRef} className="mh-head" />
+          <div ref={leftRef} className="mh-left" />
+          <div ref={rightRef} className="mh-right" />
+        </div>
+        <div ref={frameRef} className="map-frame">
         {/* 지도 캔버스는 탭 순서에서 뺀다 — 키보드 사용자가 지도에 갇히지 않게 */}
         <div ref={elRef} className="map-canvas" tabIndex={-1} />
 
@@ -124,8 +187,12 @@ export default function MapHost({ active, children }: { active: boolean; childre
             UI 까지 좌측 0 에서 시작하면 검색·목록이 레일(64px) 밑에 깔려 안 눌린다.
             래퍼가 그 폭만큼 비켜서 캔버스와 UI 의 좌측 기준선을 갈라 놓는다
             (MapHost.css `.map-overlays`). */}
-        {active && <div className="map-overlays">{children}</div>}
+        {/* 2026-11-08: 오버레이 층은 지도 칸(.map-frame) 안이다 — 지도 위 UI(레이어 토글 · 범례 · 펴기 버튼)가
+            가운데 지도 위에 선다. 칸으로 옮길 내용은 각 화면이 MapSlot 으로 꺼내 간다. */}
+        {active && slots && <div className="map-overlays">{children}</div>}
+        </div>
       </div>
+      </MapLayoutCtx.Provider>
     </MapHostCtx.Provider>
   );
 }
