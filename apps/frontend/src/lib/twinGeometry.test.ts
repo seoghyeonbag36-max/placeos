@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentLevel, boundsOf, clipToConvex, wallBays, windowSpans, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
+import { adjacentLevel, areaSummary, boundsOf, clipToConvex, wallBays, windowSpans, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
   stackFloors, startCamera, timelineScale, yearOf } from "@/lib/twinGeometry";
 
 describe("ringToLocal", () => {
@@ -180,5 +180,18 @@ describe("windowSpans — 창 규칙(표현용)", () => {
     const sq: [number, number][] = [[0, 0], [10, 0], [10, 7], [0, 7]];
     const key = (ws: ReturnType<typeof windowSpans>) => ws.map((w) => [Math.min(w.a[0], w.b[0]), Math.min(w.a[1], w.b[1])].map((v) => v.toFixed(3)).join(",")).sort();
     expect(key(windowSpans([...sq].reverse()))).toEqual(key(windowSpans(sq)));
+  });
+});
+
+describe("areaSummary — 전용 · 공용 · 계약 · 전용률", () => {
+  it("공용이 있는 호실만 계약·전용률에 넣는다", () => {
+    const a = areaSummary([{ area_m2: 60, pub_m2: 40 }, { area_m2: 30, pub_m2: null }]);
+    expect(a).toEqual({ n: 2, excl: 90, nPub: 1, pub: 40, contract: 100, ratio: 60 });
+  });
+  it("공용을 모르면 계약·전용률은 null — 0 으로 지어내지 않는다", () => {
+    const a = areaSummary([{ area_m2: 50 }]);
+    expect(a.contract).toBeNull();
+    expect(a.ratio).toBeNull();
+    expect(areaSummary(null).n).toBe(0);
   });
 });

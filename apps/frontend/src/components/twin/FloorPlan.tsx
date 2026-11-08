@@ -101,7 +101,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
       </svg>
       {!!floor.units?.length && <div className="twin3d-cta" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" className="twin3d-btn" key={index}
         aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `전용 ${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
-      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"} · 호실별 공실·점포 이력 귀속 미확인</p>}
+      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"}{picked.pub_m2 ? ` · 공용 ${picked.pub_m2}㎡ · 계약 ${Math.round((picked.area_m2 ?? 0) * 100 + picked.pub_m2 * 100) / 100}㎡` : ""} · 호실별 공실·점포 이력 귀속 미확인</p>}
       <p className="twin3d-note">
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}

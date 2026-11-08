@@ -17,7 +17,12 @@
 
 ## 무엇을 남기고 무엇을 남기지 않나
 
-남기는 것: 지번(PNU) → 상업 전유 유닛 목록 `[{flr, ho, area_m2}]` + 층별 요약.
+남기는 것: 지번(PNU) → 상업 전유 유닛 목록 `[{flr, ho, area_m2, purps, dong, pub_m2?}]` + 층별 요약.
+
+`pub_m2`(2026-11-08) — 같은 전유공용면적 응답의 **공용** 행(`exposPubuseGbCdNm == "공용"`)을 동·호(`dongNm`·`hoNm`)로
+묶어 그 호의 공용면적 합을 붙인다. 계약면적(전용 + 공용)·전용률을 실측으로 보이기 위한 재료다. 추가 호출은 없다 —
+수집기(`collectors/building_vacancy.py`)가 응답 전 행을 bronze 에 그대로 남긴다. 짝이 없는 호는 `pub_m2` 를 달지 않는다
+(0 으로 채우지 않는다). 한 호에 전유 행이 여럿이면 첫 행에만 단다(공용을 두 번 세지 않게).
 **남기지 않는 것: 어느 유닛이 어느 공실인지.** 대장 전유 호(`hoNm`)와 우리 인벤토리의
 유닛은 서로 다른 식별체계이고, 붙이는 규칙(층 중앙값? 건물 중앙값? 호 매칭?)은
 **제품 판단**이다. 추출은 기계적이지만 배정은 아니라서, 여기서는 재료만 만든다.
@@ -56,13 +61,46 @@ def _floor_label(nm: object) -> str:
     return str(nm or "").strip()
 
 
+def _ho_key(row: dict) -> tuple[str, str]:
+    return (str(row.get("dongNm") or "").strip(), str(row.get("hoNm") or "").strip())
+
+
+def attach_pub(units: list[dict], pub: dict[tuple[str, str], float]) -> int:
+    """전유 유닛에 그 호의 공용면적 합(`pub_m2`)을 단다. 붙인 유닛 수를 돌려준다.
+
+    짝(동·호)이 없거나 호 이름이 비면 달지 않는다. 한 호에 전유 행이 여럿이면 첫 행에만 단다.
+    """
+    seen: set[tuple[str, str]] = set()
+    n = 0
+    for u in units:
+        key = (u.get("dong") or "", u.get("ho") or "")
+        if not key[1] or key in seen:
+            continue
+        seen.add(key)
+        area = pub.get(key) or 0.0
+        if area > 0:
+            u["pub_m2"] = round(area, 2)
+            n += 1
+    return n
+
+
 def collect_hub(slug: str) -> dict:
     """거점 하나의 전유 유닛 목록. 날짜별 체크포인트 중 **더 많이 담긴 쪽**을 남긴다."""
     per_pnu: dict[str, list[dict]] = {}
     for p in sorted((BRONZE / slug).glob("*/bldg_ledger_raw.json")):
         cur: dict[str, list[dict]] = {}
+        pub: dict[str, dict[tuple[str, str], float]] = {}
         for pnu, lst, row in stream_rows(p, _ITEM_INDENT):
             if row is None or lst != "expos":
+                continue
+            if row.get("exposPubuseGbCdNm") == "공용":
+                try:
+                    a = float(row.get("area") or 0)
+                except (TypeError, ValueError):
+                    continue
+                if a > 0:
+                    d = pub.setdefault(str(pnu), {})
+                    d[_ho_key(row)] = d.get(_ho_key(row), 0.0) + a
                 continue
             if row.get("exposPubuseGbCdNm") != "전유":
                 continue
@@ -79,7 +117,10 @@ def collect_hub(slug: str) -> dict:
                 "ho": str(row.get("hoNm") or "").strip(),
                 "area_m2": round(area, 2),
                 "purps": str(row.get("mainPurpsCdNm") or "").strip(),
+                "dong": _ho_key(row)[0],
             })
+        for pnu, units in cur.items():
+            attach_pub(units, pub.get(pnu, {}))
         # 빈 체크포인트가 나중 날짜라는 이유로 채워진 것을 덮어쓰면 안 된다.
         for pnu, units in cur.items():
             if len(units) >= len(per_pnu.get(pnu, [])):
@@ -130,6 +171,7 @@ def run(slugs: list[str]) -> dict:
         dst.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 
         n_u = sum(len(v) for v in per_pnu.values())
+        n_pub = sum(1 for v in per_pnu.values() for u in v if u.get("pub_m2"))
         spreads = [doc["pnu"][k]["spread_ratio"] for k in doc["pnu"]
                    if doc["pnu"][k]["spread_ratio"]]
         totals["hubs"] += 1
@@ -137,7 +179,8 @@ def run(slugs: list[str]) -> dict:
         totals["units"] += n_u
         totals["spreads"] += spreads
         med = round(statistics.median(spreads), 1) if spreads else None
-        print(f"  {slug}: 지번 {len(per_pnu)} · 유닛 {n_u} · 면적편차 중앙 {med}배 "
+        # 공용 짝 비율 — 첫 실행 때 0 에 가까우면 공용 행의 호 표기가 전유와 다르다는 뜻이다(짝 규칙을 다시 본다).
+        print(f"  {slug}: 지번 {len(per_pnu)} · 유닛 {n_u} · 공용면적 짝 {n_pub}/{n_u} · 면적편차 중앙 {med}배 "
               f"→ silver/{slug}/{FILENAME}")
 
     sp = totals["spreads"]

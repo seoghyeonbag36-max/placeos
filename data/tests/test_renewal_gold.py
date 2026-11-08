@@ -115,9 +115,10 @@ def test_building_floors_keeps_basements_and_joins_master():
 def test_building_floors_has_units_only_where_silver_had_them():
     with_units = sum(any("units" in lot for lot in _gz(s, "building_floors.json.gz")["lots"].values()) for s in HUBS)
     assert 40 <= with_units < len(HUBS)
-    lots = _gz("garosugil", "building_floors.json.gz")["lots"]
-    unit = next(lot["units"][0] for lot in lots.values() if lot.get("units"))
-    assert len(unit) == 6 and unit[1] in "GBR?"
+    doc = _gz("garosugil", "building_floors.json.gz")
+    unit = next(lot["units"][0] for lot in doc["lots"].values() if lot.get("units"))
+    # 2026-11-08 pub_m2(공용면적) 열이 붙었다 — 재빌드 전 6열 · 후 7열. 행 길이는 그 파일의 unit_fields 와 같아야 한다.
+    assert len(unit) == len(doc["unit_fields"]) in (6, 7) and unit[1] in "GBR?"
 
 
 def test_building_floors_size_budget():

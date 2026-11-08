@@ -181,6 +181,24 @@ export function windowSpans(pts: readonly Point[]): WindowSpan[] {
   return out;
 }
 
+/**
+ * 층 호실 면적 요약 — 전용(전유부 전유 행) · 공용(같은 응답 공용 행, 있을 때만) · 계약 = 전용 + 공용 · 전용률.
+ * 공용이 있는 호실만 계약·전용률에 넣는다(공용 모르는 호실을 0 으로 세면 전용률이 부풀어 보인다).
+ */
+export function areaSummary(units: readonly { area_m2: number | null; pub_m2?: number | null }[] | null | undefined) {
+  const r1 = (v: number) => Math.round(v * 10) / 10;
+  const valid = (units ?? []).filter((u) => (u.area_m2 ?? 0) > 0);
+  const withPub = valid.filter((u) => (u.pub_m2 ?? 0) > 0);
+  const excl = valid.reduce((s, u) => s + (u.area_m2 ?? 0), 0);
+  const exclP = withPub.reduce((s, u) => s + (u.area_m2 ?? 0), 0);
+  const pub = withPub.reduce((s, u) => s + (u.pub_m2 ?? 0), 0);
+  return {
+    n: valid.length, excl: r1(excl), nPub: withPub.length, pub: r1(pub),
+    contract: withPub.length ? r1(exclP + pub) : null,
+    ratio: withPub.length ? Math.round((exclP / (exclP + pub)) * 1000) / 10 : null,
+  };
+}
+
 /** 외곽선을 볼록 다각형(사각형)으로 자른다 — Sutherland–Hodgman. 잘린 쪽이 오목해도 넓이는 맞다. */
 export function clipToConvex(subject: readonly Point[], clip: readonly Point[]): Point[] {
   let out: Point[] = [...subject];

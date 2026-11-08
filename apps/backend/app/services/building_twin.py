@@ -122,7 +122,8 @@ def _floors(props: dict, pnu: str, listed: dict[int, dict], lot: dict | None, do
         if u.get("kind") in ("G", "B") and isinstance(no, int) and no > 0:
             lv = no if u["kind"] == "G" else -no
             units_by_level.setdefault(lv, []).append(
-                {"ho": u.get("ho"), "area_m2": u.get("area_m2"), "purps": u.get("purps")})
+                {"ho": u.get("ho"), "area_m2": u.get("area_m2"), "purps": u.get("purps"),
+                 "pub_m2": u.get("pub_m2")})   # 그 호의 공용면적 합 — 재빌드 전 Gold 에는 없다(None)
 
     floors: list[dict] = []
     for lv in [*range(top, 0, -1), *range(-1, -below - 1, -1)]:

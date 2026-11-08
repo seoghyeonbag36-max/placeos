@@ -20,10 +20,22 @@
 ### 2-1. 집합건물(구분소유 상가·오피스텔 등) — 공개 API 로 된다
 
 - 오퍼레이션 `getBrExposPubuseAreaInfo`(전유공용면적). 호(`hoNm`)마다 `exposPubuseGbCdNm`(전유/공용) · `area` 행이 나온다.
-- 지금 파이프라인(`data/pipelines/build_expos_units.py`)은 **전유 행만** 남긴다 → 화면의 「전용면적」 = 그 층 전유 호실의 합.
-- **바로 할 수 있는 다음 단계:** 같은 응답의 **공용 행**도 남기면 호실별 공용면적과 계약면적(전용+공용) · 전용률을 **실측으로** 보일 수 있다.
-  bronze 원본(`data/bronze/{거점}/*/bldg_ledger_raw.json` — git 밖, 수집 PC 에만 있음)에 공용 행이 남아 있으면 추가 호출 없이 계산된다.
-  남아 있지 않으면 해당 거점만 다시 수집한다(쿼터 소모).
+- 화면의 「전용면적」 = 그 층 전유 호실의 합(전유 행).
+- **공용면적 · 계약면적 · 전용률 — 코드 배포 완료(2026-11-08), 데이터는 수집 PC 에서 한 번 재빌드하면 나온다.**
+  - 수집기는 응답의 전 행(전유 + 공용)을 bronze(`data/bronze/{거점}/*/bldg_ledger_raw.json` — git 밖, 수집 PC 에만 있음)에 남긴다.
+  - `build_expos_units` 가 공용 행을 동·호로 묶어 그 호에 `pub_m2` 를 붙이고, `build_building_floors` 가 Gold 호실 행에 실어 나른다.
+  - 트윈 API(`units[].pub_m2`)와 화면(오른쪽 패널 「계약면적」 줄 · 호실 표 공용·전용률 열 · 3D 면적 상자)이 값이 있을 때만 보인다.
+  - **추가 API 호출은 없다** — 이미 받은 bronze 로 계산한다. 수집 PC 에서:
+
+    ```bash
+    python -m data.pipelines.build_expos_units          # 서빙 거점 전부 — 출력의 「공용면적 짝 n/m」을 본다
+    python -m data.pipelines.build_building_floors      # Gold building_floors.json.gz 재빌드
+    python -m pytest data/tests -q                       # Gold 계약(크기 예산 25MB 포함) 확인
+    git add data/gold/*/building_floors.json.gz && git commit -m "data: 호실 공용면적(pub_m2) Gold 반영" && git push   # PR → main → 자동 배포
+    ```
+
+  - 「공용면적 짝」이 0 에 가까우면 공용 행의 호 표기가 전유 행과 다르다는 뜻이다 — 원본 행 몇 개를 보고 짝 규칙(`_ho_key`)을 고친다.
+    bronze 에 공용 행이 없는 거점(수집 상한 `expos_capped` 등)은 그 거점만 다시 수집한다(쿼터 소모 · `/quota`).
 
 ### 2-2. 일반건축물(건물 한 채 한 소유 — 공실 층 대부분) — 공개 API 에 없다
 

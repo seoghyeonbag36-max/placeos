@@ -103,8 +103,9 @@ class HourlyProfile(BaseModel):
 
 class TwinUnit(BaseModel):
     ho: str | None = None
-    area_m2: float | None = None
+    area_m2: float | None = None      # 전용면적(전유부 전유 행)
     purps: str | None = None
+    pub_m2: float | None = None       # 그 호의 공용면적 합(전유공용면적 공용 행) — 계약면적 = area_m2 + pub_m2
 
 
 class TwinFloor(BaseModel):

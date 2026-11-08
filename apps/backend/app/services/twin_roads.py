@@ -15,7 +15,9 @@ OpenStreetMap 도로를 OpenFreeMap 벡터 타일(z14, 키 없음 · `tiles.open
 ## 실패해도 트윈은 산다
 
 `roads_for_twin` 은 예외를 내지 않는다 — 타일을 못 받으면 `roads=[]` + `roads_error` 이고 건물·층 응답은 그대로다.
-실패 직후 `_FAIL_BACKOFF_S` 동안은 타일 서버를 다시 치지 않는다(장애 때 트윈 요청마다 타임아웃을 기다리지 않게).
+첫 실패는 한 번 더 시도한다 — 새로 뜬 Cloud Run 인스턴스의 첫 외부 연결이 늦어 첫 요청만 도로가 비던 문제(2026-11-08 배포 직후
+두 번 관측). 두 번 다 실패하면 `_FAIL_BACKOFF_S` 동안 타일 서버를 다시 치지 않는다(장애 때 트윈 요청마다 타임아웃을 기다리지 않게).
+실패는 로그(`twin_roads`)로 남겨 원인을 Cloud Run 로그에서 본다.
 
     roads = roads_near(lat, lng)                          # [{n, c, w, sw, ow, line:[[lat, lng], ...]}, ...]
     check = address_road_check(ring, road_addr, roads)    # 도로명주소의 도로가 건물 바로 앞에 있는지
@@ -24,6 +26,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import logging
 import math
 import re
 import threading
@@ -47,8 +50,10 @@ CLASS_WIDTH = {'motorway': (36, 0), 'trunk': (36, 3), 'primary': (30, 4), 'secon
 WIDTH_OVERRIDES = {'성수이로': (25, 3), '연무장길': (10, 1.5), '상원길': (6, 0), '아차산로': (30, 4), '뚝섬로': (30, 4),
                    '왕십리로': (25, 3.5), '성수일로': (20, 3), '광나루로': (30, 4)}
 SKIP_SERVICE = {'parking_aisle', 'driveway', 'drive-through'}
-_FAIL_BACKOFF_S = 60.0       # 타일 서버 실패 뒤 다시 치지 않는 시간
+_FAIL_BACKOFF_S = 15.0       # 타일 서버가 두 번 연달아 실패한 뒤 다시 치지 않는 시간(60초 → 15초: 일시 장애로 도로가 오래 비지 않게)
+_TIMEOUT_S = 8.0             # 요청 하나의 제한 시간(5초 → 8초: 새 인스턴스의 첫 연결 DNS·TLS 여유)
 _last_fail = 0.0
+log = logging.getLogger("twin_roads")
 
 
 # ── 벡터 타일(Mapbox Vector Tile) 최소 해석기 ─────────────────────────────
@@ -158,7 +163,7 @@ def decode_lines(pbf: bytes, x: int, y: int, z: int = Z, layers: Iterable[str] =
 # ── 타일 받기 (캐시) ────────────────────────────────────────────────────
 _lock = threading.Lock()
 
-def _get(url: str, timeout: float = 5.0) -> bytes:
+def _get(url: str, timeout: float = _TIMEOUT_S) -> bytes:
     req = urllib.request.Request(url, headers={'Accept-Encoding': 'gzip', 'User-Agent': 'PlaceOS-twin-roads/1.0'})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         data = r.read()
@@ -293,11 +298,17 @@ def roads_for_twin(lat: float, lng: float, ring: list[list[float]] | None = None
     source = {**SOURCE, 'radius_m': radius_m}
     if fetch is None and time.monotonic() - _last_fail < _FAIL_BACKOFF_S:
         return {'roads': [], 'roads_source': source, 'road_check': None, 'roads_error': 'backoff'}
-    try:
-        roads = roads_near(lat, lng, radius_m, fetch=fetch)
-    except Exception as e:   # 네트워크 · 타일 형식 오류 — 도로만 빼고 트윈은 그대로
+    err: Exception | None = None
+    for attempt in (1, 2):   # 첫 실패는 한 번 더 — 받은 타일은 캐시에 남아 두 번째 시도는 빠진 것만 다시 받는다
+        try:
+            roads = roads_near(lat, lng, radius_m, fetch=fetch)
+            break
+        except Exception as e:   # 네트워크 · 타일 형식 오류 — 도로만 빼고 트윈은 그대로
+            err = e
+            log.warning("twin roads attempt %d failed at (%.5f, %.5f): %s: %s", attempt, lat, lng, type(e).__name__, e)
+    else:
         if fetch is None:
             _last_fail = time.monotonic()
-        return {'roads': [], 'roads_source': source, 'road_check': None, 'roads_error': type(e).__name__}
+        return {'roads': [], 'roads_source': source, 'road_check': None, 'roads_error': type(err).__name__}
     check = address_road_check(ring, road_addr, roads) if ring else None
     return {'roads': roads, 'roads_source': source, 'road_check': check, 'roads_error': None}
