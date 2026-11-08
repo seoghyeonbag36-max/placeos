@@ -1,11 +1,11 @@
-import VisitorFeedback from "@/components/VisitorFeedback";
+import VisitorFeedback, { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
 import PpppReportProvider from "@/components/PpppReportProvider";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
 import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
-import { IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
+import { IconFeedback, IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ExploreStepHeader, ExploreStepFooter } from "@/components/ExploreStep";
 import type { PostingDraft } from "@/pages/PostingConsole";
@@ -94,7 +94,7 @@ const PRELOAD_DELAY_MS = 1500;
  *
  * 2026-09-23(B9): **계정 화면 3종**은 해시로 연다 — #login · #signup · #account(API 키).
  *   화면을 갈아끼우지 않고 지도 위 모달(AccountDialog)로 띄운다. 트랙 패널도 그대로 남아,
- *   닫으면 보던 자리로 돌아온다. 레일 맨 아래 「계정」이 입구다.
+ *   닫으면 보던 자리로 돌아온다. 레일 맨 아래 「계정」이 입구다(그 바로 위가 「의견 보내기」 — 2026-11-08).
  *   2026-09-28(P2): #feedback(파일럿 피드백 — NPS·결제 의향)을 같은 틀에 더했다. 입구는 #account 화면.
  *   2026-09-28(P1): 로그인해 있으면 분석 요청에도 토큰이 실린다(lib/api.ts analysisFetch). 그 토큰이
  *   만료되면 분석은 익명으로 계속 돌고, 여기서 「로그인이 만료됐습니다」 한 줄을 띄운다.
@@ -410,6 +410,14 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <span>{n.label}</span>
           </button>
         ))}
+        {/* 2026-11-08: 의견 보내기를 오른쪽 아래 떠 있는 버튼에서 레일로 옮겼다 — 지도·패널 글을 가리던 자리다.
+            「계정」 바로 위(= 도움·의견은 내비게이션 맨 아래, 의견이 그 위)에 두고, 의견창(VisitorFeedback)은
+            OPEN_VISITOR_FEEDBACK 로 같은 창을 연다. 누른 버튼을 실어 보내 닫을 때 초점이 이 버튼으로 돌아온다. */}
+        <button type="button" className="rail-btn rail-feedback" aria-haspopup="dialog"
+          onClick={(event) => window.dispatchEvent(new CustomEvent(OPEN_VISITOR_FEEDBACK, { detail: { opener: event.currentTarget } }))}>
+          <IconFeedback />
+          <span>의견 보내기</span>
+        </button>
         {/* 트랙이 아니다 — data-track 을 주지 않아 레일의 남색 폴백을 쓴다(App.css) */}
         <button type="button" className={"rail-btn rail-account" + (accountScreen ? " active" : "")}
           aria-haspopup="dialog" onClick={openAccount}>

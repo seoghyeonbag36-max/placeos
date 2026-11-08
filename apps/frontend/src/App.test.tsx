@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { WorkspaceApp } from "@/App";
+import VisitorFeedback from "@/components/VisitorFeedback";
 import { saveToken, clearToken } from "@/lib/session";
 const App = () => <WorkspaceApp token="jwt.test.token" initialBusiness={{ status: "browsing" }} />;
 import { installNaverStub, removeNaverStub, type NaverStub } from "@/test/naverStub";
@@ -42,7 +43,7 @@ const TAB_LOAD = { timeout: 20000 };
 const MULTI_TAB = { timeout: 60000 };
 
 describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
-  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 맨 아래 「계정」만 있다 — 서울·거점 탭은 없다", async () => {
+  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 맨 아래 「의견 보내기」·「계정」만 있다 — 서울·거점 탭은 없다", async () => {
     mount(true);
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
     expect(rail.textContent).toContain("PlaceOS");
@@ -50,9 +51,9 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     const tracks = Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent);
     // 레일 순서는 PPPP 프레임워크 순서 그대로다(2026-09-26).
     expect(tracks).toEqual(["Platform", "Page", "Posting", "Program"]);
-    // 트랙이 아닌 버튼은 「계정」(B9, 2026-09-23) 하나뿐이고 맨 아래에 있다.
+    // 트랙이 아닌 버튼은 둘뿐이고 맨 아래에 있다 — 「계정」(B9, 2026-09-23)과 그 바로 위 「의견 보내기」(2026-11-08).
     const labels = Array.from(rail.querySelectorAll("button")).map((b) => b.textContent);
-    expect(labels).toEqual([...tracks, "계정"]);
+    expect(labels).toEqual([...tracks, "의견 보내기", "계정"]);
     expect(screen.queryByRole("button", { name: "서울" })).toBeNull();
     expect(screen.queryByRole("button", { name: "거점" })).toBeNull();
     // 레일 맨 위와 첫 화면은 같은 트랙이다(2026-09-26) — 어긋나면 여기가 운다.
@@ -93,6 +94,31 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     fireEvent.click(screen.getByRole("button", { name: "Page" }));
     expect(await screen.findByText("연남 건물", {}, TAB_LOAD)).toBeTruthy();
     expect((screen.getByRole("combobox", { name: "상권 선택" }) as HTMLSelectElement).value).toBe("yeonnam");
+  });
+
+  it("레일 「의견 보내기」가 「계정」 바로 위에서 의견창을 열고, 닫으면(× · Esc) 초점이 그 버튼으로 돌아온다 (2026-11-08)", async () => {
+    mount(true);
+    render(<VisitorFeedback />);
+    await screen.findByRole("complementary", { name: "상권 정체성" }, TAB_LOAD);
+    const rail = screen.getByRole("navigation", { name: "주요 화면" });
+    const button = within(rail).getByRole("button", { name: "의견 보내기" });
+    expect(button.nextElementSibling).toBe(within(rail).getByRole("button", { name: "계정" }));
+    const panel = () => screen.queryByRole("region", { name: "PlaceOS 의견 보내기" });
+    expect(panel()).toBeNull();
+
+    fireEvent.click(button);
+    expect(panel()).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "의견창 닫기" }));
+    expect(panel()).toBeNull();
+    expect(document.activeElement).toBe(button);
+
+    fireEvent.click(button);
+    expect(panel()).not.toBeNull();
+    fireEvent.keyDown(panel()!, { key: "Escape" });
+    expect(panel()).toBeNull();
+    // 같은 Esc 에 뒤의 Platform 패널이 접히면 접힌 패널이 초점을 가져간다 — 의견창이 열려 있는 동안은 접지 않는다
+    expect(screen.getByRole("complementary", { name: "상권 정체성" })).toBeTruthy();
+    expect(document.activeElement).toBe(button);
   });
 });
 

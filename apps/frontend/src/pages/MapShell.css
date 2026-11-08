@@ -433,10 +433,7 @@
 @media (max-width: 768px) {
   /* 현재 시트는 72dvh다. 예전 52dvh 기준 범례가 본문 위에 겹치던 것을 바로잡는다. */
   .mapshell .legend { bottom: calc(72dvh + var(--sp-3)); }
-  body:has(.mapshell) .visitor-feedback:not(:has(.visitor-feedback-panel)) {
-    top: calc(2 * var(--workspace-control-height, 40px) + 3 * var(--sp-2));
-    height: max-content; bottom: auto;
-  }
+  /* 의견 보내기 버튼을 지도 위 모서리로 피해 두던 규칙은 뺐다 — 버튼이 레일로 옮겨 갔다(App.css 2026-11-08). */
 }
 
 /* §4 3분류 · 평일/주말 · 3D 입구 */
