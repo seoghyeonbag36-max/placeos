@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentLevel, boundsOf, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
+import { adjacentLevel, boundsOf, clipToConvex, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
   stackFloors, startCamera, timelineScale, yearOf } from "@/lib/twinGeometry";
 
 describe("ringToLocal", () => {
@@ -113,5 +113,54 @@ describe("지번 이력", () => {
   it("직전 업종 근거는 끝 날짜가 가장 늦은 폐업 업소다", () => {
     expect(lastClosed(items)?.name).toBe("나");
     expect(lastClosed([items[2]])).toBeNull();
+  });
+});
+
+describe("planLayout — 건물 긴 변을 따라 놓고 외곽선 안으로 자른 개략 칸", () => {
+  // 30° 돌아간 20 × 10m 직사각형
+  const a = Math.PI / 6, c = Math.cos(a), s = Math.sin(a);
+  const rot = ([x, y]: [number, number]): [number, number] => [x * c - y * s, x * s + y * c];
+  const rect = ([[-10, -5], [10, -5], [10, 5], [-10, 5]] as [number, number][]).map(rot);
+
+  it("칸 넓이는 전용면적 비례이고 합은 외곽선 넓이를 넘지 않는다", () => {
+    const { pieces, angle } = planLayout(rect, [{ ho: "101", area_m2: 50 }, { ho: "102", area_m2: 100 }], 200);
+    expect(angle).toBeCloseTo(a, 6);
+    const units = pieces.filter((p) => p.kind === "unit");
+    expect(units).toHaveLength(2);
+    const [p1, p2] = units.map((p) => ringArea(p.poly));
+    expect(p2 / p1).toBeCloseTo(2, 1);
+    expect(pieces.reduce((t, p) => t + ringArea(p.poly), 0)).toBeLessThanOrEqual(200 + 1e-6);
+  });
+
+  it("호실이 없으면 칸이 없다", () => {
+    expect(planLayout(rect, [], 200).pieces).toEqual([]);
+  });
+
+  it("층 면적을 모르면 외곽선 넓이 기준 — 작은 호실이 층 전체를 덮지 않고 나머지는 공용·기타다", () => {
+    const { pieces } = planLayout(rect, [{ ho: "801", area_m2: 10 }, { ho: "802", area_m2: 10 }], null);
+    const unitArea = pieces.filter((p) => p.kind === "unit").reduce((t, p) => t + ringArea(p.poly), 0);
+    expect(unitArea).toBeCloseTo(20, 0);
+    expect(pieces.some((p) => p.kind === "rest")).toBe(true);
+  });
+
+  it("볼록 사각형으로 자르면 겹친 부분만 남는다", () => {
+    const sq: [number, number][] = [[0, 0], [4, 0], [4, 4], [0, 4]];
+    expect(ringArea(clipToConvex(sq, [[2, -1], [6, -1], [6, 6], [2, 6]]))).toBeCloseTo(8, 6);
+  });
+});
+
+describe("frontRoad — 주소 도로 쪽", () => {
+  const sq: [number, number][] = [[-5, -5], [5, -5], [5, 5], [-5, 5]];
+  const lat0 = 37.5, lng0 = 127;
+  const south = 20 / 111320;   // 건물 남쪽 20m 동서 도로
+  const roads = [{ n: "테스트로", line: [[lat0 - south, lng0 - 0.001], [lat0 - south, lng0 + 0.001]] as [number, number][] }];
+  it("주소 도로가 남쪽이면 남쪽 외곽선 끝을 가리킨다", () => {
+    const f = frontRoad(sq, roads, "테스트로", lat0, lng0)!;
+    expect(f.dir[1]).toBeCloseTo(-1, 3);
+    expect(f.edge[1]).toBeCloseTo(-5, 3);
+  });
+  it("주소 도로를 못 찾으면 null — 지어내지 않는다", () => {
+    expect(frontRoad(sq, roads, "다른길", lat0, lng0)).toBeNull();
+    expect(frontRoad(sq, undefined, "테스트로", lat0, lng0)).toBeNull();
   });
 });

@@ -68,12 +68,15 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
       <p className="twin3d-note">{meta.rule}</p>
       <p className="twin3d-note">근거: 상가정보 점포 대조 · 현장 미확인{asOf(twin) ? ` · 기준일 ${asOf(twin)}` : ""}</p>
       <dl className="twin3d-dl">
-        <dt>면적</dt>
+        {/* 전용면적과 층 바닥면적은 따로 적는다(2026-11-08) — 전용면적은 전유부(전유) 값뿐이고 지어내지 않는다 */}
+        <dt>전용면적</dt>
+        <dd>{unitArea > 0
+          ? <><b className="num">{unitArea.toLocaleString("ko-KR")}㎡</b> ({(unitArea / PY).toFixed(1)}평) <EvidenceBadge kind="실측" /><small> 전유부 {floor.units?.length ?? 0}호실 합</small></>
+          : <><span className="value-absent">자료 없음</span><small> 전유부가 없는 층(일반건축물)이라 대장에 전용면적이 없습니다</small></>}</dd>
+        <dt>층 바닥면적</dt>
         <dd>{floor.area_m2
-          ? <><b className="num">{floor.area_m2.toLocaleString("ko-KR")}㎡</b> ({(floor.area_m2 / PY).toFixed(1)}평) <EvidenceBadge kind="실측" />{floor.area_source ? <small> {floor.area_source}</small> : null}</>
-          : unitArea > 0
-            ? <><b className="num">호실 합 {unitArea.toLocaleString("ko-KR")}㎡</b> <EvidenceBadge kind="계산" /><small> 전유부 호실 합계 · 층 전체 면적이 아님</small></>
-            : <span className="value-absent">자료 없음</span>}</dd>
+          ? <><b className="num">{floor.area_m2.toLocaleString("ko-KR")}㎡</b> ({(floor.area_m2 / PY).toFixed(1)}평) <EvidenceBadge kind="실측" /><small> {floor.area_source ?? "대장 층별개요"} · 계단·화장실 등 공용 포함</small></>
+          : <span className="value-absent">자료 없음</span>}</dd>
         <dt>용도</dt>
         <dd>{floor.purps ?? <span className="value-absent">자료 없음</span>}</dd>
         {(vacant || floor.status === "uncertain") && <>
@@ -123,6 +126,25 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
   );
 }
 
+/** 3D 화면 위 — 고른 층의 전용면적을 층 바닥면적과 따로 보인다(2026-11-08). */
+function FloorAreaBox({ floor }: { floor: TwinFloor }) {
+  const units = floor.units ?? [];
+  const excl = Math.round(units.reduce((s, u) => s + (u.area_m2 ?? 0), 0) * 10) / 10;
+  return (
+    <div className="twin3d-area" role="status" aria-label={`${floor.label} 면적`}>
+      <b><span className="twin3d-badge" style={{ background: TWIN_STATUS[floor.status].color }} aria-hidden /> {floor.label} · {TWIN_STATUS[floor.status].label}</b>
+      <dl>
+        <dt>전용면적</dt>
+        <dd>{excl > 0
+          ? <><b className="num">{excl.toLocaleString("ko-KR")}㎡</b> · {(excl / PY).toFixed(1)}평 <small>전유부 {units.length}호실</small></>
+          : <><span className="value-absent">자료 없음</span> <small>전유부 없음</small></>}</dd>
+        <dt>층 바닥면적</dt>
+        <dd>{floor.area_m2 ? <><span className="num">{floor.area_m2.toLocaleString("ko-KR")}㎡</span> <small>공용 포함</small></> : <span className="value-absent">자료 없음</span>}</dd>
+      </dl>
+    </div>
+  );
+}
+
 export default function BuildingTwinDialog(props: BuildingTwinDialogProps) {
   return <BuildingTwinContent key={`${props.districtId}:${props.buildingId}`} {...props} />;
 }
@@ -134,6 +156,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   const [neighbors, setNeighbors] = useState(true);
   const [labels, setLabels] = useState(true);
   const [roadsOn, setRoadsOn] = useState(true);
+  const [planOn, setPlanOn] = useState(true);
   const [roadStats, setRoadStats] = useState<RoadLayerStats | null>(null);
   const [flat, setFlat] = useState(false);   // WebGL 실패 → 2D
   const [live, setLive] = useState("");
@@ -191,6 +214,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   const neighborsRef = useRef(neighbors);
   const labelsRef = useRef(labels);
   const roadsOnRef = useRef(roadsOn);
+  const planOnRef = useRef(planOn);
   useEffect(() => {
     selectRef.current = select;
     selectedLvRef.current = selectedLv;
@@ -198,6 +222,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
     neighborsRef.current = neighbors;
     labelsRef.current = labels;
     roadsOnRef.current = roadsOn;
+    planOnRef.current = planOn;
   });
 
   // 장면 — 응답이 오면 한 번 만들고, 언마운트 때 전부 해제한다. 3D 코드는 여기서만 받는다.
@@ -229,6 +254,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
         handle.setNeighbors(neighborsRef.current);
         handle.setLabels(labelsRef.current);
         handle.setRoads(roadsOnRef.current);
+        handle.setPlan(planOnRef.current);
         setRoadStats(handle.roadStats);
       } catch {
         setFlat(true);
@@ -246,6 +272,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   useEffect(() => { handleRef.current?.setNeighbors(neighbors); }, [neighbors]);
   useEffect(() => { handleRef.current?.setLabels(labels); }, [labels]);
   useEffect(() => { handleRef.current?.setRoads(roadsOn); }, [roadsOn]);
+  useEffect(() => { handleRef.current?.setPlan(planOn); }, [planOn]);
 
   const onViewKey = (e: React.KeyboardEvent) => {
     if (handleRef.current?.handleKey(e.key)) e.preventDefault();
@@ -356,6 +383,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                   <div className="twin3d-seg" role="group" aria-label="장면 표시">
                     <button type="button" aria-pressed={neighbors} onClick={() => setNeighbors((v) => !v)}>주변 건물</button>
                     <button type="button" aria-pressed={labels} onClick={() => setLabels((v) => !v)}>층 라벨</button>
+                    <button type="button" aria-pressed={planOn} onClick={() => setPlanOn((v) => !v)}>개략 배치</button>
                     <button type="button" onClick={() => handleRef.current?.resetView()}>시점 초기화</button>
                   </div>
                 </div>
@@ -367,6 +395,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                   </button>
                 ))}
               </div>
+              {!flat && selected && <FloorAreaBox floor={selected} />}
               {!flat && <div className="twin3d-compass" title="위쪽 바늘이 진북입니다" aria-hidden><span ref={needleRef}><i>N</i></span></div>}
               <div className="twin3d-legend">
                 {LEGEND.map((k) => <span key={k} title={TWIN_STATUS[k].rule}><i style={{ background: TWIN_STATUS[k].color }} />{TWIN_STATUS[k].label}</span>)}

@@ -6,7 +6,7 @@ import { installFetchStub } from "@/test/fetchStub";
 import type { BuildingTwin } from "@/lib/api";
 import { JOURNEY_KEY, loadJourney } from "@/lib/journeyState";
 
-const handle = { setMode: vi.fn(), setNeighbors: vi.fn(), setRoads: vi.fn(), roadStats: { segments: 42, junctions: 7, crosswalks: 12, names: 9 }, setLabels: vi.fn(), selectFloor: vi.fn(), resetView: vi.fn(), handleKey: vi.fn(() => true), dispose: vi.fn() };
+const handle = { setMode: vi.fn(), setNeighbors: vi.fn(), setRoads: vi.fn(), roadStats: { segments: 42, junctions: 7, crosswalks: 12, names: 9 }, setLabels: vi.fn(), setPlan: vi.fn(), selectFloor: vi.fn(), resetView: vi.fn(), handleKey: vi.fn(() => true), dispose: vi.fn() };
 const scene = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock("three", () => { throw new Error("three 를 불러오면 안 된다"); });
 vi.mock("@/components/twin/TwinScene", () => ({ createTwinScene: scene.create }));
@@ -124,7 +124,7 @@ describe("BuildingTwinDialog", () => {
     mount();
     await screen.findByRole("heading", { name: "1F · 공실확정" });
     fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
-    expect(screen.getByText("개략 배치 · 실측 도면 아님")).toBeTruthy();
+    expect(screen.getByText("호실 크기는 전용면적 비례 · 실측 도면 아님")).toBeTruthy();
     expect(screen.getByText("전유부 호실 1개", { exact: false })).toBeTruthy();
   });
 
@@ -152,5 +152,26 @@ describe("BuildingTwinDialog", () => {
     expect(within(sec).getByText(/도로 형상을 불러오지 못했습니다/)).toBeTruthy();
     expect(within(sec).queryByRole("checkbox")).toBeNull();
     expect(screen.getByRole("heading", { name: "1F · 공실확정" })).toBeTruthy();
+  });
+
+  it("전용면적과 층 바닥면적을 따로 적는다 — 전유부가 없으면 전용면적은 자료 없음", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    const box = await screen.findByRole("status", { name: "1F 면적" });
+    expect(within(box).getByText("전용면적")).toBeTruthy();
+    expect(within(box).getByText("자료 없음")).toBeTruthy();
+    expect(within(box).getByText("120㎡")).toBeTruthy();
+    expect(screen.getByText(/전유부가 없는 층\(일반건축물\)/)).toBeTruthy();
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
+    const box2 = screen.getByRole("status", { name: "2F 면적" });
+    expect(within(box2).getByText("40㎡")).toBeTruthy();          // 전유부 201호 전용 40㎡
+    expect(within(box2).getByText("전유부 1호실")).toBeTruthy();
+  });
+
+  it("개략 배치 켜고 끄기가 장면으로 간다", async () => {
+    mount();
+    await waitFor(() => expect(handle.setPlan).toHaveBeenCalledWith(true));
+    fireEvent.click(screen.getByRole("button", { name: "개략 배치" }));
+    expect(handle.setPlan).toHaveBeenLastCalledWith(false);
   });
 });
