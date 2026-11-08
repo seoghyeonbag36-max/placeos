@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
-import { boundsOf, frontRoad, planLayout, ringArea, ringToLocal } from "@/lib/twinGeometry";
+import { boundsOf, frontRoad, planLayout, ringArea, ringToLocal, windowSpans } from "@/lib/twinGeometry";
 
 interface Overlay { url: string; name: string; opacity: number; rotate: number; scale: number }
 
@@ -16,6 +16,8 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   const b = useMemo(() => boundsOf(pts), [pts]);
   const outline = useMemo(() => ringArea(pts), [pts]);
   const { pieces: cells, omitted } = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2), [pts, floor.units, floor.area_m2]);
+  // 창 — 3D 외벽과 같은 규칙(windowSpans). 지상층만 · 표현용(실측 아님)
+  const windows = useMemo(() => (floor.lv > 0 ? windowSpans(pts) : []), [pts, floor.lv]);
   const front = useMemo(() => frontRoad(pts, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng),
     [pts, twin.roads, twin.road_check, twin.lat, twin.lng]);
   const [overlays, setOverlays] = useState<Record<number, Overlay>>({});
@@ -52,7 +54,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         {cells.length > 0 && <span className="twin3d-tag">호실 크기는 전용면적 비례 · 실측 도면 아님</span>}
       </div>
       <svg viewBox={`${b.minX - pad} ${-b.maxY - pad} ${b.w + pad * 2} ${b.h + pad * 2}`} role="img"
-        aria-label={`${floor.label} 바닥 외곽선${cells.length ? ` · 호실 ${cells.filter((c) => c.kind === "unit").length}개 개략 칸` : ""}`}>
+        aria-label={`${floor.label} 바닥 외곽선${cells.length ? ` · 호실 ${cells.filter((c) => c.kind === "unit").length}개 개략 칸` : ""}${windows.length ? ` · 창 ${windows.length}개(표현용)` : ""}`}>
         <defs><clipPath id={clip}><path d={path} /></clipPath></defs>
         <path d={path} className="twin3d-plan-floor" vectorEffect="non-scaling-stroke" />
         <g clipPath={`url(#${clip})`}>
@@ -82,6 +84,16 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
           )}
         </g>
         <path d={path} className="twin3d-plan-outline" vectorEffect="non-scaling-stroke" />
+        {windows.length > 0 && (
+          <g className="twin3d-plan-windows" aria-hidden>
+            {windows.map((w, i) => (
+              <g key={i}>
+                <line x1={w.a[0]} y1={-w.a[1]} x2={w.b[0]} y2={-w.b[1]} className="twin3d-plan-window" vectorEffect="non-scaling-stroke" />
+                <line x1={w.a[0]} y1={-w.a[1]} x2={w.b[0]} y2={-w.b[1]} className="twin3d-plan-glass" vectorEffect="non-scaling-stroke" />
+              </g>
+            ))}
+          </g>
+        )}
         {front && (
           <text x={front.edge[0] + front.dir[0] * pad * 0.55} y={-(front.edge[1] + front.dir[1] * pad * 0.55)} className="twin3d-plan-front"
             style={{ fontSize: big * 0.045 }}>▼ 전면 · {front.name}</text>
@@ -94,6 +106,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}
       </p>
+      {windows.length > 0 && <p className="twin3d-note"><span className="twin3d-plan-key" aria-hidden /> 창 — 3D 외벽과 같은 자리의 표현용 그림입니다(실측 창호 아님).</p>}
       {cells.length === 0 && <p className="twin3d-note">이 층은 전유부 호실 자료가 없어 칸을 나누지 않았습니다. 평면도 원천은 없습니다.</p>}
       {omitted > 0 && <p className="twin3d-note">면적이 없는 호실 {omitted}개는 칸에서 뺐습니다.</p>}
       <div className="twin3d-upload">
