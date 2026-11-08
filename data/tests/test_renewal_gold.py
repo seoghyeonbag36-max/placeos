@@ -17,7 +17,7 @@ from data.pipelines.build_building_floors import (
     parse_floor,
     pnu_of_building_id,
 )
-from data.pipelines.build_hub_outlines import outline
+from data.pipelines.build_hub_outlines import _heatmap_service, outline
 from data.pipelines.build_rone_history import series_by_hub
 from data.pipelines.build_stores_lite import (
     LITE_FIELDS,
@@ -211,8 +211,41 @@ def test_colocation_doc():
 
 # ── 외곽선 ───────────────────────────────────────────────────────────────
 def _cells(*ij):
+    """서버(`gold_vacancy.build_cells`) 규약 — `i` = 위도(남→북) 칸 · `j` = 경도(서→동) 칸.
+
+    2026-11-08 까지 이 픽스처가 거꾸로(`i` = 경도) 만들어, 같은 착오를 한 `outline` 과 맞물려 통과했다.
+    """
     d = 0.001
-    return [{"i": i, "j": j, "lat": 37 + j * d, "lng": 127 + i * d, "dlat": d, "dlng": d} for i, j in ij]
+    return [{"i": i, "j": j, "lat": 37 + i * d, "lng": 127 + j * d, "dlat": d, "dlng": d} for i, j in ij]
+
+
+def _in_ring(lat: float, lng: float, ring: list[list[float]]) -> bool:
+    """짝홀 규칙 점-다각형 판정. 링은 `[lat, lng]` 순."""
+    inside = False
+    for (y1, x1), (y2, x2) in zip(ring, ring[1:] + ring[:1]):
+        if (x1 > lng) != (x2 > lng) and lat < (y2 - y1) * (lng - x1) / (x2 - x1) + y1:
+            inside = not inside
+    return inside
+
+
+def _covers(pieces: list[dict], lat: float, lng: float) -> bool:
+    return any(_in_ring(lat, lng, p["outer"]) and not any(_in_ring(lat, lng, h) for h in p["holes"])
+               for p in pieces)
+
+
+def test_outline_reads_latlng_not_index_axes():
+    """비대칭 L자(동쪽 3칸 + 서쪽 끝 위 1칸) — 외곽선이 셀 자리에 서고, i·j 를 뒤바꿔 넣어도 같다.
+
+    정사각형은 뒤집혀도 같은 모양이라 축 착오를 못 잡는다(2026-11-08 · 실셀과 같은 거점 0/158).
+    """
+    cells = _cells((0, 0), (0, 1), (0, 2), (1, 0))
+    doc = outline(cells)
+    outer = doc["pieces"][0]["outer"]
+    lats, lngs = [p[0] for p in outer], [p[1] for p in outer]
+    assert (min(lats), max(lats), min(lngs), max(lngs)) == (37.0, 37.002, 127.0, 127.003)
+    assert [37.001, 127.001] in outer                       # L자의 오목한 꼭짓점
+    assert not _covers(doc["pieces"], 37.0015, 127.0025)    # 빠진 북동쪽 칸은 밖
+    assert outline([{**c, "i": c["j"], "j": c["i"]} for c in cells]) == doc
 
 
 def test_outline_merges_square_and_drops_collinear():
@@ -243,6 +276,31 @@ def test_outlines_gold():
         assert hub["pieces"] and all(len(p["outer"]) >= 4 for p in hub["pieces"])
         lat, lng = hub["pieces"][0]["outer"][0]
         assert round(lat, 5) == lat and 33 < lat < 39 and 124 < lng < 132
+
+
+def test_outlines_gold_cover_exactly_the_measured_cells():
+    """저장된 외곽선이 **실제 셀 자리**를 덮는가 — 셀 중심은 전부 안, 셀이 아닌 격자 칸 중심은 전부 밖.
+
+    합성 셀 테스트만으로는 축 착오를 못 잡았다. 2026-11-08 에 실셀과 대조하자 정확히 같은 거점이
+    0/158 이었고, 왕십리는 Page 공실 점 242개 중 4개만 Platform 범위 안이었다. 점-다각형 판정은
+    `outline` 알고리즘과 무관하게 저장본만 읽는다 — 셀 Gold 를 새로 빌드하고 외곽선을 안 다시 만들어도 여기서 걸린다.
+    """
+    svc = _heatmap_service()
+    bad: list[str] = []
+    for slug, hub in _json("platform_hub_outlines.json")["hubs"].items():
+        cells = svc.get_vacancy_heatmap(slug)["cells"]
+        dlat, dlng = cells[0]["dlat"], cells[0]["dlng"]
+        lat0, lng0 = min(c["lat"] for c in cells), min(c["lng"] for c in cells)
+        filled = {(round((c["lng"] - lng0) / dlng), round((c["lat"] - lat0) / dlat)) for c in cells}
+        xs, ys = [x for x, _ in filled], [y for _, y in filled]
+        wrong = [(x, y) for x in range(min(xs) - 1, max(xs) + 2) for y in range(min(ys) - 1, max(ys) + 2)
+                 if _covers(hub["pieces"], lat0 + (y + .5) * dlat, lng0 + (x + .5) * dlng) != ((x, y) in filled)]
+        pts = [p for piece in hub["pieces"] for p in piece["outer"]]
+        bbox = (min(p[0] for p in pts), max(p[0] for p in pts), min(p[1] for p in pts), max(p[1] for p in pts))
+        want = (lat0, lat0 + (max(ys) + 1) * dlat, lng0, lng0 + (max(xs) + 1) * dlng)
+        if wrong or any(abs(a - b) > 1e-5 for a, b in zip(bbox, want)):
+            bad.append(f"{slug}(어긋난 칸 {len(wrong)})")
+    assert not bad, f"외곽선이 실측 셀과 다르다 {len(bad)}곳: {bad[:8]} — python -m data.pipelines.build_hub_outlines"
 
 
 # ── R-ONE 시계열 ─────────────────────────────────────────────────────────

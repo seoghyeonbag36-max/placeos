@@ -1,7 +1,8 @@
 """[Platform] 거점별 실측 범위 외곽선 — gold/platform_hub_outlines.json.
 
 `/heatmap/vacancy` 의 100m 격자 셀 합집합의 외곽선이다. 프론트 `lib/hubBoundary.ts computeHubBoundary` 와
-같은 뜻(4-이웃 조각 · 내부가 왼쪽인 변 추적 · 핀치는 오른쪽 우선 · `v > 0` 으로 셀을 거르지 않음)이고, 한 직선 위의
+같은 뜻(4-이웃 조각 · 내부가 왼쪽인 변 추적 · 핀치는 오른쪽 우선 · `v > 0` 으로 셀을 거르지 않음 · 격자 좌표는
+셀 `lat`·`lng` 에서 구함 — `i`·`j` 축 규약을 읽지 않음)이고, 한 직선 위의
 꼭짓점만 줄여 싣는다. 조각을 감싸 하나로 덮지 않는다 — 안 잰 곳을 잰 것처럼 그리게 된다.
 **공식 상권 경계가 아니다.** 합성 그리드 폴백 거점은 싣지 않는다.
 
@@ -103,13 +104,21 @@ def _inside_bbox(inner: list[Point], outer: list[Point]) -> bool:
 
 
 def outline(cells: list[dict]) -> dict | None:
-    """히트맵 셀(i·j·lat·lng·dlat·dlng) → `{cells, components, largest_share, pieces}`. 셀이 없으면 None."""
+    """히트맵 셀(lat·lng·dlat·dlng) → `{cells, components, largest_share, pieces}`. 셀이 없으면 None.
+
+    ⚠ 격자 좌표는 셀의 남서 모서리(`lat`·`lng`)에서 구한다 — `i`·`j` 를 읽지 않는다.
+    `gold_vacancy.build_cells` 의 `i` 는 **위도**(남→북)·`j` 는 **경도**(서→동) 인덱스인데, 이 함수는
+    2026-11-08 까지 `i` 를 경도·`j` 를 위도로 읽어 외곽선이 대각선으로 뒤집힌 채 옮겨졌다(실셀과 정확히 같은
+    거점 0/158 · 왕십리 공실 점 242개 중 범위 안 4개). 인덱스 축 규약에 기대지 않으면 같은 실수가 다시 날 자리가 없다.
+    """
     if not cells:
         return None
     c0 = cells[0]
     dlat, dlng = c0["dlat"], c0["dlng"]
-    lat0, lng0 = c0["lat"] - c0["j"] * dlat, c0["lng"] - c0["i"] * dlng
-    filled = {(c["i"], c["j"]) for c in cells}
+    # 모든 셀이 같은 격자 위에 있으므로 최소 위·경도가 곧 격자 꼭짓점이다.
+    lat0, lng0 = min(c["lat"] for c in cells), min(c["lng"] for c in cells)
+    # (x=경도 칸, y=위도 칸). 응답 좌표는 6자리 반올림이라 나눗셈을 정수로 반올림한다.
+    filled = {(round((c["lng"] - lng0) / dlng), round((c["lat"] - lat0) / dlat)) for c in cells}
 
     def to_latlng(ring: list[Point]) -> list[list[float]]:
         return [[round(lat0 + y * dlat, 5), round(lng0 + x * dlng, 5)] for x, y in _drop_collinear(ring)]
