@@ -104,3 +104,15 @@
 .twin3d-road-facts { margin: 0; padding-left: 1.1em; display: grid; gap: 2px; }
 .twin3d-ok { color: var(--source-real); }
 .twin3d-warn { color: var(--danger-text); }
+/* 개략 배치도 · 전용면적 (2026-11-08) */
+.twin3d-plan-front { fill: var(--muted); font-weight: 700; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+.twin3d-area { position: absolute; left: var(--sp-3); bottom: 64px; z-index: 2; min-width: 190px; padding: 8px 10px; background: rgba(255, 255, 255, .94); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.twin3d-area > b { display: flex; align-items: center; gap: 6px; }
+.twin3d-area dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; }
+.twin3d-area dt { color: var(--muted); }
+.twin3d-area dd { margin: 0; }
+.twin3d-area small { color: var(--muted); }
+/* 3D 개략 배치 칸 라벨 · 전면 표시 */
+.twin3d-unit-label { pointer-events: none; padding: 2px 6px; font: inherit; font-size: 11px; font-weight: 600; white-space: nowrap; color: #312E81; background: rgba(255, 255, 255, .92); border: 1px solid #A5B4FC; border-radius: 6px; }
+.twin3d-unit-label.is-empty { color: var(--muted); border-color: var(--line); }
+.twin3d-front-label { pointer-events: none; padding: 2px 8px; font: inherit; font-size: 11px; font-weight: 700; white-space: nowrap; color: var(--surface); background: var(--ink); border-radius: 999px; }

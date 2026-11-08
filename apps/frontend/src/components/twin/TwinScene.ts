@@ -8,10 +8,15 @@
  *
  * 현실감(2026-11-07)은 **표현만** 바꾼다 — 하늘 그라데이션 · 먼 곳 안개 · 따뜻한 햇빛 · 주변 건물 벽/지붕 톤 · 접지 그늘.
  * 주변 건물은 불투명하게 세우고, 카메라와 대상 건물 사이를 가리는 것만 반투명으로 비킨다. 형상·층수·높이는 그대로
- * 실측이고, 창호·외장 텍스처와 해 그림자는 여전히 그리지 않는다(실측이 아니다).
+ * 실측이고, 해 그림자는 그리지 않는다(실측이 아니다).
+ *
+ * 2026-11-08 사용자 결정 — ① 대상 건물 외벽에 창문을 그린다. **창 위치·크기는 표현용 그림이고 실측이 아니다**(범례 「창호·내부는
+ * 실측 아님」). 층마다 한 줄, 약 3m 간격, 1층은 통유리 상점 전면 · 지하는 창 없음. ② 고른 층을 열어 전유부 호실을 **전용면적
+ * 비례 개략 칸**으로 세운다(`planLayout` — 2D 개략 배치도와 같은 칸 · 위치는 실측 아님 · 호실별 공실은 모름). 주소 도로를 찾으면
+ * 그쪽에 「▼ 전면」을 단다.
  */
 import {
-  Box3, BufferGeometry, CanvasTexture, Color, Fog, MeshBasicMaterial, Ray, SRGBColorSpace, Texture, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
+  Box3, BufferGeometry, CanvasTexture, RepeatWrapping, Color, Fog, MeshBasicMaterial, Ray, SRGBColorSpace, Texture, DirectionalLight, DoubleSide, EdgesGeometry, ExtrudeGeometry, Group, HemisphereLight,
   LineBasicMaterial, LineSegments, Material, Mesh, MeshStandardMaterial, Object3D, PerspectiveCamera, Raycaster, Scene,
   Shape, ShapeGeometry, Path, Spherical, Vector2, Vector3, WebGLRenderer,
 } from "three";
@@ -19,8 +24,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
 import { createRoadLayer, type RoadLayerStats } from "./twinRoads";
-import { adjacentLevel, boundsOf, explodeOffset, isVacantStatus, nudgeOrbit, ringToLocal, stackFloors, startCamera,
-  TWIN_STATUS, type Point } from "@/lib/twinGeometry";
+import { adjacentLevel, boundsOf, explodeOffset, frontRoad, isVacantStatus, nudgeOrbit, planLayout, ringArea, ringToLocal, stackFloors,
+  startCamera, TWIN_STATUS, type Point } from "@/lib/twinGeometry";
 
 export type TwinMode = "exterior" | "exploded" | "vacant";
 
@@ -42,13 +47,15 @@ export interface TwinSceneHandle {
   /** 그린 도로 구간 · 교차로 · 횡단보도 · 이름 라벨 수 */
   roadStats: RoadLayerStats;
   setLabels(on: boolean): void;
+  /** 고른 층을 열어 전용면적 비례 개략 칸을 세울지 */
+  setPlan(on: boolean): void;
   selectFloor(lv: number | null, focus?: boolean): void;
   resetView(): void;
   handleKey(key: string): boolean;
   dispose(): void;
 }
 
-interface FloorObj { floor: TwinFloor; group: Group; mesh: Mesh; mat: MeshStandardMaterial; line: LineBasicMaterial; label: CSS2DObject; baseY: number; offset: number; target: number }
+interface FloorObj { floor: TwinFloor; group: Group; mesh: Mesh; mat: MeshStandardMaterial; cap: MeshStandardMaterial; line: LineBasicMaterial; label: CSS2DObject; height: number; baseY: number; offset: number; target: number }
 
 const GAP = 2.6;
 const MAX_POLAR = Math.PI * 0.49;
@@ -100,6 +107,32 @@ function skyTexture(): Texture {
   }
   const t = new CanvasTexture(c);
   t.colorSpace = SRGBColorSpace;
+  return t;
+}
+
+const WIN_BAY_M = 3.0;           // 창 한 칸 폭(표현용)
+
+/**
+ * 창 격자 텍스처 — 흰 바탕(벽·띠) + 회청색 유리 + 가운데 멀리언. 층 색과 곱해져 유리 외벽처럼 보인다.
+ * `shop` 은 1층 상점 전면(바닥 가까이까지 내려온 통유리). 표현용 그림이다 — 실측 창호가 아니다.
+ */
+function windowTexture(shop: boolean): Texture {
+  const c = document.createElement("canvas");
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext("2d");
+  if (ctx) {
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 64, 64);
+    const top = shop ? 5 : 9, bottom = shop ? 60 : 44;   // 캔버스 위 = 층 위
+    const g = ctx.createLinearGradient(0, top, 0, bottom);
+    g.addColorStop(0, "#c9d3df"); g.addColorStop(0.55, "#8b98aa"); g.addColorStop(1, "#7d8b9e");
+    ctx.fillStyle = g; ctx.fillRect(5, top, 54, bottom - top);
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(31, top, 2, bottom - top);
+    if (!shop) { ctx.fillStyle = "#e4e8ee"; ctx.fillRect(5, bottom, 54, 2); }   // 창턱
+  }
+  const t = new CanvasTexture(c);
+  t.wrapS = t.wrapT = RepeatWrapping;
+  t.colorSpace = SRGBColorSpace;
+  t.anisotropy = 4;
   return t;
 }
 
@@ -209,6 +242,14 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const pos = local.reduce<Point>((best, p) => (p[0] - p[1] > best[0] - best[1] ? p : best), local[0] ?? [0, 0]);
   const tall = twin.floors.length > LABELS_ALL_MAX;
   const labelRoot: HTMLElement[] = [];
+  // 창 텍스처 — (상점 여부 × 층고)마다 하나. ExtrudeGeometry 옆면 UV 는 미터 단위라 반복값으로 칸 폭·층 높이를 맞춘다.
+  const winTex = new Map<string, Texture>();
+  const texOf = (shop: boolean, h: number) => {
+    const k = `${shop ? 1 : 0}:${Math.round(h * 100)}`;
+    let t = winTex.get(k);
+    if (!t) { t = windowTexture(shop); t.repeat.set(1 / WIN_BAY_M, 1 / h); winTex.set(k, t); }
+    return t;
+  };
   for (const s of stack.floors) {
     const floor = byLv.get(s.lv)!;
     const key = Math.round(s.height * 100);
@@ -220,9 +261,14 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       floorGeos.set(key, geo);
       floorEdges.set(key, edges);
     }
-    const mat = trackM(new MeshStandardMaterial({ color: TWIN_STATUS[floor.status].color, roughness: 0.8, metalness: 0, transparent: true, opacity: 1, fog: false }));
+    const color = TWIN_STATUS[floor.status].color;
+    // 그룹 0 = 바닥·천장(층 색), 1 = 옆면(층 색 × 창 텍스처). 지하는 창이 없다.
+    const cap = trackM(new MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, transparent: true, opacity: 1, fog: false }));
+    const mat = s.lv > 0
+      ? trackM(new MeshStandardMaterial({ color, map: texOf(s.lv === 1, s.height - slab), roughness: 0.45, metalness: 0.05, transparent: true, opacity: 1, fog: false }))
+      : cap;
     const line = trackM(new LineBasicMaterial({ color: EDGE, transparent: true, opacity: 0.7 }));
-    const mesh = new Mesh(geo, mat);
+    const mesh = new Mesh(geo, [cap, mat]);
     mesh.userData.lv = s.lv;
     const group = new Group();
     group.position.y = s.y0;
@@ -241,7 +287,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     label.center.set(0, 0.5);
     group.add(label);
     scene.add(group);
-    floorObjs.push({ floor, group, mesh, mat, line, label, baseY: s.y0, offset: 0, target: 0 });
+    floorObjs.push({ floor, group, mesh, mat, cap, line, label, height: s.height, baseY: s.y0, offset: 0, target: 0 });
   }
 
   // ── 카메라 ────────────────────────────────────────────────────────────────
@@ -258,6 +304,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   let mode: TwinMode = "exterior";
   let selected: number | null = null;
   let labelsOn = true;
+  let planOn = true;
   let raf = 0;
   let renders = 0;
   let disposed = false;
@@ -323,6 +370,83 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     request();
   }
 
+  // ── 개략 배치 — 고른 층 안에 전유부 호실을 전용면적 비례 칸으로 세운다(2D 개략 배치도와 같은 planLayout) ──────────
+  const front = frontRoad(local, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng);
+  const planUnitMat = trackM(new MeshStandardMaterial({ color: "#EEF0FB", roughness: 0.7, transparent: true, opacity: 0.9, fog: false }));
+  const planRestMat = trackM(new MeshStandardMaterial({ color: "#DCE1E8", roughness: 0.9, fog: false }));
+  const planLine = trackM(new LineBasicMaterial({ color: "#4F46E5", transparent: true, opacity: 0.85 }));
+  let plan: { lv: number; group: Group; geos: BufferGeometry[] } | null = null;
+  function clearPlan() {
+    if (!plan) return;
+    const rm: Object3D[] = [];
+    plan.group.traverse((o) => { if (o instanceof CSS2DObject) rm.push(o); });
+    rm.forEach((o) => o.removeFromParent());   // CSS2D DOM 도 떼어 낸다
+    plan.geos.forEach((g) => g.dispose());
+    plan.group.removeFromParent();
+    plan = null;
+  }
+  const planTag = (text: string, cls: string) => {
+    const t = document.createElement("div");
+    t.className = cls;
+    t.textContent = text;
+    return new CSS2DObject(t);
+  };
+  function buildPlan() {
+    const want = planOn && selected !== null ? selected : null;
+    if (plan && plan.lv === want) return;
+    clearPlan();
+    const f = floorObjs.find((x) => x.floor.lv === want);
+    if (!f || want === null) return;
+    const group = new Group();
+    group.name = "twin-plan";
+    const geos: BufferGeometry[] = [];
+    const wall = Math.max(0.6, f.height - slab - 0.45);
+    const { pieces } = planLayout(local, f.floor.units ?? [], f.floor.area_m2);
+    const units = pieces.filter((p) => p.kind === "unit");
+    const add = (pts: Point[], h: number, mat: Material, edges: boolean) => {
+      const g = extrude(shapeOf(pts), h);
+      geos.push(g);
+      const m = new Mesh(g, mat);
+      m.position.y = 0.06;
+      group.add(m);
+      if (edges) { const e = new EdgesGeometry(g, 30); geos.push(e); const l = new LineSegments(e, planLine); l.position.y = 0.06; group.add(l); }
+    };
+    if (!pieces.length) {
+      // 전유부가 없는 층(일반건축물) — 칸을 지어내지 않고 바닥만 깐다
+      add(inflate(local, -0.3), 0.12, planRestMat, false);
+      const t = planTag(`전용면적 자료 없음 · 층 바닥 ${f.floor.area_m2 != null ? `${f.floor.area_m2.toLocaleString("ko-KR")}㎡` : "자료 없음"}`, "twin3d-unit-label is-empty");
+      t.position.set(0, wall * 0.5, 0);
+      group.add(t);
+    }
+    for (const p of pieces) {
+      const inset = inflate(p.poly, -0.22);
+      if (p.kind === "unit") add(inset, wall, planUnitMat, true); else add(inset, 0.12, planRestMat, false);
+    }
+    const detail = units.length <= 24;
+    const unitSum = units.reduce((t, p) => t + p.area, 0);
+    if (units.length > 1 && unitSum / (f.floor.area_m2 ?? ringArea(local)) < 0.15) {
+      // 호실이 층 일부의 작은 블록이면 라벨이 겹친다 — 한 장으로 묶는다(호실별 목록은 오른쪽 패널에 있다)
+      const cx = units.reduce((t, p) => t + p.at[0], 0) / units.length, cy = units.reduce((t, p) => t + p.at[1], 0) / units.length;
+      const t = planTag(`전유부 ${units.length}호실 · 전용 ${unitSum.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}㎡`, "twin3d-unit-label");
+      t.position.set(cx, wall + 0.5, -cy);
+      t.center.set(0.5, 1);
+      group.add(t);
+    } else units.forEach((p, i) => {
+      const ho = p.ho ? (/호$/.test(p.ho) ? p.ho : `${p.ho}호`) : "호수 미상";
+      const t = planTag(detail ? `${ho} · 전용 ${p.area.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}㎡` : ho, "twin3d-unit-label");
+      t.position.set(p.at[0], wall + 0.5 + (detail && i % 2 ? 1.4 : 0), -p.at[1]);
+      t.center.set(0.5, 1);
+      group.add(t);
+    });
+    if (front) {
+      const t = planTag(`▼ 전면 · ${front.name}`, "twin3d-front-label");
+      t.position.set(front.edge[0] + front.dir[0] * 1.8, 0.3, -(front.edge[1] + front.dir[1] * 1.8));
+      group.add(t);
+    }
+    f.group.add(group);
+    plan = { lv: want, group, geos };
+  }
+
   function applyVisuals() {
     const showGroundThin = mode !== "exterior" || (selected !== null && selected < 0);
     groundMat.opacity = showGroundThin && twin.floors_below > 0 ? 0.4 : 1;
@@ -332,8 +456,12 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       const vac = isVacantStatus(f.floor.status);
       let opacity = 1;
       if (mode === "vacant") opacity = vac ? 1 : 0.07;
-      f.mat.opacity = opacity;
-      f.mat.depthWrite = opacity >= PICK_MIN_OPACITY;
+      // 개략 배치를 볼 때 — 고른 층은 열고(반투명), 그 위층은 비쳐 보이게 해 위에서 칸이 보이게 한다(층 분리 때는 위층이 이미 떨어져 있다).
+      if (planOn && selected !== null) {
+        if (isSel) opacity = 0.12;
+        else if (mode !== "exploded" && f.floor.lv > selected) opacity = Math.min(opacity, 0.25);
+      }
+      for (const m of [f.mat, f.cap]) { m.opacity = opacity; m.depthWrite = opacity >= PICK_MIN_OPACITY; }
       f.line.color.copy(isSel ? INK : EDGE);
       f.line.opacity = isSel ? 1 : opacity >= PICK_MIN_OPACITY ? 0.7 : 0.25;
       f.target = mode === "exploded" ? explodeOffset(f.floor.lv, GAP) : 0;
@@ -342,6 +470,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       f.label.visible = want;
       (f.label.element as HTMLElement).classList.toggle("is-selected", isSel);
     }
+    buildPlan();
     request();
   }
 
@@ -441,6 +570,7 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     setRoads(on) { roadLayer.group.visible = on; request(); },
     roadStats: roadLayer.stats,
     setLabels(on) { labelsOn = on; applyVisuals(); },
+    setPlan(on) { planOn = on; applyVisuals(); },
     selectFloor(lv, focus = false) {
       selected = lv;
       applyVisuals();
@@ -467,6 +597,8 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     },
     dispose() {
       roadLayer.dispose();   // 도로 라벨(CSS2D)을 하나씩 떼어 HTML 도 지운다 · 도로 형상·재질 해제
+      clearPlan();
+      winTex.forEach((t) => t.dispose());
       disposed = true;
       if (raf) cancelAnimationFrame(raf);
       if (hoverRaf) cancelAnimationFrame(hoverRaf);

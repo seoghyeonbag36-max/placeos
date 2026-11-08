@@ -148,6 +148,103 @@ export function layoutUnits(b: Pick<Bounds, "minX" | "minY" | "w" | "h">,
   return { cells, omitted };
 }
 
+/** 외곽선을 볼록 다각형(사각형)으로 자른다 — Sutherland–Hodgman. 잘린 쪽이 오목해도 넓이는 맞다. */
+export function clipToConvex(subject: readonly Point[], clip: readonly Point[]): Point[] {
+  let out: Point[] = [...subject];
+  for (let i = 0; i < clip.length && out.length; i++) {
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    const inside = (p: Point) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= -1e-9;
+    const cut = (p: Point, q: Point): Point => {
+      const d1 = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+      const d2 = (b[0] - a[0]) * (q[1] - a[1]) - (b[1] - a[1]) * (q[0] - a[0]);
+      const t = d1 / (d1 - d2);
+      return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+    };
+    const src = out;
+    out = [];
+    src.forEach((p, k) => {
+      const q = src[(k + 1) % src.length];
+      if (inside(p)) { out.push(p); if (!inside(q)) out.push(cut(p, q)); } else if (inside(q)) out.push(cut(p, q));
+    });
+  }
+  return out;
+}
+
+export interface PlanPiece extends PlanCell {
+  /** 외곽선 안으로 잘린 칸(로컬 동·북 m) — 화면·3D 가 이 모양을 그린다 */
+  poly: Point[];
+  /** 라벨 자리(잘린 칸의 무게중심) */
+  at: Point;
+}
+
+/**
+ * 건물 긴 변을 따라 놓은 개략 배치(2026-11-08) — `layoutUnits` 를 외곽선의 가장 긴 변 방향으로 돌려 쓰고, 칸을 실측 외곽선
+ * 안으로 자른다. 칸 넓이는 전유부 전용면적 비례이고 위치는 지어낸 것이 아니라 「정해지지 않았다」 — 늘 개략 배치다.
+ */
+export function planLayout(pts: readonly Point[], units: readonly { ho: string | null; area_m2: number | null }[], floorArea: number | null) {
+  const ring = pts.length > 2 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1] ? pts.slice(0, -1) : [...pts];
+  let ang = 0, longest = 0;
+  ring.forEach((p, i) => {
+    const q = ring[(i + 1) % ring.length], len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    if (len > longest) { longest = len; ang = Math.atan2(q[1] - p[1], q[0] - p[0]); }
+  });
+  // 긴 변이 가로(x)가 되게 돌린다. 방향이 뒤집혀도 같은 축이라 −90°~90° 로 접는다.
+  if (ang > Math.PI / 2) ang -= Math.PI; else if (ang < -Math.PI / 2) ang += Math.PI;
+  const c = Math.cos(ang), s = Math.sin(ang);
+  const toAxis = ([x, y]: Point): Point => [x * c + y * s, -x * s + y * c];
+  const fromAxis = ([x, y]: Point): Point => [x * c - y * s, x * s + y * c];
+  const rp = ring.map(toAxis);
+  // 층 면적을 모르면 외곽선 넓이를 기준으로 삼는다 — 그러지 않으면 작은 호실 몇 개가 층 전체를 덮어 보인다(집합건물 일부 전유만 있는 층).
+  const bb = boundsOf(rp);
+  const base = floorArea ?? ringArea(rp);
+  const total = units.reduce((t, u) => t + Math.max(0, u.area_m2 ?? 0), 0);
+  let { cells, omitted } = layoutUnits(bb, units, base);
+  if (total > 0 && base > 0 && total / base < 0.6 && bb.w > 0 && bb.h > 0) {
+    // 호실이 층 일부만 덮으면 얇은 띠가 되어 읽히지 않는다 — 한쪽 모서리에 같은 비율의 작은 블록으로 모으고 나머지는 공용·기타로 둔다.
+    const k = Math.min(1, Math.sqrt(total / (bb.w * bb.h)));
+    const bw = bb.w * k, bh = bb.h * k;
+    ({ cells, omitted } = layoutUnits({ minX: bb.minX, minY: bb.minY, w: bw, h: bh }, units, total));
+    cells = cells.filter((c) => c.kind === "unit");
+    cells.push({ kind: "rest", ho: null, area: 0, x: bb.minX + bw, y: bb.minY, w: bb.w - bw, h: bb.h },
+      { kind: "rest", ho: null, area: 0, x: bb.minX, y: bb.minY + bh, w: bw, h: bb.h - bh });
+  }
+  const pieces: PlanPiece[] = [];
+  for (const cell of cells) {
+    const rect: Point[] = [[cell.x, cell.y], [cell.x + cell.w, cell.y], [cell.x + cell.w, cell.y + cell.h], [cell.x, cell.y + cell.h]];
+    const cut = clipToConvex(rp, rect);
+    if (cut.length < 3 || ringArea(cut) < 0.05) continue;
+    const cx = cut.reduce((t, p) => t + p[0], 0) / cut.length, cy = cut.reduce((t, p) => t + p[1], 0) / cut.length;
+    pieces.push({ ...cell, area: cell.kind === "rest" && !cell.area ? ringArea(cut) : cell.area, poly: cut.map(fromAxis), at: fromAxis([cx, cy]) });
+  }
+  return { pieces, omitted, angle: ang };
+}
+
+/**
+ * 주소 도로가 건물의 어느 쪽인가 — OSM 도로 중심선(트윈 `roads`) 중 주소 도로 이름과 같은 선에서 건물 중심에 가장 가까운 점의 방향.
+ * 반환 `dir` 은 단위 벡터(동·북), `edge` 는 그 방향 외곽선 끝 점. 주소 도로를 못 찾으면 null(지어내지 않는다).
+ */
+export function frontRoad(pts: readonly Point[], roads: readonly { n: string; line: [number, number][] }[] | undefined,
+  name: string | null | undefined, lat0: number, lng0: number): { name: string; dir: Point; edge: Point } | null {
+  if (!name || !roads?.length || pts.length < 3) return null;
+  const k = Math.cos((lat0 * Math.PI) / 180);
+  let best: Point | null = null, bestD = Infinity;
+  for (const r of roads) {
+    if (r.n !== name) continue;
+    // 도로선은 링이 아니다 — 닫는 점을 떼는 ringToLocal 대신 점마다 편다
+    const seg: Point[] = r.line.map(([lat, lng]) => [(lng - lng0) * M_PER_LAT * k, (lat - lat0) * M_PER_LAT]);
+    for (let i = 0; i + 1 < seg.length; i++) {
+      const a = seg[i], b = seg[i + 1], dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy || 1e-9;
+      const t = Math.max(0, Math.min(1, -(a[0] * dx + a[1] * dy) / L));
+      const p: Point = [a[0] + dx * t, a[1] + dy * t], d = Math.hypot(p[0], p[1]);
+      if (d < bestD) { bestD = d; best = p; }
+    }
+  }
+  if (!best || bestD < 1e-6) return null;
+  const dir: Point = [best[0] / bestD, best[1] / bestD];
+  const reach = Math.max(...pts.map(([x, y]) => x * dir[0] + y * dir[1]));
+  return { name, dir, edge: [dir[0] * reach, dir[1] * reach] };
+}
+
 const DATE_RE = /^(\d{4})-?(\d{2})-?(\d{2})?/;
 /** "20180131"·"2018-01-31" → 연 단위 실수. 못 읽으면 null. */
 export function yearOf(d: string | null | undefined): number | null {

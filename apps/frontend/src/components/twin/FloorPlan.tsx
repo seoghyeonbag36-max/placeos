@@ -1,20 +1,23 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
-import { boundsOf, layoutUnits, ringArea, ringToLocal } from "@/lib/twinGeometry";
+import { boundsOf, frontRoad, planLayout, ringArea, ringToLocal } from "@/lib/twinGeometry";
 
 interface Overlay { url: string; name: string; opacity: number; rotate: number; scale: number }
 
 /**
- * 층 바닥 — 실측 외곽선 + (전유부가 있으면) 면적 비례 개략 칸 + 사용자가 올린 도면.
- * 평면도 원천은 없다. 올린 파일은 이 브라우저 안에서만 읽고 서버로 보내지 않는다.
+ * 층 바닥 — 실측 외곽선 + (전유부가 있으면) 전용면적 비례 개략 칸 + 사용자가 올린 도면.
+ * 칸은 건물 긴 변을 따라 놓고 외곽선 안으로 자른다(`planLayout` — 3D 트윈의 개략 배치와 같은 칸). 주소 도로를 OSM 에서 찾으면
+ * 그쪽에 「▼ 전면」을 단다. 평면도 원천은 없다. 올린 파일은 이 브라우저 안에서만 읽고 서버로 보내지 않는다.
  */
 export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: TwinFloor }) {
   const clip = useId();
   const pts = useMemo(() => ringToLocal(twin.ring, twin.lat, twin.lng), [twin.ring, twin.lat, twin.lng]);
   const b = useMemo(() => boundsOf(pts), [pts]);
   const outline = useMemo(() => ringArea(pts), [pts]);
-  const { cells, omitted } = useMemo(() => layoutUnits(b, floor.units ?? [], floor.area_m2), [b, floor.units, floor.area_m2]);
+  const { pieces: cells, omitted } = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2), [pts, floor.units, floor.area_m2]);
+  const front = useMemo(() => frontRoad(pts, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng),
+    [pts, twin.roads, twin.road_check, twin.lat, twin.lng]);
   const [overlays, setOverlays] = useState<Record<number, Overlay>>({});
   const [selection, setSelection] = useState<{ lv: number; index: number } | null>(null);
   const picked = selection?.lv === floor.lv ? floor.units?.[selection.index] : null;
@@ -37,7 +40,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
     setOverlays((o) => { const n = { ...o }; delete n[floor.lv]; return n; });
   };
   if (pts.length < 3) return <p className="twin3d-note"><span className="value-absent">자료 없음</span> — 외곽선이 없습니다.</p>;
-  const pad = Math.max(b.w, b.h) * 0.06;
+  const pad = Math.max(b.w, b.h) * (front ? 0.2 : 0.06);
   // 화면 위가 북이다 — SVG y 는 아래로 자라므로 뒤집는다.
   const path = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)} ${(-y).toFixed(2)}`).join(" ") + " Z";
   const big = Math.max(b.w, b.h) || 1;
@@ -46,7 +49,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
     <div className="twin3d-plan">
       <div className="twin3d-plan-head">
         <b>{floor.label} 개략 배치도</b>
-        {cells.length > 0 && <span className="twin3d-tag">개략 배치 · 실측 도면 아님</span>}
+        {cells.length > 0 && <span className="twin3d-tag">호실 크기는 전용면적 비례 · 실측 도면 아님</span>}
       </div>
       <svg viewBox={`${b.minX - pad} ${-b.maxY - pad} ${b.w + pad * 2} ${b.h + pad * 2}`} role="img"
         aria-label={`${floor.label} 바닥 외곽선${cells.length ? ` · 호실 ${cells.filter((c) => c.kind === "unit").length}개 개략 칸` : ""}`}>
@@ -54,21 +57,21 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         <path d={path} className="twin3d-plan-floor" vectorEffect="non-scaling-stroke" />
         <g clipPath={`url(#${clip})`}>
           {cells.map((c, i) => {
-            const y = -(c.y + c.h);
+            const poly = c.poly.map(([x, y]) => `${x.toFixed(2)},${(-y).toFixed(2)}`).join(" ");
             const unitIndex = c.kind === "unit" ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
             const active = selection?.lv === floor.lv && selection.index === unitIndex && unitIndex >= 0;
             const choose = () => { if (unitIndex >= 0) setSelection({ lv: floor.lv, index: unitIndex }); };
             return (
               <g key={i}>
-                <rect x={c.x} y={y} width={c.w} height={c.h} className={c.kind === "unit" ? "twin3d-plan-cell" : "twin3d-plan-rest"} vectorEffect="non-scaling-stroke"
+                <polygon points={poly} className={c.kind === "unit" ? "twin3d-plan-cell" : "twin3d-plan-rest"} vectorEffect="non-scaling-stroke"
                   role={unitIndex >= 0 ? "button" : undefined} tabIndex={unitIndex >= 0 ? 0 : undefined}
                   aria-label={unitIndex >= 0 ? `${c.ho ?? "호수 미상"}호 개략 칸 선택` : undefined} aria-pressed={unitIndex >= 0 ? active : undefined}
                   onClick={choose} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } }}
                   style={active ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 } : undefined}>
-                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · ${c.area.toFixed(1)}㎡(대장)` : `공용·기타 · ${c.area.toFixed(1)}㎡`}</title>
-                </rect>
+                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)` : `공용·기타 · ${c.area.toFixed(1)}㎡`}</title>
+                </polygon>
                 {labelled && c.kind === "unit" && c.w > big * 0.09 && c.h > big * 0.05 && (
-                  <text x={c.x + c.w / 2} y={y + c.h / 2} className="twin3d-plan-text" style={{ fontSize: big * 0.032 }}>{c.ho}</text>
+                  <text x={c.at[0]} y={-c.at[1]} className="twin3d-plan-text" style={{ fontSize: big * 0.032 }}>{c.ho}</text>
                 )}
               </g>
             );
@@ -79,10 +82,14 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
           )}
         </g>
         <path d={path} className="twin3d-plan-outline" vectorEffect="non-scaling-stroke" />
+        {front && (
+          <text x={front.edge[0] + front.dir[0] * pad * 0.55} y={-(front.edge[1] + front.dir[1] * pad * 0.55)} className="twin3d-plan-front"
+            style={{ fontSize: big * 0.045 }}>▼ 전면 · {front.name}</text>
+        )}
       </svg>
       {!!floor.units?.length && <div className="twin3d-cta" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" className="twin3d-btn" key={index}
-        aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
-      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 대장 면적 {picked.area_m2 != null ? `${picked.area_m2}㎡` : "미제공"} · 호실별 공실·점포 이력 귀속 미확인</p>}
+        aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `전용 ${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
+      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"} · 호실별 공실·점포 이력 귀속 미확인</p>}
       <p className="twin3d-note">
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}
