@@ -3,19 +3,21 @@
  * R1 상권 순위(+ 비교 모드 → R1-c 상권 나란히 보기 · screens/Compare) · R1-p 업종 순위(바꾸기) · Q-p 무엇부터 ·
  * Q4 상권 직접 고르기 · R2 상권 소개.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { BusinessGoal } from "@/lib/businessProfile";
 import { CORRIDOR_ID, type DistrictSummary, type IndustryFitRow } from "@/lib/api";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import { fitGroups, rankText } from "@/lib/fitGroups";
 import { groupName, groupOf, RANK_GROUPS } from "@/lib/districtMapModel";
+import { distinctDistrictColors } from "@/lib/districtColors";
+import { DistrictMap } from "../DistrictMap";
 import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { eun, iga, ro } from "../format";
 import { comparePath, corridorPath, explorePath, go } from "../route";
 import { setDistrict, setGoal, setHomeDistrict, setIndustry, setStartupOrder, setStartupRegion, setStartupDistrict } from "../state";
 import {
-  Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet,
+  Badge, BottomCTA, ChoiceList, CloseButton, Details, FlowScreen, IconChevron, LoadError, ResultView, Row, RowList, Sheet,
   SkeletonRows, TextButton, WarnLine,
 } from "../ui";
 import {
@@ -73,13 +75,129 @@ export function StartupDistrict() {
   const { state, update } = useFlow();
   const ok = useNeed(state.goal === "start" && state.startupOrder === "region" && !!state.startupRegion, "/startup-region");
   if (!ok) return null;
-  return <FlowScreen back="/startup-region" caption={`지역별 창업 · ${state.startupRegion}`}
-    title={`${state.startupRegion}의 어느 상권에서 창업하시나요?`} sub="공개된 상권 중 한 곳을 고른 다음 업종을 선택해요.">
-    <DistrictPickList region={state.startupRegion} emptyHint="다른 검색어를 입력하거나 지역을 다시 골라 주세요." onPick={(d) => {
+  // 2026-11-08: 목록 옆에 그 지역 상권 지도를 깐다 — 상권마다 다른 색으로 구역을 칠한다(서울 81곳 81색 · DistrictMap)
+  return <FlowScreen mapWide back="/startup-region" caption={`지역별 창업 · ${state.startupRegion}`}
+    title={`${state.startupRegion}의 어느 상권에서 창업하시나요?`}
+    sub="공개된 상권 중 한 곳을 고른 다음 업종을 선택해요. 지도에서 색칠된 구역을 눌러도 돼요.">
+    <DistrictMapPicker region={state.startupRegion ?? null} emptyHint="다른 검색어를 입력하거나 지역을 다시 골라 주세요." onPick={(d) => {
       update((s) => setStartupDistrict(s, d.id));
       go("/industry");
     }} />
   </FlowScreen>;
+}
+
+/** 상권 고르기 목록 + 지도(2026-11-08) — 줄의 점과 지도 구역이 같은 색이다. 줄을 누르면 바로 다음 질문, 지도 구역을 누르면
+ *  아래 카드에서 한 번 더 확인한다(지도를 끌다 잘못 눌러 넘어가지 않게). 줄에 마우스 · 포커스를 두면 지도 구역이 강조된다. */
+function DistrictMapPicker({ region, onPick, emptyHint }: { region: string | null; onPick: (d: DistrictSummary) => void; emptyHint: string }) {
+  const ds = useDistricts();
+  const data = useFlowData();
+  const outlines = useLoad("outlines", data.outlines);
+  const [q, setQ] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoverId, setHoverId] = useState<string | null>(null);
+  // 메모 키는 응답 배열 자체다 — useLoad 는 렌더마다 새 상자({...결과, retry})를 돌려줘서, 상자를 키로 쓰면 색 · 설명 Map 이 매번
+  // 새로 생기고 지도가 구역을 다시 그리며 카메라를 지역 전체로 되돌린다(2026-11-08 리뷰 — 확대해 둔 지도가 가리킬 때마다 튀었다)
+  const all = ds.status === "ready" ? ds.data : null;
+  const regional = useMemo(() => (all
+    ? all.filter((d) => !region || groupName(groupOf(d)) === region).sort((a, b) => a.name.localeCompare(b.name, "ko"))
+    : []), [all, region]);
+  const colors = useMemo(() => distinctDistrictColors(regional), [regional]);
+  const shown = useMemo(() => regional.filter((d) => matches(d, q)), [regional, q]);
+  const matchIds = useMemo(() => new Set(shown.map((d) => d.id)), [shown]);
+  const outlineHubs = outlines.status === "ready" ? outlines.data?.hubs ?? null : null;
+  // 상권 유형 라벨(2026-10-09 서울 상권 유형 분류표 · 외곽선 응답의 type_name) — 색과 함께 짧은 설명으로 보인다.
+  // 2026-11-08 사용자 결정: **서울만** 보인다. 경기 · 광주 · 전주는 placeos.co.kr 반영 확인 뒤 따로 지시한다(그때까지 설명 없음).
+  const typeLabels = useMemo(() => {
+    const out = new Map<string, { name: string; manual: boolean }>();
+    const byId = new Map((outlineHubs ?? []).map((o) => [o.id, o]));
+    for (const d of regional) {
+      const o = byId.get(d.id);
+      if (groupOf(d) === "seoul" && o?.type_name) out.set(d.id, { name: o.type_name, manual: o.type_is_manual });
+    }
+    return out;
+  }, [outlineHubs, regional]);
+  const descriptions = useMemo(() => new Map([...typeLabels].map(([id, t]) => [id, t.name])), [typeLabels]);
+  // 지도에서 고른 상권을 목록에서도 보이게 — **목록 칸 안에서만** 그 줄까지 내린다. 좁은 화면(≤900px)은 목록이 문서 흐름이라
+  // (스스로 스크롤하지 않는다) 내리지 않는다 — scrollIntoView 는 문서까지 굴려 지도와 「이 상권으로 계속」 카드를 화면 밖으로 밀어냈다
+  useEffect(() => {
+    if (!selectedId) return;
+    const row = Array.from(document.querySelectorAll<HTMLElement>("[data-district-row]"))
+      .find((el) => el.dataset.districtRow === selectedId);
+    const list = row?.closest<HTMLElement>(".fl-dmap-list");
+    if (!row || !list || getComputedStyle(list).overflowY === "visible" || typeof list.scrollTo !== "function") return;
+    const top = row.offsetTop, bottom = top + row.offsetHeight;
+    if (top < list.scrollTop || bottom > list.scrollTop + list.clientHeight) {
+      list.scrollTo({ top: Math.max(0, top - list.clientHeight / 3), behavior: "smooth" });
+    }
+  }, [selectedId]);
+  if (ds.status === "loading") return <SkeletonRows n={6} label="상권 목록을 불러오는 중" />;
+  if (ds.status === "error") return <LoadError what="상권 목록" error={ds.error} onRetry={ds.retry} />;
+  const selected = regional.find((d) => d.id === selectedId) ?? null;
+  const selectedType = selected ? typeLabels.get(selected.id) ?? null : null;
+  const manualN = [...typeLabels.values()].filter((t) => t.manual).length;
+  const typeTitle = (t: { manual: boolean }) => (t.manual ? "상권 유형 — 사람이 붙인 라벨(2026-10-09 분류표)" : "상권 유형 — 원본 데이터 분류(2026-10-09 분류표)");
+  return (
+    <div className="fl-dmap">
+      <div className="fl-dmap-side">
+        <label className="fl-search">
+          <span className="sr-only">동네 이름으로 찾기</span>
+          <input type="search" value={q} placeholder="동네 이름으로 찾기" onChange={(e) => setQ(e.target.value)} />
+        </label>
+        <p className="fl-dmap-count">{region ?? "공개"} 상권 {regional.length}곳{q ? ` · 찾은 상권 ${shown.length}곳` : ""} · 점 색 = 지도 구역 색</p>
+        {typeLabels.size > 0 && (
+          <p className="fl-dmap-count">설명 = 상권 유형(2026-10-09 서울 분류표 · 사람이 붙인 라벨 {manualN}곳 · 원본 데이터 분류 {typeLabels.size - manualN}곳)</p>
+        )}
+        {shown.some((d) => d.caveat) && (
+          <p className="fl-foot">* 공실률 비교 시 주의가 필요한 상권이에요. 자세한 이유는 상권 상세에서 확인해 주세요.</p>
+        )}
+        {shown.length === 0 ? (
+          <p className="fl-empty">{region ? `${region}에서 조건에 맞는 공개 상권이 없어요.` : "찾는 상권이 없어요."} {emptyHint}</p>
+        ) : (
+          <ul className="fl-rows fl-dmap-list" aria-label="상권">
+            {shown.map((d) => (
+              <li key={d.id} data-district-row={d.id}
+                className={"fl-row" + (d.id === selectedId ? " is-picked" : "") + (d.id === hoverId ? " is-hot" : "")}>
+                <button type="button" className="fl-row-btn" onClick={() => onPick(d)}
+                  onMouseEnter={() => setHoverId(d.id)} onMouseLeave={() => setHoverId((h) => (h === d.id ? null : h))}
+                  onFocus={() => setHoverId(d.id)} onBlur={() => setHoverId((h) => (h === d.id ? null : h))}>
+                  <i className="fl-dmap-dot" style={{ background: colors.get(d.id) }} aria-hidden="true" />
+                  <span className="fl-row-main">
+                    <span className="fl-row-title">{d.name}{d.caveat ? <span className="fl-caveat-mark" title={d.caveat}>*</span> : null}</span>
+                    <span className="fl-row-meta">
+                      {typeLabels.has(d.id) && (
+                        <span className="fl-dmap-type" style={{ "--c": colors.get(d.id) } as CSSProperties}
+                          title={typeTitle(typeLabels.get(d.id)!)}>{typeLabels.get(d.id)!.name}</span>
+                      )}
+                      {`${d.gu}${d.vacancy_rate != null ? ` · 공실률 ${d.vacancy_rate}%` : ""}`}
+                    </span>
+                  </span>
+                  <span className="fl-row-chev"><IconChevron /></span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <DistrictMap districts={regional} matchIds={matchIds} outlines={outlineHubs} colors={colors} descriptions={descriptions}
+        selectedId={selectedId} hoverId={hoverId} onSelect={setSelectedId} onHover={setHoverId}
+        label={`${region ?? "공개"} 상권 지도 — 상권마다 다른 색`}>
+        {selected && (
+          <div className="fl-dmap-card" role="group" aria-label="지도에서 고른 상권">
+            <i className="fl-dmap-dot" style={{ background: colors.get(selected.id) }} aria-hidden="true" />
+            <span className="fl-dmap-card-main">
+              <b>{selected.name}</b>
+              <span>{selectedType ? `${selectedType.name} · ` : ""}{selected.gu}{selected.vacancy_rate != null ? ` · 공실률 ${selected.vacancy_rate}%` : ""}{selected.caveat ? " · 비교 시 주의" : ""}</span>
+            </span>
+            <button type="button" className="fl-dmap-go" onClick={() => onPick(selected)}>이 상권으로 계속</button>
+            <button type="button" className="fl-dmap-x" aria-label="고른 상권 닫기" onClick={() => setSelectedId(null)}>✕</button>
+          </div>
+        )}
+        {(outlines.status === "error" || (outlines.status === "ready" && !outlineHubs)) && (
+          <p className="fl-dmap-note" role="note">구역 외곽선을 불러오지 못해 상권 중심에 원으로 표시했어요.</p>
+        )}
+      </DistrictMap>
+    </div>
+  );
 }
 
 /* ── Q2 업종 ─────────────────────────────────────────────────────────────── */

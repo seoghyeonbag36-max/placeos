@@ -9,10 +9,11 @@
   font-family: var(--font-sans, system-ui, sans-serif);
   color: var(--ink);
 }
-.trackmap[data-track="platform"] { --tm-accent: var(--track-platform); --tm-soft: var(--track-platform-soft); }
-.trackmap[data-track="page"]     { --tm-accent: var(--track-page);     --tm-soft: var(--track-page-soft); }
-.trackmap[data-track="posting"]  { --tm-accent: var(--track-posting);  --tm-soft: var(--track-posting-soft); }
-.trackmap[data-track="program"]  { --tm-accent: var(--track-program);  --tm-soft: var(--track-program-soft); }
+/* 칸으로 옮긴 덩어리(.mh-slot — MapSlot)도 같은 트랙 색을 쓴다 */
+:is(.trackmap, .mh-slot)[data-track="platform"] { --tm-accent: var(--track-platform); --tm-soft: var(--track-platform-soft); }
+:is(.trackmap, .mh-slot)[data-track="page"]     { --tm-accent: var(--track-page);     --tm-soft: var(--track-page-soft); }
+:is(.trackmap, .mh-slot)[data-track="posting"]  { --tm-accent: var(--track-posting);  --tm-soft: var(--track-posting-soft); }
+:is(.trackmap, .mh-slot)[data-track="program"]  { --tm-accent: var(--track-program);  --tm-soft: var(--track-program-soft); }
 
 .trackmap-panel {
   position: absolute; top: 12px; left: 12px; bottom: 12px;
@@ -87,3 +88,49 @@
 /* 레일 패널에서는 두 그룹이 나란하므로 세로 목록용 위 여백을 제거한다. */
 .trackmap-panel .progstudio .draft-channel-group + .draft-channel-group{margin-top:0}
 @media(max-width:420px){.trackmap-panel .progstudio .draft-channels{grid-template-columns:minmax(0,1fr)}}
+
+/* ── 칸 배치(2026-11-08) — 패널이 지도 위가 아니라 오른쪽 칸에 선다 ─────────────────────────
+   위 규칙은 지도 위에 뜨는 패널(단독 렌더)용이다. 칸 안에서는 자리를 칸이 정하므로 위치·폭을 걷는다. */
+.mh-right .trackmap-panel {
+  position: relative; top: auto; left: auto; bottom: auto; width: auto;
+  flex: 1; min-height: 0; z-index: auto;
+}
+/* 왼쪽 칸 공통 카드 — 상권 목록 · 비용 입력 · 기능 메뉴가 이 상자 안에 선다 */
+.mh-left > .mh-slot {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: var(--shadow-card, 0 1px 3px rgba(11,27,51,.08));
+  border-top: 3px solid var(--tm-accent, var(--line));
+}
+/* 머리 칸 — 단계 · 질문. 넓은 화면에서는 한 줄 머리(왼쪽 질문 · 오른쪽 단계)다 */
+.mh-head .explore-step-header { border: 1px solid var(--line); border-radius: 14px; }
+
+@media (min-width: 1200px) {
+  .mh-right > .trackmap-slot { flex: 1; display: flex; flex-direction: column; }
+  .mh-left > .mh-slot { overflow-y: auto; overscroll-behavior: contain; }
+  .mh-left > .mh-slot:only-child { flex: 1; }
+  .mh-head .explore-step-header {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sp-5); align-items: center;
+    grid-template-areas: "count steps" "title steps" "desc steps";
+    padding: var(--sp-3) var(--sp-4);
+    /* 오른쪽 위 「입점 준비」 버튼(FounderPlanner · 고정 위치) 자리를 비운다 */
+    padding-right: 200px;
+  }
+  .mh-head .explore-step-header .explore-step-count { grid-area: count; margin: 0 0 2px; }
+  .mh-head .explore-step-header ol { grid-area: steps; margin: 0; }
+  .mh-head .explore-step-header h1 { grid-area: title; margin: 0; font-size: var(--fs-heading, 20px); }
+  .mh-head .explore-step-header > p:last-child { grid-area: desc; }
+  /* 패널 안 1단 접기 규칙은 칸에서도 같다 — 오른쪽 칸 폭은 380~560px 다(위 .trackmap-panel 규칙이 그대로 걸린다) */
+}
+
+/* 좁은 화면(<1200px): 칸 셋이 지도 위 패널 하나에 쌓인다(MapHost.css) — 패널이 통째로 스크롤하므로
+   오른쪽 칸의 패널은 자체 스크롤 · 테두리를 걷고, 다음 단계 버튼은 패널 아래에 붙여 둔다. */
+@media (max-width: 1199px) {
+  .mh-panel .trackmap-panel:not([hidden]) {
+    position: static; display: block; height: auto; overflow: visible;
+    border: 0; border-top: 0; border-radius: 0; box-shadow: none; background: transparent;
+  }
+  .mh-panel .trackmap-scroll { overflow: visible; }
+  .mh-panel .explore-step-footer { position: sticky; bottom: 0; z-index: 2; }
+  .mh-panel .mh-head .explore-step-header { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  .mh-left > .mh-slot { margin: var(--sp-3) var(--sp-3) 0; }
+}

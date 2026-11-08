@@ -24,6 +24,8 @@ import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type V
 import { useReportCapture } from "@/lib/ppppReportContext";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import { useMapHost } from "@/components/mapHostContext";
+import MapSlot from "@/components/MapSlot";
+import { useMapLayout } from "@/components/mapLayoutContext";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
 import { isEditableTarget } from "@/lib/keyboard";
 import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
@@ -232,6 +234,14 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 않는다 — 후보 저장·비교가 여기 있다. 대신 **접을 수 있게** 해서, 지도만 보고
   // 싶을 때 화면 전체를 지도에 내준다. 기본은 종전대로 펼친 상태다.
   const [panelOpen, setPanelOpen] = useState(true);
+  // 칸 배치(2026-11-08) — 지도 셸 안이면 목록·상세를 지도 위 패널이 아니라 좌우 칸에 꽂는다(아래 return).
+  // 접기(‹ · Esc)는 좌우 칸을 함께 걷고 지도를 넓힌다. 이 화면을 떠나면 펴진 배치로 돌려놓는다.
+  const layout = useMapLayout();
+  const inSlots = layout !== null;
+  const setLayoutCollapsed = layout?.setCollapsed;
+  useEffect(() => { setLayoutCollapsed?.(!panelOpen); }, [setLayoutCollapsed, panelOpen]);
+  useEffect(() => () => setLayoutCollapsed?.(false), [setLayoutCollapsed]);
+  const detailRef = useRef<HTMLDivElement>(null);
   const [inventory, setInventory] = useState<{ districtId: string; buildings: Building[]; source: "api" | "local" } | null>(null);
   // 불러오는 중 이전 거점의 건물·출처를 새 거점 이름으로 보여주지 않는다.
   const currentInventory = inventory?.districtId === districtId ? inventory : null;
@@ -255,6 +265,13 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [footHm, setFootHm] = useState<FootfallHeatmap | null>(null);
   const [densHm, setDensHm] = useState<DensityHeatmap | null>(null);
   const selected = buildings.find((b) => b.id === workspace.selectedId) ?? null;
+  // 좁은 화면(<1200px)에서는 칸이 지도 위 패널 하나에 쌓여 상세가 목록 아래에 선다 — 건물을 고르면 상세로 내려 준다
+  const selectedId = selected?.id ?? null;
+  useEffect(() => {
+    if (!inSlots || !selectedId || !window.matchMedia?.("(max-width: 1199px)")?.matches) return;
+    const el = detailRef.current;
+    if (el && typeof el.scrollIntoView === "function") el.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [inSlots, selectedId]);
   const [rec, setRec] = useState<IndustryRecommend | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
@@ -693,11 +710,11 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
       if (twinOpen) { setTwinOpen(false); return; }
       if (compareOpen) { setCompareOpen(false); return; }
       if (workspace.selectedId) { setWorkspace((w) => ({ ...w, selectedId: null })); return; }
-      if (panelOpen) setPanelOpen(false);
+      if (panelOpen) { setPanelOpen(false); setLayoutCollapsed?.(true); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [twin3dOpen, twinOpen, compareOpen, workspace.selectedId, panelOpen, setWorkspace]);
+  }, [twin3dOpen, twinOpen, compareOpen, workspace.selectedId, panelOpen, setWorkspace, setLayoutCollapsed]);
 
   // Platform 「이 상권 공실 3D로 보기」 — 목록 맨 위(빈 건물 먼저) 건물의 트윈을 연다. 빈 건물이 없으면 목록에 머문다.
   const wantsTwin = !!workspace.openTwin;
@@ -731,40 +748,25 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     onReview?.({ districtId, buildingId: b.id, buildingName: b.name });
   };
 
-  return (
-    <div className="mapshell">
-      {/* 지도 캔버스와 인증 실패 안내는 MapHost 가 그린다 — 여기는 오버레이만. */}
-
-      {/* 상단: 거점 선택 + 검색 + 레이어 토글 */}
-      <div className="overlay overlay-top">
+  // ── 화면 조각 — 단독 렌더(지도 위 한 패널)와 칸 배치(2026-11-08 · 왼쪽 목록 | 지도 | 오른쪽 상세)가 같이 쓴다 ──
+  const districtTools = <>
             <DistrictPicker className="hub-select" districts={hubs}
               ariaLabel="상권 선택"
               emptyLabel={hubListStatus === "loading" ? "선택한 상권 확인 중…" : hubListStatus === "failed" ? "상권 목록 조회 실패" : "상권 목록 없음"}
               value={districtId} onChange={setDistrictId} />
             <CaveatNote district={hubs.find((h) => h.id === districtId)} />
         <input className="search" aria-label="건물 검색" placeholder={`건물 검색 (${hub?.name ?? "가로수길"})`} value={q} onChange={(e) => setQ(e.target.value)} />
+  </>;
+  const layerSeg = (
         <div className="seg" role="group" aria-label="지도 데이터 레이어">
           {LAYERS.map((l) => (
             <button key={l.key} aria-pressed={layer === l.key} className={layer === l.key ? "active" : ""} onClick={() => setLayer(l.key)}>{l.label}</button>
           ))}
         </div>
-      </div>
-
-      {/* 접었을 때만 뜨는 펴기 버튼 — 접힌 패널이 어디로 갔는지 화면에 남긴다. */}
-      {!panelOpen && (
-        <button className="overlay panel-reopen" onClick={() => setPanelOpen(true)}
-          aria-expanded={false} aria-controls="page-side-panel">
-          ☰ 건물 목록
-        </button>
-      )}
-
-      {/* 좌측 리스트 패널 (모바일: 하단 시트) */}
-      <div id="page-side-panel" hidden={!panelOpen}
-        className={"overlay side-panel" + (selected ? " has-selection" : "")}>
-        {stepHeader}
-        <div className="page-panel-scroll">
+  );
+  const spHead = (
         <div className="sp-head">
-          <button className="sp-collapse" onClick={() => setPanelOpen(false)}
+          <button className="sp-collapse" onClick={() => { setPanelOpen(false); setLayoutCollapsed?.(true); }}
             aria-expanded aria-controls="page-side-panel" aria-label="건물 목록 접기"
             title="목록을 접고 지도를 넓게 본다">‹</button>
           {/* PPPP: Product ▶ Page — 이 platform 안에 어떤 page 가 놓일 자리인지를 본다.
@@ -775,6 +777,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {hub ? `${hub.gu} · ` : ""}{currentInventory ? <>{filtered.length.toLocaleString()}동 · {src === "api" ? "실측" : "샘플"}(추정)</> : "건물 불러오는 중…"}
           </div>
         </div>
+  );
+  const layerPanels = <>
         {layer === "footfall" && <HourlyPanel districtId={districtId} daytype={daytype} hour={hour} />}
         {layer === "density" && densHm && <DensityPanel hm={densHm} cell={densCell} />}
         {/* 임대시세 레이어의 첫 답 — "이 상권, 층마다 평당 월 얼마인가". 격자 색이 아니라 숫자다. */}
@@ -802,6 +806,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           </div>
         )}
         {layer === "rent" && <RentTrendPanel districtId={districtId} />}
+  </>;
+  const buildingList = <>
         <div className="building-filters">
           <label>공실 상태<select aria-label="공실 상태 필터" value={workspace.status}
             onChange={(e) => setWorkspace((w) => ({ ...w, status: e.target.value as VacancyFilter }))}>
@@ -915,8 +921,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           ))}
         </div>
 
-        {selected && (
-          <div className="b-detail">
+  </>;
+  const detail = selected ? (
+          <div className="b-detail" ref={detailRef}>
             <button className="building-back" type="button" onClick={() => setWorkspace((w) => ({ ...w, selectedId: null }))}>← 건물 목록</button>
             <div className="b-name">{selected.name}</div>
             {selected.roadAddr && <div className="b-road">{selected.roadAddr}</div>}
@@ -993,26 +1000,21 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {onReview && <button className="building-review" disabled={src !== "api"} onClick={() => review(selected)}>이 건물로 입점 검토 →</button>}
             {src !== "api" && <p className="building-hint">샘플 자료는 후보 저장과 입점 계산에 사용할 수 없습니다.</p>}
           </div>
-        )}
+  ) : null;
+  const tray = (
         <div className="candidate-tray">
           <div><strong>저장한 후보 {saved.length}/3</strong><span>현재 상권 · 이번 작업 동안 유지</span></div>
           <button type="button" disabled={saved.length === 0} onClick={() => setCompareOpen(true)}>후보 비교</button>
         </div>
-        </div>
+  );
+  const footer = <>
         {onPreviousStep && <ExploreStepFooter onPrevious={onPreviousStep}
           onNext={() => { if (selected) review(selected); }}
           nextLabel="이 자리 비용 확인" disabled={!selected || src !== "api" || !currentInventory} />}
-      </div>
+  </>;
 
-      {compareOpen && <CandidateCompare districtName={hub?.name ?? districtId}
-        candidates={saved.map((b) => ({ ...b, statusLabel: STATUS[b.status].label, vacancyRate: b.capacity > 0 ? vacRate(b) : null }))}
-        notes={Object.fromEntries(saved.map((b) => [b.id, workspace.notes[`${districtId}:${b.id}`] ?? ""]))}
-        onNote={(id, value) => setWorkspace((w) => ({ ...w, notes: { ...w.notes, [`${districtId}:${id}`]: value } }))}
-        onRemove={toggleSaved} onClose={() => setCompareOpen(false)}
-        onReview={onReview ? (id) => { const b = saved.find((item) => item.id === id); if (b) review(b); } : undefined} />}
-
-      {/* 유동인구 레이어 전용 시간 슬라이더 = 흐름 축 */}
-      {layer === "footfall" && (
+  // 지도 위 아래쪽 — 시간 막대(유동인구 레이어만) · 범례. 칸 배치에서는 한 묶음에 쌓고 단독 렌더는 예전 자리(아래 return)
+  const timeBar = layer === "footfall" ? (
         <div className="overlay time-bar">
           <span className="t">{String(hour).padStart(2, "0")}:00</span>
           <input type="range" min={0} max={23} value={hour} aria-label="유동인구 시각" onChange={(e) => setHour(+e.target.value)} />
@@ -1021,9 +1023,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <button type="button" aria-pressed={daytype === "weekend"} onClick={() => setDaytype("weekend")}>주말</button>
           </span>
         </div>
-      )}
-
-      {/* 범례 */}
+  ) : null;
+  /* 범례 */
+  const legend = (
       <div className="overlay legend">
         {/* 범례는 **지금 화면에 그려진 것만** 말한다. 점 모드에서 만실·부분공실 칩을
             띄우면 "그 색도 어딘가 있다"는 거짓말이 된다(줌을 당겨야 나온다). */}
@@ -1091,6 +1093,82 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
           </span>
         )}
       </div>
+  );
+
+  return (
+    <div className={"mapshell" + (inSlots ? " is-slotted" : "")}>
+      {/* 지도 캔버스와 인증 실패 안내는 MapHost 가 그린다 — 여기는 오버레이만. */}
+
+      {/* 상단: 거점 선택 + 검색 + 레이어 토글. 칸 배치에서는 상권 선택·검색이 왼쪽 목록 칸 머리로 가고 지도 위에는 레이어만 남는다 */}
+      <div className="overlay overlay-top">
+        {!inSlots && districtTools}
+        {layerSeg}
+      </div>
+
+      {/* 접었을 때만 뜨는 펴기 버튼 — 접힌 패널이 어디로 갔는지 화면에 남긴다. */}
+      {!panelOpen && (
+        <button className="overlay panel-reopen" onClick={() => { setPanelOpen(true); setLayoutCollapsed?.(false); }}
+          aria-expanded={false} aria-controls="page-side-panel">
+          ☰ 건물 목록
+        </button>
+      )}
+
+      {inSlots ? <>
+        {/* 칸 배치(2026-11-08): 머리 칸 = 단계 · 질문 / 왼쪽 칸 = 상권 · 검색 · 건물 목록 / 오른쪽 칸 = 고른 건물 상세 + 레이어 요약.
+            참고 시안 Case 1 의 「목록 | 지도 | 상세」 배치다. 접기(‹)는 좌우 칸을 함께 걷는다(MapHost is-collapsed). */}
+        {stepHeader && <MapSlot name="head" className="page-head" track="page">{stepHeader}</MapSlot>}
+        <MapSlot name="left" className="mapshell mapshell-slot page-side" track="page">
+          <div id="page-side-panel" hidden={!panelOpen}
+            className={"side-panel page-list-panel" + (selected ? " has-selection" : "")}>
+            <div className="page-panel-scroll">
+              <div className="page-side-tools">{districtTools}</div>
+              {spHead}
+              {buildingList}
+            </div>
+            {tray}
+          </div>
+        </MapSlot>
+        <MapSlot name="right" className="mapshell mapshell-slot page-detail" track="page">
+          <section className="side-panel page-detail-panel" hidden={!panelOpen} aria-label="건물 상세">
+            <div className="page-panel-scroll">
+              {detail ?? (
+                <div className="page-detail-empty" role="note">
+                  <strong>건물을 고르면 여기에 자세히 나와요</strong>
+                  목록이나 지도에서 건물을 누르면 공실 상태 · 빈 층 임대료 · 이 자리 업종 추천 · 층별 공실과 3D 트윈 · 거리뷰가 이 칸에 펼쳐집니다.
+                </div>
+              )}
+              {layerPanels}
+            </div>
+            {footer}
+          </section>
+        </MapSlot>
+      </> : (
+      /* 좌측 리스트 패널 (모바일: 하단 시트) — 단독 렌더(지도 셸 밖) */
+      <div id="page-side-panel" hidden={!panelOpen}
+        className={"overlay side-panel" + (selected ? " has-selection" : "")}>
+        {stepHeader}
+        <div className="page-panel-scroll">
+        {spHead}
+        {layerPanels}
+        {buildingList}
+        {detail}
+        {tray}
+        </div>
+        {footer}
+      </div>
+      )}
+
+      {compareOpen && <CandidateCompare districtName={hub?.name ?? districtId}
+        candidates={saved.map((b) => ({ ...b, statusLabel: STATUS[b.status].label, vacancyRate: b.capacity > 0 ? vacRate(b) : null }))}
+        notes={Object.fromEntries(saved.map((b) => [b.id, workspace.notes[`${districtId}:${b.id}`] ?? ""]))}
+        onNote={(id, value) => setWorkspace((w) => ({ ...w, notes: { ...w.notes, [`${districtId}:${id}`]: value } }))}
+        onRemove={toggleSaved} onClose={() => setCompareOpen(false)}
+        onReview={onReview ? (id) => { const b = saved.find((item) => item.id === id); if (b) review(b); } : undefined} />}
+
+      {/* 유동인구 레이어 전용 시간 슬라이더 = 흐름 축 */}
+      {/* 칸 배치(2026-11-08)에서는 지도 칸이 좁아 가운데 시간 막대와 왼쪽 범례가 겹쳤다(범례가 막대를 덮어 시각을 못 바꿨다) —
+          아래 한 묶음에 차례로 쌓는다(.overlay-bottom). 단독 렌더는 예전 자리 그대로다 */}
+      {inSlots ? <div className="overlay overlay-bottom">{timeBar}{legend}</div> : <>{timeBar}{legend}</>}
 
       {/* 건물 상세 — 2D 층 근거 + 공실 이력(일반 건물). 계획상가는 3D 디지털 트윈이 맡는다(2026-10-27 결정 · 구현 전) */}
       {twinOpen && selected && (

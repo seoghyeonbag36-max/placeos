@@ -173,6 +173,11 @@ q { quotes:"“" "”"; }
     linear-gradient(90deg, transparent 30%, #fff 30% 32%, transparent 32% 66%, #fff 66% 68%, transparent 68%),
     linear-gradient(0deg, transparent 40%, #fff 40% 42%, transparent 42%), #E6ECEF; position:relative; }
 .phone .map::after { content:"●"; position:absolute; left:47%; top:36%; color:var(--empty); font-size:6cqw; }
+.phone .zmap { height:30cqw; margin:3cqw 6.4cqw 0; border-radius:3cqw; position:relative; overflow:hidden; background:
+    linear-gradient(90deg, transparent 38%, #fff 38% 39.5%, transparent 39.5%), linear-gradient(0deg, transparent 55%, #CFE2F3 55% 61%, transparent 61%), #E6ECEF; }
+.phone .zmap i { position:absolute; width:15cqw; height:9cqw; border-radius:40%; opacity:.6; }
+.phone .dot { display:block; width:3.4cqw; height:3.4cqw; border-radius:1cqw; justify-self:center; }
+.phone .bdg { display:inline-block; margin-right:1.4cqw; padding:0 1.6cqw; border-radius:9cqw; background:var(--grey-100); color:var(--grey-800); font-weight:600; }
 .phone .sheet { position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:6cqw 6cqw 0 0; box-shadow:0 -2cqw 8cqw rgba(25,31,40,.18); padding:3cqw 6.4cqw 22cqw; display:grid; gap:2cqw; }
 .phone .sheet::before { content:""; justify-self:center; width:10cqw; height:1.2cqw; border-radius:9cqw; background:var(--grey-300); }
 .phone .dim { position:absolute; inset:0; background:rgba(25,31,40,.42); }
@@ -209,7 +214,7 @@ q { quotes:"“" "”"; }
 
 <div class="shell">
   <aside class="index" aria-label="목차">
-    <div class="brand"><span class="mark" aria-hidden="true">P</span><div><b>PlaceOS</b><span>화면설계서 5판 · 2026-10-12<br>한 화면 한 질문</span></div></div>
+    <div class="brand"><span class="mark" aria-hidden="true">P</span><div><b>PlaceOS</b><span>화면설계서 5판 · 2026-10-12 · 고침 2026-11-08<br>한 화면 한 질문</span></div></div>
     <nav>
       <a href="#feedback"><span class="n">0</span>피드백 → 이 문서</a>
       <a href="#priority"><span class="n">1</span>우선순위</a>
@@ -228,6 +233,7 @@ q { quotes:"“" "”"; }
       <a href="#rules"><span class="n">8</span>근거 표기</a>
       <a href="#a11y"><span class="n">9</span>접근성</a>
       <a href="#explore"><span class="n">10</span>지도 탐색(종전 4트랙)</a>
+      <a href="#explore-layout"><span class="n">10-1</span>칸 배치(11-08)</a>
       <a href="#checks"><span class="n">11</span>통과 조건</a>
       <a href="#open"><span class="n">12</span>미해결 · 변경 이력</a>
     </nav>
@@ -240,7 +246,7 @@ q { quotes:"“" "”"; }
       <p>3·4판은 <b>지도를 배경으로 깔고 네 트랙(Platform·Page·Posting·Program)을 패널로 띄우는</b> 구조였다. 한 패널에 질문이 4~6개(상권·자리·업종·세부 업종·권리금·운영 조건)가 겹쳐 있었고, 처음 온 사람은 로그인부터 해야 했다. 5판은 <b>우선순위로 흐름을 다시 짜고</b>, 그 흐름을 <b>한 화면에 한 질문</b>씩 묻는 화면 24개로 나눈다. 묻는 순서는 PPPP 그대로다 — <b>어떤 상권인가 → 어느 빈 자리인가 → 얼마면 되나 → 통하는지 어떻게 확인하나.</b></p>
       <p>3·4판의 <b>데이터 규칙</b>(근거 표기 · 공실 4단계 정의 · 임대료 식 · 업종 12종 대응표 · 인계 계약)은 그대로 유효하다. 바뀌는 것은 <b>화면 구성·흐름·말투·시각 토큰</b>이다. 화면 구성에서 3·4판과 이 문서가 다르면 이 문서를 따른다.</p>
       <dl class="meta">
-        <div><dt>판</dt><dd>5판 · 2026-10-12</dd></div>
+        <div><dt>판</dt><dd>5판 · 2026-10-12 · 고침 2026-11-08(§10-1 칸 배치 · <a href="#Q4-r">Q4-r</a> 상권 고르기 지도)</dd></div>
         <div><dt>대체하는 것</dt><dd>3·4판(screen-spec-pppp-2026-09-13.html)의 화면 구성 · 공통 프레임 C1</dd></div>
         <div><dt>기준 화면</dt><dd>모바일 375×812 · 데스크톱 1440×900</dd></div>
         <div><dt>대상 독자</dt><dd>디자이너 · 기획 · 개발</dd></div>
@@ -317,7 +323,7 @@ q { quotes:"“" "”"; }
       <ol style="padding-left:20px;display:grid;gap:6px;max-width:80ch">
         <li><b>첫 결과까지 질문 2개 · 가입 0번.</b> 목적과 업종만 고르면 상권 순위가 뜬다(바꾸기·옮기기는 지금 상권 하나 더). 3·4판은 가입 → 카드 하나에 다섯 칸 → 시작이었다.</li>
         <li><b>로그인은 저장할 때.</b> 후보 저장 · 결과 저장 · 검증 계획 만들기 · 내 정보에서만 묻는다. 그때까지 고른 것은 그대로 계정으로 옮긴다.</li>
-        <li><b>지도는 「어디」를 고를 때만.</b> 질문 화면에는 지도를 깔지 않는다. 자리 상세에 작은 지도, 목록에서 「지도로 보기」, 그리고 지도 탐색(종전 화면)에 그대로 남는다.</li>
+        <li><b>지도는 「어디」를 고를 때만.</b> 질문 화면에는 지도를 깔지 않는다. 자리 상세에 작은 지도, 목록에서 「지도로 보기」, 그리고 지도 탐색(종전 화면)에 그대로 남는다. <span class="tag real">2026-11-08</span> 예외 하나 — 지역별 창업의 상권 고르기(<a href="#Q4-r">Q4-r</a>)는 질문 자체가 「어디」라 목록 옆에 지도를 둔다(목록만으로도 끝까지 고를 수 있다).</li>
         <li><b>계산 가능 여부를 먼저 말한다.</b> 빈 자리 카드에 「본전 계산 가능」 배지와 필터를 둔다. 약 9%만 계산된다는 사실을 숨기지 않는다.</li>
         <li><b>PPPP 는 단계 이름 밑으로.</b> 화면 본문에서는 「상권 · 빈 자리 · 비용 · 작게 확인」을 쓰고, Platform·Page·Posting·Program 은 홈의 단계 표시와 지도 탐색에만 남긴다.</li>
         <li><b>흐름 밖으로 뺀 것을 화면에 다시 들이지 않는다.</b> 새 기능은 「네 단계 중 어느 질문에 답하나」를 말하지 못하면 흐름에 넣지 않는다(토스 Minimum Features, §3-1).</li>
@@ -391,7 +397,7 @@ q { quotes:"“" "”"; }
 
       <h3>2-3. 이어하기 · 뒤로가기</h3>
       <ul style="padding-left:20px;display:grid;gap:5px;max-width:80ch">
-        <li><b>화면마다 주소가 있다</b>(<code>#/start</code> · <code>#/industry</code> · <code>#/districts</code> · <code>#/space/{id}</code> …). 브라우저·휴대폰 뒤로가기는 앞 질문으로 간다. 화면 안 왼쪽 위 「뒤로」도 같은 일을 한다.</li>
+        <li><b>화면마다 주소가 있다</b>(<code>#/start</code> · <code>#/startup-order</code> · <code>#/startup-region</code> · <code>#/industry</code> · <code>#/districts</code> · <code>#/space/{id}</code> …). 브라우저·휴대폰 뒤로가기는 앞 질문으로 간다. 화면 안 왼쪽 위 「뒤로」도 같은 일을 한다.</li>
         <li><b>답은 고르는 순간 저장한다</b>(이 브라우저 <code>localStorage</code>, 로그인하면 계정). 중간에 나갔다 와도 마지막 화면에서 이어진다(NN/g Wizards: 상태 저장 · 이미 아는 것은 다시 묻지 않는다).</li>
         <li><b>답을 바꾸면 그 뒤만 비운다.</b> 업종을 바꾸면 상권·자리·비용·검증 입력을 비우고, 상권을 바꾸면 자리·비용을 비운다. 앞 답은 남긴다.</li>
         <li><b>필요한 앞 답이 없으면 그 질문으로 돌려보낸다</b>(예: 주소로 <code>#/spaces</code> 를 바로 열었는데 상권이 없으면 Q4).</li>
@@ -514,13 +520,13 @@ q { quotes:"“" "”"; }
           <tr><th>⑤ 본문</th><td>선택지 목록 · 입력칸 · 결과. <b>선택지를 누르면 바로 다음 화면</b>(버튼을 한 번 더 누르게 하지 않는다)</td><td class="tnum">위 24 · 행 좌우 20/24 · 행 상하 12~16</td><td>TDS Top lowerGap 24 · ListRow 여백</td></tr>
           <tr><th>⑥ 하단 고정 버튼</th><td>입력이 필요한 화면과 결과 화면에만. 문구는 누르면 일어날 일(「상권 순위 보기」·「본전 시점 계산하기」). 보조 행동이 진짜 대안일 때만 두 개</td><td class="tnum">높이 56 · 모서리 16 · 17/700 · 좌우 20 · 아래 safe-area + 16 · 위 그라데이션 24</td><td>TDS FixedBottomCTA · Montage Action area</td></tr>
         </tbody></table></div>
-      <p class="note">데스크톱(≥1024px)은 질문 화면을 <b>가운데 한 열(최대 560px)</b>로 둔다. 목록·비교 화면(R1·R3·R5·홈)은 최대 960px 안에서 카드 2~4열로 넓힌다. 양옆을 지도·패널로 채우지 않는다 — 질문에 집중하게 하는 것이 이 판의 목적이다.</p>
+      <p class="note">데스크톱(≥1024px)은 질문 화면을 <b>가운데 한 열(최대 560px)</b>로 둔다. 목록·비교 화면(R1·R3·R5·홈)은 최대 960px 안에서 카드 2~4열로 넓힌다. 양옆을 지도·패널로 채우지 않는다 — 질문에 집중하게 하는 것이 이 판의 목적이다. <span class="tag real">2026-11-08</span> 예외: <a href="#Q4-r">Q4-r</a> 은 목록 │ 지도 두 칸을 최대 1320px 안에 둔다(<code>FlowScreen mapWide</code> · 900px 이하에서는 지도 위 · 목록 아래).</p>
 
       <h3>4-2. 불변 조건 — 3·4판에서 무엇이 바뀌나</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>조건</th><th>3·4판</th><th>5판</th><th>이유</th></tr></thead>
         <tbody>
-          <tr><th>C1 지도</th><td>지도는 모든 화면의 배경이고 하나다</td><td><b>지도는 「어디」를 고르는 자리에만.</b> 질문 화면에는 지도가 없다. 자리 상세(R4)에 작은 지도, 빈 자리(R3)의 「지도로 보기」, 지도 탐색(X)에 남는다. <b>지도 탐색 안에서는 C1 이 그대로 유효</b>하다(인스턴스 하나 · 탭 전환 시 재생성 금지)</td><td>한 화면 한 질문. 지도 위 패널은 질문 4~6개를 한꺼번에 폈다</td></tr>
+          <tr><th>C1 지도</th><td>지도는 모든 화면의 배경이고 하나다</td><td><b>지도는 「어디」를 고르는 자리에만.</b> 질문 화면에는 지도가 없다. 자리 상세(R4)에 작은 지도, 빈 자리(R3)의 「지도로 보기」, 지도 탐색(X)에 남는다. <span class="tag real">2026-11-08</span> 지역별 창업 상권 고르기(<a href="#Q4-r">Q4-r</a>)의 보조 지도 — 지도 탐색을 대신하지 않는다(§10 ⛔). <b>지도 탐색 안에서는 C1 이 그대로 유효</b>하다(인스턴스 하나 · 탭 전환 시 재생성 금지)</td><td>한 화면 한 질문. 지도 위 패널은 질문 4~6개를 한꺼번에 폈다</td></tr>
           <tr><th>C2 상권 공유</th><td>상권 선택은 화면 전환이 아니다 · 네 트랙이 공유</td><td>흐름에서 고른 상권은 지도 탐색이 이어받는다(같은 저장 값). 지도 탐색 안 규칙은 그대로</td><td>탐색으로 넘어가도 다시 고르지 않게</td></tr>
           <tr><th>C3 한 화면 한 질문 <span class="tag p">신설</span></th><td>—</td><td>질문 화면은 답할 것이 하나다. 비교가 일인 화면(R1·R3·R5)은 <b>후보를 한 화면에 나란히</b> 둔다 — 그 화면의 질문은 「어느 것?」 하나다</td><td>§3 근거와 반례</td></tr>
           <tr><th>C4 근거 표기</th><td>3판 §근거 표기 규칙</td><td>그대로. 새 화면은 <b>결론 아래 한 줄 + 「자세히」</b> 두 단으로 싣는다(§8)</td><td>제1원칙 유지</td></tr>
@@ -589,7 +595,7 @@ q { quotes:"“" "”"; }
           <div class="qt">어떤 준비를 하고<br>계세요?</div>
           <div class="sub">고른 목적에 맞춰 상권을 보여 드려요.</div>
           <div class="bd">
-            <div class="opt on"><b>새 가게를 열어요</b><span>업종은 정했고, 동네를 찾고 있어요</span></div>
+            <div class="opt on"><b>새 가게를 열어요</b><span>지역이나 업종부터 맞는 상권을 찾아요</span></div>
             <div class="opt"><b>지금 가게 업종을 바꿔요</b><span>자리는 그대로, 무엇으로 바꿀지</span></div>
             <div class="opt"><b>하던 장사를 옮겨요</b><span>같은 업종으로 옮길 상권을 찾아요</span></div>
           </div>
@@ -599,13 +605,81 @@ q { quotes:"“" "”"; }
           <div class="sid"><b>Q1</b> · <code>#/start</code> · 진입: 랜딩 「내 업종으로 시작하기」 · 홈 「처음부터」</div>
           <h3>어떤 준비를 하고 계세요?</h3>
           <dl>
-            <dt>답하는 법</dt><dd>세 줄 중 하나를 누른다 → 바로 Q2. 기본 선택 없음(<code>radiogroup</code>, 키보드 ↑↓ · Enter)</dd>
-            <dt>선택지</dt><dd><ul><li>새 가게를 열어요 — <q>업종은 정했고, 어느 동네가 좋을지 찾고 있어요</q> → <code>goal=start</code></li>
+            <dt>답하는 법</dt><dd>세 줄 중 하나를 누른다 → 새 가게면 <a href="#Q1-o">Q1-o</a>(<span class="tag real">2026-11-04</span>), 그 밖은 바로 Q2. 기본 선택 없음(<code>radiogroup</code>, 키보드 ↑↓ · Enter)</dd>
+            <dt>선택지</dt><dd><ul><li>새 가게를 열어요 — <q>지역이나 업종부터 내 가게에 맞는 상권을 찾아요</q> → <code>goal=start</code> · <span class="tag real">2026-11-04 바꿈</span></li>
               <li>지금 가게 업종을 바꿔요 — <q>자리는 그대로, 무엇으로 바꿀지 고민이에요</q> → <code>pivot</code></li>
               <li>하던 장사를 다른 동네로 옮겨요 — <q>같은 업종으로 옮길 상권을 찾고 있어요</q> → <code>move</code></li></ul></dd>
             <dt>아래 한 줄</dt><dd><q>로그인 없이 끝까지 볼 수 있어요. 저장할 때만 로그인해요.</q> (Baymard: 처음부터 「나중에 계정을 만들 수 있다」고 알린다)</dd>
             <dt>저장</dt><dd>목적을 바꾸면 업종 이후 답을 비운다(§2-3)</dd>
             <dt>왜 이 질문이 먼저</dt><dd>목적이 다음 질문(업종의 뜻 · 지금 상권 필요 여부)과 결과 화면(R1 · R1-p)을 가른다. 토스 보험금 청구 사례처럼 <b>사실로 답할 수 있게</b> 「~해요」 문장으로 바꿨다 — 분류어(「피벗」·「이전」)를 쓰지 않는다</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q1-o">
+        <div class="phone" role="img" aria-label="Q1-o 무엇부터 정할지 묻는 화면: 지역별 창업 · 업종별 창업 두 선택지">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">상권 찾기 · 새 가게</div>
+          <div class="qt">무엇부터 정해<br>볼까요?</div>
+          <div class="sub">먼저 정하고 싶은 조건을 골라 주세요.</div>
+          <div class="bd">
+            <div class="opt on"><b>지역별 창업</b><span>지역과 상권을 먼저 고르고, 업종을 골라요</span></div>
+            <div class="opt"><b>업종별 창업</b><span>업종을 먼저 고르고, 지역을 골라요</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q1-o</b> · <code>#/startup-order</code> · 앞: Q1(새 가게) · <span class="tag real">2026-11-04</span> 코드에 먼저 들어갔고 2026-11-08 에 이 문서에 적었다</div>
+          <h3>무엇부터 정해 볼까요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>두 줄 중 하나를 누른다 → 지역별이면 <a href="#Q1-r">Q1-r</a> → <a href="#Q4-r">Q4-r</a> → Q2 → R2, 업종별이면 Q2 → <a href="#Q1-r">Q1-r</a> → R1</dd>
+            <dt>선택지</dt><dd><ul><li>지역별 창업 — <q>지역과 상권을 먼저 고르고, 그곳에서 할 업종을 골라요</q> → <code>startupOrder=region</code></li>
+              <li>업종별 창업 — <q>업종을 먼저 고르고, 가게를 열 지역을 골라요</q> → <code>startupOrder=industry</code></li></ul></dd>
+            <dt>저장</dt><dd>목적이 새 가게가 아니면 Q1 로 돌려보낸다(<code>flow/screens/Find.tsx</code> <code>StartupOrder</code>)</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q1-r">
+        <div class="phone" role="img" aria-label="Q1-r 어느 지역에서 창업할지 묻는 화면: 서울 · 경기 · 광주 · 전주 타일 넷">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">상권 찾기 · 새 가게</div>
+          <div class="qt">어느 지역에서<br>창업하시나요?</div>
+          <div class="sub">지역을 고른 다음 그 안의 상권을 선택해요.</div>
+          <div class="bd"><div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="tile">서울</div><div class="tile">경기</div><div class="tile">광주</div><div class="tile">전주</div></div></div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q1-r</b> · <code>#/startup-region</code> · 앞: <a href="#Q1-o">Q1-o</a>(지역별) · Q2(업종별) · <span class="tag real">2026-11-04</span></div>
+          <h3>어느 지역에서 창업하시나요?</h3>
+          <dl>
+            <dt>답하는 법</dt><dd>타일 넷 — 서울 · 경기 · 광주 · 전주(<code>RANK_GROUPS</code> — R1 순위 묶음과 같은 시도 단위). 누르면 <code>#/districts</code>: 지역별이면 <a href="#Q4-r">Q4-r</a>, 업종별이면 R1(그 지역 묶음으로 연다)</dd>
+            <dt>보조 문구</dt><dd>지역별 <q>지역을 고른 다음 그 안의 상권을 선택해요.</q> · 업종별 <q>선택한 업종으로 살펴볼 지역을 골라 주세요.</q></dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="screen" id="Q4-r">
+        <div class="phone" role="img" aria-label="Q4-r 지역별 창업 상권 고르기: 위 지도에 상권마다 다른 색 구역, 아래 목록 줄마다 같은 색 점과 상권 유형 설명">
+          <div class="bar"><span class="bk">‹</span></div>
+          <div class="cap">지역별 창업 · 서울</div>
+          <div class="qt" style="font-size:5.6cqw">서울의 어느 상권에서<br>창업하시나요?</div>
+          <div class="zmap"><i style="left:10%;top:22%;background:#22B07D"></i><i style="left:42%;top:48%;background:#8E3FD1"></i><i style="left:70%;top:14%;background:#C2571A"></i><i style="left:64%;top:60%;background:#1E3A8A"></i></div>
+          <div class="bd" style="gap:0;padding-top:2cqw">
+            <div class="row"><i class="dot" style="background:#22B07D"></i><div><b>가락시장</b><em><span class="bdg">시장·도매</span>송파구 · 공실률 ○%</em></div><span class="rt">›</span></div>
+            <div class="row"><i class="dot" style="background:#8E3FD1"></i><div><b>강남역·강남대로</b><em><span class="bdg">오피스·업무 배후</span>강남구</em></div><span class="rt">›</span></div>
+            <div class="row"><i class="dot" style="background:#C2571A"></i><div><b>건대입구·화양동</b><em><span class="bdg">대학가·청년·수험</span>광진구</em></div><span class="rt">›</span></div>
+          </div>
+        </div>
+        <div class="spec">
+          <div class="sid"><b>Q4-r</b> · <code>#/districts</code>(지역별 창업일 때 — 같은 주소가 업종별이면 R1) · 앞: <a href="#Q1-r">Q1-r</a> · 다음: Q2 · <span class="tag real">2026-11-08 신설</span></div>
+          <h3>{지역}의 어느 상권에서 창업하시나요?</h3>
+          <dl>
+            <dt>배치</dt><dd>목록 │ 지도 두 칸(<code>FlowScreen mapWide</code> — 최대 1320px · 목록 칸 300~380px). 900px 이하는 지도 위(높이 46dvh) · 목록 아래. 이 지도는 이 화면만의 보조 지도다 — 지도 탐색(<a href="#explore">§10</a>)을 대신하지 않는다(⛔ PPPP 화면 보존 규칙)</dd>
+            <dt>색</dt><dd><b>상권마다 다른 색</b> — 서울 81곳 81색(<code>lib/districtColors</code>: 공간 순서 × 황금각이라 이웃 상권끼리 색이 벌어진다). 목록 줄의 점과 지도 구역이 같은 색이다. <b>구별용이지 순위 · 등급 · 공실이 아니다</b></dd>
+            <dt>설명</dt><dd>색 옆에 짧은 설명 — <b>서울만</b> 상권 유형(<code>/commercial-districts/outlines</code> 의 <code>type_name</code> · 2026-10-09 서울 분류표 T1~T10: 시장·도매 · 오피스·업무 배후 · 트렌드 골목·감성 …). 사람이 붙인 라벨 54곳 · 원본 데이터 분류 27곳을 목록 위 한 줄과 알약 툴팁(<code>type_is_manual</code>)으로 밝힌다. 경기 · 광주 · 전주는 설명 없이 이름만(<a href="#open">U14</a> — 사용자 지시 대기). 참고 시안 Case 1 의 「수제화거리」·「성수역 오피스」는 성수동 안 데모 구역 이름이라 그대로 옮기지 않았다</dd>
+            <dt>행</dt><dd>색 점 · 상권명(비교 주의면 *) · 설명 알약(그 상권 색 14% 바탕 · 글자는 grey900) · 구 · 대표 공실률. 행을 누르면 바로 Q2(종전과 같다)</dd>
+            <dt>지도</dt><dd>그 지역 공개 상권만 칠한다(실측 범위 외곽선 — 공식 상권 경계가 아니다 · 외곽선이 없으면 중심에 반경 180m 원). 이름표(이름 │ 설명)는 줌 13 이상이거나 고른 · 가리킨 상권만(81개를 한 번에 띄우면 겹친다). 글자는 상권 색 위에 올리지 않는다(흰 바탕 · 고름은 굵은 색 테두리). 목록 줄에 마우스 · 포커스를 두면 그 구역이 굵어진다</dd>
+            <dt>구역 누르기</dt><dd>고르기만 한다 — 아래 카드 「{상권} · {설명 · 구 · 공실률}」의 <b>「이 상권으로 계속」</b>을 눌러야 Q2. 지도를 끌다 잘못 눌러 질문이 넘어가지 않게</dd>
+            <dt>실패</dt><dd>SDK 실패 → 회색 칸 「지도를 불러오지 못했어요 — 목록에서 골라 주세요」 · 외곽선 실패 → 원으로 표시하고 그렇다고 적는다. 목록만으로 끝까지 고를 수 있다</dd>
           </dl>
         </div>
       </article>
@@ -696,7 +770,7 @@ q { quotes:"“" "”"; }
           </div>
         </div>
         <div class="spec">
-          <div class="sid"><b>R1</b> · <code>#/districts</code> · 앞: Q2(창업) · Q3(옮기기)</div>
+          <div class="sid"><b>R1</b> · <code>#/districts</code> · 앞: Q2(창업) · <a href="#Q1-r">Q1-r</a>(업종별 창업 · <span class="tag real">2026-11-04</span>) · Q3(옮기기) · 같은 주소가 지역별 창업이면 <a href="#Q4-r">Q4-r</a></div>
           <h3>{업종} 입지 점수가 높은 상권이에요</h3>
           <dl>
             <dt>보조 한 줄</dt><dd><q>비슷한 자리에 {업종}이 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.</q> — 3판의 FIT_NOTE 를 한 문장으로(늘 보인다)</dd>
@@ -776,6 +850,7 @@ q { quotes:"“" "”"; }
           <h3>어느 상권을 볼까요?</h3>
           <dl>
             <dt>답하는 법</dt><dd>Q3 와 같은 검색 목록. 행을 누르면 R2</dd>
+            <dt>지역별 창업</dt><dd><span class="tag real">2026-11-08</span> 지역을 먼저 고른 창업은 목록 + 지도인 <a href="#Q4-r">Q4-r</a> 이 같은 일을 한다</dd>
             <dt>행</dt><dd>상권명 · 구 · 대표 공실률(<code>vacancy_rate</code>, 미제공이면 그 문구) — 「빈 층 {n}곳」은 요청 비용 때문에 1차에서는 넣지 않는다(81회 요청). 와이어프레임의 빈 층 수는 2차 안</dd>
           </dl>
         </div>
@@ -1297,11 +1372,12 @@ q { quotes:"“" "”"; }
       <div class="table-wrap"><table>
         <thead><tr><th>부품</th><th>쓰는 곳</th><th>규칙</th></tr></thead>
         <tbody>
-          <tr><th><code>FlowScreen</code></th><td>모든 Q·R 화면</td><td>§4-1 다섯 칸. 화면에 들어오면 제목(<code>h1</code>)에 포커스. <code>tabs</code> 를 주면 하단 탭바(허브만)</td></tr>
+          <tr><th><code>FlowScreen</code></th><td>모든 Q·R 화면</td><td>§4-1 다섯 칸. 화면에 들어오면 제목(<code>h1</code>)에 포커스. <code>tabs</code> 를 주면 하단 탭바(허브만) · <code>wide</code> 최대 960 · <span class="tag real">2026-11-08</span> <code>mapWide</code> 최대 1320(목록 │ 지도 — <a href="#Q4-r">Q4-r</a>)</td></tr>
           <tr><th><code>TopBar</code></th><td>모든 흐름 화면</td><td>왼쪽 「뒤로」(첫 화면은 없음) · 오른쪽 하나(닫기 · ♡ · 지도). 높이 56</td></tr>
           <tr><th><code>ChoiceList</code> · <code>ChoiceRow</code></th><td>Q1 · Q-p · Q5 · Q6 · Q10 · Q12 · Q13</td><td><code>role="radiogroup"</code> · 행은 <code>role="radio"</code> · ↑↓ 이동 · Enter/Space 선택 · 오른쪽 값(개수 등)은 <code>aria-describedby</code></td></tr>
           <tr><th><code>TileGrid</code></th><td>Q2</td><td>3열(데스크톱 4열) · 이모지는 <code>aria-hidden</code> · 아래 보조 줄 한 줄</td></tr>
           <tr><th><code>RankRow</code></th><td>R1 · R1-p · Q3 · Q4</td><td>왼쪽 순위 · 가운데 이름+보조 · 오른쪽 숫자 두 줄. 행 전체가 버튼(<code>&lt;button&gt;</code>)</td></tr>
+          <tr><th><code>DistrictMap</code></th><td>Q4-r</td><td><span class="tag real">2026-11-08</span> <code>flow/DistrictMap.tsx</code> — 그 지역 상권 구역을 상권 색으로 칠한다(외곽선이 없으면 반경 180m 원) · 이름표(이름 │ 설명)는 줌 13 이상 또는 고른 · 가리킨 상권만 · 구역을 누르면 고르기만 하고 넘어가지 않는다(카드에서 확인) · SDK 실패 시 회색 칸. 색은 <code>lib/districtColors</code>, 설명 알약은 <code>.fl-dmap-type</code>(그 상권 색 14% 바탕 · 40% 테두리)</td></tr>
           <tr><th><code>SpaceCard</code></th><td>R3</td><td>Montage Card — 층 그림 4:3 · 층 오버레이 · ♡(<code>aria-pressed</code>) · 제목 2줄 말줄임 · 월세 1줄. DOM 순서 = 읽는 순서(이름 → 월세 → 면적 → 배지)</td></tr>
           <tr><th><code>FloorStack</code></th><td>SpaceCard 썸네일 · R4</td><td>층마다 막대 하나(최대 8층, 넘으면 위를 접고 「+n층」) · 빈 층 = 빨강 채움 · 추정 빈 층 = 빗금 · 영업 = 회색 · 고른 층 = 테두리. 색만으로 말하지 않는다(빗금·테두리)</td></tr>
           <tr><th><code>FilterChips</code></th><td>R3</td><td>한 줄 가로 스크롤 · 켠 칩은 진한 바탕 · <code>aria-pressed</code></td></tr>
@@ -1329,6 +1405,7 @@ q { quotes:"“" "”"; }
           <li>재지정: <code>--ink → grey-900</code> · <code>--muted → grey-600</code> · <code>--line → grey-200</code> · <code>--bg → grey-100</code></li>
           <li>⚠ <code>--muted</code>(grey600)는 회색 바탕(grey100) 위에서 <b>4.19:1</b> — 작은 글자는 흰 표면에서만. 회색 바탕 위 보조 글자는 <code>--sub</code>(grey700)</li>
           <li><code>grey-500</code>(3.04:1)은 비활성·placeholder·아이콘만 — 정보를 담은 글자에 쓰지 않는다</li>
+          <li><span class="tag real">2026-11-08</span> 상권 구별 색은 토큰이 아니라 계산이다(<code>lib/districtColors</code>): 공간 순서(위도 띠 0.03° 마다 뱀 순서) × 황금각 137.508°, 채도 · 밝기 세 단 → <code>#RRGGBB</code>. 구별용이다 — 순위 · 등급 · 공실 · 유형이 아니다(Platform 「유형」 색칠의 T1~T10 고정색과 다른 체계). 지도 채우기 0.42(고름 0.72 · 가리킴 0.6 · 검색 밖 0.1). <b>글자는 이 색 위에 올리지 않는다</b> — 밝은 색은 흰 글자 대비 4.5:1 미만이다(81색 중 48색). 설명 알약은 14% 바탕 + grey900 글자, 이름표는 흰 바탕</li>
         </ul></div>
         <div class="box"><h4>글자 · 간격 · 모서리</h4><ul>
           <li>흐름 글자 다섯 단(rem — 브라우저 글꼴 크기를 따른다): 질문 제목 <b>1.5rem/1.375</b>(데스크톱 1.75rem) · 큰 숫자 <b>1.75rem</b>(최대 2.25rem, clamp) · 선택지·본문 <b>1.0625rem(17)</b> · 보조 <b>0.9375rem(15)</b> · 캡션 <b>0.8125rem(13)</b></li>
@@ -1371,7 +1448,7 @@ q { quotes:"“" "”"; }
         <div class="box"><h4>입력 · 보기</h4><ul>
           <li>누르는 자리 최소 44×44(행 56 · 버튼 56)</li>
           <li>글자는 rem — 브라우저 글꼴 크기를 키우면 따라 커진다. 큰 숫자만 상한</li>
-          <li>색만으로 말하지 않는다: 층 그림은 빗금·테두리, 배지는 글자</li>
+          <li>색만으로 말하지 않는다: 층 그림은 빗금·테두리, 배지는 글자 · <span class="tag real">2026-11-08</span> <a href="#Q4-r">Q4-r</a> 의 상권 색은 구별용이고 이름 · 설명이 글자로 함께 나온다. 지도 구역 누르기는 카드 확인이 있고, 키보드 · 화면 낭독기는 목록으로 끝까지 고른다</li>
           <li>움직임 줄이기 설정이면 골격 애니메이션·화면 전환 없음</li>
           <li>대비 AA(4.5:1) — §7 값은 검산했다</li>
         </ul></div>
@@ -1389,9 +1466,27 @@ q { quotes:"“" "”"; }
         <li>레일 맨 위에 「홈」(<code>#/home</code>)을 더한다 — 지도 탐색에서 흐름으로 돌아가는 길</li>
         <li><span class="tag real">2026-10-24</span> <b>트랙 · 상권 · 건물을 실어 연다.</b> <code>#/explore?track={platform|page|posting|program}&amp;district={id}&amp;building={id}</code> — 홈의 「지도에서 내 자리 보기」·지도 미리보기(<a href="#H-done">H</a>)가 쓴다. 쿼리는 <b>첫 트랙과 선택만</b> 정하고, 레일 넷·화면 넷은 그대로다(더한 입구 — 대신하지 않는다). Page 는 그 건물을 고른 채(MapShell 이 건물 목록을 받은 뒤 카메라를 옮긴다 — Platform 「Page에서 이 건물 보기」와 같은 길), Posting 은 그 건물의 입점 계산으로 연다(유닛이 없으면 화면이 그렇다고 말한다). 모르는 트랙 이름은 버리고 첫 화면 규칙(Platform)대로. 쿼리가 붙어도 지도 탐색이다 — App 은 해시를 <code>===</code> 가 아니라 경로로 가른다(<code>flow/route.isExploreHash</code>). 기존 진입로 셋(탭 · R2 · R3)은 쿼리 없이 그대로 간다</li>
         <li><span class="tag real">2026-10-24</span> <b>Platform 「상권 비교」.</b> 상권 선택 아래 「+ 상권 비교에 담기」 → 상권을 바꿔 가며 2~3곳 → 「상권 비교」 대화상자(<code>&lt;dialog&gt;</code> · Page 「후보 비교」와 같은 틀). 줄·규칙은 흐름 <a href="#R1-c">R1-c</a> 와 같다(<code>lib/districtCompare</code> · <code>components/DistrictCompare</code>). 열의 「이 상권 보기」가 그 상권으로 옮긴다. 담은 상권은 상권을 바꿔도 남고(자리 비교와 다르다), 새로고침하면 비워진다</li>
-        <li>안의 규칙(C1 지도 하나 · 탭 전환 시 재생성 금지 · 4레이어 · 거리뷰 모달)은 3·4판 그대로</li>
-        <li>안의 문구·패널 구성은 이번 판에서 바꾸지 않는다 — 토큰(회색·글자색)만 5판 값을 따른다. 다음 판 과제(§12)</li>
+        <li>안의 규칙(C1 지도 하나 · 탭 전환 시 재생성 금지 · 4레이어 · 거리뷰 모달)은 3·4판 그대로 — <span class="tag real">2026-11-08</span> 단 화면 <b>배치</b>는 아래 <a href="#explore-layout">10-1 칸 배치</a>가 3판 「레이아웃 맵 — 데스크톱 양식 2번」의 트랙 패널(w min(560, 100%−24)) · Page 목록 패널(w 360) 자리를 대신한다</li>
+        <li>안의 문구는 이번 판에서 바꾸지 않는다 — 토큰(회색·글자색)만 5판 값을 따른다. 다음 판 과제(§12 U6). <span class="tag real">2026-11-08 바꿈</span> 패널 <b>배치</b>는 바꿨다 — 덩어리를 칸으로 옮겼고 기능은 같다. 문구는 칸 안내 몇 줄만 더하거나 바꿨다: Posting 「자리와 비용 조건」 안내(「…고르면 여기에 바로 계산 결과가 나옵니다」) · Page 빈 상세 안내(「건물을 고르면 여기에 자세히 나와요」) · Program 머리말 제목 h1 → h2(머리 칸에 단계 제목이 있다) · 접기 버튼 title</li>
       </ul>
+      <h3 id="explore-layout">10-1. 칸 배치 — 지도를 가운데, 기능을 양옆에 <span class="tag real">2026-11-08</span></h3>
+      <p class="note">지도 위 패널 하나로는 지도가 크고 기능이 작아 쓰기 불편했다(사용자 피드백 2026-11-08). 넓은 화면은 참고 시안 <code>Renewal/PlaceOS 참고.html</code> Case 1 의 <code>270px │ 지도 │ 390px</code> 배치를 따른다. 지도는 여전히 하나(C1)이고 가운데 칸에 선다 — 칸은 MapHost 가 세우고 트랙 화면이 덩어리를 <code>MapSlot</code>(portal)으로 꽂는다(<code>components/mapLayoutContext.ts</code>). 지도 셸 밖 단독 렌더의 DOM 은 그대로다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>폭</th><th>배치</th><th>값</th></tr></thead>
+        <tbody>
+          <tr><th>≥1200px</th><td>머리(단계 · 질문) / <b>왼쪽(고르기) · 지도 · 오른쪽(답)</b>. 칸마다 따로 스크롤 · 지도는 가운데 카드. 빈 칸은 걷히고 지도가 그 폭을 쓴다. 접기(‹ · Esc)는 좌우 칸을 함께 걷고, 펴기 버튼은 지도 위에 남는다</td><td class="tnum">왼쪽 clamp(264, 21vw, 340) · 오른쪽 clamp(380, 33vw, 560) · 칸 사이 12 · 1440 기준 302 │ 527 │ 475 · 1920 기준 340 │ 885 │ 560</td></tr>
+          <tr><th>769~1199px</th><td>지도 전체 + 지도 위 왼쪽 패널 하나 — 머리 → 왼쪽 → 오른쪽 덩어리가 그 패널에 차례로 쌓이고 패널이 통째로 스크롤. Page 는 건물을 고르면 상세로 내려 준다</td><td class="tnum">패널 min(480, 100vw − 레일 − 24) — 종전 min(560, 100% − 24)보다 좁다(지도도 보여야 한다) · 지도 위 UI 는 패널 오른쪽</td></tr>
+          <tr><th>≤768px</th><td>지도 + 하단 시트(같은 쌓기) · 「의견 보내기」는 시트 위로 비킨다</td><td class="tnum">시트 72dvh(종전과 같다)</td></tr>
+        </tbody></table></div>
+      <div class="table-wrap" style="margin-top:12px"><table>
+        <thead><tr><th>트랙</th><th>왼쪽 칸 — 고르기</th><th>가운데 지도</th><th>오른쪽 칸 — 답</th></tr></thead>
+        <tbody>
+          <tr><th>Platform</th><td>상권 지도 — 묶음(서울 · 경기 · 광주 · 전주) · 색칠 기준(유형 · 적합도 · 공실률) · 상권 목록 · 범례</td><td>상권 외곽선 · 자리 칩</td><td>「상권 정체성」 — 상권 요약 · 특징 · 접근성과 주변 가게 · 추천과 근거(탭) · 다음 단계</td></tr>
+          <tr><th>Page</th><td>상권 선택 · 건물 검색 · 공실 필터 · 건물 목록 · 저장한 후보</td><td>공실 · 레이어 토글(지도 위) · 범례 · 시간 막대</td><td>「건물 상세」 — 고른 건물(상태 · 빈 층 임대료 · 업종 추천 · 층별 · 3D 트윈 · 거리뷰) + 레이어 요약 · 이전/다음 단계</td></tr>
+          <tr><th>Posting</th><td>자리 · 업종 · 비용 조건 입력(다른 탭을 봐도 남는다)</td><td>자리별 월 임대료 칩</td><td>「입점 계산」 — 계산 결과 · 주변 업종 · 인테리어 · 찾아오는 길(탭)</td></tr>
+          <tr><th>Program</th><td>Promotion ▶ Program 머리말 + 네 기능 메뉴(한 줄 설명)</td><td>행사 · 연계 자리</td><td>「오프라인 캠페인」 — 고른 기능 본문</td></tr>
+        </tbody></table></div>
+      <p class="note">⛔ 보존 규칙은 그대로다 — 레일 넷 · 네 구현 모듈 · 진입로 · 패널 이름표(실화면 검사 P2 가 찾는 이름) · 가드 <code>src/ppppScreens.test.tsx</code> 를 바꾸지 않았다. 근거 <code>docs/decision-explore-three-column-2026-11-08.md</code></p>
     </section>
 
     <!-- ═════════ 11 통과 조건 ═════════ -->
@@ -1411,13 +1506,16 @@ q { quotes:"“" "”"; }
         <li data-id="F-10">♡·저장·계획 만들기를 누르면 그때 로그인 시트가 뜨고, 로그인하면 하려던 일이 이어진다</li>
         <li data-id="F-11">R6 은 모르는 금액이 있으면 총액을 내지 않고 모르는 칸을 말한다</li>
         <li data-id="F-12">R7 은 검증 지표의 판단선(<code>decision</code>)을 모객·연계보다 먼저 보인다 · 기본 예시면 그 사실을 띠로 말한다</li>
-        <li data-id="F-13">질문 화면에 지도 SDK 를 불러오지 않는다(R4 · 지도 탐색 · <span class="tag real">2026-10-24</span> 빈 자리를 고른 뒤의 H 지도 미리보기에서만)</li>
-        <li data-id="F-14">375×812 · 1440×900 에서 가로 스크롤이 없고 하단 버튼이 내용을 가리지 않는다(실화면 캡처)</li>
+        <li data-id="F-13">질문 화면에 지도 SDK 를 불러오지 않는다(R4 · 지도 탐색 · <span class="tag real">2026-10-24</span> 빈 자리를 고른 뒤의 H 지도 미리보기 · <span class="tag real">2026-11-08</span> 지역별 창업의 상권 고르기 <a href="#Q4-r">Q4-r</a>에서만)</li>
+        <li data-id="F-14">375×812 · 1440×900 에서 가로 스크롤이 없고 하단 버튼이 내용을 가리지 않는다(실화면 캡처) · <span class="tag real">2026-11-08</span> 지도 탐색은 1024 · 1440 · 1920 에서도(칸 배치 경계 1200 위 · 아래) · 떠 있는 「의견 보내기」가 칸 · 시트를 가리지 않는다</li>
         <li data-id="F-15">지도 탐색(<code>#/explore</code>)이 로그인 없이 열리고 종전 4트랙 테스트가 그대로 통과한다</li>
         <li data-id="F-16"><code>npm run build</code> · <code>npm test</code> · <code>npm run lint</code> 통과</li>
         <li data-id="F-17">H 에서 네 단계를 다 마쳤으면 하단 주 버튼 「지도에서 내 자리 보기」가 지도 탐색을 Page 트랙 · 고른 건물로 연다 · 지도 미리보기와 칩 넷이 같은 상권의 그 트랙으로 간다 · 탭 「지도」는 그대로 <code>#/explore</code>(<code>flow/FlowApp.test.tsx</code> · <code>src/exploreDeepLink.test.tsx</code> · 실화면 <code>scripts/pppp_screens_check.py</code> P6)</li>
         <li data-id="F-18">R1-c 는 입지 점수 · 유형 · 구성 · 붐비는 때 · 빈 층 · 월세 · 본전 계산 가능 줄만 놓고, 종합 점수 · 공실 예측 · 감성 줄이 없다 · 없는 값은 0 이 아니라 「없음」이다(<code>lib/districtCompare.test.ts</code>)</li>
         <li data-id="F-19">R1-c 에서 상권을 바꾸면 비워질 답이 있으면 바꾸기 전에 묻는다 · 지도 탐색 Platform 의 「상권 비교」도 같은 줄을 보인다(<code>pages/PlatformConsole.test.tsx</code>)</li>
+        <li data-id="F-20"><span class="tag real">2026-11-08</span> 지도 탐색은 1200px 이상에서 머리 / 왼쪽 · 지도 · 오른쪽 칸으로 서고 네 트랙이 <a href="#explore-layout">§10-1</a> 표대로 덩어리를 꽂는다 · 빈 칸은 걷히고 지도가 그 폭을 쓴다 · 접기(‹ · Esc)는 좌우 칸을 함께 걷는다 · 1200px 아래는 지도 위 패널 하나 · 지도 셸 밖 단독 렌더의 DOM 은 그대로다(<code>components/MapLayout.test.tsx</code> · 실화면 <code>scripts/pppp_screens_check.py</code> + 1920 · 1440 · 1024 · 390 캡처)</li>
+        <li data-id="F-21"><span class="tag real">2026-11-08</span> <a href="#Q4-r">Q4-r</a> 은 고른 지역의 공개 상권만 칠하고, 상권마다 색이 다르며(서울 81곳 81색), 목록 점과 지도 구역이 같은 색이다 · 구역을 누르면 카드의 「이 상권으로 계속」을 한 번 더 눌러야 Q2 로 가고, 목록 줄은 누르면 바로 Q2 다(<code>flow/DistrictMapPicker.test.tsx</code> · <code>lib/districtColors.test.ts</code>)</li>
+        <li data-id="F-22"><span class="tag real">2026-11-08</span> <a href="#Q4-r">Q4-r</a> 의 설명은 응답(<code>/commercial-districts/outlines</code> 의 <code>type_name</code>)에서만 오고 서울만 보인다 · 줄 · 지도 이름표 · 카드가 같은 값이다 · 사람이 붙인 라벨과 원본 데이터 분류를 나눠 말한다(<code>type_is_manual</code>) · 유형이 없는 상권과 경기 · 광주 · 전주에는 설명을 지어내지 않는다(<code>flow/DistrictMapPicker.test.tsx</code>)</li>
       </ul>
     </section>
 
@@ -1441,6 +1539,9 @@ q { quotes:"“" "”"; }
           <tr><th>U11</th><td>H 지도 미리보기의 로딩 시간 계측(<code>client:</code> 새 이름 — <code>map_ready</code> 에 합치지 않는다)</td><td>2026-10-24 미배선. <code>client:</code> 이름은 <code>services/latency</code> 가 자동으로 <b>3초 목표</b>로 판정한다 — 새 이름을 받는 순간 사용자가 정한 적 없는 목표가 하나 생긴다(KPI 규칙 1). 받을지·어떤 기준으로 판정할지는 사용자 결정. 그때까지 「홈에 지도를 둬도 느려지지 않았다」를 쓰지 않는다</td></tr>
           <tr><th>U12</th><td>R1 행 누르기 · H 「저장한 것」 행 누르기도 상권을 바꾸면 고른 자리·금액을 <b>묻지 않고</b> 비운다(<code>setDistrict</code>)</td><td>2026-10-24 R1-c 만 먼저 묻게 했다(다 마친 사람이 홈에서 들어오는 길이라 잃을 답이 있다). 두 진입로도 같은 시트를 쓸지는 다음 판 — 흐름의 「뒤 답을 비운다」(§2-3) 규칙 자체는 바꾸지 않는다</td></tr>
           <tr><th>U13</th><td>홈 진입로(주 버튼 · 지도 미리보기 · 상권 나란히 보기)가 실제로 지도 탐색 방문을 늘렸는가</td><td>U2 퍼널 계측이 없어 잴 수 없다 — <b>「지도로 더 많이 간다」를 쓰지 않는다</b>(KPI 규칙 4)</td></tr>
+          <tr><th>U14</th><td><a href="#Q4-r">Q4-r</a> 설명 — 경기 59 · 광주 13 · 전주 5 상권</td><td>사람이 붙인 유형 표(<code>data/config/hub_types.py</code>)는 서울 81 뿐이다. 2026-11-08 사용자 결정: 서울만 보이고, 나머지는 placeos.co.kr 반영 확인 뒤 따로 지시한다. 계산 유형(<code>identity.archetype</code> — 업종 구성 「…중심형 / …복합형」)은 158곳 모두 있지만 상권마다 <code>/commercial-districts/{id}/platform</code> 를 따로 요청해야 하고(U4 와 같은 비용), 업종 묶음 규칙이 상가정보 분류(백반/한정식 등)를 놓쳐 「기타」가 22~29% 남는다 — 목록 응답에 실리기 전 · 규칙을 고치기 전에는 쓰지 않는다</td></tr>
+          <tr><th>U15</th><td>지도 탐색 칸 배치는 1200px 이상만</td><td>태블릿 · 휴대폰은 지도 위 패널 하나(칸 셋이 쌓인다). Page 건물 목록은 가상화가 없어 큰 상권(800동+)에서 길다(예전과 같다). 칸 배치 뒤 <code>map_ready</code> 는 지도 칸 크기가 달라졌다 — 11-08 전후 표본을 섞어 「빨라졌다 · 느려졌다」를 쓰지 않는다. Q4-r 지도는 로딩 시간을 재지 않는다(U11 과 같은 이유)</td></tr>
+          <tr><th>U16</th><td>§2 흐름 지도 · 2-1 경로 표에 지역별 창업 분기(<a href="#Q1-o">Q1-o</a> · <a href="#Q1-r">Q1-r</a> · <a href="#Q4-r">Q4-r</a>) 반영</td><td>2026-11-08 에는 화면 카드(§5-1)와 주소 목록(§2-3)만 더했다. 2-1 표의 「새로 창업」 행 질문 수는 업종 먼저 기준 그대로다 — 다시 세서 고친다</td></tr>
         </tbody></table></div>
       <h3>변경 이력</h3>
       <div class="table-wrap"><table>
@@ -1449,6 +1550,7 @@ q { quotes:"“" "”"; }
           <tr><th>2026-10-12</th><td>5판 착수 — 디자이너 피드백 4개. 조사(토스·TDS·원티드·한 화면 한 질문 65항목, 수치 원문 대조) · §0~§2 · §4 · §5-1 · §5-2 작성 중 세션 한도로 중단(기록 없음)</td></tr>
           <tr><th>2026-10-13</th><td>대화 기록에서 복원해 §3 · §5-3~§12 완성. 구현: <code>apps/frontend/src/flow/</code>(화면 24 · 통과 조건 테스트 <code>flow/FlowApp.test.tsx</code>). 구현 중 고친 것: Q8 다섯째 칸(U8 옆 · 서버 판정 규칙) · R1 시트 근거(U9) · §7 상태 토큰 이름 · U7·U8 · 계정 전환 시 흐름 답 지우기(U10)</td></tr>
           <tr><th>2026-10-24</th><td>사용자 피드백 두 가지 — ① 네 단계를 다 마친 홈에서 지도를 찾아 들어가지 않는다 ② 건물끼리만 비교되고 상권(Platform)끼리는 비교가 없다. ① H 다 마쳤을 때(주 버튼 「지도에서 내 자리 보기」) · H 지도 미리보기(칩 넷 = 레일 네 트랙) · §10 깊은 링크(<code>#/explore?track=…</code>) · 흐름 답에 자리 위치(<code>spaceAt</code>) · F-13 개정 · F-17. ② R1 비교 모드 · <a href="#R1-c">R1-c</a> 상권 나란히 보기 · H 「상권 나란히 보기」 · §10 Platform 「상권 비교」 · F-18 · F-19. 함께 고친 것: H 「저장한 것」 행의 ›가 행 끝이 아니라 글자 옆에 붙던 것(목록 행을 그리드 → flex) · R2 「언제 붐비나요」가 <code>gap_band</code>(유동 대비 매출이 가장 빈 시간대)를 「한산한 때」로 적던 것(붐비는 때와 같은 시간대가 「한산한 때」로도 찍혔다 — R1-c 실화면에서 발견). 미해결 U11~U13. ⛔ PPPP 화면 보존 규칙은 그대로 — 새 입구는 모두 <code>#/explore</code> 의 같은 네 화면으로 간다</td></tr>
+          <tr><th>2026-11-08</th><td>사용자 요청 — ① 지도 탐색 네 화면은 지도 위에 패널 하나라 지도가 크고 기능이 작아 쓰기 불편하다 ② 지역을 고른 뒤 상권을 고르는 화면(<code>#/districts</code>)에 지도를 깔고 상권을 색깔별 구역으로(서울 81곳은 각각의 색으로), 색과 함께 「수제화거리」·「성수역 오피스」처럼 짧은 설명도. ① <a href="#explore-layout">§10-1 칸 배치</a> — 1200px 이상은 머리(단계 · 질문) / 왼쪽(고르기) · 지도 · 오른쪽(답)(참고 시안 <code>Renewal/PlaceOS 참고.html</code> Case 1), 그보다 좁으면 지도 위 패널 하나(폭 560 → 480 · 칸 셋이 차례로 쌓인다) · F-14 개정 · F-20. ② <a href="#Q4-r">Q4-r</a> 상권 고르기 목록 + 지도 — 상권마다 다른 색(<code>lib/districtColors</code> · 서울 81곳 81색 · 구별용이지 순위가 아니다) · 설명 = <b>서울만</b> 상권 유형(2026-10-09 분류표 · 사람이 붙인 라벨 54 · 원본 데이터 분류 27 — 시안의 「수제화거리」 등은 데모 이름이라 옮기지 않았다) · 경기 · 광주 · 전주는 설명 없음(U14 · 사용자 결정: placeos.co.kr 반영 확인 뒤 따로 지시) · F-13 개정 · F-21 · F-22. 함께 적은 것: 11-04 코드에 먼저 들어간 창업 분기 <a href="#Q1-o">Q1-o</a> · <a href="#Q1-r">Q1-r</a>(이 문서에 없었다) · §1-4 ③ · §4-1 · §4-2 C1 의 예외(「어디」를 고르는 질문 화면) · §6 <code>DistrictMap</code> · §7 상권 구별 색 · §9. 함께 고친 것: 고른 · 가리킨 지도 이름표가 상권 색 위에 흰 글자를 올려 81색 중 48색이 대비 4.5:1 미만이었다 → 흰 바탕 · 굵은 색 테두리. 휴대폰에서 「의견 보내기」가 시트를 가리던 것(단계 머리가 칸으로 옮겨 가며 생긴 회귀) · 오른쪽 칸에서 상권 순위표 마지막 칸이 잘리던 것. 미해결 U14~U16. ⛔ PPPP 화면 보존 규칙은 그대로 — 배치만 바꿨고 레일 넷 · 네 화면 · 진입로 · 가드(<code>src/ppppScreens.test.tsx</code>)는 같다. 근거 <code>docs/decision-explore-three-column-2026-11-08.md</code></td></tr>
         </tbody></table></div>
     </section>
   </main>

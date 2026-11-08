@@ -85,3 +85,10 @@
   .fit-facts { grid-template-columns: minmax(0, 1fr); }
   .fit-source-toggle { width: 100%; }
 }
+
+/* 2026-11-08 칸 배치 — 지도 탐색 오른쪽 칸(380~560px)에서 순위표 마지막 칸(「이 상권 보기」)이 잘리지 않게 칸을 좁힌다 */
+@container industry-fit (max-width: 30rem) {
+  .fit-table th, .fit-table td { padding: 6px 5px; }
+  .fit-table tbody th { min-width: 4.5em; }
+  .fit-table button { white-space: normal; padding: 4px 6px; line-height: 1.3; }
+}

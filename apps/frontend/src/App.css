@@ -97,11 +97,13 @@
   font-size: 13px; color: var(--muted);
 }
 
-/* 휴대폰의 다음 단계 버튼 위에 의견 보내기 버튼이 겹치지 않게 지도 쪽으로 옮긴다. */
+/* 휴대폰의 다음 단계 버튼 위에 의견 보내기 버튼이 겹치지 않게 지도 쪽으로 옮긴다.
+   2026-11-08 칸 배치부터 단계 머리는 패널 안이 아니라 머리 칸(.mh-head)에 선다 — 시트가 펴져 있으면(접힘 아님) 같은 자리로 옮긴다. */
 @media (max-width: 768px) {
   body:has(.appshell .trackmap-panel:not([hidden]) > .explore-step-header,
-    .appshell .side-panel:not([hidden]) > .explore-step-header)
+    .appshell .side-panel:not([hidden]) > .explore-step-header,
+    .appshell .maphost:not(.is-collapsed) .mh-head > .mh-slot)
     .visitor-feedback:not(:has(.visitor-feedback-panel)) {
-    bottom: calc(72dvh + var(--sp-3));
+    bottom: calc(var(--mh-sheet-h, 72dvh) + var(--sp-3));
   }
 }

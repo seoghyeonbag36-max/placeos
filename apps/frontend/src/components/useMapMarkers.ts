@@ -74,17 +74,27 @@ const CHIP_CLEARANCE = 72;
  * 빠져 있었고, Posting 에서 가장 왼쪽 자리 칩(월 1,307만 · 월 562만)이 패널 가장자리에 잘렸다.
  * 상수를 더하지 않고 **그려진 패널을 잰다** — 접힌 패널(=레일만)·모바일 시트 높이·좁은 화면의
  * `min(560px, 100% − 24px)` 가 저절로 맞는다. DOM 이 없으면(단위 테스트) 레일·패널 0 으로 본다.
+ *
+ * 2026-11-08 칸 배치: 넓은 화면(≥1200px)에서는 지도가 가운데 칸이라 패널이 지도를 덮지 않는다 — 패널 묶음
+ * (.mh-panel)은 그때 `display: contents` 라 상자가 없고(크기 0), 여백은 레일 0 + 칩 반폭만 남는다.
+ * 좁은 화면에서는 예전처럼 지도가 뷰포트 전체이고 패널 묶음이 그 위를 덮는다. 좌표는 **지도 캔버스 기준**으로 잰다.
  */
 export function mapFitPadding(): FitPadding {
-  const rail = document.querySelector(".maphost .map-overlays")?.getBoundingClientRect().left ?? 0;
-  const panel = document.querySelector(".trackmap-panel:not([hidden])")?.getBoundingClientRect();
+  const canvas = document.querySelector(".maphost .map-canvas")?.getBoundingClientRect();
+  const originX = canvas?.left ?? 0;
+  const bottomY = canvas && canvas.height > 0 ? canvas.bottom : window.innerHeight;
+  const overlays = document.querySelector(".maphost .map-overlays")?.getBoundingClientRect();
+  // 지도 위 UI 가 시작하는 곳 — 좁은 화면에서는 레일(과 패널)을 비킨 자리다
+  const rail = Math.max(0, (overlays?.left ?? 0) - originX);
+  const panel = document.querySelector(".maphost .mh-panel")?.getBoundingClientRect()
+    ?? document.querySelector(".trackmap-panel:not([hidden])")?.getBoundingClientRect();
   const shown = !!panel && panel.width > 0 && panel.height > 0;
   if (window.innerWidth <= 768) {
     // 모바일: 패널은 하단 시트다 — 시트 윗변부터 아래가 가려진다.
-    const covered = shown ? Math.max(0, window.innerHeight - panel.top) : 0;
-    return { top: 72, right: 24, bottom: Math.round(covered) + 24, left: Math.round(rail) + 24 };
+    const covered = shown ? Math.max(0, bottomY - panel.top) : 0;
+    return { top: 72, right: 24, bottom: Math.round(covered) + 24, left: Math.round(Math.min(rail, 96)) + 24 };
   }
-  return { top: 72, right: CHIP_CLEARANCE, bottom: 48, left: Math.round(shown ? panel.right : rail) + CHIP_CLEARANCE };
+  return { top: 72, right: CHIP_CLEARANCE, bottom: 48, left: Math.round(shown ? panel.right - originX : rail) + CHIP_CLEARANCE };
 }
 
 /**

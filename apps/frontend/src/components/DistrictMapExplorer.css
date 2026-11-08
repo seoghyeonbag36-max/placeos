@@ -28,3 +28,14 @@
 .dme-legend li { display: inline-flex; align-items: center; gap: 4px; }
 .dme-legend i { width: 10px; height: 10px; border-radius: 3px; }
 .dme-note { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
+
+/* ── 칸 배치(2026-11-08) — 지도 탐색의 왼쪽 칸에 설 때(PlatformConsole · MapSlot .platform-side) ──
+   칸이 이미 카드라 이 패널의 테두리를 걷고, 넓은 화면에서는 상권 목록이 칸 높이를 채워 스크롤한다(참고 시안 Case 1 왼쪽 목록). */
+.platform-side .dme { border: 0; border-radius: 0; margin: 0; background: transparent; }
+@media (min-width: 1200px) {
+  /* 칸보다 길면 칸이 스크롤한다 — 숨기면 범례 · 「공식 상권 경계가 아니다」 안내가 잘려 닿을 수 없었다(2026-11-08 리뷰) */
+  .mh-left > .platform-side { display: flex; flex-direction: column; overflow-y: auto; flex: 1; }
+  .platform-side .dme { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .platform-side .dme-list { flex: 1 1 auto; min-height: 160px; max-height: none; }
+  .platform-side .dme-top { flex-shrink: 0; max-height: 34%; overflow-y: auto; }
+}
