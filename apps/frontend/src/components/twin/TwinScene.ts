@@ -441,7 +441,10 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     if (!pieces.length) {
       // 전유부가 없는 층(일반건축물) — 칸을 지어내지 않고 바닥만 깐다
       add(inflate(local, -0.3), 0.12, planRestMat, false);
-      const t = planTag(`전용면적 자료 없음 · 층 바닥 ${f.floor.area_m2 != null ? `${f.floor.area_m2.toLocaleString("ko-KR")}㎡` : "자료 없음"}`, "twin3d-unit-label is-empty");
+      const est = f.floor.excl_est;
+      const t = planTag(est
+        ? `전용 약 ${est.m2.toLocaleString("ko-KR")}㎡(추정) · 층 바닥 ${f.floor.area_m2?.toLocaleString("ko-KR") ?? "—"}㎡`
+        : `전용면적 자료 없음 · 층 바닥 ${f.floor.area_m2 != null ? `${f.floor.area_m2.toLocaleString("ko-KR")}㎡` : "자료 없음"}`, "twin3d-unit-label is-empty");
       t.position.set(0, wall * 0.5, 0);
       group.add(t);
     }

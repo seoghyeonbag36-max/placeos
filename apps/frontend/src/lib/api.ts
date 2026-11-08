@@ -1615,6 +1615,8 @@ export interface TwinFloor {
   area_m2: number | null; area_source: string | null; purps: string | null;
   /** 층 전체 월임대 추정(만원) · 평당(만원). 호가가 아니다 */
   rent_est_manwon: number | null; rent_per_pyeong: number | null;
+  /** 전유부가 없는 층(일반건축물)의 전용면적 추정 — 층 바닥면적 × 상업층 전용률. 실측 아님(2026-11-08) */
+  excl_est?: { m2: number; low: number; high: number; ratio: number; basis: string } | null;
   /** 층 매물 `vfu-` */
   unit_id: string | null;
   /** 전유부 호실 — area_m2 = 전용면적, pub_m2 = 그 호의 공용면적 합(Gold 재빌드 전에는 없다 · 2026-11-08) */

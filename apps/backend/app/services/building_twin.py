@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 
-from app.services import (building_floors, building_history, building_vacancy, floor_vacancy, posting_inputs,
+from app.services import (building_floors, building_history, exclusive_estimate, building_vacancy, floor_vacancy, posting_inputs,
                           rent_layer, vacancy_class, vacant_inventory)
 
 _FLOOR_HEIGHT_M = 3.3
@@ -153,6 +153,10 @@ def _floors(props: dict, pnu: str, listed: dict[int, dict], lot: dict | None, do
             "rent_est_manwon": est, "rent_per_pyeong": per,
             "unit_id": (vfu or {}).get("id"),
             "units": units_by_level.get(lv),
+            # 전유부가 없는 층(일반건축물)의 전용면적 추정 — 층 바닥면적 × 상업층 전용률(2026-11-08 · 늘 「추정」).
+            # 전유부가 있으면 그 실측 합을 쓰므로 싣지 않는다. 비상업 층에는 상업층 비율을 빌려 쓰지 않는다.
+            "excl_est": (exclusive_estimate.estimate(area)
+                         if area and not units_by_level.get(lv) and status != "noncom" else None),
         })
     return floors, top, below, conflict
 

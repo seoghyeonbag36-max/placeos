@@ -452,3 +452,22 @@ def test_twin_units_carry_common_area_when_gold_has_it(monkeypatch):
     body = client.get(f"{API}/buildings/{bid}/twin", params={"district": "cheongnyangni"}).json()
     units = [u for f in body["floors"] for u in (f["units"] or [])]
     assert units and all(u["pub_m2"] == 5.5 for u in units)
+
+
+def test_general_building_floor_gets_exclusive_estimate_with_basis():
+    """전유부가 없는 상업층은 층 바닥면적 × 상업층 전용률 추정이 근거와 함께 실린다 — 실측처럼 보이지 않게(2026-11-08)."""
+    from app.services import exclusive_estimate
+    doc = exclusive_estimate.ratio()
+    assert doc and 0.5 <= doc["median"] <= 1.0
+    body = client.get(f"{API}/buildings/1123010800100160081-1/twin", params={"district": "kyunghee"}).json()   # 경희대 경성빌딩
+    f4 = next(f for f in body["floors"] if f["lv"] == 4)
+    est = f4["excl_est"]
+    assert not f4["units"] and f4["area_m2"] and est
+    assert est["m2"] == round(f4["area_m2"] * doc["median"], 1) and est["low"] <= est["m2"] <= est["high"] < f4["area_m2"]
+    assert "실측 아님" in est["basis"] and "지번" in est["basis"]
+    assert all(f["excl_est"] is None for f in body["floors"] if f["status"] == "noncom" or not f["area_m2"])
+
+
+def test_floor_with_exclusive_units_has_no_estimate():
+    body = client.get(f"{API}/buildings/1123010200107870000-1/twin", params={"district": "cheongnyangni"}).json()
+    assert all(f["excl_est"] is None for f in body["floors"] if f["units"])
