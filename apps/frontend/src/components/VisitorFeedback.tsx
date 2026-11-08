@@ -1,11 +1,12 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { ApiError, submitVisitorFeedback, type VisitorFeedbackCategory, type VisitorFeedbackRole } from "@/lib/api";
 import { FEEDBACK_CATEGORIES, FEEDBACK_ROLES, roleOf } from "./visitorFeedbackRoles";
 import "./VisitorFeedback.css";
 
 const INSTAGRAM = "https://www.instagram.com/placeos1/";
-/** 떠 있는 버튼 말고 다른 자리(흐름의 홈·내 정보)에서 이 창을 여는 신호 — 2026-10-13 화면설계서 5판.
- *  모바일 흐름 화면은 하단 버튼·탭이 있어 떠 있는 버튼을 숨긴다(flow.css). */
+/** 떠 있는 버튼 말고 다른 자리(흐름의 홈·내 정보, 지도 탐색 레일의 「의견 보내기」)에서 이 창을 여는 신호 — 2026-10-13 화면설계서 5판.
+ *  모바일 흐름 화면은 하단 버튼·탭이 있어 떠 있는 버튼을 숨긴다(flow.css). 지도 탐색은 레일 버튼이 입구라 떠 있는 버튼을 숨긴다(App.css).
+ *  누른 버튼을 `detail.opener` 로 실어 보내면 창을 닫을 때 초점이 거기로 돌아간다 — 숨은 떠 있는 버튼으로는 못 돌아간다. */
 export const OPEN_VISITOR_FEEDBACK = "placeos:open-visitor-feedback";
 
 const NEED_TEXT = { category: "의견 유형을 골라 주세요", contact: "답변 받을 연락처를 적어 주세요" } as const;
@@ -34,6 +35,8 @@ export default function VisitorFeedback() {
   const [contact, setContact] = useState("");
   const [error, setError] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
+  /** 창을 연 버튼 — 닫을 때 초점을 돌려준다. 떠 있는 버튼이 숨은 화면(지도 탐색)에서는 레일 버튼이다. */
+  const opener = useRef<HTMLElement | null>(null);
   const panel = useRef<HTMLElement>(null);
   const categoryGroup = useRef<HTMLFieldSetElement>(null);
   const contactInput = useRef<HTMLInputElement>(null);
@@ -51,8 +54,21 @@ export default function VisitorFeedback() {
     }
     (need === "category" ? target?.querySelector("input") : target)?.focus({ preventScroll: true });
   }
+  /** 창을 닫고 초점을 연 버튼으로 돌린다 — 그 버튼이 사라졌으면 떠 있는 버튼으로. */
+  const closePanel = useCallback(() => {
+    setOpen(false);
+    const back = opener.current?.isConnected ? opener.current : trigger.current;
+    opener.current = null;
+    back?.focus();
+  }, []);
   useEffect(() => {
-    const openPanel = () => setOpen(true);
+    const openPanel = (event: Event) => {
+      const from = (event as CustomEvent<{ opener?: HTMLElement } | undefined>).detail?.opener;
+      if (from) opener.current = from;
+      else if (!opener.current && document.activeElement instanceof HTMLElement && document.activeElement !== document.body) opener.current = document.activeElement;
+      setOpen(true);
+      panel.current?.focus();  // 이미 열려 있으면 열린 창으로 데려간다(처음 열 때는 아래 이펙트가 한다)
+    };
     window.addEventListener(OPEN_VISITOR_FEEDBACK, openPanel);
     return () => window.removeEventListener(OPEN_VISITOR_FEEDBACK, openPanel);
   }, []);
@@ -60,11 +76,11 @@ export default function VisitorFeedback() {
     if (!open) return;
     panel.current?.focus();
     const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { setOpen(false); trigger.current?.focus(); }
+      if (event.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", escape);
     return () => window.removeEventListener("keydown", escape);
-  }, [open]);
+  }, [open, closePanel]);
   // 단계가 바뀌면 누른 버튼이 사라진다 — 초점을 창으로 돌리고 맨 위부터 보이게 한다.
   // 초점을 잃었을 때(body)나 창 안에 있을 때만 — 제출을 기다리는 사이 페이지로 옮겨 간 초점은 끌어오지 않는다.
   useEffect(() => {
@@ -96,7 +112,7 @@ export default function VisitorFeedback() {
   }
   return <aside className="visitor-feedback">
     {open && <section ref={panel} tabIndex={-1} className="visitor-feedback-panel" aria-label="PlaceOS 의견 보내기">
-      <header><strong>PlaceOS 의견 보내기</strong><button type="button" onClick={() => { setOpen(false); trigger.current?.focus(); }} aria-label="의견창 닫기">×</button></header>
+      <header><strong>PlaceOS 의견 보내기</strong><button type="button" onClick={closePanel} aria-label="의견창 닫기">×</button></header>
       {sent ? <div role="status">
         <p>의견이 접수됐어요. 감사합니다!</p>
         <p>PlaceOS의 개선 소식과 활용 팁을 인스타그램에서 확인하세요.</p>
@@ -157,6 +173,7 @@ export default function VisitorFeedback() {
         </div>
       </form>}
     </section>}
-    <button ref={trigger} className="visitor-feedback-trigger" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>의견 보내기</button>
+    <button ref={trigger} className="visitor-feedback-trigger" type="button" aria-expanded={open}
+      onClick={() => { if (open) closePanel(); else { opener.current = trigger.current; setOpen(true); } }}>의견 보내기</button>
   </aside>;
 }
