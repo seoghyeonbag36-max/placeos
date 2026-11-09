@@ -17,6 +17,11 @@
 .interior-result { margin: var(--sp-3) 0; }
 .interior-result img { max-width: 100%; height: auto; }
 .interior-planner pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* 2026-11-09 — 3D 디지털 트윈 · 공간 구성 키워드 단계 */
+.interior-step { margin-block: var(--sp-4); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.interior-step h3 { margin: 0 0 var(--sp-2); font-size: var(--fs-body, 15px); }
+.interior-planner .interior-kw-chips button { padding: 5px 11px; border-radius: 999px; color: var(--ink); }
+.interior-planner .interior-kw-chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 .interior-design-keywords, .interior-concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--sp-3); }
 .interior-design-keywords article, .interior-concepts button { padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .interior-design-keywords h4 { margin: 0; }
