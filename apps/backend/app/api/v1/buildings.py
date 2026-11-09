@@ -6,7 +6,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.schemas.building import BuildingHistory
 from app.schemas.renewal import BuildingTwin
-from app.services import building_floors, building_ledger_live, building_twin, store_units, twin_roads
+from app.services import building_energy_live, building_floors, building_ledger_live, building_twin, store_units, twin_roads
 from app.services.building_history import get_history
 
 router = APIRouter()
@@ -48,6 +48,18 @@ async def get_building_twin(
     # 상가정보 점포를 층 · 호실에 단다(호실 대조는 호수가 있을 때만 — 실시간 또는 재빌드한 Gold)
     out["stores_live"] = store_units.annotate(out["floors"], stores)
     return out
+
+
+@router.get("/{building_id}/energy")
+async def get_building_energy(
+    building_id: str,
+    kind: str = Query("gas", pattern="^(gas|electricity)$"),
+) -> dict:
+    """그 건물 지번의 월별 가스(또는 전기) 사용량 — 건축HUB 건물에너지정보 실시간(2026-11-09).
+
+    트윈과 따로 부른다 — 한 달씩 물으면 최대 18콜이라 트윈 창이 그만큼 기다리지 않게 한다. 늘 200 이고,
+    활용신청 전 · 키 없음 · 원천 장애는 `status` 와 `error` 로 밝힌다(`services/building_energy_live`)."""
+    return await run_in_threadpool(building_energy_live.energy, building_floors.pnu_of(building_id), kind)
 
 
 @router.get("/{building_id}/model")

@@ -1691,6 +1691,21 @@ export interface TwinLedgerLive {
   /** 키 = 층 번호(지하 음수) 문자열 */
   floors: Record<string, TwinLedgerFloor> | null;
 }
+/** 건물 지번 월별 가스 · 전기 사용량 — 건축HUB 건물에너지정보 실시간(서버 services/building_energy_live · 2026-11-09) */
+export interface BuildingEnergy {
+  /** ok · refused(활용신청 전 · 키 거절 등) · no_key · no_pnu(산 지번 등) · backoff · error */
+  status: "ok" | "refused" | "no_key" | "no_pnu" | "backoff" | "error" | string;
+  kind: "gas" | "electricity"; source: string; apply_url: string; error?: string | null;
+  /** 값이 있는 달만(지번 합계) — 빠진 달은 「자료 없음」이지 0 이 아니다 */
+  months: { ym: string; qty: number; n: number }[];
+  /** 응답에 단위 필드가 있을 때만 */
+  unit: string | null;
+  /** 물은 기간 [가장 이른 달, 가장 늦은 달](YYYYMM) */
+  window: [string, string] | null;
+  fields: string[]; query?: "all" | "monthly";
+}
+export const getBuildingEnergy = (buildingId: string, kind: "gas" | "electricity" = "gas", signal?: AbortSignal) =>
+  getOptional<BuildingEnergy>(`/buildings/${encodeURIComponent(buildingId)}/energy${query({ kind })}`, signal);
 export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
   getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);
 

@@ -1,0 +1,74 @@
+"""건물에너지(가스) 월별 실시간 조회(services/building_energy_live) — 2026-11-09. 네트워크 없이."""
+from datetime import date
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.services import building_energy_live as E
+
+client = TestClient(app)
+PNU = "1114012500100660009"
+
+XML_OK = """<?xml version="1.0" encoding="UTF-8"?><response><header><resultCode>00</resultCode><resultMsg>NORMAL SERVICE.</resultMsg></header>
+<body><items><item><useYm>202604</useYm><useQty>1200.5</useQty><sigunguCd>11140</sigunguCd></item>
+<item><useYm>202604</useYm><useQty>99.5</useQty><sigunguCd>11140</sigunguCd></item></items><totalCount>2</totalCount></body></response>""".encode()
+XML_KEY = b"<OpenAPI_ServiceResponse><cmmMsgHeader><errMsg>SERVICE ERROR</errMsg><returnAuthMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>"
+
+
+def test_parse_xml_json_and_errors():
+    rows, total = E.parse(XML_OK)
+    assert total == 2 and rows[0]["useYm"] == "202604" and rows[0]["useQty"] == "1200.5"
+    rows, _ = E.parse(b'{"response":{"header":{"resultCode":"00"},"body":{"items":{"item":{"useYm":"202605","useQty":"3"}},"totalCount":1}}}')
+    assert rows == [{"useYm": "202605", "useQty": "3"}]
+    for bad in (XML_KEY, b"<response><header><resultCode>22</resultCode><resultMsg>LIMITED</resultMsg></header></response>"):
+        try:
+            E.parse(bad)
+            raise AssertionError("expected EnergyError")
+        except E.EnergyError:
+            pass
+    assert E.parse(b"<response><header><resultCode>03</resultCode></header><body><items/></body></response>")[0] == []
+
+
+def test_summarise_sums_the_lot_by_month_and_keeps_fields():
+    s = E.summarise([{"useYm": "202604", "useQty": "1,200.5"}, {"useYm": "202604", "useQty": "99.5"},
+                     {"useYm": "202603", "useQty": "0"}, {"useYm": "", "useQty": "5"}])
+    assert s["months"] == [{"ym": "202603", "qty": 0.0, "n": 1}, {"ym": "202604", "qty": 1300.0, "n": 2}]
+    assert s["unit"] is None and s["fields"] == ["useQty", "useYm"]
+
+
+def test_jibun_and_months():
+    assert E.jibun_of(PNU) == {"sigunguCd": "11140", "bjdongCd": "12500", "bun": "0066", "ji": "0009"}
+    assert E.jibun_of("1114012500200660009") is None and E.jibun_of("x") is None     # 산 지번 · 형식 아님
+    assert E.months_back(date(2026, 1, 15), 3) == ["202512", "202511", "202510"]
+
+
+def test_monthly_fallback_and_window(monkeypatch):
+    monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
+    calls = []
+
+    def fake(op, params, key):
+        calls.append(params.get("useYm"))
+        if "useYm" not in params:
+            return [{"useYm": "202605", "useQty": "1"}]          # 한 달만 → 한 달씩으로 넘어간다
+        return [{"useYm": params["useYm"], "useQty": "10"}] if params["useYm"] in ("202605", "202604") else []
+    monkeypatch.setattr(E, "_get", fake)
+    out = E.energy(PNU, "gas", today=date(2026, 11, 9))
+    assert out["status"] == "ok" and out["query"] == "monthly" and len(calls) == 1 + E.MONTHS
+    assert [m["ym"] for m in out["months"]] == ["202604", "202605"] and out["window"] == ["202505", "202610"]
+
+
+def test_refused_is_soft_and_names_the_apply_page(monkeypatch):
+    monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
+
+    def refuse(op, params, key):
+        raise E.EnergyError("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
+    monkeypatch.setattr(E, "_get", refuse)
+    out = E.energy(PNU, "gas")
+    assert out["status"] == "refused" and "NOT_REGISTERED" in out["error"] and out["apply_url"].endswith("15135963/openapi.do")
+    assert E.energy(PNU, "gas")["status"] == "backoff"
+
+
+def test_route():
+    body = client.get(f"/api/v1/buildings/{PNU}-1/energy").json()
+    assert body["kind"] == "gas" and body["status"] in ("no_key", "error", "backoff")
+    assert client.get(f"/api/v1/buildings/{PNU}-1/energy", params={"kind": "water"}).status_code == 422

@@ -288,6 +288,9 @@ describe("BuildingTwinDialog", () => {
     expect(gas.getAttribute("target")).toBe("_blank");
     expect(screen.getByRole("link", { name: /^전기/ }).getAttribute("href")).toBe("https://www.data.go.kr/data/15054214/fileData.do");
     expect(screen.getByText(/집합건물은 지번 합계라 호실을 가를 수 없습니다/)).toBeTruthy();
+    // 월별 값은 따로 부른다 — 옛 서버(404)면 자료 없음, 트윈은 그대로
+    const sec = screen.getByRole("region", { name: "월별 가스 사용량" });
+    expect(await within(sec).findByText(/가스 사용량 조회가 안 됐습니다/)).toBeTruthy();
   });
 
   it("상가정보 대조 응답이 없으면(옛 응답) 상가정보 열을 내지 않는다", async () => {

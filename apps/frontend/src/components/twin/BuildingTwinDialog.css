@@ -142,6 +142,18 @@
 .twin3d-plan-legend .k-store { background: #DDF3EA; border: 1px solid #22B07D; }
 .twin3d-plan-legend .k-nostore { background: var(--track-page-soft); border: 1px dashed #F2682C; }
 .twin3d-store.is-store { color: #13795A; }
+/* 월별 가스 사용량(2026-11-09) — 한 계열 막대 · 축은 머리카락 선 · 글자는 글자 토큰 */
+.twin3d-energy-head { margin: 0 0 var(--sp-1); font-size: var(--fs-caption); }
+.twin3d-energy-chart { display: block; width: 100%; height: auto; max-height: 140px; }
+.twin3d-energy-bar { fill: var(--track-page); }
+.twin3d-energy-bar.is-hover { fill: var(--ink); }
+.twin3d-energy-axis { stroke: var(--line); stroke-width: 1; }
+.twin3d-energy-grid { stroke: var(--line); stroke-width: 1; opacity: .6; }
+.twin3d-energy-gap { stroke: var(--text-subtle); stroke-width: 1.5; }
+.twin3d-energy-tick { fill: var(--muted); font-size: 9px; }
+.twin3d-energy-table summary { cursor: pointer; font-size: var(--fs-caption); color: var(--muted); }
+.twin3d-energy-table table { width: 100%; font-size: var(--fs-caption); border-collapse: collapse; }
+.twin3d-energy-table td, .twin3d-energy-table th { padding: 2px 4px; text-align: left; border-bottom: 1px solid var(--line); }
 .twin3d-store.is-none { color: #B4471B; }
 .twin3d-plan-legend .k-lease { background: #FFF7ED; border: 1px solid #C2410C; }
 .twin3d-plan-legend .k-common { background: #E2E8F0; border: 1px dashed #94A3B8; }
