@@ -11,6 +11,7 @@ import { getBuildingTwin, type BuildingTwin, type TwinFloor } from "@/lib/api";
 import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, hasStop, removeStop } from "@/lib/journeyState";
 import { ledgerNote } from "@/lib/twinLedger";
+import { ENERGY_LINKS, jibunLabel, jibunOfBuilding } from "@/lib/twinEnergy";
 import { STORE_STATE_LABEL, storesNote, unitStoreState } from "@/lib/twinStores";
 import { areaSummary, isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
 import FloorPlan from "./FloorPlan";
@@ -328,6 +329,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
   const vacantFloors = twin?.floors.filter((f) => isVacantStatus(f.status)) ?? [];
   const hasFloorBasis = !!twin?.floors.some((f) => f.status !== "unknown");
   const title = twin?.name ?? fallback.name;
+  const energyJibun = jibunOfBuilding(twin?.id ?? buildingId);
   return createPortal(
     <div className="twin3d-modal" onClick={onClose}>
       <div className="twin3d-box" role="dialog" aria-modal="true" aria-label={`${title} 3D 트윈`} ref={boxRef}
@@ -385,6 +387,15 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                     ? <>승용 {twin.ledger_live.elevators.passenger} · 비상용 {twin.ledger_live.elevators.emergency}대 <EvidenceBadge kind="실측" /><small> 건축물대장 표제부(실시간){(twin.ledger_live.title?.n_titles ?? 0) > 1 ? " · 같은 지번 주건축물 기준" : ""}</small></>
                     : <><span className="value-absent">자료 없음</span><small> {ledgerNote(twin.ledger_live)}</small></>}</dd>
                   {twin.lot_buildings && twin.lot_buildings > 1 ? <><dt>같은 지번</dt><dd>건물 {twin.lot_buildings}동</dd></> : null}
+                  {/* 건물 에너지(2026-11-09) — 값은 싣지 않고 공공데이터포털 링크와 찾을 지번만. 월 사용량 0 · 급감은 공실에 가까운 신호다 */}
+                  <dt>에너지 사용량</dt>
+                  <dd>
+                    <a href={ENERGY_LINKS.gas} target="_blank" rel="noopener noreferrer">가스 사용량(지번별 · 월별) ↗<span className="sr-only">(새 창)</span></a>{" · "}
+                    <a href={ENERGY_LINKS.electricity} target="_blank" rel="noopener noreferrer">전기 ↗<span className="sr-only">(새 창)</span></a>
+                    <small> 국토교통부 건물에너지 · 공공데이터포털 파일. 화면에 값을 싣지 않았습니다
+                      {energyJibun ? <> — 이 건물 지번: <span className="num">{jibunLabel(energyJibun)}</span></> : null}.
+                      {" "}단독주택 · 200세대 미만 공동주택은 없고, 집합건물은 지번 합계라 호실을 가를 수 없습니다.</small>
+                  </dd>
                 </dl>
               </section>
               <RoadCheckSection name={title ?? "건물"} lat={twin.lat} lng={twin.lng} check={twin.road_check} source={twin.roads_source}
