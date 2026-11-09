@@ -280,6 +280,16 @@ describe("BuildingTwinDialog", () => {
     expect(screen.getByText("상가정보 점포")).toBeTruthy();                        // 층 점포 목록은 그대로
   });
 
+  it("건물 정보에 가스 · 전기 사용량(공공데이터포털) 링크와 찾을 지번을 단다", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    const gas = screen.getByRole("link", { name: /가스 사용량\(지번별 · 월별\)/ });
+    expect(gas.getAttribute("href")).toBe("https://www.data.go.kr/data/15054213/fileData.do");
+    expect(gas.getAttribute("target")).toBe("_blank");
+    expect(screen.getByRole("link", { name: /^전기/ }).getAttribute("href")).toBe("https://www.data.go.kr/data/15054214/fileData.do");
+    expect(screen.getByText(/집합건물은 지번 합계라 호실을 가를 수 없습니다/)).toBeTruthy();
+  });
+
   it("상가정보 대조 응답이 없으면(옛 응답) 상가정보 열을 내지 않는다", async () => {
     mount();
     await screen.findByRole("heading", { name: "1F · 공실확정" });
