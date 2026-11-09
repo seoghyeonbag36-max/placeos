@@ -118,6 +118,17 @@ describe("interiorLayout", () => {
     expect(est.dims.h).toBe(3.3); expect(est.dims.hMeasured).toBe(false);
   });
 
+  it("그린 칸이 공공데이터 넓이와 크게 다르면 「*」와 대장 면적 환산 치수 · 주의를 단다(옥탑 층 등)", () => {
+    const L = interiorLayout({ outline: OUTLINE, pieces: [], frontEdge: [[0, 0], [14, 0]], angle: 0, lv: 4, keywords: [], spaceM2: 21 });
+    expect(L.dims.mismatch).not.toBeNull();
+    expect(L.dims.mismatch!.w * L.dims.mismatch!.d).toBeCloseTo(21, 6);          // 같은 비율로 21㎡ 에 맞춤
+    expect(L.summary.join(" ")).toMatch(/가로 약 14\.0m × 세로 약 12\.0m\(외곽선\)\*.*대장 면적 기준 환산: 가로 약 4\.9m × 세로 약 4\.2m/);
+    expect(L.notes.join(" ")).toMatch(/그린 칸 넓이\(약 168㎡\)가 공공데이터 넓이\(21㎡\)와 크게 다릅니다/);
+    for (const m2 of [160, 120, 230]) {     // 1.5배 안(외곽선 168㎡) — 흔한 어긋남은 표시하지 않는다
+      expect(interiorLayout({ outline: OUTLINE, pieces: [], frontEdge: [[0, 0], [14, 0]], angle: 0, lv: 1, keywords: [], spaceM2: m2 }).dims.mismatch).toBeNull();
+    }
+  });
+
   it("집합건물 — 가장 큰 호실을 꾸미고 그 전유부 면적을 적는다", () => {
     const L = run([], { units: [{ ho: "101", area_m2: 40 }, { ho: "102", area_m2: 70 }, { ho: "103", area_m2: 30 }] });
     expect(L.spaceKind).toBe("unit");

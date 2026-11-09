@@ -99,6 +99,12 @@ export interface InteriorDims {
   ext: [Point, Point][];
   /** 높이 치수선을 세울 바닥 점(가로 · 세로 치수선이 만나는 모서리) */
   corner: Point;
+  /**
+   * 그린 칸 넓이가 공공데이터 넓이와 1.5배 넘게 다를 때 — 외곽선(V-World) 모양으로 그린 칸이라 가로 · 세로가 실제와 다를 수 있다.
+   * (외곽선과 대장 면적은 20~30% 어긋나는 일이 흔해 그 정도는 표시하지 않는다 — 예시 7곳 중 3곳이 0.75~1.33 밖이었다.)
+   * 같은 비율로 대장 면적에 맞춘 환산값을 함께 싣는다(예: 옥탑처럼 층 면적이 외곽선보다 훨씬 작은 층).
+   */
+  mismatch: { drawnM2: number; dataM2: number; w: number; d: number } | null;
 }
 
 export interface InteriorLayout {
@@ -223,9 +229,11 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
   const W = S1 - S0, D = T1 - T0;
   // 공실 바닥 치수 — 칸 모양(개략)의 가장 긴 가로 · 세로. 치수선은 공간 밖 0.7m(전면 앞 · 오른쪽 옆)
   const OFF = 0.7;
-  const fh = inp.floorHeight ?? { m: 3.3, basis: "층고 추정 3.3m(높이 자료 없음)", measured: false };
+  const fh = inp.floorHeight ?? { m: 3.3, basis: "높이 자료 없어 추정", measured: false };
   const dims: InteriorDims = {
     w: W, d: D, h: fh.m, hBasis: fh.basis, hMeasured: fh.measured,
+    mismatch: spaceM2 && spaceM2 > 0 && (spaceArea / spaceM2 > 1.5 || spaceArea / spaceM2 < 1 / 1.5)
+      ? { drawnM2: spaceArea, dataM2: spaceM2, w: W * Math.sqrt(spaceM2 / spaceArea), d: D * Math.sqrt(spaceM2 / spaceArea) } : null,
     wLine: [fromST(S0, T0 - OFF), fromST(S1, T0 - OFF)],
     dLine: [fromST(S1 + OFF, T0), fromST(S1 + OFF, T1)],
     ext: [[fromST(S0, T0), fromST(S0, T0 - OFF - 0.2)], [fromST(S1, T0), fromST(S1, T0 - OFF - 0.2)],
@@ -475,7 +483,11 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
     extras.push("샹들리에 · 러그");
   }
 
-  summary.unshift(`공실 바닥 가로 약 ${W.toFixed(1)}m × 세로 약 ${D.toFixed(1)}m${spaceKind === "outline" ? "(외곽선)" : "(개략 칸 · 가장 긴 곳)"} · 높이(층고) 약 ${fh.m.toFixed(1)}m(${fh.basis})`);
+  const mm = dims.mismatch;
+  summary.unshift(`공실 바닥 가로 약 ${W.toFixed(1)}m × 세로 약 ${D.toFixed(1)}m${spaceKind === "outline" ? "(외곽선)" : "(개략 칸 · 가장 긴 곳)"}${mm ? "*" : ""} · 높이(층고) 약 ${fh.m.toFixed(1)}m(${fh.basis})`
+    + (mm ? ` — 대장 면적 기준 환산: 가로 약 ${mm.w.toFixed(1)}m × 세로 약 ${mm.d.toFixed(1)}m` : ""));
+  if (mm) notes.push(`* 그린 칸 넓이(약 ${Math.round(mm.drawnM2).toLocaleString("ko-KR")}㎡)가 공공데이터 넓이(${Math.round(mm.dataM2).toLocaleString("ko-KR")}㎡)와 크게 다릅니다 — `
+    + "칸은 건물 외곽선(V-World) 모양으로 그린 개략이라 가로 · 세로가 실제 공실과 다를 수 있습니다(옥탑 · 일부만 쓰는 층 등). 실제 치수는 도면 · 현장으로 확인하세요.");
   summary.unshift(`${mode === "seating" ? "좌석형(카페 · 음식)" : "진열형(소매 · 서비스)"} · 꾸민 공간 ${spaceM2 != null
     ? `${spaceKind === "lease" ? "전용 약 " : spaceKind === "unit" ? "전용 " : "층 바닥 "}${Math.round(spaceM2).toLocaleString("ko-KR")}㎡${spaceKind === "lease" ? "(추정)" : spaceKind === "unit" ? "(전유부)" : "(대장)"}`
     : "넓이 자료 없음"}`);

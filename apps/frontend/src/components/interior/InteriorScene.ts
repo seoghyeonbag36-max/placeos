@@ -310,7 +310,8 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
       seg(new Vector3(p[0] - (ux + uy) * k, y, -(p[1] - (uy - ux) * k)), new Vector3(p[0] + (ux + uy) * k, y, -(p[1] + (uy - ux) * k)), dimMat);
     };
     for (const [a, b] of dm.ext) seg(at(a), at(b), extMat);
-    for (const [line, text] of [[dm.wLine, `가로 ${dm.w.toFixed(1)}m`], [dm.dLine, `세로 ${dm.d.toFixed(1)}m`]] as const) {
+    const star = dm.mismatch ? "*" : "";       // 그린 칸이 대장 면적과 크게 다름 — 요약 줄에 환산값과 설명
+    for (const [line, text] of [[dm.wLine, `가로 ${dm.w.toFixed(1)}m${star}`], [dm.dLine, `세로 ${dm.d.toFixed(1)}m${star}`]] as const) {
       const [a, b] = line;
       seg(at(a), at(b), dimMat);
       tick(a, [b[0] - a[0], b[1] - a[1]]); tick(b, [b[0] - a[0], b[1] - a[1]]);
