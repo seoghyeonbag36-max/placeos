@@ -51,7 +51,7 @@ export default function InteriorTwinView({ twin, floor, keywords, industry, stra
       <div className="interior3d-bar">
         <span className="interior3d-tag">3D 디지털 트윈 · 규칙 배치 예시 · 실측 도면 아님</span>
         {!flat && <button type="button" aria-pressed={view === "plan"} onClick={() => setView(view === "3d" ? "plan" : "3d")}>{view === "3d" ? "평면 보기" : "3D 보기"}</button>}
-        {show3d && <button type="button" onClick={() => handleRef.current?.resetView()}>시점 초기화</button>}
+        {show3d && <button type="button" onClick={() => handleRef.current?.resetView()}>전체 보기</button>}
       </div>
       {show3d
         ? <div className="interior3d-canvas" ref={hostRef} data-testid="interior-canvas" role="img"

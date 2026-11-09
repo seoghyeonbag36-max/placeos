@@ -15,6 +15,7 @@ import {
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { InteriorItem, InteriorLayout } from "@/lib/interiorLayout";
+import { overviewCamera } from "@/lib/interiorView";
 import type { Point, WindowSpan } from "@/lib/twinGeometry";
 
 export interface InteriorSceneInput {
@@ -295,16 +296,19 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     render();
   }
 
+  /** 「전체 보기」 — 트윈 전체(외곽선 × 벽 높이 + 라벨 여유)가 화면 한 장에 다 드는 가장 가까운 거리. 화면 비율(세로 패널 · 휴대폰)을 따른다 */
+  let userMoved = false;
+  controls.addEventListener("start", () => { userMoved = true; });
   function resetView() {
-    const { layout } = input;
-    const pts = layout.space.flat();
-    const cx = pts.reduce((t, p) => t + p[0], 0) / Math.max(1, pts.length), cy = pts.reduce((t, p) => t + p[1], 0) / Math.max(1, pts.length);
-    const R = Math.max(7, ...pts.map((p) => Math.hypot(p[0] - cx, p[1] - cy)));
-    const [vx, vy] = layout.frame.v;
-    // 입구 쪽(앞)에서 비스듬히 내려다본다 — 긴 공간도 입구까지 한 화면에 들게 넉넉히 물러선다
-    camera.position.set(cx - vx * R * 1.55 + vy * R * 0.45, R * 1.6, -(cy - vy * R * 1.55 - vx * R * 0.45));
-    controls.target.set(cx, 0.6, -cy);
+    const { layout, outline } = input;
+    const ring = outline.length > 2 && outline[0][0] === outline[outline.length - 1][0] && outline[0][1] === outline[outline.length - 1][1] ? outline.slice(0, -1) : outline;
+    const [vx, vy] = layout.frame.v;                      // 안쪽 방향 — 입구(전면) 쪽은 그 반대
+    const cam = overviewCamera(ring, H + 0.7, [-vx, -vy], camera.fov, camera.aspect);
+    camera.position.set(...cam.position);
+    controls.target.set(...cam.target);
+    controls.maxDistance = Math.max(120, cam.distance * 2.5);
     controls.update();
+    userMoved = false;
     render();
   }
 
@@ -312,7 +316,7 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     const w = host.clientWidth || wpx, h = host.clientHeight || hpx;
     renderer.setSize(w, h); labels.setSize(w, h);
     camera.aspect = w / h; camera.updateProjectionMatrix();
-    render();
+    if (!userMoved) resetView(); else render();           // 손대지 않았으면 새 비율에 맞춰 다시 전체가 들게
   };
   const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onResize) : null;
   ro?.observe(host);
