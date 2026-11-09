@@ -20,6 +20,49 @@ class HubOutlines(BaseModel):
     hubs: list[HubOutline]
 
 
+class ResearchLedger(BaseModel):
+    """점포가 확인된 지번의 대장 관측 — 공실·수용량이 아니다."""
+    pnus: int                           # 점포가 확인된 지번 수
+    pnus_with_commercial_floor: int     # 층별개요에 상업 용도 층이 있는 지번
+    pnus_with_expos: int                # 전유부(호실)가 있는 지번 — 집합건물
+    commercial_expos_units: int         # 상업 용도 전유 호실 합
+    pnus_without_ledger: int            # 두 대장 모두 0행인 지번
+
+
+class ResearchCategory(BaseModel):
+    name: str
+    count: int
+
+
+class ResearchLocation(BaseModel):
+    """광주·전주 조사 위치 — 정식 상권·서빙 거점이 아니다. 공실률·순위·임대료가 없다."""
+    id: str
+    label: str
+    name: str
+    region: str
+    group: Literal["gwangju", "jeonju"]
+    lat: float
+    lng: float
+    radius_m: int
+    stores: int | None = None           # 700m 반경 상가정보 점포 — 이웃 위치와 겹쳐 합산하지 않는다
+    buildings: int | None = None
+    stores_per_building: float | None = None
+    top10_building_pct: float | None = None
+    density_verdict: str | None = None
+    ledger: ResearchLedger
+    top_categories: list[ResearchCategory]
+    nearest_hub: str | None = None      # 가장 가까운 등록 거점(탐색 당시) — 전주 보완 위치는 없다
+    nearest_hub_m: int | None = None
+
+
+class ResearchLocations(BaseModel):
+    note: str | None = None
+    source: str | None = None
+    built_at: str | None = None
+    counts: dict[str, int]
+    locations: list[ResearchLocation]
+
+
 class RentHistory(BaseModel):
     district_id: str
     quarters: list[str]

@@ -1559,6 +1559,32 @@ export interface HubOutlines { note: string | null; hubs: HubOutline[] }
 export const getHubOutlines = (signal?: AbortSignal) =>
   getOptional<HubOutlines>("/commercial-districts/outlines", signal);
 
+/**
+ * 광주·전주 **조사 위치** — 정식 상권도 서빙 거점도 아니다(2026-11-09 결정 · docs/decision-research-locations-layer-2026-11-09.md).
+ * 일반음식점 인허가 주소에서 찾은 700m 조사 원이고 서로 겹친다. 관측값만 있고 공실률·순위·임대료가 없다.
+ */
+export type ResearchGroup = "gwangju" | "jeonju";
+export interface ResearchLocation {
+  id: string; label: string; name: string; region: string; group: ResearchGroup;
+  lat: number; lng: number; radius_m: number;
+  /** 700m 반경 상가정보 점포 — 이웃 조사 위치와 반경이 겹쳐 합산하지 않는다 */
+  stores: number | null; buildings: number | null;
+  stores_per_building: number | null; top10_building_pct: number | null; density_verdict: string | null;
+  /** 점포가 확인된 지번의 대장 관측 — 공실·수용량이 아니다 */
+  ledger: {
+    pnus: number; pnus_with_commercial_floor: number; pnus_with_expos: number;
+    commercial_expos_units: number; pnus_without_ledger: number;
+  };
+  top_categories: { name: string; count: number }[];
+  nearest_hub: string | null; nearest_hub_m: number | null;
+}
+export interface ResearchLocations {
+  note: string | null; source: string | null; built_at: string | null;
+  counts: Record<string, number>; locations: ResearchLocation[];
+}
+export const getResearchLocations = (group: ResearchGroup, signal?: AbortSignal) =>
+  getOptional<ResearchLocations>(`/commercial-districts/research-locations${query({ group })}`, signal);
+
 export interface RentHistory {
   district_id: string; quarters: string[];
   /** 1층 기준 · 만원/평·월. 값이 없는 분기는 null */

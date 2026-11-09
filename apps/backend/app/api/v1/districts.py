@@ -7,10 +7,11 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.district import DistrictSummary, Posting, Zone
 from app.schemas.floor_vacancy import FloorVacancyList
-from app.schemas.renewal import DistrictReport, HubOutlines, NearbyStores, RentHistory, SiteRanking
+from app.schemas.renewal import (DistrictReport, HubOutlines, NearbyStores, RentHistory, ResearchLocations,
+                                 SiteRanking)
 from app.services import districts as svc
 from app.services import (district_report, floor_vacancy, hub_outlines, nearby_stores, platform_profile,
-                          rone_history)
+                          research_locations, rone_history)
 
 router = APIRouter()
 
@@ -27,6 +28,17 @@ async def get_outlines() -> dict:
     out = hub_outlines.outlines()
     if out is None:
         raise HTTPException(status_code=404, detail="hub outlines not built")
+    return out
+
+
+@router.get("/research-locations", response_model=ResearchLocations)
+async def get_research_locations(
+    group: str | None = Query(None, pattern="^(gwangju|jeonju)$", description="지도 묶음 — 비우면 광주·전주 전부"),
+) -> dict:
+    """광주·전주 조사 위치(대장 관측). 서빙 거점이 아니다. ⚠ `/{district_id}` 보다 먼저 선언해야 한다."""
+    out = research_locations.research_locations(group)
+    if out is None:
+        raise HTTPException(status_code=404, detail="research locations not built")
     return out
 
 
