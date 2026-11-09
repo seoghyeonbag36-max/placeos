@@ -24,3 +24,22 @@ export function jibunOfBuilding(id: string | null | undefined): Jibun | null {
 export function jibunLabel(j: Jibun): string {
   return `시군구 ${j.sigungu} · 법정동 ${j.bjdong} · ${j.san ? "산 " : ""}${j.bun}${j.ji ? `-${j.ji}` : ""}`;
 }
+
+/** 'YYYYMM' → 'YYYY.MM' */
+export const ymLabel = (ym: string) => `${ym.slice(0, 4)}.${ym.slice(4, 6)}`;
+
+/** [이른 달, 늦은 달] → 그 사이 모든 달(YYYYMM, 오름차순). 순서가 뒤집혀 오면 바로잡는다 · 최대 60달 */
+export function monthSpan([a, b]: readonly [string, string]): string[] {
+  const [lo, hi] = a <= b ? [a, b] : [b, a];
+  const out: string[] = [];
+  let y = +lo.slice(0, 4), m = +lo.slice(4, 6);
+  while (out.length < 60) {
+    const ym = `${y}${String(m).padStart(2, "0")}`;
+    out.push(ym);
+    if (ym >= hi) break;
+    m += 1;
+    if (m > 12) { y += 1; m = 1; }
+  }
+  return out;
+}
+

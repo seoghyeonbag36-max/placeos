@@ -18,6 +18,7 @@ import FloorPlan from "./FloorPlan";
 import { useReportCapture } from "@/lib/ppppReportContext";
 import HistoryTimeline from "./HistoryTimeline";
 import RoadCheckSection from "./RoadCheckSection";
+import EnergySection from "./EnergySection";
 import type { TwinMode, TwinSceneHandle } from "./TwinScene";
 import type { RoadLayerStats } from "./twinRoads";
 import "./BuildingTwinDialog.css";
@@ -392,11 +393,15 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                   <dd>
                     <a href={ENERGY_LINKS.gas} target="_blank" rel="noopener noreferrer">가스 사용량(지번별 · 월별) ↗<span className="sr-only">(새 창)</span></a>{" · "}
                     <a href={ENERGY_LINKS.electricity} target="_blank" rel="noopener noreferrer">전기 ↗<span className="sr-only">(새 창)</span></a>
-                    <small> 국토교통부 건물에너지 · 공공데이터포털 파일. 화면에 값을 싣지 않았습니다
-                      {energyJibun ? <> — 이 건물 지번: <span className="num">{jibunLabel(energyJibun)}</span></> : null}.
+                    <small> 국토교통부 건물에너지 · 공공데이터포털 파일(전국 내려받기). 이 건물 월별 값은 아래 「월별 가스 사용량」(실시간)
+                      {energyJibun ? <> · 이 건물 지번: <span className="num">{jibunLabel(energyJibun)}</span></> : null}.
                       {" "}단독주택 · 200세대 미만 공동주택은 없고, 집합건물은 지번 합계라 호실을 가를 수 없습니다.</small>
                   </dd>
                 </dl>
+              </section>
+              <section className="twin3d-sec" aria-label="월별 가스 사용량">
+                <h4>월별 가스 사용량</h4>
+                <EnergySection buildingId={twin.id ?? buildingId} />
               </section>
               <RoadCheckSection name={title ?? "건물"} lat={twin.lat} lng={twin.lng} check={twin.road_check} source={twin.roads_source}
                 roadCount={twin.roads?.length ?? 0} stats={flat ? null : roadStats} sceneOff={flat}
