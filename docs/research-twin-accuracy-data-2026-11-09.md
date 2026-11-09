@@ -23,7 +23,7 @@
 
 | # | 데이터 | 높이는 것 | 얻는 길 | 상태 · 할 일 |
 |---|---|---|---|---|
-| 1 | 건축HUB **표제부** — 승용·비상용 승강기 수, 높이, 구조, 연면적, 주차 | 승강기 칸 · 높이 검증 | `DATA_GO_KR_SERVICE_KEY` · [건축HUB 15134735](https://www.data.go.kr/data/15134735/openapi.do) | **실시간 조회 배포**. 필드 이름(`rideUseElvtCnt` · `emgenUseElvtCnt`)은 공식 가이드로 미확인 → 배포 뒤 응답으로 확인 |
+| 1 | 건축HUB **표제부** — 승용·비상용 승강기 수, 높이, 구조, 연면적, 주차 | 승강기 칸 · 높이 검증 | `DATA_GO_KR_SERVICE_KEY` · [건축HUB 15134735](https://www.data.go.kr/data/15134735/openapi.do) | **실시간 조회 배포 · 프로덕션 확인**(2026-11-09 경성빌딩: 승용 1 · 비상용 0 · 높이 17.43m — 필드 `rideUseElvtCnt` · `emgenUseElvtCnt`) |
 | 2 | 건축HUB **층별개요 용도별 행** | 계단실 넓이 · 주차장 · 용도별 칸 | 같은 키 | **실시간 조회 배포**(트윈 연 건물만). 전 거점 Gold 에 실으려면 수집 PC 에서 `fold_floors` 가 행을 보존하도록 재빌드 |
 | 3 | 건축HUB **전유공용면적 공용 행** | 호실 공용 · 계약면적 · 전용률(실측) | 같은 키 · bronze 에 이미 있음 | 코드 배포됨 — `build_expos_units` → `build_building_floors` 재빌드만 |
 | 4 | 소상공인 **상가정보 호(hoNo)** | 집합건물 **호실별** 영업 · 공실(지금은 층 단위) | 같은 키 · `storeListInBuilding` 응답의 `flrNo` · `hoNo` | 지금 `stores_lite` 는 층만 남기고 호를 버린다 → 호를 남겨 전유부 `hoNm` 과 맞추면 호실별 공실 판정이 생긴다(맞추기 규칙은 제품 판단 · `build_expos_units` 주석) |
