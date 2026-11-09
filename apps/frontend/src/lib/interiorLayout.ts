@@ -194,6 +194,31 @@ export function seatRules(strategy: InteriorStrategy | null | undefined, k: read
   const notes = has(k, "좌석 우선") && roomy ? ["「좌석 우선」과 「여유 동선」을 함께 골랐습니다 — 통로는 여유 동선을 따랐습니다."] : [];
   return { strategy: st, perSeat: Math.round(perSeat * 100) / 100, perSeatBase: base, aisle: Math.round(aisle * 100) / 100, aisleBase, minimal, steps, notes };
 }
+/**
+ * 업종 → 기본 공간 키워드(2026-11-09 사용자 요청 — Posting 에서 업종을 바꾸면 키워드 · 배치도 바뀐다).
+ * **규칙**이다 — 상권 · 고객 자료로 고른 값이 아니다. 위에서부터 처음 맞는 줄을 쓴다(「카페·바」는 카페). 맞는 줄이 없으면 null.
+ */
+const INDUSTRY_KEYWORDS: { re: RegExp; label: string; keywords: InteriorKeyword[] }[] = [
+  { re: /테이크아웃|키오스크/, label: "테이크아웃", keywords: ["빠른 픽업", "깔끔", "심플"] },
+  { re: /브런치/, label: "브런치", keywords: ["내추럴", "초록 식물", "포토존", "창가자리"] },
+  { re: /베이커리|제과|빵|디저트|케이크|도넛|떡/, label: "베이커리 · 디저트", keywords: ["우드톤", "내추럴", "빠른 픽업", "포토존"] },
+  { re: /카페|커피|찻집|티룸/, label: "카페", keywords: ["창가자리", "우드톤", "초록 식물", "노트북석"] },
+  { re: /주점|술집|호프|와인|맥주|포차|이자카야|펍|(^|[\s·,/])바$/, label: "주점 · 바", keywords: ["따뜻한 조명", "인더스트리얼", "단체석", "레트로"] },
+  { re: /음식|식당|한식|중식|일식|양식|분식|고기|구이|치킨|피자|버거|국수|레스토랑|요리|뷔페|백반/, label: "음식점", keywords: ["단체석", "깔끔", "오픈 키친", "따뜻한 조명"] },
+  { re: /의류|패션|옷|편집숍|잡화|신발|가방|액세서리|주얼리/, label: "의류 · 잡화", keywords: ["갤러리", "미니멀", "무채색", "포토존"] },
+  { re: /화장품|코스메틱|향수/, label: "화장품", keywords: ["깔끔", "대리석", "포토존", "갤러리"] },
+  { re: /미용|헤어|네일|피부|에스테틱|뷰티/, label: "미용 · 뷰티", keywords: ["깔끔", "미니멀", "대리석", "초록 식물"] },
+  { re: /편의점|마트|슈퍼|생활용품/, label: "편의점 · 마트", keywords: ["깔끔", "심플", "빠른 픽업"] },
+  { re: /꽃|플라워|화원|식물/, label: "꽃 · 식물", keywords: ["초록 식물", "내추럴", "우드"] },
+  { re: /서점|책방|문구|공방/, label: "서점 · 문구 · 공방", keywords: ["우드", "갤러리", "아늑함", "노트북석"] },
+];
+export function industryKeywords(industry?: string | null): { label: string; keywords: InteriorKeyword[] } | null {
+  const t = industry?.trim();
+  if (!t) return null;
+  const hit = INDUSTRY_KEYWORDS.find((r) => r.re.test(t));
+  return hit ? { label: hit.label, keywords: [...hit.keywords] } : null;
+}
+
 /** 테이블 위 펜던트 조명을 다는 키워드 */
 export const pendantsOn = (k: readonly string[]) => (["빈티지", "레트로", "화려함", "인더스트리얼", "따뜻한 조명", "아늑함"] as InteriorKeyword[]).some((w) => has(k, w));
 const SEATING = /카페|커피|음식|식당|베이커리|디저트|주점|술집|분식|치킨|한식|일식|중식|양식|푸드|레스토랑|브런치|제과|빵|버거|피자|국수|고기|요리/;

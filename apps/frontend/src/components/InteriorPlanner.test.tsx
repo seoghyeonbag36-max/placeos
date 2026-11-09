@@ -38,11 +38,15 @@ const HANDOFF: ProgramHandoff = {
 beforeEach(() => { vi.clearAllMocks(); scene.create.mockReturnValue(handle); localStorage.clear(); });
 afterEach(cleanup);
 
+let rerenderPlanner: (handoff: ProgramHandoff) => void = () => {};
 function mount(handoff: ProgramHandoff | null = HANDOFF) {
   const api = installFetchStub([{ match: /\/api\/v1\/buildings\/1168010100100010001-1\/twin\?district=garosugil/, body: TWIN }]);
-  render(<InteriorPlanner handoff={handoff ?? undefined} district="garosugil" industry="카페" />);
+  const view = render(<InteriorPlanner handoff={handoff ?? undefined} district="garosugil" industry="카페" />);
+  rerenderPlanner = (h) => view.rerender(<InteriorPlanner handoff={h} district="garosugil" industry={h.industry ?? ""} />);
   return api;
 }
+const pressed = () => within(screen.getByRole("group", { name: "공간 구성 키워드" })).getAllByRole("button")
+  .filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.textContent);
 
 it("고른 공실의 트윈으로 3D 내부를 세우고 AI 이미지 생성은 없다", async () => {
   const api = mount();
@@ -77,8 +81,9 @@ it("키워드 30개를 네 갈래로 보이고, 누르면 3D 배치가 그 키�
   for (const k of ["#노트북석", "#1인석", "#단체석", "#소파존", "#오픈 키친", "#좌석 우선", "#여유 동선", "#모던", "#인더스트리얼", "#북유럽", "#아늑함", "#대리석", "#노출 콘크리트", "#파스텔", "#따뜻한 조명"]) {
     expect(chips.some((b) => b.textContent === k), k).toBe(true);
   }
+  // 업종(카페)의 기본 키워드로 시작한다 — 초록 식물은 이미 켜져 있다
+  expect(pressed()).toEqual(["#창가자리", "#초록 식물", "#노트북석", "#우드톤"]);
   fireEvent.click(screen.getByRole("button", { name: "#포토존" }));
-  fireEvent.click(screen.getByRole("button", { name: "#초록 식물" }));
   expect(screen.getByRole("button", { name: "#포토존" }).getAttribute("aria-pressed")).toBe("true");
   expect(kindsOf().has("photo") && kindsOf().has("plant")).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "#단체석" }));
@@ -119,6 +124,7 @@ it("가구 더하기 — 의자 · 테이블 · 책상을 따로 더하고, 의�
   await waitFor(() => expect(scene.create).toHaveBeenCalled());
   const seats = () => Number(seatsText().match(/(\d+)석/)![1]);
   const n0 = seats();
+  const desks0 = lastLayout().items.filter((i: It) => i.kind === "desk").length;   // 카페 기본 키워드 #노트북석의 책상 줄
   const loose = screen.getByRole("group", { name: "가구 더하기 · 낱개" });
   expect(within(loose).getAllByRole("button").map((b) => b.textContent)).toEqual(
     ["의자 1개", "스툴 1개", "벤치 1개", "테이블만 70×70", "테이블만 120×75", "원형 테이블만 Ø75", "장테이블만 180×80", "책상 100×60"]);
@@ -128,7 +134,7 @@ it("가구 더하기 — 의자 · 테이블 · 책상을 따로 더하고, 의�
   fireEvent.click(within(loose).getByRole("button", { name: "의자 1개" }));
   fireEvent.click(within(loose).getByRole("button", { name: "책상 100×60" }));
   expect(seats()).toBe(n0 + 2);
-  expect(lastLayout().items.filter((i: It) => i.kind === "desk").length).toBe(1);
+  expect(lastLayout().items.filter((i: It) => i.kind === "desk").length).toBe(desks0 + 1);
   // 고른 의자의 디자인을 바꾼다
   fireEvent.click(within(loose).getByRole("button", { name: "의자 1개" }));
   fireEvent.change(within(screen.getByRole("region", { name: "고른 가구" })).getByLabelText("의자"), { target: { value: "arm" } });
@@ -156,27 +162,30 @@ it("그대로 두는 칸 — 디자인 방향 · 공사 범위 · 기존 내부 
   expect(screen.getByLabelText("기존 내부 화장실")).toBeTruthy();
   expect(screen.getByRole("heading", { name: "공사 전 체크리스트" })).toBeTruthy();
   fireEvent.change(screen.getByLabelText("공사 범위"), { target: { value: "부분 공사 · 바닥과 천장 유지" } });
-  fireEvent.click(screen.getByRole("button", { name: "#창가자리" }));
+  fireEvent.click(screen.getByRole("button", { name: "#포토존" }));
   fireEvent.click(screen.getByRole("button", { name: "리포트에 인테리어 조건 저장" }));
   const saved = JSON.parse(localStorage.getItem("placeos.interior-brief.garosugil")!);
   expect(saved.source).toBe("user_input");
   expect(saved.brief).toContain("부분 공사 · 바닥과 천장 유지");
-  expect(saved.brief).toContain("#창가자리");
+  expect(saved.brief).toContain("#포토존");
+  expect(saved.brief).toContain("#창가자리");   // 업종(카페) 기본 키워드
   expect(saved.brief).toMatch(/3D 배치 결과: .*좌석 \d+석/);
   expect(saved.brief).toMatch(/디자인: .*키워드 규칙 배치/);
   expect(saved.brief).toContain("실측 도면·설계·시공안 아님");
   expect(screen.queryByText("인테리어 콘셉트")).toBeNull();
   expect(screen.queryByLabelText("참고 이미지 시간대")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "디자인 설정 초기화" }));
-  expect(screen.getByRole("button", { name: "#창가자리" }).getAttribute("aria-pressed")).toBe("false");
+  expect(screen.getByRole("button", { name: "#포토존" }).getAttribute("aria-pressed")).toBe("false");
+  expect(pressed()).toEqual([]);
 });
 
-it("업종을 소매로 바꾸면 테이블 세트 대신 선반 · 진열대", async () => {
+it("업종을 소매로 바꾸면 그 업종의 키워드로 바뀌고, 테이블 세트 대신 선반 · 진열대", async () => {
   mount();
   await waitFor(() => expect(scene.create).toHaveBeenCalled());
   fireEvent.change(screen.getByLabelText("디자인할 업종"), { target: { value: "의류 소매" } });
+  await waitFor(() => expect(lastLayout().layout.mode).toBe("retail"), { timeout: 2000 });
+  expect(pressed()).toEqual(["#포토존", "#갤러리", "#미니멀", "#무채색"]);
   const last = lastLayout();
-  expect(last.layout.mode).toBe("retail");
   expect(last.items.some((i: It) => i.kind === "chair")).toBe(false);
   expect(last.items.some((i: It) => i.kind === "shelf" || i.kind === "display")).toBe(true);
 });
@@ -195,4 +204,29 @@ it("자리를 고르지 않았으면 트윈을 부르지 않고 안내한다", (
   expect(screen.getByText(/공실 자리를 먼저 고르면/)).toBeTruthy();
   expect(api.urls().length).toBe(0);
   expect(scene.create).not.toHaveBeenCalled();
+});
+
+it("Posting 에서 업종을 바꾸면 — 그 업종의 기본 키워드로 바뀌고, 직접 옮긴 배치가 있어도 새로 놓는다(되돌리기 가능)", async () => {
+  mount();
+  await waitFor(() => expect(scene.create).toHaveBeenCalled());
+  // 먼저 직접 옮겨 둔다
+  const plan = screen.getByRole("application", { name: /공실 내부 배치 평면/ });
+  fireEvent.pointerDown(plan.querySelector(".ied-obj")!, { pointerId: 1 });
+  fireEvent.pointerUp(plan, { pointerId: 1 });
+  fireEvent.keyDown(document.querySelector(".interior-editor")!, { key: "ArrowRight", shiftKey: true });
+  expect(seatsText()).toMatch(/직접/);
+  rerenderPlanner({ ...HANDOFF, industry: "음식점" });
+  await waitFor(() => expect(pressed()).toEqual(["#단체석", "#오픈 키친", "#깔끔", "#따뜻한 조명"]), { timeout: 2000 });
+  expect(screen.getByText(/업종 「음식점」 기본 키워드\(음식점\)/)).toBeTruthy();
+  expect(screen.getByText(/업종이 「음식점」\(으\)로 바뀌어 좌석형\(테이블 · 의자\) 배치를 새로 놓았습니다 — 직접 옮긴 배치는 「되돌리기」로 돌아갑니다/)).toBeTruthy();
+  expect(seatsText()).not.toMatch(/직접/);
+  expect(lastLayout().items.some((i: It) => i.kind === "counter" && /오픈 키친/.test((i as unknown as { label?: string }).label ?? ""))).toBe(true);
+  // 이전 키워드로 되돌리기
+  fireEvent.click(screen.getByRole("button", { name: "이전 키워드로 되돌리기" }));
+  expect(pressed()).toEqual(["#창가자리", "#초록 식물", "#노트북석", "#우드톤"]);
+  // 규칙이 없는 업종 — 키워드는 그대로, 배치는 그 업종으로
+  rerenderPlanner({ ...HANDOFF, industry: "일반 숙박" });
+  await waitFor(() => expect(screen.getByText(/업종 「일반 숙박」의 기본 키워드 규칙이 없어 고른 키워드를 그대로 둡니다/)).toBeTruthy(), { timeout: 2000 });
+  expect(pressed()).toEqual(["#창가자리", "#초록 식물", "#노트북석", "#우드톤"]);
+  expect(lastLayout().layout.mode).toBe("retail");
 });

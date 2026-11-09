@@ -1,6 +1,6 @@
 /** 공실 내부 규칙 배치(2026-11-09) — 합성 직사각형 건물. 실측 건물이 아니다. */
 import { describe, expect, it } from "vitest";
-import { INTERIOR_KEYWORDS, KEYWORD_EFFECT, KEYWORD_GROUPS, interiorLayout, modeOf, paletteOf, seatRules, type InteriorItem, type InteriorLayout } from "@/lib/interiorLayout";
+import { INTERIOR_KEYWORDS, KEYWORD_EFFECT, KEYWORD_GROUPS, industryKeywords, interiorLayout, modeOf, paletteOf, seatRules, type InteriorItem, type InteriorLayout } from "@/lib/interiorLayout";
 import { planLayout, type Point } from "@/lib/twinGeometry";
 
 // 동서 14m × 남북 12m. 남쪽(−y)이 도로 — 전면
@@ -56,6 +56,23 @@ describe("interiorLayout", () => {
     expect(open.label).toBe("오픈 키친");
     expect(open.w).toBeGreaterThan(run([]).items.find((i) => i.kind === "counter")!.w);
     expect(run(["노트북석"], { industry: "의류 소매" }).items.some((i) => i.kind === "desk")).toBe(false);
+  });
+
+  it("업종 → 기본 키워드(규칙) — 처음 맞는 줄 · 모르는 업종은 없음", () => {
+    expect(industryKeywords("카페")?.keywords).toEqual(["창가자리", "우드톤", "초록 식물", "노트북석"]);
+    expect(industryKeywords("카페·바")?.label).toBe("카페");
+    expect(industryKeywords("와인 바")?.label).toBe("주점 · 바");
+    expect(industryKeywords("음식점")?.label).toBe("음식점");
+    expect(industryKeywords("의류 소매")?.label).toBe("의류 · 잡화");
+    expect(industryKeywords("뷰티")?.label).toBe("미용 · 뷰티");          // 「티」로 카페에 걸리지 않는다
+    expect(industryKeywords("브런치 카페")?.label).toBe("브런치");
+    expect(industryKeywords("일반 숙박")).toBeNull();
+    expect(industryKeywords("")).toBeNull();
+    for (const t of ["테이크아웃", "베이커리", "카페", "주점", "음식점", "의류", "화장품", "미용", "편의점", "꽃집", "서점"]) {
+      const r = industryKeywords(t)!;
+      expect(r, t).toBeTruthy();
+      for (const k of r.keywords) expect(INTERIOR_KEYWORDS, `${t} → ${k}`).toContain(k);
+    }
   });
 
   it("좌석 규칙 — 좌석 우선은 좌석을 늘리고 여유 동선은 줄인다 · 둘 다면 여유 동선을 따르고 알린다", () => {

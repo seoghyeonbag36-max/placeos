@@ -57,6 +57,17 @@ describe("단계형 비용 검토", () => {
     expect(await screen.findByText("전제(0)")).toBeTruthy();
   });
 
+  it("Posting 「업종」을 바꾸면 상권 맞춤 인테리어의 공간 키워드가 그 업종 기본값으로 바뀐다", async () => {
+    installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    const chips = () => [...document.querySelectorAll('[aria-label="공간 구성 키워드"] button[aria-pressed="true"]')].map((b) => b.textContent);
+    fireEvent.change(screen.getByPlaceholderText("예: 카페 (비우면 자리 기본값)"), { target: { value: "카페" } });
+    await waitFor(() => expect(chips()).toEqual(["#창가자리", "#초록 식물", "#노트북석", "#우드톤"]), { timeout: 2000 });
+    fireEvent.change(screen.getByPlaceholderText("예: 카페 (비우면 자리 기본값)"), { target: { value: "의류" } });
+    await waitFor(() => expect(chips()).toEqual(["#포토존", "#갤러리", "#미니멀", "#무채색"]), { timeout: 2000 });
+    expect((screen.getByLabelText("디자인할 업종") as HTMLInputElement).value).toBe("의류");
+  });
+
   it("권리금을 바꾸면 버튼 없이 잠시 뒤 다시 계산하고 결과를 같은 화면에 갱신한다", async () => {
     const api = installApi();
     render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
