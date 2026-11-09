@@ -218,6 +218,31 @@ describe("BuildingTwinDialog", () => {
     expect(sum).toContain("전용 96㎡");
     expect(sum).toContain("공용 24㎡");
     expect(sum).toContain("층 바닥 120㎡");
-    expect(screen.getByLabelText("배치도 범례").textContent).toContain("공용(계단·화장실·복도)");
+    // 2026-11-09 — 계단을 공용에서 따로 그린다(2층 이상 건물)
+    expect(screen.getByLabelText("배치도 범례").textContent).toContain("공용(화장실·복도 등)");
+    expect(screen.getByLabelText("배치도 범례").textContent).toContain("계단");
+  });
+
+  it("대장 실시간 조회가 되면 승강기 · 층별 용도 · 배치도 계단·승강기를 보이고, 안 되면 사유를 적는다", async () => {
+    const est = { m2: 96, low: 85, high: 102, ratio: 0.8, basis: "근거" };
+    const ledger_live = { status: "ok", source: "대장", elevators: { passenger: 1, emergency: 1 }, fields_missing: false, title: null,
+      floors: { "1": { parts: [{ purps: "제1종근린생활시설", etc: "소매점", area_m2: 100 }, { purps: "제1종근린생활시설", etc: "계단실", area_m2: 12 }], stair_m2: 12, ev_m2: null } } };
+    mount({ ...TWIN, ledger_live, floors: TWIN.floors.map((f) => f.lv === 1 ? { ...f, excl_est: est } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    expect(screen.getAllByText(/승용 1 · 비상용 1대/).length).toBe(2);     // 건물 정보 · 배치도 안내
+    expect(screen.getByText("대장 층별 용도")).toBeTruthy();
+    expect(screen.getByText(/계단실/, { selector: "span" })).toBeTruthy();
+    expect(document.querySelectorAll(".twin3d-plan-ev").length).toBe(2);
+    expect(document.querySelector(".twin3d-plan-stair")).toBeTruthy();
+    expect(screen.getByLabelText("배치도 범례").textContent).toContain("승강기(대장 대수)");
+  });
+
+  it("대장 조회가 거절되면 승강기는 그리지 않고 사유를 적는다", async () => {
+    const est = { m2: 96, low: 85, high: 102, ratio: 0.8, basis: "근거" };
+    mount({ ...TWIN, ledger_live: { status: "refused", source: "대장", error: "SERVICE_KEY_IS_NOT_REGISTERED_ERROR", elevators: null, fields_missing: false, title: null, floors: null },
+      floors: TWIN.floors.map((f) => f.lv === 1 ? { ...f, excl_est: est } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    expect(document.querySelectorAll(".twin3d-plan-ev").length).toBe(0);
+    expect(screen.getAllByText(/조회를 거절해 표시하지 않음\(SERVICE_KEY_IS_NOT_REGISTERED_ERROR\)/).length).toBeGreaterThan(0);
   });
 });

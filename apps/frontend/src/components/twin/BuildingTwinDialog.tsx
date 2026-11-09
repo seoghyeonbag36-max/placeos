@@ -10,6 +10,7 @@ import type { ViewerBuilding } from "@/components/buildingFloors";
 import { getBuildingTwin, type BuildingTwin, type TwinFloor } from "@/lib/api";
 import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, hasStop, removeStop } from "@/lib/journeyState";
+import { ledgerNote } from "@/lib/twinLedger";
 import { areaSummary, isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
 import FloorPlan from "./FloorPlan";
 import { useReportCapture } from "@/lib/ppppReportContext";
@@ -47,6 +48,7 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
   const meta = TWIN_STATUS[floor.status];
   const vacant = isVacantStatus(floor.status);
   const areas = areaSummary(floor.units);
+  const ledgerFloor = twin.ledger_live?.status === "ok" ? twin.ledger_live.floors?.[String(floor.lv)] ?? null : null;
   const unitArea = areas.excl;
   const toggleStop = () => {
     if (saved) removeStop(stopKey);
@@ -88,6 +90,12 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
           : <span className="value-absent">자료 없음</span>}</dd>
         <dt>용도</dt>
         <dd>{floor.purps ?? <span className="value-absent">자료 없음</span>}</dd>
+        {ledgerFloor && ledgerFloor.parts.length > 0 && <>
+          <dt>대장 층별 용도</dt>
+          <dd>{ledgerFloor.parts.slice(0, 6).map((p, i) => (
+            <span key={i}>{i ? " · " : ""}{p.etc ?? p.purps ?? "용도 미상"} <span className="num">{p.area_m2.toLocaleString("ko-KR")}㎡</span></span>
+          ))}{ledgerFloor.parts.length > 6 ? ` 외 ${ledgerFloor.parts.length - 6}행` : ""} <EvidenceBadge kind="실측" /><small> 건축물대장 층별개요(실시간)</small></dd>
+        </>}
         {(vacant || floor.status === "uncertain") && <>
           <dt>월 임대 추정</dt>
           <dd>{floor.rent_est_manwon != null
@@ -352,6 +360,10 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
                     <small>{twin.height_source === "vworld" ? " V-World" : " 층수 × 3.3m"}</small></dd>
                   <dt>사용승인</dt>
                   <dd>{ymd(twin.approval_date) ?? <span className="value-absent">자료 없음</span>}</dd>
+                  <dt>승강기</dt>
+                  <dd>{twin.ledger_live?.status === "ok" && twin.ledger_live.elevators
+                    ? <>승용 {twin.ledger_live.elevators.passenger} · 비상용 {twin.ledger_live.elevators.emergency}대 <EvidenceBadge kind="실측" /><small> 건축물대장 표제부(실시간){(twin.ledger_live.title?.n_titles ?? 0) > 1 ? " · 같은 지번 주건축물 기준" : ""}</small></>
+                    : <><span className="value-absent">자료 없음</span><small> {ledgerNote(twin.ledger_live)}</small></>}</dd>
                   {twin.lot_buildings && twin.lot_buildings > 1 ? <><dt>같은 지번</dt><dd>건물 {twin.lot_buildings}동</dd></> : null}
                 </dl>
               </section>

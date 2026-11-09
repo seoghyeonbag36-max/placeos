@@ -108,6 +108,29 @@ class TwinUnit(BaseModel):
     pub_m2: float | None = None       # 그 호의 공용면적 합(전유공용면적 공용 행) — 계약면적 = area_m2 + pub_m2
 
 
+class TwinLedgerPart(BaseModel):
+    purps: str | None = None
+    etc: str | None = None
+    area_m2: float
+
+
+class TwinLedgerFloor(BaseModel):
+    parts: list[TwinLedgerPart]          # 층별개요 용도별 행(넓은 순)
+    stair_m2: float | None = None        # 계단실 행 넓이 합(있을 때만 · 실측)
+    ev_m2: float | None = None           # 승강기 관련 행 넓이 합(있을 때만 · 실측)
+
+
+class TwinLedgerLive(BaseModel):
+    """건축물대장 실시간 조회(services/building_ledger_live) — 승강기 수 · 층별개요 용도별 행."""
+    status: str                           # ok · no_key · no_pnu · refused · error · backoff
+    source: str
+    error: str | None = None
+    elevators: dict[str, int] | None = None   # {passenger, emergency} — 개수만 실측, 위치는 모른다
+    fields_missing: bool = False
+    title: dict | None = None
+    floors: dict[str, TwinLedgerFloor] | None = None   # 키 = 층 번호(지하 음수) 문자열
+
+
 class TwinExclEstimate(BaseModel):
     """일반건축물 층 전용면적 추정 — 층 바닥면적 × 상업층 전용률. 실측 아님(services/exclusive_estimate)."""
     m2: float
@@ -225,6 +248,7 @@ class BuildingTwin(BaseModel):
     roads_source: TwinRoadsSource | None = None
     road_check: TwinRoadCheck | None = None
     roads_error: str | None = None
+    ledger_live: TwinLedgerLive | None = None   # 2026-11-09 — 대장 실시간(승강기 · 층별 용도) · 실패해도 트윈은 그대로
 
 
 class RelationCounts(BaseModel):

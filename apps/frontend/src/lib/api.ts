@@ -1657,6 +1657,21 @@ export interface BuildingTwin {
   roads_source?: TwinRoadsSource | null;
   road_check?: TwinRoadCheck | null;
   roads_error?: string | null;
+  /** 건축물대장 실시간 조회(2026-11-09) — 승강기 대수 · 층별개요 용도별 행. 실패하면 status 에 사유 */
+  ledger_live?: TwinLedgerLive | null;
+}
+export interface TwinLedgerFloor {
+  parts: { purps: string | null; etc: string | null; area_m2: number }[];
+  stair_m2: number | null; ev_m2: number | null;
+}
+export interface TwinLedgerLive {
+  status: "ok" | "no_key" | "no_pnu" | "refused" | "error" | "backoff" | string;
+  source: string; error?: string | null;
+  elevators: { passenger: number; emergency: number } | null;
+  fields_missing: boolean;
+  title: { dong: string | null; grnd: number | null; ugrnd: number | null; height_m: number | null; tot_area_m2: number | null; strct: string | null; n_titles: number } | null;
+  /** 키 = 층 번호(지하 음수) 문자열 */
+  floors: Record<string, TwinLedgerFloor> | null;
 }
 export const getBuildingTwin = (buildingId: string, district: string, signal?: AbortSignal) =>
   getOptional<BuildingTwin>(`/buildings/${encodeURIComponent(buildingId)}/twin${query({ district })}`, signal);
