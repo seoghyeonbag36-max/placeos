@@ -1,5 +1,6 @@
 /**
- * 공실 내부 3D 디지털 트윈 장면(2026-11-09) — `interiorLayout` 의 공간 · 막힌 칸 · 가구를 three 로 그린다.
+ * 공실 내부 3D 디지털 트윈 장면(2026-11-09) — `interiorLayout` 의 공간 · 막힌 칸과 직접 배치 편집기(`interiorEdit`)의 가구를 three 로 그린다.
+ * 가구를 누르면 고르고, 끌면 바닥 위로 옮긴다(궤도 회전보다 먼저 — 캡처 단계). 빈 곳을 끌면 돌려 본다.
  *
  * - 벽은 안쪽을 보는 면만 그린다(FrontSide) — 밖에서 보면 카메라 쪽 벽이 저절로 사라져 안이 보인다(돌려 봐도 같다).
  * - 창 · 출입구 자리는 트윈 외벽 창(`windowSpans` · 표현용)과 전면 변(도로명주소 × OSM)이다. 실측 창호가 아니다.
@@ -10,17 +11,22 @@ import {
   AmbientLight, BoxGeometry, BufferGeometry, CanvasTexture, Color, CylinderGeometry, DirectionalLight, DoubleSide, ExtrudeGeometry,
   FrontSide, Group, HemisphereLight, IcosahedronGeometry, Line, LineBasicMaterial, Material, Mesh, MeshStandardMaterial, Object3D,
   PerspectiveCamera, PlaneGeometry, RepeatWrapping, Scene, Shape, ShapeGeometry, SphereGeometry, SRGBColorSpace, TorusGeometry,
-  Vector3, WebGLRenderer, BufferAttribute,
+  Vector3, WebGLRenderer, BufferAttribute, Plane, Raycaster, Vector2, LineLoop,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { InteriorItem, InteriorLayout } from "@/lib/interiorLayout";
+import type { EditItem } from "@/lib/interiorEdit";
 import { overviewCamera } from "@/lib/interiorView";
 import type { Point, WindowSpan } from "@/lib/twinGeometry";
 
 export interface InteriorSceneInput {
   outline: Point[];
   layout: InteriorLayout;
+  /** 직접 배치 편집기 — 물건(oid) · 색 · 모양이 붙은 항목. 없으면 layout.items 를 그린다 */
+  items?: EditItem[];
+  /** 바닥 표시 — 고른 물건 상자 · 문제 상자 · 입구/주 통로 · 좁은 통로 선 */
+  marks?: { selected: Point[] | null; bad: Point[][]; zones: Point[][]; lines: [Point, Point][] };
   /** 지상층만 창을 그린다 */
   lv: number;
   windows: WindowSpan[];
@@ -30,6 +36,8 @@ export interface InteriorSceneInput {
 
 export interface InteriorSceneHandle {
   setLayout(input: InteriorSceneInput): void;
+  /** 끄는 동안 — 그 물건(oid)의 묶음만 짓기 당시 자리에서 d(로컬 m)만큼 옮긴다(다시 짓지 않는다) */
+  moveObj(oid: number, d: Point): void;
   resetView(): void;
   dispose(): void;
 }
@@ -65,7 +73,15 @@ function floorTexture(pattern: "plain" | "wood" | "checker", a: string, b: strin
   return t;
 }
 
-export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput): InteriorSceneHandle {
+export interface SceneCallbacks {
+  /** 3D 에서 물건을 눌렀다(null = 빈 곳) */
+  onPick(oid: number | null): void;
+  /** 3D 에서 끄는 중 — 누른 곳에서 바닥 위로 옮긴 거리(로컬 m) */
+  onDrag(oid: number, d: Point): void;
+  onDrop(oid: number): void;
+}
+
+export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput, cb?: SceneCallbacks): InteriorSceneHandle {
   /** 벽 높이 = 공실 높이(층고 · layout.dims.h). 짓기마다 다시 정한다 */
   let H = 3.0;
   const renderer = new WebGLRenderer({ antialias: true, alpha: false });
@@ -96,6 +112,8 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
 
   let root = new Group();
   scene.add(root);
+  /** 물건(oid) → 그 물건을 이루는 묶음들(테이블 · 의자 · 조명) */
+  const groups = new Map<number, Group[]>();
   const geos: BufferGeometry[] = [];
   const mats: Material[] = [];
   const texs: CanvasTexture[] = [];
@@ -213,24 +231,56 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     };
     const lineMat = new LineBasicMaterial({ color: "#777" });
     mats.push(lineMat);
-    for (const it of layout.items) {
+    const colorMats = new Map<string, Material>();
+    const cmat = (c: string | undefined, fallback: Material) => {
+      if (!c) return fallback;
+      let m = colorMats.get(c);
+      if (!m) { m = mat(c); colorMats.set(c, m); }
+      return m;
+    };
+    groups.clear();
+    for (const it of (input.items ?? layout.items) as EditItem[]) {
       const g = new Group();
+      const F = cmat(it.color, M.furniture), C = cmat(it.color, M.chair);
       switch (it.kind) {
         case "table": {
-          const top = it.shape === "round" ? mesh(new CylinderGeometry(it.w / 2, it.w / 2, 0.04, 28), M.furniture) : mesh(new BoxGeometry(it.w, 0.04, it.d), M.furniture);
+          const th = 0.04;
+          const top = it.shape === "round" ? mesh(new CylinderGeometry(it.w / 2, it.w / 2, th, 28), F) : mesh(new BoxGeometry(it.w, th, it.d), F);
           top.position.y = it.h; g.add(top);
-          const leg = mesh(new CylinderGeometry(0.04, 0.06, it.h, 10), M.leg); leg.position.y = it.h / 2; g.add(leg);
+          if (it.variant === "low" || it.shape === "round") { const leg = mesh(new CylinderGeometry(0.04, 0.06, it.h, 10), M.leg); leg.position.y = it.h / 2; g.add(leg); }
+          else for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+            const leg = mesh(new BoxGeometry(0.04, it.h, 0.04), M.leg); leg.position.set(sx * (it.w / 2 - 0.05), it.h / 2, sz * (it.d / 2 - 0.05)); g.add(leg);
+          }
           break;
         }
         case "chair": {
-          const seat = mesh(new BoxGeometry(it.w, 0.05, it.d), M.chair); seat.position.y = 0.45; g.add(seat);
-          const back = mesh(new BoxGeometry(it.w, 0.42, 0.05), M.chair); back.position.set(0, 0.68, it.d / 2 - 0.03); g.add(back);
-          const leg = mesh(new BoxGeometry(it.w * 0.8, 0.43, it.d * 0.8), M.leg); leg.position.y = 0.215; leg.scale.set(1, 1, 1); g.add(leg);
+          const v = it.variant ?? "chair";
+          if (v === "bench") {
+            const seat = mesh(new BoxGeometry(it.w, 0.06, it.d), C); seat.position.y = 0.45; g.add(seat);
+            for (const sx of [-1, 1]) { const leg = mesh(new BoxGeometry(0.05, 0.42, it.d * 0.8), M.leg); leg.position.set(sx * (it.w / 2 - 0.08), 0.21, 0); g.add(leg); }
+          } else if (v === "arm" || v === "lounge") {
+            const sh = v === "lounge" ? 0.38 : 0.44;
+            const base = mesh(new BoxGeometry(it.w, sh, it.d), C); base.position.y = sh / 2; g.add(base);
+            const back = mesh(new BoxGeometry(it.w, v === "lounge" ? 0.42 : 0.38, 0.12), C); back.position.set(0, sh + (v === "lounge" ? 0.21 : 0.19), it.d / 2 - 0.06); g.add(back);
+            for (const sx of [-1, 1]) { const arm = mesh(new BoxGeometry(0.09, 0.2, it.d - 0.1), C); arm.position.set(sx * (it.w / 2 - 0.045), sh + 0.1, 0.03); g.add(arm); }
+          } else {
+            const seat = mesh(new BoxGeometry(it.w, 0.05, it.d), C); seat.position.y = 0.45; g.add(seat);
+            const back = mesh(new BoxGeometry(it.w, 0.42, 0.05), C); back.position.set(0, 0.68, it.d / 2 - 0.03); g.add(back);
+            const leg = mesh(new BoxGeometry(it.w * 0.8, 0.43, it.d * 0.8), M.leg); leg.position.y = 0.215; g.add(leg);
+          }
           break;
         }
         case "stool": {
-          const s = mesh(new CylinderGeometry(it.w / 2, it.w / 2, 0.06, 20), M.chair); s.position.y = it.h; g.add(s);
+          const s = mesh(new CylinderGeometry(it.w / 2, it.w / 2, 0.06, 20), C); s.position.y = it.h; g.add(s);
           const p = mesh(new CylinderGeometry(0.03, 0.05, it.h, 8), M.leg); p.position.y = it.h / 2; g.add(p);
+          break;
+        }
+        case "sofa": {
+          if (it.variant === "sofa") {
+            const base = mesh(new BoxGeometry(it.w, 0.42, it.d), C); base.position.y = 0.21; g.add(base);
+            const back = mesh(new BoxGeometry(it.w, 0.4, 0.16), C); back.position.set(0, 0.62, it.d / 2 - 0.08); g.add(back);
+            for (const sx of [-1, 1]) { const arm = mesh(new BoxGeometry(0.14, 0.22, it.d), C); arm.position.set(sx * (it.w / 2 - 0.07), 0.53, 0); g.add(arm); }
+          } else { const b = mesh(new BoxGeometry(it.w, it.h, it.d), C); b.position.y = it.h / 2; g.add(b); }
           break;
         }
         case "photo": {
@@ -279,7 +329,7 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
           break;
         }
         default: {
-          const m = it.kind === "shelf" ? M.shelf : it.kind === "counter" || it.kind === "pickup" ? M.counter
+          const m = it.color ? F : it.kind === "shelf" ? M.shelf : it.kind === "counter" || it.kind === "pickup" ? M.counter
             : it.mat === "accent" ? M.accent : it.mat === "chair" ? M.chair : M.furniture;
           const b = mesh(new BoxGeometry(it.w, it.h, it.d), m); b.position.y = it.h / 2; g.add(b);
           if (it.kind === "shelf") {
@@ -289,7 +339,16 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
       }
       place(g, it, it.z);
       root.add(g);
-      if (it.label) {
+      if (it.oid != null) {
+        g.userData.oid = it.oid;
+        g.userData.p0 = g.position.clone();
+        groups.set(it.oid, [...(groups.get(it.oid) ?? []), g]);
+      }
+      if (it.label && it.kind !== "door") {
+        const t = tag(it.label, "");
+        t.position.set(0, it.h + 0.35, 0);
+        g.add(t);
+      } else if (it.label && it.kind === "door") {
         const t = tag(it.label, it.kind === "door" ? "is-door" : "");
         t.position.set(it.at[0], (it.z || 0) + it.h + 0.35, -it.at[1]);
         root.add(t);
@@ -325,6 +384,77 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     const ht = tag(`높이 ${dm.h.toFixed(1)}m${dm.hMeasured ? "" : "(추정)"}`, "is-dim");
     ht.position.set(dm.corner[0], H / 2, -dm.corner[1]);
     root.add(ht);
+
+    // 편집 표시 — 입구 앞 · 주 통로(옅은 주황) · 문제 상자(빨강) · 고른 물건(파랑) · 좁은 통로(빨간 선)
+    const mk = input.marks ?? { selected: null, bad: [], zones: [], lines: [] };
+    const flat = (poly: Point[], color: string, opacity: number, y: number) => {
+      const m = mesh(new ShapeGeometry(shapeOf(poly)), mat(color, { transparent: true, opacity, side: DoubleSide, depthWrite: false }));
+      m.rotation.x = -Math.PI / 2; m.position.y = y; root.add(m);
+    };
+    const loop = (poly: Point[], color: string, y: number) => {
+      const lm = new LineBasicMaterial({ color }); mats.push(lm);
+      const l = new LineLoop(new BufferGeometry().setFromPoints(poly.map((p) => new Vector3(p[0], y, -p[1]))), lm);
+      geos.push(l.geometry); root.add(l);
+    };
+    for (const z of mk.zones) flat(z, "#F4A259", 0.18, 0.006);
+    for (const b of mk.bad) { flat(b, "#E03131", 0.22, 0.008); loop(b, "#E03131", 0.02); }
+    if (mk.selected) { flat(mk.selected, "#1C7ED6", 0.16, 0.01); loop(mk.selected, "#1C7ED6", 0.025); }
+    const redMat = new LineBasicMaterial({ color: "#E03131" }); mats.push(redMat);
+    for (const [a, b] of mk.lines) seg(at(a, 0.5), at(b, 0.5), redMat);
+    render();
+  }
+
+  // ── 3D 에서 직접 끌기 — 물건을 누르면 궤도 회전을 멈추고 바닥 위로 옮긴다 ──
+  const ray = new Raycaster();
+  const floorPlane = new Plane(new Vector3(0, 1, 0), 0);
+  const ndc = (e: PointerEvent) => {
+    const r = renderer.domElement.getBoundingClientRect();
+    return new Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  };
+  const floorAt = (e: PointerEvent): Point | null => {
+    ray.setFromCamera(ndc(e), camera);
+    const hit = new Vector3();
+    return ray.ray.intersectPlane(floorPlane, hit) ? [hit.x, -hit.z] : null;
+  };
+  let drag: { oid: number; p0: Point; moved: boolean } | null = null;
+  const onDown = (e: PointerEvent) => {
+    if (!cb || e.button > 0) return;
+    ray.setFromCamera(ndc(e), camera);
+    const hits = ray.intersectObjects([...groups.values()].flat(), true);
+    let oid: number | null = null;
+    for (const h of hits) {
+      let o: Object3D | null = h.object;
+      while (o && o.userData.oid == null) o = o.parent;
+      if (o) { oid = o.userData.oid as number; break; }
+    }
+    cb.onPick(oid);
+    if (oid == null) return;
+    const p = floorAt(e), g0 = groups.get(oid)?.[0];
+    if (!p || !g0) return;
+    // 궤도 회전보다 먼저(캡처 단계) 막는다
+    controls.enabled = false;
+    drag = { oid, p0: p, moved: false };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
+  };
+  const onMove = (e: PointerEvent) => {
+    if (!drag || !cb) return;
+    const p = floorAt(e);
+    if (!p) return;
+    drag.moved = true;
+    cb.onDrag(drag.oid, [p[0] - drag.p0[0], p[1] - drag.p0[1]]);
+  };
+  const onUp = () => {
+    window.removeEventListener("pointermove", onMove);
+    controls.enabled = true;
+    if (drag && cb && drag.moved) cb.onDrop(drag.oid);
+    drag = null;
+  };
+  host.addEventListener("pointerdown", onDown, { capture: true });
+  /** 짓기 당시 자리에서 d(로컬 m)만큼 옮겨 그린다 — 다시 짓기 전까지 */
+  function moveObj(oid: number, d: Point) {
+    const [dx, dy] = d;
+    for (const g of groups.get(oid) ?? []) g.position.set(g.userData.p0.x + dx, g.userData.p0.y, g.userData.p0.z - dy);
     render();
   }
 
@@ -359,8 +489,11 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
   resetView();
   return {
     setLayout(next) { input = next; build(); },
+    moveObj,
     resetView,
     dispose() {
+      host.removeEventListener("pointerdown", onDown, { capture: true });
+      window.removeEventListener("pointermove", onMove);
       ro?.disconnect();
       controls.removeEventListener("change", render);
       controls.dispose();

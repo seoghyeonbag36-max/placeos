@@ -151,7 +151,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
 
     fireEvent.click(within(table).getByRole("button", { name: "카페·디저트로 입점 계산" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
-    const input = await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement;
+    const input = await screen.findByPlaceholderText(/예: 카페 \(비우면/) as HTMLInputElement;
     expect(input.value).toBe("카페");
     expect(screen.getByText(/Platform 에서 고른 업종으로 채웠습니다/)).toBeTruthy();
     // (2026-10-06) 순위표에서 고른 업종은 「바꿀 업종」으로 저장된다 — 다음에 바로 들어와도 그 업종으로 시작한다.
@@ -164,7 +164,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     mount();
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
-    const posting = await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement;
+    const posting = await screen.findByPlaceholderText(/예: 카페 \(비우면/) as HTMLInputElement;
     expect(posting.value, "버릴 업종(음식점)이 기본값으로 채워졌다").toBe("");
     expect(screen.queryByText(/내 사업 기준으로 채웠습니다/)).toBeNull();
 
@@ -180,7 +180,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     expect(await screen.findByRole("button", { name: /가로수길 · 카페·디저트에서 음식점으로 바꾸기/ }, TAB_LOAD)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
-    expect((await screen.findByPlaceholderText(/예: 카페/) as HTMLInputElement).value).toBe("음식점");
+    expect((await screen.findByPlaceholderText(/예: 카페 \(비우면/) as HTMLInputElement).value).toBe("음식점");
     expect(screen.getByText(/내 사업 기준으로 채웠습니다/)).toBeTruthy();
 
     saveToken("test-token");

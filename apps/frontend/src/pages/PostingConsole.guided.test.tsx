@@ -26,6 +26,7 @@ describe("단계형 비용 검토", () => {
     const emptyApi = installApi(true);
     render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     await waitFor(() => expect([...drafts.values()][0].calculation).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     expect((screen.getByRole("button", { name: "시뮬레이션" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.queryByText("전제(0)")).toBeNull();
     expect(emptyApi.count(/simulate-revenue$/)).toBe(0);
@@ -37,7 +38,22 @@ describe("단계형 비용 검토", () => {
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     expect(screen.queryByRole("button", { name: "검증 리포트" })).toBeNull();
     expect(screen.queryByRole("button", { name: "계산 결과" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
+    expect(await screen.findByText("전제(0)")).toBeTruthy();
+  });
+
+  it("첫 화면은 「상권 맞춤 인테리어」(맨 처음 순서)이고, 자리 · 비용 입력은 처음부터 그려 두어 자동 계산이 돈다", async () => {
+    const api = installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    const nav = screen.getByRole("navigation", { name: "비용 검토" });
+    expect([...nav.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["상권 맞춤 인테리어", "자리와 비용 조건", "주변 업종 지도", "찾아오는 길"]);
+    expect(screen.getByRole("button", { name: "상권 맞춤 인테리어" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("heading", { name: "인테리어 참고안" })).toBeTruthy();
+    // 입력 쪽은 숨은 채 그려져 있다 — 첫 자리로 자동 계산이 돌고, 탭을 열면 결과가 바로 있다
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    expect(screen.getByPlaceholderText("만원 — 비우면 0 전제")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     expect(await screen.findByText("전제(0)")).toBeTruthy();
   });
 
@@ -45,6 +61,7 @@ describe("단계형 비용 검토", () => {
     const api = installApi();
     render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "300" } });
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(2), { timeout: 3000 });
     expect(api.matching(/simulate-revenue$/)[1].body).toMatchObject({ prem: 300 });
@@ -57,6 +74,7 @@ describe("단계형 비용 검토", () => {
     const drafts = new Map<string, PostingDraft>();
     let view = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "자리와 비용 조건" }));
     expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기 →" })).toBeNull();
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "200" } });
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
@@ -74,7 +92,7 @@ describe("단계형 비용 검토", () => {
     expect(api.count(/simulate-revenue$/)).toBe(2);
   });
 
-  it("예전에 「계산 결과」 탭을 연 채 저장된 초안은 입력 화면으로 연다", async () => {
+  it("예전에 「계산 결과」 탭을 연 채 저장된 초안은 첫 화면(인테리어)으로 연다 · 「자리와 비용 조건」을 연 채 저장했으면 그 화면", async () => {
     installApi();
     const drafts = new Map<string, PostingDraft>();
     const first = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
@@ -82,6 +100,10 @@ describe("단계형 비용 검토", () => {
     first.unmount();
     const [key, saved] = [...drafts.entries()][0];
     drafts.set(key, { ...saved, page: "result" });
+    const second = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
+    expect(screen.getByRole("button", { name: "상권 맞춤 인테리어" }).getAttribute("aria-current")).toBe("page");
+    second.unmount();
+    drafts.set(key, { ...saved, page: "input" });
     render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     expect(screen.getByRole("button", { name: "자리와 비용 조건" }).getAttribute("aria-current")).toBe("page");
   });

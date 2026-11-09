@@ -1,13 +1,20 @@
-import { INTERIOR_KEYWORDS, KEYWORD_EFFECT } from "@/lib/interiorLayout";
+import { KEYWORD_EFFECT, KEYWORD_GROUPS } from "@/lib/interiorLayout";
 
-/** 공간 구성 키워드(2026-11-09 사용자 지정 15개) — 누르면 3D 배치가 그 키워드에 맞게 다시 놓인다. */
+/** 공간 구성 키워드(2026-11-09 사용자 지정 15개 + 더한 15개 · 네 갈래) — 누르면 3D 배치가 그 키워드에 맞게 다시 놓인다. */
 export default function InteriorKeywordChips({ value, onChange }: { value: readonly string[]; onChange: (next: string[]) => void }) {
   const toggle = (k: string) => onChange(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]);
   return (
     <div className="interior-kw">
-      <div className="interior-kw-chips" role="group" aria-label="공간 구성 키워드">
-        {INTERIOR_KEYWORDS.map((k) => (
-          <button type="button" key={k} aria-pressed={value.includes(k)} title={KEYWORD_EFFECT[k]} onClick={() => toggle(k)}>#{k}</button>
+      <div role="group" aria-label="공간 구성 키워드">
+        {KEYWORD_GROUPS.map((g) => (
+          <div key={g.name} className="interior-kw-group">
+            <span>{g.name}</span>
+            <div className="interior-kw-chips">
+              {g.keywords.map((k) => (
+                <button type="button" key={k} aria-pressed={value.includes(k)} title={KEYWORD_EFFECT[k]} onClick={() => toggle(k)}>#{k}</button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
       <p className="interior-kw-picked" role="status">
