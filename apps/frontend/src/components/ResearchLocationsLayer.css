@@ -1,0 +1,22 @@
+/* 조사 위치 레이어(2026-11-09) — 거점 목록 아래에 선다. 거점과 갈리게 중립색 · 속이 빈 점 · 점선 카드. */
+.rl { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.rl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.rl-head h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.rl-head button { font: inherit; font-size: 12.5px; font-weight: 700; color: var(--text-secondary); background: var(--surface-sunken);
+  border: 1px solid transparent; border-radius: 8px; padding: 5px 9px; cursor: pointer; min-height: 32px; }
+.rl-head button[aria-pressed="true"] { border-color: var(--line); }
+.rl-badge { display: inline-block; font-size: 12px; color: var(--text-secondary); background: var(--surface-sunken);
+  border: 1px dashed var(--text-secondary); border-radius: 4px; padding: 0 4px; margin-right: 2px; }
+.rl-card { margin-top: 8px; border: 1.5px dashed var(--text-secondary); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
+.rl-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rl-card-head b { font-size: 14px; overflow-wrap: anywhere; }
+.rl-card-head button { font: inherit; font-size: 16px; line-height: 1; background: none; border: 0; color: var(--text-secondary);
+  cursor: pointer; min-width: 32px; min-height: 32px; }
+.rl-card dl { margin: 6px 0 0; display: grid; gap: 4px; font-size: 12.5px; }
+.rl-card dl > div { display: grid; grid-template-columns: 76px 1fr; gap: 6px; }
+.rl-card dt { color: var(--text-secondary); }
+.rl-card dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.rl-link { font: inherit; font-weight: 700; color: var(--track-platform); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+/* 넓은 화면 칸 배치는 `.platform-side .dme-list` 를 칸 높이로 늘린다 — 조사 위치 목록은 거점 목록 밑이라 늘지 않게 높여 잡는다 */
+.dme .rl .rl-list { max-height: 200px; flex: none; min-height: 0; }
+.rl-list .rl-dot { background: var(--surface); border: 2px solid var(--text-secondary); box-sizing: border-box; }
