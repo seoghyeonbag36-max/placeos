@@ -53,6 +53,8 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
   const unitArea = areas.excl;
   // 상가정보 대조(2026-11-09) — 응답에 stores_live 가 있을 때만 열을 단다(옛 응답 · 대조 전에는 없다)
   const storesLive = twin.stores_live ?? null;
+  // 호수가 있는 점포가 하나도 없으면 열을 달지 않는다 — 전부 「—」인 열은 정보가 없다(2026-11-09 프로덕션: 15개 건물 1,803곳 호수 0)
+  const storeCol = !!storesLive && storesLive.has_ho && storesLive.n_with_ho > 0;
   const floorStores = floor.stores ?? [];
   const nMatched = (floor.units ?? []).filter((u) => u.store).length;
   const toggleStop = () => {
@@ -124,12 +126,12 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
       </dl>
       {floor.units && floor.units.length > 0 && (
         <details className="twin3d-units" open={floor.units.length <= 8}>
-          <summary>전유부 호실 {floor.units.length}개 <EvidenceBadge kind="실측" />{storesLive?.has_ho && nMatched > 0 ? <> · 상가정보 영업 기록 {nMatched}호</> : null}</summary>
-          <p className="twin3d-note">{storesLive
+          <summary>전유부 호실 {floor.units.length}개 <EvidenceBadge kind="실측" />{storeCol && nMatched > 0 ? <> · 상가정보 영업 기록 {nMatched}호</> : null}</summary>
+          <p className="twin3d-note">{storeCol
             ? <>호수·면적·용도는 대장입니다. 상가정보 열은 점포를 같은 층 · 같은 호로 맞춘 결과입니다 — 「기록 없음」은 공실 <b>가능성</b>이지 확인된 공실이 아닙니다(현장 미확인). {storesNote(twin)}</>
-            : "호실별 공실은 모릅니다. 대장의 호수·면적·용도입니다."}</p>
+            : <>호실별 공실은 모릅니다. 대장의 호수·면적·용도입니다.{storesLive ? <> {storesNote(twin)}</> : null}</>}</p>
           <table>
-            <thead><tr><th scope="col">호</th><th scope="col">전용</th>{areas.nPub > 0 && <><th scope="col">공용</th><th scope="col">전용률</th></>}<th scope="col">용도</th>{storesLive && <th scope="col">상가정보</th>}</tr></thead>
+            <thead><tr><th scope="col">호</th><th scope="col">전용</th>{areas.nPub > 0 && <><th scope="col">공용</th><th scope="col">전용률</th></>}<th scope="col">용도</th>{storeCol && <th scope="col">상가정보</th>}</tr></thead>
             <tbody>
               {floor.units.map((u, i) => (
                 <tr key={`${u.ho ?? ""}-${i}`}>
@@ -140,7 +142,7 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
                     <td className="num">{u.pub_m2 && u.area_m2 ? `${Math.round((u.area_m2 / (u.area_m2 + u.pub_m2)) * 100)}%` : "—"}</td>
                   </>}
                   <td>{u.purps ?? "—"}</td>
-                  {storesLive && <td className={`twin3d-store is-${unitStoreState(u)}`}>{u.store
+                  {storeCol && <td className={`twin3d-store is-${unitStoreState(u)}`}>{u.store
                     ? <>{u.store.name}{u.store.ind ? <small> {u.store.ind}</small> : null}</>
                     : unitStoreState(u) === "none" ? "기록 없음" : <span title={STORE_STATE_LABEL.unknown}>—</span>}</td>}
                 </tr>
