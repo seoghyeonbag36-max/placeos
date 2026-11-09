@@ -40,7 +40,7 @@ export default function InteriorPlan2D({ outline, layout }: { outline: Point[]; 
       {/* 공실 바닥 치수 — 가로(전면 앞) · 세로(오른쪽 옆) · 높이(모서리 표기) */}
       <g className="interior2d-dims" aria-hidden>
         {dm.ext.map(([a, c], i) => <line key={`e${i}`} x1={a[0]} y1={-a[1]} x2={c[0]} y2={-c[1]} stroke="#7A8594" strokeWidth={big * 0.003} />)}
-        {([[dm.wLine, `가로 ${dm.w.toFixed(1)}m`, [-layout.frame.v[0], -layout.frame.v[1]]], [dm.dLine, `세로 ${dm.d.toFixed(1)}m`, layout.frame.u]] as const).map(([[a, c], text, out], i) => {
+        {([[dm.wLine, `가로 ${dm.w.toFixed(1)}m${dm.mismatch ? "*" : ""}`, [-layout.frame.v[0], -layout.frame.v[1]]], [dm.dLine, `세로 ${dm.d.toFixed(1)}m${dm.mismatch ? "*" : ""}`, layout.frame.u]] as const).map(([[a, c], text, out], i) => {
           const L = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1, ux = (c[0] - a[0]) / L, uy = (c[1] - a[1]) / L, k = big * 0.012;
           const tk = (p: Point) => <line x1={p[0] - (ux + uy) * k} y1={-(p[1] - (uy - ux) * k)} x2={p[0] + (ux + uy) * k} y2={-(p[1] + (uy - ux) * k)} stroke="#1C2533" strokeWidth={big * 0.004} />;
           const deg = (-Math.atan2(uy, ux) * 180) / Math.PI, up = deg > 90 || deg < -90 ? deg + 180 : deg;

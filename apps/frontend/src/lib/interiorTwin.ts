@@ -32,7 +32,7 @@ export function floorHeightOf(twin: BuildingTwin, lv: number): FloorHeight {
       if (m >= 2.4 && m <= 8) return { m: Math.round(m * 10) / 10, basis: `${src} · 계산${tail}`, measured: true };
     }
   }
-  return { m: 3.3, basis: `층고 추정 3.3m(높이 자료 없음)${tail}`, measured: false };
+  return { m: 3.3, basis: `높이 자료 없어 추정${tail}`, measured: false };
 }
 
 export interface InteriorBuild {
