@@ -1,10 +1,12 @@
 """건물 관련 엔드포인트 — 공실 히스토리."""
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Query
 from starlette.concurrency import run_in_threadpool
 
 from app.schemas.building import BuildingHistory
 from app.schemas.renewal import BuildingTwin
-from app.services import building_twin, twin_roads
+from app.services import building_floors, building_ledger_live, building_twin, twin_roads
 from app.services.building_history import get_history
 
 router = APIRouter()
@@ -34,8 +36,13 @@ async def get_building_twin(
     out = building_twin.twin(district, building_id)
     if out is None:
         raise HTTPException(status_code=404, detail=f"unknown building: {building_id}")
-    # 타일 받기는 블로킹 네트워크 호출 — 이벤트 루프를 막지 않게 스레드풀에서 부른다.
-    out.update(await run_in_threadpool(twin_roads.roads_for_twin, out["lat"], out["lng"], out.get("ring"), out.get("road_addr")))
+    # 도로 타일 · 대장 실시간 조회는 블로킹 네트워크 호출 — 스레드풀에서 동시에 부른다(느린 쪽만큼만 기다린다).
+    roads, ledger = await asyncio.gather(
+        run_in_threadpool(twin_roads.roads_for_twin, out["lat"], out["lng"], out.get("ring"), out.get("road_addr")),
+        run_in_threadpool(building_ledger_live.ledger, building_floors.pnu_of(out.get("id") or building_id)),
+    )
+    out.update(roads)
+    out["ledger_live"] = ledger
     return out
 
 

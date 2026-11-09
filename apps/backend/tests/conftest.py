@@ -53,6 +53,22 @@ def _no_network_tiles(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_network_ledger(monkeypatch):
+    """트윈의 건축물대장 실시간 조회(apis.data.go.kr)를 기본 스위트에서 치지 않는다 (2026-11-09).
+
+    키가 있는 환경(로컬 .env)에서 트윈 테스트가 실제 건축HUB 를 부르면 쿼터를 쓰고 결과가 흔들린다.
+    대장 응답이 필요한 시험은 `summarise` 에 행을 직접 넘긴다. 캐시 · 실패 대기도 테스트마다 비운다.
+    """
+    from app.services import building_ledger_live as L
+
+    def _offline(op, jibun, key):
+        raise OSError("tests: ledger network disabled")
+    monkeypatch.setattr(L, "_fetch", _offline)
+    monkeypatch.setattr(L, "_last_fail", 0.0)
+    L._cache.clear()
+
+
+@pytest.fixture(autouse=True)
 def _fresh_rate_limits():
     """요청량 카운터(services/rate_limit)를 테스트마다 비운다.
 

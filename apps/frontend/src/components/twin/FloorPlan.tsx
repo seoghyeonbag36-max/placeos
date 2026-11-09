@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
+import { ledgerNote } from "@/lib/twinLedger";
 import { boundsOf, frontRoad, isVacantStatus, planLayout, ringArea, ringToLocal, windowSpans, type PlanPiece } from "@/lib/twinGeometry";
 
 interface Overlay { url: string; name: string; opacity: number; rotate: number; scale: number }
@@ -25,8 +26,13 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   const front = useMemo(() => frontRoad(pts, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng),
     [pts, twin.roads, twin.road_check, twin.lat, twin.lng]);
   const exclEst = floor.excl_est?.m2 ?? null;
-  const plan = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2, { front: front?.dir, exclEst }),
-    [pts, floor.units, floor.area_m2, front, exclEst]);
+  // 대장 실시간 — 승강기 대수(표제부) · 이 층 계단실 넓이(층별개요). 조회가 안 되면 승강기는 그리지 않는다(지어내지 않는다)
+  const live = twin.ledger_live?.status === "ok" ? twin.ledger_live : null;
+  const nEv = live?.elevators ? live.elevators.passenger + live.elevators.emergency : 0;
+  const stairM2 = live?.floors?.[String(floor.lv)]?.stair_m2 ?? null;
+  const multiStory = twin.floors_above + twin.floors_below > 1;
+  const plan = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2, { front: front?.dir, exclEst, elevators: nEv, stairM2, multiStory }),
+    [pts, floor.units, floor.area_m2, front, exclEst, nEv, stairM2, multiStory]);
   const { pieces: cells, omitted, areas, frontEdge } = plan;
   // 창 — 3D 외벽과 같은 규칙(windowSpans). 지상층만 · 표현용(실측 아님)
   const windows = useMemo(() => (floor.lv > 0 ? windowSpans(pts) : []), [pts, floor.lv]);
@@ -69,6 +75,8 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   const nUnits = cells.filter((c) => c.kind === "unit").length;
   const lease = largest(cells.filter((c) => c.kind === "lease"));
   const common = largest(cells.filter((c) => c.kind === "common"));
+  const stair = largest(cells.filter((c) => c.kind === "stair"));
+  const evs = cells.filter((c) => c.kind === "ev");
   const vacant = isVacantStatus(floor.status);
   const bar = NICE_BARS.find((n) => n >= big / 6) ?? 100;
   const laid = cells.some((c) => c.kind === "unit" || c.kind === "lease");
@@ -84,6 +92,10 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         aria-label={`${floor.label} 개략 배치도${nUnits ? ` · 호실 ${nUnits}개 개략 칸` : ""}${lease ? " · 임대 공간과 공용" : ""}${windows.length ? ` · 창 ${windows.length}개(표현용)` : ""}${frontEdge && front ? ` · 전면 ${front.name}` : ""}`}>
         <defs>
           <clipPath id={clip}><path d={path} /></clipPath>
+          <pattern id={`${clip}-stair`} width={big * 0.022} height={big * 0.022} patternUnits="userSpaceOnUse">
+            <rect width={big * 0.022} height={big * 0.022} className="twin3d-plan-stair-bg" />
+            <line x1="0" y1="0" x2="0" y2={big * 0.022} className="twin3d-plan-stair-line" style={{ strokeWidth: big * 0.003 }} />
+          </pattern>
           <pattern id={hatch} width={big * 0.035} height={big * 0.035} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width={big * 0.035} height={big * 0.035} className="twin3d-plan-hatch-bg" />
             <line x1="0" y1="0" x2="0" y2={big * 0.035} className="twin3d-plan-hatch-line" style={{ strokeWidth: big * 0.012 }} />
@@ -97,19 +109,26 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
             const unitIndex = isMain ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
             const active = selection?.lv === floor.lv && selection.index === unitIndex && unitIndex >= 0;
             const choose = () => { if (unitIndex >= 0) setSelection({ lv: floor.lv, index: unitIndex }); };
-            const cls = c.kind === "unit" ? "twin3d-plan-cell" : c.kind === "lease" ? "twin3d-plan-lease" : c.kind === "common" ? "twin3d-plan-common" : "twin3d-plan-rest";
+            const cls = c.kind === "unit" ? "twin3d-plan-cell" : c.kind === "lease" ? "twin3d-plan-lease" : c.kind === "common" ? "twin3d-plan-common"
+              : c.kind === "stair" ? "twin3d-plan-stair" : c.kind === "ev" ? "twin3d-plan-ev" : "twin3d-plan-rest";
             return (
               <g key={i}>
                 <polygon points={poly} className={cls} vectorEffect="non-scaling-stroke"
                   role={unitIndex >= 0 ? "button" : undefined} tabIndex={unitIndex >= 0 ? 0 : undefined}
                   aria-label={unitIndex >= 0 ? `${c.ho ?? "호수 미상"}호 개략 칸 선택` : undefined} aria-pressed={unitIndex >= 0 ? active : undefined}
                   onClick={choose} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } }}
-                  style={active || (c.kind === "unit" && selection?.lv === floor.lv && floor.units?.[selection.index]?.ho === c.ho && floor.units?.[selection.index]?.area_m2 === c.area) ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 }
+                  style={c.kind === "stair" ? { fill: `url(#${clip}-stair)` } : active || (c.kind === "unit" && selection?.lv === floor.lv && floor.units?.[selection.index]?.ho === c.ho && floor.units?.[selection.index]?.area_m2 === c.area) ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 }
                     : c.kind === "lease" && vacant ? { fill: `url(#${hatch})` } : undefined}>
                   <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)`
                     : c.kind === "lease" ? `임대 공간 · 전용 약 ${m2(c.area)}(추정)${vacant ? " · 공실 층" : ""}`
-                      : c.kind === "common" ? `공용(계단·화장실·복도) · 이 칸 ${m2(c.area)}` : `공용·기타 · ${m2(c.area)}`}</title>
+                      : c.kind === "common" ? `공용(화장실·복도 등) · 이 칸 ${m2(c.area)}`
+                        : c.kind === "stair" ? `계단 · ${areas.stair?.measured ? `대장 계단실 ${m2(c.area)}` : "넓이·자리 개략"}`
+                          : c.kind === "ev" ? "승강기(대장 표제부 대수 · 자리·크기 개략)" : `공용·기타 · ${m2(c.area)}`}</title>
                 </polygon>
+                {c.kind === "ev" && c.poly.length === 4 && (
+                  <path d={`M${c.poly[0][0]} ${-c.poly[0][1]} L${c.poly[2][0]} ${-c.poly[2][1]} M${c.poly[1][0]} ${-c.poly[1][1]} L${c.poly[3][0]} ${-c.poly[3][1]}`}
+                    className="twin3d-plan-ev-x" vectorEffect="non-scaling-stroke" />
+                )}
                 {labelled && isMain && c.w > big * 0.09 && c.h > big * 0.05 && (
                   <text x={c.at[0]} y={-c.at[1]} className="twin3d-plan-text" style={{ fontSize: fs }}>
                     <tspan x={c.at[0]} dy={c.w > big * 0.16 && c.h > big * 0.1 ? -fs * 0.5 : 0} className="twin3d-plan-ho">{c.ho}</tspan>
@@ -132,9 +151,15 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         )}
         {common && areas.common > 0 && (
           <text x={common.at[0]} y={-common.at[1]} className="twin3d-plan-text" style={{ fontSize: fs * 0.9 }}>
-            <tspan x={common.at[0]} dy={-fs * 0.5} className="twin3d-plan-ho">공용</tspan>
-            <tspan x={common.at[0]} dy={fs * 1.1} className="twin3d-plan-sub">계단·화장실 등 {m2(areas.common)}</tspan>
+            <tspan x={common.at[0]} dy={-fs * 0.5} className="twin3d-plan-ho">공용 {m2(areas.common)}</tspan>
+            <tspan x={common.at[0]} dy={fs * 1.1} className="twin3d-plan-sub">{stair || evs.length ? "화장실·복도 등" : "계단·화장실 등"}</tspan>
           </text>
+        )}
+        {stair && (
+          <text x={stair.at[0]} y={-stair.at[1]} className="twin3d-plan-text twin3d-plan-tag" style={{ fontSize: fs * 0.9, strokeWidth: fs * 0.25 }}>계단</text>
+        )}
+        {evs.length > 0 && (
+          <text x={evs[0].at[0]} y={-evs[0].at[1]} className="twin3d-plan-text twin3d-plan-tag" style={{ fontSize: fs * 0.85, strokeWidth: fs * 0.25 }}>EV{evs.length > 1 ? `×${evs.length}` : ""}</text>
         )}
         <path d={path} className="twin3d-plan-outline" vectorEffect="non-scaling-stroke" />
         {frontEdge && (
@@ -169,12 +194,24 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
         </p>
       )}
       {!laid && cells.length > 0 && <p className="twin3d-note">대장 상업 전유 호실이 층의 일부라 나머지는 「공용·기타」로 두었습니다(공용으로 단정하지 않음).</p>}
+      {laid && (stair || evs.length > 0 || twin.ledger_live) && (
+        <p className="twin3d-note">
+          {live?.elevators
+            ? <>승강기 승용 {live.elevators.passenger} · 비상용 {live.elevators.emergency}대 <EvidenceBadge kind="실측" /> 건축물대장 표제부(실시간) — 자리·크기는 개략. </>
+            : <>승강기 — {ledgerNote(twin.ledger_live)}. </>}
+          {stair && (areas.stair?.measured
+            ? <>계단실 {m2(areas.stair.m2)} <EvidenceBadge kind="실측" /> 층별개요 — 자리는 개략.</>
+            : <>계단 — 대장에 이 층 계단실 행이 없어 넓이·자리를 개략으로 그렸습니다(계단 개수는 대장에 없음).</>)}
+        </p>
+      )}
       {frontEdge && front && <p className="twin3d-note">전면 {front.name}(OSM · 도로명주소) — {entry}. 진입 방식은 일반 구조 기준의 개략입니다.</p>}
       {(laid || windows.length > 0) && (
         <p className="twin3d-plan-legend" aria-label="배치도 범례">
           {nUnits > 0 && <span><i className="k-unit" />호실(전용)</span>}
           {lease && <span><i className="k-lease" />임대 공간(전용 추정)</span>}
-          {areas.common > 0 && laid && <span><i className="k-common" />공용(계단·화장실·복도)</span>}
+          {areas.common > 0 && laid && <span><i className="k-common" />공용(화장실·복도 등)</span>}
+          {stair && <span><i className="k-stair" />계단</span>}
+          {evs.length > 0 && <span><i className="k-ev" />승강기(대장 대수)</span>}
           {lease && vacant && <span><i className="k-vacant" />공실 층</span>}
           {frontEdge && <span><i className="k-front" />전면(도로 쪽)</span>}
           {windows.length > 0 && <span><i className="twin3d-plan-key" />창(표현용)</span>}

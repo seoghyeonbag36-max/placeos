@@ -397,6 +397,8 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const planRestMat = trackM(new MeshStandardMaterial({ color: "#DCE1E8", roughness: 0.9, fog: false }));
   const planCommonMat = trackM(new MeshStandardMaterial({ color: "#94A3B8", roughness: 0.8, transparent: true, opacity: 0.7, fog: false }));
   const planLeaseMat = trackM(new MeshStandardMaterial({ color: "#FFF7ED", roughness: 0.7, transparent: true, opacity: 0.85, fog: false }));
+  const planStairMat = trackM(new MeshStandardMaterial({ color: "#E2E8F0", roughness: 0.9, fog: false }));
+  const planEvMat = trackM(new MeshStandardMaterial({ color: "#475569", roughness: 0.6, transparent: true, opacity: 0.9, fog: false }));
   const planLeaseVacMat = trackM(new MeshStandardMaterial({ color: "#FDBA74", roughness: 0.7, transparent: true, opacity: 0.75, fog: false }));
   const planLine = trackM(new LineBasicMaterial({ color: "#4F46E5", transparent: true, opacity: 0.85 }));
   // 열린 층의 창 — 벽이 반투명이라 텍스처 창이 안 보인다. 같은 자리(windowSpans)에 유리판과 창틀을 세운다(표현용 · 실측 아님).
@@ -431,8 +433,13 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     group.name = "twin-plan";
     const geos: BufferGeometry[] = [];
     const wall = Math.max(0.6, f.height - slab - 0.45);
-    const { pieces, areas } = planLayout(local, f.floor.units ?? [], f.floor.area_m2,
-      { front: front?.dir, exclEst: f.floor.excl_est?.m2 ?? null });
+    const live = twin.ledger_live?.status === "ok" ? twin.ledger_live : null;
+    const { pieces, areas } = planLayout(local, f.floor.units ?? [], f.floor.area_m2, {
+      front: front?.dir, exclEst: f.floor.excl_est?.m2 ?? null,
+      elevators: live?.elevators ? live.elevators.passenger + live.elevators.emergency : 0,
+      stairM2: live?.floors?.[String(f.floor.lv)]?.stair_m2 ?? null,
+      multiStory: twin.floors_above + twin.floors_below > 1,
+    });
     const units = pieces.filter((p) => p.kind === "unit");
     const biggest = (kind: string) => pieces.filter((p) => p.kind === kind).reduce<(typeof pieces)[number] | null>(
       (a, c) => (!a || ringArea(c.poly) > ringArea(a.poly) ? c : a), null);
@@ -457,6 +464,8 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       if (p.kind === "unit") add(inset, wall, planUnitMat, true);
       else if (p.kind === "lease") add(inset, wall * 0.92, vacant ? planLeaseVacMat : planLeaseMat, true);
       else if (p.kind === "common") add(inset, wall * 0.96, planCommonMat, false);
+      else if (p.kind === "stair") add(inset, wall * 0.98, planStairMat, true);
+      else if (p.kind === "ev") add(inflate(p.poly, -0.12), wall, planEvMat, true);
       else add(inset, 0.12, planRestMat, false);
     }
     // 임대 공간(일반건축물) · 공용 라벨 — 넓이는 대장(층 바닥) · 전용은 추정 · 자리는 개략
@@ -468,8 +477,22 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       group.add(t);
     }
     if (common && areas.common > 0) {
-      const t = planTag(`공용 · 계단·화장실 등 ${Math.round(areas.common).toLocaleString("ko-KR")}㎡`, "twin3d-unit-label is-common");
+      const t = planTag(`공용 ${Math.round(areas.common).toLocaleString("ko-KR")}㎡${areas.stair || areas.elevators ? " · 화장실·복도 등" : ""}`, "twin3d-unit-label is-common");
       t.position.set(common.at[0], wall + 0.5, -common.at[1]);
+      t.center.set(0.5, 1);
+      group.add(t);
+    }
+    // 계단 · 승강기 — 승강기 대수는 대장(실측), 계단실 넓이는 층별개요 행이 있을 때만 실측, 자리는 개략
+    const stair = biggest("stair"), ev = pieces.find((p) => p.kind === "ev");
+    if (stair) {
+      const t = planTag(areas.stair?.measured ? `계단 · 계단실 ${Math.round(areas.stair.m2)}㎡(대장)` : "계단", "twin3d-unit-label is-common");
+      t.position.set(stair.at[0], wall + 1.6, -stair.at[1]);
+      t.center.set(0.5, 1);
+      group.add(t);
+    }
+    if (ev) {
+      const t = planTag(`승강기 ${areas.elevators}대(대장)`, "twin3d-unit-label is-ev");
+      t.position.set(ev.at[0], wall + 3.4, -ev.at[1]);
       t.center.set(0.5, 1);
       group.add(t);
     }

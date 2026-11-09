@@ -104,9 +104,10 @@ export function adjacentLevel(levels: readonly number[], current: number | null,
 
 /**
  * 칸 종류 — unit: 전유부 호실(전용면적 비례) · lease: 일반건축물 층의 임대 공간(전용 추정 면적) ·
- * common: 공용(계단·화장실·복도 — 층 바닥면적 − 전용) · rest: 대장 상업 전유 밖(공용·기타).
+ * common: 공용(화장실·복도 등 — 층 바닥면적 − 전용 중 계단·승강기 밖) · stair: 계단 · ev: 승강기(공용의 일부) ·
+ * rest: 대장 상업 전유 밖(공용·기타).
  */
-export interface PlanCell { kind: "unit" | "lease" | "common" | "rest"; ho: string | null; area: number; x: number; y: number; w: number; h: number }
+export interface PlanCell { kind: "unit" | "lease" | "common" | "stair" | "ev" | "rest"; ho: string | null; area: number; x: number; y: number; w: number; h: number }
 
 /**
  * 면적 비례 개략 칸 — 시안 layoutFloor 의 「면적 ÷ 깊이 = 폭」을 외곽선 bbox 띠 나누기로 옮겼다.
@@ -238,6 +239,12 @@ export interface PlanOptions {
   front?: Point | null;
   /** 전유부가 없는 층의 전용면적 추정(㎡) — 있으면 「임대 공간」 칸과 공용 블록을 그린다 */
   exclEst?: number | null;
+  /** 승강기 대수(건축물대장 표제부 승용 + 비상용) — 공용 블록 안에 그 수만큼 칸(자리·크기 개략) */
+  elevators?: number | null;
+  /** 이 층 계단실 넓이(층별개요 계단실 행 · 실측) — 없으면 공용 블록의 일정 몫(개략) */
+  stairM2?: number | null;
+  /** 2층 이상 건물인가 — 단층이면 계단을 그리지 않는다 */
+  multiStory?: boolean;
 }
 
 export interface PlanAreas {
@@ -247,6 +254,10 @@ export interface PlanAreas {
   excl: number; exclEstimated: boolean;
   /** 공용 = 바닥 − 전용 */
   common: number;
+  /** 계단 칸 넓이 · 대장 계단실 행에서 왔는가 */
+  stair: { m2: number; measured: boolean } | null;
+  /** 그린 승강기 칸 수(대장 대수 · 4 상한) */
+  elevators: number;
 }
 
 /**
@@ -299,7 +310,8 @@ export function planLayout(pts: readonly Point[], units: readonly { ho: string |
     pieces.push({ ...cell, area: areaFromCut ? ringArea(cut) : cell.area, x: Math.min(...xs), y: Math.min(...ys),
       w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys), poly: cut.map(fromAxis), at: fromAxis([cx, cy]) });
   };
-  const areas: PlanAreas = { floor: A, floorFromLedger: floorArea != null, excl: est ?? total, exclEstimated: est != null, common: Math.max(0, A - (est ?? total)) };
+  const areas: PlanAreas = { floor: A, floorFromLedger: floorArea != null, excl: est ?? total, exclEstimated: est != null,
+    common: Math.max(0, A - (est ?? total)), stair: null, elevators: 0 };
   const frontEdge = front ? frontEdgeOf(ring, front) : null;
   const done = (omitted: number) => ({ pieces, omitted, angle: ang, areas, frontEdge, dims: { w: bb.w, h: bb.h } });
   if (!(bb.w > 0 && bb.h > 0) || (!valid.length && est == null)) return done(omittedAll);
@@ -330,7 +342,28 @@ export function planLayout(pts: readonly Point[], units: readonly { ho: string |
   const fd = rows === 2 ? H - corrD - backD : H - coreD;          // 앞줄 깊이
   const bd0 = rows === 2 ? fd + corrD : H - coreD;                 // 뒷줄(공용 옆) 시작 깊이
   const x0 = bb.minX, x1 = bb.maxX;
-  if (coreW > 0.05 && coreD > 0.05) push({ kind: "common", ho: null, area: 0 }, rect(x0, x0 + coreW, H - coreD, H), true);
+  if (coreW > 0.05 && coreD > 0.05) {
+    // 공용 블록 = 계단 | 승강기 열 | 나머지(화장실·복도 등). 승강기 대수는 대장(실측), 계단실 넓이는 층별개요에 행이 있을 때만 실측 —
+    // 자리와 승강기 칸 크기(약 2.2m 각)는 개략이다.
+    const coreArea = coreW * coreD, cd0 = H - coreD;
+    const nEv = Math.min(4, Math.max(0, Math.round(opts.elevators ?? 0)));
+    const stairMeasured = !!(opts.stairM2 && opts.stairM2 > 0);
+    const stairWant = !opts.multiStory ? 0 : stairMeasured ? (opts.stairM2 as number) * S : coreArea * 0.45;
+    let evSide = nEv ? Math.min(2.2, coreD / nEv, coreW * 0.4) : 0;
+    const stairA = Math.min(stairWant, Math.max(0, coreArea - nEv * evSide * evSide) * 0.85);
+    const stairW = stairA > 0 ? Math.min(stairA / coreD, coreW - evSide) : 0;
+    evSide = Math.min(evSide, Math.max(0, coreW - stairW));
+    if (stairW > 0.05) {
+      push({ kind: "stair", ho: null, area: stairMeasured ? (opts.stairM2 as number) : 0 }, rect(x0, x0 + stairW, cd0, H), !stairMeasured);
+      areas.stair = { m2: stairMeasured ? (opts.stairM2 as number) : stairW * coreD / S, measured: stairMeasured };
+    }
+    for (let i = 0; i < nEv && evSide > 0.05; i++) {
+      push({ kind: "ev", ho: null, area: 0 }, rect(x0 + stairW, x0 + stairW + evSide, cd0 + i * evSide, cd0 + (i + 1) * evSide), true);
+      areas.elevators += 1;
+    }
+    if (nEv && evSide > 0.05 && cd0 + nEv * evSide < H - 0.05) push({ kind: "common", ho: null, area: 0 }, rect(x0 + stairW, x0 + stairW + evSide, cd0 + nEv * evSide, H), true);
+    if (x0 + stairW + evSide < x0 + coreW - 0.05) push({ kind: "common", ho: null, area: 0 }, rect(x0 + stairW + evSide, x0 + coreW, cd0, H), true);
+  }
   if (corrD > 0) push({ kind: "common", ho: null, area: 0 }, rect(x0, x1, fd, fd + corrD), true);
   if (est != null) {
     push({ kind: "lease", ho: null, area: est }, rect(x0, x1, 0, fd));

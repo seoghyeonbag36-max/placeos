@@ -235,3 +235,23 @@ describe("planLayout — 참고 시안 형식(공용 블록 · 복도 · 임대 
     expect(planLayout(box, [], 200).pieces).toEqual([]);
   });
 });
+
+describe("planLayout — 계단 · 승강기(2026-11-09)", () => {
+  const box: [number, number][] = [[-10, -5], [10, -5], [10, 5], [-10, 5]];   // 200㎡
+  it("승강기 대수만큼 칸 · 대장 계단실 넓이가 있으면 그 넓이로, 공용 합은 그대로", () => {
+    const { pieces, areas } = planLayout(box, [], 200, { exclEst: 140, elevators: 2, stairM2: 14, multiStory: true });
+    expect(pieces.filter((p) => p.kind === "ev")).toHaveLength(2);
+    expect(areas.elevators).toBe(2);
+    expect(areas.stair).toEqual({ m2: 14, measured: true });
+    const stair = pieces.filter((p) => p.kind === "stair").reduce((t, p) => t + ringArea(p.poly), 0);
+    expect(stair).toBeCloseTo(14, 0);
+    const common = pieces.filter((p) => ["common", "stair", "ev"].includes(p.kind)).reduce((t, p) => t + ringArea(p.poly), 0);
+    expect(common).toBeCloseTo(60, 0);                                  // 공용 = 바닥 200 − 전용 140
+  });
+  it("승강기 대수를 모르면 승강기 칸이 없고, 단층이면 계단도 없다", () => {
+    expect(planLayout(box, [], 200, { exclEst: 140, multiStory: true }).pieces.some((p) => p.kind === "ev")).toBe(false);
+    const one = planLayout(box, [], 200, { exclEst: 140, elevators: 0, multiStory: false });
+    expect(one.pieces.some((p) => p.kind === "stair")).toBe(false);
+    expect(one.areas.stair).toBeNull();
+  });
+});

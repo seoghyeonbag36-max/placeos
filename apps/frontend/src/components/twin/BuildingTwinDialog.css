@@ -146,3 +146,14 @@
 .twin3d-plan-units { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; max-height: 132px; overflow-y: auto; }
 .twin3d-plan-units button { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 2px 7px; font: inherit; font-size: 11px; font-weight: 600; color: var(--ink); cursor: pointer; }
 .twin3d-plan-units button[aria-pressed="true"] { background: var(--track-page); border-color: var(--track-page); color: var(--on-accent); }
+/* 계단 · 승강기(2026-11-09) — 시안처럼 계단은 디딤판 선, 승강기는 X 표시 */
+.twin3d-plan-stair { stroke: #64748B; stroke-width: 1; }
+.twin3d-plan-stair-bg { fill: #F1F5F9; }
+.twin3d-plan-stair-line { stroke: #94A3B8; }
+.twin3d-plan-ev { fill: #CBD5E1; stroke: #475569; stroke-width: 1.2; }
+.twin3d-plan-ev-x { stroke: #475569; stroke-width: 1; fill: none; }
+/* 글자 테두리 두께는 인라인(글자 크기 비례) — SVG 단위가 미터라 px 로 주면 3m 가 된다 */
+.twin3d-plan-tag { font-weight: 800; fill: #1E293B; paint-order: stroke; stroke: #FFFFFF; stroke-linejoin: round; }
+.twin3d-plan-legend .k-stair { background: repeating-linear-gradient(90deg, #F1F5F9 0 3px, #94A3B8 3px 4px); border: 1px solid #64748B; }
+.twin3d-plan-legend .k-ev { background: linear-gradient(45deg, transparent 45%, #475569 45% 55%, transparent 55%), linear-gradient(-45deg, #CBD5E1 45%, #475569 45% 55%, #CBD5E1 55%); border: 1px solid #475569; }
+.twin3d-unit-label.is-ev { color: #FFFFFF; background: #334155; border-color: #334155; }
