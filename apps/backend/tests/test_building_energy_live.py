@@ -68,6 +68,21 @@ def test_refused_is_soft_and_names_the_apply_page(monkeypatch):
     assert E.energy(PNU, "gas")["status"] == "backoff"
 
 
+def test_http_401_403_is_refused_with_the_code(monkeypatch):
+    assert E.http_reason(403, b"Forbidden") == "HTTP 403 Forbidden"
+    assert E.http_reason(401, b"<OpenAPI_ServiceResponse><returnAuthMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</returnAuthMsg></OpenAPI_ServiceResponse>") \
+        == "HTTP 401 SERVICE_KEY_IS_NOT_REGISTERED_ERROR"
+    monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
+    calls = []
+
+    def forbid(op, params, key):
+        calls.append(1)
+        raise E.EnergyError("HTTP 403 Forbidden")
+    monkeypatch.setattr(E, "_get", forbid)
+    out = E.energy(PNU, "gas")
+    assert out["status"] == "refused" and out["error"] == "HTTP 403 Forbidden" and len(calls) == 1   # 한 달씩 18콜로 번지지 않는다
+
+
 def test_route():
     body = client.get(f"/api/v1/buildings/{PNU}-1/energy").json()
     assert body["kind"] == "gas" and body["status"] in ("no_key", "error", "backoff")

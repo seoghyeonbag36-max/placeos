@@ -27,6 +27,7 @@ import logging
 import re
 import threading
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -108,9 +109,21 @@ def parse(raw: bytes) -> tuple[list[dict], int]:
 def _get(op: str, params: dict, key: str) -> list[dict]:
     q = urllib.parse.urlencode({"serviceKey": key, "_type": "json", "type": "json", "numOfRows": 100, "pageNo": 1, **params})
     req = urllib.request.Request(f"{BASE}/{op}?{q}", headers={"User-Agent": "PlaceOS-twin-energy/1.0"})
-    with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as r:
-        rows, _ = parse(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as r:
+            rows, _ = parse(r.read())
+    except urllib.error.HTTPError as e:
+        # 게이트웨이는 미신청 · 키 오류를 HTTP 401/403 으로 돌려준다(2026-11-09 프로덕션 첫 응답 HTTPError) — 코드와 원천 문구를 남긴다
+        raise EnergyError(http_reason(e.code, e.read() or b"")) from e
     return rows
+
+
+def http_reason(code: int, body: bytes) -> str:
+    """HTTP 오류 → 「HTTP 403 Forbidden」 · 「HTTP 401 SERVICE_KEY_IS_NOT_REGISTERED_ERROR」. 본문에서 사유 낱말만(키는 본문에 없다)."""
+    text = body[:400].decode("utf-8", "replace")
+    m = re.search(r"<returnAuthMsg>([^<]+)</returnAuthMsg>|<errMsg>([^<]+)</errMsg>|([A-Z_]{8,}ERROR)|(Unauthorized|Forbidden|Not Found|API not found)", text)
+    word = next((g for g in (m.groups() if m else ()) if g), "")
+    return f"HTTP {code} {word}".strip()
 
 
 def _num(v) -> float | None:
@@ -145,7 +158,7 @@ def _fetch_all(op: str, jib: dict, key: str, today: date) -> tuple[list[dict], s
             return rows, "all", []
     except EnergyError as e:
         # 「필수값 누락」류라면 한 달씩으로 넘어간다. 키 거절은 한 달씩 해도 같다 — 그대로 올린다.
-        if re.search(r"KEY|등록|인증|승인|LIMIT|초과", str(e), re.I):
+        if re.search(r"KEY|등록|인증|승인|LIMIT|초과|HTTP 40[13]|Unauthorized|Forbidden", str(e), re.I):
             raise
     yms = months_back(today)
     with ThreadPoolExecutor(max_workers=_WORKERS) as ex:
