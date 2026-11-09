@@ -219,14 +219,23 @@ export default function InteriorEditor({ twin, floor, keywords, industry, strate
   // 키워드 · 전략 · 업종이 바뀌면 — 직접 옮긴 게 없으면 다시 놓고, 있으면 그대로 두고 알린다(색 · 바닥 · 조명은 바로 바뀐다)
   const ctxKey = `${keywords.join("|")}#${st}#${industry ?? ""}`;
   const [prevKey, setPrevKey] = useState(ctxKey);
+  const [prevIndustry, setPrevIndustry] = useState(industry ?? "");
+  const [notice, setNotice] = useState<string | null>(null);
   if (prevKey !== ctxKey) {   // 렌더 중 조정(effect 로 미루면 한 번 낡은 배치가 그려진다)
     setPrevKey(ctxKey);
-    const d = designTouched ? design : rec.design;
-    if (!designTouched) setDesign(rec.design);
-    if (!dirty) {
+    // 업종이 바뀌면 직접 옮긴 배치가 있어도 새로 놓는다 — 좌석형 · 진열형이 갈리고 가구 구성이 통째로 달라진다(2026-11-09 사용자 요청).
+    // 키워드 · 전략만 바뀌면 직접 옮긴 자리를 지키고 알린다. 이전 배치는 「되돌리기」로 돌아간다
+    const industryChanged = prevIndustry !== (industry ?? "");
+    if (industryChanged) setPrevIndustry(industry ?? "");
+    const keep = designTouched && !industryChanged;
+    const d = keep ? design : rec.design;
+    if (!keep) { setDesign(rec.design); setDesignTouched(false); }
+    if (!dirty || industryChanged) {
       setHist((h) => [...h.slice(-59), state.objs]);
-      setState(autoLayout(L, d, st, keywords)); setSel(null); setBanner(false);
-    } else setBanner(true);
+      setState(autoLayout(L, d, st, keywords)); setSel(null); setBanner(false); setDirty(false);
+      setNotice(industryChanged ? `업종이 「${industry?.trim() || "미정"}」(으)로 바뀌어 ${L.mode === "seating" ? "좌석형(테이블 · 의자)" : "진열형(선반 · 진열대)"} 배치를 새로 놓았습니다`
+        + `${dirty ? " — 직접 옮긴 배치는 「되돌리기」로 돌아갑니다" : ""}.` : null);
+    } else { setBanner(true); setNotice(null); }
   }
 
   // 요약 — 저장 · 리포트에 싣는다
@@ -417,6 +426,7 @@ export default function InteriorEditor({ twin, floor, keywords, industry, strate
         </div>
         <ul className="interior3d-summary">{summary.slice(0, 3).map((s) => <li key={s}>{s}</li>)}</ul>
         {(L.notes.length > 0) && <ul className="interior3d-notes">{L.notes.map((s) => <li key={s}>{s}</li>)}</ul>}
+        {notice && <p className="ied-notice" role="status">{notice}</p>}
         {banner && <div className="ied-banner" role="status">직접 옮긴 배치가 있어 가구 자리는 그대로 두었습니다. 색 · 바닥 · 조명은 새 키워드로 바뀌었습니다.
           <span><button type="button" onClick={() => relayout(designTouched ? design : rec.design)}>키워드로 처음부터 다시 배치</button>
             <button type="button" onClick={() => refillSeats(designTouched ? design : rec.design)}>좌석만 다시 채우기</button>
