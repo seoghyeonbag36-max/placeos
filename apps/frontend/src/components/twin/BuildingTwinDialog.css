@@ -120,3 +120,29 @@
 .twin3d-plan-window { stroke: #7D8B9E; stroke-width: 5; stroke-linecap: butt; }
 .twin3d-plan-glass { stroke: #FFFFFF; stroke-width: 1.5; stroke-linecap: butt; }
 .twin3d-plan-key { display: inline-block; width: 18px; height: 5px; vertical-align: middle; background: linear-gradient(#7D8B9E 0 35%, #fff 35% 65%, #7D8B9E 65%); }
+/* 개략 배치도 — 참고 시안 형식(2026-11-08): 임대 공간 · 공용 · 공실 빗금 · 전면 굵은 선 · 축척 · 범례 */
+.twin3d-plan-lease { fill: #FFF7ED; stroke: #C2410C; stroke-width: 1.2; }
+.twin3d-plan-common { fill: #E2E8F0; stroke: #94A3B8; stroke-width: 1; stroke-dasharray: 4 3; }
+.twin3d-plan-hatch-bg { fill: #FFF7ED; }
+.twin3d-plan-hatch-line { stroke: #FDBA74; }
+.twin3d-plan-ho { font-weight: 800; }
+.twin3d-plan-sub { fill: var(--muted); font-size: .82em; }
+.twin3d-plan-frontline { stroke: #38BDF8; stroke-width: 5; stroke-linecap: round; }
+.twin3d-plan-scale line { stroke: var(--ink); stroke-width: 2; }
+.twin3d-plan-scale text { fill: var(--ink); dominant-baseline: middle; }
+.twin3d-plan-north { font-weight: 800; text-anchor: middle; }
+.twin3d-plan-sum { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-weight: 600; }
+.twin3d-plan-legend { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); }
+.twin3d-plan-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.twin3d-plan-legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.twin3d-plan-legend .k-unit { background: var(--track-page-soft); border: 1px dashed var(--track-page); }
+.twin3d-plan-legend .k-lease { background: #FFF7ED; border: 1px solid #C2410C; }
+.twin3d-plan-legend .k-common { background: #E2E8F0; border: 1px dashed #94A3B8; }
+.twin3d-plan-legend .k-vacant { background: repeating-linear-gradient(45deg, #FFF7ED 0 3px, #FDBA74 3px 5px); }
+.twin3d-plan-legend .k-front { background: #38BDF8; height: 4px; }
+.twin3d-unit-label.is-lease { color: #9A3412; border-color: #FDBA74; }
+.twin3d-unit-label.is-common { color: #334155; border-color: #CBD5E1; }
+/* 호실 칩 — 시안 .ulist 처럼 작게(호실이 수십 개인 집합건물 층에서 배치도를 밀어내지 않게) */
+.twin3d-plan-units { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; max-height: 132px; overflow-y: auto; }
+.twin3d-plan-units button { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 2px 7px; font: inherit; font-size: 11px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.twin3d-plan-units button[aria-pressed="true"] { background: var(--track-page); border-color: var(--track-page); color: var(--on-accent); }

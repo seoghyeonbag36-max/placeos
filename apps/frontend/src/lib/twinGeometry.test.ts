@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentLevel, areaSummary, boundsOf, clipToConvex, wallBays, windowSpans, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
+import { adjacentLevel, areaSummary, boundsOf, clipToConvex, frontEdgeOf, wallBays, windowSpans, frontRoad, planLayout, explodeOffset, lastClosed, layoutUnits, nudgeOrbit, ringArea, ringToLocal,
   stackFloors, startCamera, timelineScale, yearOf } from "@/lib/twinGeometry";
 
 describe("ringToLocal", () => {
@@ -125,10 +125,11 @@ describe("planLayout — 건물 긴 변을 따라 놓고 외곽선 안으로 자
   it("칸 넓이는 전용면적 비례이고 합은 외곽선 넓이를 넘지 않는다", () => {
     const { pieces, angle } = planLayout(rect, [{ ho: "101", area_m2: 50 }, { ho: "102", area_m2: 100 }], 200);
     expect(angle).toBeCloseTo(a, 6);
-    const units = pieces.filter((p) => p.kind === "unit");
-    expect(units).toHaveLength(2);
-    const [p1, p2] = units.map((p) => ringArea(p.poly));
-    expect(p2 / p1).toBeCloseTo(2, 1);
+    // 한 호실이 앞줄·뒷줄에 걸치면 두 조각이다(2026-11-08 시안 형식) — 호마다 넓이를 합쳐 비교한다
+    const byHo = new Map<string, number>();
+    pieces.filter((p) => p.kind === "unit").forEach((p) => byHo.set(p.ho ?? "", (byHo.get(p.ho ?? "") ?? 0) + ringArea(p.poly)));
+    expect([...byHo.keys()].sort()).toEqual(["101", "102"]);
+    expect(byHo.get("102")! / byHo.get("101")!).toBeCloseTo(2, 1);
     expect(pieces.reduce((t, p) => t + ringArea(p.poly), 0)).toBeLessThanOrEqual(200 + 1e-6);
   });
 
@@ -193,5 +194,44 @@ describe("areaSummary — 전용 · 공용 · 계약 · 전용률", () => {
     expect(a.contract).toBeNull();
     expect(a.ratio).toBeNull();
     expect(areaSummary(null).n).toBe(0);
+  });
+});
+
+describe("planLayout — 참고 시안 형식(공용 블록 · 복도 · 임대 공간 · 전면)", () => {
+  const box: [number, number][] = [[-10, -5], [10, -5], [10, 5], [-10, 5]];   // 20 × 10m = 200㎡
+  const sum = (ps: ReturnType<typeof planLayout>["pieces"], kind: string) => ps.filter((p) => p.kind === kind).reduce((t, p) => t + ringArea(p.poly), 0);
+
+  it("일반건축물(전용 추정) — 임대 공간 + 공용 = 층 바닥, 공용 넓이 = 바닥 − 전용", () => {
+    const { pieces, areas } = planLayout(box, [], 200, { exclEst: 160 });
+    expect(areas).toMatchObject({ floor: 200, excl: 160, exclEstimated: true, common: 40 });
+    expect(sum(pieces, "lease")).toBeCloseTo(160, 0);
+    expect(sum(pieces, "common")).toBeCloseTo(40, 0);
+  });
+
+  it("호실 4개 이상이면 복도(공용)를 두고, 공용 합은 바닥 − 전유 합이다", () => {
+    const units = ["101", "102", "103", "104"].map((ho) => ({ ho, area_m2: 35 }));
+    const { pieces, areas } = planLayout(box, units, 200);
+    expect(areas).toMatchObject({ excl: 140, common: 60, exclEstimated: false });
+    const commons = pieces.filter((p) => p.kind === "common");
+    expect(commons.length).toBe(2);                                   // 공용 블록 + 복도
+    expect(sum(pieces, "common")).toBeCloseTo(60, 0);
+    expect(sum(pieces, "unit")).toBeCloseTo(140, 0);
+  });
+
+  it("주소 도로가 남쪽이면 앞줄(임대 공간)이 남쪽 변에 붙고, 전면 변은 남쪽 변이다", () => {
+    const { pieces, frontEdge } = planLayout(box, [], 200, { exclEst: 160, front: [0, -1] });
+    const lease = pieces.filter((p) => p.kind === "lease");
+    expect(Math.min(...lease.flatMap((p) => p.poly.map((q) => q[1])))).toBeCloseTo(-5, 3);
+    const common = pieces.find((p) => p.kind === "common")!;
+    expect(Math.max(...common.poly.map((q) => q[1]))).toBeCloseTo(5, 3);   // 공용은 뒤(북)쪽
+    expect(frontEdge && frontEdge.every((q) => Math.abs(q[1] + 5) < 1e-6)).toBe(true);
+  });
+
+  it("전면 변 — 바깥 법선이 도로 쪽인 가장 긴 변", () => {
+    expect(frontEdgeOf(box, [1, 0])!.every((q) => Math.abs(q[0] - 10) < 1e-6)).toBe(true);
+  });
+
+  it("전유부도 전용 추정도 없으면 칸이 없다(지어내지 않는다)", () => {
+    expect(planLayout(box, [], 200).pieces).toEqual([]);
   });
 });
