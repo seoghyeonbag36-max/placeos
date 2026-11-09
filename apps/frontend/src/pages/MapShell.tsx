@@ -41,7 +41,6 @@ import "./MapShell.css";
 
 // 층 근거·공실 이력을 끌고 들어오므로 눌렀을 때만 받는다.
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
-const FloorExplorer = lazy(() => import("@/components/twin/FloorExplorer"));
 // 3D 트윈 — 대화상자 청크와 three 청크는 눌렀을 때만 받는다(트랙 청크에 들어가면 1.5초 뒤 프리로드된다).
 const BuildingTwinDialog = lazy(() => import("@/components/twin/BuildingTwinDialog"));
 
@@ -991,7 +990,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             )}
 
             {src === "api" && <button className="b-twin b-twin-3d" onClick={() => setTwin3dOpen(true)}>3D 트윈으로 보기</button>}
-            {src === "api" && <Suspense fallback={<p>층·호실 자료 불러오는 중…</p>}><FloorExplorer key={`${districtId}:${selected.id}`} districtId={districtId} buildingId={selected.id} /></Suspense>}
+            {/* 「층·호실 상세 · 개략 배치도 · 점포 이력 열기」는 지웠다(2026-11-09 사용자 요청) — 같은 층·호실 · 개략 배치도 · 점포 이력은
+                위 「3D 트윈으로 보기」 대화상자(BuildingTwinDialog)에 그대로 있다 */}
             {src === "api" && <a className="b-twin" href={kakaoRoadviewUrl(selected.center)} target="_blank" rel="noopener noreferrer">거리뷰 · 층별 보기<span className="sr-only">(새 창)</span></a>}
             <button className="b-twin" onClick={() => setTwinOpen(true)}>층별 공실 · 공실 이력 보기</button>
             <button className="save-candidate detail-save" type="button" aria-pressed={savedIds.includes(selected.id)}
