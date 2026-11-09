@@ -34,7 +34,6 @@ export interface InteriorSceneHandle {
   dispose(): void;
 }
 
-const H = 3.0;           // 실내 천장 높이(표현용)
 
 function shapeOf(pts: readonly Point[]) {
   const s = new Shape();
@@ -67,6 +66,8 @@ function floorTexture(pattern: "plain" | "wood" | "checker", a: string, b: strin
 }
 
 export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput): InteriorSceneHandle {
+  /** 벽 높이 = 공실 높이(층고 · layout.dims.h). 짓기마다 다시 정한다 */
+  let H = 3.0;
   const renderer = new WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = SRGBColorSpace;
@@ -126,6 +127,7 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     scene.add(root);
     const { outline, layout, lv, windows, frontEdge } = input;
     const P = layout.palette;
+    H = Math.min(8, Math.max(2.4, layout.dims.h));
 
     // 바닥 — 층 전체(회색) 위에 꾸민 공간 바닥
     const slab = mesh(new ShapeGeometry(shapeOf(outline)), mat("#C9CCD1", { side: DoubleSide }));
@@ -293,6 +295,35 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
         root.add(t);
       }
     }
+    // 공실 바닥 치수 — 가로(전면 앞) · 세로(오른쪽 옆) · 높이(모서리 세로선). 선은 진한 회색, 값은 라벨
+    const dm = layout.dims;
+    const dimMat = new LineBasicMaterial({ color: "#1C2533" });
+    const extMat = new LineBasicMaterial({ color: "#7A8594" });
+    mats.push(dimMat, extMat);
+    const seg = (a: Vector3, b: Vector3, m: LineBasicMaterial) => {
+      const l = new Line(new BufferGeometry().setFromPoints([a, b]), m);
+      geos.push(l.geometry); root.add(l);
+    };
+    const at = (p: Point, y = 0.03) => new Vector3(p[0], y, -p[1]);
+    const tick = (p: Point, along: Point, y = 0.03) => {      // 치수선 끝 사선 눈금
+      const L = Math.hypot(along[0], along[1]) || 1, ux = along[0] / L, uy = along[1] / L, k = 0.18;
+      seg(new Vector3(p[0] - (ux + uy) * k, y, -(p[1] - (uy - ux) * k)), new Vector3(p[0] + (ux + uy) * k, y, -(p[1] + (uy - ux) * k)), dimMat);
+    };
+    for (const [a, b] of dm.ext) seg(at(a), at(b), extMat);
+    for (const [line, text] of [[dm.wLine, `가로 ${dm.w.toFixed(1)}m`], [dm.dLine, `세로 ${dm.d.toFixed(1)}m`]] as const) {
+      const [a, b] = line;
+      seg(at(a), at(b), dimMat);
+      tick(a, [b[0] - a[0], b[1] - a[1]]); tick(b, [b[0] - a[0], b[1] - a[1]]);
+      const t = tag(text, "is-dim");
+      t.position.set((a[0] + b[0]) / 2, 0.15, -(a[1] + b[1]) / 2);
+      root.add(t);
+    }
+    seg(at(dm.corner, 0), at(dm.corner, H), dimMat);
+    seg(new Vector3(dm.corner[0] - 0.2, H, -dm.corner[1]), new Vector3(dm.corner[0] + 0.2, H, -dm.corner[1]), dimMat);
+    seg(new Vector3(dm.corner[0] - 0.2, 0.02, -dm.corner[1]), new Vector3(dm.corner[0] + 0.2, 0.02, -dm.corner[1]), dimMat);
+    const ht = tag(`높이 ${dm.h.toFixed(1)}m${dm.hMeasured ? "" : "(추정)"}`, "is-dim");
+    ht.position.set(dm.corner[0], H / 2, -dm.corner[1]);
+    root.add(ht);
     render();
   }
 
@@ -303,7 +334,9 @@ export function createInteriorScene(host: HTMLElement, first: InteriorSceneInput
     const { layout, outline } = input;
     const ring = outline.length > 2 && outline[0][0] === outline[outline.length - 1][0] && outline[0][1] === outline[outline.length - 1][1] ? outline.slice(0, -1) : outline;
     const [vx, vy] = layout.frame.v;                      // 안쪽 방향 — 입구(전면) 쪽은 그 반대
-    const cam = overviewCamera(ring, H + 0.7, [-vx, -vy], camera.fov, camera.aspect);
+    // 트윈 외곽선 + 치수선(공간 밖 0.7m)까지 한 화면에
+    const dm = layout.dims;
+    const cam = overviewCamera([...ring, ...dm.wLine, ...dm.dLine], H + 0.7, [-vx, -vy], camera.fov, camera.aspect);
     camera.position.set(...cam.position);
     controls.target.set(...cam.target);
     controls.maxDistance = Math.max(120, cam.distance * 2.5);
