@@ -439,7 +439,8 @@
 /* §4 3분류 · 평일/주말 · 3D 입구 */
 .mapshell .b-road { font-size: var(--fs-caption); color: var(--muted); overflow-wrap: anywhere; }
 .mapshell .b-mine { font-size: var(--fs-caption); color: var(--track-page); margin-top: 2px; }
-.mapshell a.b-twin { display: block; text-align: center; text-decoration: none; box-sizing: border-box; }
+/* 링크(거리뷰 · 층별 보기)도 버튼처럼 글씨를 가로 · 세로 가운데에 — block 이면 36px 칸 위쪽에 붙는다(2026-11-09) */
+.mapshell a.b-twin { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; box-sizing: border-box; }
 .mapshell .b-twin-3d { background: var(--track-page); border-color: var(--track-page); color: var(--on-accent); font-weight: 700; }
 .mapshell .time-bar .daytype { display: inline-flex; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
 .mapshell .time-bar .daytype button { border: 0; background: var(--surface); font: inherit; font-size: var(--fs-caption); padding: 4px 10px; cursor: pointer; color: var(--ink); }
