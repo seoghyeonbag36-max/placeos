@@ -73,7 +73,7 @@ def _no_network_energy(monkeypatch):
     """건물에너지 실시간 조회도 기본 스위트에서 치지 않는다(2026-11-09)."""
     from app.services import building_energy_live as E
 
-    def _offline(op, params, key):
+    def _offline(op, params, key, base=None):
         raise OSError("tests: energy network disabled")
     monkeypatch.setattr(E, "_get", _offline)
     monkeypatch.setattr(E, "_last_fail", 0.0)
