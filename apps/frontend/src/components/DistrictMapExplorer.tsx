@@ -7,6 +7,7 @@ import {
 } from "@/lib/districtMapModel";
 import { useMapHost } from "@/components/mapHostContext";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
+import ResearchLocationsLayer from "@/components/ResearchLocationsLayer";
 import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
 import type { NaverListener, NaverOverlay } from "@/lib/naverTypes";
@@ -249,6 +250,9 @@ export default function DistrictMapExplorer({ districts, districtId, onSelect, o
       {mode === "vacancy" && <p className="dme-note">건축물대장 실측 대표 공실률이고 스냅샷입니다. 값이 없는 상권은 회색입니다.</p>}
       {outlineErr && <p className="dme-note value-absent">상권 외곽선을 불러오지 못했습니다. 목록으로 고를 수 있습니다.</p>}
       <p className="dme-note">지도 선은 실측 범위이지 공식 상권 경계가 아닙니다.</p>
+      {/* 광주·전주 조사 위치 — 거점 목록·색칠과 섞지 않고 밑에 따로 선다(2026-11-09 · 정식 상권 아님) */}
+      {(group === "gwangju" || group === "jeonju") &&
+        <ResearchLocationsLayer group={group} districts={districts} onSelectHub={onSelect} />}
     </section>
   );
 }

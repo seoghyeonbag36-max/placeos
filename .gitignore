@@ -125,6 +125,9 @@ apps/frontend/tsconfig.tsbuildinfo
 # building_vacancy.json·대장 원본·parquet 등 중간·원본 산출물은 계속 제외.
 # 예외: 리뉴얼 전역 Gold — 외곽선·체인 추정·동시 입지·R-ONE 시계열(각 3MB 이하). 재생성은 각 빌더 머리말
 !data/gold/platform_hub_outlines.json
+# 예외: 광주·전주 조사 위치 요약(206곳 · ~190KB) — services/research_locations 가 디스크에서 읽는다(2026-11-09).
+# 원천 대장 Gold(data/gold/regional_research_ledgers)는 git 밖이라 빠지면 배포에서 레이어가 조용히 사라진다.
+!data/gold/platform_research_locations.json
 !data/gold/platform_store_brands.json
 !data/gold/platform_industry_colocation.json
 !data/gold/platform_rone_history.json
