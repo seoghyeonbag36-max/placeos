@@ -82,7 +82,7 @@ def test_http_401_403_is_refused_with_the_code(monkeypatch):
     out = E.energy(PNU, "gas")
     # 주소마다 한 번씩만(한 달씩 18콜로 번지지 않는다) · 어느 주소가 무엇이라 했는지 남긴다
     assert out["status"] == "refused" and len(calls) == len(E.ENDPOINTS)
-    assert out["error"].startswith("건축HUB: HTTP 403 Forbidden") and "구 건물에너지정보 서비스: HTTP 403 Forbidden" in out["error"]
+    assert out["error"] == "건축HUB: HTTP 403 Forbidden · 건축HUB(http): HTTP 403 Forbidden"
 
 
 def test_falls_through_to_the_endpoint_that_accepts_the_key(monkeypatch):
@@ -91,14 +91,27 @@ def test_falls_through_to_the_endpoint_that_accepts_the_key(monkeypatch):
 
     def by_base(op, params, key, base=None):
         seen.append(base)
-        if "1611000" not in base:
+        if base.startswith("https"):
             raise E.EnergyError("HTTP 403 SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
         return [{"useYm": "202604", "useQty": "10"}, {"useYm": "202605", "useQty": "12"}]
     monkeypatch.setattr(E, "_get", by_base)
     out = E.energy(PNU, "gas")
-    assert out["status"] == "ok" and out["endpoint"] == "구 건물에너지정보 서비스" and out["query"] == "all"
+    assert out["status"] == "ok" and out["endpoint"] == "건축HUB(http)" and out["query"] == "all"
     assert [m["ym"] for m in out["months"]] == ["202604", "202605"]
-    assert len(seen) == 3 and "1613000" in seen[0]
+    assert len(seen) == 2
+
+
+def test_missing_service_is_skipped_not_asked_month_by_month(monkeypatch):
+    """서비스 없음(NO_OPENAPI_SERVICE)은 다음 주소로 — 그 주소에 18달을 하나씩 묻지 않는다(12:41 프로덕션에서 본 낭비)."""
+    monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
+    calls = []
+
+    def gone(op, params, key, base=None):
+        calls.append(params.get("useYm"))
+        raise E.EnergyError("HTTP 400 NO_OPENAPI_SERVICE_ERROR")
+    monkeypatch.setattr(E, "_get", gone)
+    out = E.energy(PNU, "gas")
+    assert out["status"] == "refused" and len(calls) == len(E.ENDPOINTS) and "건축HUB: HTTP 400 NO_OPENAPI_SERVICE_ERROR" in out["error"]
 
 
 def test_route():

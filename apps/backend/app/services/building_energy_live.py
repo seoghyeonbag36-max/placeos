@@ -38,13 +38,14 @@ from app.core.config import settings
 
 BASE = "https://apis.data.go.kr/1613000/BldEngyHubService"
 # 거절(키 미등록)이면 다음 주소로 한 번 더 묻는다(2026-11-09 — 사용자는 「승인됨」인데 건축HUB 주소가 계속 403).
-# 같은 계정 키라도 승인된 서비스가 예전 「건물에너지정보 서비스」(1611000)일 수 있고, 게이트웨이가 http/https 를 달리 볼 수 있다.
+# 게이트웨이가 http/https 를 달리 볼 수 있어 http 도 묻는다. 예전 「건물에너지정보 서비스」(1611000/BldEngyService)는
+# 프로덕션에서 HTTP 400 NO_OPENAPI_SERVICE_ERROR(서비스 없음)로 확인돼 뺐다(2026-11-09 12:41).
 ENDPOINTS: list[tuple[str, str]] = [
     ("건축HUB", BASE),
     ("건축HUB(http)", "http://apis.data.go.kr/1613000/BldEngyHubService"),
-    ("구 건물에너지정보 서비스", "http://apis.data.go.kr/1611000/BldEngyService"),
 ]
-_KEY_ERR = re.compile(r"KEY|등록|인증|승인|LIMIT|초과|HTTP 40[13]|Unauthorized|Forbidden", re.I)
+# 이 주소가 이 키를 모르거나(키 · 승인) 서비스가 없다 — 다음 주소로. 한 달씩 묻는 18콜로 번지지 않는다
+_KEY_ERR = re.compile(r"KEY|등록|인증|승인|LIMIT|초과|HTTP 40[134]|Unauthorized|Forbidden|NO_OPENAPI_SERVICE|API not found|Not Found", re.I)
 OPS = {"gas": "getBeGasUsgInfo", "electricity": "getBeElctyUsgInfo"}
 SOURCE = "국토교통부 건축HUB 건물에너지정보(국가건물에너지 통합관리시스템) — 실시간 조회"
 APPLY_URL = "https://www.data.go.kr/data/15135963/openapi.do"
