@@ -12,12 +12,25 @@
  */
 import type { Point, PlanPiece } from "@/lib/twinGeometry";
 
-/** 사용자가 고르는 공간 키워드(2026-11-09 사용자 지정 목록 · 순서 그대로) */
+/**
+ * 사용자가 고르는 공간 키워드. 앞 15개는 2026-11-09 사용자 지정 목록(순서 그대로), 뒤 15개는 같은 날 「더 다양하게」 요청으로
+ * 더한 것 — 좌석 · 동선(노트북석 · 1인석 · 단체석 · 소파존 · 오픈 키친 · 좌석 우선 · 여유 동선) · 스타일 · 소재 · 조명.
+ */
 export const INTERIOR_KEYWORDS = [
   "포토존", "창가자리", "우드톤", "갤러리", "빠른 픽업", "초록 식물", "미니멀", "우드", "내추럴",
   "레트로", "빈티지", "깔끔", "무채색", "화려함", "심플",
+  "노트북석", "1인석", "단체석", "소파존", "오픈 키친", "좌석 우선", "여유 동선",
+  "모던", "인더스트리얼", "북유럽", "아늑함", "대리석", "노출 콘크리트", "파스텔", "따뜻한 조명",
 ] as const;
 export type InteriorKeyword = (typeof INTERIOR_KEYWORDS)[number];
+
+/** 칩을 묶어 보이는 갈래 — 키워드 30개를 한 줄로 늘어놓지 않는다. 모든 키워드가 정확히 한 갈래에 든다(테스트) */
+export const KEYWORD_GROUPS: { name: string; keywords: InteriorKeyword[] }[] = [
+  { name: "자리 · 공간", keywords: ["포토존", "창가자리", "빠른 픽업", "갤러리", "초록 식물", "노트북석", "1인석", "단체석", "소파존", "오픈 키친"] },
+  { name: "좌석 수 · 동선", keywords: ["좌석 우선", "여유 동선"] },
+  { name: "분위기 · 스타일", keywords: ["미니멀", "심플", "깔끔", "내추럴", "레트로", "빈티지", "화려함", "모던", "인더스트리얼", "북유럽", "아늑함"] },
+  { name: "소재 · 색 · 조명", keywords: ["우드톤", "우드", "무채색", "대리석", "노출 콘크리트", "파스텔", "따뜻한 조명"] },
+];
 
 /** 키워드가 3D 에서 무엇을 바꾸는지 — 칩 아래 한 줄 설명 */
 export const KEYWORD_EFFECT: Record<InteriorKeyword, string> = {
@@ -36,9 +49,24 @@ export const KEYWORD_EFFECT: Record<InteriorKeyword, string> = {
   무채색: "검정 · 회색 · 흰색만",
   화려함: "포인트 색 · 샹들리에 · 러그 · 장식 더",
   심플: "기본 테이블 · 의자만 · 장식 최소",
+  노트북석: "옆벽을 따라 책상 높이(74cm) 1인 좌석 — 한 자리 폭 80cm · 깊이 60cm · 벽을 보고 앉는다",
+  "1인석": "옆벽을 따라 높은 바(105cm) · 스툴 — 한 자리 폭 60cm",
+  단체석: "6인 장테이블을 안쪽에 먼저(최대 2개) — 일행 · 모임 손님",
+  소파존: "2인 소파 · 낮은 테이블 · 의자 2 세트를 안쪽 모서리에(최대 2개) — 오래 머무는 자리",
+  "오픈 키친": "안쪽 카운터를 길게(최대 4m · 깊이 90cm) — 조리 · 주문을 한 줄로, 앞 1.2m 비움",
+  "좌석 우선": "통로 −0.15m(최소 0.75m) · 좌석당 넓이 −0.3㎡(최소 1.5㎡) — 같은 넓이에 좌석을 더",
+  "여유 동선": "통로 +0.3m · 좌석당 넓이 +0.5㎡ — 휠체어 · 유모차가 지나가기 쉬운 쪽으로(기준 확인 값 아님)",
+  모던: "흰 벽 · 회색 바닥 · 검정 프레임 가구 · 파란 포인트",
+  인더스트리얼: "콘크리트 바닥 · 철제 검정 · 짙은 원목 상판 · 전구 펜던트 · 녹슨 주황 포인트",
+  북유럽: "흰 벽 · 밝은 자작나무 · 연회색 패브릭 · 차분한 청록 포인트",
+  아늑함: "따뜻한 베이지 · 패브릭 · 러그 · 낮은 펜던트 · 좌석당 넓이 +0.3㎡",
+  대리석: "대리석 상판 · 밝은 석재 바닥",
+  "노출 콘크리트": "회색 콘크리트 벽 · 바닥",
+  파스텔: "연분홍 벽 · 분홍 의자 · 민트 포인트",
+  "따뜻한 조명": "테이블마다 전구색 펜던트",
 };
 
-export type ItemKind = "counter" | "pickup" | "kiosk" | "shelf" | "bar" | "stool" | "table" | "chair" | "sofa"
+export type ItemKind = "counter" | "pickup" | "kiosk" | "shelf" | "bar" | "desk" | "stool" | "table" | "chair" | "sofa"
   | "display" | "plinth" | "photo" | "spot" | "frame" | "plant" | "plantwall" | "pendant" | "chandelier" | "rug" | "door";
 export type MatKey = "furniture" | "chair" | "accent" | "counter" | "plant" | "pot" | "light" | "frame" | "shelf" | "rug" | "door";
 
@@ -146,6 +174,28 @@ const overlap = (a: Rect, b: Rect) => a.s0 < b.s1 && b.s0 < a.s1 && a.t0 < b.t1 
 const grow = (r: Rect, g: number): Rect => ({ s0: r.s0 - g, t0: r.t0 - g, s1: r.s1 + g, t1: r.t1 + g });
 
 const has = (k: readonly string[], w: InteriorKeyword) => k.includes(w);
+
+/**
+ * 좌석 규칙 — 좌석당 넓이(좌석 상한 = 넓이 ÷ 이 값)와 테이블 세트 사이 통로. 배치 엔진과 직접 배치 편집기가 같은 값을 쓴다.
+ * 전략: 기능중심 1.7㎡ · 0.75m / 가성비 2.1㎡ · 0.9m / 고급화 2.8㎡ · 1.2m. 키워드가 더하고 뺀다. 모두 규칙의 예시 값 — 법정 기준이 아니다.
+ */
+export function seatRules(strategy: InteriorStrategy | null | undefined, k: readonly string[]) {
+  const st = strategy ?? "가성비";
+  const base = st === "기능중심" ? 1.7 : st === "고급화" ? 2.8 : 2.1;
+  const aisleBase = st === "기능중심" ? 0.75 : st === "고급화" ? 1.2 : 0.9;
+  const minimal = has(k, "미니멀") || has(k, "심플") || has(k, "깔끔");
+  const steps: string[] = [];
+  let perSeat = base, aisle = aisleBase;
+  if (minimal) { perSeat += 0.5; aisle += 0.2; steps.push("미니멀 · 깔끔 · 심플 +0.5㎡ · 통로 +0.2m"); }
+  if (has(k, "아늑함")) { perSeat += 0.3; steps.push("아늑함 +0.3㎡"); }
+  const roomy = has(k, "여유 동선"), dense = has(k, "좌석 우선") && !roomy;
+  if (roomy) { perSeat += 0.5; aisle += 0.3; steps.push("여유 동선 +0.5㎡ · 통로 +0.3m"); }
+  if (dense) { perSeat = Math.max(1.5, perSeat - 0.3); aisle = Math.max(0.75, aisle - 0.15); steps.push("좌석 우선 −0.3㎡ · 통로 −0.15m(최소 1.5㎡ · 0.75m)"); }
+  const notes = has(k, "좌석 우선") && roomy ? ["「좌석 우선」과 「여유 동선」을 함께 골랐습니다 — 통로는 여유 동선을 따랐습니다."] : [];
+  return { strategy: st, perSeat: Math.round(perSeat * 100) / 100, perSeatBase: base, aisle: Math.round(aisle * 100) / 100, aisleBase, minimal, steps, notes };
+}
+/** 테이블 위 펜던트 조명을 다는 키워드 */
+export const pendantsOn = (k: readonly string[]) => (["빈티지", "레트로", "화려함", "인더스트리얼", "따뜻한 조명", "아늑함"] as InteriorKeyword[]).some((w) => has(k, w));
 const SEATING = /카페|커피|음식|식당|베이커리|디저트|주점|술집|분식|치킨|한식|일식|중식|양식|푸드|레스토랑|브런치|제과|빵|버거|피자|국수|고기|요리/;
 
 /** 업종 → 좌석형(카페 · 음식) / 진열형(소매 · 서비스). 업종이 비면 좌석형 */
@@ -159,14 +209,25 @@ export function paletteOf(k: readonly string[]): { palette: Palette; notes: stri
   if (has(k, "깔끔")) Object.assign(p, { wall: "#F8F9FA", floor: "#E9ECEF", furniture: "#FFFFFF", chair: "#CED4DA", counter: "#F1F3F5", shelf: "#E9ECEF" });
   if (has(k, "미니멀")) Object.assign(p, { wall: "#F7F7F5", floor: "#E4E2DE", furniture: "#F0EEEA", chair: "#D5D2CC", counter: "#EDEBE7", shelf: "#E7E4DF" });
   if (has(k, "심플")) Object.assign(p, { furniture: "#FFFFFF", chair: "#343A40", counter: "#E9ECEF" });
+  if (has(k, "모던")) Object.assign(p, { wall: "#F2F2F0", floor: "#CFCFCB", floorPattern: "plain", furniture: "#2F3437", chair: "#4A4F55", counter: "#2F3437", shelf: "#3A3F44", accent: "#4C6EF5" });
+  if (has(k, "북유럽")) Object.assign(p, { wall: "#FAFAF7", floor: "#E3D3B8", floorPattern: "wood", furniture: "#E6D2B5", chair: "#BFC5C9", counter: "#F1EDE6", shelf: "#E6D2B5", accent: "#5F8D96" });
   if (has(k, "내추럴")) Object.assign(p, { wall: "#EFE7DA", floor: "#D7BC94", floorPattern: "wood", chair: "#D8C9B0", furniture: "#D2B48C", counter: "#D9C3A0", shelf: "#CDB591" });
+  if (has(k, "아늑함")) Object.assign(p, { wall: "#F3E9DC", floor: "#C9A67C", floorPattern: "wood", furniture: "#B08861", chair: "#C8A98B", rug: "#B07D62", light: "#FFD8A8" });
+  if (has(k, "인더스트리얼")) Object.assign(p, { wall: "#B5B1AA", floor: "#8E9091", floorPattern: "plain", furniture: "#5C4033", chair: "#2B2B2B", counter: "#3A3A3A", shelf: "#2E2E2E", accent: "#B5651D", light: "#FFC266" });
   if (has(k, "우드톤")) Object.assign(p, { floor: "#B98B5E", floor2: "#A97C51", floorPattern: "wood" });
   if (has(k, "우드")) Object.assign(p, { furniture: "#9C6B3F", chair: "#7A5230", counter: "#8B5E34", shelf: "#9C6B3F" });
+  if (has(k, "노출 콘크리트")) {
+    if (has(k, "우드톤")) notes.push("「우드톤」과 「노출 콘크리트」를 함께 골라 바닥은 노출 콘크리트를 따랐습니다.");
+    Object.assign(p, { wall: "#B9B9B4", floor: "#9FA2A3", floor2: null, floorPattern: "plain", counter: "#8C8F90" });
+  }
+  if (has(k, "대리석")) Object.assign(p, { furniture: "#E6E2DA", counter: "#E9E5DE", ...(has(k, "노출 콘크리트") ? {} : { floor: "#ECEAE6", floor2: null, floorPattern: "plain" as const }) });
   if (has(k, "빈티지")) Object.assign(p, { floor: "#6F4E37", floor2: "#5E4230", floorPattern: "wood", furniture: "#5C4033", chair: "#8B5A2B", counter: "#4E3526", light: "#FFC266", rug: "#8C3B2E" });
   if (has(k, "레트로")) Object.assign(p, { floor: "#E8D9B5", floor2: "#2F4F4F", floorPattern: "checker", furniture: "#D9A441", chair: "#C0392B", accent: "#2A9D8F", counter: "#2A9D8F" });
+  if (has(k, "파스텔")) Object.assign(p, { wall: "#FFF5F7", chair: "#F7C6D0", accent: "#8CD3C0", counter: "#DDEFF7", rug: "#E5DBFF" });
   if (has(k, "화려함")) Object.assign(p, { accent: "#D6336C", chair: "#F2C14E", rug: "#B5179E", light: "#FFF3BF" });
+  if (has(k, "따뜻한 조명")) p.light = "#FFC98A";
   if (has(k, "무채색")) {
-    if (has(k, "화려함") || has(k, "레트로")) notes.push("「무채색」과 「화려함 · 레트로」는 색이 부딪힙니다 — 색은 무채색을 따르고 장식 · 가구 배치만 살렸습니다.");
+    if (has(k, "화려함") || has(k, "레트로") || has(k, "파스텔")) notes.push("「무채색」과 「화려함 · 레트로 · 파스텔」은 색이 부딪힙니다 — 색은 무채색을 따르고 장식 · 가구 배치만 살렸습니다.");
     Object.assign(p, { wall: "#E6E6E6", floor: "#BDBDBD", floor2: p.floorPattern === "plain" ? null : "#9E9E9E", furniture: "#3A3A3A",
       chair: "#6B6B6B", accent: "#111111", counter: "#2B2B2B", shelf: "#555555", light: "#F5F5F5", rug: "#8A8A8A" });
   }
@@ -282,15 +343,15 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
   // 문(표시용) — 전면에 붙는다
   items.push({ kind: "door", at: fromST(sd, T0 + 0.05), w: 1.2, d: 0.1, h: 2.2, z: 0, rot, shape: "box", mat: "door", label: "입구" });
 
-  const minimal = has(k, "미니멀") || has(k, "심플") || has(k, "깔끔");
+  const rules = seatRules(inp.strategy, k);
+  const minimal = rules.minimal;
   const lavish = has(k, "화려함");
-  const strategy = inp.strategy ?? "가성비";
-  let aisle = strategy === "기능중심" ? 0.75 : strategy === "고급화" ? 1.2 : 0.9;
-  if (minimal) aisle += 0.2;
+  const aisle = rules.aisle;
+  notes.push(...rules.notes);
   const extras: string[] = [];
-  // 좌석 상한 — 공공데이터 넓이 ÷ 좌석당 넓이(기능중심 1.7 · 가성비 2.1 · 고급화 2.8㎡, 미니멀 · 심플 · 깔끔 +0.5).
+  // 좌석 상한 — 공공데이터 넓이 ÷ 좌석당 넓이(`seatRules` — 전략 · 키워드).
   // 칸 모양은 외곽선에 맞춰 늘거나 줄어든 개략이라, 모양만 보고 채우면 실제 넓이보다 좌석이 많아질 수 있다. 창가 스툴도 센다.
-  const perSeat = (strategy === "기능중심" ? 1.7 : strategy === "고급화" ? 2.8 : 2.1) + (minimal ? 0.5 : 0);
+  const perSeat = rules.perSeat;
   const maxSeats = Math.max(2, Math.floor((spaceM2 ?? spaceArea) / perSeat));
 
   // 4) 카운터 — 빠른 픽업이면 입구 옆 주문·픽업, 아니면 안쪽 벽
@@ -308,12 +369,16 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
     if (ki) { put(ki, front(ki, 0.7), { kind: "kiosk", h: 1.6, z: 0, shape: "box", mat: "accent", tag: "빠른 픽업", label: "키오스크" }); extras.push("키오스크"); }
   }
   if (!items.some((i) => i.kind === "pickup")) {
-    const cw = mode === "retail" ? Math.min(1.8, Math.max(1.2, W * 0.25)) : Math.min(2.8, Math.max(1.4, W * 0.35));
+    const open = has(k, "오픈 키친") && mode === "seating";
+    const cw = mode === "retail" ? Math.min(1.8, Math.max(1.2, W * 0.25)) : open ? Math.min(4.0, Math.max(2.4, W * 0.5)) : Math.min(2.8, Math.max(1.4, W * 0.35));
     const c = mode === "retail"
       ? find(cw, 0.6, (s, t) => Math.abs(t - (T0 + 2.0)) + 0.5 * Math.abs(s - (sd + (sd - S0 > S1 - sd ? -2 : 2))), (b) => front(grow(b, 0.2), 1.0))
-      : find(cw, 0.7, (s, t) => (T1 - t) + 0.3 * Math.abs(s - (S0 + S1) / 2), (b) => front(back(b, 0.9), 1.2));
-    if (c) put(c, mode === "retail" ? front(grow(c, 0.2), 1.0) : front(back(c, 0.9), 1.2),
-      { kind: "counter", h: 1.0, z: 0, shape: "box", mat: "counter", label: mode === "retail" ? "계산대" : "카운터 · 작업대" });
+      : find(cw, open ? 0.9 : 0.7, (s, t) => (T1 - t) + 0.3 * Math.abs(s - (S0 + S1) / 2), (b) => front(back(b, 0.9), 1.2));
+    if (c) {
+      put(c, mode === "retail" ? front(grow(c, 0.2), 1.0) : front(back(c, 0.9), 1.2),
+        { kind: "counter", h: 1.0, z: 0, shape: "box", mat: "counter", tag: open ? "오픈 키친" : undefined, label: mode === "retail" ? "계산대" : open ? "오픈 키친" : "카운터 · 작업대" });
+      if (open) extras.push(`오픈 키친 ${(c.s1 - c.s0).toFixed(1)}m`);
+    }
     else notes.push("카운터 자리를 찾지 못했습니다(공간이 좁거나 모양이 복잡함).");
   }
 
@@ -359,6 +424,45 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
       else notes.push("창 쪽에 바 테이블을 놓을 자리가 모자랍니다.");
     }
   }
+
+  // 6-2) 노트북석 · 1인석 — 옆벽을 따라 한 줄(벽 좌석은 좌석 상한의 1/3 까지). 노트북석은 책상 높이 · 벽을 보고, 1인석은 높은 바 · 스툴
+  let wallSeats = 0;
+  const wallSides = new Set<number>();
+  const wallRow = (kw: "노트북석" | "1인석") => {
+    if (mode !== "seating") { notes.push(`「${kw}」은 좌석형(카페 · 음식) 업종에서만 놓습니다.`); return; }
+    const desk = kw === "노트북석";
+    const top = desk ? 0.6 : 0.45, zone = desk ? 0.65 : 0.6, pitch = desk ? 0.8 : 0.6;
+    const n0 = Math.min(6, Math.floor(maxSeats / 3) - wallSeats, Math.floor(Math.min(4.8, D * 0.6) / pitch));
+    for (const side of [-1, 1] as const) {
+      if (wallSides.has(side)) continue;
+      for (let n = n0; n >= 2; n--) {
+        const L = n * pitch;
+        const s0 = side < 0 ? S0 + WALL + 0.02 : S1 - WALL - 0.02 - top;
+        const keepOf = (b: Rect): Rect => (side < 0 ? { ...b, s1: b.s1 + zone + 0.4 } : { ...b, s0: b.s0 - zone - 0.4 });
+        let best: Rect | null = null;
+        for (let t = T0 + 1.8; t + L <= T1 - 0.3 && !best; t += 0.2) {
+          const b = { s0, t0: t, s1: s0 + top, t1: t + L };
+          if (free(b, keepOf(b))) best = b;
+        }
+        if (!best) continue;
+        put(best, keepOf(best), { kind: desk ? "desk" : "bar", h: desk ? 0.74 : 1.05, z: 0, shape: "box", mat: "furniture", tag: kw, label: desk ? "노트북석" : "1인석 바" });
+        const sc = side < 0 ? best.s1 + zone / 2 : best.s0 - zone / 2;
+        const backTo: Point = side < 0 ? u : [-u[0], -u[1]];          // 벽을 보고 앉는다 — 등받이는 안쪽
+        for (let i = 0; i < n; i++) {
+          const at = fromST(sc, best.t0 + pitch / 2 + i * pitch);
+          items.push(desk
+            ? { kind: "chair", at, w: 0.42, d: 0.42, h: 0.82, z: 0, rot: Math.atan2(backTo[0], -backTo[1]), shape: "box", mat: "chair", tag: kw }
+            : { kind: "stool", at, w: 0.38, d: 0.38, h: 0.75, z: 0, rot, shape: "round", mat: "chair", tag: kw });
+        }
+        wallSeats += n; wallSides.add(side);
+        extras.push(`${desk ? "노트북석" : "1인석 바"} ${n}석`);
+        return;
+      }
+    }
+    notes.push(`옆벽에 「${kw}」 자리(2석 이상)를 찾지 못했습니다.`);
+  };
+  if (has(k, "노트북석")) wallRow("노트북석");
+  if (has(k, "1인석")) wallRow("1인석");
 
   // 7) 초록 식물 — 식물 벽(옆벽) + 모서리 · 창가 화분
   let plantWallSide: -1 | 1 | 0 = 0;
@@ -412,9 +516,44 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
   }
 
   // 10) 좌석(좌석형) · 진열(진열형) 채우기
-  let tables = 0, seats = stools;
-  const pendants = has(k, "빈티지") || has(k, "레트로") || lavish;
+  let tables = 0, seats = stools + wallSeats;
+  const pendants = pendantsOn(k);
+  const pendantTag = (["빈티지", "레트로", "화려함", "인더스트리얼", "따뜻한 조명", "아늑함"] as InteriorKeyword[]).find((w) => has(k, w));
+  const chairAt = (s: number, t: number, back: Point, tag?: InteriorKeyword) =>
+    items.push({ kind: "chair", at: fromST(s, t), w: 0.42, d: 0.42, h: 0.82, z: 0, rot: Math.atan2(back[0], -back[1]), shape: "box", mat: "chair", tag });
+  const negV: Point = [-v[0], -v[1]];
   if (mode === "seating") {
+    // 소파존 — 2인 소파 · 낮은 테이블 · 의자 2(안쪽 모서리부터, 최대 2세트)
+    if (has(k, "소파존")) {
+      let n = 0;
+      for (let i = 0; i < 2 && seats + 4 <= maxSeats; i++) {
+        const b = find(1.5, 2.0, (s, t) => (T1 - t) + 0.5 * Math.min(Math.abs(s - S0), Math.abs(s - S1)), (x) => grow(x, aisle / 2));
+        if (!b) break;
+        placed.push({ box: b, keep: grow(b, aisle / 2) });
+        const cs = (b.s0 + b.s1) / 2;
+        items.push({ kind: "sofa", at: fromST(cs, b.t1 - 0.35), w: 1.5, d: 0.7, h: 0.8, z: 0, rot, shape: "box", mat: "chair", tag: "소파존", label: n ? undefined : "소파존" });
+        items.push({ kind: "table", at: fromST(cs, b.t1 - 1.05), w: 1.0, d: 0.6, h: 0.45, z: 0, rot, shape: "box", mat: "furniture", tag: "소파존" });
+        for (const ds of [-0.3, 0.3]) chairAt(cs + ds, b.t0 + 0.25, negV, "소파존");
+        if (pendants) items.push({ kind: "pendant", at: fromST(cs, b.t1 - 1.05), w: 0.3, d: 0.3, h: 0.3, z: 2.35, rot, shape: "round", mat: "light", tag: pendantTag });
+        seats += 4; n += 1;
+      }
+      if (n) extras.push(`소파존 ${n}세트`); else notes.push("소파 세트(1.5 × 2.0m) 자리를 찾지 못했습니다.");
+    }
+    // 단체석 — 6인 장테이블(안쪽 가운데부터, 최대 2개)
+    if (has(k, "단체석")) {
+      let n = 0;
+      for (let i = 0; i < 2 && seats + 6 <= maxSeats; i++) {
+        const b = find(1.9, 1.75, (s, t) => (T1 - t) + 0.3 * Math.abs(s - (S0 + S1) / 2), (x) => grow(x, aisle / 2));
+        if (!b) break;
+        placed.push({ box: b, keep: grow(b, aisle / 2) });
+        const cs = (b.s0 + b.s1) / 2, ct = (b.t0 + b.t1) / 2;
+        items.push({ kind: "table", at: fromST(cs, ct), w: 1.8, d: 0.8, h: 0.74, z: 0, rot, shape: "box", mat: "furniture", tag: "단체석", label: n ? undefined : "단체석" });
+        for (const ds of [-0.6, 0, 0.6]) for (const dt of [-0.62, 0.62]) chairAt(cs + ds, ct + dt, dt < 0 ? negV : v, "단체석");
+        if (pendants) items.push({ kind: "pendant", at: fromST(cs, ct), w: 0.3, d: 0.3, h: 0.3, z: 2.35, rot, shape: "round", mat: "light", tag: pendantTag });
+        tables += 1; seats += 6; n += 1;
+      }
+      if (n) extras.push(`단체석 장테이블 ${n}`); else notes.push("6인 장테이블(1.9 × 1.75m) 자리를 찾지 못했습니다.");
+    }
     // 테이블 세트 — 레트로 원형 2인 · 빈티지/화려함 4인 · 미니멀/깔끔/심플 사각 2인 · 기본 2인과 4인을 줄마다 번갈아
     const kinds = has(k, "레트로") ? ["round"] : (has(k, "빈티지") || lavish) ? ["four", "two"] : minimal ? ["two"] : ["two", "four"];
     const dims = { two: { w: 0.8, d: 1.7, tw: 0.7, td: 0.7, n: 2 }, four: { w: 1.3, d: 1.75, tw: 1.2, td: 0.75, n: 4 }, round: { w: 1.6, d: 0.9, tw: 0.75, td: 0.75, n: 2 } } as const;
@@ -439,14 +578,14 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
             const b: Point = kind === "round" ? (ds < 0 ? [-u[0], -u[1]] : u) : (dt < 0 ? [-v[0], -v[1]] : v);
             items.push({ kind: "chair", at: fromST(s + dm.w / 2 + ds, t + dm.d / 2 + dt), w: 0.42, d: 0.42, h: 0.82, z: 0, rot: Math.atan2(b[0], -b[1]), shape: "box", mat: "chair" });
           }
-          if (pendants) items.push({ kind: "pendant", at: c, w: 0.3, d: 0.3, h: 0.3, z: 2.35, rot, shape: "round", mat: "light", tag: has(k, "빈티지") ? "빈티지" : has(k, "레트로") ? "레트로" : "화려함" });
+          if (pendants) items.push({ kind: "pendant", at: c, w: 0.3, d: 0.3, h: 0.3, z: 2.35, rot, shape: "round", mat: "light", tag: pendantTag });
           tables += 1; seats += dm.n; placedRow = true;
           s += dm.w + aisle;
         } else s += 0.2;
       }
       t += placedRow ? dm.d + aisle : 0.3;
     }
-    summary.push(`좌석 ${seats}석(테이블 ${tables}${stools ? ` · 창가 스툴 ${stools}` : ""}) · 통로 약 ${aisle.toFixed(2)}m · 좌석 상한 ${maxSeats}석(좌석당 ${perSeat.toFixed(1)}㎡)`);
+    summary.push(`좌석 ${seats}석(테이블 ${tables}${stools ? ` · 창가 스툴 ${stools}` : ""}${wallSeats ? ` · 벽 좌석 ${wallSeats}` : ""}) · 통로 약 ${aisle.toFixed(2)}m · 좌석 상한 ${maxSeats}석(좌석당 ${perSeat.toFixed(1)}㎡)`);
   } else {
     // 진열형 — 옆벽 · 뒷벽 선반, 가운데 진열대
     let shelves = 0, displays = 0;
@@ -481,6 +620,9 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
     items.push({ kind: "chandelier", at: mid, w: 0.9, d: 0.9, h: 0.6, z: 2.2, rot, shape: "round", mat: "light", tag: "화려함", label: "샹들리에" });
     items.push({ kind: "rug", at: mid, w: Math.min(3.2, W * 0.5), d: Math.min(2.4, D * 0.4), h: 0.015, z: 0, rot, shape: "box", mat: "rug", tag: "화려함" });
     extras.push("샹들리에 · 러그");
+  } else if (has(k, "아늑함")) {
+    items.push({ kind: "rug", at: fromST((S0 + S1) / 2, (T0 + T1) / 2), w: Math.min(2.8, W * 0.45), d: Math.min(2.0, D * 0.35), h: 0.015, z: 0, rot, shape: "box", mat: "rug", tag: "아늑함" });
+    extras.push("러그");
   }
 
   const mm = dims.mismatch;

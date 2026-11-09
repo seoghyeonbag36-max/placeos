@@ -107,7 +107,9 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
-  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
+  // 첫 화면은 「상권 맞춤 인테리어」(2026-11-09 사용자 요청 — Posting 맨 처음 순서). 자리 · 비용 입력은 늘 그려 둔다(keepMounted) —
+  // 지도 탐색에서는 왼쪽 칸에 서 있어 인테리어를 보면서 자리를 바꿀 수 있다
+  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "interior"));
   const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
@@ -411,7 +413,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </div>
       )}
 
-      <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} pages={[
+      <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} keepMounted={["input"]} pages={[
+        { id: "interior", label: "상권 맞춤 인테리어", description: "고른 자리의 3D 디지털 트윈에서 키워드로 가구를 놓고, 테이블 · 의자를 골라 직접 배치하세요.", content:
+          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
         { id: "input", label: "자리와 비용 조건", description: inSlots
           ? "자리와 비용 조건을 고르면 여기에 바로 계산 결과가 나옵니다."
           : "조건을 입력하면 바로 아래에 계산 결과가 나옵니다.", content: <>
@@ -599,8 +603,6 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </> },
         { id: "nearby", label: "주변 업종 지도", description: "업종을 확인하고 「조회」를 누르면 공실 주변 50~100m의 같은 업종과 체인점을 보여 줍니다.", content:
           page === "nearby" && (unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>) },
-        { id: "interior", label: "상권 맞춤 인테리어", description: "자리와 비용 조건을 바탕으로 공간 참고안을 준비하세요.", content:
-          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
         // 「검증 리포트」 탭은 Posting 에서 뺐다(2026-11-07 사용자 요청). 종합 리포트는 지도 탐색의 「검증 리포트」(App.tsx)와 Program 에 그대로 있다.
         { id: "access", label: "찾아오는 길", description: "검토하는 자리 주변의 교통과 접근성을 확인하세요.", content:
           unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}

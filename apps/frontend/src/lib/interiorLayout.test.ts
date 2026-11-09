@@ -1,6 +1,6 @@
 /** 공실 내부 규칙 배치(2026-11-09) — 합성 직사각형 건물. 실측 건물이 아니다. */
 import { describe, expect, it } from "vitest";
-import { INTERIOR_KEYWORDS, interiorLayout, modeOf, paletteOf, type InteriorItem, type InteriorLayout } from "@/lib/interiorLayout";
+import { INTERIOR_KEYWORDS, KEYWORD_EFFECT, KEYWORD_GROUPS, interiorLayout, modeOf, paletteOf, seatRules, type InteriorItem, type InteriorLayout } from "@/lib/interiorLayout";
 import { planLayout, type Point } from "@/lib/twinGeometry";
 
 // 동서 14m × 남북 12m. 남쪽(−y)이 도로 — 전면
@@ -22,13 +22,60 @@ const inside = (p: Point, poly: readonly Point[]) => {
   }
   return c;
 };
-const SOLID = new Set<InteriorItem["kind"]>(["counter", "pickup", "kiosk", "shelf", "bar", "table", "sofa", "display", "plinth", "photo", "plant", "plantwall"]);
+const SOLID = new Set<InteriorItem["kind"]>(["counter", "pickup", "kiosk", "shelf", "bar", "desk", "table", "sofa", "display", "plinth", "photo", "plant", "plantwall"]);
 const kinds = (L: InteriorLayout) => new Set(L.items.map((i) => i.kind));
 
 describe("interiorLayout", () => {
-  it("키워드는 사용자가 정한 15개 · 그 순서", () => {
-    expect([...INTERIOR_KEYWORDS]).toEqual(["포토존", "창가자리", "우드톤", "갤러리", "빠른 픽업", "초록 식물", "미니멀", "우드", "내추럴",
+  it("키워드 — 사용자가 정한 15개(그 순서) 뒤에 더한 15개 · 모두 효과 설명이 있고 정확히 한 갈래에 든다", () => {
+    expect(INTERIOR_KEYWORDS.slice(0, 15)).toEqual(["포토존", "창가자리", "우드톤", "갤러리", "빠른 픽업", "초록 식물", "미니멀", "우드", "내추럴",
       "레트로", "빈티지", "깔끔", "무채색", "화려함", "심플"]);
+    expect(INTERIOR_KEYWORDS).toHaveLength(30);
+    expect(new Set(INTERIOR_KEYWORDS).size).toBe(30);
+    for (const k of INTERIOR_KEYWORDS) expect(KEYWORD_EFFECT[k], k).toBeTruthy();
+    const grouped = KEYWORD_GROUPS.flatMap((g) => g.keywords);
+    expect([...grouped].sort()).toEqual([...INTERIOR_KEYWORDS].sort());
+  });
+
+  it("더한 키워드 — 노트북석 · 1인석은 옆벽 한 줄, 단체석은 6인 장테이블, 소파존은 소파 세트, 오픈 키친은 긴 카운터", () => {
+    const nb = run(["노트북석"]);
+    const desk = nb.items.find((i) => i.kind === "desk")!;
+    expect(desk).toBeTruthy();
+    expect(nb.items.filter((i) => i.kind === "chair" && i.tag === "노트북석").length).toBeGreaterThanOrEqual(2);
+    expect(desk.d).toBeGreaterThan(desk.w);                       // 안쪽(세로)으로 긴 줄 — 옆벽
+    const one = run(["1인석"]);
+    expect(one.items.some((i) => i.kind === "bar" && i.tag === "1인석")).toBe(true);
+    expect(one.items.filter((i) => i.kind === "stool" && i.tag === "1인석").length).toBeGreaterThanOrEqual(2);
+    const both = run(["노트북석", "1인석"]);
+    const [a, b] = [both.items.find((i) => i.kind === "desk")!, both.items.find((i) => i.kind === "bar")!].map((i) => toST(both, i.at)[0]);
+    expect(Math.abs(a - b)).toBeGreaterThan(5);                    // 서로 다른 옆벽
+    const g = run(["단체석"]);
+    expect(g.items.some((i) => i.kind === "table" && i.w === 1.8 && i.tag === "단체석")).toBe(true);
+    expect(g.items.filter((i) => i.kind === "chair" && i.tag === "단체석").length % 6).toBe(0);
+    expect(run(["소파존"]).items.some((i) => i.kind === "sofa" && i.tag === "소파존")).toBe(true);
+    const open = run(["오픈 키친"]).items.find((i) => i.kind === "counter")!;
+    expect(open.label).toBe("오픈 키친");
+    expect(open.w).toBeGreaterThan(run([]).items.find((i) => i.kind === "counter")!.w);
+    expect(run(["노트북석"], { industry: "의류 소매" }).items.some((i) => i.kind === "desk")).toBe(false);
+  });
+
+  it("좌석 규칙 — 좌석 우선은 좌석을 늘리고 여유 동선은 줄인다 · 둘 다면 여유 동선을 따르고 알린다", () => {
+    expect(seatRules("가성비", [])).toMatchObject({ perSeat: 2.1, aisle: 0.9 });
+    expect(seatRules("가성비", ["좌석 우선"])).toMatchObject({ perSeat: 1.8, aisle: 0.75 });
+    expect(seatRules("가성비", ["여유 동선"])).toMatchObject({ perSeat: 2.6, aisle: 1.2 });
+    expect(seatRules("기능중심", ["좌석 우선"]).perSeat).toBe(1.5);
+    const both = seatRules("가성비", ["좌석 우선", "여유 동선"]);
+    expect(both.perSeat).toBe(2.6); expect(both.notes.join(" ")).toMatch(/여유 동선을 따랐습니다/);
+    expect(run(["좌석 우선"]).seats).toBeGreaterThan(run(["여유 동선"]).seats);
+  });
+
+  it("더한 색 · 소재 키워드 — 노출 콘크리트 바닥 · 대리석 상판 · 파스텔 · 따뜻한 조명(펜던트)", () => {
+    expect(paletteOf(["노출 콘크리트"]).palette.floor).toBe("#9FA2A3");
+    const wc = paletteOf(["우드톤", "노출 콘크리트"]);
+    expect(wc.palette.floorPattern).toBe("plain"); expect(wc.notes.join(" ")).toMatch(/노출 콘크리트를 따랐습니다/);
+    expect(paletteOf(["대리석"]).palette.furniture).toBe("#E6E2DA");
+    expect(paletteOf(["파스텔", "무채색"]).notes.join(" ")).toMatch(/파스텔/);
+    expect(kinds(run(["따뜻한 조명"])).has("pendant")).toBe(true);
+    expect(kinds(run(["아늑함"])).has("rug")).toBe(true);
   });
 
   it("모든 키워드를 켜도 — 놓인 물건은 공간 안 · 서로 겹치지 않음 · 입구 통로는 빈다", () => {

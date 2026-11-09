@@ -19,7 +19,8 @@ function download(name: string, content: string) {
 
 /**
  * 상권 맞춤 인테리어(2026-11-09 개편) — AI 이미지 생성 대신, 고른 공실 자리의 3D 디지털 트윈(개략 배치도 · 공간 정보)으로
- * 내부를 세우고, 공간 구성 키워드를 누르면 가구 · 의자 · 인테리어 물품을 규칙대로 다시 놓는다.
+ * 내부를 세우고, 공간 구성 키워드(30개)를 누르면 가구 · 의자 · 인테리어 물품을 규칙대로 다시 놓는다. 그다음 테이블 · 의자 디자인을
+ * 고르고 평면 · 3D 에서 직접 끌어 옮긴다(`interior/InteriorEditor`). Posting 의 첫 화면이다(2026-11-09 사용자 요청).
  * 어울림 점수 · 실측 치수 · 시공 견적은 만들지 않는다.
  */
 export default function InteriorPlanner({ handoff, district, industry }: {
@@ -50,15 +51,16 @@ export default function InteriorPlanner({ handoff, district, industry }: {
           ? <><td>{(t.invest_mn * 100).toLocaleString("ko-KR")}만원</td><td>{t.month_net.toLocaleString("ko-KR")}만원</td><td>{t.viable ? `${t.roi_months}개월` : "회수 불가"}</td></>
           : <td colSpan={3}>자료 부족</td>}</tr>;
       })}</tbody></table></div>}
+    <section className="interior-step" aria-label="공간 구성 키워드">
+      <h3>1 · 공간 구성 키워드</h3>
+      <p>키워드를 누르면 3D 디지털 트윈이 가구 · 의자 · 인테리어 물품을 그 키워드에 맞게 스스로 다시 놓습니다. 여러 개를 함께 고를 수 있습니다.
+        직접 옮긴 가구가 있으면 자리는 그대로 두고 색 · 바닥 · 조명만 바꿉니다.</p>
+      <InteriorKeywordChips value={design.keywords} onChange={(keywords) => setDesign((d) => ({ ...d, keywords }))} />
+    </section>
     <section className="interior-step" aria-label="3D 디지털 트윈 공실 내부">
-      <h3>1 · 3D 디지털 트윈으로 세운 공실 내부</h3>
+      <h3>2 · 3D 디지털 트윈으로 세운 공실 내부 — 테이블 · 의자 고르고 직접 배치</h3>
       <InteriorTwin buildingId={handoff?.buildingId} unitId={handoff?.unitId} districtId={handoff?.districtId ?? district}
         floorLabel={handoff?.floor} keywords={design.keywords} industry={ownIndustry} strategy={strategy} onSummary={setLayoutSummary} />
-    </section>
-    <section className="interior-step" aria-label="공간 구성 키워드">
-      <h3>2 · 공간 구성 키워드</h3>
-      <p>키워드를 누르면 3D 디지털 트윈이 가구 · 의자 · 인테리어 물품을 그 키워드에 맞게 스스로 다시 놓습니다. 여러 개를 함께 고를 수 있습니다.</p>
-      <InteriorKeywordChips value={design.keywords} onChange={(keywords) => setDesign((d) => ({ ...d, keywords }))} />
     </section>
     <fieldset>
       <legend>사용자 조건</legend>

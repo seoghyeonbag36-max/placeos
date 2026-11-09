@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { getBuildingTwin, type BuildingTwin } from "@/lib/api";
 import type { InteriorStrategy } from "@/lib/interiorLayout";
 import { pickFloor } from "@/lib/interiorTwin";
-import InteriorTwinView from "./InteriorTwinView";
+import InteriorEditor from "./InteriorEditor";
 
-/** 고른 공실 자리의 트윈을 불러 내부 3D 를 세운다(Posting 「상권 맞춤 인테리어」 · 2026-11-09). */
+/** 고른 공실 자리의 트윈을 불러 내부 3D 를 세우고 직접 배치 편집기를 연다(Posting 「상권 맞춤 인테리어」 · 2026-11-09). */
 export default function InteriorTwin({ buildingId, unitId, districtId, floorLabel, keywords, industry, strategy, onSummary }: {
   buildingId?: string | null; unitId?: string | null; districtId?: string | null; floorLabel?: string | null;
   keywords: readonly string[]; industry?: string | null; strategy?: InteriorStrategy | null;
@@ -23,7 +23,7 @@ export default function InteriorTwin({ buildingId, unitId, districtId, floorLabe
     return () => ctrl.abort();
   }, [id, districtId, key]);
 
-  if (!id || !districtId) return <p className="interior3d-note">공실 자리를 먼저 고르면 그 자리의 3D 디지털 트윈으로 내부를 세웁니다.</p>;
+  if (!id || !districtId) return <p className="interior3d-note">공실 자리를 먼저 고르면 그 자리의 3D 디지털 트윈으로 내부를 세웁니다 — 「자리와 비용 조건」에서 상권 · 자리를 고르세요.</p>;
   const cur = state?.key === key ? state : null;
   if (!cur) return <p className="interior3d-note" role="status">공실 자리의 3D 디지털 트윈을 불러오는 중…</p>;
   if (!cur.twin || cur.twin.ring.length < 3) {
@@ -35,7 +35,7 @@ export default function InteriorTwin({ buildingId, unitId, districtId, floorLabe
     <>
       <p className="interior3d-where">{cur.twin.name ?? cur.twin.road_addr ?? "건물"} · {floor.label}
         {floor.area_m2 ? ` · 층 바닥 ${floor.area_m2.toLocaleString("ko-KR")}㎡(대장)` : ""}</p>
-      <InteriorTwinView twin={cur.twin} floor={floor} keywords={keywords} industry={industry} strategy={strategy} onSummary={onSummary} />
+      <InteriorEditor key={`${key}:${floor.lv}`} twin={cur.twin} floor={floor} keywords={keywords} industry={industry} strategy={strategy} onSummary={onSummary} />
     </>
   );
 }
