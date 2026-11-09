@@ -102,11 +102,16 @@ export function adjacentLevel(levels: readonly number[], current: number | null,
   return asc[asc.indexOf(current) + dir] ?? null;
 }
 
-export interface PlanCell { kind: "unit" | "rest"; ho: string | null; area: number; x: number; y: number; w: number; h: number }
+/**
+ * 칸 종류 — unit: 전유부 호실(전용면적 비례) · lease: 일반건축물 층의 임대 공간(전용 추정 면적) ·
+ * common: 공용(계단·화장실·복도 — 층 바닥면적 − 전용) · rest: 대장 상업 전유 밖(공용·기타).
+ */
+export interface PlanCell { kind: "unit" | "lease" | "common" | "rest"; ho: string | null; area: number; x: number; y: number; w: number; h: number }
 
 /**
  * 면적 비례 개략 칸 — 시안 layoutFloor 의 「면적 ÷ 깊이 = 폭」을 외곽선 bbox 띠 나누기로 옮겼다.
- * 호실 위치 자료는 없다. 시안의 코어·복도·앞줄/뒷줄은 **지어낸 값이라 옮기지 않았다.** 화면은 늘 「개략 배치 · 실측 도면 아님」.
+ * 호실 위치 자료는 없다 — 화면은 늘 「개략 배치 · 실측 도면 아님」. 공용 블록 · 복도 · 앞줄/뒷줄은 `planLayout` 이 덧붙인다
+ * (2026-11-08 사용자 결정 — 공용 **넓이**는 대장 값에서 오고, 자리·모양만 개략이다).
  * 호실 면적 합이 층 면적보다 작으면 나머지를 「공용·기타」 칸으로 남긴다.
  */
 export function layoutUnits(b: Pick<Bounds, "minX" | "minY" | "w" | "h">,
@@ -228,46 +233,152 @@ export interface PlanPiece extends PlanCell {
   at: Point;
 }
 
+export interface PlanOptions {
+  /** 주소 도로 쪽 단위 벡터(동·북) — `frontRoad().dir`. 있으면 앞줄을 그쪽에 놓는다 */
+  front?: Point | null;
+  /** 전유부가 없는 층의 전용면적 추정(㎡) — 있으면 「임대 공간」 칸과 공용 블록을 그린다 */
+  exclEst?: number | null;
+}
+
+export interface PlanAreas {
+  /** 층 바닥면적 기준(대장 층별개요 · 없으면 외곽선 넓이) */
+  floor: number; floorFromLedger: boolean;
+  /** 전용 — 전유부 합(실측) 또는 추정 */
+  excl: number; exclEstimated: boolean;
+  /** 공용 = 바닥 − 전용 */
+  common: number;
+}
+
 /**
- * 건물 긴 변을 따라 놓은 개략 배치(2026-11-08) — `layoutUnits` 를 외곽선의 가장 긴 변 방향으로 돌려 쓰고, 칸을 실측 외곽선
- * 안으로 자른다. 칸 넓이는 전유부 전용면적 비례이고 위치는 지어낸 것이 아니라 「정해지지 않았다」 — 늘 개략 배치다.
+ * 개략 배치(2026-11-08 · 참고 시안 Case 2 형식) — 칸 **넓이는 공공데이터**, 자리·모양은 개략이다.
+ *
+ * - 넓이: 층 바닥면적(건축물대장 층별개요 · 없으면 V-World 외곽선) · 호실 전용면적(전유부) · 공용 = 바닥 − 전용 ·
+ *   일반건축물은 전용 추정(`excl_est` — 상업층 전용률)으로 「임대 공간」과 공용을 나눈다.
+ * - 자리: 외곽선의 가장 긴 변을 가로로 두고, 주소 도로(OSM)가 있으면 그쪽을 앞(전면)으로 돌린다. 앞줄에 호실(또는 임대 공간),
+ *   뒤 모서리에 공용 블록. 호실이 4개 이상이면 앞줄과 뒷줄 사이에 복도(공용의 일부 · 폭 1.8m)를 둔다. 칸은 실측 외곽선 안으로 자른다.
+ * - 호실이 층의 절반 미만이면(집합건물 일부 전유만 있는 층) 공용으로 단정하지 않고 모서리 블록 + 「공용·기타」로 둔다.
  */
-export function planLayout(pts: readonly Point[], units: readonly { ho: string | null; area_m2: number | null }[], floorArea: number | null) {
+export function planLayout(pts: readonly Point[], units: readonly { ho: string | null; area_m2: number | null }[],
+  floorArea: number | null, opts: PlanOptions = {}) {
   const ring = pts.length > 2 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1] ? pts.slice(0, -1) : [...pts];
   let ang = 0, longest = 0;
   ring.forEach((p, i) => {
     const q = ring[(i + 1) % ring.length], len = Math.hypot(q[0] - p[0], q[1] - p[1]);
     if (len > longest) { longest = len; ang = Math.atan2(q[1] - p[1], q[0] - p[0]); }
   });
-  // 긴 변이 가로(x)가 되게 돌린다. 방향이 뒤집혀도 같은 축이라 −90°~90° 로 접는다.
+  // 긴 변이 가로(x)가 되게 돌린다. 앞(도로)이 옆쪽이면 90° 더 돌려 앞이 위·아래에 오게 한다.
+  const front = opts.front ?? null;
+  if (front) {
+    const fx = front[0] * Math.cos(ang) + front[1] * Math.sin(ang), fy = -front[0] * Math.sin(ang) + front[1] * Math.cos(ang);
+    if (Math.abs(fx) > Math.abs(fy)) ang += Math.PI / 2;
+  }
   if (ang > Math.PI / 2) ang -= Math.PI; else if (ang < -Math.PI / 2) ang += Math.PI;
   const c = Math.cos(ang), s = Math.sin(ang);
   const toAxis = ([x, y]: Point): Point => [x * c + y * s, -x * s + y * c];
   const fromAxis = ([x, y]: Point): Point => [x * c - y * s, x * s + y * c];
   const rp = ring.map(toAxis);
-  // 층 면적을 모르면 외곽선 넓이를 기준으로 삼는다 — 그러지 않으면 작은 호실 몇 개가 층 전체를 덮어 보인다(집합건물 일부 전유만 있는 층).
   const bb = boundsOf(rp);
-  const base = floorArea ?? ringArea(rp);
-  const total = units.reduce((t, u) => t + Math.max(0, u.area_m2 ?? 0), 0);
-  let { cells, omitted } = layoutUnits(bb, units, base);
-  if (total > 0 && base > 0 && total / base < 0.6 && bb.w > 0 && bb.h > 0) {
-    // 호실이 층 일부만 덮으면 얇은 띠가 되어 읽히지 않는다 — 한쪽 모서리에 같은 비율의 작은 블록으로 모으고 나머지는 공용·기타로 둔다.
+  const plate = ringArea(rp);
+  const A = floorArea ?? plate;
+  const valid = units.filter((u) => (u.area_m2 ?? 0) > 0);
+  const omittedAll = units.length - valid.length;
+  const total = valid.reduce((t, u) => t + (u.area_m2 as number), 0);
+  const est = !valid.length && opts.exclEst && opts.exclEst > 0 ? Math.min(opts.exclEst, A) : null;
+  // 앞이 위(maxY)인지 — 도로를 모르면 아래(minY)를 앞으로 둔다(전면 표시는 하지 않는다)
+  const frontTop = front ? -front[0] * s + front[1] * c > 0 : false;
+  const rect = (x0: number, x1: number, d0: number, d1: number): Point[] => {
+    const y0 = frontTop ? bb.maxY - d1 : bb.minY + d0, y1 = frontTop ? bb.maxY - d0 : bb.minY + d1;
+    return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  };
+  const pieces: PlanPiece[] = [];
+  const push = (cell: Omit<PlanCell, "x" | "y" | "w" | "h">, r: Point[], areaFromCut = false) => {
+    const cut = clipToConvex(rp, r);
+    if (cut.length < 3 || ringArea(cut) < 0.05) return;
+    const cx = cut.reduce((t, p) => t + p[0], 0) / cut.length, cy = cut.reduce((t, p) => t + p[1], 0) / cut.length;
+    const xs = r.map((p) => p[0]), ys = r.map((p) => p[1]);
+    pieces.push({ ...cell, area: areaFromCut ? ringArea(cut) : cell.area, x: Math.min(...xs), y: Math.min(...ys),
+      w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys), poly: cut.map(fromAxis), at: fromAxis([cx, cy]) });
+  };
+  const areas: PlanAreas = { floor: A, floorFromLedger: floorArea != null, excl: est ?? total, exclEstimated: est != null, common: Math.max(0, A - (est ?? total)) };
+  const frontEdge = front ? frontEdgeOf(ring, front) : null;
+  const done = (omitted: number) => ({ pieces, omitted, angle: ang, areas, frontEdge, dims: { w: bb.w, h: bb.h } });
+  if (!(bb.w > 0 && bb.h > 0) || (!valid.length && est == null)) return done(omittedAll);
+
+  if (valid.length && total / A < 0.5) {
+    // 호실이 층 일부만 덮으면(집합건물 일부 전유) 나머지를 공용이라 단정하지 않는다 — 앞 모서리 블록 + 공용·기타.
     const k = Math.min(1, Math.sqrt(total / (bb.w * bb.h)));
     const bw = bb.w * k, bh = bb.h * k;
-    ({ cells, omitted } = layoutUnits({ minX: bb.minX, minY: bb.minY, w: bw, h: bh }, units, total));
-    cells = cells.filter((c) => c.kind === "unit");
-    cells.push({ kind: "rest", ho: null, area: 0, x: bb.minX + bw, y: bb.minY, w: bb.w - bw, h: bb.h },
-      { kind: "rest", ho: null, area: 0, x: bb.minX, y: bb.minY + bh, w: bw, h: bb.h - bh });
+    const { cells, omitted } = layoutUnits({ minX: 0, minY: 0, w: bw, h: bh }, valid, total);
+    for (const cl of cells.filter((x) => x.kind === "unit")) push(cl, rect(bb.minX + cl.x, bb.minX + cl.x + cl.w, cl.y, cl.y + cl.h));
+    push({ kind: "rest", ho: null, area: 0 }, rect(bb.minX + bw, bb.maxX, 0, bb.h), true);
+    push({ kind: "rest", ho: null, area: 0 }, rect(bb.minX, bb.minX + bw, bh, bb.h), true);
+    areas.common = 0;
+    return done(omitted + omittedAll);
   }
-  const pieces: PlanPiece[] = [];
-  for (const cell of cells) {
-    const rect: Point[] = [[cell.x, cell.y], [cell.x + cell.w, cell.y], [cell.x + cell.w, cell.y + cell.h], [cell.x, cell.y + cell.h]];
-    const cut = clipToConvex(rp, rect);
-    if (cut.length < 3 || ringArea(cut) < 0.05) continue;
-    const cx = cut.reduce((t, p) => t + p[0], 0) / cut.length, cy = cut.reduce((t, p) => t + p[1], 0) / cut.length;
-    pieces.push({ ...cell, area: cell.kind === "rest" && !cell.area ? ringArea(cut) : cell.area, poly: cut.map(fromAxis), at: fromAxis([cx, cy]) });
+
+  // 넓이 → bbox 넓이로 맞춘 배율(층 바닥 A 가 bbox 를 채운다고 보고 칸 크기를 정한 뒤 외곽선으로 자른다)
+  const S = (bb.w * bb.h) / Math.max(A, est ?? total);
+  const W = bb.w, H = bb.h;
+  const commonS = Math.max(0, A - (est ?? total)) * S;
+  let rows = valid.length >= 4 ? 2 : 1;
+  let corrD = rows === 2 ? Math.min(1.8, H * 0.18) : 0;
+  if (W * corrD > commonS * 0.6) { corrD = 0; rows = 1; }
+  const coreA = Math.max(0, commonS - W * corrD);
+  const backD = rows === 2 ? (H - corrD) * 0.45 : H * 0.4;
+  let coreD = backD, coreW = coreD > 0 ? coreA / coreD : 0;
+  if (coreW > W * 0.7) { coreW = W * 0.7; coreD = Math.min(H * 0.85, coreA / coreW); }
+  const fd = rows === 2 ? H - corrD - backD : H - coreD;          // 앞줄 깊이
+  const bd0 = rows === 2 ? fd + corrD : H - coreD;                 // 뒷줄(공용 옆) 시작 깊이
+  const x0 = bb.minX, x1 = bb.maxX;
+  if (coreW > 0.05 && coreD > 0.05) push({ kind: "common", ho: null, area: 0 }, rect(x0, x0 + coreW, H - coreD, H), true);
+  if (corrD > 0) push({ kind: "common", ho: null, area: 0 }, rect(x0, x1, fd, fd + corrD), true);
+  if (est != null) {
+    push({ kind: "lease", ho: null, area: est }, rect(x0, x1, 0, fd));
+    push({ kind: "lease", ho: null, area: est }, rect(x0 + coreW, x1, bd0, H));
+    return done(omittedAll);
   }
-  return { pieces, omitted, angle: ang };
+  // 호실 — 앞줄 왼→오로 채우고, 다 차면 뒷줄(공용 옆) 오→왼으로 이어 채운다(시안 fillRow). 한 호실이 두 줄에 걸치면 두 조각이다.
+  // 칸 넓이 합 = 전유 합(배율 S) — 띠 넓이 합과 같으므로 남는 자리는 「공용·기타」(반올림 오차 수준)뿐이다.
+  const sorted = [...valid].sort((a, b) => (a.ho ?? "").localeCompare(b.ho ?? "", "ko", { numeric: true }));
+  const segs = [
+    { x0, x1, d0: 0, d1: fd, dir: 1 },
+    { x0: x0 + coreW, x1, d0: bd0, d1: H, dir: -1 },
+  ].filter((g) => g.x1 - g.x0 > 0.01 && g.d1 - g.d0 > 0.01);
+  let si = 0, cur = segs[0] ? (segs[0].dir > 0 ? segs[0].x0 : segs[0].x1) : 0;
+  const total0 = sorted.reduce((t, u) => t + (u.area_m2 as number) * S, 0);
+  const cap = segs.reduce((t, g) => t + (g.x1 - g.x0) * (g.d1 - g.d0), 0);
+  const fit = total0 > cap && total0 > 0 ? cap / total0 : 1;      // 공용 블록이 상한에 걸려 띠가 모자라면 고르게 줄인다
+  for (const u of sorted) {
+    let need = (u.area_m2 as number) * S * fit;
+    while (need > 1e-6 && si < segs.length) {
+      const g = segs[si], depth = g.d1 - g.d0, end = g.dir > 0 ? g.x1 : g.x0;
+      const room = Math.abs(end - cur) * depth;
+      if (room <= 1e-6) { si += 1; if (segs[si]) cur = segs[si].dir > 0 ? segs[si].x0 : segs[si].x1; continue; }
+      const take = Math.min(need, room), nx = cur + g.dir * (take / depth);
+      push({ kind: "unit", ho: u.ho, area: u.area_m2 as number }, rect(Math.min(cur, nx), Math.max(cur, nx), g.d0, g.d1));
+      need -= take; cur = nx;
+    }
+  }
+  for (let k = si; k < segs.length; k++) {
+    const g = segs[k], from = k === si ? cur : (g.dir > 0 ? g.x0 : g.x1), to = g.dir > 0 ? g.x1 : g.x0;
+    if (Math.abs(to - from) > 0.05) push({ kind: "rest", ho: null, area: 0 }, rect(Math.min(from, to), Math.max(from, to), g.d0, g.d1), true);
+  }
+  return done(omittedAll);
+}
+
+/** 주소 도로 쪽 외곽선 변 — 바깥 법선이 도로 방향과 가장 맞고 긴 변(2D 전면 굵은 선 · 3D 전면 표시). */
+export function frontEdgeOf(ring: readonly Point[], dir: Point): [Point, Point] | null {
+  if (ring.length < 3) return null;
+  const ccw = ring.reduce((t, p, i) => { const q = ring[(i + 1) % ring.length]; return t + p[0] * q[1] - q[0] * p[1]; }, 0) > 0;
+  let best: [Point, Point] | null = null, score = 0;
+  ring.forEach((p, i) => {
+    const q = ring[(i + 1) % ring.length], dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy);
+    if (L < 1e-6) return;
+    const nx = (ccw ? dy : -dy) / L, ny = (ccw ? -dx : dx) / L;
+    const sc = (nx * dir[0] + ny * dir[1]) * L;
+    if (sc > score) { score = sc; best = [p, q]; }
+  });
+  return best;
 }
 
 /**

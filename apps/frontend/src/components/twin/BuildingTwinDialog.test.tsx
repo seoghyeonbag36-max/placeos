@@ -206,4 +206,18 @@ describe("BuildingTwinDialog", () => {
     expect(screen.getByText(/층 바닥면적 × 79\.7%로 추정했습니다/)).toBeTruthy();
     expect(screen.getByText(/일반건축물 실측 아님/)).toBeTruthy();
   });
+
+  it("일반건축물 층 개략 배치도 — 임대 공간 · 공용 · 공실 빗금 · 「전용 + 공용 = 층 바닥」", async () => {
+    const est = { m2: 96, low: 85, high: 102, ratio: 0.8, basis: "근거 — 일반건축물 실측 아님" };
+    mount({ ...TWIN, floors: TWIN.floors.map((f) => f.lv === 1 ? { ...f, excl_est: est } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    expect(document.querySelector(".twin3d-plan-lease")).toBeTruthy();
+    expect(document.querySelector(".twin3d-plan-common")).toBeTruthy();
+    expect(screen.getByText("임대 공간 · 공실")).toBeTruthy();
+    const sum = document.querySelector(".twin3d-plan-sum")!.textContent!;
+    expect(sum).toContain("전용 96㎡");
+    expect(sum).toContain("공용 24㎡");
+    expect(sum).toContain("층 바닥 120㎡");
+    expect(screen.getByLabelText("배치도 범례").textContent).toContain("공용(계단·화장실·복도)");
+  });
 });

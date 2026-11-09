@@ -1,25 +1,35 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
-import { boundsOf, frontRoad, planLayout, ringArea, ringToLocal, windowSpans } from "@/lib/twinGeometry";
+import { boundsOf, frontRoad, isVacantStatus, planLayout, ringArea, ringToLocal, windowSpans, type PlanPiece } from "@/lib/twinGeometry";
 
 interface Overlay { url: string; name: string; opacity: number; rotate: number; scale: number }
 
+const m2 = (v: number) => `${Math.round(v).toLocaleString("ko-KR")}㎡`;
+const NICE_BARS = [2, 5, 10, 20, 50, 100];
+/** 가장 넓은 조각(라벨 자리) */
+const largest = (ps: PlanPiece[]) => ps.reduce<PlanPiece | null>((a, c) => (!a || ringArea(c.poly) > ringArea(a.poly) ? c : a), null);
+
 /**
- * 층 바닥 — 실측 외곽선 + (전유부가 있으면) 전용면적 비례 개략 칸 + 사용자가 올린 도면.
- * 칸은 건물 긴 변을 따라 놓고 외곽선 안으로 자른다(`planLayout` — 3D 트윈의 개략 배치와 같은 칸). 주소 도로를 OSM 에서 찾으면
- * 그쪽에 「▼ 전면」을 단다. 평면도 원천은 없다. 올린 파일은 이 브라우저 안에서만 읽고 서버로 보내지 않는다.
+ * 층 개략 배치도(2026-11-08 · 참고 시안 Case 2 형식) — 칸 **넓이는 공공데이터**, 자리·모양은 개략이다.
+ * V-World 외곽선 · 건축물대장 층별개요(층 바닥면적) · 전유부(호실 전용면적) · 공용 = 바닥 − 전용 · 일반건축물은 전용 추정(상업층 전용률) ·
+ * 주소 도로(OSM)로 전면 · 층 공실 판정으로 빗금. 3D 트윈의 개략 배치와 같은 칸(`planLayout`)이다.
+ * 사용자가 올린 도면은 이 브라우저 안에서만 읽고 서버로 보내지 않는다.
  */
 export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: TwinFloor }) {
   const clip = useId();
+  const hatch = `${clip}-hatch`;
   const pts = useMemo(() => ringToLocal(twin.ring, twin.lat, twin.lng), [twin.ring, twin.lat, twin.lng]);
   const b = useMemo(() => boundsOf(pts), [pts]);
   const outline = useMemo(() => ringArea(pts), [pts]);
-  const { pieces: cells, omitted } = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2), [pts, floor.units, floor.area_m2]);
-  // 창 — 3D 외벽과 같은 규칙(windowSpans). 지상층만 · 표현용(실측 아님)
-  const windows = useMemo(() => (floor.lv > 0 ? windowSpans(pts) : []), [pts, floor.lv]);
   const front = useMemo(() => frontRoad(pts, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng),
     [pts, twin.roads, twin.road_check, twin.lat, twin.lng]);
+  const exclEst = floor.excl_est?.m2 ?? null;
+  const plan = useMemo(() => planLayout(pts, floor.units ?? [], floor.area_m2, { front: front?.dir, exclEst }),
+    [pts, floor.units, floor.area_m2, front, exclEst]);
+  const { pieces: cells, omitted, areas, frontEdge } = plan;
+  // 창 — 3D 외벽과 같은 규칙(windowSpans). 지상층만 · 표현용(실측 아님)
+  const windows = useMemo(() => (floor.lv > 0 ? windowSpans(pts) : []), [pts, floor.lv]);
   const [overlays, setOverlays] = useState<Record<number, Overlay>>({});
   const [selection, setSelection] = useState<{ lv: number; index: number } | null>(null);
   const picked = selection?.lv === floor.lv ? floor.units?.[selection.index] : null;
@@ -42,38 +52,69 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
     setOverlays((o) => { const n = { ...o }; delete n[floor.lv]; return n; });
   };
   if (pts.length < 3) return <p className="twin3d-note"><span className="value-absent">자료 없음</span> — 외곽선이 없습니다.</p>;
-  const pad = Math.max(b.w, b.h) * (front ? 0.2 : 0.06);
+  const big = Math.max(b.w, b.h) || 1;
+  const pad = big * 0.2;
+  const vx = b.minX - pad, vy = -b.maxY - pad, vw = b.w + pad * 2, vh = b.h + pad * 2;
+  const fs = big * 0.032;
   // 화면 위가 북이다 — SVG y 는 아래로 자라므로 뒤집는다.
   const path = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)} ${(-y).toFixed(2)}`).join(" ") + " Z";
-  const big = Math.max(b.w, b.h) || 1;
   const labelled = cells.length <= 40;
+  // 한 호실이 두 줄에 걸치면 조각이 둘이다 — 라벨 · 버튼은 가장 큰 조각 하나에만 단다
+  const mainPiece = new Map<string, number>();
+  cells.forEach((c, i) => {
+    if (c.kind !== "unit") return;
+    const key = `${c.ho}|${c.area}`, j = mainPiece.get(key);
+    if (j === undefined || ringArea(c.poly) > ringArea(cells[j].poly)) mainPiece.set(key, i);
+  });
+  const nUnits = cells.filter((c) => c.kind === "unit").length;
+  const lease = largest(cells.filter((c) => c.kind === "lease"));
+  const common = largest(cells.filter((c) => c.kind === "common"));
+  const vacant = isVacantStatus(floor.status);
+  const bar = NICE_BARS.find((n) => n >= big / 6) ?? 100;
+  const laid = cells.some((c) => c.kind === "unit" || c.kind === "lease");
+  const entry = floor.lv === 1 ? "도로에서 바로 진입" : floor.lv < 0 ? "1층 출입구에서 계단으로 진입" : "공용 계단으로 진입";
   return (
     <div className="twin3d-plan">
       <div className="twin3d-plan-head">
         <b>{floor.label} 개략 배치도</b>
-        {cells.length > 0 && <span className="twin3d-tag">호실 크기는 전용면적 비례 · 실측 도면 아님</span>}
+        {nUnits > 0 && <span className="twin3d-tag">호실 크기는 전용면적 비례 · 실측 도면 아님</span>}
+        {lease && <span className="twin3d-tag">임대 공간 · 공용 넓이는 대장 기준 · 자리는 개략 · 실측 도면 아님</span>}
       </div>
-      <svg viewBox={`${b.minX - pad} ${-b.maxY - pad} ${b.w + pad * 2} ${b.h + pad * 2}`} role="img"
-        aria-label={`${floor.label} 바닥 외곽선${cells.length ? ` · 호실 ${cells.filter((c) => c.kind === "unit").length}개 개략 칸` : ""}${windows.length ? ` · 창 ${windows.length}개(표현용)` : ""}`}>
-        <defs><clipPath id={clip}><path d={path} /></clipPath></defs>
+      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="img"
+        aria-label={`${floor.label} 개략 배치도${nUnits ? ` · 호실 ${nUnits}개 개략 칸` : ""}${lease ? " · 임대 공간과 공용" : ""}${windows.length ? ` · 창 ${windows.length}개(표현용)` : ""}${frontEdge && front ? ` · 전면 ${front.name}` : ""}`}>
+        <defs>
+          <clipPath id={clip}><path d={path} /></clipPath>
+          <pattern id={hatch} width={big * 0.035} height={big * 0.035} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width={big * 0.035} height={big * 0.035} className="twin3d-plan-hatch-bg" />
+            <line x1="0" y1="0" x2="0" y2={big * 0.035} className="twin3d-plan-hatch-line" style={{ strokeWidth: big * 0.012 }} />
+          </pattern>
+        </defs>
         <path d={path} className="twin3d-plan-floor" vectorEffect="non-scaling-stroke" />
         <g clipPath={`url(#${clip})`}>
           {cells.map((c, i) => {
             const poly = c.poly.map(([x, y]) => `${x.toFixed(2)},${(-y).toFixed(2)}`).join(" ");
-            const unitIndex = c.kind === "unit" ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
+            const isMain = c.kind === "unit" && mainPiece.get(`${c.ho}|${c.area}`) === i;
+            const unitIndex = isMain ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
             const active = selection?.lv === floor.lv && selection.index === unitIndex && unitIndex >= 0;
             const choose = () => { if (unitIndex >= 0) setSelection({ lv: floor.lv, index: unitIndex }); };
+            const cls = c.kind === "unit" ? "twin3d-plan-cell" : c.kind === "lease" ? "twin3d-plan-lease" : c.kind === "common" ? "twin3d-plan-common" : "twin3d-plan-rest";
             return (
               <g key={i}>
-                <polygon points={poly} className={c.kind === "unit" ? "twin3d-plan-cell" : "twin3d-plan-rest"} vectorEffect="non-scaling-stroke"
+                <polygon points={poly} className={cls} vectorEffect="non-scaling-stroke"
                   role={unitIndex >= 0 ? "button" : undefined} tabIndex={unitIndex >= 0 ? 0 : undefined}
                   aria-label={unitIndex >= 0 ? `${c.ho ?? "호수 미상"}호 개략 칸 선택` : undefined} aria-pressed={unitIndex >= 0 ? active : undefined}
                   onClick={choose} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } }}
-                  style={active ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 } : undefined}>
-                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)` : `공용·기타 · ${c.area.toFixed(1)}㎡`}</title>
+                  style={active || (c.kind === "unit" && selection?.lv === floor.lv && floor.units?.[selection.index]?.ho === c.ho && floor.units?.[selection.index]?.area_m2 === c.area) ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 }
+                    : c.kind === "lease" && vacant ? { fill: `url(#${hatch})` } : undefined}>
+                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)`
+                    : c.kind === "lease" ? `임대 공간 · 전용 약 ${m2(c.area)}(추정)${vacant ? " · 공실 층" : ""}`
+                      : c.kind === "common" ? `공용(계단·화장실·복도) · 이 칸 ${m2(c.area)}` : `공용·기타 · ${m2(c.area)}`}</title>
                 </polygon>
-                {labelled && c.kind === "unit" && c.w > big * 0.09 && c.h > big * 0.05 && (
-                  <text x={c.at[0]} y={-c.at[1]} className="twin3d-plan-text" style={{ fontSize: big * 0.032 }}>{c.ho}</text>
+                {labelled && isMain && c.w > big * 0.09 && c.h > big * 0.05 && (
+                  <text x={c.at[0]} y={-c.at[1]} className="twin3d-plan-text" style={{ fontSize: fs }}>
+                    <tspan x={c.at[0]} dy={c.w > big * 0.16 && c.h > big * 0.1 ? -fs * 0.5 : 0} className="twin3d-plan-ho">{c.ho}</tspan>
+                    {c.w > big * 0.16 && c.h > big * 0.1 && <tspan x={c.at[0]} dy={fs * 1.2} className="twin3d-plan-sub">전용 {c.area.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}㎡</tspan>}
+                  </text>
                 )}
               </g>
             );
@@ -83,7 +124,22 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
               transform={`rotate(${overlay.rotate} ${b.cx} ${-b.cy}) translate(${b.cx} ${-b.cy}) scale(${overlay.scale}) translate(${-b.cx} ${-b.cy})`} />
           )}
         </g>
+        {lease && (
+          <text x={lease.at[0]} y={-lease.at[1]} className="twin3d-plan-text" style={{ fontSize: fs * 1.1 }}>
+            <tspan x={lease.at[0]} dy={-fs * 0.6} className="twin3d-plan-ho">임대 공간{vacant ? " · 공실" : ""}</tspan>
+            <tspan x={lease.at[0]} dy={fs * 1.3} className="twin3d-plan-sub">전용 약 {m2(areas.excl)}(추정)</tspan>
+          </text>
+        )}
+        {common && areas.common > 0 && (
+          <text x={common.at[0]} y={-common.at[1]} className="twin3d-plan-text" style={{ fontSize: fs * 0.9 }}>
+            <tspan x={common.at[0]} dy={-fs * 0.5} className="twin3d-plan-ho">공용</tspan>
+            <tspan x={common.at[0]} dy={fs * 1.1} className="twin3d-plan-sub">계단·화장실 등 {m2(areas.common)}</tspan>
+          </text>
+        )}
         <path d={path} className="twin3d-plan-outline" vectorEffect="non-scaling-stroke" />
+        {frontEdge && (
+          <line x1={frontEdge[0][0]} y1={-frontEdge[0][1]} x2={frontEdge[1][0]} y2={-frontEdge[1][1]} className="twin3d-plan-frontline" vectorEffect="non-scaling-stroke" />
+        )}
         {windows.length > 0 && (
           <g className="twin3d-plan-windows" aria-hidden>
             {windows.map((w, i) => (
@@ -98,16 +154,42 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
           <text x={front.edge[0] + front.dir[0] * pad * 0.55} y={-(front.edge[1] + front.dir[1] * pad * 0.55)} className="twin3d-plan-front"
             style={{ fontSize: big * 0.045 }}>▼ 전면 · {front.name}</text>
         )}
+        {/* 축척 막대 · 방위(화면 위 = 북) */}
+        <g aria-hidden className="twin3d-plan-scale">
+          <line x1={vx + pad * 0.3} y1={vy + vh - pad * 0.35} x2={vx + pad * 0.3 + bar} y2={vy + vh - pad * 0.35} vectorEffect="non-scaling-stroke" />
+          <text x={vx + pad * 0.3 + bar + big * 0.015} y={vy + vh - pad * 0.35} style={{ fontSize: fs * 0.9 }}>{bar}m</text>
+          <text x={vx + vw - pad * 0.35} y={vy + pad * 0.45} className="twin3d-plan-north" style={{ fontSize: fs * 1.1 }}>N ▲</text>
+        </g>
       </svg>
-      {!!floor.units?.length && <div className="twin3d-cta" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" className="twin3d-btn" key={index}
+      {laid && (
+        <p className="twin3d-plan-sum">
+          전용 {m2(areas.excl)} {areas.exclEstimated ? <EvidenceBadge kind="추정" /> : <EvidenceBadge kind="실측" />}
+          {" + "}공용 {m2(areas.common)} <EvidenceBadge kind={areas.exclEstimated ? "추정" : "계산"} />
+          {" = "}층 바닥 {m2(areas.floor)} {areas.floorFromLedger ? <EvidenceBadge kind="실측" /> : <small>(외곽선 넓이 — 대장 층 면적 없음)</small>}
+        </p>
+      )}
+      {!laid && cells.length > 0 && <p className="twin3d-note">대장 상업 전유 호실이 층의 일부라 나머지는 「공용·기타」로 두었습니다(공용으로 단정하지 않음).</p>}
+      {frontEdge && front && <p className="twin3d-note">전면 {front.name}(OSM · 도로명주소) — {entry}. 진입 방식은 일반 구조 기준의 개략입니다.</p>}
+      {(laid || windows.length > 0) && (
+        <p className="twin3d-plan-legend" aria-label="배치도 범례">
+          {nUnits > 0 && <span><i className="k-unit" />호실(전용)</span>}
+          {lease && <span><i className="k-lease" />임대 공간(전용 추정)</span>}
+          {areas.common > 0 && laid && <span><i className="k-common" />공용(계단·화장실·복도)</span>}
+          {lease && vacant && <span><i className="k-vacant" />공실 층</span>}
+          {frontEdge && <span><i className="k-front" />전면(도로 쪽)</span>}
+          {windows.length > 0 && <span><i className="twin3d-plan-key" />창(표현용)</span>}
+        </p>
+      )}
+      {!!floor.units?.length && <div className="twin3d-plan-units" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" key={index}
         aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `전용 ${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
       {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"}{picked.pub_m2 ? ` · 공용 ${picked.pub_m2}㎡ · 계약 ${Math.round((picked.area_m2 ?? 0) * 100 + picked.pub_m2 * 100) / 100}㎡` : ""} · 호실별 공실·점포 이력 귀속 미확인</p>}
       <p className="twin3d-note">
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}
+        {" "}· 건물 약 {plan.dims.w.toFixed(1)}m × {plan.dims.h.toFixed(1)}m
       </p>
       {windows.length > 0 && <p className="twin3d-note"><span className="twin3d-plan-key" aria-hidden /> 창 — 3D 외벽과 같은 자리의 표현용 그림입니다(실측 창호 아님).</p>}
-      {cells.length === 0 && <p className="twin3d-note">이 층은 전유부 호실 자료가 없어 칸을 나누지 않았습니다. 평면도 원천은 없습니다.</p>}
+      {cells.length === 0 && <p className="twin3d-note">이 층은 전유부 호실 자료가 없어 칸을 나누지 않았습니다(층 바닥면적이 없어 전용 추정도 못 했습니다). 평면도 원천은 없습니다.</p>}
       {omitted > 0 && <p className="twin3d-note">면적이 없는 호실 {omitted}개는 칸에서 뺐습니다.</p>}
       <div className="twin3d-upload">
         <label className="twin3d-btn">

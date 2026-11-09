@@ -395,6 +395,9 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const front = frontRoad(local, twin.roads, twin.road_check?.found ? twin.road_check.name : null, twin.lat, twin.lng);
   const planUnitMat = trackM(new MeshStandardMaterial({ color: "#EEF0FB", roughness: 0.7, transparent: true, opacity: 0.9, fog: false }));
   const planRestMat = trackM(new MeshStandardMaterial({ color: "#DCE1E8", roughness: 0.9, fog: false }));
+  const planCommonMat = trackM(new MeshStandardMaterial({ color: "#94A3B8", roughness: 0.8, transparent: true, opacity: 0.7, fog: false }));
+  const planLeaseMat = trackM(new MeshStandardMaterial({ color: "#FFF7ED", roughness: 0.7, transparent: true, opacity: 0.85, fog: false }));
+  const planLeaseVacMat = trackM(new MeshStandardMaterial({ color: "#FDBA74", roughness: 0.7, transparent: true, opacity: 0.75, fog: false }));
   const planLine = trackM(new LineBasicMaterial({ color: "#4F46E5", transparent: true, opacity: 0.85 }));
   // 열린 층의 창 — 벽이 반투명이라 텍스처 창이 안 보인다. 같은 자리(windowSpans)에 유리판과 창틀을 세운다(표현용 · 실측 아님).
   const glassMat = trackM(new MeshStandardMaterial({ color: "#9FB3C8", roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.55,
@@ -428,8 +431,11 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     group.name = "twin-plan";
     const geos: BufferGeometry[] = [];
     const wall = Math.max(0.6, f.height - slab - 0.45);
-    const { pieces } = planLayout(local, f.floor.units ?? [], f.floor.area_m2);
+    const { pieces, areas } = planLayout(local, f.floor.units ?? [], f.floor.area_m2,
+      { front: front?.dir, exclEst: f.floor.excl_est?.m2 ?? null });
     const units = pieces.filter((p) => p.kind === "unit");
+    const biggest = (kind: string) => pieces.filter((p) => p.kind === kind).reduce<(typeof pieces)[number] | null>(
+      (a, c) => (!a || ringArea(c.poly) > ringArea(a.poly) ? c : a), null);
     const add = (pts: Point[], h: number, mat: Material, edges: boolean) => {
       const g = extrude(shapeOf(pts), h);
       geos.push(g);
@@ -439,25 +445,43 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
       if (edges) { const e = new EdgesGeometry(g, 30); geos.push(e); const l = new LineSegments(e, planLine); l.position.y = 0.06; group.add(l); }
     };
     if (!pieces.length) {
-      // 전유부가 없는 층(일반건축물) — 칸을 지어내지 않고 바닥만 깐다
+      // 전유부도 전용 추정도 없는 층 — 칸을 지어내지 않고 바닥만 깐다
       add(inflate(local, -0.3), 0.12, planRestMat, false);
-      const est = f.floor.excl_est;
-      const t = planTag(est
-        ? `전용 약 ${est.m2.toLocaleString("ko-KR")}㎡(추정) · 층 바닥 ${f.floor.area_m2?.toLocaleString("ko-KR") ?? "—"}㎡`
-        : `전용면적 자료 없음 · 층 바닥 ${f.floor.area_m2 != null ? `${f.floor.area_m2.toLocaleString("ko-KR")}㎡` : "자료 없음"}`, "twin3d-unit-label is-empty");
+      const t = planTag(`전용면적 자료 없음 · 층 바닥 ${f.floor.area_m2 != null ? `${f.floor.area_m2.toLocaleString("ko-KR")}㎡` : "자료 없음"}`, "twin3d-unit-label is-empty");
       t.position.set(0, wall * 0.5, 0);
       group.add(t);
     }
+    const vacant = isVacantStatus(f.floor.status);
     for (const p of pieces) {
       const inset = inflate(p.poly, -0.22);
-      if (p.kind === "unit") add(inset, wall, planUnitMat, true); else add(inset, 0.12, planRestMat, false);
+      if (p.kind === "unit") add(inset, wall, planUnitMat, true);
+      else if (p.kind === "lease") add(inset, wall * 0.92, vacant ? planLeaseVacMat : planLeaseMat, true);
+      else if (p.kind === "common") add(inset, wall * 0.96, planCommonMat, false);
+      else add(inset, 0.12, planRestMat, false);
+    }
+    // 임대 공간(일반건축물) · 공용 라벨 — 넓이는 대장(층 바닥) · 전용은 추정 · 자리는 개략
+    const lease = biggest("lease"), common = biggest("common");
+    if (lease) {
+      const t = planTag(`임대 공간${vacant ? " · 공실" : ""} · 전용 약 ${Math.round(areas.excl).toLocaleString("ko-KR")}㎡(추정)`, "twin3d-unit-label is-lease");
+      t.position.set(lease.at[0], wall + 0.5, -lease.at[1]);
+      t.center.set(0.5, 1);
+      group.add(t);
+    }
+    if (common && areas.common > 0) {
+      const t = planTag(`공용 · 계단·화장실 등 ${Math.round(areas.common).toLocaleString("ko-KR")}㎡`, "twin3d-unit-label is-common");
+      t.position.set(common.at[0], wall + 0.5, -common.at[1]);
+      t.center.set(0.5, 1);
+      group.add(t);
     }
     const detail = units.length <= 24;
-    const unitSum = units.reduce((t, p) => t + p.area, 0);
-    if (units.length > 1 && unitSum / (f.floor.area_m2 ?? ringArea(local)) < 0.15) {
-      // 호실이 층 일부의 작은 블록이면 라벨이 겹친다 — 한 장으로 묶는다(호실별 목록은 오른쪽 패널에 있다)
+    // 한 호실이 두 줄에 걸치면 조각이 둘이다 — 호실 수 · 전용 합은 호 단위로 센다
+    const byHo = new Map(units.map((p) => [`${p.ho}|${p.area}`, p.area]));
+    const unitSum = [...byHo.values()].reduce((t, v) => t + v, 0);
+    if (units.length > 24 || (units.length > 1 && unitSum / (f.floor.area_m2 ?? ringArea(local)) < 0.15)) {
+      // 호실이 많거나(24 초과) 층 일부의 작은 블록이면 라벨이 겹친다 — 한 장으로 묶는다(호실별 목록은 오른쪽 패널 · 2D 배치도에 있다)
+      const nHo = byHo.size, exclSum = unitSum;
       const cx = units.reduce((t, p) => t + p.at[0], 0) / units.length, cy = units.reduce((t, p) => t + p.at[1], 0) / units.length;
-      const t = planTag(`전유부 ${units.length}호실 · 전용 ${unitSum.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}㎡`, "twin3d-unit-label");
+      const t = planTag(`전유부 ${nHo}호실 · 전용 ${exclSum.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}㎡`, "twin3d-unit-label");
       t.position.set(cx, wall + 0.5, -cy);
       t.center.set(0.5, 1);
       group.add(t);
