@@ -101,11 +101,20 @@ class HourlyProfile(BaseModel):
     note: str | None = None
 
 
+class TwinStoreRef(BaseModel):
+    name: str
+    ind: str | None = None
+    ho: str | None = None
+
+
 class TwinUnit(BaseModel):
     ho: str | None = None
     area_m2: float | None = None      # 전용면적(전유부 전유 행)
     purps: str | None = None
     pub_m2: float | None = None       # 그 호의 공용면적 합(전유공용면적 공용 행) — 계약면적 = area_m2 + pub_m2
+    # 상가정보 대조(2026-11-09) — 같은 층 · 같은 호 점포. store_checked=False 면 호수가 없어 대조하지 않은 것
+    store: TwinStoreRef | None = None
+    store_checked: bool = False
 
 
 class TwinLedgerPart(BaseModel):
@@ -153,6 +162,7 @@ class TwinFloor(BaseModel):
     unit_id: str | None = None          # 층 매물 vfu-
     units: list[TwinUnit] | None = None
     excl_est: TwinExclEstimate | None = None   # 전유부가 없는 층만 · 추정
+    stores: list[TwinStoreRef] | None = None   # 상가정보 이 층 점포(2026-11-09)
 
 
 class TwinNeighbor(BaseModel):
@@ -249,6 +259,7 @@ class BuildingTwin(BaseModel):
     road_check: TwinRoadCheck | None = None
     roads_error: str | None = None
     ledger_live: TwinLedgerLive | None = None   # 2026-11-09 — 대장 실시간(승강기 · 층별 용도) · 실패해도 트윈은 그대로
+    stores_live: dict | None = None             # 2026-11-09 — 상가정보 대조 요약(원천 · 호실 대조 수)
 
 
 class RelationCounts(BaseModel):

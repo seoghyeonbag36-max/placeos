@@ -134,6 +134,23 @@ def _hub(slug: str) -> _Hub | None:
     return _read_hub(slug, stamp)
 
 
+def lot_stores(slug: str, pnu: str) -> tuple[list[dict], str | None, bool]:
+    """그 지번(lno == pnu)의 점포 — [{name, ind, floor, ho}], 판(as_of), 호수 필드가 실렸는가(2026-11-09 재빌드부터).
+
+    트윈의 호실 대조(`services/store_units`)가 실시간 조회가 안 될 때 쓰는 Gold 대안이다. floor 는 지하 음수 ·
+    BASEMENT_UNKNOWN = 지하(층 번호 없음) · None = 층 미상.
+    """
+    hub = _hub(slug)
+    if hub is None or not pnu:
+        return [], None, False
+    f, cats = hub.f, hub.categories
+    has_ho = "ho" in f
+    out = [{"name": r[f["name"]], "ind": cats.get(r[f["scls"]]) or cats.get(r[f["mcls"]]),
+            "floor": r[f["floor"]], "ho": (r[f["ho"]] if has_ho else None)}
+           for r in hub.rows if r[f["lno"]] == pnu]
+    return out, hub.as_of, has_ho
+
+
 @lru_cache(maxsize=1)
 def _brand_names(mtime: float) -> dict[str, str]:
     try:

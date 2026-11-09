@@ -1620,7 +1620,16 @@ export interface TwinFloor {
   /** 층 매물 `vfu-` */
   unit_id: string | null;
   /** 전유부 호실 — area_m2 = 전용면적, pub_m2 = 그 호의 공용면적 합(Gold 재빌드 전에는 없다 · 2026-11-08) */
-  units: { ho: string | null; area_m2: number | null; purps: string | null; pub_m2?: number | null }[] | null;
+  units: TwinUnit[] | null;
+  /** 상가정보 이 층 점포(2026-11-09) — 옛 응답에는 없다 */
+  stores?: TwinStoreRef[] | null;
+}
+export interface TwinStoreRef { name: string; ind: string | null; ho?: string | null }
+export interface TwinUnit {
+  ho: string | null; area_m2: number | null; purps: string | null; pub_m2?: number | null;
+  /** 같은 층 · 같은 호의 상가정보 점포(2026-11-09). store_checked=false 면 대조하지 못한 것(「없다」가 아니다) */
+  store?: { name: string; ind: string | null } | null;
+  store_checked?: boolean;
 }
 export interface TwinVacancyStat {
   basis: string; label: string; vacant: number; total: number; rate_pct: number | null; note: string;
@@ -1659,6 +1668,15 @@ export interface BuildingTwin {
   roads_error?: string | null;
   /** 건축물대장 실시간 조회(2026-11-09) — 승강기 대수 · 층별개요 용도별 행. 실패하면 status 에 사유 */
   ledger_live?: TwinLedgerLive | null;
+  /** 상가정보 점포 ↔ 호실 대조 요약(2026-11-09) */
+  stores_live?: TwinStoresLive | null;
+}
+export interface TwinStoresLive {
+  /** ok = 실시간 조회 · gold = 스냅샷(stores_lite) · none = 자료 없음 */
+  status: "ok" | "gold" | "none" | string;
+  source: string | null; live_status?: string | null; error?: string | null; as_of?: string | null;
+  has_ho: boolean; n_stores: number; n_with_ho: number;
+  units_total: number; units_matched: number; units_unchecked: number;
 }
 export interface TwinLedgerFloor {
   parts: { purps: string | null; etc: string | null; area_m2: number }[];

@@ -69,6 +69,18 @@ def _no_network_ledger(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_network_store_units(monkeypatch):
+    """트윈의 상가정보 실시간 조회도 기본 스위트에서 치지 않는다(2026-11-09) — Gold(stores_lite)로 내려간다."""
+    from app.services import store_units as S
+
+    def _offline(lat, lng, key, radius=60):
+        raise OSError("tests: stores network disabled")
+    monkeypatch.setattr(S, "_fetch_live", _offline)
+    monkeypatch.setattr(S, "_last_fail", 0.0)
+    S._cache.clear()
+
+
+@pytest.fixture(autouse=True)
 def _fresh_rate_limits():
     """요청량 카운터(services/rate_limit)를 테스트마다 비운다.
 

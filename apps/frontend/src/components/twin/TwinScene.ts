@@ -24,6 +24,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
 import { createRoadLayer, type RoadLayerStats } from "./twinRoads";
+import { unitOfPiece, unitStoreState } from "@/lib/twinStores";
 import { adjacentLevel, boundsOf, explodeOffset, frontRoad, isVacantStatus, nudgeOrbit, planLayout, ringArea, ringToLocal, stackFloors,
   startCamera, TWIN_STATUS, wallBays, WIN_GLASS_U, WIN_GLASS_V, windowSpans, type Point } from "@/lib/twinGeometry";
 
@@ -401,6 +402,10 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
   const planEvMat = trackM(new MeshStandardMaterial({ color: "#475569", roughness: 0.6, transparent: true, opacity: 0.9, fog: false }));
   const planLeaseVacMat = trackM(new MeshStandardMaterial({ color: "#FDBA74", roughness: 0.7, transparent: true, opacity: 0.75, fog: false }));
   const planLine = trackM(new LineBasicMaterial({ color: "#4F46E5", transparent: true, opacity: 0.85 }));
+  // 상가정보 대조(2026-11-09) — 영업 기록 호실은 「영업 확인」 색, 기록 없음은 주황 테두리만(공실 확정처럼 칠하지 않는다)
+  const planStoreMat = trackM(new MeshStandardMaterial({ color: "#CDEEDF", roughness: 0.7, transparent: true, opacity: 0.92, fog: false }));
+  const planStoreLine = trackM(new LineBasicMaterial({ color: "#22B07D", transparent: true, opacity: 0.95 }));
+  const planNoStoreLine = trackM(new LineBasicMaterial({ color: "#F2682C", transparent: true, opacity: 0.95 }));
   // 열린 층의 창 — 벽이 반투명이라 텍스처 창이 안 보인다. 같은 자리(windowSpans)에 유리판과 창틀을 세운다(표현용 · 실측 아님).
   const glassMat = trackM(new MeshStandardMaterial({ color: "#9FB3C8", roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.55,
     side: DoubleSide, depthWrite: false, fog: false }));
@@ -443,13 +448,13 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     const units = pieces.filter((p) => p.kind === "unit");
     const biggest = (kind: string) => pieces.filter((p) => p.kind === kind).reduce<(typeof pieces)[number] | null>(
       (a, c) => (!a || ringArea(c.poly) > ringArea(a.poly) ? c : a), null);
-    const add = (pts: Point[], h: number, mat: Material, edges: boolean) => {
+    const add = (pts: Point[], h: number, mat: Material, edges: boolean, line: LineBasicMaterial = planLine) => {
       const g = extrude(shapeOf(pts), h);
       geos.push(g);
       const m = new Mesh(g, mat);
       m.position.y = 0.06;
       group.add(m);
-      if (edges) { const e = new EdgesGeometry(g, 30); geos.push(e); const l = new LineSegments(e, planLine); l.position.y = 0.06; group.add(l); }
+      if (edges) { const e = new EdgesGeometry(g, 30); geos.push(e); const l = new LineSegments(e, line); l.position.y = 0.06; group.add(l); }
     };
     if (!pieces.length) {
       // 전유부도 전용 추정도 없는 층 — 칸을 지어내지 않고 바닥만 깐다
@@ -461,7 +466,11 @@ export function createTwinScene(el: HTMLElement, twin: BuildingTwin, cb: TwinSce
     const vacant = isVacantStatus(f.floor.status);
     for (const p of pieces) {
       const inset = inflate(p.poly, -0.22);
-      if (p.kind === "unit") add(inset, wall, planUnitMat, true);
+      if (p.kind === "unit") {
+        const u = twin.stores_live ? unitOfPiece(f.floor, p.ho ?? null, p.area) : undefined;
+        const st = u ? unitStoreState(u) : null;
+        add(inset, wall, st === "store" ? planStoreMat : planUnitMat, true, st === "store" ? planStoreLine : st === "none" ? planNoStoreLine : planLine);
+      }
       else if (p.kind === "lease") add(inset, wall * 0.92, vacant ? planLeaseVacMat : planLeaseMat, true);
       else if (p.kind === "common") add(inset, wall * 0.96, planCommonMat, false);
       else if (p.kind === "stair") add(inset, wall * 0.98, planStairMat, true);

@@ -136,6 +136,13 @@
 .twin3d-plan-legend span { display: inline-flex; align-items: center; gap: 4px; }
 .twin3d-plan-legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
 .twin3d-plan-legend .k-unit { background: var(--track-page-soft); border: 1px dashed var(--track-page); }
+/* 상가정보 대조(2026-11-09) — 영업 기록은 「영업 확인」 색, 기록 없음은 점선 테두리만(공실 확정처럼 칠하지 않는다) */
+.twin3d-plan-cell.is-store { fill: #DDF3EA; stroke: #22B07D; stroke-dasharray: none; }
+.twin3d-plan-cell.is-none { stroke: #F2682C; stroke-width: 1.4; stroke-dasharray: 2 2; }
+.twin3d-plan-legend .k-store { background: #DDF3EA; border: 1px solid #22B07D; }
+.twin3d-plan-legend .k-nostore { background: var(--track-page-soft); border: 1px dashed #F2682C; }
+.twin3d-store.is-store { color: #13795A; }
+.twin3d-store.is-none { color: #B4471B; }
 .twin3d-plan-legend .k-lease { background: #FFF7ED; border: 1px solid #C2410C; }
 .twin3d-plan-legend .k-common { background: #E2E8F0; border: 1px dashed #94A3B8; }
 .twin3d-plan-legend .k-vacant { background: repeating-linear-gradient(45deg, #FFF7ED 0 3px, #FDBA74 3px 5px); }

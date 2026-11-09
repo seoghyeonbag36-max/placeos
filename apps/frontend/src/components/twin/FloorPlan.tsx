@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import type { BuildingTwin, TwinFloor } from "@/lib/api";
 import { ledgerNote } from "@/lib/twinLedger";
+import { storesNote, unitOfPiece, unitStoreState } from "@/lib/twinStores";
 import { boundsOf, frontRoad, isVacantStatus, planLayout, ringArea, ringToLocal, windowSpans, type PlanPiece } from "@/lib/twinGeometry";
 
 interface Overlay { url: string; name: string; opacity: number; rotate: number; scale: number }
@@ -80,6 +81,9 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
   const vacant = isVacantStatus(floor.status);
   const bar = NICE_BARS.find((n) => n >= big / 6) ?? 100;
   const laid = cells.some((c) => c.kind === "unit" || c.kind === "lease");
+  // 상가정보 대조(2026-11-09) — 호실 칸에 영업 기록 · 기록 없음을 칠한다(공실 확정이 아니다)
+  const storeOf = (c: PlanPiece) => (twin.stores_live && c.kind === "unit" ? unitOfPiece(floor, c.ho ?? null, c.area) : undefined);
+  const unitStates = new Set(cells.map((c) => { const u = storeOf(c); return u ? unitStoreState(u) : null; }).filter(Boolean));
   const entry = floor.lv === 1 ? "도로에서 바로 진입" : floor.lv < 0 ? "1층 출입구에서 계단으로 진입" : "공용 계단으로 진입";
   return (
     <div className="twin3d-plan">
@@ -109,7 +113,8 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
             const unitIndex = isMain ? floor.units?.findIndex(u => u.ho === c.ho && u.area_m2 === c.area) ?? -1 : -1;
             const active = selection?.lv === floor.lv && selection.index === unitIndex && unitIndex >= 0;
             const choose = () => { if (unitIndex >= 0) setSelection({ lv: floor.lv, index: unitIndex }); };
-            const cls = c.kind === "unit" ? "twin3d-plan-cell" : c.kind === "lease" ? "twin3d-plan-lease" : c.kind === "common" ? "twin3d-plan-common"
+            const su = storeOf(c);
+            const cls = c.kind === "unit" ? `twin3d-plan-cell${su ? ` is-${unitStoreState(su)}` : ""}` : c.kind === "lease" ? "twin3d-plan-lease" : c.kind === "common" ? "twin3d-plan-common"
               : c.kind === "stair" ? "twin3d-plan-stair" : c.kind === "ev" ? "twin3d-plan-ev" : "twin3d-plan-rest";
             return (
               <g key={i}>
@@ -119,7 +124,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
                   onClick={choose} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } }}
                   style={c.kind === "stair" ? { fill: `url(#${clip}-stair)` } : active || (c.kind === "unit" && selection?.lv === floor.lv && floor.units?.[selection.index]?.ho === c.ho && floor.units?.[selection.index]?.area_m2 === c.area) ? { fill: "var(--track-page-soft)", stroke: "var(--track-page)", strokeWidth: 3 }
                     : c.kind === "lease" && vacant ? { fill: `url(#${hatch})` } : undefined}>
-                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)`
+                  <title>{c.kind === "unit" ? `${c.ho ?? "호수 미상"} · 전용 ${c.area.toFixed(1)}㎡(전유부)${su?.store ? ` · 상가정보 ${su.store.name}` : su && unitStoreState(su) === "none" ? " · 상가정보 기록 없음(공실 가능 · 현장 미확인)" : ""}`
                     : c.kind === "lease" ? `임대 공간 · 전용 약 ${m2(c.area)}(추정)${vacant ? " · 공실 층" : ""}`
                       : c.kind === "common" ? `공용(화장실·복도 등) · 이 칸 ${m2(c.area)}`
                         : c.kind === "stair" ? `계단 · ${areas.stair?.measured ? `대장 계단실 ${m2(c.area)}` : "넓이·자리 개략"}`
@@ -204,10 +209,13 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
             : <>계단 — 대장에 이 층 계단실 행이 없어 넓이·자리를 개략으로 그렸습니다(계단 개수는 대장에 없음).</>)}
         </p>
       )}
+      {nUnits > 0 && twin.stores_live && <p className="twin3d-note">{storesNote(twin)} 「기록 없음」은 확인된 공실이 아닙니다(현장 미확인).</p>}
       {frontEdge && front && <p className="twin3d-note">전면 {front.name}(OSM · 도로명주소) — {entry}. 진입 방식은 일반 구조 기준의 개략입니다.</p>}
       {(laid || windows.length > 0) && (
         <p className="twin3d-plan-legend" aria-label="배치도 범례">
           {nUnits > 0 && <span><i className="k-unit" />호실(전용)</span>}
+          {unitStates.has("store") && <span><i className="k-store" />상가정보 영업 기록</span>}
+          {unitStates.has("none") && <span><i className="k-nostore" />상가정보 기록 없음(공실 가능)</span>}
           {lease && <span><i className="k-lease" />임대 공간(전용 추정)</span>}
           {areas.common > 0 && laid && <span><i className="k-common" />공용(화장실·복도 등)</span>}
           {stair && <span><i className="k-stair" />계단</span>}
@@ -219,7 +227,11 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
       )}
       {!!floor.units?.length && <div className="twin3d-plan-units" role="group" aria-label="호실 선택">{floor.units.map((u, index) => <button type="button" key={index}
         aria-pressed={selection?.lv === floor.lv && selection.index === index} onClick={() => setSelection({ lv: floor.lv, index })}>{u.ho ?? "호수 미상"} · {u.area_m2 != null ? `전용 ${u.area_m2}㎡` : "면적 미제공"}</button>)}</div>}
-      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"}{picked.pub_m2 ? ` · 공용 ${picked.pub_m2}㎡ · 계약 ${Math.round((picked.area_m2 ?? 0) * 100 + picked.pub_m2 * 100) / 100}㎡` : ""} · 호실별 공실·점포 이력 귀속 미확인</p>}
+      {picked && <p role="status">선택 호실: {picked.ho ?? "미상"} · {picked.purps ?? "용도 미제공"} · 전용면적 {picked.area_m2 != null ? `${picked.area_m2}㎡(전유부)` : "미제공"}{picked.pub_m2 ? ` · 공용 ${picked.pub_m2}㎡ · 계약 ${Math.round((picked.area_m2 ?? 0) * 100 + picked.pub_m2 * 100) / 100}㎡` : ""}
+        {twin.stores_live
+          ? picked.store ? ` · 상가정보 ${picked.store.name}${picked.store.ind ? `(${picked.store.ind})` : ""} — 현장 미확인`
+            : unitStoreState(picked) === "none" ? " · 상가정보 기록 없음 — 공실 가능, 현장 미확인" : " · 상가정보 대조 불가(호수 없음)"
+          : " · 호실별 공실·점포 이력 귀속 미확인"}</p>}
       <p className="twin3d-note">
         외곽선 {Math.round(outline).toLocaleString("ko-KR")}㎡(V-World 형상 계산) <EvidenceBadge kind="계산" />
         {floor.area_m2 ? <> · 대장 층 면적 {floor.area_m2.toLocaleString("ko-KR")}㎡ <EvidenceBadge kind="실측" /></> : <> · 대장 층 면적 <span className="value-absent">자료 없음</span></>}

@@ -245,4 +245,34 @@ describe("BuildingTwinDialog", () => {
     expect(document.querySelectorAll(".twin3d-plan-ev").length).toBe(0);
     expect(screen.getAllByText(/조회를 거절해 표시하지 않음\(SERVICE_KEY_IS_NOT_REGISTERED_ERROR\)/).length).toBeGreaterThan(0);
   });
+
+  it("상가정보 호수 대조 — 영업 기록 · 기록 없음(공실 가능) · 대조 불가를 표 · 배치도에 나눠 적는다", async () => {
+    const stores_live = { status: "ok", source: "상가정보", live_status: "ok", has_ho: true, n_stores: 2, n_with_ho: 1,
+      units_total: 3, units_matched: 1, units_unchecked: 0 };
+    const units = [
+      { ho: "201", area_m2: 40, purps: "음식점", store: { name: "카페A", ind: "카페" }, store_checked: true },
+      { ho: "202", area_m2: 30, purps: "음식점", store: null, store_checked: true },
+      { ho: "203", area_m2: 20, purps: "음식점", store: null, store_checked: false },
+    ];
+    mount({ ...TWIN, stores_live, floors: TWIN.floors.map((f) => f.lv === 2 ? { ...f, units, stores: [{ name: "카페A", ind: "카페", ho: "201" }] } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
+    expect(screen.getByRole("columnheader", { name: "상가정보" })).toBeTruthy();
+    expect(screen.getByText("상가정보 영업 기록 1호", { exact: false })).toBeTruthy();
+    expect(screen.getByText("기록 없음")).toBeTruthy();
+    expect(document.querySelectorAll(".twin3d-store.is-unknown").length).toBe(1);
+    expect(document.querySelector(".twin3d-units .twin3d-note")?.textContent).toContain("공실 가능성이지 확인된 공실이 아닙니다");   // 확인된 공실이라 하지 않는다
+    expect(document.querySelectorAll(".twin3d-plan-cell.is-store").length).toBeGreaterThan(0);
+    expect(document.querySelectorAll(".twin3d-plan-cell.is-none").length).toBeGreaterThan(0);
+    expect(screen.getByLabelText("배치도 범례").textContent).toContain("상가정보 기록 없음(공실 가능)");
+    expect(screen.getByText("상가정보 점포")).toBeTruthy();
+  });
+
+  it("상가정보 대조 응답이 없으면(옛 응답) 상가정보 열을 내지 않는다", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
+    expect(screen.queryByRole("columnheader", { name: "상가정보" })).toBeNull();
+    expect(screen.getByText("호실별 공실은 모릅니다. 대장의 호수·면적·용도입니다.")).toBeTruthy();
+  });
 });
