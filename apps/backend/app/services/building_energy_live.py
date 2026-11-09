@@ -37,6 +37,14 @@ from datetime import date
 from app.core.config import settings
 
 BASE = "https://apis.data.go.kr/1613000/BldEngyHubService"
+# 거절(키 미등록)이면 다음 주소로 한 번 더 묻는다(2026-11-09 — 사용자는 「승인됨」인데 건축HUB 주소가 계속 403).
+# 같은 계정 키라도 승인된 서비스가 예전 「건물에너지정보 서비스」(1611000)일 수 있고, 게이트웨이가 http/https 를 달리 볼 수 있다.
+ENDPOINTS: list[tuple[str, str]] = [
+    ("건축HUB", BASE),
+    ("건축HUB(http)", "http://apis.data.go.kr/1613000/BldEngyHubService"),
+    ("구 건물에너지정보 서비스", "http://apis.data.go.kr/1611000/BldEngyService"),
+]
+_KEY_ERR = re.compile(r"KEY|등록|인증|승인|LIMIT|초과|HTTP 40[13]|Unauthorized|Forbidden", re.I)
 OPS = {"gas": "getBeGasUsgInfo", "electricity": "getBeElctyUsgInfo"}
 SOURCE = "국토교통부 건축HUB 건물에너지정보(국가건물에너지 통합관리시스템) — 실시간 조회"
 APPLY_URL = "https://www.data.go.kr/data/15135963/openapi.do"
@@ -106,9 +114,9 @@ def parse(raw: bytes) -> tuple[list[dict], int]:
     return rows, total
 
 
-def _get(op: str, params: dict, key: str) -> list[dict]:
+def _get(op: str, params: dict, key: str, base: str = BASE) -> list[dict]:
     q = urllib.parse.urlencode({"serviceKey": key, "_type": "json", "type": "json", "numOfRows": 100, "pageNo": 1, **params})
-    req = urllib.request.Request(f"{BASE}/{op}?{q}", headers={"User-Agent": "PlaceOS-twin-energy/1.0"})
+    req = urllib.request.Request(f"{base}/{op}?{q}", headers={"User-Agent": "PlaceOS-twin-energy/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as r:
             rows, _ = parse(r.read())
@@ -150,20 +158,25 @@ def summarise(rows: list[dict]) -> dict:
     return {"months": months, "unit": unit, "fields": sorted(rows[0].keys()) if rows else []}
 
 
-def _fetch_all(op: str, jib: dict, key: str, today: date) -> tuple[list[dict], str, list[str]]:
-    """(행, 방식, 물은 달). 먼저 useYm 없이 — 두 달 이상이면 그것으로, 아니면 한 달씩."""
-    try:
-        rows = _get(op, jib, key)
-        if len({str(r.get("useYm") or "") for r in rows}) >= 2:
-            return rows, "all", []
-    except EnergyError as e:
-        # 「필수값 누락」류라면 한 달씩으로 넘어간다. 키 거절은 한 달씩 해도 같다 — 그대로 올린다.
-        if re.search(r"KEY|등록|인증|승인|LIMIT|초과|HTTP 40[13]|Unauthorized|Forbidden", str(e), re.I):
-            raise
-    yms = months_back(today)
-    with ThreadPoolExecutor(max_workers=_WORKERS) as ex:
-        parts = list(ex.map(lambda ym: _get(op, {**jib, "useYm": ym}, key), yms))
-    return [r for p in parts for r in p], "monthly", yms
+def _fetch_all(op: str, jib: dict, key: str, today: date) -> tuple[list[dict], str, list[str], str]:
+    """(행, 방식, 물은 달, 쓴 주소 이름). 주소마다 먼저 useYm 없이 — 키 거절이면 다음 주소로.
+    받아 주는 주소에서 두 달 이상이 오면 그것으로, 아니면 한 달씩."""
+    tried: list[str] = []
+    for name, base in ENDPOINTS:
+        try:
+            rows = _get(op, jib, key, base=base)
+            if len({str(r.get("useYm") or "") for r in rows}) >= 2:
+                return rows, "all", [], name
+        except EnergyError as e:
+            if _KEY_ERR.search(str(e)):
+                tried.append(f"{name}: {e}")
+                continue                    # 이 주소는 이 키를 모른다 — 다음 주소
+            # 「필수값 누락」류 — 이 주소에서 한 달씩 묻는다
+        yms = months_back(today)
+        with ThreadPoolExecutor(max_workers=_WORKERS) as ex:
+            parts = list(ex.map(lambda ym: _get(op, {**jib, "useYm": ym}, key, base=base), yms))
+        return [r for p in parts for r in p], "monthly", yms, name
+    raise EnergyError(" · ".join(tried))
 
 
 def energy(pnu: str, kind: str = "gas", today: date | None = None) -> dict:
@@ -188,7 +201,7 @@ def energy(pnu: str, kind: str = "gas", today: date | None = None) -> dict:
     try:
         for attempt in range(1, _ATTEMPTS + 1):
             try:
-                rows, how, asked = _fetch_all(op, jib, key, today or date.today())
+                rows, how, asked, endpoint = _fetch_all(op, jib, key, today or date.today())
                 break
             except EnergyError:
                 raise
@@ -200,7 +213,7 @@ def energy(pnu: str, kind: str = "gas", today: date | None = None) -> dict:
         log.warning("energy live %s refused: %s", ck, e)
         with _lock:
             _last_fail = time.monotonic()
-        return {**base, "status": "refused", "error": str(e)[:160]}
+        return {**base, "status": "refused", "error": str(e)[:400]}
     except Exception as e:
         log.warning("energy live %s failed: %s: %s", ck, type(e).__name__, e)
         with _lock:
@@ -209,7 +222,7 @@ def energy(pnu: str, kind: str = "gas", today: date | None = None) -> dict:
     s = summarise(rows)
     # 물은 기간 — 그 안에서 값이 없는 달은 「자료 없음」(0 을 쓴 게 아니다)
     span = sorted(asked) if asked else [m["ym"] for m in s["months"]]
-    out = {**base, **s, "status": "ok", "query": how, "window": [span[0], span[-1]] if span else None}
+    out = {**base, **s, "status": "ok", "query": how, "endpoint": endpoint, "window": [span[0], span[-1]] if span else None}
     with _lock:
         if len(_cache) >= _CACHE_MAX:
             _cache.pop(next(iter(_cache)))

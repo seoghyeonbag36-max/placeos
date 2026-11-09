@@ -46,7 +46,7 @@ def test_monthly_fallback_and_window(monkeypatch):
     monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
     calls = []
 
-    def fake(op, params, key):
+    def fake(op, params, key, base=None):
         calls.append(params.get("useYm"))
         if "useYm" not in params:
             return [{"useYm": "202605", "useQty": "1"}]          # 한 달만 → 한 달씩으로 넘어간다
@@ -60,7 +60,7 @@ def test_monthly_fallback_and_window(monkeypatch):
 def test_refused_is_soft_and_names_the_apply_page(monkeypatch):
     monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
 
-    def refuse(op, params, key):
+    def refuse(op, params, key, base=None):
         raise E.EnergyError("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
     monkeypatch.setattr(E, "_get", refuse)
     out = E.energy(PNU, "gas")
@@ -75,12 +75,30 @@ def test_http_401_403_is_refused_with_the_code(monkeypatch):
     monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
     calls = []
 
-    def forbid(op, params, key):
+    def forbid(op, params, key, base=None):
         calls.append(1)
         raise E.EnergyError("HTTP 403 Forbidden")
     monkeypatch.setattr(E, "_get", forbid)
     out = E.energy(PNU, "gas")
-    assert out["status"] == "refused" and out["error"] == "HTTP 403 Forbidden" and len(calls) == 1   # 한 달씩 18콜로 번지지 않는다
+    # 주소마다 한 번씩만(한 달씩 18콜로 번지지 않는다) · 어느 주소가 무엇이라 했는지 남긴다
+    assert out["status"] == "refused" and len(calls) == len(E.ENDPOINTS)
+    assert out["error"].startswith("건축HUB: HTTP 403 Forbidden") and "구 건물에너지정보 서비스: HTTP 403 Forbidden" in out["error"]
+
+
+def test_falls_through_to_the_endpoint_that_accepts_the_key(monkeypatch):
+    monkeypatch.setattr(E.settings, "data_go_kr_service_key", "dummy", raising=False)
+    seen = []
+
+    def by_base(op, params, key, base=None):
+        seen.append(base)
+        if "1611000" not in base:
+            raise E.EnergyError("HTTP 403 SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
+        return [{"useYm": "202604", "useQty": "10"}, {"useYm": "202605", "useQty": "12"}]
+    monkeypatch.setattr(E, "_get", by_base)
+    out = E.energy(PNU, "gas")
+    assert out["status"] == "ok" and out["endpoint"] == "구 건물에너지정보 서비스" and out["query"] == "all"
+    assert [m["ym"] for m in out["months"]] == ["202604", "202605"]
+    assert len(seen) == 3 and "1613000" in seen[0]
 
 
 def test_route():
