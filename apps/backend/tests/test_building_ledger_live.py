@@ -68,3 +68,29 @@ def test_twin_carries_ledger_live(monkeypatch):
     assert lv["status"] == "ok" and lv["elevators"] == {"passenger": 1, "emergency": 0}
     assert lv["floors"]["4"]["stair_m2"] == 14.3
     assert body["floors"]                                             # 트윈 본체는 그대로
+
+
+def test_network_error_is_retried_once(monkeypatch):
+    """새 인스턴스 첫 연결 실패는 한 번 더 시도해 채운다(2026-11-09 배포 직후 관측)."""
+    monkeypatch.setattr(L.settings, "data_go_kr_service_key", "dummy", raising=False)
+    calls = {"n": 0}
+
+    def flaky(op, j, k):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise TimeoutError("cold start")
+        return TITLES if op == "getBrTitleInfo" else FLOORS
+    monkeypatch.setattr(L, "_fetch", flaky)
+    out = L.ledger("1123010800100160081")
+    assert out["status"] == "ok" and out["elevators"] == {"passenger": 1, "emergency": 0}
+
+
+def test_refusal_is_not_retried(monkeypatch):
+    monkeypatch.setattr(L.settings, "data_go_kr_service_key", "dummy", raising=False)
+    calls = {"n": 0}
+
+    def refuse(op, j, k):
+        calls["n"] += 1
+        raise L.LedgerError("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
+    monkeypatch.setattr(L, "_fetch", refuse)
+    assert L.ledger("1123010800100160081")["status"] == "refused" and calls["n"] == 1

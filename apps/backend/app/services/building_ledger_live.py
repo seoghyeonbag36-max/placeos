@@ -14,7 +14,8 @@ Gold(`building_floors.json.gz`)는 층별개요를 **층당 한 줄로 접고** 
 
 - 승강기 **위치**는 대장에 없다 — 개수만 실측이다. 배치도의 승강기 칸 자리 · 크기는 개략이다.
 - 계단 **개수**는 대장에 없다. 층별개요에 계단실 행이 있으면 그 층의 계단실 넓이만 실측이다.
-- 필드 이름은 공식 활용가이드로 확인하지 못했다(2026-11-09) — 응답에 없으면 `elevators=None` · `fields_missing` 으로 밝힌다.
+- 필드 이름은 공식 활용가이드 대신 **실제 응답으로 확인했다**(2026-11-09 프로덕션 · 경희대 경성빌딩 승용 1 · 비상용 0 · 높이 17.43m).
+  응답에 없으면 `elevators=None` · `fields_missing` 으로 밝힌다.
 """
 from __future__ import annotations
 
@@ -32,7 +33,10 @@ BASE = "http://apis.data.go.kr/1613000/BldRgstHubService"
 SOURCE = "건축물대장(건축HUB) 표제부 · 층별개요 — 실시간 조회"
 _TIMEOUT_S = 8.0
 _TTL_S = 6 * 3600.0          # 대장은 자주 안 바뀐다 — 같은 지번은 6시간 재사용
-_FAIL_BACKOFF_S = 60.0       # 실패 뒤 잠시 다시 치지 않는다(키 거절 · 장애 때 트윈마다 기다리지 않게)
+_FAIL_BACKOFF_S = 15.0       # 실패 뒤 잠시 다시 치지 않는다(키 거절 · 장애 때 트윈마다 기다리지 않게)
+# 네트워크 오류는 한 번 더 시도한다 — 새 Cloud Run 인스턴스의 첫 외부 연결이 늦어 첫 조회만 실패하던 것(2026-11-09 배포 직후 관측 ·
+# 도로 타일과 같은 증상). 키 거절(LedgerError)은 다시 해도 같으니 재시도하지 않는다.
+_ATTEMPTS = 2
 _MAX_PAGES = 5
 _CACHE_MAX = 512
 _cache: dict[str, tuple[float, dict]] = {}
@@ -183,8 +187,17 @@ def ledger(pnu: str) -> dict:
         if now - _last_fail < _FAIL_BACKOFF_S:
             return {**base, "status": "backoff"}
     try:
-        titles = _fetch("getBrTitleInfo", jib, key)
-        floor_rows = _fetch("getBrFlrOulnInfo", jib, key)
+        for attempt in range(1, _ATTEMPTS + 1):
+            try:
+                titles = _fetch("getBrTitleInfo", jib, key)
+                floor_rows = _fetch("getBrFlrOulnInfo", jib, key)
+                break
+            except LedgerError:
+                raise
+            except Exception as e:
+                if attempt == _ATTEMPTS:
+                    raise
+                log.warning("ledger live %s attempt %d failed: %s: %s — retrying", pnu, attempt, type(e).__name__, e)
     except LedgerError as e:
         log.warning("ledger live %s refused: %s", pnu, e)
         with _lock:
