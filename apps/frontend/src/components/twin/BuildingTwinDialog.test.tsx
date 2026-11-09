@@ -268,6 +268,18 @@ describe("BuildingTwinDialog", () => {
     expect(screen.getByText("상가정보 점포")).toBeTruthy();
   });
 
+  it("상가정보 점포에 호수가 하나도 없으면 열을 달지 않고 그 사유를 적는다", async () => {
+    const stores_live = { status: "ok", source: "상가정보", live_status: "ok", has_ho: true, n_stores: 12, n_with_ho: 0,
+      units_total: 1, units_matched: 0, units_unchecked: 1 };
+    mount({ ...TWIN, stores_live, floors: TWIN.floors.map((f) => f.lv === 2 ? { ...f, units: [{ ho: "201", area_m2: 40, purps: "음식점", store: null, store_checked: false }],
+      stores: [{ name: "카페A", ind: "카페", ho: null }] } : f) });
+    await screen.findByRole("heading", { name: "1F · 공실확정" });
+    fireEvent.click(within(screen.getByRole("group", { name: "층 이동" })).getByRole("button", { name: "2F 영업 확인" }));
+    expect(screen.queryByRole("columnheader", { name: "상가정보" })).toBeNull();
+    expect(screen.getAllByText(/점포 12곳 모두 호수가 비어 있어 호실별로 맞추지 못했습니다/).length).toBeGreaterThan(0);
+    expect(screen.getByText("상가정보 점포")).toBeTruthy();                        // 층 점포 목록은 그대로
+  });
+
   it("상가정보 대조 응답이 없으면(옛 응답) 상가정보 열을 내지 않는다", async () => {
     mount();
     await screen.findByRole("heading", { name: "1F · 공실확정" });

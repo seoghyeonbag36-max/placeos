@@ -209,7 +209,7 @@ export default function FloorPlan({ twin, floor }: { twin: BuildingTwin; floor: 
             : <>계단 — 대장에 이 층 계단실 행이 없어 넓이·자리를 개략으로 그렸습니다(계단 개수는 대장에 없음).</>)}
         </p>
       )}
-      {nUnits > 0 && twin.stores_live && <p className="twin3d-note">{storesNote(twin)} 「기록 없음」은 확인된 공실이 아닙니다(현장 미확인).</p>}
+      {nUnits > 0 && twin.stores_live && <p className="twin3d-note">{storesNote(twin)}{twin.stores_live.n_with_ho > 0 ? " 「기록 없음」은 확인된 공실이 아닙니다(현장 미확인)." : ""}</p>}
       {frontEdge && front && <p className="twin3d-note">전면 {front.name}(OSM · 도로명주소) — {entry}. 진입 방식은 일반 구조 기준의 개략입니다.</p>}
       {(laid || windows.length > 0) && (
         <p className="twin3d-plan-legend" aria-label="배치도 범례">
