@@ -107,6 +107,17 @@ describe("interiorLayout", () => {
     expect(JSON.stringify(run(["포토존", "우드"]))).toBe(JSON.stringify(run(["포토존", "우드"])));
   });
 
+  it("공실 바닥 치수 — 가로는 전면 변 방향 · 세로는 안쪽 · 높이는 층고 · 치수선은 공간 밖 0.7m", () => {
+    const L = interiorLayout({ outline: OUTLINE, pieces: [], frontEdge: [[0, 0], [14, 0]], angle: 0, lv: 1, keywords: [],
+      floorHeight: { m: 4.2, basis: "건축물대장 높이 ÷ 지상 층수 · 계산", measured: true } });
+    expect(L.dims.w).toBeCloseTo(14, 6); expect(L.dims.d).toBeCloseTo(12, 6); expect(L.dims.h).toBe(4.2);
+    expect(L.dims.wLine[0][1]).toBeCloseTo(-0.7, 6); expect(L.dims.wLine[1][1]).toBeCloseTo(-0.7, 6);   // 전면(남) 앞
+    expect(L.dims.dLine[0][0]).toBeCloseTo(14.7, 6);                                                   // 오른쪽(동) 옆
+    expect(L.summary.join(" ")).toMatch(/공실 바닥 가로 약 14\.0m × 세로 약 12\.0m\(외곽선\) · 높이\(층고\) 약 4\.2m\(건축물대장 높이/);
+    const est = interiorLayout({ outline: OUTLINE, pieces: [], frontEdge: [[0, 0], [14, 0]], angle: 0, lv: 1, keywords: [] });
+    expect(est.dims.h).toBe(3.3); expect(est.dims.hMeasured).toBe(false);
+  });
+
   it("집합건물 — 가장 큰 호실을 꾸미고 그 전유부 면적을 적는다", () => {
     const L = run([], { units: [{ ho: "101", area_m2: 40 }, { ho: "102", area_m2: 70 }, { ho: "103", area_m2: 30 }] });
     expect(L.spaceKind).toBe("unit");

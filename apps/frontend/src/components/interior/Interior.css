@@ -10,6 +10,7 @@
 .interior3d-label { font-size: 11px; font-weight: 700; color: var(--ink); background: rgba(255,255,255,.88); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
 .interior3d-label.is-muted { color: var(--muted); font-weight: 600; }
 .interior3d-label.is-door { color: #B4471B; }
+.interior3d-label.is-dim { color: #FFFFFF; background: #1C2533; border-color: #1C2533; font-variant-numeric: tabular-nums; }
 .interior2d { display: block; width: 100%; height: auto; max-height: 420px; background: #F4F6F8; border-radius: 12px; }
 .interior3d-summary, .interior3d-notes { margin: 0; padding-left: 1.1em; font-size: var(--fs-caption); }
 .interior3d-notes { color: #8A5A00; }

@@ -50,6 +50,9 @@ it("고른 공실의 트윈으로 3D 내부를 세우고 AI 이미지 생성은 
   expect(input.layout.spaceKind).toBe("lease");
   expect(screen.getByText(/꾸민 공간 전용 약 128㎡\(추정\)/)).toBeTruthy();
   expect(screen.getByText("3D 디지털 트윈 · 규칙 배치 예시 · 실측 도면 아님")).toBeTruthy();
+  // 공실 바닥 가로 · 세로 · 높이(층고) — 높이 자료가 V-World 10m ÷ 지상 3층
+  expect(screen.getByText(/공실 바닥 가로 약 [\d.]+m × 세로 약 [\d.]+m\(개략 칸 · 가장 긴 곳\) · 높이\(층고\) 약 3\.3m\(V-World 높이 ÷ 지상 층수 · 계산\)/)).toBeTruthy();
+  expect(input.layout.dims.h).toBeCloseTo(3.3, 6);
   // AI 생성 · 동의 · 한도 · 업로드가 없다
   expect(screen.queryByRole("checkbox")).toBeNull();
   expect(screen.queryByRole("button", { name: /AI 참고 이미지/ })).toBeNull();
@@ -111,6 +114,8 @@ it("WebGL 이 안 되면 같은 배치를 평면으로 보인다", async () => {
   mount();
   expect(await screen.findByRole("img", { name: /공실 내부 배치 평면/ })).toBeTruthy();
   expect(screen.getByText(/3D 를 그리지 못해 평면으로/)).toBeTruthy();
+  const dimText = document.querySelector(".interior2d-dims")?.textContent ?? "";
+  expect(dimText).toMatch(/가로 [\d.]+m/); expect(dimText).toMatch(/세로 [\d.]+m/); expect(dimText).toMatch(/높이 3\.3m/);
 });
 
 it("자리를 고르지 않았으면 트윈을 부르지 않고 안내한다", () => {

@@ -84,6 +84,21 @@ export interface InteriorInput {
   keywords: readonly string[];
   /** 꾸밀 공간의 공공데이터 넓이(㎡) — 임대 공간은 전용 추정(`planLayout().areas.excl`). 칸 모양 넓이는 개략이라 화면 숫자로 쓰지 않는다 */
   spaceM2?: number | null;
+  /** 높이(층고) — 대장 높이 ÷ 지상 층수 · V-World 높이 ÷ 지상 층수 · 추정 3.3m(`floorHeightOf`) */
+  floorHeight?: FloorHeight | null;
+}
+
+export interface FloorHeight { m: number; basis: string; measured: boolean }
+
+/** 공실 바닥 치수(2026-11-09 사용자 요청) — 가로 = 전면(입구) 변 방향 길이, 세로 = 안쪽 방향 길이, 높이 = 층고. 치수선은 공간 밖 0.7m */
+export interface InteriorDims {
+  w: number; d: number; h: number; hBasis: string; hMeasured: boolean;
+  /** 치수선(로컬 m) — 가로는 전면 앞, 세로는 오른쪽 옆 */
+  wLine: [Point, Point]; dLine: [Point, Point];
+  /** 공간 모서리 → 치수선 보조선 */
+  ext: [Point, Point][];
+  /** 높이 치수선을 세울 바닥 점(가로 · 세로 치수선이 만나는 모서리) */
+  corner: Point;
 }
 
 export interface InteriorLayout {
@@ -106,6 +121,7 @@ export interface InteriorLayout {
   /** 화면에 그대로 적는 요약 · 주의 */
   summary: string[];
   notes: string[];
+  dims: InteriorDims;
 }
 
 // ── 기하 ────────────────────────────────────────────────────────────────
@@ -205,6 +221,17 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
   const S0 = Math.min(...st.map((p) => p[0])), S1 = Math.max(...st.map((p) => p[0]));
   const T0 = Math.min(...st.map((p) => p[1])), T1 = Math.max(...st.map((p) => p[1]));
   const W = S1 - S0, D = T1 - T0;
+  // 공실 바닥 치수 — 칸 모양(개략)의 가장 긴 가로 · 세로. 치수선은 공간 밖 0.7m(전면 앞 · 오른쪽 옆)
+  const OFF = 0.7;
+  const fh = inp.floorHeight ?? { m: 3.3, basis: "층고 추정 3.3m(높이 자료 없음)", measured: false };
+  const dims: InteriorDims = {
+    w: W, d: D, h: fh.m, hBasis: fh.basis, hMeasured: fh.measured,
+    wLine: [fromST(S0, T0 - OFF), fromST(S1, T0 - OFF)],
+    dLine: [fromST(S1 + OFF, T0), fromST(S1 + OFF, T1)],
+    ext: [[fromST(S0, T0), fromST(S0, T0 - OFF - 0.2)], [fromST(S1, T0), fromST(S1, T0 - OFF - 0.2)],
+      [fromST(S1, T0), fromST(S1 + OFF + 0.2, T0)], [fromST(S1, T1), fromST(S1 + OFF + 0.2, T1)]],
+    corner: fromST(S1 + OFF, T0 - OFF),
+  };
   const inSpace = (p: Point) => polys.some((q) => inside(p, q));
   const WALL = 0.12;                      // 벽에서 띄우는 여유
   const fits = (r: Rect) => {
@@ -448,10 +475,11 @@ export function interiorLayout(inp: InteriorInput): InteriorLayout {
     extras.push("샹들리에 · 러그");
   }
 
+  summary.unshift(`공실 바닥 가로 약 ${W.toFixed(1)}m × 세로 약 ${D.toFixed(1)}m${spaceKind === "outline" ? "(외곽선)" : "(개략 칸 · 가장 긴 곳)"} · 높이(층고) 약 ${fh.m.toFixed(1)}m(${fh.basis})`);
   summary.unshift(`${mode === "seating" ? "좌석형(카페 · 음식)" : "진열형(소매 · 서비스)"} · 꾸민 공간 ${spaceM2 != null
     ? `${spaceKind === "lease" ? "전용 약 " : spaceKind === "unit" ? "전용 " : "층 바닥 "}${Math.round(spaceM2).toLocaleString("ko-KR")}㎡${spaceKind === "lease" ? "(추정)" : spaceKind === "unit" ? "(전유부)" : "(대장)"}`
     : "넓이 자료 없음"}`);
   if (extras.length) summary.push(extras.join(" · "));
   if (!k.length) notes.push("키워드를 고르면 가구 · 집기 · 색이 그 키워드에 맞게 다시 놓입니다.");
-  return { space, spaceKind, spaceM2, blocked, spaceArea, spaceBasis, door: { at: fromST(sd, T0), w: 1.2, rot }, frame: { o, u, v }, items, palette, mode, seats, summary, notes };
+  return { space, spaceKind, spaceM2, blocked, spaceArea, spaceBasis, door: { at: fromST(sd, T0), w: 1.2, rot }, frame: { o, u, v }, items, palette, mode, seats, summary, notes, dims };
 }
