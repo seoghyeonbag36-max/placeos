@@ -21,10 +21,13 @@ from data.pipelines.build_hub_outlines import _heatmap_service, outline
 from data.pipelines.build_rone_history import series_by_hub
 from data.pipelines.build_stores_lite import (
     LITE_FIELDS,
+    LITE_FIELDS_V1,
     BrandMatcher,
     industry_of,
+    lite_doc,
     name_key,
     store_floor,
+    store_ho,
 )
 
 GOLD = Path(__file__).resolve().parents[1] / "gold"
@@ -130,16 +133,35 @@ def test_building_floors_size_budget():
 @pytest.mark.parametrize("slug", HUBS)
 def test_stores_lite_hub(slug):
     doc = _gz(slug, "stores_lite.json.gz")
-    assert doc["slug"] == slug and doc["fields"] == LITE_FIELDS and doc["n"] == len(doc["rows"]) > 0
+    # 호수를 싣기 전 판(8칸)도 받는다 — 재빌드는 bronze 가 있는 수집 PC 몫이라 거점마다 시차가 난다(2026-11-09)
+    assert doc["slug"] == slug and doc["fields"] in (LITE_FIELDS, LITE_FIELDS_V1) and doc["n"] == len(doc["rows"]) > 0
     head = doc["rows"][0]
-    assert len(head) == len(LITE_FIELDS)
+    assert len(head) == len(doc["fields"])
     lat, lng = head[LITE_FIELDS.index("lat")], head[LITE_FIELDS.index("lng")]
     assert round(lat, 5) == lat and 33 < lat < 39 and 124 < lng < 132
 
 
 def test_stores_lite_size_budget_and_no_private_fields():
     assert sum((GOLD / s / "stores_lite.json.gz").stat().st_size for s in HUBS) <= 15 * MB
-    assert not {"hoNo", "ho", "tel", "phone"} & set(LITE_FIELDS)
+    # 전화는 싣지 않는다. 호수(ho)는 2026-11-09 사용자 요청으로 싣는다 — 점포 위치(공공데이터)이지 개인 정보가 아니다.
+    assert not {"hoNo", "tel", "phone", "telNo"} & set(LITE_FIELDS)
+    assert LITE_FIELDS[: len(LITE_FIELDS_V1)] == LITE_FIELDS_V1   # 앞 칸 자리를 바꾸지 않는다(위치로 읽는 소비자)
+
+
+@pytest.mark.parametrize("raw,want", [("101호", "101호"), (" B 01 ", "B01"), ("", None), (None, None), ("１０１", "101")])
+def test_store_ho(raw, want):
+    assert store_ho(raw) == want
+
+
+def test_lite_doc_keeps_ho_and_counts_it():
+    rows = [
+        {"bizesId": "a", "bizesNm": "카페A", "lat": 37.5, "lon": 127.0, "flrNo": "2", "hoNo": "201호", "lnoCd": "1"},
+        {"bizesId": "b", "bizesNm": "학원B", "lat": 37.5, "lon": 127.0, "flrNo": "", "hoNo": "", "lnoCd": "1"},
+    ]
+    doc = lite_doc("t", rows, None, BrandMatcher({}))
+    ho = LITE_FIELDS.index("ho")
+    assert doc["fields"] == LITE_FIELDS and doc["n_with_ho"] == 1
+    assert {r[0]: r[ho] for r in doc["rows"]} == {"카페A": "201호", "학원B": None}
 
 
 @pytest.mark.parametrize("raw,want", [("1", 1), ("B1", -1), ("지", -99), ("", None), (None, None), ("401", None)])

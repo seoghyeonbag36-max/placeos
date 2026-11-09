@@ -6,7 +6,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.schemas.building import BuildingHistory
 from app.schemas.renewal import BuildingTwin
-from app.services import building_floors, building_ledger_live, building_twin, twin_roads
+from app.services import building_floors, building_ledger_live, building_twin, store_units, twin_roads
 from app.services.building_history import get_history
 
 router = APIRouter()
@@ -37,12 +37,16 @@ async def get_building_twin(
     if out is None:
         raise HTTPException(status_code=404, detail=f"unknown building: {building_id}")
     # 도로 타일 · 대장 실시간 조회는 블로킹 네트워크 호출 — 스레드풀에서 동시에 부른다(느린 쪽만큼만 기다린다).
-    roads, ledger = await asyncio.gather(
+    pnu = building_floors.pnu_of(out.get("id") or building_id)
+    roads, ledger, stores = await asyncio.gather(
         run_in_threadpool(twin_roads.roads_for_twin, out["lat"], out["lng"], out.get("ring"), out.get("road_addr")),
-        run_in_threadpool(building_ledger_live.ledger, building_floors.pnu_of(out.get("id") or building_id)),
+        run_in_threadpool(building_ledger_live.ledger, pnu),
+        run_in_threadpool(store_units.stores_for, district, pnu, out["lat"], out["lng"], out.get("ring")),
     )
     out.update(roads)
     out["ledger_live"] = ledger
+    # 상가정보 점포를 층 · 호실에 단다(호실 대조는 호수가 있을 때만 — 실시간 또는 재빌드한 Gold)
+    out["stores_live"] = store_units.annotate(out["floors"], stores)
     return out
 
 

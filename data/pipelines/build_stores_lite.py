@@ -1,7 +1,7 @@
 """[Posting·Platform] 점포 요약 · 체인 추정 표 · 업종 동시 입지 lift.
 
 산출물
-  gold/{거점}/stores_lite.json.gz          반경 경쟁(`/nearby-stores`)의 재료. 호수·전화 없음
+  gold/{거점}/stores_lite.json.gz          반경 경쟁(`/nearby-stores`) · 트윈 호실 대조의 재료. 전화 없음 · 호수는 2026-11-09 부터 싣는다
   gold/platform_store_brands.json          체인 추정 표
   gold/platform_industry_colocation.json   함께 모이는 업종(관측) — 100m 격자 동시 입지 lift
 
@@ -237,7 +237,17 @@ def _coord(row: dict) -> tuple[float, float] | None:
     return (lat, lng) if lat and lng else None
 
 
-LITE_FIELDS = ["name", "brand", "mcls", "scls", "lat", "lng", "floor", "lno"]
+# 호수(`ho`)는 2026-11-09 사용자 요청으로 남긴다 — 트윈이 집합건물 전유부 호실(`hoNm`)과 점포를 맞춘다
+# (apps/backend/app/services/store_units.py). 끝에 붙여 앞 8칸의 자리는 그대로다. 그 전 판(8칸)은 `LITE_FIELDS_V1`.
+# 상가정보는 호를 비워 두는 행이 많다(공란은 null — 「그 호실이 비었다」가 아니다).
+LITE_FIELDS_V1 = ["name", "brand", "mcls", "scls", "lat", "lng", "floor", "lno"]
+LITE_FIELDS = [*LITE_FIELDS_V1, "ho"]
+
+
+def store_ho(raw: object) -> str | None:
+    """hoNo → 공백을 걷은 원문(「101호」 · 「B01」). 공란은 None. 호실과 맞추는 정규화는 서버(store_units.ho_key)가 한다."""
+    s = re.sub(r"\s+", "", unicodedata.normalize("NFKC", str(raw if raw is not None else "")))
+    return s or None
 
 
 def lite_doc(slug: str, rows: list[dict], as_of: str | None, matcher: BrandMatcher) -> dict:
@@ -256,13 +266,16 @@ def lite_doc(slug: str, rows: list[dict], as_of: str | None, matcher: BrandMatch
         if mcls:
             cats[mcls] = str(r.get("indsMclsNm") or "").strip()
         out.append([str(r.get("bizesNm") or "").strip(), matcher.match(r), mcls or None, scls or None,
-                    round(pt[0], 5), round(pt[1], 5), store_floor(r.get("flrNo")), r.get("lnoCd") or None])
+                    round(pt[0], 5), round(pt[1], 5), store_floor(r.get("flrNo")), r.get("lnoCd") or None,
+                    store_ho(r.get("hoNo"))])
     out.sort(key=lambda x: (x[7] or "", x[0]))
     return {
         "slug": slug, "as_of": as_of, "n": len(out),
-        "source": "소상공인시장진흥공단 상가(상권)정보 (bronze stores_raw — 호수·전화 제외)",
+        "source": "소상공인시장진흥공단 상가(상권)정보 (bronze stores_raw — 전화 제외)",
         "note": ("brand 는 체인 추정(platform_store_brands.json)이고 가맹 여부 확인값이 아니다. 좌표는 건물 단위라 같은 "
-                 f"건물 점포는 좌표가 같다. floor 는 지하 음수 · {BASEMENT_UNKNOWN} = 지하(층 번호 없음) · null = 층 미상."),
+                 f"건물 점포는 좌표가 같다. floor 는 지하 음수 · {BASEMENT_UNKNOWN} = 지하(층 번호 없음) · null = 층 미상. "
+                 "ho 는 상가정보 호(공백 제거 원문) · null = 호 미상(호실이 비었다는 뜻이 아니다)."),
+         "n_with_ho": sum(1 for x in out if x[8]),
         "fields": LITE_FIELDS, "categories": dict(sorted(cats.items())), "rows": out,
     }
 
