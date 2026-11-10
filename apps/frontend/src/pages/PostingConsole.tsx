@@ -591,10 +591,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             {unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>}
           </> },
         // 「검증 리포트」 탭은 Posting 에서 뺐다(2026-11-07 사용자 요청). 종합 리포트는 지도 탐색의 「검증 리포트」(App.tsx)와 Program 에 그대로 있다.
-        // 2026-11-10 사용자 요청 — 공실까지 지하철역 · 버스정류장에서 걸어서 몇 분인지(TMAP 보행 경로) 보인다. 쪽을 열면 바로 조회한다
+        // 2026-11-10 사용자 요청 — 공실까지 지하철역 · 버스정류장에서 걸어서 몇 분인지(TMAP 보행 경로) 보인다. 쪽을 열면 바로 조회한다.
+        // 쪽 나눔이 없는 단독 렌더(guided 아님)는 모든 쪽이 한꺼번에 그려져 「연 것」이 아니다 — 그때는 종전대로 펼칠 때만 조회한다
         { id: "access", label: "찾아오는 길", description: "검토하는 공실까지 지하철역 · 버스정류장에서 걸어서 얼마나 걸리는지와 주변 교통을 확인하세요.", content:
           unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
-            destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} openOnMount walkSummary /> : <p>자리를 먼저 선택해 주세요.</p> },
+            destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} openOnMount={guided} walkSummary /> : <p>자리를 먼저 선택해 주세요.</p> },
         { id: "risk", label: "위험 확인", description: "이 자리를 떨어뜨릴 이유가 있는지, 계약 전에 더 확인할 것은 무엇인지 시뮬레이션 결과와 입력의 출처로 가릅니다.", content:
           <PostingRiskCheck result={result} strategy={calculation?.input.strategy} industry={calculation?.input.industry_type ?? industry}
             busy={busy} stale={!!changedInput} /> },
