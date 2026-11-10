@@ -7,8 +7,21 @@ import { district, postings, simulateResult } from "@/test/fixtures";
 // 오른쪽 칸 순서(2026-11-10 사용자 요청) — 왼쪽 입력 칸은 그대로다. 검증 program 만들기는 「비용 비교 및 결정」 안에 있다
 const POSTING_PAGES = ["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
 
+// 테스트 전용 합성 응답 — 실제는 /travel/access 의 카카오 Local · TMAP 보행 경로 · 서울 열린데이터
+const ACCESS = {
+  destination: { lat: 37.52, lng: 127.02 }, queried_at: "2026-11-10T01:00:00Z", bus_window: null,
+  subway: { status: "ok", radius_meters: 1000, items: [{ kind: "subway", name: "신사역", detail: "3호선", point: { lat: 37.52, lng: 127.02 },
+    straight_meters: 546, walk: { status: "ok", source: "tmap_pedestrian", duration_seconds: 521, distance_meters: 640 },
+    daily_riders: null, route_count: null, source: "kakao_local", place_url: null }] },
+  bus_stops: { status: "ok", radius_meters: 500, items: [{ kind: "bus_stop", name: "가로수길 정류장", detail: null, point: { lat: 37.52, lng: 127.02 },
+    straight_meters: 120, walk: { status: "ok", source: "tmap_pedestrian", duration_seconds: 150, distance_meters: 160 },
+    daily_riders: 900, route_count: 3, source: "seoul_open_data", place_url: null }] },
+  parking: { status: "no_results", radius_meters: 500, items: [] },
+};
+
 function installApi(empty = false) {
   return installFetchStub([
+    { match: /travel\/access$/, body: ACCESS },
     { match: /commercial-districts$/, body: [district("garosugil")] },
     { match: /commercial-districts\/([^/]+)\/postings$/, body: (m: RegExpExecArray) => empty ? [] : postings(m[1], 2) },
     { match: /simulate-revenue$/, body: (_m: RegExpExecArray, call: ApiCall) => {
@@ -150,5 +163,17 @@ describe("단계형 비용 검토", () => {
     drafts.set(key, { ...saved, page: "interior" });
     render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     expect(screen.getByRole("button", { name: "상권 맞춤 인테리어" }).getAttribute("aria-current")).toBe("page");
+  });
+  it("찾아오는 길은 열자마자 공실까지 지하철역 · 버스정류장에서 걸어서 걸리는 시간을 보인다(2026-11-10)", async () => {
+    const api = installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    expect(api.count(/travel\/access$/)).toBe(0);   // 쪽을 열기 전에는 부르지 않는다
+    fireEvent.click(screen.getByRole("button", { name: "찾아오는 길" }));
+    const summary = await screen.findByRole("list", { name: "걸어서 걸리는 시간" });
+    expect(summary.textContent).toContain("지하철역에서걸어서 약 9분신사역");
+    expect(summary.textContent).toContain("버스정류장에서걸어서 약 3분가로수길 정류장");
+    expect(screen.getByText("지하철역에서 걸어서")).toBeTruthy();
+    expect(api.count(/travel\/access$/)).toBe(1);
   });
 });
