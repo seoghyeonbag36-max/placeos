@@ -165,6 +165,15 @@ function NodeSheet({ node, byId, districts, industryOn, onClose }: {
   );
 }
 
+/** 상권 흐름을 닫아 둔 동안(2026-11-10 사용자 결정 — 사이트는 서울만 · `lib/siteScope`) 옛 주소로 들어온 사람에게 보이는 화면.
+ *  흐름은 파주 · 고양을 잇는 산출물이라 서울만 보일 때는 열지 않는다. 데이터와 화면 코드는 그대로 있다 */
+export function CorridorClosed() {
+  return <FlowScreen back="/home" right={<CloseButton />} title="손님 흐름은 지금 쉬고 있어요">
+    <ResultView title="지금은 서울 상권만 보여 드려요" body="파주 · 고양을 잇는 손님 흐름은 서울 밖 상권을 다시 열 때 함께 열어요."
+      action={{ label: "홈으로", onClick: () => go("/home") }} />
+  </FlowScreen>;
+}
+
 export function Corridor({ id }: { id: string }) {
   const { state, update } = useFlow();
   const data = useFlowData();

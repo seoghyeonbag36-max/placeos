@@ -18,6 +18,7 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parents[3]
 _PAGE_HUBS = _ROOT / "data" / "config" / "page_hubs.py"
 _FACTS = _ROOT / "apps" / "frontend" / "src" / "lib" / "landingFacts.ts"
+_SITE_SCOPE = _ROOT / "apps" / "frontend" / "src" / "lib" / "siteScope.ts"
 
 
 def _active_hubs():
@@ -34,11 +35,26 @@ def _landing_hubs() -> int:
     return int(m.group(1))
 
 
+def _site_cities() -> set[str]:
+    """사이트에 보이는 도시(2026-11-10 사용자 결정: 서울만) — `lib/siteScope.ts` 의 `SITE_CITIES` 를 읽는다."""
+    text = _SITE_SCOPE.read_text(encoding="utf-8")
+    m = re.search(r"export\s+const\s+SITE_CITIES\b[^=]*=\s*new\s+Set\(\[([^\]]*)\]\)", text)
+    assert m, f"{_SITE_SCOPE} 에서 SITE_CITIES 를 못 읽었다 — 모양을 바꿨다면 이 테스트도 같이 고친다"
+    cities = set(re.findall(r"[\"']([a-z0-9-]+)[\"']", m.group(1)))
+    assert cities, "SITE_CITIES 가 비었다 — 사이트에 보이는 도시가 하나도 없다"
+    return cities
+
+
 def test_landing_hub_count_matches_served_hubs():
-    served = len(_active_hubs())
+    """랜딩은 **보이는** 서빙 거점 수를 말한다 — 서울 밖 거점은 서빙·데이터는 그대로지만 사이트에 안 보인다(2026-11-10)."""
+    cities = _site_cities()
+    hubs = _active_hubs()
+    unknown = cities - {h.city for h in hubs.values()}
+    assert not unknown, f"siteScope.SITE_CITIES 에 서빙 거점이 없는 도시가 있다: {sorted(unknown)}"
+    served = sum(1 for h in hubs.values() if h.city in cities)
     claimed = _landing_hubs()
     assert claimed == served, (
-        f"랜딩이 「{claimed}개 상권」이라고 말하는데 서빙 거점은 {served}개다. "
+        f"랜딩이 「{claimed}개 상권」이라고 말하는데 사이트에 보이는 서빙 거점({'·'.join(sorted(cities))})은 {served}개다. "
         "apps/frontend/src/lib/landingFacts.ts 의 LANDING_HUBS 를 고칠 것(docs/spec-landing-founders-2026-10-08.md)."
     )
 

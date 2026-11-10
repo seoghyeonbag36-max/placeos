@@ -211,8 +211,8 @@ describe("ProgramStudio — 검증 브리프", () => {
     const api = mount({
       props: { handoff },
       routes: [{ match: /\/commercial-districts$/, body: [
-        { id: "garosugil", name: "가로수길", gu: "강남구", center: [37.52, 127.02] },
-        { id: "yeonnam", name: "연남동", gu: "마포구", center: [37.56, 126.92] },
+        { id: "garosugil", name: "가로수길", gu: "강남구", city: "seoul", center: [37.52, 127.02] },
+        { id: "yeonnam", name: "연남동", gu: "마포구", city: "seoul", center: [37.56, 126.92] },
       ] }],
     });
     expect(screen.getByText("검증할 자리", { selector: "b" })).toBeTruthy();

@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getHourlyProfile } from "@/lib/api";
 import type { DistrictSummary, HubOutlines, IndustryFit, IndustryOption } from "@/lib/api";
 import {
-  RANK_GROUPS, fitBasisLine, groupName, groupOf, hubColors, legendFor, NO_VALUE_COLOR, outlineBounds, rankWithin,
+  siteRankGroups, fitBasisLine, groupName, groupOf, hubColors, legendFor, NO_VALUE_COLOR, outlineBounds, rankWithin,
   type ColorMode, type RankGroupKey, type RankedRow,
 } from "@/lib/districtMapModel";
 import { useMapHost } from "@/components/mapHostContext";
 import { fitInView, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import ResearchLocationsLayer from "@/components/ResearchLocationsLayer";
+import { showsCrossRegion } from "@/lib/siteScope";
 import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import { colors } from "@/design/tokens/colors";
 import type { NaverListener, NaverOverlay } from "@/lib/naverTypes";
@@ -191,7 +192,8 @@ export default function DistrictMapExplorer({ districts, districtId, onSelect, o
         </div>
       </div>
       <div className="dme-tabs" role="group" aria-label="상권 묶음">
-        {RANK_GROUPS.map((g) => <button key={g.key} type="button" aria-pressed={group === g.key}
+        {/* 보이는 지역만 탭으로 — 서울만 보일 때(2026-11-10 · lib/siteScope)는 「서울」 하나다 */}
+        {siteRankGroups().map((g) => <button key={g.key} type="button" aria-pressed={group === g.key}
           onClick={() => { setGroup(g.key); showGroup(g.key); }}>
           {g.name} {districts.filter((d) => groupOf(d) === g.key).length}
         </button>)}
@@ -251,7 +253,7 @@ export default function DistrictMapExplorer({ districts, districtId, onSelect, o
       {outlineErr && <p className="dme-note value-absent">상권 외곽선을 불러오지 못했습니다. 목록으로 고를 수 있습니다.</p>}
       <p className="dme-note">지도 선은 실측 범위이지 공식 상권 경계가 아닙니다.</p>
       {/* 광주·전주 조사 위치 — 거점 목록·색칠과 섞지 않고 밑에 따로 선다(2026-11-09 · 정식 상권 아님) */}
-      {(group === "gwangju" || group === "jeonju") &&
+      {showsCrossRegion() && (group === "gwangju" || group === "jeonju") &&
         <ResearchLocationsLayer group={group} districts={districts} onSelectHub={onSelect} />}
     </section>
   );

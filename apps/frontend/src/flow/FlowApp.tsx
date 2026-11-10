@@ -22,7 +22,8 @@ import { businessToFlow, clearFlow, emptyFlow, flowToBusiness, loadFlow, saveFlo
 import { Sheet, Toast, type ToastMsg } from "./ui";
 import { BudgetCheck, Budget, Contract, Fitout, Payback, Premium } from "./screens/Cost";
 import { Compare } from "./screens/Compare";
-import { Corridor } from "./screens/Corridor";
+import { Corridor, CorridorClosed } from "./screens/Corridor";
+import { showsCrossRegion } from "@/lib/siteScope";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion, StartupDistrict } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
@@ -49,7 +50,8 @@ function Screen({ route }: { route: Route }) {
     case "district-search": return <DistrictSearch />;
     case "district": return <District id={route.param!} />;
     case "compare": return <Compare param={route.param!} />;
-    case "corridor": return <Corridor id={route.param!} />;
+    // 상권 흐름은 파주 · 고양을 잇는다 — 서울만 보일 때(2026-11-10 · lib/siteScope)는 옛 주소로 와도 닫혀 있다
+    case "corridor": return showsCrossRegion() ? <Corridor id={route.param!} /> : <CorridorClosed />;
     case "rent-cap": return <RentCap />;
     case "spaces": return <Spaces />;
     case "space": return <SpaceDetail id={route.param!} />;

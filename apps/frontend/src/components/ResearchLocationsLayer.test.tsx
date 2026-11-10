@@ -9,6 +9,9 @@ import { district } from "@/test/fixtures";
 import type { HubOutlines, ResearchLocation } from "@/lib/api";
 import type { NaverMap } from "@/lib/naverTypes";
 
+// 서울 밖(경기 · 광주 · 전주) 화면은 2026-11-10 부터 사이트에서 닫혀 있다(lib/siteScope) — 코드가 남아 있으니 범위를 넓혀 계속 지킨다
+vi.mock("@/lib/siteScope", async (orig) => (await import("@/test/siteScopeWide")).wideSiteScope(await orig<typeof import("@/lib/siteScope")>()));
+
 // 테스트 전용 합성 응답이다. TODO: 실제 값은 /commercial-districts/research-locations 응답(data/gold/platform_research_locations.json)을 쓴다.
 const loc = (id: string, name: string, stores: number, over: Partial<ResearchLocation> = {}): ResearchLocation => ({
   id, label: `전남광주통합특별시 ${name}`, name, region: "광주", group: "gwangju", lat: 35.15, lng: 126.9, radius_m: 700,

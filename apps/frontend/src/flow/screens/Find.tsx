@@ -8,7 +8,8 @@ import type { BusinessGoal } from "@/lib/businessProfile";
 import { CORRIDOR_ID, type DistrictSummary, type IndustryFitRow } from "@/lib/api";
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import { fitGroups, rankText } from "@/lib/fitGroups";
-import { groupName, groupOf, RANK_GROUPS } from "@/lib/districtMapModel";
+import { groupName, groupOf, siteRankGroups } from "@/lib/districtMapModel";
+import { showsCrossRegion } from "@/lib/siteScope";
 import { distinctDistrictColors } from "@/lib/districtColors";
 import { DistrictMap } from "../DistrictMap";
 import { useFlow } from "../context";
@@ -64,9 +65,10 @@ export function StartupRegion() {
   const industryOk = useNeed(state.startupOrder !== "industry" || !!state.industryKey, "/industry");
   if (!ok || !industryOk) return null;
   return <FlowScreen back={state.startupOrder === "region" ? "/startup-order" : "/industry"}
-    caption="상권 찾기 · 새 가게" title="어느 지역에서 창업하시나요?" sub={state.startupOrder === "region" ? "지역을 고른 다음 그 안의 상권을 선택해요." : "선택한 업종으로 살펴볼 지역을 골라 주세요."}>
+    caption="상권 찾기 · 새 가게" title="어느 지역에서 창업하시나요?" sub={(state.startupOrder === "region" ? "지역을 고른 다음 그 안의 상권을 선택해요." : "선택한 업종으로 살펴볼 지역을 골라 주세요.")
+      + (siteRankGroups().length === 1 ? ` 지금은 ${siteRankGroups()[0].name} 상권만 보여 드려요.` : "")}>
     <ChoiceList tiles label="창업 지역" value={state.startupRegion ?? null}
-      options={RANK_GROUPS.map(({ name }) => ({ value: name, title: name }))}
+      options={siteRankGroups().map(({ name }) => ({ value: name, title: name }))}
       onChoose={(region) => { update((s) => setStartupRegion(s, region)); go("/districts"); }} />
   </FlowScreen>;
 }
@@ -447,7 +449,7 @@ function DistrictRankings() {
   const scope = fit.data.ranking_scopes?.find((s) => s.name === activeRegion);
   const regionalCount = groups.reduce((n, g) => n + g.rows.filter((r) => regionOf(r) === activeRegion).length, 0);
   const regionPicker = <div className="fl-region-picker" role="group" aria-label="상권 지역 선택">
-    {RANK_GROUPS.map(({ name }) => <button key={name} type="button" aria-pressed={activeRegion === name}
+    {siteRankGroups().map(({ name }) => <button key={name} type="button" aria-pressed={activeRegion === name}
       onClick={() => { setRegion(name); if (state.goal === "start") update((s) => ({ ...s, startupRegion: name })); }}>{name}</button>)}
   </div>;
   const multi = groups.length > 1;
@@ -544,8 +546,8 @@ function DistrictRankings() {
         <TextButton onClick={() => setPicked(home ? [home.district_id] : [])}>상권 나란히 비교하기</TextButton>
         <TextButton onClick={() => setWhy(true)}>왜 이 순서인가요?</TextButton>
         <TextButton onClick={() => go("/district-search")}>다른 상권 직접 고르기</TextButton>
-        {/* 상권 흐름(2026-10-26) — 순위를 대신하지 않고 옆에 더한다 */}
-        <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
+        {/* 상권 흐름(2026-10-26) — 순위를 대신하지 않고 옆에 더한다. 파주 · 고양을 잇는 화면이라 서울만 보일 때는 닫는다(2026-11-10) */}
+        {showsCrossRegion() && <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>}
       </div>
       <Sheet open={why} onClose={() => setWhy(false)} title="왜 이 순서인가요?">
         <p>입지 점수는 비슷한 자리에 {ind.label} 가게가 이미 얼마나 모여 있는지를 추천 모델이 배운 값이에요(×100). 매출이나 생존율이 아니에요.</p>
@@ -726,7 +728,7 @@ export function District({ id }: { id: string }) {
       {/* PPPP 지도 탐색으로 — 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙) */}
       <div className="fl-actions">
         <TextButton onClick={() => go("/explore")}>지도에서 자세히</TextButton>
-        {(d?.city === "paju" || d?.city === "goyang") && (
+        {showsCrossRegion() && (d?.city === "paju" || d?.city === "goyang") && (
           <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주·고양·서울 손님 흐름에서 보기</TextButton>
         )}
       </div>

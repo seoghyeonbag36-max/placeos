@@ -9,6 +9,9 @@ import { district } from "@/test/fixtures";
 import type { HubOutlines, IndustryFit } from "@/lib/api";
 import type { NaverMap } from "@/lib/naverTypes";
 
+// 서울 밖(경기 · 광주 · 전주) 화면은 2026-11-10 부터 사이트에서 닫혀 있다(lib/siteScope) — 코드가 남아 있으니 범위를 넓혀 계속 지킨다
+vi.mock("@/lib/siteScope", async (orig) => (await import("@/test/siteScopeWide")).wideSiteScope(await orig<typeof import("@/lib/siteScope")>()));
+
 // 테스트 전용 합성 응답이다. TODO: 실제 값은 /outlines · /ai/industry-fit 응답을 쓴다.
 const RING: [number, number][] = [[37.5, 127], [37.5, 127.01], [37.51, 127.01]];
 const OUTLINES = { note: "n", hubs: [

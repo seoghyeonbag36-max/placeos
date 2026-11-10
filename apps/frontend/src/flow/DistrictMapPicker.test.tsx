@@ -11,6 +11,9 @@ import { district } from "@/test/fixtures";
 import FlowApp from "./FlowApp";
 import { FLOW_KEY } from "./state";
 
+// 서울 밖(경기 · 광주 · 전주) 화면은 2026-11-10 부터 사이트에서 닫혀 있다(lib/siteScope) — 코드가 남아 있으니 범위를 넓혀 계속 지킨다
+vi.mock("@/lib/siteScope", async (orig) => (await import("@/test/siteScopeWide")).wideSiteScope(await orig<typeof import("@/lib/siteScope")>()));
+
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => Promise.resolve(), describeNaverMapError: String }));
 
 const ring = (lat: number, lng: number): [number, number][] =>

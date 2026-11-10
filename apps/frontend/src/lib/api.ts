@@ -3,6 +3,7 @@
 // 타입만 가져온다(런타임 순환 없음) — 정의는 clientTiming.ts 에 둔다(백엔드 드리프트 테스트가 거기서 읽는다).
 import type { ClientMetric } from "@/lib/clientTiming";
 import { clearToken, loadToken } from "@/lib/session";
+import { isSiteCity, isSiteRankGroup, isSiteSido } from "@/lib/siteScope";
 
 const BASE = "/api/v1";
 
@@ -430,8 +431,20 @@ export interface RentHeatmap {
   note: string;
 }
 
-/** 서울 13 Page 거점 요약(감성·공실·리뷰·Tier) — 거점 대시보드 */
-export const listDistricts = () => getJSON<DistrictSummary[]>("/commercial-districts");
+/** 서빙 상권 요약(감성·공실·리뷰·Tier) — **사이트 범위(서울)만** 돌려준다(2026-11-10 사용자 결정 · `lib/siteScope`).
+ *  서울 밖 상권도 백엔드는 그대로 서빙하고 데이터도 그대로다 — 화면에 오는 이 길목에서만 거른다 */
+export const listDistricts = () =>
+  getJSON<DistrictSummary[]>("/commercial-districts").then((all) => all.filter((d) => isSiteCity(d.city)));
+
+/** 사이트 범위 밖 상권 id — 업종 순위 · 외곽선처럼 도시를 싣지 않은 응답을 거르는 데 쓴다. 동시에 부른 호출은 한 요청을
+ *  나눠 쓰고, 끝나면 놓는다(목록을 붙잡아 두지 않는다). 목록을 못 읽으면 null — 부른 쪽이 응답 안의 단서(순위 묶음)로만 거른다 */
+let outsidePending: Promise<Set<string> | null> | null = null;
+function outsideSiteIds(): Promise<Set<string> | null> {
+  outsidePending ??= getJSON<DistrictSummary[]>("/commercial-districts")
+    .then((all) => new Set(all.filter((d) => !isSiteCity(d.city)).map((d) => d.id)), () => null)
+    .finally(() => { outsidePending = null; });
+  return outsidePending;
+}
 /** 거점 전체 원천 데이터(zones/units/events/poi/grid) */
 export const getDistrict = (id: string) => getJSON<DistrictDetail>(`/commercial-districts/${id}`);
 /** 거점 감성 구역(Platform) */
@@ -950,8 +963,25 @@ export interface IndustryFit {
   source: string; note: string;
 }
 
+/** 업종 순위 — 사이트 범위(서울) 묶음 · 줄만 남긴다(`scopeIndustryFit`). 순위는 묶음마다 1 부터라 거른 뒤에도 그대로 맞다 */
 export const getIndustryFit = (key: string) =>
-  getJSON<IndustryFit>(`/ai/industry-fit?industry=${encodeURIComponent(key)}`);
+  Promise.all([getJSON<IndustryFit>(`/ai/industry-fit?industry=${encodeURIComponent(key)}`), outsideSiteIds()])
+    .then(([fit, outside]) => scopeIndustryFit(fit, outside));
+
+/** 업종 순위 응답을 사이트 범위로 줄인다(2026-11-10 · `lib/siteScope`). 줄에는 도시가 없어 두 단서로 가른다 —
+ *  ① 순위 묶음 열쇠(`잣대/시도`) ② 범위 밖 상권 id(`outside` · 순위가 없는 줄은 이것만 가른다). 값은 고치지 않는다 */
+export function scopeIndustryFit(fit: IndustryFit, outside: Set<string> | null): IndustryFit {
+  const inSite = (r: IndustryFitRow) => !outside?.has(r.district_id)
+    && (r.rank_group || r.rank_group_name ? isSiteRankGroup(r.rank_group, r.rank_group_name) : true);
+  const districts = fit.districts.filter(inSite);
+  return {
+    ...fit,
+    ranking_scopes: fit.ranking_scopes?.filter((s) => isSiteSido(s.region)),
+    rank_groups: fit.rank_groups?.filter((g) => isSiteRankGroup(g.key, g.name)),
+    ranked_n: districts.filter((r) => r.fit_rank != null).length,
+    districts,
+  };
+}
 
 /* ===== 상권 흐름(파주-고양-서울) — GET /corridors/{id} (2026-10-26) =====
  *
@@ -1557,8 +1587,10 @@ export interface HubOutline {
   type_is_manual: boolean;
 }
 export interface HubOutlines { note: string | null; hubs: HubOutline[] }
+/** 상권 외곽선 — 사이트 범위(서울) 상권만(2026-11-10 · `lib/siteScope`) */
 export const getHubOutlines = (signal?: AbortSignal) =>
-  getOptional<HubOutlines>("/commercial-districts/outlines", signal);
+  Promise.all([getOptional<HubOutlines>("/commercial-districts/outlines", signal), outsideSiteIds()])
+    .then(([o, outside]) => (o && outside ? { ...o, hubs: o.hubs.filter((h) => !outside.has(h.id)) } : o));
 
 /**
  * 광주·전주 **조사 위치** — 정식 상권도 서빙 거점도 아니다(2026-11-09 결정 · docs/decision-research-locations-layer-2026-11-09.md).

@@ -17,6 +17,7 @@
  */
 import type { BusinessGoal, BusinessState } from "@/lib/businessProfile";
 import type { ValidationMode } from "@/lib/api";
+import { isSiteRegion } from "@/lib/siteScope";
 
 /** 권리금 답 — 없음(0, 관측) · 모름(null, 0 전제) · 금액(만원) */
 export type PremiumAnswer = { kind: "none" } | { kind: "unknown" } | { kind: "amount"; manwon: number };
@@ -127,7 +128,8 @@ export function loadFlow(): FlowState {
     return {
       ...base,
       startupOrder: ["region", "industry"].includes(v?.startupOrder) ? v.startupOrder : null,
-      startupRegion: ["서울", "경기", "광주", "전주"].includes(v?.startupRegion) ? v.startupRegion : null,
+      // 보이는 지역만 되살린다 — 서울만 보일 때(2026-11-10) 전에 고른 「경기」 등은 비운다(lib/siteScope)
+      startupRegion: isSiteRegion(v?.startupRegion) ? v.startupRegion : null,
       goal: isGoal(v?.goal) ? v.goal : null,
       industryKey: str(v?.industryKey),
       customIndustry: str(v?.customIndustry),
