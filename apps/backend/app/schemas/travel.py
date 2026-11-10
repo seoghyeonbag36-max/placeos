@@ -74,7 +74,8 @@ class AccessRequest(BaseModel):
 class WalkTime(BaseModel):
     """한 장소에서 공실까지의 보행 경로 값. `ok` 가 아니면 수치는 모두 null 이다."""
     status: Literal["ok", "not_configured", "no_route", "upstream_error", "quota_exceeded"]
-    source: Literal["tmap_pedestrian"] = "tmap_pedestrian"
+    # tmap_pedestrian = TMAP 보행자 경로(키가 있을 때) · osrm_foot = OpenStreetMap 보행 경로(FOSSGIS OSRM 도보 서버 · 2026-11-10)
+    source: Literal["tmap_pedestrian", "osrm_foot"] = "tmap_pedestrian"
     duration_seconds: float | None = Field(default=None, ge=0, allow_inf_nan=False)
     distance_meters: float | None = Field(default=None, ge=0, allow_inf_nan=False)
 

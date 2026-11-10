@@ -44,7 +44,8 @@ export interface TravelPoint { lat: number; lng: number }
 /** 한 장소에서 공실까지의 TMAP 보행 경로 값. `ok` 가 아니면 수치는 null 이다. */
 export interface WalkTime {
   status: "ok" | "not_configured" | "no_route" | "upstream_error" | "quota_exceeded";
-  source: "tmap_pedestrian";
+  /** tmap_pedestrian = TMAP 보행자 경로 · osrm_foot = OpenStreetMap 보행 경로(FOSSGIS OSRM 도보 서버 · 2026-11-10) */
+  source: "tmap_pedestrian" | "osrm_foot";
   duration_seconds: number | null;
   distance_meters: number | null;
 }

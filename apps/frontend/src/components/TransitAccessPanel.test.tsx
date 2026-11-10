@@ -153,4 +153,18 @@ describe("주변 교통 접근성", () => {
     await screen.findByText("신사역");
     expect(screen.queryByRole("list", { name: "걸어서 걸리는 시간" })).toBeNull();
   });
+  it("도보시간이 OSM 보행 경로(OSRM)면 출처 · 「지도 오류 신고」 링크를 달고, TMAP 이면 달지 않는다", async () => {
+    const response = structuredClone(RESPONSE);
+    response.subway.items[0].walk = { status: "ok", source: "osrm_foot", duration_seconds: 482, distance_meters: 602 };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ok(response)));
+    const view = render(<TransitAccessPanel destination={destination} destinationName="경성빌딩" openOnMount walkSummary />);
+    expect(await screen.findByText(/OpenStreetMap 보행 경로\(OSRM 도보/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "지도 오류 신고" }).getAttribute("href")).toBe("https://www.openstreetmap.org/fixthemap");
+    expect(screen.getByRole("link", { name: "ODbL" })).toBeTruthy();
+    view.unmount();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ok(RESPONSE)));
+    render(<TransitAccessPanel destination={destination} destinationName="경성빌딩" openOnMount walkSummary />);
+    expect(await screen.findByText(/TMAP 보행자 경로의 예상값/)).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "지도 오류 신고" })).toBeNull();
+  });
 });
