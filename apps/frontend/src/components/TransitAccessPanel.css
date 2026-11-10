@@ -16,3 +16,9 @@
 }
 .transit-place span, .transit-access-panel small, .transit-access-panel .transit-note { color: var(--muted); font-size: inherit; }
 .transit-access-panel [role="alert"] { color: var(--danger-text); }
+/* 맨 위 한 줄 요약(Posting 「찾아오는 길」 · 2026-11-10) — 가장 빨리 걸어오는 역 · 정류장 */
+.transit-walk-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-2); margin: var(--sp-2) 0 0; padding: 0; list-style: none; }
+.transit-walk-summary li { display: grid; gap: 2px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg); }
+.transit-walk-summary li span { color: var(--muted); }
+.transit-walk-summary li b { font-size: 15px; color: var(--ink); }
+.transit-walk-summary li small { color: var(--muted); }

@@ -130,4 +130,27 @@ describe("주변 교통 접근성", () => {
     expect(screen.queryByText("신사역")).toBeNull();
     expect(screen.queryByText("공실: 목적 건물")).toBeNull();   // 새 패널은 접힌 채로 시작한다
   });
+  it("Posting 「찾아오는 길」(openOnMount · walkSummary)은 열자마자 한 번 조회하고 가장 빨리 걸어오는 역 · 정류장을 한 줄로 보인다", async () => {
+    const response = structuredClone(RESPONSE);
+    response.subway.items.push({ ...response.subway.items[0], name: "압구정역", straight_meters: 900,
+      walk: { status: "ok", source: "tmap_pedestrian", duration_seconds: 1100, distance_meters: 1300 } });
+    const fetch = vi.fn().mockResolvedValue(ok(response));
+    vi.stubGlobal("fetch", fetch);
+    render(<TransitAccessPanel destination={destination} destinationName="경성빌딩" openOnMount walkSummary />);
+    const summary = await screen.findByRole("list", { name: "걸어서 걸리는 시간" });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    // 지하철은 TMAP 보행 시간이 가장 짧은 곳(신사역 521초 → 9분), 버스는 도보시간이 없어 직선거리와 사유만 — 시간으로 바꾸지 않는다
+    expect(summary.textContent).toContain("지하철역에서걸어서 약 9분신사역 · 걷는 거리 640m");
+    expect(summary.textContent).toContain("버스정류장에서도보시간 없음신사역8번출구.가로수길 직선 410m · 도보시간 조회 준비 중");
+    expect(screen.getByText("지하철역에서 걸어서")).toBeTruthy();
+    expect(screen.getAllByText(/도보 약/).length).toBe(2);
+  });
+
+  it("walkSummary 를 주지 않은 곳(Page · Platform)에는 요약 줄이 없다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ok(RESPONSE)));
+    render(panel());
+    fireEvent.click(screen.getByText(OPEN));
+    await screen.findByText("신사역");
+    expect(screen.queryByRole("list", { name: "걸어서 걸리는 시간" })).toBeNull();
+  });
 });
