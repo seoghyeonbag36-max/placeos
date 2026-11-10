@@ -61,7 +61,8 @@ const won = (v: number) => `${Math.round(v).toLocaleString()}만원`;
 /** 권리금·전략·업종을 바꾼 뒤 이 시간만큼 입력이 멈추면 다시 계산한다(2026-11-07 「계산 결과가 바로 나오게」). */
 const AUTO_RUN_MS = 600;
 /** 2026-11-07 에 빠진 탭(「검증 리포트」 · 「계산 결과」). 그 탭을 연 채 저장된 초안은 입력 탭으로 연다. */
-const RETIRED_PAGES = new Set(["report", "result"]);
+// 「program」은 2026-11-10 「비용 비교 및 결정」 안으로 합쳐 없어진 쪽이다
+const RETIRED_PAGES = new Set(["report", "result", "program"]);
 
 interface PostingConsoleProps {
   onReportChange?: (handoff: ProgramHandoff | undefined) => void;
@@ -110,7 +111,7 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
   // 첫 화면은 「시뮬레이션 결과」(2026-11-10 사용자 요청 — 오른쪽 칸 순서: 시뮬레이션 결과 → 상권 맞춤 인테리어 → 주변 업종 지도 →
-  // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정 → 이 자리로 검증 program 만들기). 11-09 에는 인테리어가 첫 화면이었다.
+  // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정(그 안에 이 자리로 검증 program 만들기)). 11-09 에는 인테리어가 첫 화면이었다.
   // 자리 · 비용 입력은 늘 그려 둔다(keepMounted) — 지도 탐색에서는 왼쪽 칸에 서 있어 어느 쪽을 보면서도 자리를 바꿀 수 있다
   const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
   const layout = useMapLayout();
@@ -517,7 +518,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </MapSlot>
 
         {/* ── 결과 — 「시뮬레이션 결과」(2026-11-10 사용자 요청): 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간만 둔다.
-            결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, 검증 program 버튼은 마지막 쪽, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
+            결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, 검증 program 버튼은 「비용 비교 및 결정」 맨 아래, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
             세부 업종을 고르면 세 가격대 대신 그 업종 운영 시나리오가 계산 결과다 — 그래서 그것만은 여기에 남는다. ── */}
         <div className="results">
           <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
@@ -598,7 +599,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             busy={busy} stale={!!changedInput} /> },
         { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
           <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
-        { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요.", content: <div className="pstep">
+        { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요. 정했으면 아래에서 이 자리로 검증 program 을 만듭니다.", content: <div className="pstep">
           <Verdict
             eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
             question="어떤 비용과 전략으로 입점할까요?"
@@ -618,8 +619,10 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
           {inSlots && <p className="pstep-pointer">후보를 3곳까지 담아 계약 조건 · 답사 체크리스트로 비교하려면 화면 오른쪽 위 「입점 준비」를 쓰세요.</p>}
-        </div> },
-        { id: "program", label: "이 자리로 검증 program 만들기", description: "정한 자리와 계산을 Program 「가설 검증」으로 넘겨, 작게 먼저 확인할 계획을 세웁니다.", content: <div className="pstep pstep-program">
+          {/* 정했으면 바로 검증 program 으로 — 2026-11-10 사용자 요청으로 따로 있던 마지막 쪽을 이 쪽 안으로 합쳤다 */}
+          <section className="pstep-program" aria-labelledby="posting-program-title">
+          <h3 id="posting-program-title">이 자리로 검증 program 만들기</h3>
+          <p className="pstep-lede">정한 자리와 계산을 Program 「가설 검증」으로 넘겨, 작게 먼저 확인할 계획을 세웁니다.</p>
           {unit ? <dl>
             <dt>자리</dt><dd>{unit.n} · {effectiveUnit?.area ?? unit.area}평 · {unit.floor}</dd>
             <dt>업종</dt><dd>{calculation?.result.industry_type || calculation?.input.industry_type || unit.was?.trim() || "자리 기본 업종"}</dd>
@@ -633,6 +636,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
               onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
           ) : <p className="pstep-empty">지도 탐색의 Posting 에서 열면 이 자리로 Program 을 바로 만듭니다.</p>}
+          </section>
         </div> },
       ]} />
     </div></div>

@@ -78,8 +78,8 @@ def main() -> int:
         page.get_by_role("region", name="면적별 BEP 결과").wait_for()
         checks["BEP 입력 계산"] = True
         shot(page, "03-posting-desktop")
-        # 2026-11-10 — 검증 program 버튼은 Posting 오른쪽 칸의 마지막 쪽 「이 자리로 검증 program 만들기」에 있다
-        page.get_by_role("button", name="이 자리로 검증 program 만들기", exact=True).click()
+        # 2026-11-10 — 검증 program 버튼은 Posting 오른쪽 칸 「비용 비교 및 결정」 쪽 안에 있다
+        page.get_by_role("button", name="비용 비교 및 결정", exact=True).click()
         page.get_by_role("button", name="이 자리로 검증 program 만들기 →", exact=True).click()
         page.get_by_role("heading", name="오프라인 캠페인", exact=True).wait_for()
         page.get_by_role("heading", name="인테리어 참고안", exact=True).wait_for()

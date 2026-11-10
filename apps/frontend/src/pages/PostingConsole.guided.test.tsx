@@ -4,8 +4,8 @@ import PostingConsole, { type PostingDraft } from "./PostingConsole";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings, simulateResult } from "@/test/fixtures";
 
-// 오른쪽 칸 순서(2026-11-10 사용자 요청) — 왼쪽 입력 칸은 그대로다
-const POSTING_PAGES = ["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정", "이 자리로 검증 program 만들기"];
+// 오른쪽 칸 순서(2026-11-10 사용자 요청) — 왼쪽 입력 칸은 그대로다. 검증 program 만들기는 「비용 비교 및 결정」 안에 있다
+const POSTING_PAGES = ["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
 
 function installApi(empty = false) {
   return installFetchStub([
@@ -46,7 +46,7 @@ describe("단계형 비용 검토", () => {
     expect(await screen.findByText("전제(0)")).toBeTruthy();
   });
 
-  it("오른쪽 쪽 순서는 시뮬레이션 결과 → … → 이 자리로 검증 program 만들기이고, 첫 화면은 「시뮬레이션 결과」다", async () => {
+  it("오른쪽 쪽 순서는 시뮬레이션 결과 → … → 비용 비교 및 결정이고, 첫 화면은 「시뮬레이션 결과」다", async () => {
     const api = installApi();
     render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
     const nav = screen.getByRole("navigation", { name: "비용 검토" });
@@ -84,6 +84,9 @@ describe("단계형 비용 검토", () => {
     expect(menu.getByRole("table", { name: /추정 월매출/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "비용 비교 및 결정" }));
     expect(screen.getByText("어떤 비용과 전략으로 입점할까요?")).toBeTruthy();
+    // 검증 program 만들기는 같은 쪽 안 — 따로 된 쪽이 없다
+    expect(screen.getByRole("region", { name: "이 자리로 검증 program 만들기" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기" })).toBeNull();
   });
 
   it("Posting 「업종」을 바꾸면 상권 맞춤 인테리어의 공간 키워드가 그 업종 기본값으로 바뀐다", async () => {
