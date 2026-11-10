@@ -507,3 +507,9 @@
 .mapshell .b-floor-pick b { color: var(--track-page); }
 .mapshell .b-floor-clear { font: inherit; font-size: var(--fs-caption); border: 0; background: none; padding: 0; color: var(--track-page); text-decoration: underline; cursor: pointer; }
 .mapshell .b-rent-table.is-pickable th:nth-child(2), .mapshell .b-rent-table.is-pickable td:nth-child(2) { text-align: left; }
+
+/* 층별 공실 필터(2026-11-10) */
+.mapshell .floor-filter-note { flex-basis: 100%; margin: 0; font-size: var(--fs-caption); color: var(--muted); line-height: 1.5; }
+.mapshell .b-floors { font-size: var(--fs-caption); color: var(--muted); margin-top: 2px; }
+.mapshell .b-floors b { color: var(--track-page); }
+.mapshell .b-floors i { font-style: normal; color: var(--caution-ink); }
