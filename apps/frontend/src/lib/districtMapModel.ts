@@ -4,11 +4,14 @@
  */
 import { colors } from "@/design/tokens/colors";
 import type { DistrictSummary, HubOutline, IndustryFit, IndustryFitRow } from "@/lib/api";
+import { isSiteRegion } from "@/lib/siteScope";
 
 export type RankGroupKey = "seoul" | "gyeonggi" | "gwangju" | "jeonju";
 export const RANK_GROUPS: { key: RankGroupKey; name: string }[] = [
   { key: "seoul", name: "서울" }, { key: "gyeonggi", name: "경기" }, { key: "gwangju", name: "광주" }, { key: "jeonju", name: "전주" },
 ];
+/** 화면에 보이는 지역 — 지역 고르기 · 순위 지역 단추 · 상권 묶음 탭(2026-11-10 사용자 결정: 서울만 · `lib/siteScope`) */
+export const siteRankGroups = () => RANK_GROUPS.filter((g) => isSiteRegion(g.name));
 export type ColorMode = "type" | "fit" | "vacancy";
 
 /** 순위 묶음은 시도 단위다(business_fit `_region`). 전북의 서빙 도시는 현재 전주다. */

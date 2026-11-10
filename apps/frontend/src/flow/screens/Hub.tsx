@@ -11,6 +11,7 @@ import PrivacyNote from "@/components/PrivacyNote";
 import SocialSignIn from "@/components/SocialSignIn";
 import { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
+import { showsCrossRegion } from "@/lib/siteScope";
 import { clearToken } from "@/lib/session";
 import { LOGIN_BENEFITS, useFlow, type LoginReason } from "../context";
 import { compareIds } from "@/lib/districtCompare";
@@ -172,8 +173,8 @@ export function Home() {
           { value: "move", title: "하던 장사를 다른 동네로 옮겨요", desc: "같은 업종으로 옮길 상권을 찾고 있어요" },
         ]} onChoose={(g) => { update((s) => setGoal(s, g)); go("/industry"); }} />
         <div className="fl-actions">
-          {/* 상권 흐름(2026-10-26) — 업종을 고르기 전에도 볼 수 있다 */}
-          <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
+          {/* 상권 흐름(2026-10-26) — 업종을 고르기 전에도 볼 수 있다. 서울만 보일 때는 닫는다(2026-11-10 · lib/siteScope) */}
+          {showsCrossRegion() && <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>}
           {!token && <TextButton onClick={openLogin}>로그인</TextButton>}
         </div>
       </FlowScreen>
@@ -224,9 +225,9 @@ export function Home() {
       {state.spaceId && mapDistrict && (
         <MapPreview districtId={mapDistrict} spaceId={state.spaceId} spaceLabel={state.spaceLabel} at={state.spaceAt} results={token ? results : null} />
       )}
-      <div className="fl-actions">
+      {showsCrossRegion() && <div className="fl-actions">
         <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>
-      </div>
+      </div>}
       <h2 className="fl-h2">저장한 것</h2>
       {token ? (results ? <SavedList items={results} limit={5} /> : <p className="fl-note">불러오는 중…</p>)
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}
