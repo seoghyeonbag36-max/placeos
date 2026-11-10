@@ -497,3 +497,13 @@
   /* 시트가 지도 아래를 덮는 대신 오버레이 층이 시트 위에서 끝난다(MapHost.css) — 범례·시간 막대는 그 바닥에 붙는다 */
   .mapshell-slot .side-panel:not([hidden]) { height: auto; }
 }
+
+/* 비용 확인할 빈 층 고르기(2026-11-10) — 「빈 층 임대료」 표의 줄을 고르면 「이 자리 비용 확인」이 그 층으로 간다 */
+.mapshell .b-rent-table.is-pickable tbody tr { cursor: pointer; }
+.mapshell .b-rent-table.is-pickable td:first-child { width: 22px; padding-right: 0; }
+.mapshell .b-rent-table.is-pickable input[type="radio"] { margin: 0; accent-color: var(--track-page); cursor: pointer; }
+.mapshell .b-rent-table tr.is-chosen td { background: var(--track-page-soft); }
+.mapshell .b-floor-pick { margin-top: 6px; font-size: var(--fs-caption); color: var(--ink); line-height: 1.6; }
+.mapshell .b-floor-pick b { color: var(--track-page); }
+.mapshell .b-floor-clear { font: inherit; font-size: var(--fs-caption); border: 0; background: none; padding: 0; color: var(--track-page); text-decoration: underline; cursor: pointer; }
+.mapshell .b-rent-table.is-pickable th:nth-child(2), .mapshell .b-rent-table.is-pickable td:nth-child(2) { text-align: left; }

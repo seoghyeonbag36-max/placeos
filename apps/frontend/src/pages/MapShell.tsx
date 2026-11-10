@@ -264,6 +264,11 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [footHm, setFootHm] = useState<FootfallHeatmap | null>(null);
   const [densHm, setDensHm] = useState<DensityHeatmap | null>(null);
   const selected = buildings.find((b) => b.id === workspace.selectedId) ?? null;
+  // 「이 자리 비용 확인」 · 「입점 검토」로 넘길 빈 층(2026-11-10 사용자 요청) — 고른 건물의 「빈 층 임대료」 표에서 고른다.
+  // 층 매물 id(`vfu-`)를 넘기면 Posting 이 그 층의 대장 면적 · 층 임대료로 계산한다. 다른 건물을 고르면 풀린다
+  const [costFloor, setCostFloor] = useState<{ bid: string; unitId: string } | null>(null);
+  const chosenFloor = selected && costFloor?.bid === selected.id
+    ? (rentByBuilding.get(selected.id) ?? []).find((x) => x.id === costFloor.unitId) ?? null : null;
   // 좁은 화면(<1200px)에서는 칸이 지도 위 패널 하나에 쌓여 상세가 목록 아래에 선다 — 건물을 고르면 상세로 내려 준다
   const selectedId = selected?.id ?? null;
   useEffect(() => {
@@ -744,7 +749,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const review = (b: Building) => {
     if (src !== "api") return;
     setCompareOpen(false);
-    onReview?.({ districtId, buildingId: b.id, buildingName: b.name });
+    const floor = chosenFloor && selected?.id === b.id ? chosenFloor : null;
+    onReview?.({ districtId, buildingId: b.id, buildingName: b.name, ...(floor ? { unitId: floor.id } : {}) });
   };
 
   // ── 화면 조각 — 단독 렌더(지도 위 한 패널)와 칸 배치(2026-11-08 · 왼쪽 목록 | 지도 | 오른쪽 상세)가 같이 쓴다 ──
@@ -941,11 +947,15 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                 {(rentByBuilding.get(selected.id) ?? []).length === 0
                   ? <div className="b-rec-note">이 건물에는 금액을 붙일 빈 층 매물이 없다.</div>
                   : (
-                    <table className="b-rent-table">
-                      <thead><tr><th>층</th><th>면적</th><th>평당/월</th><th>월 임대료</th></tr></thead>
+                    <table className="b-rent-table is-pickable">
+                      <thead><tr><th><span className="sr-only">비용 확인할 층</span></th><th>층</th><th>면적</th><th>평당/월</th><th>월 임대료</th></tr></thead>
                       <tbody>
                         {rentByBuilding.get(selected.id)!.map((x) => (
-                          <tr key={x.id} className={x.certainty === "probable" ? "is-probable" : ""}>
+                          <tr key={x.id} className={(x.certainty === "probable" ? "is-probable" : "") + (chosenFloor?.id === x.id ? " is-chosen" : "")}
+                            onClick={() => setCostFloor({ bid: selected.id, unitId: x.id })}>
+                            <td><input type="radio" name={`cost-floor-${selected.id}`} checked={chosenFloor?.id === x.id}
+                              disabled={src !== "api"} aria-label={`${x.floor_label} 비용 확인`}
+                              onChange={() => setCostFloor({ bid: selected.id, unitId: x.id })} /></td>
                             <td>{x.floor_label}{x.certainty === "probable" && <i title="층 미상 점포가 다른 층에 있으면 빈다"> 추정</i>}</td>
                             <td className="num">{x.area_py.toLocaleString("ko-KR")}평</td>
                             <td className="num">{x.rent_per_pyeong.toLocaleString("ko-KR")}만</td>
@@ -955,6 +965,14 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                       </tbody>
                     </table>
                   )}
+                {(rentByBuilding.get(selected.id) ?? []).length > 0 && (
+                  <div className="b-floor-pick" role="status">
+                    {chosenFloor
+                      ? <>「이 자리 비용 확인」은 <b>{chosenFloor.floor_label}</b>(월 {chosenFloor.monthly_rent.toLocaleString("ko-KR")}만원 · {chosenFloor.area_py.toLocaleString("ko-KR")}평)로 계산합니다.
+                        {" "}<button type="button" className="b-floor-clear" onClick={() => setCostFloor(null)}>층 선택 해제</button></>
+                      : "빈 층을 고르면 「이 자리 비용 확인」이 그 층의 면적 · 임대료로 계산합니다. 고르지 않으면 건물 기준입니다."}
+                  </div>
+                )}
                 <div className="b-rec-note">
                   실제 호가와 다를 수 있습니다. {currentRent.excludes.join("·")} 제외 · 한 층에 호실이 여럿이면 층 전체 금액입니다.
                 </div>
@@ -997,7 +1015,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <button className="save-candidate detail-save" type="button" aria-pressed={savedIds.includes(selected.id)}
               disabled={src !== "api" || (!savedIds.includes(selected.id) && savedIds.length >= 3)}
               onClick={() => toggleSaved(selected.id)}>{savedIds.includes(selected.id) ? "✓ 후보 저장됨" : "+ 이 건물 후보 저장"}</button>
-            {onReview && <button className="building-review" disabled={src !== "api"} onClick={() => review(selected)}>이 건물로 입점 검토 →</button>}
+            {onReview && <button className="building-review" disabled={src !== "api"} onClick={() => review(selected)}>
+              {chosenFloor ? `${chosenFloor.floor_label}로 입점 검토 →` : "이 건물로 입점 검토 →"}</button>}
             {src !== "api" && <p className="building-hint">샘플 자료는 후보 저장과 입점 계산에 사용할 수 없습니다.</p>}
           </div>
   ) : null;
@@ -1010,7 +1029,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const footer = <>
         {onPreviousStep && <ExploreStepFooter onPrevious={onPreviousStep}
           onNext={() => { if (selected) review(selected); }}
-          nextLabel="이 자리 비용 확인" disabled={!selected || src !== "api" || !currentInventory} />}
+          nextLabel={chosenFloor ? `이 자리 비용 확인 · ${chosenFloor.floor_label}` : "이 자리 비용 확인"}
+          disabled={!selected || src !== "api" || !currentInventory} />}
   </>;
 
   // 지도 위 아래쪽 — 시간 막대(유동인구 레이어만) · 범례. 칸 배치에서는 한 묶음에 쌓고 단독 렌더는 예전 자리(아래 return)

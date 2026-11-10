@@ -305,6 +305,23 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     expect(screen.getByRole("button", { name: "임대시세" }).getAttribute("aria-pressed")).toBe("true");
   });
 
+  it("빈 층 임대료 표에서 층을 고르면 입점 검토 · 이 자리 비용 확인이 그 층 매물로 넘어간다(2026-11-10)", async () => {
+    const review = vi.fn();
+    mount({ rent: RENT, onReview: review });
+    await screen.findByText("가로수 C");
+    fireEvent.click(screen.getByRole("button", { name: /^가로수 C 카페/ }));
+    expect(await screen.findByText(/고르지 않으면 건물 기준입니다/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("radio", { name: "2F 비용 확인" }));
+    expect((screen.getByRole("radio", { name: "2F 비용 확인" }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText(/로 계산합니다/).textContent).toContain("2F");
+    fireEvent.click(screen.getByRole("button", { name: "2F로 입점 검토 →" }));
+    expect(review).toHaveBeenLastCalledWith({ districtId: "garosugil", buildingId: "g3", buildingName: "가로수 C", unitId: "vfu-g3-2" });
+    // 층 선택을 풀면 종전대로 건물 기준
+    fireEvent.click(screen.getByRole("button", { name: "층 선택 해제" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 건물로 입점 검토 →" }));
+    expect(review).toHaveBeenLastCalledWith({ districtId: "garosugil", buildingId: "g3", buildingName: "가로수 C" });
+  });
+
   it("R-ONE 이 없는 거점은 금액을 지어내지 않고 없다고 말한다", async () => {
     installFetchStub([{ match: /\/api\/v1\/commercial-districts$/, body: HUBS },
       { match: /\/api\/v1\/heatmap\/buildings\?district=garosugil/, body: GAROSU_BUILDINGS }]);
