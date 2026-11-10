@@ -15,7 +15,7 @@ import type { NaverOverlay, NaverListener, NaverBounds } from "@/lib/naverTypes"
 //   하나만 만들어 들고 있고(설계서 §10-1), 여기서는 그 위에 오버레이만 그린다.
 //   그전에는 탭을 옮길 때마다 지도가 죽고 다시 태어나 사용자가 맞춘 카메라가 날아갔다.
 //   이 컴포넌트의 루트는 이제 MapHost 안을 채우는 절대배치 레이어다(MapShell.css 참조).
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type ReactNode } from "react";
 import { ExploreStepFooter } from "@/components/ExploreStep";
 import CandidateCompare from "@/components/CandidateCompare";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
@@ -28,9 +28,9 @@ import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
 import { feedbackPanelOpen, isEditableTarget } from "@/lib/keyboard";
-import { getBuildingVacancy, getDensityHeatmap, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
+import { getBuildingVacancy, getDensityHeatmap, getFloorVacancies, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
   type DensityHeatmap, type DistrictSummary, type FootfallHeatmap, type GeoJSONFC, type IndustryRecommend,
-  type IndustryOption, type RentHeatmap, type RentListing, type TrdarCell, type VacClass } from "@/lib/api";
+  type FloorVacancyUnit, type IndustryOption, type RentHeatmap, type RentListing, type TrdarCell, type VacClass } from "@/lib/api";
 import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, removeStop } from "@/lib/journeyState";
 import { colors } from "@/design/tokens/colors";
@@ -110,6 +110,15 @@ interface Building {
 }
 
 const vacRate = (b: Building) => Math.round((1 - b.active / b.capacity) * 100);
+/** 층별 공실 필터(2026-11-10 사용자 요청) — 그 층에 빈 층(확정 · 추정)이 있는 건물만. 근거는 층 매물 목록(`/floor-vacancies`) */
+type FloorFilter = "all" | "1" | "2" | "3+";
+const FLOOR_FILTERS: { key: Exclude<FloorFilter, "all">; label: string; test: (floor: number) => boolean }[] = [
+  { key: "1", label: "1층", test: (f) => f === 1 },
+  { key: "2", label: "2층", test: (f) => f === 2 },
+  { key: "3+", label: "3층 이상", test: (f) => f >= 3 },
+];
+/** 건물 id(`{PNU}-{동}`) → 지번(PNU). 층 매물은 지번 단위라 한 지번에 동이 여럿이면 함께 걸린다(어느 동인지 모른다) */
+const pnuOf = (id: string) => id.split("-")[0];
 const displayOf = (b: Pick<Building, "vacClass" | "status">) => (b.vacClass ? VAC_CLASS[b.vacClass] : STATUS[b.status]);
 /** 필터 값 하나로 3분류·4상태를 다 받는다 — `full` 은 양쪽에 있고 나머지 이름은 겹치지 않는다. */
 function matchesStatus(b: Building, f: VacancyFilter): boolean {
@@ -279,6 +288,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [rec, setRec] = useState<IndustryRecommend | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
+  const [floorFilter, setFloorFilter] = useState<FloorFilter>("all");
+  // 층 매물 목록 — 층별 필터를 처음 고를 때 한 번 부른다(Page 첫 화면 호출을 늘리지 않는다). 404 면 그 상권에 층 산출물이 없다
+  const [floorVac, setFloorVac] = useState<{ districtId: string; byPnu: Map<string, FloorVacancyUnit[]> | null } | null>(null);
   const [hour, setHour] = useState(18);
   const [daytype, setDaytype] = useState<"weekday" | "weekend">("weekday");
   const [twinOpen, setTwinOpen] = useState(false);
@@ -339,10 +351,36 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     candidates: saved.map(b => ({ id: b.id, name: b.name, note: workspace.notes[`${districtId}:${b.id}`] ?? "" })),
   } : null);
   const hasClass = useMemo(() => buildings.some((b) => b.vacClass), [buildings]);
+  const floorOn = floorFilter !== "all" && src === "api";
+  const currentFloorVac = floorVac?.districtId === districtId ? floorVac : null;
+  useEffect(() => {
+    if (!floorOn || currentFloorVac) return;
+    let alive = true;
+    getFloorVacancies(districtId, { limit: 2000 })
+      .then((list) => {
+        if (!alive) return;
+        const byPnu = new Map<string, FloorVacancyUnit[]>();
+        for (const u of list.units) {
+          const key = u.pnu ?? (u.building_id ? pnuOf(u.building_id) : null);
+          if (key) byPnu.set(key, [...(byPnu.get(key) ?? []), u]);
+        }
+        for (const rows of byPnu.values()) rows.sort((a, b) => a.floor - b.floor);
+        setFloorVac({ districtId, byPnu });
+      })
+      .catch(() => { if (alive) setFloorVac({ districtId, byPnu: null }); });
+    return () => { alive = false; };
+  }, [floorOn, currentFloorVac, districtId]);
+  // 층 자료가 아직 없거나(불러오는 중) 이 상권에 없으면 층으로 거르지 않는다 — 그 사실은 필터 아래 한 줄이 말한다
+  const floorMatch = useCallback((b: Building, key: FloorFilter): boolean => {
+    if (key === "all" || src !== "api" || !currentFloorVac?.byPnu) return true;
+    const test = FLOOR_FILTERS.find((f) => f.key === key)!.test;
+    return (currentFloorVac.byPnu.get(pnuOf(b.id)) ?? []).some((u) => test(u.floor));
+  }, [src, currentFloorVac]);
   const filtered = useMemo(() => buildings.filter((b) => (!q.trim() || b.name.toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())
       || !!b.roadAddr?.includes(q.trim()))
     && matchesStatus(b, workspace.status)
-    && (!savedOnly || savedIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, savedIds]);
+    && floorMatch(b, floorFilter)
+    && (!savedOnly || savedIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, savedIds, floorFilter, floorMatch]);
 
   // 목록에 실제로 그리는 것. **지도 오버레이는 filtered 를 그대로 쓴다** — 뷰포트로
   // 오버레이까지 거르면 지도를 조금 움직일 때마다 폴리곤을 전부 다시 만들게 되고,
@@ -821,6 +859,14 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               ? VAC_CLASS_KEYS.map((key) => <option key={key} value={key}>{VAC_CLASS[key].label}</option>)
               : (Object.keys(STATUS) as VacStatus[]).map((key) => <option key={key} value={key}>{STATUS[key].label}</option>)}
           </select></label>
+          <label>층별<select aria-label="층별 공실 필터" value={floorFilter} disabled={src !== "api"}
+            title={src !== "api" ? "샘플 자료에는 층별 공실이 없습니다" : "그 층에 빈 층이 있는 건물만 보입니다"}
+            onChange={(e) => setFloorFilter(e.target.value as FloorFilter)}>
+            <option value="all">전체 층</option>
+            {FLOOR_FILTERS.map((f) => <option key={f.key} value={f.key}>
+              {f.label}{currentFloorVac?.byPnu ? ` · ${buildings.filter((b) => floorMatch(b, f.key)).length.toLocaleString("ko-KR")}동` : ""}
+            </option>)}
+          </select></label>
           <button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly((value) => !value)}>저장한 후보 {saved.length}</button>
           {/* 뷰포트 동기화 스위치(R2). 켜 두는 것이 기본이다 — 화면 밖 매물은 사용자에게
               존재하지 않으므로, 지도를 옮겼는데 목록이 그대로면 둘 다 못 믿게 된다.
@@ -829,9 +875,14 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             title="지도를 움직이면 목록이 화면에 보이는 범위로 좁혀집니다">
             {viewportOnly ? "지도 범위만" : "거점 전체"}
           </button>
-          {(q || workspace.status !== "all" || savedOnly) && <button type="button" onClick={() => {
-            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false);
+          {(q || workspace.status !== "all" || savedOnly || floorFilter !== "all") && <button type="button" onClick={() => {
+            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false); setFloorFilter("all");
           }}>조건 초기화</button>}
+          {floorOn && <p className="floor-filter-note" role="status">
+            {!currentFloorVac ? "층별 공실을 불러오는 중…"
+              : !currentFloorVac.byPnu ? "이 상권은 층별 공실 자료가 없어 층으로 거르지 않았습니다."
+              : `${FLOOR_FILTERS.find((f) => f.key === floorFilter)!.label}에 빈 층(확정 · 추정)이 있는 건물만 보입니다 · 같은 지번의 건물은 함께 보입니다.`}
+          </p>}
         </div>
         {/* 건수를 **먼저 수로** 말한다 — 네모가 "이 조건의 매물 N건"을 먼저 답하는 것과
             같은 자리다(design/references/INDEX.md §1-4). 뷰포트가 목록을 실제로 줄이고
@@ -876,7 +927,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             <p>
               {buildings.length === 0 ? "다른 상권을 선택해 주세요."
                 : filtered.length > 0 ? `조건에 맞는 ${filtered.length.toLocaleString("ko-KR")}동이 화면 밖에 있습니다. 지도를 줄이거나 「거점 전체」로 바꿔 보세요.`
-                : "검색어·공실 상태를 바꾸거나 저장한 후보 조건을 해제해 주세요."}
+                : "검색어·공실 상태·층별 조건을 바꾸거나 저장한 후보 조건을 해제해 주세요."}
             </p>
           </div>}
           {listed.map((b) => (
@@ -908,6 +959,14 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                     <div className="b-rent">
                       빈 층 {rows.length}개 · 월 <b className="num">{lo.toLocaleString("ko-KR")}{lo !== hi ? `~${hi.toLocaleString("ko-KR")}` : ""}만원</b> 추정
                     </div>
+                  );
+                })()}
+                {floorOn && currentFloorVac?.byPnu && (currentFloorVac.byPnu.get(pnuOf(b.id)) ?? []).length > 0 && (() => {
+                  const test = FLOOR_FILTERS.find((f) => f.key === floorFilter)!.test;
+                  return (
+                    <div className="b-floors">빈 층 {(currentFloorVac.byPnu.get(pnuOf(b.id)) ?? []).map((u, i) => (
+                      <span key={u.id}>{i > 0 && " · "}{test(u.floor) ? <b>{u.floor_label}</b> : u.floor_label}{u.certainty === "probable" && <i> 추정</i>}</span>
+                    ))}</div>
                   );
                 })()}
                 {/* 내 업종 점수는 건물 상세를 열 때 받는다(첫 렌더 fetch 불변). */}

@@ -63,8 +63,9 @@ function mountClassified() {
 }
 
 /** `withBuildings: false` 면 /heatmap/buildings 가 404 → 화면이 로컬 샘플로 폴백한다. */
-function mount(opts: { withBuildings?: boolean; rent?: RentHeatmap; onReview?: (selection: { districtId: string; buildingId: string; buildingName: string }) => void } = {}) {
+function mount(opts: { withBuildings?: boolean; rent?: RentHeatmap; floorVac?: unknown; onReview?: (selection: { districtId: string; buildingId: string; buildingName: string }) => void } = {}) {
   const routes: Route[] = [
+    ...(opts.floorVac ? [{ match: /\/api\/v1\/commercial-districts\/garosugil\/floor-vacancies\?/, body: opts.floorVac }] : []),
     { match: /\/api\/v1\/commercial-districts$/, body: HUBS },
     { match: /\/api\/v1\/heatmap\/rent\?district=/, body: opts.rent ?? rentHeatmap("garosugil") },
     {
@@ -320,6 +321,44 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     fireEvent.click(screen.getByRole("button", { name: "층 선택 해제" }));
     fireEvent.click(screen.getByRole("button", { name: "이 건물로 입점 검토 →" }));
     expect(review).toHaveBeenLastCalledWith({ districtId: "garosugil", buildingId: "g3", buildingName: "가로수 C" });
+  });
+
+  // 층 매물 목록(테스트 전용 합성) — g1: 1층 빈 층 · g3: 2층 · 4층(추정). g2 는 빈 층 없음
+  const floorUnit = (pnu: string, floor: number, certainty: "confirmed" | "probable" = "confirmed") => ({
+    id: `vfu-${pnu}-${floor}`, building_id: pnu, pnu, bldgs_on_pnu: 1, n: pnu, lat: 37.52, lng: 127.02, floor, floor_label: `${floor}F`,
+    certainty, area: 30, area_m2: 99, purps: "제1종근린생활시설", bld_floors: 5, com_floors: [], occ_floors: [], unknown_n: 0, was: "" });
+  const FLOOR_VAC = { district_id: "garosugil", total: 3, counts: { confirmed: 2, probable: 1 }, counts_all: {}, by_floor: { 1: 1, 2: 1, 4: 1 },
+    units: [floorUnit("g1", 1), floorUnit("g3", 2), floorUnit("g3", 4, "probable")] };
+
+  it("층별 필터 — 고른 층에 빈 층이 있는 건물만 목록 · 지도에 남고, 처음 고를 때만 층 목록을 부른다(2026-11-10)", async () => {
+    mount({ floorVac: FLOOR_VAC });
+    await screen.findByText("가로수 A");
+    expect(api.count(/floor-vacancies/)).toBe(0);                    // 첫 화면은 부르지 않는다
+    const floorSelect = screen.getByRole("combobox", { name: "층별 공실 필터" });
+    fireEvent.change(floorSelect, { target: { value: "1" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 C 카페/ })).toBeNull());
+    expect(screen.getByRole("button", { name: /^가로수 A 카페/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^가로수 B 카페/ })).toBeNull();
+    expect(screen.getByText(/1층에 빈 층\(확정 · 추정\)이 있는 건물만/)).toBeTruthy();
+    // 고른 뒤에는 층마다 건물 수가 붙는다
+    expect([...floorSelect.querySelectorAll("option")].map((o) => o.textContent)).toEqual(["전체 층", "1층 · 1동", "2층 · 1동", "3층 이상 · 1동"]);
+    fireEvent.change(floorSelect, { target: { value: "3+" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 A 카페/ })).toBeNull());
+    const c = screen.getByRole("button", { name: /^가로수 C 카페/ });
+    expect(c.querySelector(".b-floors")!.textContent).toBe("빈 층 2F · 4F 추정");
+    expect(c.querySelector(".b-floors b")!.textContent).toBe("4F");      // 맞는 층은 굵게
+    expect(api.count(/floor-vacancies/)).toBe(1);                    // 한 번만 부른다
+    fireEvent.click(screen.getByRole("button", { name: "조건 초기화" }));
+    expect((floorSelect as HTMLSelectElement).value).toBe("all");
+    expect(await screen.findByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
+  });
+
+  it("층별 공실 자료가 없는 상권은 층으로 거르지 않고 그렇다고 말한다", async () => {
+    mount();
+    await screen.findByText("가로수 A");
+    fireEvent.change(screen.getByRole("combobox", { name: "층별 공실 필터" }), { target: { value: "2" } });
+    expect(await screen.findByText("이 상권은 층별 공실 자료가 없어 층으로 거르지 않았습니다.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
   });
 
   it("R-ONE 이 없는 거점은 금액을 지어내지 않고 없다고 말한다", async () => {
