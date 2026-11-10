@@ -6,6 +6,8 @@ import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import AreaBepPlanner from "@/components/AreaBepPlanner";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
+import PostingRiskCheck from "@/components/PostingRiskCheck";
+import MenuPlanner from "@/components/MenuPlanner";
 import {
   BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPostings, getBuildingTwin, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
@@ -107,9 +109,10 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
-  // 첫 화면은 「상권 맞춤 인테리어」(2026-11-09 사용자 요청 — Posting 맨 처음 순서). 자리 · 비용 입력은 늘 그려 둔다(keepMounted) —
-  // 지도 탐색에서는 왼쪽 칸에 서 있어 인테리어를 보면서 자리를 바꿀 수 있다
-  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "interior"));
+  // 첫 화면은 「시뮬레이션 결과」(2026-11-10 사용자 요청 — 오른쪽 칸 순서: 시뮬레이션 결과 → 상권 맞춤 인테리어 → 주변 업종 지도 →
+  // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정 → 이 자리로 검증 program 만들기). 11-09 에는 인테리어가 첫 화면이었다.
+  // 자리 · 비용 입력은 늘 그려 둔다(keepMounted) — 지도 탐색에서는 왼쪽 칸에 서 있어 어느 쪽을 보면서도 자리를 바꿀 수 있다
+  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
   const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
@@ -414,15 +417,14 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} keepMounted={["input"]} pages={[
-        { id: "interior", label: "상권 맞춤 인테리어", description: "고른 자리의 3D 디지털 트윈에서 키워드로 가구를 놓고, 테이블 · 의자를 골라 직접 배치하세요.", content:
-          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
-        { id: "input", label: "자리와 비용 조건", description: inSlots
-          ? "자리와 비용 조건을 고르면 여기에 바로 계산 결과가 나옵니다."
-          : "조건을 입력하면 바로 아래에 계산 결과가 나옵니다.", content: <>
+        { id: "input", label: "시뮬레이션 결과", description: inSlots
+          ? "왼쪽에서 자리와 비용 조건을 고르고 「시뮬레이션」을 누르면 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 여기에 나옵니다."
+          : "조건을 입력하면 바로 아래에 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 나옵니다.", content: <>
         {/* ── 입력 ── 2026-11-08 칸 배치: 지도 탐색에서는 **왼쪽 칸**에 선다(결과는 오른쪽 칸 · 지도는 가운데).
             다른 탭(주변 업종 · 인테리어 · 찾아오는 길)을 봐도 입력은 왼쪽에 그대로 남는다. 단독 렌더는 예전 자리(MapSlot). */}
         <MapSlot name="left" className="postconsole posting-side" track="posting">
-        <form className="panel" onSubmit={(e) => { e.preventDefault(); run(); }}>
+        {/* 「시뮬레이션」을 누르면 결과가 나오는 오른쪽 「시뮬레이션 결과」를 연다(자동 재계산은 쪽을 옮기지 않는다) */}
+        <form className="panel" onSubmit={(e) => { e.preventDefault(); setPage("input"); run(); }}>
           <div className="ptitle">1. 자리와 업종 선택</div>
           {handoffNote && <div className="posting-handoff" role="status">{handoffNote}</div>}
 
@@ -514,19 +516,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </form>
         </MapSlot>
 
-        {/* ── 결과 — 입력 바로 아래(2026-11-07 「자리와 비용 조건에 계산 결과가 바로 나오게」). 종전에는 별도 「계산 결과」 탭이었다 ── */}
+        {/* ── 결과 — 「시뮬레이션 결과」(2026-11-10 사용자 요청): 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간만 둔다.
+            결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, 검증 program 버튼은 마지막 쪽, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
+            세부 업종을 고르면 세 가격대 대신 그 업종 운영 시나리오가 계산 결과다 — 그래서 그것만은 여기에 남는다. ── */}
         <div className="results">
-          <Verdict
-            eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
-            question="어떤 비용과 전략으로 입점할까요?"
-            verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
-          />
-          {onMakeProgram && (
-            <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
-              onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
-          )}
           <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
-          {detailKey && <IndustryCompetitionPanel districtId={districtId} detailKey={detailKey} />}
           {result?.unavailable_reason && <p role="status">{result.unavailable_reason}</p>}
           {result?.economics && <IndustryEconomicsResult result={result.economics} />}
           {!result && !busy && <div className="empty">자리를 고르면 계산한다.</div>}
@@ -584,29 +578,62 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               <div className="rsrc">
                 매출·순익·회수기간은 입력 조건에 따른 추정입니다. 실제 계약 금액과 운영 조건에 따라 달라질 수 있습니다.
               </div>
-              {/* 결과 저장(2026-10-06) — 새로고침하면 사라지던 계산을 본인 계정에 남긴다. 고른 것만 남긴다. */}
-              <SaveResultButton disabled={busy || !calculation} onSaved={() => setSavedTick((n) => n + 1)}
-                build={() => calculation && {
-                  kind: "posting",
-                  title: `${districts.find((d) => d.id === calculation.input.district_id)?.name ?? calculation.input.district_id}`
-                    + ` · ${unit?.n ?? calculation.result.unit_id} · ${calculation.result.industry_type || calculation.input.industry_type || "자리 기본 업종"}`,
-                  districtId: calculation.input.district_id,
-                  payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null },
-                }} />
             </>
           )}
-          {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy} onSaved={() => setSavedTick((n) => n + 1)}
-            build={() => ({ kind: "posting", title: `${districts.find((d) => d.id === districtId)?.name ?? districtId} · ${result.economics!.label} 운영 시나리오`,
-              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
-          <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
         </div>
         </> },
+        { id: "interior", label: "상권 맞춤 인테리어", description: "고른 자리의 3D 디지털 트윈에서 키워드로 가구를 놓고, 테이블 · 의자를 골라 직접 배치하세요.", content:
+          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
         { id: "nearby", label: "주변 업종 지도", description: "업종을 확인하고 「조회」를 누르면 공실 주변 50~100m의 같은 업종과 체인점을 보여 줍니다.", content:
-          page === "nearby" && (unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>) },
+          page === "nearby" && <>
+            {detailKey && <IndustryCompetitionPanel districtId={districtId} detailKey={detailKey} />}
+            {unit ? <NearbyCompetition key={`${districtId}:${unit.id}`} districtId={districtId} lat={unit.lat} lng={unit.lng} industry={industry} detailKey={detailKey} /> : <p>먼저 자리를 선택하세요.</p>}
+          </> },
         // 「검증 리포트」 탭은 Posting 에서 뺐다(2026-11-07 사용자 요청). 종합 리포트는 지도 탐색의 「검증 리포트」(App.tsx)와 Program 에 그대로 있다.
         { id: "access", label: "찾아오는 길", description: "검토하는 자리 주변의 교통과 접근성을 확인하세요.", content:
           unit ? <TransitAccessPanel key={`${districtId}:${unit.id}:${unit.lat}:${unit.lng}`}
             destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} showWalking={false} /> : <p>자리를 먼저 선택해 주세요.</p> },
+        { id: "risk", label: "위험 확인", description: "이 자리를 떨어뜨릴 이유가 있는지, 계약 전에 더 확인할 것은 무엇인지 시뮬레이션 결과와 입력의 출처로 가릅니다.", content:
+          <PostingRiskCheck result={result} strategy={calculation?.input.strategy} industry={calculation?.input.industry_type ?? industry}
+            busy={busy} stale={!!changedInput} /> },
+        { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
+          <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
+        { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요.", content: <div className="pstep">
+          <Verdict
+            eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
+            question="어떤 비용과 전략으로 입점할까요?"
+            verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
+          />
+          {/* 결과 저장(2026-10-06) — 새로고침하면 사라지던 계산을 본인 계정에 남긴다. 고른 것만 남긴다. 2026-11-10 이 쪽으로 옮겼다 */}
+          {result && !result.economics && result.calculation_status !== "unavailable" && <SaveResultButton disabled={busy || !calculation} onSaved={() => setSavedTick((n) => n + 1)}
+            build={() => calculation && {
+              kind: "posting",
+              title: `${districts.find((d) => d.id === calculation.input.district_id)?.name ?? calculation.input.district_id}`
+                + ` · ${unit?.n ?? calculation.result.unit_id} · ${calculation.result.industry_type || calculation.input.industry_type || "자리 기본 업종"}`,
+              districtId: calculation.input.district_id,
+              payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null },
+            }} />}
+          {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy} onSaved={() => setSavedTick((n) => n + 1)}
+            build={() => ({ kind: "posting", title: `${districts.find((d) => d.id === districtId)?.name ?? districtId} · ${result.economics!.label} 운영 시나리오`,
+              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
+          <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
+          {inSlots && <p className="pstep-pointer">후보를 3곳까지 담아 계약 조건 · 답사 체크리스트로 비교하려면 화면 오른쪽 위 「입점 준비」를 쓰세요.</p>}
+        </div> },
+        { id: "program", label: "이 자리로 검증 program 만들기", description: "정한 자리와 계산을 Program 「가설 검증」으로 넘겨, 작게 먼저 확인할 계획을 세웁니다.", content: <div className="pstep pstep-program">
+          {unit ? <dl>
+            <dt>자리</dt><dd>{unit.n} · {effectiveUnit?.area ?? unit.area}평 · {unit.floor}</dd>
+            <dt>업종</dt><dd>{calculation?.result.industry_type || calculation?.input.industry_type || unit.was?.trim() || "자리 기본 업종"}</dd>
+            <dt>계산</dt><dd>{calculation ? (result?.economics ? `${result.economics.label} 운영 시나리오` : "세 가격대 비용과 회수기간") : "아직 없음 — 「시뮬레이션」을 먼저 하세요"}</dd>
+          </dl> : <p className="pstep-empty">왼쪽에서 자리를 먼저 고르세요.</p>}
+          <p className="pstep-lede">{result?.economics?.status === "calculated"
+            ? "세부 업종 운영 계산의 하루 손익분기 건수가 가설 검증의 목표선이 됩니다."
+            : "세부 업종 운영 계산(단가 · 영업일 · 비용)까지 하면 하루 손익분기 건수가 가설 검증의 목표선으로 함께 넘어갑니다."}</p>
+          {changedInput && <p className="pstep-note" role="status">입력이 바뀌어 다시 계산하는 중입니다 — 계산이 끝나면 넘길 수 있습니다.</p>}
+          {onMakeProgram ? (
+            <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
+              onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
+          ) : <p className="pstep-empty">지도 탐색의 Posting 에서 열면 이 자리로 Program 을 바로 만듭니다.</p>}
+        </div> },
       ]} />
     </div></div>
   );

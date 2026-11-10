@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { act, fireEvent, render, screen, waitFor, type RenderResult } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within, type RenderResult } from "@testing-library/react";
 import PostingConsole from "./PostingConsole";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings, simulateResult } from "@/test/fixtures";
@@ -103,7 +103,8 @@ describe("Posting — 자료 부족 전략 (2026-10-28 사용자 결정 (b))", (
     });
     await screen.findByText("전제(0)");
     expect(screen.getByText("자료 부족")).toBeTruthy();
-    expect(screen.getByText(why)).toBeTruthy();
+    // 가격대 카드에 이유가 실린다(「위험 확인」도 같은 이유를 참고로 옮겨 적는다 — 2026-11-10)
+    expect(within(document.querySelector<HTMLElement>(".tiers")!).getByText(why)).toBeTruthy();
     // 계산한 두 전략만 초기 투자를 싣는다 — 자료 부족 전략에 0·NaN 같은 숫자를 그리지 않는다
     expect(screen.getAllByText("8,000만원")).toHaveLength(2);
     expect(screen.queryByText(/NaN/)).toBeNull();
