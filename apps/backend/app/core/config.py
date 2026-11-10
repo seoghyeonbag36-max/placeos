@@ -81,6 +81,10 @@ class Settings(BaseSettings):
     # 공실까지의 도보시간(TMAP 보행자 경로). 비우면 도보시간만 "준비 중"으로 빠지고
     # 역·정류장·주차장 위치와 직선거리는 그대로 나온다. 브라우저로 보내지 않는다.
     tmap_app_key: str = ""
+    # TMAP 키가 없을 때 쓰는 키 없는 보행 경로(2026-11-10 사용자 선택) — FOSSGIS 의 OSRM 도보 서버(OpenStreetMap).
+    # 이용 조건: 초당 1회 이하 · 앱을 밝히는 User-Agent · Referer · OSM 출처와 「지도 오류 신고」 링크 표시 ·
+    # 고트래픽 사이트 금지 · 보장 없음(fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen). 비우면 도보시간을 묻지 않는다.
+    walk_routing_url: str = "https://routing.openstreetmap.de/routed-foot"
     # 출발지→상권 대중교통 소요(ODsay). 차량은 KAKAO_MOBILITY_API_KEY(카카오모빌리티 길찾기 권한이 필요하다).
     # 미설정 수단은 수치를 돌려주지 않는다(`not_configured`). 브라우저로 보내지 않는다.
     odsay_api_key: str = ""

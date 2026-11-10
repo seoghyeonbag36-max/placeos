@@ -64,6 +64,11 @@ def isolated(monkeypatch, tmp_path):
     monkeypatch.setattr(settings, "travel_daily_cap_per_instance", 1000)
     monkeypatch.setattr(travel, "_calls", 0)
     monkeypatch.setattr(travel, "_started", 0.0)
+    # OSM 보행 경로(OSRM) — 테스트 주소 · 간격 0 · 빈 캐시(테스트끼리 결과가 새지 않게)
+    monkeypatch.setattr(settings, "walk_routing_url", "https://osrm.test/routed-foot")
+    monkeypatch.setattr(travel, "_OSRM_MIN_INTERVAL_S", 0.0)
+    monkeypatch.setattr(travel, "_osrm_next", 0.0)
+    travel._walk_cache.clear()
     gold = tmp_path / "page_bus_stops.json"
     write_gold(gold, BUS_ROWS)
     monkeypatch.setattr(bus_stops, "_SRC", gold)
@@ -145,12 +150,13 @@ def test_groups_provenance_and_provider_requests(isolated):
     assert "test-local-key" not in response.text and "test-tmap-key" not in response.text
 
 
-def test_without_tmap_key_keeps_places_and_never_fabricates_time(isolated, monkeypatch):
+def test_without_any_walk_provider_keeps_places_and_never_fabricates_time(isolated, monkeypatch):
     monkeypatch.setattr(settings, "tmap_app_key", "")
+    monkeypatch.setattr(settings, "walk_routing_url", "")
     seen = []
     isolated(lambda r: (seen.append(r), respond(r))[1])
     result = run()
-    assert all(r.url.host == "dapi.kakao.com" for r in seen)       # TMAP 을 부르지 않는다
+    assert all(r.url.host == "dapi.kakao.com" for r in seen)       # TMAP · OSRM 을 부르지 않는다
     for item in result.subway.items + result.bus_stops.items:
         assert item.walk.status == "not_configured"
         assert item.walk.duration_seconds is None and item.walk.distance_meters is None
@@ -323,3 +329,108 @@ def test_bus_stops_corrupt_file_returns_none_not_empty(monkeypatch, tmp_path):
     assert bus_stops.busiest_within(37.5, 127.0, 500, 3) is None
     assert bus_stops.available() is False
     bus_stops._load.cache_clear()
+
+
+# ── OSM 보행 경로(FOSSGIS OSRM 도보 서버 · TMAP 키가 없을 때 · 2026-11-10) ─────────────────────────
+def osrm_table(n, durations=None, distances=None, code="Ok"):
+    return {"code": code, "durations": [[d] for d in (durations or [300.0 + 60 * k for k in range(n)])],
+            "distances": [[m] for m in (distances or [400.0 + 80 * k for k in range(n)])]}
+
+
+def test_without_tmap_key_asks_osrm_once_for_all_stations_and_stops(isolated, monkeypatch):
+    monkeypatch.setattr(settings, "tmap_app_key", "")
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        if request.url.host == "osrm.test":
+            n = len(request.url.params["sources"].split(";"))
+            return httpx.Response(200, json=osrm_table(n))
+        return respond(request)
+
+    isolated(handler)
+    result = run()
+    walks = [r for r in calls if r.url.host == "osrm.test"]
+    assert len(walks) == 1                                       # 지하철 3 + 버스 3 을 table 한 번으로(초당 1회 이용 조건)
+    req = walks[0]
+    assert req.url.path.startswith("/routed-foot/table/v1/foot/")
+    coords = req.url.path.rsplit("/", 1)[1].split(";")
+    assert len(coords) == 7 and coords[-1] == f"{DEST['lng']:.6f},{DEST['lat']:.6f}"   # 마지막이 공실(경도,위도)
+    assert req.url.params["sources"] == "0;1;2;3;4;5" and req.url.params["destinations"] == "6"
+    assert req.headers["User-Agent"].startswith("PlaceOS/") and req.headers["Referer"] == "https://placeos.co.kr/"
+    places = result.subway.items + result.bus_stops.items
+    assert [p.walk.duration_seconds for p in places] == [300.0, 360.0, 420.0, 480.0, 540.0, 600.0]   # 순서대로 붙는다
+    assert all(p.walk.source == "osrm_foot" and p.walk.status == "ok" for p in places)
+    assert all(p.walk is None for p in result.parking.items)
+    assert not [r for r in calls if r.url.host == "apis.openapi.sk.com"]   # 키가 없으면 TMAP 을 부르지 않는다
+
+
+def test_osrm_results_are_cached_so_a_repeat_lookup_does_not_ask_again(isolated, monkeypatch):
+    monkeypatch.setattr(settings, "tmap_app_key", "")
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        if request.url.host == "osrm.test":
+            return httpx.Response(200, json=osrm_table(len(request.url.params["sources"].split(";"))))
+        return respond(request)
+
+    isolated(handler)
+    first = run()
+    second = run()
+    assert len([r for r in calls if r.url.host == "osrm.test"]) == 1
+    assert [p.walk for p in second.subway.items] == [p.walk for p in first.subway.items]
+
+
+@pytest.mark.parametrize("failure,status", [("http", "upstream_error"), ("code", "upstream_error"), ("json", "upstream_error"),
+                                            ("negative", "upstream_error"), ("429", "quota_exceeded")])
+def test_osrm_failure_keeps_places_and_never_fabricates_time(isolated, monkeypatch, failure, status):
+    monkeypatch.setattr(settings, "tmap_app_key", "")
+
+    def handler(request):
+        if request.url.host != "osrm.test":
+            return respond(request)
+        n = len(request.url.params["sources"].split(";"))
+        if failure == "http":
+            return httpx.Response(502)
+        if failure == "429":
+            return httpx.Response(429)
+        if failure == "json":
+            return httpx.Response(200, text="깨진 JSON")
+        if failure == "code":
+            return httpx.Response(200, json=osrm_table(n, code="NoTable"))
+        return httpx.Response(200, json=osrm_table(n, durations=[-1.0] * n))
+
+    isolated(handler)
+    result = run()
+    places = result.subway.items + result.bus_stops.items
+    assert {p.walk.status for p in places} == {status}
+    assert all(p.walk.duration_seconds is None and p.walk.distance_meters is None for p in places)
+    assert all(p.straight_meters > 0 for p in places) and len(result.parking.items) == 2
+    assert not travel._walk_cache                                 # 실패는 캐시에 남기지 않는다
+
+
+def test_osrm_unreachable_pair_is_no_route_not_zero(isolated, monkeypatch):
+    monkeypatch.setattr(settings, "tmap_app_key", "")
+
+    def handler(request):
+        if request.url.host != "osrm.test":
+            return respond(request)
+        n = len(request.url.params["sources"].split(";"))
+        return httpx.Response(200, json=osrm_table(n, durations=[None] + [300.0] * (n - 1),
+                                                   distances=[None] + [400.0] * (n - 1)))
+
+    isolated(handler)
+    walks = [p.walk for p in run().subway.items]
+    assert walks[0].status == "no_route" and walks[0].duration_seconds is None
+    assert {w.status for w in walks[1:]} == {"ok"}
+
+
+def test_osrm_rate_limit_backs_off_instead_of_queueing_long(isolated, monkeypatch):
+    monkeypatch.setattr(settings, "tmap_app_key", "")
+    monkeypatch.setattr(travel, "_osrm_next", travel.time.monotonic() + 60)   # 이미 1분 줄이 섰다
+    seen = []
+    isolated(lambda r: (seen.append(r), respond(r))[1])
+    places = run().subway.items
+    assert {p.walk.status for p in places} == {"quota_exceeded"}
+    assert not [r for r in seen if r.url.host == "osrm.test"]      # 이용 조건(초당 1회)을 넘겨 부르지 않는다

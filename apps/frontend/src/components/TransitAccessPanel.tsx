@@ -123,6 +123,8 @@ export default function TransitAccessPanel({ destination, destinationName, showW
   }
 
   const busWindow = data?.bus_window;
+  // 도보시간 출처 — 역 · 정류장 중 하나라도 OSM 보행 경로면 그 이용 조건(출처 · 「지도 오류 신고」 링크)을 단다
+  const osm = !!data && [...data.subway.items, ...data.bus_stops.items].some((p) => p.walk?.source === "osrm_foot");
   return <section className="transit-access-panel" aria-label="주변 교통 접근성">
     <details open={expanded}>
       <summary onClick={(event) => { event.preventDefault(); toggle(); }}>주변 지하철·버스·주차장</summary>
@@ -144,11 +146,17 @@ export default function TransitAccessPanel({ destination, destinationName, showW
           <small>조회: {new Date(data.queried_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (한국시간)</small>
         </div>}
         <p className="transit-note">
-          {showWalking ? "도보시간은 TMAP 보행자 경로의 예상값이며 신호·경사·혼잡은 반영되지 않습니다. 역과 정류장은 대표 좌표 기준이라 출입구·출구까지의 거리는 포함하지 않습니다."
+          {showWalking ? `도보시간은 ${osm ? "OpenStreetMap 보행 경로(OSRM 도보 · FOSSGIS 공개 서버)" : "TMAP 보행자 경로"}의 예상값이며 신호·경사·혼잡은 반영되지 않습니다. 역과 정류장은 대표 좌표 기준이라 출입구·출구까지의 거리는 포함하지 않습니다.`
             : "정류장에서 건물까지의 도보시간은 Page에서 건물을 선택한 뒤 확인하세요."}
           {busWindow && ` 버스 이용량은 ${busWindow.start}~${busWindow.end} 일평균 교통카드 승하차이며 정류소 이용량이지 점포 방문자 수가 아닙니다.`}
           {" "}주차장은 위치만 안내하며 빈자리·요금은 제공하지 않습니다.
         </p>
+        {/* FOSSGIS 이용 조건 — OSM 출처와 「지도 오류 신고」 링크를 보인다 */}
+        {showWalking && osm && <p className="transit-attribution">
+          도보 경로 데이터 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> 기여자
+          (<a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">ODbL</a>) ·{" "}
+          <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">지도 오류 신고</a>
+        </p>}
       </>}
     </details>
   </section>;

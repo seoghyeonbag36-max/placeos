@@ -3,10 +3,13 @@
 - 지하철역·주차장: 카카오 Local 카테고리 검색(SW8·PK6). 좌표는 장소 대표점이며 출입구가 아니다.
 - 버스정류장: 서울열린데이터 교통카드 승하차 Gold(`services/bus_stops`)에서 반경 안
   일평균 이용량 상위. 외부 호출 없음.
-- 도보시간: TMAP 보행자 경로. 실패를 직선거리 환산으로 대체하지 않고 이유와 함께 null 로 둔다.
+- 도보시간: TMAP 키가 있으면 TMAP 보행자 경로, 없으면 OpenStreetMap 보행 경로(FOSSGIS OSRM 도보 서버 ·
+  2026-11-10 사용자 선택 · `WALK_ROUTING_URL`). 실패를 직선거리 환산으로 대체하지 않고 이유와 함께 null 로 둔다.
+  OSRM 은 한 조회의 역 · 정류장(최대 6곳)을 `table` 한 번으로 묻고, 서버 이용 조건(초당 1회 이하)대로 간격을 둔다.
+  같은 출발 · 도착은 24시간 메모리에 둔다(역 · 정류장 → 공실 좌표뿐 — 사용자 위치가 아니다).
 
-요청량 상한은 프로세스별 24시간 외부 호출 수이며 재시작하면 초기화된다. 좌표·경로는 저장하지
-않는다. 한 번의 조회는 최대 8회(카카오 2 + TMAP 6)를 쓰고 실패 호출도 센다.
+요청량 상한은 프로세스별 24시간 외부 호출 수이며 재시작하면 초기화된다. 좌표·경로는 디스크에 저장하지
+않는다. 한 번의 조회는 최대 8회(카카오 2 + TMAP 6 · OSRM 이면 카카오 2 + 1)를 쓰고 실패 호출도 센다.
 
 출발지 → 목적지 소요(`/times` · 2026-11-02 되살림 · `/access` 와 공존): 차량 = 카카오모빌리티, 대중교통 = ODsay.
 실패를 수치로 대체하지 않고 수단별로 돌려준다. ODsay 도시간 응답은 터미널 전후 구간이 빠지므로 총 이동시간으로 쓰지
@@ -33,6 +36,12 @@ from app.services import bus_stops
 
 LOCAL_URL = "https://dapi.kakao.com/v2/local/search/category.json"
 WALK_URL = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1"
+# FOSSGIS 이용 조건 — 앱을 밝히는 User-Agent(라이브러리 기본값은 안 된다) · Referer · 초당 1회 이하
+OSRM_HEADERS = {"User-Agent": "PlaceOS/1.0 (+https://placeos.co.kr)", "Referer": "https://placeos.co.kr/"}
+_OSRM_MIN_INTERVAL_S = 1.0
+_OSRM_MAX_WAIT_S = 5.0        # 이보다 오래 줄 서야 하면 묻지 않고 「조회 한도」로 돌린다
+_WALK_TTL_S = 24 * 3600.0
+_WALK_CACHE_MAX = 4096
 DRIVING_URL = "https://apis-navi.kakaomobility.com/v1/directions"
 TRANSIT_URL = "https://api.odsay.com/v1/api/searchPubTransPathT"
 ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json"
@@ -44,6 +53,9 @@ PARKING_RADIUS_M, PARKING_LIMIT = 500, 5
 _lock = threading.Lock()
 _started = 0.0
 _calls = 0
+_osrm_lock = threading.Lock()
+_osrm_next = 0.0
+_walk_cache: dict[tuple[float, float, float, float], tuple[float, WalkTime]] = {}
 
 
 def _reserve_call() -> bool:
@@ -139,6 +151,80 @@ async def _walk(client: httpx.AsyncClient, origin: TravelPoint, destination: Tra
         return WalkTime(status="upstream_error")
 
 
+def _walk_key(origin: TravelPoint, destination: TravelPoint) -> tuple[float, float, float, float]:
+    return (round(origin.lat, 5), round(origin.lng, 5), round(destination.lat, 5), round(destination.lng, 5))
+
+
+async def _osrm_walks(client: httpx.AsyncClient, origins: list[TravelPoint], destination: TravelPoint) -> list[WalkTime]:
+    """OpenStreetMap 보행 경로(OSRM `table`) — 여러 출발점 → 공실 한 곳을 한 번에 묻는다. 예외를 내지 않는다."""
+    global _osrm_next
+    base = settings.walk_routing_url.strip().rstrip("/")
+    out: list[WalkTime | None] = []
+    now = time.monotonic()
+    with _lock:
+        for origin in origins:
+            hit = _walk_cache.get(_walk_key(origin, destination))
+            out.append(hit[1] if hit and now - hit[0] < _WALK_TTL_S else None)
+    missing = [i for i, w in enumerate(out) if w is None]
+    if not missing:
+        return [w for w in out if w is not None]
+
+    def fill(status: str) -> list[WalkTime]:
+        return [w if w is not None else WalkTime(status=status, source="osrm_foot") for w in out]
+
+    with _osrm_lock:
+        now = time.monotonic()
+        wait = max(0.0, _osrm_next - now)
+        if wait > _OSRM_MAX_WAIT_S:
+            return fill("quota_exceeded")
+        _osrm_next = max(now, _osrm_next) + _OSRM_MIN_INTERVAL_S
+    if not _reserve_call():
+        return fill("quota_exceeded")
+    if wait:
+        await asyncio.sleep(wait)
+    coords = ";".join(f"{origins[i].lng:.6f},{origins[i].lat:.6f}" for i in missing)
+    n = len(missing)
+    url = (f"{base}/table/v1/foot/{coords};{destination.lng:.6f},{destination.lat:.6f}"
+           f"?sources={';'.join(str(k) for k in range(n))}&destinations={n}&annotations=duration,distance")
+    try:
+        response = await client.get(url, headers=OSRM_HEADERS)
+        if response.status_code == 429:
+            return fill("quota_exceeded")
+        response.raise_for_status()
+        body = response.json()
+        if body.get("code") != "Ok":
+            raise ValueError("OSRM 응답 코드")
+        durations, distances = body["durations"], body["distances"]
+        fresh: list[WalkTime] = []
+        for k in range(n):
+            seconds, meters = durations[k][0], distances[k][0]
+            fresh.append(WalkTime(status="no_route", source="osrm_foot") if seconds is None or meters is None
+                         else WalkTime(status="ok", source="osrm_foot", duration_seconds=_number(seconds),
+                                       distance_meters=_number(meters)))
+    except (httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, AttributeError):
+        # 예외 원문은 응답 · 로그에 싣지 않는다. 캐시에서 온 값은 그대로 두고 이번에 물은 곳만 실패다
+        return fill("upstream_error")
+    stamp = time.monotonic()
+    with _lock:
+        for i, walk in zip(missing, fresh):
+            out[i] = walk
+            if len(_walk_cache) >= _WALK_CACHE_MAX:
+                _walk_cache.pop(next(iter(_walk_cache)))
+            _walk_cache[_walk_key(origins[i], destination)] = (stamp, walk)
+    return fill("upstream_error")
+
+
+async def _walks(client: httpx.AsyncClient, origins: list[TravelPoint], destination: TravelPoint) -> list[WalkTime]:
+    """도보시간 공급자 — TMAP 키가 있으면 TMAP(곳마다 1회), 없으면 OSM 보행 경로(한 번에), 둘 다 없으면 「준비 중」."""
+    if not origins:
+        return []
+    if settings.tmap_app_key.strip():
+        return list(await asyncio.gather(*(_walk(client, origin, destination) for origin in origins)))
+    if settings.walk_routing_url.strip():
+        return await _osrm_walks(client, origins, destination)
+    return [WalkTime(status="not_configured") for _ in origins]
+
+
 def _group(status: str, radius: int, items: list[AccessPlace] | None = None) -> AccessGroup:
     if status == "ok" and not items:
         status = "no_results"
@@ -172,11 +258,10 @@ async def _subway(client: httpx.AsyncClient, destination: TravelPoint) -> Access
         points = [TravelPoint(lat=s["lat"], lng=s["lng"]) for s in nearest]
     except (ValueError, KeyError, TypeError, AttributeError):
         return _group("upstream_error", SUBWAY_RADIUS_M)
-    walks = await asyncio.gather(*(_walk(client, point, destination) for point in points))
     items = [
         AccessPlace(kind="subway", name=s["name"], detail=", ".join(s["lines"]) or None, point=point,
-                    straight_meters=s["distance"], walk=walk, source="kakao_local", place_url=s["url"])
-        for s, point, walk in zip(nearest, points, walks)
+                    straight_meters=s["distance"], source="kakao_local", place_url=s["url"])
+        for s, point in zip(nearest, points)
     ]
     return _group("ok", SUBWAY_RADIUS_M, items)
 
@@ -187,13 +272,12 @@ async def _bus(client: httpx.AsyncClient, destination: TravelPoint) -> AccessGro
         # 산출물이 없다 — "주변에 정류장이 없다"와 다른 상태다.
         return _group("unavailable", BUS_RADIUS_M)
     points = [TravelPoint(lat=s["lat"], lng=s["lng"]) for s in stops]
-    walks = await asyncio.gather(*(_walk(client, point, destination) for point in points))
     items = [
         AccessPlace(kind="bus_stop", name=s["name"] or "이름 없는 정류장", point=point,
-                    straight_meters=s["straight_meters"], walk=walk, daily_riders=s["daily_total"],
+                    straight_meters=s["straight_meters"], daily_riders=s["daily_total"],
                     route_count=s["routes"], route_numbers=s.get("route_numbers", []),
                     routes_as_of=s.get("routes_as_of"), source="seoul_open_data")
-        for s, point, walk in zip(stops, points, walks)
+        for s, point in zip(stops, points)
     ]
     return _group("ok", BUS_RADIUS_M, items)
 
@@ -227,6 +311,10 @@ async def get_transit_access(request: AccessRequest) -> AccessResponse:
         # 한 종류의 지연·실패가 다른 종류의 결과를 바꾸지 않는다.
         subway, bus, parking = await asyncio.gather(
             _subway(client, destination), _bus(client, destination), _parking(client, destination))
+        # 역 · 정류장 도보시간은 모아서 묻는다 — OSRM 은 한 번의 table 요청(초당 1회 이용 조건), TMAP 은 곳마다
+        places = [place for group in (subway, bus) for place in group.items]
+        for place, walk in zip(places, await _walks(client, [p.point for p in places], destination)):
+            place.walk = walk
     return AccessResponse(destination=destination, queried_at=queried_at, subway=subway,
                           bus_stops=bus, parking=parking, bus_window=bus_stops.window())
 
