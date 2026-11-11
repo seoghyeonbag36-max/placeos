@@ -194,22 +194,17 @@ export function setStartupOrder(s: FlowState, startupOrder: "region" | "industry
   if (s.startupOrder === startupOrder) return s;
   return { ...emptyFlow(), goal: "start", startupOrder, lastPath: s.lastPath };
 }
-export function setStartupRegion(s: FlowState, startupRegion: string): FlowState {
-  if (s.startupRegion === startupRegion) return s;
-  const next = clearValidateOn(clearDistrictOn({ ...s, startupRegion }));
-  return s.startupOrder === "region" ? { ...next, industryKey: null, customIndustry: null } : next;
-}
 
 export function setIndustry(s: FlowState, industryKey: string, customIndustry: string | null = null): FlowState {
   if (s.industryKey === industryKey && s.customIndustry === customIndustry) return s;
   const keepHome = s.goal !== "start";
   const next = clearValidateOn(clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
     homeDistrictId: keepHome ? s.homeDistrictId : null }));
-  // 지역별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
+  // 상권별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
   return s.goal === "start" && s.startupOrder === "region" ? { ...next, districtId: s.districtId } : next;
 }
 
-/** 지역별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
+/** 상권별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
 export function setStartupDistrict(s: FlowState, id: string): FlowState {
   if (s.districtId === id) return s;
   return clearValidateOn({ ...setDistrict(s, id), industryKey: null, customIndustry: null, targetIndustryKey: null });

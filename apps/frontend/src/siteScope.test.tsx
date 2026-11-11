@@ -101,14 +101,21 @@ describe("사이트 범위 — 서울만 보인다(2026-11-10)", () => {
     expect(screen.queryByRole("button", { name: /손님 흐름/ })).toBeNull();
   });
 
-  it("지역 고르기는 서울 하나 — 전에 고른 「경기」는 되살리지 않는다", async () => {
+  it("상권별 창업은 지역을 묻지 않고 서울 상권 고르기로 바로 간다(2026-11-11)", async () => {
     installFetchStub([{ match: /\/commercial-districts$/, body: DISTRICTS }]);
-    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "region", startupRegion: "경기" }));
-    window.history.replaceState(null, "", "/#/startup-region");
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start" }));
+    window.history.replaceState(null, "", "/#/startup-order");
     render(<FlowApp token={null} />);
-    await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
-    expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual(["서울"]);
-    expect(screen.getByRole("radio", { name: "서울" }).getAttribute("aria-checked")).toBe("false");
+    await screen.findByRole("heading", { name: "무엇부터 정해 볼까요?" });
+    expect(screen.getAllByRole("radio").map((r) => r.querySelector("b, strong, span")?.textContent ?? r.textContent))
+      .toEqual(expect.arrayContaining([expect.stringContaining("상권별 창업"), expect.stringContaining("업종별 창업")]));
+    expect(screen.queryByRole("radio", { name: /지역별 창업/ })).toBeNull();
+    fireEvent.click(screen.getByRole("radio", { name: /상권별 창업/ }));
+    await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    expect(window.location.hash).toBe("#/districts");
+    expect(screen.queryByRole("heading", { name: "어느 지역에서 창업하시나요?" })).toBeNull();
+    expect(await screen.findByText("성수동 카페거리")).toBeTruthy();
+    expect(screen.queryByText("밤가시마을")).toBeNull();
   });
 
   it("상권 순위(R1)는 서울 묶음만 — 지역 단추도 서울 하나다", async () => {
