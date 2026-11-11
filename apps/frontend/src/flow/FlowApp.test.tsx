@@ -106,7 +106,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect((screen.getByRole("combobox", { name: "정렬" }) as HTMLSelectElement).value).toBe("area");
   });
 
-  it("F-01·F-03 업종별 창업은 업종 다음 지역을 고르면 로그인 없이 상권 순위를 본다", async () => {
+  it("F-01·F-03 업종별 창업은 업종을 고르면 지역을 묻지 않고 로그인 없이 상권 순위를 본다", async () => {
     const api = stub();
     open("/start");
     render(<FlowApp token={null} />);
@@ -116,9 +116,8 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     pick(/업종별 창업/);
     expect((await screen.findByRole("heading", { level: 1, name: "어떤 가게를 여시나요?" }))).toBeTruthy();
     fireEvent.click(await screen.findByRole("radio", { name: /카페·디저트/ }));
-    await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
-    pick("서울");
     expect(await screen.findByRole("heading", { level: 1, name: "카페·디저트 입지 점수가 높은 상권이에요" })).toBeTruthy();
+    expect(window.location.hash).toBe("#/districts");
     // F-07 빈 1층 수는 그 상권 층 산출물(by_floor["1"])에서 센다
     expect(await screen.findByText("빈 1층 12곳")).toBeTruthy();
     expect(await screen.findByText("빈 1층 9곳")).toBeTruthy();
@@ -126,7 +125,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(api.count(/\/auth\//)).toBe(0);
   });
 
-  it("지역별 창업은 지역 → 지역 내 상권 → 업종 → 선택 상권 결과 순서이며 새로고침·뒤로가기에 앞 답을 유지한다", async () => {
+  it("상권별 창업은 상권 → 업종 → 선택 상권 결과 순서이며(지역은 묻지 않는다 · 2026-11-11) 새로고침·뒤로가기에 앞 답을 유지한다", async () => {
     const api = stub([{ match: /\/commercial-districts$/, body: [
       district("seongsu", { name: "성수동 카페거리", gu: "성동구" }),
       district("garosugil", { name: "가로수길" }),
@@ -136,14 +135,13 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     const first = render(<FlowApp token={null} />);
     pick(/새 가게를 열어요/);
     await screen.findByRole("heading", { name: "무엇부터 정해 볼까요?" });
-    pick(/지역별 창업/);
-    await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
-    for (const name of ["서울", "경기", "광주", "전주"]) expect(screen.getByRole("radio", { name })).toBeTruthy();
-    pick("서울");
-    await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    expect(screen.queryByRole("radio", { name: /지역별 창업/ })).toBeNull();
+    pick(/상권별 창업/);
+    // 이 파일은 사이트 범위를 넓혀(서울 밖 포함) 돈다 — 지역이 여럿이라 제목에 지역 이름이 없다. 서울만일 때는 src/siteScope.test.tsx
+    await screen.findByRole("heading", { name: "어느 상권에서 창업하시나요?" });
     expect(window.location.hash).toBe("#/districts");
+    expect(screen.queryByRole("heading", { name: "어느 지역에서 창업하시나요?" })).toBeNull();
     expect(await screen.findByText("성수동 카페거리")).toBeTruthy();
-    expect(screen.queryByText("광주 공개 상권")).toBeNull();
     fireEvent.click(screen.getByText("성수동 카페거리"));
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
     expect(window.location.hash).toBe("#/industry");
@@ -162,21 +160,21 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
-    await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    await screen.findByRole("heading", { name: "어느 상권에서 창업하시나요?" });
     expect(window.location.hash).toBe("#/districts");
     fireEvent.click(screen.getByText("가로수길"));
     await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
     expect(screen.getByRole("radio", { name: /술집/ }).getAttribute("aria-checked")).toBe("false");
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
-    await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
+    await screen.findByRole("heading", { name: "어느 상권에서 창업하시나요?" });
     expect(window.location.hash).toBe("#/districts");
     fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
-    await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
-    expect(screen.getByRole("radio", { name: "서울" }).getAttribute("aria-checked")).toBe("true");
+    await screen.findByRole("heading", { name: "무엇부터 정해 볼까요?" });
+    expect(screen.getByRole("radio", { name: /상권별 창업/ }).getAttribute("aria-checked")).toBe("true");
     expect(api.count(/\/auth\//)).toBe(0);
   });
 
-  it("지역별 창업의 기타 업종도 미리 선택한 상권 결과로 간다", async () => {
+  it("상권별 창업의 기타 업종도 미리 선택한 상권 결과로 간다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "region", startupRegion: "서울", districtId: "seongsu" }));
     open("/industry");
@@ -191,27 +189,41 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect((await screen.findByRole("textbox", { name: "업종" }) as HTMLInputElement).value).toBe("도자기 공방");
   });
 
-  it("지역별 창업에서 상권 답이 없으면 업종 대신 해당 지역 상권 선택으로 돌아간다", async () => {
+  it("상권별 창업에서 상권 답이 없으면 업종 대신 상권 선택으로 돌아간다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "region", startupRegion: "서울" }));
     open("/industry");
     render(<FlowApp token={null} />);
     await screen.findByRole("heading", { name: "서울의 어느 상권에서 창업하시나요?" });
     expect(window.location.hash).toBe("#/districts");
-    expect(window.location.hash).toBe("#/districts");
   });
 
-  it("순위 미지원 업종도 선택한 지역 안에서 공개 상권을 직접 고른다", async () => {
+  it("옛 주소 「어느 지역에서 창업하시나요?」(#/startup-region)는 다음 단계로 넘긴다 — 그 질문은 뺐다(2026-11-11)", async () => {
+    stub();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "region" }));
+    open("/startup-region");
+    const first = render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { name: "어느 상권에서 창업하시나요?" });
+    expect(window.location.hash).toBe("#/districts");
+    first.unmount();
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "industry" }));
+    open("/startup-region");
+    render(<FlowApp token={null} />);
+    await screen.findByRole("heading", { name: "어떤 가게를 여시나요?" });
+    expect(window.location.hash).toBe("#/industry");
+    expect(screen.queryByRole("heading", { name: "어느 지역에서 창업하시나요?" })).toBeNull();
+  });
+
+  it("순위 미지원 업종도 순위 화면에서 고른 지역 안에서 공개 상권을 직접 고른다", async () => {
     stub([{ match: /\/commercial-districts$/, body: [
       district("seongsu", { name: "성수동 카페거리", city: "seoul", city_name: "서울" }),
       district("gwangju-test", { name: "광주 공개 상권", city: "gwangju", city_name: "광주" }),
     ] }]);
-    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "industry" }));
+    // 지역은 이제 따로 묻지 않는다(2026-11-11) — 상권 순위 화면의 지역 단추로 고른 값이 남아 있는 경우
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "industry", startupRegion: "광주" }));
     open("/industry");
     render(<FlowApp token={null} />);
     fireEvent.click(await screen.findByRole("radio", { name: /술집/ }));
-    await screen.findByRole("heading", { name: "어느 지역에서 창업하시나요?" });
-    pick("광주");
     fireEvent.click(await screen.findByRole("button", { name: "상권 직접 고르기" }));
     expect(await screen.findByText("광주 공개 상권")).toBeTruthy();
     expect(screen.queryByText("성수동 카페거리")).toBeNull();
@@ -219,7 +231,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
 
   it("F-02 질문 화면의 제목은 하나이고 물음표로 끝나며, 강한 버튼은 많아야 하나다", async () => {
     stub();
-    for (const path of ["/start", "/startup-order", "/startup-region", "/industry", "/rent-cap", "/validate"]) {
+    for (const path of ["/start", "/startup-order", "/industry", "/rent-cap", "/validate"]) {
       window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "industry", industryKey: "cafe", districtId: "seongsu" }));
       open(path);
       const { unmount } = render(<FlowApp token={null} />);
