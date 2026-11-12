@@ -1,6 +1,6 @@
-/** Program 허브(2026-11-07 리뉴얼) — 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증.
+/** Program 허브(2026-11-07 리뉴얼) — 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 설정.
  *
- *  못 박는 것: 네 탭이 이 순서로 로그인 없이 열린다 · Posting 인계로 오면 가설 검증부터 · 원천이 비면 왜 비었는지
+ *  못 박는 것: 네 탭이 이 순서로 로그인 없이 열린다 · Posting 인계로 오면 가설 설정부터 · 원천이 비면 왜 비었는지
  *  보인다 · 연락처 입력 칸이 없다 · 실행 카드마다 측정이 있다 · 전국 행사("public-open-data")가 실데이터로 보인다
  *  (예전 화면은 "seoul-open-data" 만 실데이터로 봐서, 전국 Gold 가 들어오면 서울 행사까지 사라졌을 것이다).
  *  캠페인 원장 자체의 동작은 components/program/CampaignLedger.test.tsx 가 본다. */
@@ -79,22 +79,24 @@ afterEach(() => { cleanup(); clearToken(); localStorage.clear(); });
 const tabs = () => within(screen.getByRole("navigation", { name: "Program 네 기능" })).getAllByRole("button");
 
 describe("Program 허브 — 네 기능", () => {
-  it("네 탭이 PPPP 리뉴얼 순서로 있고, 로그인 없이 네트워킹이 먼저 열린다", async () => {
+  it("네 탭이 PPPP 리뉴얼 순서로 있고, 로그인 없이 가설 설정이 먼저 열린다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" industryLabel="카페·디저트" businessGoal="start" />);
-    expect(tabs().map((b) => b.textContent)).toEqual(["네트워킹", "지원 프로그램", "오프라인 마케팅 솔루션", "가설 검증"]);
+    expect(tabs().map((b) => b.textContent)).toEqual(["가설 설정", "지원 프로그램", "네트워킹", "오프라인 마케팅 솔루션"]);
     expect(tabs()[0].getAttribute("aria-current")).toBe("page");
+    expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
+    fireEvent.click(tabs()[2]);
     expect(await screen.findByText("서울 창업 세미나", {}, LOAD)).toBeTruthy();
     const call = api.matching(/\/program\/network\?/)[0];
     expect(call.url).toContain("industry=cafe");
     expect(call.url).toContain("stage=pre_founder");
   });
 
-  it("Posting 인계로 오면 가설 검증부터 연다", async () => {
+  it("Posting 인계로 오면 가설 설정부터 연다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" handoff={{ districtId: "garosugil", unitId: "vu-1", unitName: "자리",
       lat: 37.5, lng: 127, area: 20, floor: "1F", rent: 300, industry: "카페", strategy: null }} />);
-    expect(tabs()[3].getAttribute("aria-current")).toBe("page");
+    expect(tabs()[0].getAttribute("aria-current")).toBe("page");
     expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
-    expect(await screen.findByTestId("pppp-report", {}, LOAD)).toBeTruthy();
+    expect(screen.queryByTestId("pppp-report")).toBeNull();
   });
 
   it("지원 프로그램 — 원천이 비면 왜 비었는지 보이고, 담은 공고는 이 브라우저에 남는다", async () => {
@@ -113,6 +115,7 @@ describe("Program 허브 — 네 기능", () => {
 
   it("네트워킹 — 연락처 입력 칸이 없고, 질문 체크·메모만 이 브라우저에 남긴다", async () => {
     const { container } = render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" />);
+    fireEvent.click(tabs()[2]);
     await screen.findByText("서울 창업 세미나", {}, LOAD);
     expect(container.querySelector("input[type=tel], input[type=email], input[name*=phone], input[name*=contact]")).toBeNull();
     fireEvent.click(screen.getByRole("checkbox", { name: /권리금/ }));
@@ -122,7 +125,7 @@ describe("Program 허브 — 네 기능", () => {
 
   it("오프라인 마케팅 솔루션 — 실행 카드마다 측정이 있고, 전국 행사도 실데이터로 보이며, 실행 기록이 그대로 있다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" />);
-    fireEvent.click(tabs()[2]);
+    fireEvent.click(tabs()[3]);
     const cards = await screen.findByRole("region", { name: "실행 카드" }, LOAD);
     await within(cards).findByText("「골목 사진전」 방문객 연계", {}, LOAD);
     expect(within(cards).getAllByText("측정")).toHaveLength(2);
@@ -136,6 +139,7 @@ describe("Program 허브 — 네 기능", () => {
 
   it("상권이 없으면 고르라고 말하고 원천을 부르지 않는다", async () => {
     render(<CampaignStudio />);
+    fireEvent.click(tabs()[2]);
     expect(screen.getByText(/상권을 먼저 고르면/)).toBeTruthy();
     await waitFor(() => expect(api.count(/\/program\/network/)).toBe(0));
   });
@@ -145,9 +149,11 @@ describe("Program 허브 — 상권을 바꾸면", () => {
   it("네트워킹 메모를 지난 상권 것으로 보이거나 새 상권 키로 옮겨 적지 않는다", async () => {
     localStorage.setItem("placeos.program.network.garosugil", JSON.stringify({ checked: [], memo: "가로수길 메모" }));
     const view = render(<CampaignStudio mapDistrictId="garosugil" />);
+    fireEvent.click(tabs()[2]);
     await screen.findByText("서울 창업 세미나", {}, LOAD);
     expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("가로수길 메모");
     view.rerender(<CampaignStudio mapDistrictId="yeonnam" />);
+    fireEvent.click(tabs()[2]);
     await screen.findByText("서울 창업 세미나", {}, LOAD);
     expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("");
     expect(localStorage.getItem("placeos.program.network.yeonnam")).toBeNull();

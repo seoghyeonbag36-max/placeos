@@ -19,6 +19,13 @@ export interface ReportPageFloor {
   status: string; unitId: string | null;
 }
 export interface ReportProgram {
+  draft?: {
+    item: string; category: string; mode: import("./api").ValidationMode; stage: import("./api").FounderStage;
+    districtId: string; address: string; hypothesis: string; targetCustomer: string;
+    startDate: string; runDays: string; budgetMin: string; budgetMax: string; differentiatorsText: string;
+  };
+  rejectRatio?: string;
+  postingSnapshot?: string;
   districtId: string; unitId?: string;
   linkedDistrictId?: string | null;
   item: string; category: string; hypothesis: string; targetCustomer: string;

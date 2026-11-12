@@ -6,3 +6,12 @@
 .pppp-report dt{font-weight:var(--fw-semibold)}
 .pppp-report dd{margin:0 0 var(--sp-2)}
 .pppp-report pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--fs-caption);max-height:30em;overflow:auto}
+
+.analysis-report-dialog { pointer-events: auto; width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; padding: var(--sp-5); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--ink); background: var(--surface); }
+.analysis-report-dialog::backdrop { background: rgb(0 0 0 / 35%); }
+.analysis-report-close { display: block; margin-left: auto; font: inherit; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); cursor: pointer; }
+.analysis-report-summary { background: var(--bg); padding: var(--sp-4); border-radius: var(--radius-md); }
+.analysis-report-summary ol { display: grid; gap: var(--sp-3); list-style: none; padding: 0; }
+.analysis-report-summary li { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: var(--sp-2); }
+.analysis-report-summary span { overflow-wrap: anywhere; }
+.pppp-report-tool button:disabled { opacity: .6; cursor: wait; }

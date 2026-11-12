@@ -14,6 +14,7 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
   handoff?: ProgramHandoff; campaign?: Campaign; plan?: ProgramPlan; districtId?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [pdfState, setPdfState] = useState<"idle" | "busy" | "error">("idle");
   const workspace = usePpppReport();
   const workspaceDistrict = useReportDistrict();
   const scope = workspaceDistrict ?? districtId ?? suppliedHandoff?.districtId ?? suppliedCampaign?.conditions.district_id;
@@ -57,11 +58,11 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
     } catch { /* 저장 자료가 없으면 비워 둔다. */ }
   }
   function documentHtml() {
-    return `<!doctype html><html lang="ko"><meta charset="utf-8"><title>PlaceOS PPPP 결과 보고서</title><style>body{font-family:sans-serif;max-width:900px;margin:32px auto;padding:24px;line-height:1.7;color:#202735}section{break-inside:avoid;margin:24px 0}dt{font-weight:bold}dd{margin:0 0 12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}h1{font-size:28px}@page{size:A4;margin:18mm}</style><body>${report.current?.innerHTML ?? ""}</body></html>`;
+    return `<!doctype html><html lang="ko"><meta charset="utf-8"><title>PlaceOS 상권 분석 보고서</title><style>body{font-family:sans-serif;max-width:900px;margin:32px auto;padding:24px;line-height:1.7;color:#202735}section{break-inside:avoid;margin:24px 0}dt{font-weight:bold}dd{margin:0 0 12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}h1{font-size:28px}@page{size:A4;margin:18mm}</style><body>${report.current?.innerHTML ?? ""}</body></html>`;
   }
   function download() {
     const url = URL.createObjectURL(new Blob([documentHtml()], { type: "text/html;charset=utf-8" }));
-    const link = document.createElement("a"); link.href = url; link.download = "PlaceOS-PPPP-결과보고서.html";
+    const link = document.createElement("a"); link.href = url; link.download = "PlaceOS-상권분석보고서.html";
     link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function print() {
@@ -69,17 +70,33 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
     if (!popup) return;
     popup.document.write(documentHtml()); popup.document.close(); popup.focus(); popup.print();
   }
-  return <section className="pppp-report-tool" aria-label="PPPP 결과 보고서">
-    <h2>PPPP 결과 보고서</h2>
-    <p><strong>검증 리포트</strong> · Platform → Page → Posting → Program에서 나온 결과를 종합합니다.</p>
+  async function downloadPdf() {
+    if (!report.current || pdfState === "busy") return;
+    setPdfState("busy");
+    try {
+      const { downloadAnalysisPdf } = await import("@/lib/analysisPdf");
+      await downloadAnalysisPdf(report.current);
+      setPdfState("idle");
+    } catch { setPdfState("error"); }
+  }
+  return <section className="pppp-report-tool" aria-label="상권 분석 보고서">
+    <h2>상권 분석 보고서</h2>
+    <p>창업자를 위한 상권·자리·비용·아이템 가설 요약</p>
+    <section className="analysis-report-summary" aria-label="상권 분석 약식 보고서">
+      <h3>{data.platform?.districtName ?? handoff?.districtName ?? "선택 상권"}</h3>
+      <ol>{summary.stages.map(stage => <li key={stage.name}><strong>{stage.name}</strong><span>{stage.result}</span></li>)}</ol>
+      <p>{summary.costResult}</p><p>{summary.conclusion}</p>
+    </section>
     <p>이번 작업의 상권 검토·자리 선택·비용 계산·검증 계획과 실행 기록을 연결합니다. 미작성 단계는 보완 사항으로 남깁니다. 단계를 수정했다면 다시 만들어 최신 결과를 반영하세요.</p>
-    <button type="button" onClick={generate}>PPPP 결과 보고서 만들기</button>
+    <button type="button" onClick={generate}>{open ? "최신 내용으로 보고서 갱신" : "상권 분석 보고서 만들기"}</button>
     {open && <>
       <div className="pppp-report-actions"><button type="button" onClick={download}>보고서 내려받기</button>
+        <button type="button" onClick={downloadPdf} disabled={pdfState === "busy"}>{pdfState === "busy" ? "PDF 만드는 중…" : "PDF 다운로드"}</button>
         <button type="button" onClick={print}>인쇄·PDF 저장</button>
         <button type="button" onClick={() => setOpen(false)}>보고서 닫기</button></div>
-      <article ref={report} className="pppp-report" aria-label="PPPP 보고서 미리보기">
-        <h1>PlaceOS PPPP 종합 결과 리포트</h1>
+      {pdfState === "error" && <p role="alert">PDF를 만들지 못했습니다. 다시 다운로드해 주세요.</p>}
+      <article ref={report} className="pppp-report" aria-label="상권 분석 보고서 미리보기">
+        <h1>PlaceOS 상권 분석 보고서</h1>
         <p>작성일: {new Date().toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}</p>
         <p>의사결정 참고용 · 점주 입력과 조건부 계산을 포함합니다.</p>
         <section aria-label="네 단계 종합 결과"><h2>종합 결과</h2><p>{summary.conclusion}</p>

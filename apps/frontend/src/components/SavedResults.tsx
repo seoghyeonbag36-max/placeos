@@ -58,10 +58,11 @@ export function SaveResultButton({ build, onSaved, disabled }: {
 }
 
 /** 저장한 결과 목록 — kind 로 거른다. refreshKey 가 바뀌면 다시 받는다. */
-export default function SavedResults({ kind, refreshKey, render }: {
+export default function SavedResults({ kind, refreshKey, render, districtId }: {
   kind: SavedResultKind;
   refreshKey: number;
   render: (item: SavedResult) => ReactNode;
+  districtId?: string;
 }) {
   const signedIn = useSignedIn();
   const [items, setItems] = useState<SavedResult[] | null>(null);
@@ -75,10 +76,10 @@ export default function SavedResults({ kind, refreshKey, render }: {
     if (!signedIn || !token) return;
     let alive = true;
     listSavedResults(token)
-      .then((all) => { if (alive) { setItems(all.filter((r) => r.kind === kind)); setError(false); } })
+      .then((all) => { if (alive) { setItems(all.filter((r) => r.kind === kind && (!districtId || r.districtId === districtId))); setError(false); } })
       .catch(() => { if (alive) setError(true); });
     return () => { alive = false; };
-  }, [signedIn, kind, refreshKey, reload]);
+  }, [signedIn, kind, refreshKey, reload, districtId]);
 
   if (!signedIn) return null;
   const remove = async (id: string) => {

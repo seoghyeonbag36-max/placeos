@@ -36,3 +36,13 @@
 .brief-agebar i { display: block; height: 100%; background: #7C9BC7; }
 .brief-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .brief .value-absent { font-size: 12px; }
+
+/* 제목 길이와 패널 폭에 따라 배지를 독립 배치한다. 출처 표시는 항상 유지한다. */
+.brief { container-type: inline-size; }
+.brief .brief-tile { padding: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-2); }
+.brief .brief-tile-l, .brief h3 { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); line-height: var(--lh-body); }
+.brief .brief-tile-l > span { min-width: 0; overflow-wrap: anywhere; }
+.brief .evid { display: inline-flex; align-items: center; flex: 0 0 auto; align-self: center; font-size: var(--fs-caption); line-height: 1.3; padding: 2px var(--sp-1); vertical-align: middle; }
+.brief .brief-tile-v { margin: 0; line-height: var(--lh-heading); }
+.brief .brief-tile-f { overflow-wrap: anywhere; line-height: var(--lh-body); }
+@container (max-width: 380px) { .brief-tiles, .brief-cols { grid-template-columns: minmax(0, 1fr); } }

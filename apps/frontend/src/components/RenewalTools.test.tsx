@@ -90,8 +90,8 @@ it("없는 행사 후보를 만들지 않고 작성·저장한 온라인·오프
   fireEvent.change(screen.getByLabelText("온라인 홍보·쿠폰·예약 계획"), { target: { value: "예약 링크 안내" } });
   fireEvent.change(screen.getByLabelText("오프라인 참여·방문 혜택·측정 방법"), { target: { value: "현장 방문 코드 집계" } });
   fireEvent.click(screen.getByRole("button", { name: "행사 연계 계획 저장" }));
-  fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
-  const report = screen.getByRole("article", { name: "PPPP 보고서 미리보기" });
+  fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
+  const report = screen.getByRole("article", { name: "상권 분석 보고서 미리보기" });
   expect(report.textContent).toContain("예약 링크 안내");
   expect(report.textContent).toContain("현장 방문 코드 집계");
   expect(report.textContent).toContain("실행 성과 미확인");

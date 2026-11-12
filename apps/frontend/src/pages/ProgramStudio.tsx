@@ -1,5 +1,4 @@
-import PpppReport from "@/components/PpppReport";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useReportCapture, usePpppReport } from "@/lib/ppppReportContext";
 import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CaveatNote } from "@/components/DistrictPicker";
@@ -109,9 +108,11 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   businessGoal?: BusinessGoal;
 } = {}) {
   const baseStage = stageOf(businessGoal);
+  const workspace = usePpppReport();
+  const previous = workspace.program?.districtId === mapDistrictId ? workspace.program : undefined;
   const [form, setForm] = useState<FormState>(() => handoff
-    ? { ...emptyForm(baseStage), districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.address ?? "" }
-    : { ...emptyForm(baseStage), category: defaultCategory ?? "" });
+    ? { ...emptyForm(baseStage), ...previous?.draft, districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.address ?? (previous?.unitId === handoff.unitId ? previous?.draft?.address : "") ?? "" }
+    : { ...emptyForm(baseStage), category: defaultCategory ?? "", districtId: mapDistrictId ?? "", ...previous?.draft });
   // 「검증할 자리」 안내·지도 핀. 비우기나 거점 변경에서 걷는다 —
   // 폼은 다른 상권이 됐는데 안내와 unit_id 만 남으면 엉뚱한 자리를 검증 무대로 싣는다.
   const [arrival, setArrivalState] = useState<ProgramHandoff | null>(handoff ?? null);
@@ -119,7 +120,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const [eventId, setEventId] = useState<string | null>(null);
   const [districts, setDistricts] = useState<DistrictSummary[] | null>(null);
   const [districtErr, setDistrictErr] = useState(false);
-  const [result, setResult] = useState<ProgramPlan | null>(null);
+  const [result, setResult] = useState<ProgramPlan | null>(() => previous?.postingSnapshot === JSON.stringify(handoff) ? previous?.plan ?? null : null);
   const [resultVersion, setResultVersion] = useState(0);
   // 저장한 결과 목록을 다시 받게 하는 신호(「결과 저장」 성공 때 올린다)
   const [savedTick, setSavedTick] = useState(0);
@@ -158,7 +159,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   // 목표선(2026-11-07 리뉴얼) — 같은 거점으로 넘어온 Posting 계산에서만 끌어낸다. 지어낸 기본값은 없다.
   const breakEven = useMemo(() => breakEvenDaily(siteUnitId ? arrival?.calculation?.result.economics : null),
     [arrival, siteUnitId]);
-  const [rejectRatio, setRejectRatio] = useState("");
+  const [rejectRatio, setRejectRatio] = useState(previous?.rejectRatio ?? "");
   const ratioNumber = Number(rejectRatio.trim());
   const rejectRatioValue = rejectRatio.trim() && Number.isInteger(ratioNumber) && ratioNumber >= 10 && ratioNumber <= 100
     ? ratioNumber : undefined;
@@ -167,12 +168,13 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const canSubmit = form.item.trim() !== "" && form.category.trim() !== "" && !halfBudget && !badRatio && !busy;
 
   const hub = (districts ?? []).find((d) => d.id === form.districtId);
-  useReportCapture("program", (form.districtId || mapDistrictId) && form.item.trim() ? {
+  useReportCapture("posting", arrival);
+  useReportCapture("program", (form.districtId || mapDistrictId) ? {
     districtId: form.districtId || mapDistrictId!, linkedDistrictId: form.districtId || null, unitId: siteUnitId,
     item: form.item, category: form.category, hypothesis: form.hypothesis, targetCustomer: form.targetCustomer,
     period: [form.startDate, form.runDays ? `${form.runDays}일` : ""].filter(Boolean).join(" · "),
     budget: form.budgetMin || form.budgetMax ? `${form.budgetMin || "미입력"} ~ ${form.budgetMax || "미입력"}원` : "",
-    differentiators: form.differentiatorsText, plan: result,
+    differentiators: form.differentiatorsText, plan: result, draft: form, rejectRatio, postingSnapshot: JSON.stringify(arrival ?? undefined),
   } : null);
   const eventsDistrict = form.districtId || mapDistrictId || null;
   const [previousEventsDistrict, setPreviousEventsDistrict] = useState(eventsDistrict);
@@ -276,9 +278,19 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
     <div className="progstudio"><div className="wrap">
       <Verdict
         eyebrow="PlaceOS · Program" conversion="PROMOTION ▶ PROGRAM"
-        question="이 아이템의 수요를 어떻게 확인할까요?"
+        question="상권·자리·비용을 바탕으로 어떤 창업 가설을 세울까요?"
         verdict={head.verdict} grounds={result ? head.grounds.map(({ label, value }) => ({ label, value })) : []}
       />
+
+      <section className="hypothesis-evidence" aria-label="가설 설정의 근거">
+        <h2>앞선 단계에서 가져온 근거</h2>
+        <dl>
+          <dt>Platform · 상권</dt><dd>{workspace.platform ? `${workspace.platform.districtName} · ${workspace.platform.archetype ?? "유형 미제공"} · 출처 ${workspace.platform.source ?? "미제공"}` : "상권 검토 기록 미작성"}</dd>
+          <dt>Page · 후보 자리</dt><dd>{workspace.page ? `${workspace.page.name} · ${workspace.page.address ?? "주소 미제공"} · ${workspace.page.status}` : "자리 검토 기록 미작성"}</dd>
+          <dt>Posting · 비용 조건</dt><dd>{arrival ? `${arrival.unitName} · ${arrival.area}평 · 월 임대료 ${arrival.rent}만원 · 출처 ${arrival.inputsSource?.rent ?? "미제공"}` : "저장한 Posting 결과를 연결하거나 Posting에서 자리를 선택해 주세요."}</dd>
+        </dl>
+        <p>이 근거를 바탕으로 ‘누구에게 어떤 아이템을 제공하면 어떤 반응이 나타날 것인가’를 작성하세요. 가설은 창업자의 판단이며, 비용 계산은 실제 매출이 아닙니다.</p>
+      </section>
 
       {/* Posting → Program 인계 안내. 금액은 안내에만 쓰고 생성 요청에는 싣지 않는다 —
           임대료는 Posting 의 추정값이라 브리프의 예산(창업자가 정한 값)과 섞이면 안 된다. */}
@@ -301,7 +313,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
         {/* ── 입력: 검증 브리프 ── */}
         <form className="panel" onSubmit={submit}>
           <div className="ptitle">
-            검증 브리프
+            창업 아이템 가설 설정
             <div className="ptools">
               <Button variant="ghost" type="button" className="ghost" onClick={fillExample}>예시 채우기</Button>
               <Button variant="ghost" type="button" className="ghost" onClick={() => {
@@ -442,7 +454,6 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
           {result && !busy && <>
             <Result key={resultVersion} r={result} />
-            <PpppReport key={resultVersion} handoff={handoff} plan={result} districtId={form.districtId || mapDistrictId} />
           </>}
           {/* 결과 저장(2026-10-06) — 기각 조건이 든 판정표를 4주 뒤에도 볼 수 있게 본인 계정에 남긴다. 고른 것만 남긴다. */}
           {result && !busy && (
