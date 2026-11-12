@@ -36,6 +36,12 @@ it("이력이 있으면 지번 단위 직전 업종과 폐업일을 채우고, �
   expect(within(sec).getAllByText("확인 자료 없음")).toHaveLength(1);
   expect(within(sec).getByText(/어느 층·호실인지 모르고/)).toBeTruthy();
   expect(within(sec).getByText(/건물 2동/)).toBeTruthy();
+  // 이력 요약(2026-11-12) — 거쳐 간 곳 · 닫은 곳 영업기간 중앙 · 같은 지번 다른 건물 이력이 섞였다는 사실
+  const sum = within(sec).getByRole("note");
+  expect(sum.textContent).toContain("가게 2곳이 거쳐 갔어요");
+  expect(sum.textContent).toContain("영업기간 중앙 5.3년");
+  expect(sum.textContent).toContain("생존율이 아니에요");
+  expect(sum.textContent).toContain("같은 지번의 다른 건물 이력이 섞여 있어요");
   expect(screen.queryByText(/거리뷰|로드뷰/)).toBeNull();
   expect(renderStreetView).not.toHaveBeenCalled();
 });

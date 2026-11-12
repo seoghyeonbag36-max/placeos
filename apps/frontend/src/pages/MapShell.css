@@ -513,3 +513,18 @@
 .mapshell .b-floors { font-size: var(--fs-caption); color: var(--muted); margin-top: 2px; }
 .mapshell .b-floors b { color: var(--track-page); }
 .mapshell .b-floors i { font-style: normal; color: var(--caution-ink); }
+/* 층 용도로 본 영업 · 건물 연식(2026-11-12 사용자 요청) — 근거는 건축물대장 기재값 */
+.mapshell .b-usebox { margin-top: var(--sp-3); padding-top: 10px; border-top: 1px dashed var(--line); display: grid; gap: 6px; }
+.mapshell .b-age { font-size: 12.5px; color: var(--text-secondary); }
+.mapshell .b-age small { display: block; color: var(--text-subtle); font-size: var(--fs-caption); }
+.mapshell .b-uselist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.mapshell .b-uselist li { display: grid; grid-template-columns: 34px minmax(0,1fr) auto; gap: 2px 8px; align-items: baseline;
+  border: 1px solid var(--line-alt); border-radius: var(--radius-md); padding: 6px 8px; font-size: 12.5px; }
+.mapshell .b-uselist li small { grid-column: 1 / -1; color: var(--text-subtle); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.mapshell .b-use-floor { font-weight: 700; color: var(--ink-alt); }
+.mapshell .b-use-purps { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapshell .b-use-badge { font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.mapshell .b-use-badge.is-food { background: var(--source-real-soft); color: var(--source-real); }
+.mapshell .b-use-badge.is-neigh { background: var(--caution-soft); color: var(--caution-ink); }
+.mapshell .b-use-badge.is-other { background: var(--danger-soft); color: var(--danger-ink); }
+.mapshell .b-use-badge.is-unknown { background: var(--surface-sunken); color: var(--muted); }

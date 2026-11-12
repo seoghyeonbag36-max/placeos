@@ -36,6 +36,7 @@ import { addStop, removeStop } from "@/lib/journeyState";
 import { colors } from "@/design/tokens/colors";
 import { topic } from "@/lib/businessProfile";
 import { mapLabelHTML, shortManwon, vacancyDotAnchor, vacancyDotHTML } from "@/design/components/mapMarkerHtml";
+import FloorUseBox from "@/components/FloorUseBox";
 import "@/styles/tokens.css";
 import "./MapShell.css";
 
@@ -112,6 +113,9 @@ interface Building {
 const vacRate = (b: Building) => Math.round((1 - b.active / b.capacity) * 100);
 /** 층별 공실 필터(2026-11-10 사용자 요청) — 그 층에 빈 층(확정 · 추정)이 있는 건물만. 근거는 층 매물 목록(`/floor-vacancies`) */
 type FloorFilter = "all" | "1" | "2" | "3+";
+/** 월세 상한 · 면적 필터(2026-11-12 사용자 요청 · N5) — 빈 층 매물(임대 추정)의 월 임대료(만원) · 면적(평) 기준 */
+const RENT_CAPS = [200, 300, 500, 800] as const;
+const MIN_AREAS = [10, 20, 30] as const;
 const FLOOR_FILTERS: { key: Exclude<FloorFilter, "all">; label: string; test: (floor: number) => boolean }[] = [
   { key: "1", label: "1층", test: (f) => f === 1 },
   { key: "2", label: "2층", test: (f) => f === 2 },
@@ -289,6 +293,8 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [compareOpen, setCompareOpen] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
   const [floorFilter, setFloorFilter] = useState<FloorFilter>("all");
+  const [rentCap, setRentCap] = useState<number | null>(null);
+  const [minArea, setMinArea] = useState<number | null>(null);
   // 층 매물 목록 — 층별 필터를 처음 고를 때 한 번 부른다(Page 첫 화면 호출을 늘리지 않는다). 404 면 그 상권에 층 산출물이 없다
   const [floorVac, setFloorVac] = useState<{ districtId: string; byPnu: Map<string, FloorVacancyUnit[]> | null } | null>(null);
   const [hour, setHour] = useState(18);
@@ -353,8 +359,10 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const hasClass = useMemo(() => buildings.some((b) => b.vacClass), [buildings]);
   const floorOn = floorFilter !== "all" && src === "api";
   const currentFloorVac = floorVac?.districtId === districtId ? floorVac : null;
+  // 층 매물 목록은 층별 필터를 고르거나 건물을 고를 때 부른다 — 상세의 「층 용도로 본 영업」 · 「건물 연식」이 같은 목록을 읽는다(2026-11-12)
+  const needFloorVac = src === "api" && (floorOn || !!workspace.selectedId);
   useEffect(() => {
-    if (!floorOn || currentFloorVac) return;
+    if (!needFloorVac || currentFloorVac) return;
     let alive = true;
     getFloorVacancies(districtId, { limit: 2000 })
       .then((list) => {
@@ -369,18 +377,27 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
       })
       .catch(() => { if (alive) setFloorVac({ districtId, byPnu: null }); });
     return () => { alive = false; };
-  }, [floorOn, currentFloorVac, districtId]);
+  }, [needFloorVac, currentFloorVac, districtId]);
   // 층 자료가 아직 없거나(불러오는 중) 이 상권에 없으면 층으로 거르지 않는다 — 그 사실은 필터 아래 한 줄이 말한다
   const floorMatch = useCallback((b: Building, key: FloorFilter): boolean => {
     if (key === "all" || src !== "api" || !currentFloorVac?.byPnu) return true;
     const test = FLOOR_FILTERS.find((f) => f.key === key)!.test;
     return (currentFloorVac.byPnu.get(pnuOf(b.id)) ?? []).some((u) => test(u.floor));
   }, [src, currentFloorVac]);
+  // 월세 상한 · 면적 — 그 건물의 빈 층 매물 중 **한 층이라도** 조건(층별 필터 포함)을 다 맞으면 남긴다. 임대 자료가 없으면 거르지 않는다
+  const rentOn = (rentCap != null || minArea != null) && src === "api";
+  const rentMatch = useCallback((b: Building, cap: number | null, area: number | null): boolean => {
+    if ((cap == null && area == null) || src !== "api" || !currentRent) return true;
+    const test = floorFilter === "all" ? null : FLOOR_FILTERS.find((f) => f.key === floorFilter)!.test;
+    return (rentByBuilding.get(b.id) ?? []).some((x) => (cap == null || x.monthly_rent <= cap)
+      && (area == null || x.area_py >= area) && (!test || test(x.floor)));
+  }, [src, currentRent, rentByBuilding, floorFilter]);
   const filtered = useMemo(() => buildings.filter((b) => (!q.trim() || b.name.toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())
       || !!b.roadAddr?.includes(q.trim()))
     && matchesStatus(b, workspace.status)
     && floorMatch(b, floorFilter)
-    && (!savedOnly || savedIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, savedIds, floorFilter, floorMatch]);
+    && rentMatch(b, rentCap, minArea)
+    && (!savedOnly || savedIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, savedIds, floorFilter, floorMatch, rentMatch, rentCap, minArea]);
 
   // 목록에 실제로 그리는 것. **지도 오버레이는 filtered 를 그대로 쓴다** — 뷰포트로
   // 오버레이까지 거르면 지도를 조금 움직일 때마다 폴리곤을 전부 다시 만들게 되고,
@@ -867,6 +884,17 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               {f.label}{currentFloorVac?.byPnu ? ` · ${buildings.filter((b) => floorMatch(b, f.key)).length.toLocaleString("ko-KR")}동` : ""}
             </option>)}
           </select></label>
+          <label>월세<select aria-label="월세 상한 필터" value={rentCap ?? ""} disabled={src !== "api" || !currentRent}
+            title={!currentRent ? "이 상권은 임대 추정이 없습니다" : "그 금액 이하인 빈 층이 있는 건물만 보입니다"}
+            onChange={(e) => setRentCap(e.target.value ? Number(e.target.value) : null)}>
+            <option value="">월세 전체</option>
+            {RENT_CAPS.map((c) => <option key={c} value={c}>월 {c}만원 이하{currentRent ? ` · ${buildings.filter((b) => rentMatch(b, c, minArea)).length.toLocaleString("ko-KR")}동` : ""}</option>)}
+          </select></label>
+          <label>면적<select aria-label="면적 필터" value={minArea ?? ""} disabled={src !== "api" || !currentRent}
+            onChange={(e) => setMinArea(e.target.value ? Number(e.target.value) : null)}>
+            <option value="">면적 전체</option>
+            {MIN_AREAS.map((a) => <option key={a} value={a}>{a}평 이상{currentRent ? ` · ${buildings.filter((b) => rentMatch(b, rentCap, a)).length.toLocaleString("ko-KR")}동` : ""}</option>)}
+          </select></label>
           <button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly((value) => !value)}>저장한 후보 {saved.length}</button>
           {/* 뷰포트 동기화 스위치(R2). 켜 두는 것이 기본이다 — 화면 밖 매물은 사용자에게
               존재하지 않으므로, 지도를 옮겼는데 목록이 그대로면 둘 다 못 믿게 된다.
@@ -875,13 +903,17 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             title="지도를 움직이면 목록이 화면에 보이는 범위로 좁혀집니다">
             {viewportOnly ? "지도 범위만" : "거점 전체"}
           </button>
-          {(q || workspace.status !== "all" || savedOnly || floorFilter !== "all") && <button type="button" onClick={() => {
-            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false); setFloorFilter("all");
+          {(q || workspace.status !== "all" || savedOnly || floorFilter !== "all" || rentCap != null || minArea != null) && <button type="button" onClick={() => {
+            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false); setFloorFilter("all"); setRentCap(null); setMinArea(null);
           }}>조건 초기화</button>}
           {floorOn && <p className="floor-filter-note" role="status">
             {!currentFloorVac ? "층별 공실을 불러오는 중…"
               : !currentFloorVac.byPnu ? "이 상권은 층별 공실 자료가 없어 층으로 거르지 않았습니다."
               : `${FLOOR_FILTERS.find((f) => f.key === floorFilter)!.label}에 빈 층(확정 · 추정)이 있는 건물만 보입니다 · 같은 지번의 건물은 함께 보입니다.`}
+          </p>}
+          {rentOn && <p className="floor-filter-note" role="status">
+            {[rentCap != null && `월 ${rentCap}만원 이하`, minArea != null && `${minArea}평 이상`].filter(Boolean).join(" · ")}인 빈 층이 있는 건물만 보입니다
+            {floorFilter !== "all" ? `(${FLOOR_FILTERS.find((f) => f.key === floorFilter)!.label} 안에서)` : ""} · 월세는 R-ONE 상권 임대료 × 층 계수 × 면적 추정이에요(호가 아님).
           </p>}
         </div>
         {/* 건수를 **먼저 수로** 말한다 — 네모가 "이 조건의 매물 N건"을 먼저 답하는 것과
@@ -1037,6 +1069,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                 </div>
               </div>
             )}
+
+            {src === "api" && <FloorUseBox units={currentFloorVac?.byPnu?.get(pnuOf(selected.id)) ?? null}
+              loading={!currentFloorVac} missing={!!currentFloorVac && !currentFloorVac.byPnu} />}
 
             {/* GNN 업종 추천 — 스텁(Gold 미적재)·빈 추천은 그리지 않는다.
                 합성값을 실측처럼 보이게 하지 않는 vacancy_source 규칙과 같은 원칙이다. */}

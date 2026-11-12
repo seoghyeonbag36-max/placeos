@@ -285,6 +285,8 @@ export type PostingInputSource = Record<"area" | "rent" | "prem" | "foot", strin
    *  rent 출처("rone")와 **다른 축**이다. 한 라벨에 뭉치면 상한과 하한이 같은
    *  이름으로 나간다 → docs/feature-posting.md §0-L */
   floor?: string;
+  /** 투자비 근거 — "user_input"(창업자가 넣은 인테리어 · 설비 견적 · 2026-11-12). 없으면 업종 평균 계수다 */
+  invest?: string;
 };
 
 export interface PostingUnit {
@@ -610,6 +612,8 @@ export interface FloorVacancyUnit {
   bld_vacancy_rate?: number | null;
   com_floors: number[]; occ_floors: number[]; unknown_n: number;
   was: string;
+  /** 건축물대장 사용승인일(YYYYMMDD · 지번 단위). 없으면 키가 없다(2026-11-12 · 건물 연식) */
+  use_apr?: string | null;
   /** 근거가 없으면 **없다**. 빈 배열이 아니라 부재로 온다 —
    *  빈 목록을 주면 "이 자리에 들어갈 업종이 없다"로 읽힌다. */
   fit?: SiteIndustryFit | null;
@@ -695,6 +699,10 @@ export const simulateRevenue = (req: {
   industry_detail_key?: string; operating_inputs?: Record<string, number>;
   /** 사용자가 계약서·도면으로 넣은 내부면적(평). `inputs_source.area === "user_input"` 으로 돌아온다. */
   area_py_override?: number;
+  /** 계약서 월 임대료(만원) — `inputs_source.rent === "contract"` 로 돌아온다(2026-11-12) */
+  rent_override?: number;
+  /** 인테리어 · 설비 견적(만원) — 세 가격대 모두 이 값을 투자비로 쓴다 · `inputs_source.invest === "user_input"`(2026-11-12) */
+  fitout_override?: number;
 }) => postJSON<SimulateResult>("/ai/simulate-revenue", req);
 
 export interface OperatingField {

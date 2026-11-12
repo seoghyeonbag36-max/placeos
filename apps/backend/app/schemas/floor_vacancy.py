@@ -56,6 +56,9 @@ class FloorVacancyUnit(BaseModel):
     occ_floors: list[int] = []
     unknown_n: int = 0
     was: str = ""
+    # 건축물대장 표제부 사용승인일(YYYYMMDD) — 지번 단위(동이 여럿이면 연면적이 가장 큰 주건축물). 없으면 None
+    # (2026-11-12 사용자 요청 · Page 「건물 연식」). 리모델링 여부는 대장에 안 남을 수 있다.
+    use_apr: str | None = None
     # 근거가 없으면 **키가 없다**. 빈 목록을 주면 "들어갈 업종이 없다"로 읽힌다.
     fit: IndustryFit | None = None
 

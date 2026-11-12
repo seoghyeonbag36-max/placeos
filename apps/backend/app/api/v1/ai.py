@@ -190,7 +190,8 @@ async def simulate_revenue(req: SimulateRequest) -> dict:
         result = posting_svc.simulate(req.district_id, req.unit_id,
                                       req.industry_type, req.strategy, req.prem,
                                       req.industry_detail_key, req.operating_inputs,
-                                      area_py_override=req.area_py_override)
+                                      area_py_override=req.area_py_override,
+                                      rent_override=req.rent_override, fitout_override=req.fitout_override)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if result is None:

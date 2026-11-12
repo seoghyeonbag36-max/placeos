@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { tierAvailable, type TierScenario } from "@/lib/api";
-import { dailyFromRevenue, emptyMenuRow, menuBep, menuMix, type MenuRow } from "@/lib/menuPlan";
+import { dailyFromRevenue, emptyMenuRow, laborMonthly, menuBep, menuMix, MIN_WAGE_2026, type MenuRow } from "@/lib/menuPlan";
 import "./PostingSteps.css";
 
 const TIER_NAME: Record<string, string> = { premium: "고급화", value: "가성비", factory: "기능중심" };
@@ -16,6 +16,11 @@ export default function MenuPlanner({ rent, rentSource, scenarios }: {
   const [rows, setRows] = useState<MenuRow[]>(() => [emptyMenuRow(), emptyMenuRow(), emptyMenuRow()]);
   const [days, setDays] = useState("");
   const [other, setOther] = useState("");
+  // 인건비 도우미(2026-11-12 · N7) — 시급 기본값은 지어낸 값이 아니라 2026 최저임금(고시)이다
+  const [people, setPeople] = useState("");
+  const [hours, setHours] = useState("");
+  const [wage, setWage] = useState(String(MIN_WAGE_2026));
+  const labor = laborMonthly({ people: Number(people), weeklyHours: Number(hours), wage: Number(wage) });
   const mix = menuMix(rows);
   const bep = mix && rent != null && days.trim() && other.trim()
     ? menuBep({ rent, otherFixed: Number(other), avgPrice: mix.avgPrice, costRate: mix.costRate, days: Number(days) }) : null;
@@ -43,9 +48,28 @@ export default function MenuPlanner({ rent, rentSource, scenarios }: {
           <input id={`${id}-days`} inputMode="numeric" value={days} onChange={(e) => setDays(e.target.value.replace(/[^\d]/g, ""))} placeholder="직접 입력" /></label>
         <label htmlFor={`${id}-other`}><span>기타 월 고정비 <small>만원 · 인건비 등, 임대료 제외</small></span>
           <input id={`${id}-other`} inputMode="numeric" value={other} onChange={(e) => setOther(e.target.value.replace(/[^\d.]/g, ""))} placeholder="없으면 0" /></label>
+        <div className="pstep-helper" aria-label="인건비 도우미">
+          <h4>인건비 도우미</h4>
+          <div className="pstep-fields">
+            <label htmlFor={`${id}-people`}><span>직원 수 <small>명 · 사장 본인 제외</small></span>
+              <input id={`${id}-people`} inputMode="numeric" value={people} onChange={(e) => setPeople(e.target.value.replace(/[^\d]/g, ""))} placeholder="예: 2" /></label>
+            <label htmlFor={`${id}-hours`}><span>1인 주 근무시간 <small>시간</small></span>
+              <input id={`${id}-hours`} inputMode="numeric" value={hours} onChange={(e) => setHours(e.target.value.replace(/[^\d]/g, ""))} placeholder="예: 30" /></label>
+            <label htmlFor={`${id}-wage`}><span>시급 <small>원 · 2026 최저임금 {MIN_WAGE_2026.toLocaleString("ko-KR")}원</small></span>
+              <input id={`${id}-wage`} inputMode="numeric" value={wage} onChange={(e) => setWage(e.target.value.replace(/[^\d]/g, ""))} /></label>
+          </div>
+          {labor ? <p>월 인건비 약 <b>{n0(labor.manwon)}만원</b> <small>1인 월 {labor.paidHoursPerPerson}시간(주 15시간 이상이면 주휴 포함)</small>{" "}
+            <button type="button" className="pstep-add" onClick={() => setOther(String((Number(other) || 0) + labor.manwon))}>기타 월 고정비에 더하기</button></p>
+            : <p className="pstep-foot">직원 수와 주 근무시간을 넣으면 월 인건비를 계산합니다.</p>}
+          <p className="pstep-foot">4대보험 사업주 부담분 · 퇴직금 · 연장 · 야간 가산은 빠져 있어요.</p>
+        </div>
         <p className="pstep-rent">월 임대료 {rent != null ? `${n0(rent)}만원` : "—"} <small>{rent != null ? `왼쪽에서 고른 자리 · ${rentSource === "contract" || rentSource === "user_input" ? "입력값" : "시세 추정"}` : "자리를 먼저 고르세요"}</small></p>
       </div>
 
+      <ul className="pstep-facts" aria-label="카드 수수료 · 과세 기준">
+        <li>카드 수수료 — 연매출 3억원 이하 영세 가맹점 신용 0.40% · 체크 0.15%(2025-02-14부터 · 금융위원회). 원가에 더해 넣으세요.</li>
+        <li>간이과세 — 직전 연도 매출(공급대가) 1억 400만원 미만이면 대상(2024-07부터). 업종 · 지역에 따라 배제될 수 있어 국세청에서 확인하세요.</li>
+      </ul>
       {!mix ? <p className="pstep-empty" role="status">판매가와 원가(판매가보다 작게)를 한 줄 이상 넣으면 평균 객단가를 냅니다.</p> : (
         <div className="pstep-result" aria-label="메뉴 계산 결과">
           <p>평균 객단가 <b>{n0(mix.avgPrice)}원</b> · 평균 원가율 <b>{(mix.costRate * 100).toFixed(1)}%</b>

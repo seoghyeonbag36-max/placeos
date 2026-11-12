@@ -39,3 +39,19 @@
 .pstep-program dt{color:var(--muted);font-weight:700} .pstep-program dd{margin:0}
 .pstep-pointer{margin:0;font-size:12.5px;background:var(--surface-sunken);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
 @media (max-width:420px){.pstep-fields{grid-template-columns:minmax(0,1fr)}}
+/* 2026-11-12 보강 — 민감도 · 계약 전 체크리스트 · 인건비 도우미 · 카드 · 과세 안내 */
+.pstep-block{display:grid;gap:var(--sp-2);border-top:1px solid var(--line-alt);padding-top:var(--sp-3)}
+.pstep-block h3{margin:0;font-size:15px;color:var(--ink-alt)} .pstep-block h3 small{font-size:var(--fs-caption);color:var(--muted);font-weight:700;margin-left:4px}
+.pstep-checklist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pstep-checklist li label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--sp-2);align-items:start;border:1px solid var(--line-alt);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3);background:var(--surface);cursor:pointer}
+.pstep-checklist li label > span{display:grid;gap:1px}
+.pstep-checklist li strong{font-size:13px;color:var(--ink-alt)} .pstep-checklist li small{font-size:var(--fs-caption);color:var(--text-subtle)}
+.pstep-checklist li.is-done label{background:var(--surface-sunken)} .pstep-checklist li.is-done strong{color:var(--muted);text-decoration:line-through}
+.pstep-checklist input{margin-top:3px}
+.pstep-helper{display:grid;gap:var(--sp-2);border:1px dashed var(--line-alt);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
+.pstep-helper h4{margin:0;font-size:13px;color:var(--ink-alt)}
+.pstep-helper p{margin:0;font-size:12.5px}
+.pstep-facts{margin:0;padding-left:18px;font-size:12.5px;color:var(--text-secondary);display:grid;gap:3px}
+.pstep-fields .pstep-helper{grid-column:1/-1}
+.pstep-helper .pstep-fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:420px){.pstep-helper .pstep-fields{grid-template-columns:minmax(0,1fr)}}

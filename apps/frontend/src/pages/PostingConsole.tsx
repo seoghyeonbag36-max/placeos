@@ -8,8 +8,9 @@ import AreaBepPlanner from "@/components/AreaBepPlanner";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import PostingRiskCheck from "@/components/PostingRiskCheck";
 import MenuPlanner from "@/components/MenuPlanner";
+import PostingDecideExtras from "@/components/PostingDecideExtras";
 import {
-  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPostings, getBuildingTwin, listDistricts, recommendIndustry, simulateRevenue,
+  BASIS_LABEL, TIER_UNAVAILABLE_LABEL, tierAvailable, getPlatformProfile, getPostings, getBuildingTwin, listDistricts, recommendIndustry, simulateRevenue,
 } from "@/lib/api";
 import type {
   DistrictSummary, IndustryRec, Posting, SavedResult, SimulateResult, TierScenario,
@@ -58,6 +59,12 @@ const TIER_LABEL: Record<string, { name: string; sub: string }> = {
 };
 
 const won = (v: number) => `${Math.round(v).toLocaleString()}만원`;
+/** 입력칸 문자열 → 0 이상 숫자. 비었거나 숫자가 아니면 undefined */
+const numOrUndef = (v: string): number | undefined => {
+  if (v.trim() === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+};
 /** 권리금·전략·업종을 바꾼 뒤 이 시간만큼 입력이 멈추면 다시 계산한다(2026-11-07 「계산 결과가 바로 나오게」). */
 const AUTO_RUN_MS = 600;
 /** 2026-11-07 에 빠진 탭(「검증 리포트」 · 「계산 결과」). 그 탭을 연 채 저장된 초안은 입력 탭으로 연다. */
@@ -85,7 +92,9 @@ interface PostingConsoleProps {
 interface Calculation {
   result: SimulateResult;
   input: { district_id: string; unit_id: string; industry_type?: string; strategy?: string; prem?: number;
-    industry_detail_key?: string; operating_inputs?: Record<string, number>; area_py_override?: number };
+    industry_detail_key?: string; operating_inputs?: Record<string, number>; area_py_override?: number;
+    /** 계약 월세(만원) · 인테리어 · 설비 견적(만원) — 2026-11-12 입력 계약 */
+    rent_override?: number; fitout_override?: number };
 }
 
 /** 계정·작업공간 수명을 넘기지 않는 입력 초안. 출처와 서버 계산 결과를 그대로 보관한다. */
@@ -95,6 +104,8 @@ export interface PostingDraft {
   detailKey: string;
   operating: Record<string, string>;
   prem: string;
+  /** 인테리어 · 설비 견적 · 계약 월세 · 보증금(만원 문자열 · 2026-11-12). 옛 초안에는 없다 */
+  fitout?: string; contractRent?: string; deposit?: string;
   strategy: string;
   calculation: Calculation | null;
   previous: Calculation | null;
@@ -133,6 +144,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [detailKey, setDetailKey] = useState(draft?.detailKey ?? (industryRequest ? "" : defaultDetailKey ?? ""));
   const [operating, setOperating] = useState<Record<string, string>>(draft?.operating ?? {});
   const [prem, setPrem] = useState(draft?.prem ?? "");
+  // 받은 견적 · 계약 월세 · 보증금(2026-11-12 사용자 요청 — 회수기간 · 임대차법 판정을 실제 값으로)
+  const [fitout, setFitout] = useState(draft?.fitout ?? "");
+  const [contractRent, setContractRent] = useState(draft?.contractRent ?? "");
+  const [deposit, setDeposit] = useState(draft?.deposit ?? "");
+  // 상권 분기 개업률 · 폐업률(서울시 상권분석) — 「위험 확인」을 열 때만 받는다
+  const [turnover, setTurnover] = useState<{ districtId: string; open: number | null; close: number | null } | null>(null);
   const [strategy, setStrategy] = useState(draft?.strategy ?? "");
   const [recs, setRecs] = useState<IndustryRec[] | null>(null);
 
@@ -150,8 +167,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    drafts?.set(draftKey, { unitId, industry, detailKey, operating, prem, strategy, calculation, previous, page });
-  }, [drafts, draftKey, unitId, industry, detailKey, operating, prem, strategy, calculation, previous, page]);
+    drafts?.set(draftKey, { unitId, industry, detailKey, operating, prem, fitout, contractRent, deposit, strategy, calculation, previous, page });
+  }, [drafts, draftKey, unitId, industry, detailKey, operating, prem, fitout, contractRent, deposit, strategy, calculation, previous, page]);
 
   const unit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
   const resolved = calculation?.result.resolved_inputs;
@@ -193,6 +210,16 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   useEffect(() => () => { requestSerial.current += 1; }, []);
 
+  // 「위험 확인」을 연 상권의 분기 개업률 · 폐업률(서울시 상권분석 · Platform 과 같은 응답) — 다른 쪽을 볼 때는 부르지 않는다
+  useEffect(() => {
+    if (!guided || page !== "risk" || turnover?.districtId === districtId) return;
+    let live = true;
+    getPlatformProfile(districtId)
+      .then((p) => { if (live) setTurnover({ districtId, open: p.identity?.demand?.open_rate ?? null, close: p.identity?.demand?.close_rate ?? null }); })
+      .catch(() => { if (live) setTurnover({ districtId, open: null, close: null }); });
+    return () => { live = false; };
+  }, [guided, page, districtId, turnover?.districtId]);
+
   // 입력을 바꾸면 잠시 뒤 스스로 다시 계산한다 — 결과는 입력 바로 아래에 있다(2026-11-07).
   // 타이머는 최신 run 을 ref 로 부른다(닫힌 state 를 읽지 않게). 버튼으로 계산하거나 자리·상권을 바꾸면 대기 중인 자동 계산은 걷는다.
   // 업종 세부 운영 조건(detailKey)은 여러 칸을 다 채워야 계산되므로 자동 계산하지 않고 버튼으로 계산한다.
@@ -218,13 +245,13 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 
   function chooseDistrict(id: string) {
     clearCalculation(); setUnits([]); setUnitId(""); setRecs(null); setHandoffNote("");
-    setIndustry(baseIndustry); setPrem(""); setStrategy(""); setDistrictId(id);
+    setIndustry(baseIndustry); setPrem(""); setFitout(""); setContractRent(""); setDeposit(""); setStrategy(""); setDistrictId(id);
     setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
   }
 
   function chooseUnit(id: string) {
     clearCalculation(); setRecs(null); setErr(null);
-    setIndustry(baseIndustry); setPrem(""); setStrategy(""); setUnitId(id);
+    setIndustry(baseIndustry); setPrem(""); setFitout(""); setContractRent(""); setDeposit(""); setStrategy(""); setUnitId(id);
     setOperating({}); setDetailKey(industryRequest ? "" : defaultDetailKey ?? "");
     setHandoffNote("");
   }
@@ -306,11 +333,14 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         strategy: strategy || undefined,
         prem: Number.isFinite(parsed as number) ? (parsed as number) : undefined,
       };
+      const quote = numOrUndef(fitout), rentIn = numOrUndef(contractRent);
+      if (quote !== undefined) input.fitout_override = Math.round(quote);
+      if (rentIn !== undefined && rentIn > 0) input.rent_override = rentIn;
       if (detailKey) {
         input.industry_detail_key = detailKey;
         input.operating_inputs = Object.fromEntries(Object.entries(operating).filter(([, v]) => v.trim() !== "").map(([k, v]) => [k, Number(v)]));
         if (Object.values(input.operating_inputs).some((v) => !Number.isFinite(v))) throw new Error("운영 조건에 유효한 숫자를 입력해 주세요.");
-        input.prem = undefined; input.strategy = undefined;
+        input.prem = undefined; input.strategy = undefined; input.fitout_override = undefined; input.rent_override = undefined;
       }
       const r = await simulateRevenue(input);
       if (serial !== requestSerial.current) return;
@@ -320,6 +350,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       const sameScope = before && before.input.district_id === input.district_id && before.input.unit_id === input.unit_id
         && !detailKey && before.input.industry_type === input.industry_type && before.input.strategy === input.strategy
         && before.input.prem !== input.prem && before.result.source === r.source && before.result.inputs_quarter === r.inputs_quarter
+        && before.input.fitout_override === input.fitout_override && before.input.rent_override === input.rent_override
         && Object.entries(r.scenarios).every(([key, tier]) => before.result.scenarios[key]?.basis === tier.basis);
       setPrevious(sameScope ? before : null);
       const next = { result: r, input };
@@ -385,6 +416,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   const changedInput = calculation && (calculation.input.industry_type !== (industry.trim() || undefined)
     || calculation.input.strategy !== (strategy || undefined)
     || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem))
+    || (!detailKey && calculation.input.fitout_override !== (numOrUndef(fitout) === undefined ? undefined : Math.round(numOrUndef(fitout)!)))
+    || (!detailKey && calculation.input.rent_override !== ((numOrUndef(contractRent) ?? 0) > 0 ? numOrUndef(contractRent) : undefined))
     || calculation.input.area_py_override !== undefined);
   const reportHandoff: ProgramHandoff | undefined = effectiveUnit ? {
     buildingId: selection && (effectiveUnit.id === selection.unitId || effectiveUnit.id === `vu-${selection.buildingId}`)
@@ -495,6 +528,27 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               협의한 금액을 입력하세요. 비워 두면 <b>0원으로 가정</b>해 계산합니다.
             </span>
           </label>
+          {/* 2026-11-12 사용자 요청 — 받은 견적 · 계약 금액으로 회수기간과 임대차법 보호 범위를 본다 */}
+          <label className="field">
+            <span className="flabel">인테리어 · 설비 견적 <em>받은 견적</em></span>
+            <input value={fitout} inputMode="numeric" aria-label="인테리어 · 설비 견적(만원)"
+              onChange={(e) => { setFitout(e.target.value.replace(/[^\d]/g, "")); scheduleRun(); }}
+              placeholder="만원 — 비우면 업종 평균 계수" />
+            <span className="fhint">받은 견적을 넣으면 세 가격대 모두 <b>이 금액(+ 권리금)</b>을 투자비로 회수기간을 다시 계산합니다.</span>
+          </label>
+          <label className="field">
+            <span className="flabel">계약 월세 <em>계약서 금액</em></span>
+            <input value={contractRent} inputMode="numeric" aria-label="계약 월세(만원)"
+              onChange={(e) => { setContractRent(e.target.value.replace(/[^\d]/g, "")); scheduleRun(); }}
+              placeholder={unit ? `만원 — 비우면 시세 추정 ${Math.round(unit.rent).toLocaleString("ko-KR")}만원` : "만원 — 비우면 시세 추정"} />
+          </label>
+          <label className="field">
+            <span className="flabel">보증금 <em>계약서 금액</em></span>
+            <input value={deposit} inputMode="numeric" aria-label="보증금(만원)"
+              onChange={(e) => setDeposit(e.target.value.replace(/[^\d]/g, ""))}
+              placeholder="만원 — 임대차법 판정에만 씀" />
+            <span className="fhint">보증금은 회수기간에 넣지 않고, 상가임대차법 보호 범위(환산보증금)를 판정하는 데만 씁니다.</span>
+          </label>
 
           <details className="posting-advanced"><summary>세부 조건 · 전략 선택</summary>
           <label className="field">
@@ -528,7 +582,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           {result && !result.economics && result.calculation_status !== "unavailable" && (
             <>
               {calculation && <div className="posting-input-summary">
-                계산에 사용한 입력: {calculation.input.industry_type || "자리 기본 업종"} · 권리금 {calculation.input.prem === undefined ? "미입력 · 0 전제" : won(calculation.input.prem)} · {TIER_LABEL[calculation.input.strategy ?? ""]?.name ?? "세 전략 비교"}
+                계산에 사용한 입력: {calculation.input.industry_type || "자리 기본 업종"} · 권리금 {calculation.input.prem === undefined ? "미입력 · 0 전제" : won(calculation.input.prem)}
+                {" · "}투자비 {calculation.input.fitout_override === undefined ? "업종 평균 계수" : `견적 ${won(calculation.input.fitout_override)}`}
+                {calculation.input.rent_override !== undefined && <> · 계약 월세 {won(calculation.input.rent_override)}</>} · {TIER_LABEL[calculation.input.strategy ?? ""]?.name ?? "세 전략 비교"}
                 {changedInput && <strong role="status">입력이 변경되었습니다. 곧 다시 계산합니다.</strong>}
               </div>}
               <div className="rhead">
@@ -559,6 +615,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
                       <i>{srcLabel(result.inputs_source![k])}</i>
                     </span>
                   ))}
+                  <span className={"isrc " + (result.inputs_source.invest === "user_input" ? "is-proxy" : "is-absent")}>
+                    투자비<i>{result.inputs_source.invest === "user_input" ? "견적 입력" : "업종 평균 계수"}</i>
+                  </span>
                   {result.inputs_source.floor && (
                     <span className={"isrc " + srcClass(result.inputs_source.floor)}>
                       층<i>{result.inputs_source.floor === "flr_ouln" ? "층별개요 실측" : "1층 가정(상한)"}</i>
@@ -598,7 +657,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             destination={{ lat: unit.lat, lng: unit.lng }} destinationName={unit.n} openOnMount={guided} walkSummary /> : <p>자리를 먼저 선택해 주세요.</p> },
         { id: "risk", label: "위험 확인", description: "이 자리를 떨어뜨릴 이유가 있는지, 계약 전에 더 확인할 것은 무엇인지 시뮬레이션 결과와 입력의 출처로 가릅니다.", content:
           <PostingRiskCheck result={result} strategy={calculation?.input.strategy} industry={calculation?.input.industry_type ?? industry}
-            busy={busy} stale={!!changedInput} /> },
+            busy={busy} stale={!!changedInput} deposit={numOrUndef(deposit) ?? null} rent={effectiveUnit?.rent ?? null}
+            openRate={turnover?.districtId === districtId ? turnover.open : null} closeRate={turnover?.districtId === districtId ? turnover.close : null} /> },
         { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
           <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
         { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요. 정했으면 아래에서 이 자리로 검증 program 을 만듭니다.", content: <div className="pstep">
@@ -607,6 +667,10 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             question="어떤 비용과 전략으로 입점할까요?"
             verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
           />
+          {/* 2026-11-12 사용자 요청 — 매출이 덜 나오거나 월세가 오를 때(민감도) · 계약 전 확인 체크리스트 */}
+          <PostingDecideExtras result={result} unitId={unit?.id ?? null} strategy={calculation?.input.strategy ?? null}
+            rent={effectiveUnit?.rent ?? null} deposit={numOrUndef(deposit) ?? null}
+            inputs={{ prem: numOrUndef(prem), fitout: numOrUndef(fitout), contractRent: numOrUndef(contractRent) }} stale={!!changedInput} />
           {/* 결과 저장(2026-10-06) — 새로고침하면 사라지던 계산을 본인 계정에 남긴다. 고른 것만 남긴다. 2026-11-10 이 쪽으로 옮겼다 */}
           {result && !result.economics && result.calculation_status !== "unavailable" && <SaveResultButton disabled={busy || !calculation} onSaved={() => setSavedTick((n) => n + 1)}
             build={() => calculation && {

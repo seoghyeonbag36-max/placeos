@@ -29,3 +29,6 @@
 
 
 @media (max-width: 560px) { .bviewer-cols { grid-template-columns: 1fr; } }
+/* 이 자리 영업 이력 요약(2026-11-12) */
+.bv-history-sum { margin: 0 0 6px; font-size: 12.5px; color: var(--text-secondary); line-height: var(--lh-caption); }
+.bv-history-sum small { display: block; color: var(--text-subtle); font-size: var(--fs-caption); }

@@ -66,3 +66,27 @@ describe("위험 확인 — 계산 결과와 입력 출처로만 가른다", () 
     expect(titles(result(), { industry: "" })).toContain("info:업종을 비워 자리 기본 업종으로 계산했다");
   });
 });
+
+describe("위험 확인 보강(2026-11-12) — 견적 · 임대차법 · 상권 개폐업률", () => {
+  it("견적을 넣으면 「계수다」 대신 「입력한 견적이다」 · 1개월 미만이면 매출 추정을 짚는다", () => {
+    const quoted = result({ inputs_source: { area: "user_input", rent: "contract", prem: "contract", foot: "flpop", invest: "user_input" } });
+    expect(titles(quoted)).toEqual(["info:투자비는 입력한 견적이다"]);
+    const quick = result({ inputs_source: { area: "user_input", rent: "contract", prem: "contract", foot: "flpop", invest: "user_input" },
+      scenarios: { value: tier("value", { roi_months: 0.6 }) } });
+    const item = postingRisks(quick, { industry: "카페" }).find((i) => i.title.startsWith("회수 1개월 미만"))!;
+    expect(item.detail).toContain("추정 월매출");
+  });
+
+  it("보증금 + 월세 × 100 이 서울 9억원을 넘으면 확인 필요 · 이하면 참고 · 보증금이 없으면 넣으라고 한다", () => {
+    expect(titles(result(), { deposit: 5000, rent: 300 })).toContain("info:환산보증금 3억 5,000만원 — 서울 기준 9억원 이하");
+    expect(titles(result(), { deposit: 30000, rent: 650 })).toContain("check:환산보증금 9억 5,000만원 — 서울 기준 9억원 초과");
+    expect(titles(result(), { rent: 300 })).toContain("info:보증금을 넣으면 상가임대차법 보호 범위를 판정한다");
+  });
+
+  it("상권 분기 개업률 · 폐업률은 참고로만 · 닫는 쪽이 많으면 그렇다고 적는다", () => {
+    const it = postingRisks(result(), { openRate: 1.97, closeRate: 2.33 }).find((i) => i.title.startsWith("이 상권"))!;
+    expect(it.level).toBe("info");
+    expect(it.title).toBe("이 상권 분기 개업률 1.97% · 폐업률 2.33%");
+    expect(it.detail).toContain("닫는 가게가 여는 가게보다 많다");
+  });
+});

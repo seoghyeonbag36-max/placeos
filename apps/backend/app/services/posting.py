@@ -89,11 +89,26 @@ def _resolve_requested_unit(district_id: str, unit_id: str | None, area_py_overr
     return next(u for u in posting_inputs.resolve_units(district_id, peers) if u.get("id") == target)
 
 
+def _apply_fitout(scenarios: dict, prem: float, fitout: int) -> None:
+    """코파일럿 답에도 창업자가 넣은 견적을 투자비로 쓴다 — 공급자 계수로 견적을 덮지 않는다(2026-11-12)."""
+    for s in scenarios.values():
+        net = (s.get("_raw") or {}).get("net", s.get("month_net"))
+        if s.get("available") is False or net is None:
+            continue
+        inv = prem / 100 + fitout / 100
+        roi = float("inf") if net <= 0 else inv * 100 / net
+        s["invest_mn"] = round(inv)
+        s["roi_months"] = 99.0 if net <= 0 else round(roi, 1)
+        if s.get("_raw") is not None:
+            s["_raw"] = {**s["_raw"], "invest_mn": inv, "roi": roi}
+
+
 def simulate(district_id: str, unit_id: str | None = None,
              industry_type: str | None = None, strategy: str | None = None,
              prem: int | None = None, industry_detail_key: str | None = None,
              operating_inputs: dict | None = None,
-             area_py_override: float | None = None) -> dict | None:
+             area_py_override: float | None = None, rent_override: float | None = None,
+             fitout_override: int | None = None) -> dict | None:
     """공실 유닛의 입점 시뮬레이션. 코파일럿 우선, 실패 시 3-Tier 폴백.
 
     strategy(premium/value/factory) 지정 시 해당 전략만, 미지정 시 3전략 비교 반환.
@@ -136,11 +151,16 @@ def simulate(district_id: str, unit_id: str | None = None,
     if area_py_override is not None:
         unit = {**unit, "area": area_py_override,
                 "inputs_source": {**(unit.get("inputs_source") or {}), "area": "user_input"}}
+    if rent_override is not None:
+        # 계약서 월세(2026-11-12) — R-ONE 추정을 갈아 끼운다. 화면 · 메뉴 손익분기 · Program 인계가 같은 값을 쓰게
+        # resolved_inputs 로도 내린다(아래).
+        unit = {**unit, "rent": float(rent_override),
+                "inputs_source": {**(unit.get("inputs_source") or {}), "rent": "contract"}}
     if operating_inputs is not None and not industry_detail_key:
         raise ValueError("운영 입력에는 세부 업종이 필요합니다")
     # 화면의 BEP·Program 인계도 이 계산과 정확히 같은 면적·임대료를 쓴다.
     resolved_inputs = ({"area_py": unit["area"], "rent_manwon": unit["rent"], "floor": unit["floor"]}
-                       if is_floor_unit or area_py_override is not None else None)
+                       if is_floor_unit or area_py_override is not None or rent_override is not None else None)
     if industry_detail_key:
         from app.services import business_fit
         item = industry_detail.get(industry_detail_key)
@@ -167,6 +187,10 @@ def simulate(district_id: str, unit_id: str | None = None,
         # 이 경로는 어떤 입력에도 같은 스키마를 돌려주는 것이 계약이라 0 으로 눕힌다.
         unit = {**unit, "prem": max(0, prem)}
         unit["inputs_source"] = {**(unit.get("inputs_source") or {}), "prem": "contract"}
+    if fitout_override is not None:
+        # 인테리어 · 설비 견적(2026-11-12) — 업종 평균 계수 대신 이 값. 출처를 밝혀 「투자비는 계수다」 경고를 거둔다
+        unit = {**unit, "fitout": max(0, fitout_override)}
+        unit["inputs_source"] = {**(unit.get("inputs_source") or {}), "invest": "user_input"}
 
     scenarios, fail = _call_copilot(district_id, unit, industry_type)
     source = "copilot"
@@ -188,6 +212,8 @@ def simulate(district_id: str, unit_id: str | None = None,
         source = "fallback-3tier"
         source_note = fail
     else:
+        if fitout_override is not None:
+            _apply_fitout(scenarios, unit.get("prem") or 0, unit["fitout"])
         # 추천은 **우리가** 계산한다 — 기준(회수 최단)이 제품 정의라 공급자가 못 바꾼다.
         # 반올림 전 `_raw` 로 고르고 표시만 반올림하는 것도 폴백과 동일하게 맞춘다.
         best = svc.recommend_tier(scenarios)

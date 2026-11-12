@@ -361,6 +361,41 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     expect(screen.getByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
   });
 
+  it("월세 상한 · 면적 필터 — 그 조건에 맞는 빈 층이 있는 건물만 남는다(2026-11-12)", async () => {
+    mount({ rent: rentHeatmap("garosugil", [
+      rentListing("g1", 0, { monthly_rent: 250, area_py: 15 }),
+      rentListing("g3", 1, { monthly_rent: 600, area_py: 40 }),
+    ]) });
+    await screen.findByText("가로수 A");
+    const cap = screen.getByRole("combobox", { name: "월세 상한 필터" }) as HTMLSelectElement;
+    await waitFor(() => expect(cap.disabled).toBe(false));
+    fireEvent.change(cap, { target: { value: "300" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 C 카페/ })).toBeNull());
+    expect(screen.getByRole("button", { name: /^가로수 A 카페/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^가로수 B 카페/ })).toBeNull();     // 빈 층 매물 없음
+    expect(screen.getByText(/월 300만원 이하인 빈 층이 있는 건물만/)).toBeTruthy();
+    fireEvent.change(screen.getByRole("combobox", { name: "면적 필터" }), { target: { value: "20" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 A 카페/ })).toBeNull());   // 300 이하 · 20평 이상인 층은 없다
+    fireEvent.click(screen.getByRole("button", { name: "조건 초기화" }));
+    expect(await screen.findByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
+    expect(cap.value).toBe("");
+  });
+
+  it("건물을 고르면 층 용도로 본 영업 · 건물 연식을 보인다 — 근거는 대장 기재값(2026-11-12)", async () => {
+    mount({ floorVac: { ...FLOOR_VAC, units: [
+      { ...floorUnit("g3", 2), purps: "소매점", use_apr: "19920304" },
+      { ...floorUnit("g3", 4, "probable"), purps: "연구소", use_apr: "19920304" },
+    ] } });
+    fireEvent.click(await screen.findByRole("button", { name: /^가로수 C 카페/ }));
+    const box = await screen.findByRole("region", { name: "층 용도로 본 영업" });
+    await within(box).findByText("기재변경 필요");
+    expect(within(box).getByText("허가 · 신고 필요")).toBeTruthy();
+    expect(within(box).getByText(/\d+년 된 건물/)).toBeTruthy();
+    expect(box.textContent).toContain("사용승인 1992.03.04");
+    expect(box.textContent).toContain("관할 구청");
+    expect(api.count(/floor-vacancies/)).toBe(1);
+  });
+
   it("R-ONE 이 없는 거점은 금액을 지어내지 않고 없다고 말한다", async () => {
     installFetchStub([{ match: /\/api\/v1\/commercial-districts$/, body: HUBS },
       { match: /\/api\/v1\/heatmap\/buildings\?district=garosugil/, body: GAROSU_BUILDINGS }]);

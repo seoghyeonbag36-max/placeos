@@ -38,7 +38,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from app.services import industry_fit, vacant_inventory
+import re
+
+from app.services import building_floors, industry_fit, vacant_inventory
 
 _GOLD_DIR = Path(__file__).resolve().parents[4] / "data" / "gold"
 
@@ -99,6 +101,12 @@ def load(district_id: str | None) -> dict | None:
     return data
 
 
+def _use_apr(lot: dict | None) -> str | None:
+    """지번의 사용승인일(YYYYMMDD). 날짜 꼴이 아니면 None — 빈 값 · 「00000000」 을 연식으로 읽지 않는다."""
+    v = str((lot or {}).get("use_apr") or "")
+    return v if re.fullmatch(r"(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])", v) else None
+
+
 def listing(district_id: str | None, *, certainty: str | None = None,
             floor: int | None = None, min_area: int | None = None,
             max_area: int | None = None, limit: int = 200,
@@ -137,6 +145,9 @@ def listing(district_id: str | None, *, certainty: str | None = None,
     # 주면 "이 자리에 들어갈 업종이 없다"로 읽힌다.
     page = [u | {"fit": f} if (f := industry_fit.fit_for(u.get("floor"), u.get("purps")))
             else u for u in page]
+    # 건물 연식(2026-11-12) — 층·호실 문서의 지번 사용승인일. 내보내는 페이지에만 붙인다(적합도와 같은 이유)
+    lots = ((building_floors.load(district_id) or {}).get("lots") or {})
+    page = [u | {"use_apr": apr} if (apr := _use_apr(lots.get(u.get("pnu") or ""))) else u for u in page]
     return {
         "district_id": district_id,
         "total": len(units),

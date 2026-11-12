@@ -289,6 +289,8 @@ def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
     # 안 주면 0 전제로 돈다 — 실측 감도는 추천 5.2% 뒤집힘 · roi 중앙 1.6개월이고
     # 회수가부 판정은 전혀 안 바뀐다(270유닛 전수, docs/feature-posting.md §0-K).
     rent, area, prem = unit["rent"], unit["area"], unit.get("prem") or 0
+    # 창업자가 넣은 인테리어 · 설비 견적(만원 · 2026-11-12). 있으면 아래 계수 대신 세 가격대 모두 이 값을 쓴다.
+    fitout = unit.get("fitout")
 
     # (투자계수, 투자고정) — 백만원. ⚠ 실측이 아니라 손으로 적은 값이다(인테리어·설비 공개 통계가 없다).
     #   매출·비용은 실측으로 갈았지만 투자비는 이 계수가 그대로라 회수기간의 분자에 남는다.
@@ -307,7 +309,7 @@ def tier_scenarios(unit: dict, district_id: str | None = None) -> dict:
                 "month_net": None, "roi_months": None, "viable": False, "basis": None,
             }
             continue
-        inv = prem / 100 + area * i_a + i_c                                  # 백만원
+        inv = prem / 100 + (fitout / 100 if fitout is not None else area * i_a + i_c)   # 백만원
         cost = rent + rev * posting_revenue.opex_rate(k)                    # 만원/월
         net = rev - cost
         # 회수기간(개월). invest 는 백만원, net 은 만원이라 ×100 으로 단위를 맞춘다

@@ -3,6 +3,7 @@ import { placeFloors, approxFloors, stackBasis, type FloorKind, type ViewerBuild
 // 건물 상세 — 2D 층 근거와 공실 이력. 확인되지 않은 이력은 채우지 않는다.
 import HistoryTimeline from "@/components/twin/HistoryTimeline";
 import { getBuildingHistory, type BuildingHistory } from "@/lib/api";
+import { historySummary } from "@/lib/founderChecks";
 import { kakaoMapUrl } from "@/lib/externalMap";
 import { dateText, lastClosed, type HistoryItem } from "@/lib/twinGeometry";
 import "./BuildingViewer.css";
@@ -58,9 +59,16 @@ function VacancyHistory({ buildingId }: { buildingId?: string | null }) {
     start: r.start_date, end: r.end_date, industry: r.industry_type ?? null, name: r.business_name ?? null,
   })).sort((a, c) => (c.start ?? "").localeCompare(a.start ?? ""));
   const closed = lastClosed(items);
+  // 이 자리 영업 이력 요약(2026-11-12 사용자 요청 · N4) — 닫은 곳만 센 값이라 생존율이 아니다
+  const sum = historySummary(data?.history ?? []);
   return (
     <section aria-label="공실 이력">
       <h3>공실 이력</h3>
+      {!loading && sum.total > 0 && <p className="bv-history-sum" role="note">
+        이 지번에서 가게 <b>{sum.total}곳</b>이 거쳐 갔어요
+        {sum.medianYears != null && <> · 2000년 이후 닫은 곳의 영업기간 중앙 <b>{sum.medianYears}년</b> · 3년 안에 닫은 곳 {sum.within3y}곳</>}.
+        <small> 인허가 업종만(소매 · 사무 없음) · 닫은 곳만 센 값이라 생존율이 아니에요{data?.history_source === "localdata_lot" ? " · 같은 지번의 다른 건물 이력이 섞여 있어요" : ""}.</small>
+      </p>}
       <dl><dt>직전 업종 (지번 단위 · 층 불명)</dt><dd>{loading ? "불러오는 중…" : closed?.industry ?? ABSENT}</dd>
         <dt>폐업일</dt><dd>{loading ? "불러오는 중…" : dateText(closed?.end) ?? ABSENT}</dd>
         <dt>공실 기간</dt><dd>{ABSENT}</dd></dl>

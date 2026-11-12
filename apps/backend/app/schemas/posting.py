@@ -28,6 +28,12 @@ class SimulateRequest(BaseModel):
     operating_inputs: dict[str, Any] | None = None
     # 사용자가 계약서·도면으로 넣은 내부면적(평). 주면 `inputs_source["area"]="user_input"`.
     area_py_override: float | None = Field(default=None, gt=0, le=3000, allow_inf_nan=False)
+    # 계약서의 월 임대료(만원). 주면 R-ONE 추정 대신 이 값으로 계산하고 `inputs_source["rent"]="contract"`(2026-11-12).
+    rent_override: float | None = Field(default=None, gt=0, le=100000, allow_inf_nan=False)
+    # 받은 인테리어 · 설비 견적(만원). 주면 업종 평균 계수(면적 × 평당 계수 + 고정분) 대신 세 가격대 모두 이 값을 투자비로
+    # 쓰고 `inputs_source["invest"]="user_input"`(2026-11-12 — 계수로는 회수 1개월 미만이 836곳 중 296곳이었다).
+    # 권리금(prem)은 따로 더한다.
+    fitout_override: int | None = Field(default=None, ge=0, le=1_000_000)
 
 
 class ResolvedPostingInputs(BaseModel):
