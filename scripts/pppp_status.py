@@ -1470,13 +1470,13 @@ def program_track(total: int) -> Track:
     # ── 2026-11-07 네 기능 리뉴얼 — 배선을 코드에서 센다(문구만 고쳐서는 안 올라가게) ──
     hub_src = _read("apps/frontend/src/pages/CampaignStudio.tsx")
     app_src = _read("apps/frontend/src/App.tsx")
-    hub_ok = (all(f'label: "{n}"' in hub_src for n in ("네트워킹", "지원 프로그램", "오프라인 마케팅 솔루션", "가설 검증"))
+    hub_ok = (all(f'label: "{n}"' in hub_src for n in ("가설 설정", "지원 프로그램", "네트워킹", "오프라인 마케팅 솔루션"))
               and "ConsolePages" in hub_src and "CampaignLedger" in hub_src
               and 'import("@/pages/CampaignStudio")' in app_src)
     t.gates.append(Gate(
         "Program 네 기능 화면", 1.0 if hub_ok else 0.0,
-        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 네트워킹 · 지원 프로그램 · "
-        "오프라인 마케팅 솔루션 · 가설 검증 네 탭. 예전 네 장(캠페인 원장 · 검증 계획 · 행사 연계 · 검증 리포트)은 "
+        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 가설 설정 · 지원 프로그램 · "
+        "네트워킹 · 오프라인 마케팅 솔루션 네 탭. 예전 네 장(캠페인 원장 · 검증 계획 · 행사 연계 · 검증 리포트)은 "
         "지우지 않고 새 기능 아래로 옮겼다"
         if hub_ok else "미배선 — 허브의 네 탭 · 캠페인 원장 · App 의 Program 모듈 중 하나 이상이 없다",
     ))
