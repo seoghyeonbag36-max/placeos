@@ -148,3 +148,7 @@
    겉 상자가 .postconsole 을 다시 달아 위 규칙이 그대로 걸린다. 콘솔 바탕·여백과 폼의 sticky·테두리는 칸이 대신한다. */
 .mh-slot.postconsole.posting-side { background: var(--surface); padding: 0; }
 .posting-side .panel { position: static; border: 0; border-radius: 0; background: transparent; }
+
+/* 오른쪽 칸 쪽 목록(2026-11-10 — 8쪽). 공용 가로 탭은 넘치면 옆으로 밀려 뒤 4쪽이 안 보인다 — Posting 은 줄을 바꿔 순서 전체를 보인다 */
+.postconsole .console-pages-nav:not(.is-side){flex-wrap:wrap;overflow-x:visible;gap:6px}
+.postconsole .console-pages-nav:not(.is-side) button{min-height:34px;padding:6px 12px;font-size:12.5px}

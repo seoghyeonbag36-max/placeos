@@ -439,7 +439,8 @@
 /* §4 3분류 · 평일/주말 · 3D 입구 */
 .mapshell .b-road { font-size: var(--fs-caption); color: var(--muted); overflow-wrap: anywhere; }
 .mapshell .b-mine { font-size: var(--fs-caption); color: var(--track-page); margin-top: 2px; }
-.mapshell a.b-twin { display: block; text-align: center; text-decoration: none; box-sizing: border-box; }
+/* 링크(거리뷰 · 층별 보기)도 버튼처럼 글씨를 가로 · 세로 가운데에 — block 이면 36px 칸 위쪽에 붙는다(2026-11-09) */
+.mapshell a.b-twin { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; box-sizing: border-box; }
 .mapshell .b-twin-3d { background: var(--track-page); border-color: var(--track-page); color: var(--on-accent); font-weight: 700; }
 .mapshell .time-bar .daytype { display: inline-flex; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
 .mapshell .time-bar .daytype button { border: 0; background: var(--surface); font: inherit; font-size: var(--fs-caption); padding: 4px 10px; cursor: pointer; color: var(--ink); }
@@ -496,3 +497,19 @@
   /* 시트가 지도 아래를 덮는 대신 오버레이 층이 시트 위에서 끝난다(MapHost.css) — 범례·시간 막대는 그 바닥에 붙는다 */
   .mapshell-slot .side-panel:not([hidden]) { height: auto; }
 }
+
+/* 비용 확인할 빈 층 고르기(2026-11-10) — 「빈 층 임대료」 표의 줄을 고르면 「이 자리 비용 확인」이 그 층으로 간다 */
+.mapshell .b-rent-table.is-pickable tbody tr { cursor: pointer; }
+.mapshell .b-rent-table.is-pickable td:first-child { width: 22px; padding-right: 0; }
+.mapshell .b-rent-table.is-pickable input[type="radio"] { margin: 0; accent-color: var(--track-page); cursor: pointer; }
+.mapshell .b-rent-table tr.is-chosen td { background: var(--track-page-soft); }
+.mapshell .b-floor-pick { margin-top: 6px; font-size: var(--fs-caption); color: var(--ink); line-height: 1.6; }
+.mapshell .b-floor-pick b { color: var(--track-page); }
+.mapshell .b-floor-clear { font: inherit; font-size: var(--fs-caption); border: 0; background: none; padding: 0; color: var(--track-page); text-decoration: underline; cursor: pointer; }
+.mapshell .b-rent-table.is-pickable th:nth-child(2), .mapshell .b-rent-table.is-pickable td:nth-child(2) { text-align: left; }
+
+/* 층별 공실 필터(2026-11-10) */
+.mapshell .floor-filter-note { flex-basis: 100%; margin: 0; font-size: var(--fs-caption); color: var(--muted); line-height: 1.5; }
+.mapshell .b-floors { font-size: var(--fs-caption); color: var(--muted); margin-top: 2px; }
+.mapshell .b-floors b { color: var(--track-page); }
+.mapshell .b-floors i { font-style: normal; color: var(--caution-ink); }

@@ -11,7 +11,6 @@
 .interior3d-label.is-muted { color: var(--muted); font-weight: 600; }
 .interior3d-label.is-door { color: #B4471B; }
 .interior3d-label.is-dim { color: #FFFFFF; background: #1C2533; border-color: #1C2533; font-variant-numeric: tabular-nums; }
-.interior2d { display: block; width: 100%; height: auto; max-height: 420px; background: #F4F6F8; border-radius: 12px; }
 .interior3d-summary, .interior3d-notes { margin: 0; padding-left: 1.1em; font-size: var(--fs-caption); }
 .interior3d-notes { color: #8A5A00; }
 .interior3d-note, .interior3d-where { margin: 0; font-size: var(--fs-caption); color: var(--muted); }
@@ -23,3 +22,95 @@
 .interior-kw-picked button { font: inherit; font-size: var(--fs-caption); margin-left: 6px; }
 .interior-kw-effects { margin: 4px 0 0; padding-left: 1.1em; font-size: var(--fs-caption); color: var(--muted); }
 @media (max-width: 640px) { .interior3d-canvas { height: 320px; } }
+
+/* 직접 배치 편집기(2026-11-09) — 패널 폭(약 420px)에서는 세로로 쌓고, 넓으면(「크게 편집」 · 넓은 화면) 두 칸 */
+.interior-editor { container-type: inline-size; outline: none; }
+.interior-editor.is-wide { position: fixed; inset: 0; z-index: 10000; background: var(--surface, #fff); overflow: auto; padding: 16px; }
+.ied-inner { display: grid; gap: var(--sp-2, 8px); max-width: 1480px; margin: 0 auto; }
+.ied-grid { display: grid; gap: 12px; }
+.ied-views { display: grid; gap: 10px; }
+.ied-view { display: grid; gap: 4px; align-content: start; }
+.ied-view-h { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: var(--fs-caption, 12px); color: var(--muted); }
+.ied-view-h b { color: var(--ink); font-size: 13px; }
+.ied-plan { display: block; width: 100%; height: 360px; background: #F4F6F8; border-radius: 12px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.ied-plan .ied-obj { cursor: grab; } .ied-plan .ied-obj:hover > path:first-child { stroke: #1C7ED6; stroke-opacity: .6; }
+.ied-3d.interior3d-canvas { height: 360px; }
+.ied-help { margin: 0; font-size: var(--fs-caption, 12px); color: var(--muted); }
+.ied-help kbd { font: inherit; font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; background: var(--surface); }
+.ied-tools, .ied-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: var(--fs-caption, 12px); }
+.interior-editor .ied-tools label { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); width: auto; white-space: nowrap; margin: 0; font-size: 12px; }
+.interior-editor .ied-tools input[type=checkbox] { width: auto; margin: 0; }
+.interior-editor button { font: inherit; font-size: 12px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.interior-editor button:disabled { opacity: .45; cursor: default; }
+.interior-editor button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.interior-editor button.is-main { border-color: var(--track-posting, var(--ink)); font-weight: 700; }
+.ied-msg { margin: 0; font-size: 12.5px; color: #9A4A00; }
+.ied-banner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; background: #FFF6E0; border: 1px solid #F0D58C; border-radius: 10px; padding: 8px 10px; }
+.ied-banner span { display: flex; flex-wrap: wrap; gap: 6px; }
+.ied-add { display: grid; gap: 6px; font-size: 12.5px; } .ied-add small { color: var(--muted); }
+.ied-add-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.ied-add-row > span { width: 100%; font-size: 11.5px; color: var(--muted); }
+.ied-add button { display: inline-flex; align-items: center; gap: 4px; }
+.ied-ico { width: 24px; height: 24px; flex: none; }
+.ied-checks { font-size: 12.5px; } .ied-checks ul { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 2px; }
+.interior-editor .ied-checks li button { border: none; background: none; padding: 1px 0; text-align: left; }
+.ied-i-error button { color: #C92A2A !important; } .ied-i-warn button { color: #B35C00 !important; } .ied-i-info button { color: var(--muted) !important; }
+.ied-ok { color: #2B8A3E; font-weight: 600; }
+.ied-side { display: grid; gap: 10px; align-content: start; }
+.ied-hint { margin: 0; font-size: 12.5px; color: var(--muted); background: #F4F7FB; border-radius: 10px; padding: 8px 10px; }
+.ied-selp, .ied-design { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 7px; font-size: 12.5px; }
+.ied-selp { border-color: #1C7ED6; box-shadow: inset 3px 0 0 #1C7ED6; }
+.ied-selp h4, .ied-design h4, .ied-reason h4 { margin: 0; font-size: 13.5px; } .ied-design h4 small, .ied-reason h4 small { color: var(--muted); font-weight: 400; font-size: 11.5px; }
+.ied-selp label { display: grid; grid-template-columns: 52px 1fr; gap: 6px; align-items: center; color: var(--muted); }
+.ied-selp select { font: inherit; font-size: 12.5px; padding: 3px; }
+.ied-step { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--ink); } .ied-step small { color: var(--muted); }
+.ied-row > span:first-child { min-width: 60px; color: var(--muted); }
+.ied-row input[type=range] { flex: 1; min-width: 100px; }
+.ied-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.interior-editor .ied-cards button { display: grid; justify-items: center; gap: 2px; padding: 4px 2px; font-size: 10.5px; line-height: 1.25; color: var(--ink); }
+.interior-editor .ied-cards button[aria-pressed="true"] { color: #fff; }
+.ied-cards .ied-ico { width: 34px; height: 30px; }
+.ied-sw { display: inline-flex; align-items: center; gap: 4px; }
+.ied-sw i { width: 13px; height: 13px; border-radius: 4px; border: 1px solid #0003; display: inline-block; }
+.ied-rec { font-style: normal; font-size: 10px; font-weight: 700; color: #0B7285; background: #E3FAFC; border-radius: 4px; padding: 0 4px; margin-left: 3px; }
+button[aria-pressed="true"] .ied-rec { background: #0B7285; color: #fff; }
+.ied-why { margin: 0; padding-left: 1.1em; font-size: 12px; display: grid; gap: 3px; }
+.ied-b { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 0 4px; margin: 0 2px; white-space: nowrap; }
+.ied-b-실측 { background: #D3F9D8; color: #2B8A3E; } .ied-b-계산 { background: #E7F5FF; color: #1864AB; } .ied-b-규칙 { background: #F3F0FF; color: #5F3DC4; }
+.ied-b-추정 { background: #FFF3BF; color: #8A5A00; } .ied-b-직접 { background: #FFE8CC; color: #C2410C; }
+.ied-reason { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 10px; }
+.ied-cols { display: grid; gap: 8px; }
+.ied-card { background: #F8FAFC; border: 1px solid #E6EAF0; border-radius: 12px; padding: 10px; font-size: 12.5px; line-height: 1.55; }
+.ied-card h5 { margin: 0 0 4px; font-size: 12.5px; } .ied-card p { margin: 0 0 5px; } .ied-card ul { margin: 0; padding-left: 1.1em; }
+.ied-eq { font-size: 14px; } .ied-eq b { font-size: 17px; }
+.ied-selp .ied-eq { font-size: 12px; margin: 0; }
+.ied-mute { color: var(--muted); font-size: 11.5px; margin: 0; }
+.ied-bar { height: 8px; background: #E9ECEF; border-radius: 99px; overflow: hidden; margin: 4px 0 6px; } .ied-bar i { display: block; height: 100%; }
+.ied-tbl-wrap { overflow-x: auto; }
+.ied-tbl { border-collapse: collapse; font-size: 12px; min-width: 640px; width: 100%; }
+.ied-tbl caption { text-align: left; font-weight: 700; padding-bottom: 6px; }
+.ied-tbl th, .ied-tbl td { border-bottom: 1px solid #E6EAF0; padding: 5px 6px; text-align: left; vertical-align: middle; }
+.ied-tbl th { background: #F4F7FB; font-weight: 600; white-space: nowrap; }
+.ied-tbl td:nth-child(-n+6) { white-space: nowrap; font-variant-numeric: tabular-nums; } .ied-tbl td .ied-ico { vertical-align: middle; }
+.ied-over { color: #C92A2A; font-weight: 700; }
+@container (min-width: 760px) {
+  .ied-views { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .ied-plan, .ied-3d.interior3d-canvas { height: 440px; }
+  .ied-cols { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+}
+@container (min-width: 1100px) {
+  .ied-grid { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+  .interior-editor.is-wide .ied-plan, .interior-editor.is-wide .ied-3d.interior3d-canvas { height: 520px; }
+}
+/* 키워드 갈래(2026-11-09 · 30개) */
+.interior-kw-group { display: grid; gap: 4px; margin-bottom: 6px; }
+.interior-kw-group > span { font-size: var(--fs-caption, 12px); color: var(--muted); font-weight: 600; }
+@container (max-width: 400px) {
+  .ied-plan, .ied-3d.interior3d-canvas { height: 300px; }
+  .ied-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+/* 업종 → 기본 키워드 · 배치(2026-11-09) */
+.interior-kw-industry { margin: 0 0 6px; font-size: var(--fs-caption, 12px); color: var(--ink); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.interior-kw-industry small { color: var(--muted); }
+.interior-kw-industry button { font: inherit; font-size: 12px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer; }
+.ied-notice { margin: 0; font-size: 12.5px; color: #1864AB; background: #E7F5FF; border: 1px solid #A5D8FF; border-radius: 10px; padding: 6px 10px; }

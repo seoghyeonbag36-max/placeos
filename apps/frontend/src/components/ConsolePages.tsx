@@ -9,7 +9,7 @@ import "./ConsolePages.css";
  *  2026-11-08 칸 배치: `navSlot` 을 주면 지도 탐색에서 쪽 목록을 그 칸(왼쪽)에 **세로 메뉴**로 세운다 — 쪽마다 한 줄 설명을
  *  붙여 네 기능을 한눈에 본다(Program). 본문은 그대로 오른쪽 칸이다. 지도 셸 밖(단독 렌더)에서는 예전 가로 탭이다.
  *  `navIntro` 는 그 메뉴 위에 얹는 머리말(화면 이름 · 질문)이다 — 칸 배치일 때만 쓴다. */
-export default function ConsolePages({ label, pages, enabled = true, activeId, onChange, navSlot, navTrack, navIntro }: {
+export default function ConsolePages({ label, pages, enabled = true, activeId, onChange, navSlot, navTrack, navIntro, keepMounted }: {
   label: string;
   pages: { id: string; label: string; description: string; content: ReactNode }[];
   enabled?: boolean;
@@ -18,9 +18,11 @@ export default function ConsolePages({ label, pages, enabled = true, activeId, o
   navSlot?: MapSlotName;
   navTrack?: TrackKey;
   navIntro?: ReactNode;
+  /** 처음부터 늘 그려 둘 쪽 — 다른 쪽이 첫 화면이어도 그 쪽의 칸(MapSlot) 입력이 왼쪽에 서 있어야 할 때(Posting 「자리와 비용 조건」 · 2026-11-09) */
+  keepMounted?: string[];
 }) {
   const [active, setActive] = useState(pages[0].id);
-  const [visited, setVisited] = useState(() => new Set([pages[0].id]));
+  const [visited, setVisited] = useState(() => new Set([pages[0].id, ...(keepMounted ?? [])]));
   const id = useId();
   const heading = useRef<HTMLHeadingElement>(null);
   const layout = useMapLayout();

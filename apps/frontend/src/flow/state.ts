@@ -17,6 +17,7 @@
  */
 import type { BusinessGoal, BusinessState } from "@/lib/businessProfile";
 import type { ValidationMode } from "@/lib/api";
+import { isSiteRegion } from "@/lib/siteScope";
 
 /** 권리금 답 — 없음(0, 관측) · 모름(null, 0 전제) · 금액(만원) */
 export type PremiumAnswer = { kind: "none" } | { kind: "unknown" } | { kind: "amount"; manwon: number };
@@ -127,7 +128,8 @@ export function loadFlow(): FlowState {
     return {
       ...base,
       startupOrder: ["region", "industry"].includes(v?.startupOrder) ? v.startupOrder : null,
-      startupRegion: ["서울", "경기", "광주", "전주"].includes(v?.startupRegion) ? v.startupRegion : null,
+      // 보이는 지역만 되살린다 — 서울만 보일 때(2026-11-10) 전에 고른 「경기」 등은 비운다(lib/siteScope)
+      startupRegion: isSiteRegion(v?.startupRegion) ? v.startupRegion : null,
       goal: isGoal(v?.goal) ? v.goal : null,
       industryKey: str(v?.industryKey),
       customIndustry: str(v?.customIndustry),
@@ -192,22 +194,17 @@ export function setStartupOrder(s: FlowState, startupOrder: "region" | "industry
   if (s.startupOrder === startupOrder) return s;
   return { ...emptyFlow(), goal: "start", startupOrder, lastPath: s.lastPath };
 }
-export function setStartupRegion(s: FlowState, startupRegion: string): FlowState {
-  if (s.startupRegion === startupRegion) return s;
-  const next = clearValidateOn(clearDistrictOn({ ...s, startupRegion }));
-  return s.startupOrder === "region" ? { ...next, industryKey: null, customIndustry: null } : next;
-}
 
 export function setIndustry(s: FlowState, industryKey: string, customIndustry: string | null = null): FlowState {
   if (s.industryKey === industryKey && s.customIndustry === customIndustry) return s;
   const keepHome = s.goal !== "start";
   const next = clearValidateOn(clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
     homeDistrictId: keepHome ? s.homeDistrictId : null }));
-  // 지역별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
+  // 상권별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
   return s.goal === "start" && s.startupOrder === "region" ? { ...next, districtId: s.districtId } : next;
 }
 
-/** 지역별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
+/** 상권별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
 export function setStartupDistrict(s: FlowState, id: string): FlowState {
   if (s.districtId === id) return s;
   return clearValidateOn({ ...setDistrict(s, id), industryKey: null, customIndustry: null, targetIndustryKey: null });

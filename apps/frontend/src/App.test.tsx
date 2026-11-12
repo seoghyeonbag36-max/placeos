@@ -156,7 +156,12 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
-    // 계산 결과는 「자리와 비용 조건」 화면 바로 아래에 나온다(2026-11-07 — 별도 「계산 결과」 탭 없음)
+    // Posting 오른쪽 칸 순서(2026-11-10 사용자 요청) — 첫 화면은 「시뮬레이션 결과」, 검증 program 만들기는 「비용 비교 및 결정」 안
+    const pages = screen.getByRole("navigation", { name: "비용 검토" });
+    expect(within(pages).getAllByRole("button").map((b) => b.textContent)).toEqual(["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도",
+      "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"]);
+    expect(within(pages).getByRole("button", { name: "시뮬레이션 결과" }).getAttribute("aria-current")).toBe("page");
+    fireEvent.click(within(pages).getByRole("button", { name: "비용 비교 및 결정" }));
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
     // 2026-11-07 리뉴얼 — 인계는 그 버튼이 약속한 「가설 설정」부터 연다. 캠페인 폼은 「오프라인 마케팅 솔루션」에 있고

@@ -1,0 +1,41 @@
+/* Posting 오른쪽 칸의 단계 화면(2026-11-10) — 위험 확인 · 메뉴 설정 · 비용 비교 및 결정 · 검증 program 만들기 */
+.pstep{display:grid;gap:var(--sp-3);font-size:13px;line-height:var(--lh-body)}
+.pstep-lede{margin:0;color:var(--text-secondary)}
+.pstep-empty{margin:0;font-size:13px;color:var(--muted);background:var(--surface-sunken);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
+.pstep-note{margin:0;font-size:var(--fs-caption);color:var(--caution-ink);background:var(--caution-soft);border:1px solid var(--caution-line);border-radius:var(--radius-md);padding:6px var(--sp-3)}
+.pstep-foot{margin:0;font-size:var(--fs-caption);color:var(--muted);line-height:var(--lh-caption)}
+.pstep-verdict{margin:0;font-size:15px;font-weight:700;border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
+.pstep-verdict.is-fail{background:var(--danger-soft);color:var(--danger-ink)}
+.pstep-verdict.is-check{background:var(--caution-soft);color:var(--caution-ink)}
+.pstep-verdict.is-ok{background:var(--source-real-soft);color:var(--source-real)}
+.pstep-risks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pstep-risks li{display:grid;grid-template-columns:62px minmax(0,1fr);gap:2px var(--sp-2);align-items:baseline;border:1px solid var(--line-alt);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3);background:var(--surface)}
+.pstep-risks li > b{font-size:var(--fs-caption)}
+.pstep-risks li > span{display:grid;gap:1px;color:var(--text-secondary)}
+.pstep-risks li > span strong{color:var(--ink-alt);font-size:13px}
+.pstep-risks li > small{grid-column:2;font-size:var(--fs-caption);color:var(--text-subtle)}
+.pstep-risks li.is-fail{border-color:var(--danger-line);background:var(--danger-soft)} .pstep-risks li.is-fail > b{color:var(--danger-ink)}
+.pstep-risks li.is-check > b{color:var(--caution-ink)} .pstep-risks li.is-info > b{color:var(--muted)}
+.pstep-table{overflow-x:auto}
+.pstep-table table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pstep-table caption{text-align:left;font-size:var(--fs-caption);color:var(--muted);padding-bottom:4px}
+.pstep-table th,.pstep-table td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line-alt);white-space:nowrap}
+.pstep-table thead th{font-size:var(--fs-caption);color:var(--muted);font-weight:700}
+.pstep-table td input{min-width:64px}
+.pstep-table td:first-child input{min-width:96px}
+.pstep-x{font:inherit;border:0;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px}
+.pstep-add{justify-self:start;font:inherit;font-size:12.5px;font-weight:700;color:var(--track-posting);background:var(--surface);border:1px dashed var(--track-posting);border-radius:var(--radius-md);padding:4px var(--sp-3);cursor:pointer}
+.pstep-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2) var(--sp-3)}
+.pstep-fields label{display:grid;gap:3px;font-size:var(--fs-caption);font-weight:700;color:var(--muted)}
+.pstep-fields label small{font-weight:400}
+.pstep-rent{grid-column:1/-1;margin:0;font-size:12.5px} .pstep-rent small{color:var(--text-subtle)}
+.pstep-result{display:grid;gap:6px;border:1px solid var(--line-alt);border-radius:var(--radius-md);padding:var(--sp-3);background:var(--surface)}
+.pstep-result p{margin:0} .pstep-result small{display:block;font-size:var(--fs-caption);color:var(--text-subtle)}
+.pstep-big{font-size:15px} .pstep-big b{font-size:22px;color:var(--track-posting)}
+.pstep .is-pos{color:var(--source-real);font-weight:700} .pstep .is-neg{color:var(--danger);font-weight:700}
+.pstep-program{display:grid;gap:var(--sp-2);border-top:1px solid var(--line-alt);padding-top:var(--sp-3);margin-top:var(--sp-1)}
+.pstep-program h3{margin:0;font-size:15px;color:var(--ink-alt)}
+.pstep-program dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px var(--sp-3);margin:0;font-size:13px}
+.pstep-program dt{color:var(--muted);font-weight:700} .pstep-program dd{margin:0}
+.pstep-pointer{margin:0;font-size:12.5px;background:var(--surface-sunken);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
+@media (max-width:420px){.pstep-fields{grid-template-columns:minmax(0,1fr)}}
