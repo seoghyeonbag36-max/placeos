@@ -6,8 +6,8 @@ it("선택 자리와 계산 출처를 보고서에 담고 없는 성과를 만�
   render(<PpppReport handoff={{ districtId: "test", districtName: "테스트 상권", unitId: "test",
     unitName: "선택 건물", address: "테스트로 10", area: 30, floor: "1F", rent: 200,
     lat: 37, lng: 127, industry: "한식", strategy: null, inputsSource: { area: "seed", rent: "rone" } }} />);
-  fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
-  expect(screen.getByRole("article", { name: "PPPP 보고서 미리보기" }).textContent).toContain("테스트로 10");
+  fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
+  expect(screen.getByRole("article", { name: "상권 분석 보고서 미리보기" }).textContent).toContain("테스트로 10");
   expect(screen.getByText("seed")).toBeTruthy();
   expect(screen.getAllByText(/자료 미입력 · 판단 보류/).length).toBeGreaterThan(0);
   expect(screen.getByRole("button", { name: "인쇄·PDF 저장" })).toBeTruthy();
@@ -29,8 +29,8 @@ it("(2026-11-07 Program 리뉴얼) 네트워킹 메모와 담은 지원 공고�
   ]));
   try {
     render(<PpppReport districtId="test" />);
-    fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
-    const article = screen.getByRole("article", { name: "PPPP 보고서 미리보기" });
+    fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
+    const article = screen.getByRole("article", { name: "상권 분석 보고서 미리보기" });
     expect(article.textContent).toContain("확인함 · 상인회나 상점가 모임이 있나요?");
     expect(article.textContent).toContain("월 회비 있음");
     expect(article.textContent).toContain("들은 말은 확인된 사실이 아닙니다");

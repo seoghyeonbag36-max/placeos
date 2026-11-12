@@ -1,3 +1,4 @@
+import { savedPostingHandoff } from "@/lib/savedPosting";
 import NearbyCompetition from "@/components/NearbyCompetition";
 import InteriorPlanner from "@/components/InteriorPlanner";
 import { useReportCapture } from "@/lib/ppppReportContext";
@@ -581,20 +582,20 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
                 매출·순익·회수기간은 입력 조건에 따른 추정입니다. 실제 계약 금액과 운영 조건에 따라 달라질 수 있습니다.
               </div>
               {/* 결과 저장(2026-10-06) — 새로고침하면 사라지던 계산을 본인 계정에 남긴다. 고른 것만 남긴다. */}
-              <SaveResultButton disabled={busy || !calculation} onSaved={() => setSavedTick((n) => n + 1)}
+              <SaveResultButton disabled={busy || !calculation || !!changedInput} onSaved={() => setSavedTick((n) => n + 1)}
                 build={() => calculation && {
                   kind: "posting",
                   title: `${districts.find((d) => d.id === calculation.input.district_id)?.name ?? calculation.input.district_id}`
                     + ` · ${unit?.n ?? calculation.result.unit_id} · ${calculation.result.industry_type || calculation.input.industry_type || "자리 기본 업종"}`,
                   districtId: calculation.input.district_id,
-                  payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null },
+                  payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null, handoff: reportHandoff },
                 }} />
             </>
           )}
-          {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy} onSaved={() => setSavedTick((n) => n + 1)}
+          {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy || !!changedInput} onSaved={() => setSavedTick((n) => n + 1)}
             build={() => ({ kind: "posting", title: `${districts.find((d) => d.id === districtId)?.name ?? districtId} · ${result.economics!.label} 운영 시나리오`,
-              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null } })} />}
-          <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
+              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null, handoff: reportHandoff } })} />}
+          <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} onMakeProgram={onMakeProgram} />} />
         </div>
         </> },
         { id: "nearby", label: "주변 업종 지도", description: "업종을 확인하고 「조회」를 누르면 공실 주변 50~100m의 같은 업종과 체인점을 보여 줍니다.", content:
@@ -611,16 +612,21 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
 }
 
 /** 저장한 Posting 결과 — 읽기 전용(components/SavedResults 머리말). 저장 당시의 입력과 세 가격대를 그대로 그린다. */
-function SavedPostingView({ item }: { item: SavedResult }) {
-  const saved = item.payload as Partial<Calculation> & { unitName?: string | null };
+function SavedPostingView({ item, onMakeProgram }: { item: SavedResult; onMakeProgram?: (handoff: ProgramHandoff) => void }) {
+  const saved = item.payload as Partial<Calculation> & { unitName?: string | null; handoff?: ProgramHandoff };
   const r = saved.result;
-  if (r?.economics) return <IndustryEconomicsResult result={r.economics} />;
+  const savedHandoff = savedPostingHandoff(item);
+  const handoffAction = onMakeProgram && (savedHandoff
+    ? <Button type="button" onClick={() => onMakeProgram(savedHandoff)}>저장한 내용으로 가설 설정 →</Button>
+    : <p className="saved-note">이전 저장 결과에는 자리 연결 정보가 없습니다. Posting에서 자리를 선택하고 다시 저장해 주세요.</p>);
+  if (r?.economics) return <div className="saved-posting">{handoffAction}<IndustryEconomicsResult result={r.economics} /></div>;
   if (!r?.scenarios) return <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
   // 10-28 이전에 저장한 결과에는 손 계수(rent+fitout)로 계산한 전략이 있다 — 지금 서빙은 그 값을 내지 않는다((b)).
   // 숫자는 저장한 그대로 다시 그리되, 그 사실을 맨 위에 밝힌다(안 밝히면 거둔 값이 실측처럼 다시 읽힌다).
   const legacy = Object.values(r.scenarios).some((s) => s.basis === "rent+fitout");
   return (
     <div className="saved-posting">
+      {handoffAction}
       {legacy && (
         <p className="saved-note">
           ⚠ {BASIS_LABEL["rent+fitout"]} — 원가·인건비가 빠진 손 계수로 계산한 결과라 마진이 크고 회수기간이 실제보다 짧게 나온다.

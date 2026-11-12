@@ -43,7 +43,7 @@ const TAB_LOAD = { timeout: 20000 };
 const MULTI_TAB = { timeout: 60000 };
 
 describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
-  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 맨 아래 「의견 보내기」·「계정」만 있다 — 서울·거점 탭은 없다", async () => {
+  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 상권 분석 보고서와 맨 아래 「의견 보내기」·「계정」이 있다 — 서울·거점 탭은 없다", async () => {
     mount(true);
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
     expect(rail.textContent).toContain("PlaceOS");
@@ -51,9 +51,9 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     const tracks = Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent);
     // 레일 순서는 PPPP 프레임워크 순서 그대로다(2026-09-26).
     expect(tracks).toEqual(["Platform", "Page", "Posting", "Program"]);
-    // 트랙이 아닌 버튼은 둘뿐이고 맨 아래에 있다 — 「계정」(B9, 2026-09-23)과 그 바로 위 「의견 보내기」(2026-11-08).
+    // 보고서는 Program 아래, 의견 보내기·계정은 맨 아래에 있다.
     const labels = Array.from(rail.querySelectorAll("button")).map((b) => b.textContent);
-    expect(labels).toEqual([...tracks, "의견 보내기", "계정"]);
+    expect(labels).toEqual([...tracks, "상권 분석 보고서", "의견 보내기", "계정"]);
     expect(screen.queryByRole("button", { name: "서울" })).toBeNull();
     expect(screen.queryByRole("button", { name: "거점" })).toBeNull();
     // 레일 맨 위와 첫 화면은 같은 트랙이다(2026-09-26) — 어긋나면 여기가 운다.
@@ -159,10 +159,10 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     // 계산 결과는 「자리와 비용 조건」 화면 바로 아래에 나온다(2026-11-07 — 별도 「계산 결과」 탭 없음)
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 
-    // 2026-11-07 리뉴얼 — 인계는 그 버튼이 약속한 「가설 검증」부터 연다. 캠페인 폼은 「오프라인 마케팅 솔루션」에 있고
+    // 2026-11-07 리뉴얼 — 인계는 그 버튼이 약속한 「가설 설정」부터 연다. 캠페인 폼은 「오프라인 마케팅 솔루션」에 있고
     // 같은 인계를 받아 업종을 채운다(탭을 옮겨도 인계가 사라지지 않는다).
     const program = await screen.findByRole("navigation", { name: "Program 네 기능" }, TAB_LOAD);
-    expect(within(program).getByRole("button", { name: "가설 검증" }).getAttribute("aria-current")).toBe("page");
+    expect(within(program).getByRole("button", { name: "가설 설정" }).getAttribute("aria-current")).toBe("page");
     expect(api.count(/program\/campaigns$/)).toBe(0);   // 원장은 그 탭을 열 때 부른다
     fireEvent.click(within(program).getByRole("button", { name: "오프라인 마케팅 솔루션" }));
     await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);

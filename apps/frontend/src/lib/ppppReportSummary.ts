@@ -8,7 +8,7 @@ export function summarizePpppReport(data: PpppReportData) {
     { name: "Platform", recorded: !!data.platform?.source || !!data.platform?.recommendations.length, result: data.platform ? `${data.platform.districtName} · ${data.platform.industry ?? "업종 미선택"} · ${data.platform.archetype ?? "유형 근거 미제공"}` : "상권 검토 기록 없음" },
     { name: "Page", recorded: !!data.page, result: data.page ? `${data.page.name} · ${data.page.status}` : "자리 검토 기록 없음" },
     { name: "Posting", recorded: costReady, result: data.posting ? `${data.posting.unitName} · ${costReady ? "조건부 비용 계산 있음" : "계산 미완료"}` : "비용 검토 기록 없음" },
-    { name: "Program", recorded: !!data.program?.plan || !!data.campaign, result: data.campaign ? `캠페인 ${data.campaign.summary.completed_runs}회 완료 · 독립 검증 ${data.campaign.summary.independently_verified ? "완료" : "전"}` : data.program?.plan ? `${data.program.item} · 검증 계획 작성 · 실행 성과 미입력` : data.program ? "검증 입력 작성 · 계획 생성 미완료" : "검증 계획·실행 기록 없음" },
+    { name: "Program", recorded: !!data.program?.plan || !!data.campaign, result: data.campaign ? `캠페인 ${data.campaign.summary.completed_runs}회 완료 · 독립 검증 ${data.campaign.summary.independently_verified ? "완료" : "전"}` : data.program?.plan ? `${data.program.item} · 검증 계획 작성 · 실행 성과 미입력` : data.program?.item.trim() || data.program?.hypothesis.trim() ? "가설 작성 · 검증 계획 생성 미완료" : "가설·검증 계획·실행 기록 미작성" },
   ];
   const issues = stages.filter(stage => !stage.recorded).map(stage => `${stage.name}: ${stage.result}`);
   if (data.page && data.posting?.buildingId && data.page.buildingId !== data.posting.buildingId) issues.push("Page에서 마지막으로 본 건물과 Posting 계산 건물이 다릅니다. 최종 후보를 확인하고 다시 계산하세요.");

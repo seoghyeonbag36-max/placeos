@@ -1,5 +1,6 @@
 import VisitorFeedback, { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
 import PpppReportProvider from "@/components/PpppReportProvider";
+import AnalysisReportDialog from "@/components/AnalysisReportDialog";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -152,6 +153,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const [view, updateView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
   // 입력 초안은 이번 작업 동안만 보관한다. 지도 표식은 비활성 트랙과 함께 해제한다.
   const [postingDrafts] = useState(() => new Map<string, PostingDraft>());
+  const [reportOpen, setReportOpen] = useState(false);
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
   // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
@@ -221,9 +223,11 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   }, [setView]);
   // Posting → Program: 인계마다 requestId 를 올려 Program 을 새로 마운트한다(초기값으로만 채운다).
   const makeProgram = useCallback((handoff: ProgramHandoff) => {
+    setDistrictId(handoff.districtId);
+    setReportHandoff(handoff);
     setProgramHandoff((prev) => ({ ...handoff, requestId: (prev?.requestId ?? 0) + 1 }));
-    setView("program", postingSelection);
-  }, [setView, postingSelection]);
+    setView("program", handoff);
+  }, [setView, setDistrictId]);
   // 「비우기」 등으로 안내를 걷으면 표시만 끈다. key(requestId)는 그대로 둬 지금 화면을 다시 마운트하지 않는다.
   const dismissArrival = useCallback(() => {
     setProgramHandoff((h) => (h && !h.dismissed ? { ...h, dismissed: true } : h));
@@ -410,6 +414,10 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <span>{n.label}</span>
           </button>
         ))}
+        <button type="button" className="rail-btn rail-report" aria-haspopup="dialog" onClick={() => setReportOpen(true)}>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
+          <span>상권 분석 보고서</span>
+        </button>
         {/* 2026-11-08: 의견 보내기를 오른쪽 아래 떠 있는 버튼에서 레일로 옮겼다 — 지도·패널 글을 가리던 자리다.
             「계정」 바로 위(= 도움·의견은 내비게이션 맨 아래, 의견이 그 위)에 두고, 의견창(VisitorFeedback)은
             OPEN_VISITOR_FEEDBACK 로 같은 창을 연다. 누른 버튼을 실어 보내 닫을 때 초점이 이 버튼으로 돌아온다. */}
@@ -430,6 +438,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           갈아끼운다 — 그래야 사용자가 맞춰 둔 중심·줌이 탭 왕복에도 남는다. */}
       <MapHost active>
         <PpppReportProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
+        {reportOpen && <AnalysisReportDialog districtId={districtId} handoff={reportHandoff} onClose={() => setReportOpen(false)} />}
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
             <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" />}

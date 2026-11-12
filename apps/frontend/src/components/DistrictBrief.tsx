@@ -14,7 +14,7 @@ interface Loaded { id: string; industries: DistrictIndustries | null; rent: Rent
 
 function Tile({ label, value, evidence, foot }: { label: string; value: ReactNode; evidence: Evidence; foot?: ReactNode }) {
   return <div className="brief-tile">
-    <div className="brief-tile-l">{label} <EvidenceBadge kind={evidence} /></div>
+    <div className="brief-tile-l"><span>{label}</span><EvidenceBadge kind={evidence} /></div>
     <div className="brief-tile-v">{value}</div>
     {foot && <div className="brief-tile-f">{foot}</div>}
   </div>;

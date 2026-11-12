@@ -218,7 +218,7 @@
 .platconsole .hznote b{color:var(--sub)}
 
 /* 검증 근거 — 값 옆에 한계를 같이 싣는 블록 */
-.platconsole .evid,.platconsole .anchor{margin-top:var(--sp-3);padding-top:10px;border-top:1px dashed var(--line)}
+.platconsole .anchor{margin-top:var(--sp-3);padding-top:10px;border-top:1px dashed var(--line)}
 .platconsole .anchor{background:#f4faf7;border:1px solid #d7ece2;border-radius:9px;padding:10px 11px;margin-top:var(--sp-3)}
 .platconsole .evidh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:6px}
 .platconsole .row{display:flex;justify-content:space-between;gap:10px;font-size: var(--fs-caption);margin-top:5px}

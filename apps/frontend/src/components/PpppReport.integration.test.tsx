@@ -45,8 +45,8 @@ it("단계를 떠난 뒤에도 네 단계 결과·입력·판정 조건을 같�
   const districtReport = vi.spyOn(api, "getDistrictReport");
   render(<PpppReportProvider districtId="test"><Steps /></PpppReportProvider>);
   for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole("button", { name: "다음 단계" }));
-  fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
-  const report = screen.getByRole("article", { name: "PPPP 보고서 미리보기" });
+  fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
+  const report = screen.getByRole("article", { name: "상권 분석 보고서 미리보기" });
   for (const value of ["검토한 상권", "유형 판정 근거", "상권 단계 후보", "검토한 건물", "답사 후 출입구 확인", "test-ledger", "계산한 2층 자리", "8,000만원", "주말 방문 구매 가설", "작성한 모객 실행안", "목표 미달이면 가설 재검토", "실행한 캠페인", "rule-stub"]) {
     expect(report.textContent).toContain(value);
   }
@@ -62,8 +62,8 @@ it("단계를 떠난 뒤에도 네 단계 결과·입력·판정 조건을 같�
 it("미진행 단계와 상권을 바꾼 작업에 이전 결과를 채워 넣지 않는다", () => {
   const view = render(<PpppReportProvider key="a" districtId="test"><Steps /></PpppReportProvider>);
   view.rerender(<PpppReportProvider key="b" districtId="other"><PpppReport districtId="other" /></PpppReportProvider>);
-  fireEvent.click(screen.getByRole("button", { name: "PPPP 결과 보고서 만들기" }));
-  const report = screen.getByRole("article", { name: "PPPP 보고서 미리보기" });
+  fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
+  const report = screen.getByRole("article", { name: "상권 분석 보고서 미리보기" });
   expect(report.textContent).not.toContain("검토한 상권");
   expect(report.textContent).toContain("Platform: 상권 검토 기록 없음");
   expect(report.textContent).toContain("Page: 자리 검토 기록 없음");

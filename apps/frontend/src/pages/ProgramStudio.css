@@ -208,3 +208,9 @@
 .progstudio .draft-channel-group h3 span{flex-shrink:0}
 .progstudio .draft-channel{min-height:6em}
 @media(max-width:420px){.progstudio .draft-channels{grid-template-columns:1fr}}
+
+.hypothesis-evidence { padding: var(--sp-4); margin: var(--sp-4) 0; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.hypothesis-evidence h2 { font-size: var(--fs-heading); margin: 0 0 var(--sp-3); }
+.hypothesis-evidence dt { font-weight: var(--fw-semibold); }
+.hypothesis-evidence dd { margin: 0 0 var(--sp-3); overflow-wrap: anywhere; }
+.hypothesis-evidence p { color: var(--muted); line-height: var(--lh-body); }

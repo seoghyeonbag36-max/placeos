@@ -7,25 +7,21 @@ import NetworkingPanel from "@/components/program/NetworkingPanel";
 import SupportPrograms from "@/components/program/SupportPrograms";
 import { stageForGoal } from "@/lib/api";
 import type { BusinessGoal } from "@/lib/businessProfile";
+import { usePpppReport } from "@/lib/ppppReportContext";
+import SavedResults from "@/components/SavedResults";
+import { savedPostingHandoff } from "@/lib/savedPosting";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import "./CampaignStudio.css";
 import "@/components/program/ProgramHub.css";
 
 const ValidationStudio = lazy(() => import("@/pages/ProgramStudio"));
 const EventLinkPlanner = lazy(() => import("@/components/EventLinkPlanner"));
-const PpppReport = lazy(() => import("@/components/PpppReport"));
+
 
 type Tab = "network" | "support" | "marketing" | "hypothesis";
 
-/** Program 허브 — 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증(2026-11-07 리뉴얼).
- *
- *  ⛔ PPPP 화면 보존 규칙: Program 트랙의 구현 모듈은 계속 이 파일(pages/CampaignStudio)이다 — 가드
- *  src/ppppScreens.test.tsx 가 App 이 Program 레일에서 이 모듈을 그리는지 본다. 리뉴얼은 화면을 갈아끼우지
- *  않고 안을 바꿨다: 예전 네 장(캠페인 운영 · 검증 계획 · 온·오프라인 행사 연계 · 검증 리포트)은 지우지 않고
- *  새 기능 아래로 옮겼다 → 오프라인 마케팅 솔루션(실행 카드 + 행사 연계 계획 + 실행 기록=캠페인 원장),
- *  가설 검증(검증 계획 + 결과 리포트). 네 탭 모두 로그인 없이 열람한다 — 저장·LLM 생성만 로그인을 요구한다.
- *  → docs/renewal-program-2026-11-07.md · docs/feature-program.md §0-W
- */
+/** Program은 앞선 세 단계의 근거로 가설을 세운 뒤 지원·네트워킹·마케팅을 준비한다.
+ * PPPP 네 구현 화면은 유지하고 종합 보고서는 왼쪽 전용 메뉴에서 연다. */
 export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory, onArrivalDismiss, businessGoal,
   industryKey, industryLabel, reportHandoff }: {
   handoff?: ProgramHandoff; mapDistrictId?: string | null; defaultCategory?: string;
@@ -37,10 +33,13 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
   /** Posting 이 넘긴 최신 계산(결과 리포트용) */
   reportHandoff?: ProgramHandoff;
 } = {}) {
-  // Posting 「이 자리로 검증 program 만들기」로 오면 가설 검증부터 연다 — 그 버튼이 약속한 화면이다.
-  const [tab, setTab] = useState<Tab>(handoff ? "hypothesis" : "network");
+  // 직접 진입과 Posting 인계 모두 가설 설정부터 시작한다.
+  const [tab, setTab] = useState<Tab>("hypothesis");
   const inSlots = useMapLayout() !== null;
   const districtId = mapDistrictId ?? handoff?.districtId ?? null;
+  const workspace = usePpppReport();
+  const [imported, setImported] = useState<{ handoff: ProgramHandoff; id: string }>();
+  const linkedPosting = [imported?.handoff, reportHandoff, handoff, workspace.posting].find(value => value?.districtId === districtId);
   const stage = stageForGoal(businessGoal);
   const needDistrict = (body: ReactNode) => districtId ? body
     : <p className="program-note">지도에서 상권을 먼저 고르면 이 상권 기준으로 보여 드려요.</p>;
@@ -61,26 +60,27 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
       content: <>
         {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
         {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
-        <CampaignLedger handoff={handoff} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
+        <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
           onArrivalDismiss={onArrivalDismiss} businessGoal={businessGoal} />
       </> },
-    { id: "hypothesis", label: "가설 검증",
-      description: "위 셋으로 무엇을 시험하고, 시작 전에 고정한 기준(목표선 = Posting 손익분기)으로 계속·보류·중단을 가른다.",
+    { id: "hypothesis", label: "가설 설정",
+      description: "Platform의 상권 근거, Page의 후보 자리, Posting의 비용 조건을 바탕으로 창업 아이템·목표 고객·확인할 가설을 정합니다.",
       content: <Suspense fallback={fallback}>
-        <ValidationStudio mapDistrictId={mapDistrictId ?? undefined} handoff={handoff} onArrivalDismiss={onArrivalDismiss}
+        {districtId && <SavedResults key={districtId} kind="posting" districtId={districtId} refreshKey={0} render={item => {
+          const saved = savedPostingHandoff(item);
+          return saved ? <button type="button" onClick={() => setImported({ handoff: saved, id: item.id })}>이 저장 내용으로 가설 설정</button>
+            : <p>이전 저장 결과에는 자리 연결 정보가 없습니다. Posting에서 자리를 선택하고 다시 저장해 주세요.</p>;
+        }} />}
+        <ValidationStudio key={`${districtId}:${linkedPosting?.unitId ?? "none"}:${imported?.id ?? "current"}`} mapDistrictId={districtId ?? undefined}
+          handoff={linkedPosting} onArrivalDismiss={onArrivalDismiss}
           defaultCategory={defaultCategory} businessGoal={businessGoal} />
-        <section className="program-panel" aria-label="결과 리포트">
-          <PpppReport key={districtId ?? "none"} districtId={districtId ?? undefined}
-            handoff={reportHandoff?.districtId === districtId ? reportHandoff
-              : handoff?.districtId === districtId ? handoff : undefined} />
-        </section>
       </Suspense> },
-  ];
+  ].sort((a, b) => ["hypothesis", "support", "network", "marketing"].indexOf(a.id) - ["hypothesis", "support", "network", "marketing"].indexOf(b.id));
 
   const intro = (title: ReactNode) => <header>
     <p className="campaign-eyebrow">Promotion ▶ Program</p>
     {title}
-    <p>이 상권에서 <b>누구와 연결하고, 무엇을 지원받고, 어떻게 알리며</b>, 그 결과로 아이템이 <b>통하는지 어떤 기준으로 판정</b>할 것인가?</p>
+    <p>앞선 세 단계의 근거로 <b>창업 아이템의 가설을 설정</b>하고, 지원 프로그램·네트워킹·오프라인 마케팅으로 확인해 보세요.</p>
   </header>;
   // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
   // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.
