@@ -78,26 +78,6 @@ const QUICK_STEPS = [
   { title: "빈 층 보기", body: "건물을 선택해 층별 공실과 확인 상태를 살펴봅니다." },
 ];
 
-const FAQ: { q: string; a: JSX.Element | string }[] = [
-  {
-    q: "비용이 드나요?",
-    a: "지금은 시범 운영 중이라 결제 없이 쓸 수 있습니다. 요금은 아직 정해지지 않았고, 정해지기 전에는 결제를 요구하지 않습니다.",
-  },
-  {
-    q: "가입하면 무엇을 받나요?",
-    a: <>이메일 주소 하나로 시작합니다. 직접 적은 사업 정보는 본인 계정에서만 보이고, 계정 화면에서 탈퇴하면 바로 지웁니다.
-      자세한 내용은 <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>에 있습니다.</>,
-  },
-  {
-    q: "데이터는 어디서 오나요?",
-    a: "건축물대장(국토교통부 건축HUB), 상가 정보(소상공인시장진흥공단), 한국부동산원 R-ONE, 서울시 상권·생활인구 같은 공공데이터입니다. 지도는 네이버 지도를 씁니다.",
-  },
-  {
-    q: "영업 중인 가게의 마케팅도 도와주나요?",
-    a: "아닙니다. Program 은 팝업스토어·가오픈·시험 판매로 아이템이 통하는지 확인하려는 분을 위한 기능입니다. 이미 영업 중인 가게의 홍보는 다루지 않습니다.",
-  },
-];
-
 export default function Landing() {
   return (
     <div className="lp">
@@ -107,7 +87,8 @@ export default function Landing() {
             <span className="lp-logo-mark" aria-hidden>P</span>
             <span>PlaceOS</span>
           </a>
-          <nav className="lp-bar-actions" aria-label="계정">
+          <nav className="lp-bar-actions" aria-label="이용 안내 및 계정">
+            <a className="lp-textlink" href="#help">고객센터</a>
             <a className="lp-textlink" href="#login">로그인</a>
             <a className="lp-btn lp-btn-primary lp-btn-sm" href="#/start">시작하기</a>
           </nav>
@@ -143,14 +124,14 @@ export default function Landing() {
             <ul className="lp-results">
               <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
             </ul>
-            <div className="lp-quick" aria-labelledby="lp-quick-title">
-              <h2 id="lp-quick-title">주요 이용 순서</h2>
+            <details className="lp-quick lp-details">
+              <summary>주요 이용 순서 보기</summary>
               <ol className="lp-quick-steps">
                 {QUICK_STEPS.map((step) => <li key={step.title}>
                   <h3>{step.title}</h3><p>{step.body}</p>
                 </li>)}
               </ol>
-            </div>
+            </details>
             <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분을 위한 서비스입니다.</p>
           </div>
         </section>
@@ -202,20 +183,6 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-faq">
-          <div className="lp-wrap lp-narrow">
-            <h2 id="lp-faq">자주 묻는 것</h2>
-            <div className="lp-faq">
-              {FAQ.map((f) => (
-                <details key={f.q}>
-                  <summary>{f.q}</summary>
-                  <p>{f.a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="lp-final" aria-labelledby="lp-final-h">
           <div className="lp-wrap">
             <h2 id="lp-final-h">내 업종으로 상권을 먼저 읽어 보세요.</h2>
@@ -233,6 +200,7 @@ export default function Landing() {
           <p>
             <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>
             {" "}
+            <a href="#help">자주 묻는 것 · 고객센터</a>
             <a href="mailto:seoghyeonbag36@gmail.com">문의</a>
           </p>
         </div>

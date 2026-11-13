@@ -11,13 +11,15 @@
  *   - 금지 표현(AI 기반 · 혁신적인 · 원스톱 · 올인원 · 차세대 · 최적의 · 완벽한)
  *   - CTA 가 가입·로그인 해시로 가지 않는 것, 처리방침 링크가 빠지는 것
  */
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import Landing from "@/pages/Landing";
+import Help from "@/pages/Help";
 import { LANDING_HUBS, LANDING_REGION } from "@/lib/landingFacts";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 
 const text = () => document.body.textContent ?? "";
+beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); });
 
 describe("랜딩 — 말하는 것", () => {
   it("첫 화면에서 무엇을 하는 서비스인지와 시작하는 길을 말한다", () => {
@@ -48,7 +50,7 @@ describe("랜딩 — 말하는 것", () => {
   });
 
   it("영업 중인 가게 마케팅이 아니라는 것을 분명히 한다(Program 의 대상 — 2026-09-17)", () => {
-    render(<Landing />);
+    render(<Help />);
     expect(text()).toContain("이미 영업 중인 가게의 홍보는 다루지 않습니다");
   });
 });
@@ -76,7 +78,7 @@ describe("랜딩 — 말하지 않는 것", () => {
   });
 
   it("요금을 확정해 말하지 않는다 — 시범 운영 중 결제 없음까지만", () => {
-    render(<Landing />);
+    render(<Help />);
     expect(text()).not.toMatch(/원\/월|월\s*\d|무료 체험|평생 무료/);
     expect(text()).toContain("정해지기 전에는 결제를 요구하지 않습니다");
   });
