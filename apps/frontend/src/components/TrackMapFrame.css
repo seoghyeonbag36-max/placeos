@@ -118,7 +118,8 @@
   .mh-head .explore-step-header .explore-step-count { grid-area: count; margin: 0 0 2px; }
   .mh-head .explore-step-header ol { grid-area: steps; margin: 0; }
   .mh-head .explore-step-header h1 { grid-area: title; margin: 0; font-size: var(--fs-heading, 20px); }
-  .mh-head .explore-step-header > p:last-child { grid-area: desc; }
+  .mh-head .explore-step-header > .explore-step-description { grid-area: desc; }
+  .mh-head .explore-step-connection { grid-column: 1 / -1; }
   /* 패널 안 1단 접기 규칙은 칸에서도 같다 — 오른쪽 칸 폭은 380~560px 다(위 .trackmap-panel 규칙이 그대로 걸린다) */
 }
 

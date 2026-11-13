@@ -188,6 +188,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       window.history.pushState(null, "", `#${path}`);
     }
   }, [pageWorkspace.districtId, pageWorkspace.selectedId, postingSelection]);
+  const navigateStep = (track: ExploreTrack) => setView(TRACK_VIEW[track]);
   const reviewBuilding = (selection: BuildingSelection) => {
     setPostingSelection((previous) => previous?.districtId === selection.districtId
       && previous.buildingId === selection.buildingId && previous.unitId === selection.unitId
@@ -441,7 +442,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
         {reportOpen && <AnalysisReportDialog districtId={districtId} handoff={reportHandoff} onClose={() => setReportOpen(false)} />}
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
-            <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" />}
+            <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" onNavigate={navigateStep} />}
               footer={<ExploreStepFooter onNext={() => setView("map")} nextLabel="이 상권에서 빈 자리 찾기" />}>
               <PlatformConsole guided districtId={districtId} onDistrictChange={setDistrictId} onOpenInPage={openInPage}
                 business={profile} industries={Array.isArray(industries) ? industries : null}
@@ -449,9 +450,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             </TrackMapFrame>
           )}
           {view === "map" && <MapShell workspace={pageWorkspace} onWorkspaceChange={changePageWorkspace} onReview={reviewBuilding}
-            myIndustry={myIndustry} stepHeader={<ExploreStepHeader track="page" />} onPreviousStep={() => setView("platform")} />}
+            myIndustry={myIndustry} stepHeader={<ExploreStepHeader track="page" onNavigate={navigateStep} />} onPreviousStep={() => setView("platform")} />}
           {view === "posting" && (
-            <TrackMapFrame track="posting" label="입점 계산" header={<ExploreStepHeader track="posting" />}
+            <TrackMapFrame track="posting" label="입점 계산" header={<ExploreStepHeader track="posting" onNavigate={navigateStep} />}
               footer={<ExploreStepFooter onPrevious={() => setView("map")} />}>
               {customIndustry ? <div className="fitcard"><h2>{customIndustry} · 입점 비용 검토</h2>
                 <p>이 업종의 매출·순익·회수기간 자동 계산은 미지원입니다. ‘입점 준비’에서 직접 확인한 계약 금액을 비교하세요.</p>
@@ -466,7 +467,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           {/* 패널 이름표는 「오프라인 캠페인」 그대로다 — 사용자 결정(2026-11-08: 「오프라인 캠페인은 오프라인 캠페인으로」).
               실화면 검사(scripts/pppp_screens_check.py P2)가 Program 화면을 이 이름으로 찾는다 → docs/feature-program.md §0-W */}
           {view === "program" && (
-            <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" />}
+            <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" onNavigate={navigateStep} />}
               footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
               <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
