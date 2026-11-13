@@ -66,6 +66,40 @@ function rowValue(region: HTMLElement, name: string) {
   return within(region).getByRole("row", { name: new RegExp(`^${name}`) });
 }
 
+describe("PlatformConsole — 선택한 상권 집중", () => {
+  it("전체 상권 지도와 접근성 탭을 제거하고 선택한 T유형의 출처를 표시한다", async () => {
+    // 테스트용 합성 라벨이다. 실제 분류는 outlines API에서만 받는다.
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil")] },
+      { match: /\/commercial-districts\/outlines$/, body: { note: "테스트 분류 출처", hubs: [
+        { id: "garosugil", rings: [], holes: [], type_code: "T3", type_name: "테스트 유형", type_is_manual: true },
+      ] } },
+    ]);
+    const { container } = render(<PlatformConsole guided />);
+    const region = await screen.findByRole("region", { name: "선택한 상권 유형" });
+    await within(region).findByText("T3 · 테스트 유형");
+    expect(within(region).getByText("사람이 붙인 분류")).toBeTruthy();
+    expect(container.querySelector(".platform-side")).toBeNull();
+    expect(screen.queryByRole("button", { name: "접근성과 주변 가게" })).toBeNull();
+  });
+
+  it("유형이 없는 상권을 바꿔도 이전 상권의 T유형으로 채우지 않는다", async () => {
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil"), district("yeonnam")] },
+      { match: /\/commercial-districts\/outlines$/, body: { note: null, hubs: [
+        { id: "garosugil", rings: [], holes: [], type_code: "T3", type_name: "테스트 유형", type_is_manual: false },
+      ] } },
+    ]);
+    const change = vi.fn();
+    const { rerender } = render(<PlatformConsole districtId="garosugil" onDistrictChange={change} />);
+    await screen.findByText("T3 · 테스트 유형");
+    rerender(<PlatformConsole districtId="yeonnam" onDistrictChange={change} />);
+    const region = screen.getByRole("region", { name: "선택한 상권 유형" });
+    expect(within(region).getByText("이 상권의 유형 라벨이 없습니다.")).toBeTruthy();
+    expect(within(region).queryByText(/T3/)).toBeNull();
+  });
+});
+
 describe("PlatformConsole — 동일 상권 후보 비교", () => {
   it("고객 요약에서 내부 출처와 모델 지표를 생략하고 실측·합성 구분을 유지한다", async () => {
     mount();
