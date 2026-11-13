@@ -75,6 +75,21 @@ function deferred<T = ProgramPlan>() {
 }
 
 describe("ProgramStudio — 검증 브리프", () => {
+  it("가설 설정 안에서 가설·검증 설계·실행 준비를 순서대로 제공한다", () => {
+    mount();
+    const steps = screen.getAllByRole("group").filter(el => el.tagName === "FIELDSET");
+    expect(steps.map(el => el.querySelector("legend")?.textContent)).toEqual([
+      "1. 가설 설정", "2. 검증 설계", "3. 실행 준비",
+    ]);
+    expect(within(steps[0]).getByRole("textbox", { name: "검증 가설" })).toBeTruthy();
+    expect(within(steps[0]).getByPlaceholderText("예: 20~30대 직장인")).toBeTruthy();
+    expect(within(steps[1]).getByRole("radiogroup", { name: "검증 방식" })).toBeTruthy();
+    expect(within(steps[1]).getByLabelText("검증 기간(일)")).toBeTruthy();
+    expect(within(steps[1]).getByRole("group", { name: "판정 기준" })).toBeTruthy();
+    expect(within(steps[2]).getByLabelText("예산 하한(원)")).toBeTruthy();
+    expect(within(steps[2]).getByPlaceholderText("예: 서울 강남구 신사동 …")).toBeTruthy();
+  });
+
   it.each([
     ["팝업스토어", "popup"], ["가오픈", "soft_open"], ["MVP 테스트", "mvp"], ["실제 창업", "actual_open"],
   ] as const)("예시 채우기는 선택한 기창업자·%s·업종·상권을 보존해 생성 요청에 보낸다", async (label, mode: ValidationMode) => {

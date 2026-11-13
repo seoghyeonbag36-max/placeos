@@ -324,6 +324,9 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
           </div>
           <p>예시 채우기는 선택한 단계·검증 방식·업종·상권을 유지합니다. 예시 문구·기간·예산은 가상 입력이며 실측·평균값이 아닙니다. 직접 작성한 내용은 보존합니다.</p>
 
+          <fieldset className="prelaunch-step">
+          <legend>1. 가설 설정</legend>
+          <p>누구에게 무엇을 제안하고, 어떤 반응을 확인할지 정하세요.</p>
           <Field label="단계" required group>
             <div className="seg" role="radiogroup" aria-label="단계">
               {(["pre_founder", "founder"] as FounderStage[]).map((s) => (
@@ -331,18 +334,6 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
                   className={form.stage === s ? "on" : ""} onClick={() => changeField("stage", s)}>
                   {STAGE_LABEL[s]}
                   <small>{s === "pre_founder" ? "아직 가게가 없다" : "사업 중 · 새 상권·아이템 확인"}</small>
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="검증 방식" required group
-            hint="방식마다 기간 안에 잴 수 있는 것이 다르다 — 팝업은 유입, 가오픈은 객단가·회전, MVP 는 사전 수요. 지표도 이에 맞춰 나온다.">
-            <div className="seg seg4" role="radiogroup" aria-label="검증 방식">
-              {VALIDATION_MODES.map((m) => (
-                <button key={m.key} type="button" role="radio" aria-checked={form.mode === m.key}
-                  className={form.mode === m.key ? "on" : ""} onClick={() => changeField("mode", m.key)} title={m.hint}>
-                  {m.label}
                 </button>
               ))}
             </div>
@@ -382,13 +373,30 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
               placeholder="예: 가로수길 20~30대에게 산미 강한 원두가 통한다" />
           </Field>
 
-          {/* 선택 조건 — 넣을수록 근거가 구체적이다. 요약줄이 무엇이 채워졌는지 말하므로 접힌 채로도 빈 칸을 안다. */}
-          <Fold title="검증 조건"
-            summary={`목표 고객 ${form.targetCustomer.trim() ? "입력됨" : "없음"} · 기간 ${runDays ? `${runDays}일` : "미정"}`
-              + ` · 예산 ${budgetMin && budgetMax ? "구간 입력됨" : "없음"} · 차별점 ${differentiators.length}개`}>
             <Field label="목표 고객">
               <input value={form.targetCustomer} onChange={(e) => changeField("targetCustomer", e.target.value)} placeholder="예: 20~30대 직장인" />
             </Field>
+            <Field label="차별점" hint="창업자의 주장입니다. 검증으로 확인할 차별점을 한 줄에 하나씩 적으세요."
+              count={differentiators.length ? `${differentiators.length}개` : undefined}>
+              <textarea rows={3} aria-label="차별점" value={form.differentiatorsText} onChange={(e) => changeField("differentiatorsText", e.target.value)}
+                placeholder={"주간 단위 원두 교체\n로스팅 당일 추출"} />
+            </Field>
+          </fieldset>
+
+          <fieldset className="prelaunch-step">
+          <legend>2. 검증 설계</legend>
+          <p>창업 전에 시험할 방식과 기간을 정하세요. 생성할 계획에서 측정 방법·목표선·기각 조건을 확인합니다.</p>
+          <Field label="검증 방식" required group
+            hint="방식마다 확인할 반응이 다릅니다. 팝업은 유입, 가오픈은 객단가·회전, MVP는 사전 수요를 중심으로 계획합니다.">
+            <div className="seg seg4" role="radiogroup" aria-label="검증 방식">
+              {VALIDATION_MODES.map((m) => (
+                <button key={m.key} type="button" role="radio" aria-checked={form.mode === m.key}
+                  className={form.mode === m.key ? "on" : ""} onClick={() => changeField("mode", m.key)} title={m.hint}>
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </Field>
             <div className="row2">
               <Field label="시작 예정일">
                 <input type="date" aria-label="시작 예정일" value={form.startDate} onChange={(e) => changeField("startDate", e.target.value)} />
@@ -397,24 +405,6 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
                 <input inputMode="numeric" aria-label="검증 기간(일)" value={form.runDays} onChange={(e) => changeField("runDays", e.target.value)} placeholder="예: 10" />
               </Field>
             </div>
-            <div className="row2">
-              <Field label="예산 하한(원)" hint="검증 기간 마케팅 예산의 구간. 생성물은 비율로만 배분하고 절대액은 이 구간에서만 나온다.">
-                <input inputMode="numeric" aria-label="예산 하한(원)" value={form.budgetMin} onChange={(e) => changeField("budgetMin", e.target.value)} placeholder="예: 300000" />
-              </Field>
-              <Field label="예산 상한(원)">
-                <input inputMode="numeric" aria-label="예산 상한(원)" value={form.budgetMax} onChange={(e) => changeField("budgetMax", e.target.value)} placeholder="예: 800000" />
-              </Field>
-            </div>
-            {halfBudget && <div className="warn">예산은 하한·상한을 함께 넣거나 둘 다 비운다 — 한쪽만으로는 구간이 아니다.</div>}
-            <Field label="차별점" hint="한 줄에 하나. 창업자의 주장이지 확인된 사실이 아니다 — 이게 통하는지가 검증 대상이다."
-              count={differentiators.length ? `${differentiators.length}개` : undefined}>
-              <textarea rows={3} aria-label="차별점" value={form.differentiatorsText} onChange={(e) => changeField("differentiatorsText", e.target.value)}
-                placeholder={"주간 단위 원두 교체\n로스팅 당일 추출"} />
-            </Field>
-            <Field label="자리 주소">
-              <input value={form.address} onChange={(e) => changeField("address", e.target.value)} placeholder="예: 서울 강남구 신사동 …" />
-            </Field>
-          </Fold>
 
           {/* 판정 기준 — 목표선은 Posting 손익분기에서만, 기각선은 창업자가 시작 전에 고른다(2026-11-07 리뉴얼) */}
           <div className="be-target" role="group" aria-label="판정 기준">
@@ -428,6 +418,25 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
             </> : <p className="muted">목표선은 지어내지 않습니다 — Posting에서 세부 업종 운영 계산(단가·영업일·비용)을 하고
               「이 자리로 검증 program 만들기」로 오면 하루 손익분기 건수가 목표선이 됩니다.</p>}
           </div>
+          </fieldset>
+
+          <fieldset className="prelaunch-step">
+          <legend>3. 실행 준비</legend>
+          <p>시험할 장소와 사용할 예산을 준비하세요. 계획을 만든 뒤 오프라인 마케팅 솔루션·네트워킹·지원 프로그램에서 실행에 필요한 조건을 살펴볼 수 있습니다.</p>
+            <Field label="자리 주소">
+              <input value={form.address} onChange={(e) => changeField("address", e.target.value)} placeholder="예: 서울 강남구 신사동 …" />
+            </Field>
+            <div className="row2">
+              <Field label="예산 하한(원)" hint="검증 기간에 사용할 마케팅 예산입니다. 창업자의 입력이며 예상 매출이 아닙니다.">
+                <input inputMode="numeric" aria-label="예산 하한(원)" value={form.budgetMin} onChange={(e) => changeField("budgetMin", e.target.value)} placeholder="예: 300000" />
+              </Field>
+              <Field label="예산 상한(원)">
+                <input inputMode="numeric" aria-label="예산 상한(원)" value={form.budgetMax} onChange={(e) => changeField("budgetMax", e.target.value)} placeholder="예: 800000" />
+              </Field>
+            </div>
+            {halfBudget && <div className="warn">예산은 하한·상한을 함께 넣거나 둘 다 비운다 — 한쪽만으로는 구간이 아니다.</div>}
+            <p className="muted">생성된 계획의 모집 방법·협의 대상·측정 방법을 검토하고, 장소 사용과 협력 가능 여부는 직접 확인하세요.</p>
+          </fieldset>
 
           <Button type="submit" className="primary" disabled={!canSubmit}>
             {busy ? `생성 중… ${elapsed}초` : "검증 program 생성"}

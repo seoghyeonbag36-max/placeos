@@ -64,7 +64,7 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
           onArrivalDismiss={onArrivalDismiss} businessGoal={businessGoal} />
       </> },
     { id: "hypothesis", label: "가설 설정",
-      description: "Platform의 상권 근거, Page의 후보 자리, Posting의 비용 조건을 바탕으로 창업 아이템·목표 고객·확인할 가설을 정합니다.",
+      description: "창업 전에 앞선 세 단계의 근거로 가설을 세우고, 검증 방법·판정 기준과 실행 준비까지 설계합니다.",
       content: <Suspense fallback={fallback}>
         {districtId && <SavedResults key={districtId} kind="posting" districtId={districtId} refreshKey={0} render={item => {
           const saved = savedPostingHandoff(item);
@@ -75,12 +75,12 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
           handoff={linkedPosting} onArrivalDismiss={onArrivalDismiss}
           defaultCategory={defaultCategory} businessGoal={businessGoal} />
       </Suspense> },
-  ].sort((a, b) => ["hypothesis", "support", "network", "marketing"].indexOf(a.id) - ["hypothesis", "support", "network", "marketing"].indexOf(b.id));
+  ].sort((a, b) => ["hypothesis", "marketing", "network", "support"].indexOf(a.id) - ["hypothesis", "marketing", "network", "support"].indexOf(b.id));
 
   const intro = (title: ReactNode) => <header>
     <p className="campaign-eyebrow">Promotion ▶ Program</p>
     {title}
-    <p>앞선 세 단계의 근거로 <b>창업 아이템의 가설을 설정</b>하고, 지원 프로그램·네트워킹·오프라인 마케팅으로 확인해 보세요.</p>
+    <p>창업 전에 <b>가설 설정 → 검증 설계 → 실행 준비</b>를 마치고, 오프라인 마케팅·네트워킹·지원 프로그램을 살펴보세요.</p>
   </header>;
   // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
   // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.

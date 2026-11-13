@@ -1,4 +1,4 @@
-/** Program 허브(2026-11-07 리뉴얼) — 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 설정.
+/** Program 허브 — 가설 설정 · 오프라인 마케팅 솔루션 · 네트워킹 · 지원 프로그램.
  *
  *  못 박는 것: 네 탭이 이 순서로 로그인 없이 열린다 · Posting 인계로 오면 가설 설정부터 · 원천이 비면 왜 비었는지
  *  보인다 · 연락처 입력 칸이 없다 · 실행 카드마다 측정이 있다 · 전국 행사("public-open-data")가 실데이터로 보인다
@@ -81,7 +81,7 @@ const tabs = () => within(screen.getByRole("navigation", { name: "Program 네 �
 describe("Program 허브 — 네 기능", () => {
   it("네 탭이 PPPP 리뉴얼 순서로 있고, 로그인 없이 가설 설정이 먼저 열린다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" industryLabel="카페·디저트" businessGoal="start" />);
-    expect(tabs().map((b) => b.textContent)).toEqual(["가설 설정", "지원 프로그램", "네트워킹", "오프라인 마케팅 솔루션"]);
+    expect(tabs().map((b) => b.textContent)).toEqual(["가설 설정", "오프라인 마케팅 솔루션", "네트워킹", "지원 프로그램"]);
     expect(tabs()[0].getAttribute("aria-current")).toBe("page");
     expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
     fireEvent.click(tabs()[2]);
@@ -101,7 +101,7 @@ describe("Program 허브 — 네 기능", () => {
 
   it("지원 프로그램 — 원천이 비면 왜 비었는지 보이고, 담은 공고는 이 브라우저에 남는다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" businessGoal="start" industryLabel="카페·디저트" />);
-    fireEvent.click(tabs()[1]);
+    fireEvent.click(screen.getByRole("button", { name: "지원 프로그램" }));
     expect(await screen.findByText("서울 예비창업 사업화 지원", {}, LOAD)).toBeTruthy();
     const status = screen.getByRole("list", { name: "자료 원천 상태" });
     expect(status.querySelector('li[data-status="no_key"]')?.textContent).toContain("연결 전");
@@ -125,7 +125,7 @@ describe("Program 허브 — 네 기능", () => {
 
   it("오프라인 마케팅 솔루션 — 실행 카드마다 측정이 있고, 전국 행사도 실데이터로 보이며, 실행 기록이 그대로 있다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" />);
-    fireEvent.click(tabs()[3]);
+    fireEvent.click(screen.getByRole("button", { name: "오프라인 마케팅 솔루션" }));
     const cards = await screen.findByRole("region", { name: "실행 카드" }, LOAD);
     await within(cards).findByText("「골목 사진전」 방문객 연계", {}, LOAD);
     expect(within(cards).getAllByText("측정")).toHaveLength(2);

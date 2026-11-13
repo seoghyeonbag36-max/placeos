@@ -1,28 +1,23 @@
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import DistrictPicker, { CaveatNote, MeasuredValue } from "@/components/DistrictPicker";
 import PlatformComparison from "@/components/PlatformComparison";
 import DistrictCompareDialog from "@/components/DistrictCompareDialog";
 import { COMPARE_MAX } from "@/lib/districtCompare";
-import TransitAccessPanel from "@/components/TransitAccessPanel";
-import DistrictMapExplorer from "@/components/DistrictMapExplorer";
-import MapSlot from "@/components/MapSlot";
 import DistrictBrief from "@/components/DistrictBrief";
-import { distanceM } from "@/lib/districtMapModel";
-import { loadJourney, updateJourney } from "@/lib/journeyState";
+import { loadJourney } from "@/lib/journeyState";
 import Verdict, { Fold, type Ground } from "@/components/Verdict";
 import {
   getHubOutlines, getIndustryFit, getPlatformProfile, getSentiment, getSiteRanking, getVacancyHeatmap, listDistricts,
   listIndustries, predictVacancy, recommendIndustry,
 } from "@/lib/api";
 import type {
-  BenchmarkPlaces, DistrictSummary, HubOutlines, IndustryFit, IndustryOption, IndustryRecommend, OpeningSite, PlatformProfile,
+  DistrictSummary, HubOutlines, IndustryFit, IndustryOption, IndustryRecommend, OpeningSite, PlatformProfile,
   SiteRanking, VacancyForecast, Zone,
 } from "@/lib/api";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import { mapLabelHTML } from "@/design/components/mapMarkerHtml";
 import IndustryFitCard from "@/components/IndustryFitCard";
-import BenchmarkExplorer from "@/components/BenchmarkExplorer";
 import { findIndustry, workIndustryKey, type BusinessProfile } from "@/lib/businessProfile";
 import { lstmPromoted } from "@/lib/forecastSkill";
 import { colors } from "@/design/tokens/colors";
@@ -199,8 +194,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   // 창업·옮기기이고 내 업종이 서빙 모델 어휘 안이면 자리를 **내 업종 점수 순**으로 세우고 칩도 그 점수를 말한다
   // (화면설계서 3판 「자리 칩 · 자리 카드 — 내 업종이 있을 때」). 바꾸기·어휘 밖이면 2판 규칙 그대로.
   // 상권 지도에서 고른 업종이 「내 사업」보다 앞선다(이 화면 안에서 바꿔 보는 값). 저장은 이 브라우저 journey 뿐이다.
-  const [pickedIndustry, setPickedIndustry] = useState<string | null>(() => loadJourney().industryKey ?? null);
-  const pickIndustry = useCallback((key: string) => { setPickedIndustry(key); updateJourney({ industryKey: key }); }, []);
+  const [pickedIndustry] = useState<string | null>(() => loadJourney().industryKey ?? null);
   const [ownIndustries, setOwnIndustries] = useState<IndustryOption[] | null>(null);
   const industryList = industries ?? ownIndustries;
   useEffect(() => {
@@ -242,7 +236,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     return () => { live = false; };
   }, [districtId, rankKey]);
   const rankingHere = rankKey && ranking?.key === `${districtId}:${rankKey}` ? ranking.r : null;
-  const [benchmark, setBenchmark] = useState<BenchmarkPlaces | null>(null);
   const openingsHere = useMemo(() => {
     if (prof?.district_id !== districtId) return null;
     // 서버가 선택 업종 점수 순으로 세운 자리(값 없는 자리는 뒤로). 모델 밖 업종이면 점수가 없으니 원래 순서다.
@@ -278,19 +271,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
   const togglePick = () => setDistrictPicks((ids) => (ids.includes(districtId) ? ids.filter((x) => x !== districtId)
     : ids.length < COMPARE_MAX ? [...ids, districtId] : ids));
   const pickNames = districtPicks.map((id) => districts.find((d) => d.id === id)?.name ?? id);
-  // 고른 자리(없으면 맨 위 자리) — 벤치마킹 반경의 기준 · 소요시간 목적지
-  const firstSite = selectedSiteIds.map((id) => sitesHere?.find((s) => s.unit_id === id)).find(Boolean) ?? null;
-  const anchorSite = firstSite ?? sitesHere?.[0] ?? null;
-  const benchmarkAnchor = anchorSite?.lat != null && anchorSite.lng != null
-    ? { id: anchorSite.unit_id, name: anchorSite.name, lat: anchorSite.lat, lng: anchorSite.lng } : null;
-  const benchmarkHere = benchmark?.district_id === districtId && benchmark.places.length ? benchmark : null;
-  const matchRadius = openingsHere?.match_radius_m ?? null;
-  const benchmarkNearby = useMemo(() => (benchmarkHere && matchRadius != null ? {
-    radiusM: matchRadius,
-    count: (site: OpeningSite) => site.lat == null || site.lng == null ? 0
-      : benchmarkHere.places.filter((p) => distanceM({ lat: site.lat as number, lng: site.lng as number }, p) <= matchRadius).length,
-  } : null), [benchmarkHere, matchRadius]);
-
+  // 선택한 상권의 기존 T분류만 표시한다. 분류가 없으면 추정하지 않는다.
+  const selectedType = outlines?.hubs.find((o) => o.id === districtId);
 
   return (
     <div className="platconsole"><div className="wrap">
@@ -347,12 +329,14 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           </>}
         </div>
       </div>
-      {/* 2026-11-08 칸 배치: 상권 지도(묶음 · 색칠 기준 · 상권 목록)는 지도 탐색의 **왼쪽 칸**에 선다 — 참고 시안 Case 1 의
-          왼쪽 상권 목록 자리. 단독 렌더(지도 셸 밖)에서는 예전처럼 이 자리에 그린다(MapSlot). */}
-      <MapSlot name="left" className="platform-side" track="platform">
-        <DistrictMapExplorer districts={districts} districtId={districtId} onSelect={setDistrictId}
-          outlines={outlines} outlineErr={outlineErr} fit={fit} industries={industryList} industryKey={rankKey} onIndustry={pickIndustry} />
-      </MapSlot>
+      <section className="selected-type" aria-label="선택한 상권 유형">
+        <strong>{hub?.name ?? "선택한 상권"} · 상권 유형</strong>
+        <p>{selectedType?.type_code
+          ? `${selectedType.type_code} · ${selectedType.type_name ?? "유형명 없음"}`
+          : outlineErr ? "상권 유형을 불러오지 못했습니다."
+            : !outlines ? "상권 유형 확인 중…" : "이 상권의 유형 라벨이 없습니다."}</p>
+        {selectedType?.type_code && <small>{selectedType.type_is_manual ? "사람이 붙인 분류" : "원본 데이터 분류"}</small>}
+      </section>
       {comparingDistricts && (
         <DistrictCompareDialog ids={districtPicks} districts={districts} industry={compareIndustry}
           unrankedIndustry={workInd && !compareIndustry ? workInd.label : null}
@@ -371,16 +355,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
         identity={prof?.district_id === districtId ? prof.identity : null} fitForRent={fit}
         picked={pickedHere} pickDisabled={!pickedHere && districtPicks.length >= COMPARE_MAX} onTogglePick={togglePick}
         onOpenPage={onOpenPage} />}
-        </> },
-        { id: "access", label: "접근성과 주변 가게", description: "찾아오는 길과 참고할 주변 가게를 확인하세요.", content: <>
-      {hub && <TransitAccessPanel key={`${districtId}:${hub.center.join(":")}`}
-        destination={{ lat: hub.center[0], lng: hub.center[1] }} destinationName={`${hub.name} 중심`} showWalking={false} />}
-      <BenchmarkExplorer key={`${districtId}:${pickedIndustry}:${business?.industryKey}:${business?.industryDetailKey}:${business?.targetIndustryKey}:${business?.targetIndustryDetailKey}`}
-        districtId={districtId}
-        defaultIndustry={pickedIndustry ?? (business?.goal === "pivot"
-          ? business.targetIndustryDetailKey ?? business.targetIndustryKey ?? ""
-          : business?.industryDetailKey ?? business?.industryKey ?? "")}
-        anchor={benchmarkAnchor} radiusM={matchRadius} onResult={setBenchmark} />
         </> },
         { id: "evidence", label: "추천과 상세 근거", description: "자리별 추천과 분석의 근거·한계를 살펴보세요.", content: <>
 
@@ -410,7 +384,6 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
           rankNote={rankingHere && !rankingHere.model_covered
             ? `${rankIndustry?.label ?? "이 업종"} 자리 점수 없음 — ${rankingHere.unavailable_reason ?? "추천 모델이 다루지 않는 업종"}. 자리는 상권 평균과 가장 다른 순서입니다.`
             : rankingHere?.model_covered ? rankingHere.note : null}
-          benchmarkNearby={benchmarkNearby}
           onOpenInPage={onOpenInPage ? (site) => onOpenInPage(siteToBuilding(districtId, site)) : undefined} />
       )}
 

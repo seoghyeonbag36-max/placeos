@@ -1,0 +1,11 @@
+.hourly-comparison { margin-block: var(--sp-4); }
+.hourly-comparison h4 { margin: var(--sp-3) 0 var(--sp-2); }
+.hourly-scale { color: var(--muted); font-size: var(--fs-caption); }
+.hourly-bars { display: flex; align-items: stretch; gap: 2px; height: 96px; border-bottom: 1px solid var(--line); }
+.hourly-bar-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+.hourly-bar-slot > i { display: block; background: var(--track-platform); border-radius: 2px 2px 0 0; }
+.is-weekend .hourly-bar-slot > i { background: var(--track-program); }
+.hourly-missing { text-align: center; color: var(--muted); }
+.hourly-comparison table { width: 100%; font-size: var(--fs-caption); }
+.hourly-comparison th, .hourly-comparison td { padding: var(--sp-1); text-align: left; border-bottom: 1px solid var(--line); }
+.hourly-comparison summary { cursor: pointer; color: var(--muted); margin-top: var(--sp-2); font-size: var(--fs-caption); }

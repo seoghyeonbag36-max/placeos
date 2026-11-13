@@ -281,6 +281,10 @@
 .platconsole .vfold > summary { position: relative; padding-right: var(--sp-8); }
 .platconsole .vfold .vfoldbody { padding: var(--sp-4); }
 
+.platconsole .selected-type { margin-block: var(--sp-3); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.platconsole .selected-type p { margin-block: var(--sp-2); color: var(--track-platform); font-weight: 700; }
+.platconsole .selected-type small { display: block; color: var(--sub); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+
 /* 검색어 외부 링크 */
 .platconsole .kwlinks{list-style:none;margin:var(--sp-2) 0 0;padding:0;display:grid;gap:6px}
 .platconsole .kwlinks li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px}

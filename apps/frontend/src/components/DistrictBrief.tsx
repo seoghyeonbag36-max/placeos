@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { getDistrictIndustries, getHourlyProfile, getRentHistory } from "@/lib/api";
-import type { DistrictIndustries, DistrictSummary, HourlyProfile, HubOutline, IndustryFit, PlatformProfile, RentHistory } from "@/lib/api";
+import { getDistrictIndustries, getRentHistory } from "@/lib/api";
+import type { DistrictIndustries, DistrictSummary, HubOutline, IndustryFit, PlatformProfile, RentHistory } from "@/lib/api";
+import { HourlyComparisonView } from "@/components/HourlyComparison";
+import { useHourlyProfiles } from "@/lib/useHourlyProfiles";
 import EvidenceBadge, { type Evidence } from "@/components/EvidenceBadge";
 import { groupName, groupOf, median } from "@/lib/districtMapModel";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
@@ -10,7 +12,7 @@ import "./DistrictBrief.css";
 const REGULATED_HUBS = new Set(["seongsu"]);
 const SEOUL_ONLY = "서울만 제공";
 
-interface Loaded { id: string; industries: DistrictIndustries | null; rent: RentHistory | null; hourly: HourlyProfile | null }
+interface Loaded { id: string; industries: DistrictIndustries | null; rent: RentHistory | null }
 
 function Tile({ label, value, evidence, foot }: { label: string; value: ReactNode; evidence: Evidence; foot?: ReactNode }) {
   return <div className="brief-tile">
@@ -44,11 +46,15 @@ export default function DistrictBrief({ hub, districts, outline, identity, fitFo
     let live = true;
     const quiet = <T,>(p: Promise<T | null>) => p.catch(() => null);
     void Promise.all([
-      quiet(getDistrictIndustries(id)), quiet(getRentHistory(id, ctrl.signal)), quiet(getHourlyProfile(id, "weekday", ctrl.signal)),
-    ]).then(([industries, rent, hourly]) => { if (live) setData({ id, industries, rent, hourly }); });
+      quiet(getDistrictIndustries(id)), quiet(getRentHistory(id, ctrl.signal)),
+    ]).then(([industries, rent]) => { if (live) setData({ id, industries, rent }); });
     return () => { live = false; ctrl.abort(); };
   }, [id]);
   const here = data?.id === id ? data : null;
+  const hourlyProfiles = useHourlyProfiles(id);
+  const hourly = hourlyProfiles?.weekday.profile ?? null;
+  const dailyMean = hourly && hourly.hours.length === 24 && hourly.hours.every(h => h.value != null)
+    ? hourly.hours.reduce((sum, h) => sum + (h.value as number), 0) / 24 : null;
 
   const group = groupOf(hub);
   const gName = groupName(group);
@@ -57,9 +63,6 @@ export default function DistrictBrief({ hub, districts, outline, identity, fitFo
   const peerIds = new Set(peers.map((d) => d.id));
   const rentMed = median((fitForRent?.districts ?? []).filter((r) => peerIds.has(r.district_id)).map((r) => r.rent_1f_per_pyeong));
 
-  const hourly = here?.hourly ?? null;
-  const dailyMean = hourly && hourly.hours.every((h) => h.value != null)
-    ? hourly.hours.reduce((s, h) => s + (h.value as number), 0) / hourly.hours.length : null;
   const rentSeries = here?.rent?.rent_available ? here.rent.rent_per_pyeong_manwon : [];
   let rentAt = rentSeries.length - 1;
   while (rentAt >= 0 && rentSeries[rentAt] == null) rentAt--;
@@ -74,7 +77,6 @@ export default function DistrictBrief({ hub, districts, outline, identity, fitFo
 
   const demand = identity?.demand ?? {};
   const groups = identity?.categories.groups ?? [];
-  const maxShare = Math.max(...(hourly?.hours.map((h) => h.share ?? 0) ?? [0]), 1e-9);
   const maxAge = Math.max(...(demand.ages?.map((a) => a.share) ?? [0]), 1e-9);
   const absent = (why: string) => <span className="value-absent">{why}</span>;
   const seoulOnly = (reason: string) => absent(seoul ? "이 상권 자료 없음" : `${SEOUL_ONLY} — ${reason}`);
@@ -141,15 +143,7 @@ export default function DistrictBrief({ hub, districts, outline, identity, fitFo
       </div>
       <p className="brief-note">모델 순위는 6업종만 있고, 이미 모여 있는 정도이지 매출·생존이 아닙니다.</p>
 
-      <h3>시간대 <EvidenceBadge kind="통계" /></h3>
-      {hourly ? <>
-        <div className="brief-hours" role="img" aria-label={`평일 24시간 생활인구 구성. 가장 많은 시각 ${hourly.peak.hour}시`}>
-          {hourly.hours.map((h) => <i key={h.hour} className={h.hour === hourly.peak.hour ? "is-peak" : ""}
-            style={{ height: `${((h.share ?? 0) / maxShare) * 100}%` }} title={`${h.hour}시 ${((h.share ?? 0) * 100).toFixed(1)}%`} />)}
-        </div>
-        <div className="brief-axis" aria-hidden><span>0시</span><span>6</span><span>12</span><span>18</span><span>23시</span></div>
-        <p className="brief-note">평일 · {hourly.as_of ? `${hourly.as_of} 기준` : "기준일 미상"}{hourly.note ? ` · ${hourly.note}` : ""}</p>
-      </> : <p>{here ? seoulOnly("서울시 생활인구 원천이 서울뿐입니다") : absent("불러오는 중")}</p>}
+      <HourlyComparisonView data={hourlyProfiles} outsideSeoul={!seoul} />
 
       <h3>방문 고객 <EvidenceBadge kind="통계" /></h3>
       {demand.ages?.length ? <>
