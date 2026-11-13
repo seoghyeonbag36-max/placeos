@@ -6,6 +6,7 @@ import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
 import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
+import Help from "@/pages/Help";
 import { IconFeedback, IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ExploreStepHeader, ExploreStepFooter } from "@/components/ExploreStep";
@@ -561,7 +562,7 @@ function AppContent() {
   // 로그인한 사용자가 해시 없이 오면 홈(흐름)이 첫 화면이다. 그 밖의 해시(#admin · #board · 계정 창)는 종전대로 지도 위에서 연다.
   const explore = isExploreHash(hash);
   const flowView = !socialCallback && ((isFlowHash(hash) && !explore) || (!!token && (hash === "" || hash === "#")));
-  const needWorkspace = !!token && !flowView;
+  const needWorkspace = !!token && !flowView && hash !== "#help";
   useEffect(() => {
     if (!token || !needWorkspace) return;
     let alive = true;
@@ -573,6 +574,7 @@ function AppContent() {
     return () => { alive = false; };
   }, [token, retry, needWorkspace]);
   if (socialCallback) return <SocialCallback />;
+  if (hash === "#help") return <Help />;
   if (flowView) return <FlowApp token={token} />;
   if (!token) {
     if (explore) return <WorkspaceApp key="anonymous" token={null} initialBusiness={anonymousBusiness()} />;
