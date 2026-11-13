@@ -124,6 +124,20 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
 
 /** 화면설계서 2판 인계 표 — PL-05(Platform → Page) · PS-06 · PR-07(Posting → Program). */
 describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
+  it("상단 기능 구조에서 Platform → Page로 이동하고 자리 선택을 Posting에 인계한다", async () => {
+    const api = mount(true);
+    expect(await screen.findByText("Platform ▶ Page", {}, TAB_LOAD)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Page · 빈 자리" }));
+    expect(await screen.findByText("Page ▶ Posting", {}, TAB_LOAD)).toBeTruthy();
+    fireEvent.click(await screen.findByRole("button", { name: /^검토 건물 카페/ }, FIRST_LOAD));
+    fireEvent.click(screen.getByRole("button", { name: "이 자리 비용 확인 →" }));
+    expect(await screen.findByText("Posting ▶ Program", {}, TAB_LOAD)).toBeTruthy();
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    expect(api.matching(/simulate-revenue$/)[0].body).toMatchObject({ district_id: "garosugil", unit_id: "vu-g1" });
+    fireEvent.click(screen.getByRole("button", { name: "Page · 빈 자리" }));
+    await waitFor(() => expect(document.querySelector(".b-detail .b-name")?.textContent).toBe("검토 건물"));
+  });
+
   it("PL-05 Platform 자리 카드의 「Page에서 이 건물 보기 →」가 Page 에서 그 건물 상세를 연다", async () => {
     installFetchStub([
       { match: /commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
