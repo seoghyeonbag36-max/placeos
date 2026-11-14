@@ -60,6 +60,7 @@
     --batch gg2      경기 2차 13거점
     --batch gg3      경기 3차 50거점(2026-10-28 · 59곳까지)
     --batch gj       광주광역시 13상권(2026-10-30 등록 · 10-31 서빙)
+    --batch gjjj2    광주·전주 2차 51곳(2026-11-09 등록 — 서빙은 통과분만 GJ_JJ_BATCH2_SERVED_HUBS)
     --hubs a,b,c     직접 지정
     --skip-ledger    대장을 건너뛴다(쿼터 0 · 점포·폴리곤만)
 """
@@ -288,6 +289,8 @@ def hubs_of(batch: str) -> list[str]:
         return list(ph.GYEONGGI_BATCH3_HUBS)     # 경기 3차 50거점(2026-10-28 · 59곳까지)
     if batch == "gj":
         return list(ph.GWANGJU_HUBS)             # 광주광역시 13상권(2026-10-30)
+    if batch == "gjjj2":
+        return list(ph.GJ_JJ_BATCH2_HUBS)        # 광주·전주 2차 51곳(2026-11-09 · 조사 위치 승격)
     raise SystemExit(f"모르는 배치: {batch}")
 
 

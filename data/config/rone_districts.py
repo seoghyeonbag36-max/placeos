@@ -250,6 +250,60 @@ DISTRICT_RONE: dict[str, str] = {
     "jj-newtown": "전북>전주서부신시가지",
     "jj-hanok": "전북>전주한옥마을",
     "jj-songcheon": "전북>송천동",
+    # ── 광주·전주 2차 51곳(2026-11-09) — 자기 R-ONE 표본이 없어 **가장 가까운 광주·전주 R-ONE 상권을 공유**한다(SHARED_RONE).
+    # 거리는 조사 중심 ↔ 그 R-ONE 상권의 앵커 거점 중심. 3km 를 넘는 공유(수완·장덕·임암·평화·중동·만성·여의)는 대조력이 약하다 —
+    # 앵커 격차는 hub-chain 5단계 가드레일(|gap| ≤ 30%p)로만 거르고, 공유 사실은 화면(`rone-shared`)에 싣는다.
+    "gj-gyerim": "광주>금남로/충장로",   # 광주 동구 계림동 — 공유 (gj-chungjang · 1.25km)
+    "gj-jisan": "광주>금남로/충장로",   # 광주 동구 지산동 — 공유 (gj-chungjang · 1.18km)
+    "gj-usan-buk": "광주>전남대",   # 광주 북구 우산동 — 공유 (gj-chonnam · 1.45km)
+    "gj-ssangchon": "광주>상무지구",   # 광주 서구 쌍촌동 — 공유 (gj-sangmu · 1.05km)
+    "gj-yudong": "광주>월산동지구",   # 광주 북구 유동 — 공유 (gj-wolsan · 1.33km)
+    "gj-suwan": "광주>첨단1지구",   # 광주 광산구 수완동 — 공유 (gj-cheomdan1 · 3.46km)
+    "gj-nongseong": "광주>월산동지구",   # 광주 서구 농성동 — 공유 (gj-wolsan · 1.66km)
+    "gj-wolgok": "광주>우산동",   # 광주 광산구 월곡동 — 공유 (gj-usan · 1.24km)
+    "gj-baegun": "광주>월산동지구",   # 광주 남구 백운동 — 공유 (gj-wolsan · 1.21km)
+    "gj-wolsan-nam": "광주>월산동지구",   # 광주 남구 월산동 — 공유 (gj-wolsan · 1.26km)
+    "gj-unam": "광주>용봉동",   # 광주 북구 운암동 — 공유 (gj-yongbong · 2.47km)
+    "gj-gwangcheon": "광주>월산동지구",   # 광주 서구 광천동 — 공유 (gj-wolsan · 2.70km)
+    "gj-hwajeong": "광주>금호지구",   # 광주 서구 화정동 — 공유 (gj-geumho · 2.10km)
+    "gj-yangnim": "광주>금남로/충장로",   # 광주 남구 양림동 — 공유 (gj-chungjang · 1.06km)
+    "gj-munheung": "광주>전남대",   # 광주 북구 문흥동 — 공유 (gj-chonnam · 1.66km)
+    "gj-heukseok": "광주>우산동",   # 광주 광산구 흑석동 — 공유 (gj-usan · 2.35km)
+    "gj-sinyong": "광주>양산지구",   # 광주 북구 신용동 — 공유 (gj-yangsan · 1.76km)
+    "gj-jangdeok": "광주>우산동",   # 광주 광산구 장덕동 — 공유 (gj-usan · 3.55km)
+    "gj-dongcheon": "광주>상무지구",   # 광주 서구 동천동 — 공유 (gj-sangmu · 2.86km)
+    "gj-gakhwa": "광주>전남대",   # 광주 북구 각화동 — 공유 (gj-chonnam · 2.60km)
+    "gj-hakdong": "광주>금남로/충장로",   # 광주 동구 학동 — 공유 (gj-chungjang · 1.50km)
+    "gj-jinwol": "광주>봉선동",   # 광주 남구 진월동 — 공유 (gj-bongseon · 1.96km)
+    "gj-sotae": "광주>봉선동",   # 광주 동구 소태동 — 공유 (gj-bongseon · 1.38km)
+    "gj-pungam": "광주>금호지구",   # 광주 서구 풍암동 — 공유 (gj-geumho · 1.75km)
+    "gj-sanwol": "광주>첨단1지구",   # 광주 광산구 산월동 — 공유 (gj-cheomdan1 · 1.36km)
+    "gj-maegok": "광주>용봉동",   # 광주 북구 매곡동 — 공유 (gj-yongbong · 1.44km)
+    "gj-sinchon": "광주>송정동지구",   # 광주 광산구 신촌동 — 공유 (gj-songjeong · 1.19km)
+    "gj-imam": "광주>금호지구",   # 광주 남구 임암동 — 공유 (gj-geumho · 3.88km)
+    "gj-bia": "광주>첨단1지구",   # 광주 광산구 비아동 — 공유 (gj-cheomdan1 · 2.00km)
+    "gj-nodae": "광주>봉선동",   # 광주 남구 노대동 — 공유 (gj-bongseon · 2.35km)
+    "jj-jungang4": "전북>전주한옥마을",   # 전주 완산구 중앙동4가 — 공유 (jj-hanok · 1.10km)
+    "jj-junghwasan2": "전북>전주서부신시가지",   # 전주 완산구 중화산동2가 — 공유 (jj-newtown · 1.37km)
+    "jj-ua2": "전북>전주한옥마을",   # 전주 덕진구 우아동2가 — 공유 (jj-hanok · 2.03km)
+    "jj-geumam": "전북>전주서부",   # 전주 덕진구 금암동 — 공유 (jj-west · 1.83km)
+    "jj-samcheon1": "전북>전주서부신시가지",   # 전주 완산구 삼천동1가 — 공유 (jj-newtown · 2.68km)
+    "jj-jungdong": "전북>전주서부신시가지",   # 전주 덕진구 중동 — 공유 (jj-newtown · 4.53km)
+    "jj-songcheon2": "전북>송천동",   # 전주 덕진구 송천동2가 — 공유 (jj-songcheon · 1.44km)
+    "jj-hyoja1": "전북>전주서부신시가지",   # 전주 완산구 효자동1가 — 공유 (jj-newtown · 1.78km)
+    "jj-pyeonghwa1": "전북>전주한옥마을",   # 전주 완산구 평화동1가 — 공유 (jj-hanok · 3.19km)
+    "jj-hyoja2": "전북>전주서부신시가지",   # 전주 완산구 효자동2가 — 공유 (jj-newtown · 1.01km)
+    "jj-dongseohak": "전북>전주한옥마을",   # 전주 완산구 동서학동 — 공유 (jj-hanok · 1.11km)
+    "jj-junghwasan1": "전북>전주동부",   # 전주 완산구 중화산동1가 — 공유 (jj-east · 2.09km)
+    "jj-ua3": "전북>전주동부",   # 전주 덕진구 우아동3가 — 공유 (jj-east · 2.78km)
+    "jj-hyoja3": "전북>전주서부",   # 전주 완산구 효자동3가 — 공유 (jj-west · 1.49km)
+    "jj-manseong": "전북>전주서부신시가지",   # 전주 덕진구 만성동 — 공유 (jj-newtown · 3.84km)
+    "jj-inhu2": "전북>전주동부",   # 전주 덕진구 인후동2가 — 공유 (jj-east · 1.99km)
+    "jj-yeoui2": "전북>송천동",   # 전주 덕진구 여의동2가 — 공유 (jj-songcheon · 4.32km)
+    "jj-deokjin2": "전북>전주서부",   # 전주 덕진구 덕진동2가 — 공유 (jj-west · 1.62km)
+    "jj-ecocity": "전북>송천동",   # 전주 에코시티 — 공유 (jj-songcheon · 1.93km)
+    "jj-hoseong1": "전북>송천동",   # 전주 덕진구 호성동1가 — 공유 (jj-songcheon · 2.69km)
+    "jj-hyoja2-south": "전북>전주서부신시가지",   # 전주 완산구 효자동2가 남부 — 공유 (jj-newtown · 2.25km)
 }
 
 # 공유 매핑 거점 — 단독 R-ONE 표본이 없어 인접·포괄 상권을 빌려 쓰는 거점.
@@ -282,6 +336,14 @@ SHARED_RONE: frozenset[str] = frozenset({
     "daerim", "guui", "maebong", "gurojeonhwa", "bonseobu",
     # 경기 3차 확장 두 번째 거점 15곳 (2026-10-28) — 앵커 자리 거점과 같은 표본을 나눠 쓴다
     "songnae", "yeokgok", "sinjungdong", "myeonghak", "sujin", "taepyeong", "yatap", "jeongja", "skku", "maetan", "ganeung", "osanst", "gyomun", "gwangmyeongsa", "jukjeon",
+    # 광주·전주 2차 51곳(2026-11-09) — 전부 공유(가장 가까운 광주·전주 R-ONE 상권)
+    "gj-gyerim", "gj-jisan", "gj-usan-buk", "gj-ssangchon", "gj-yudong", "gj-suwan", "gj-nongseong", "gj-wolgok",
+    "gj-baegun", "gj-wolsan-nam", "gj-unam", "gj-gwangcheon", "gj-hwajeong", "gj-yangnim", "gj-munheung", "gj-heukseok",
+    "gj-sinyong", "gj-jangdeok", "gj-dongcheon", "gj-gakhwa", "gj-hakdong", "gj-jinwol", "gj-sotae", "gj-pungam",
+    "gj-sanwol", "gj-maegok", "gj-sinchon", "gj-imam", "gj-bia", "gj-nodae", "jj-jungang4", "jj-junghwasan2",
+    "jj-ua2", "jj-geumam", "jj-samcheon1", "jj-jungdong", "jj-songcheon2", "jj-hyoja1", "jj-pyeonghwa1", "jj-hyoja2",
+    "jj-dongseohak", "jj-junghwasan1", "jj-ua3", "jj-hyoja3", "jj-manseong", "jj-inhu2", "jj-yeoui2", "jj-deokjin2",
+    "jj-ecocity", "jj-hoseong1", "jj-hyoja2-south",
 })
 # TODO(anam 정확도): 성격상으로는 대학상권인 "서울>기타>혜화동"이 더 가깝지만 거리가 2.1km 로
 # 성신여대(1.1km)의 두 배다. 현재는 최근접 원칙을 따랐다 — 학습 후 잔차로 재검토할 것.

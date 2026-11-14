@@ -14,7 +14,7 @@
 거점의 점포 주소(`lnoAdr`)에서 (시도, 구, 동) 집합을 파생한다(`gg_licensing._hub_places` 와 같은 원칙 — 반경이 바뀌어도 낡지 않는다).
 같은 동이 두 거점에 걸치면 양쪽에 담는다. 이것은 거친 필터이고, 건물 귀속은 좌표 PIP 가 정한다.
 
-실행: python -m data.collectors.gwangju_licensing_hubs [slug ...] [--force]   (비우면 GWANGJU_HUBS 전부)
+실행: python -m data.collectors.gwangju_licensing_hubs [slug ...] [--force]   (비우면 광주 1·2차 거점 전부)
 """
 from __future__ import annotations
 
@@ -26,9 +26,11 @@ from pathlib import Path
 
 from data.collectors.common import latest_bronze, load_latest, save_json
 from data.collectors.gg_licensing import _place
-from data.config.page_hubs import GWANGJU_HUBS
+from data.config.page_hubs import GWANGJU_BATCH2_HUBS, GWANGJU_HUBS
 
 ROOT = Path(__file__).resolve().parents[2]
+# 광주 1차 13곳 + 2차 30곳(2026-11-09). 원본(5구)은 같고 거점 버킷만 늘어난다.
+_HUBS = {**GWANGJU_HUBS, **GWANGJU_BATCH2_HUBS}
 SRC = ROOT / "data" / "bronze" / "gwangju_licensing"
 _LABEL = "일반음식점"
 
@@ -112,8 +114,8 @@ def load_source_rows() -> list[dict]:
 
 def main(argv: list[str]) -> None:
     force = "--force" in argv
-    slugs = [a for a in argv if not a.startswith("-")] or list(GWANGJU_HUBS)
-    unknown = [s for s in slugs if s not in GWANGJU_HUBS]
+    slugs = [a for a in argv if not a.startswith("-")] or list(_HUBS)
+    unknown = [s for s in slugs if s not in _HUBS]
     if unknown:
         raise SystemExit(f"[gj-lic] 광주 거점이 아니다: {unknown}")
     todo = [s for s in slugs if force or latest_bronze(s, "licensing_biz.json") is None]

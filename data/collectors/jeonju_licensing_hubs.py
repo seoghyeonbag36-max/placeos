@@ -7,9 +7,11 @@ from pathlib import Path
 
 from data.collectors.common import latest_bronze, load_latest, save_json
 from data.collectors.gg_licensing import _place
-from data.config.page_hubs import JEONJU_HUBS
+from data.config.page_hubs import JEONJU_BATCH2_HUBS, JEONJU_HUBS
 
 ROOT = Path(__file__).resolve().parents[2]
+# 전주 1차 5곳 + 2차 21곳(2026-11-09). 원본(2구)은 같고 거점 버킷만 늘어난다.
+_HUBS = {**JEONJU_HUBS, **JEONJU_BATCH2_HUBS}
 SRC = ROOT / "data" / "bronze" / "jeonju_licensing"
 _LABEL = "일반음식점"
 
@@ -89,8 +91,8 @@ def load_source_rows() -> list[dict]:
 
 def main(argv: list[str]) -> None:
     force = "--force" in argv
-    slugs = [a for a in argv if not a.startswith("-")] or list(JEONJU_HUBS)
-    unknown = [s for s in slugs if s not in JEONJU_HUBS]
+    slugs = [a for a in argv if not a.startswith("-")] or list(_HUBS)
+    unknown = [s for s in slugs if s not in _HUBS]
     if unknown:
         raise SystemExit(f"[jj-lic] 전주 거점이 아니다: {unknown}")
     todo = [s for s in slugs if force or latest_bronze(s, "licensing_biz.json") is None]

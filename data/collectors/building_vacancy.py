@@ -43,6 +43,7 @@ try:
 except ImportError:  # pragma: no cover
     requests = None
 
+from data.collectors import ledger_cache
 from data.collectors.common import GOLD, latest_bronze, load_env, load_latest, save_json
 from data.config.page_hubs import ACTIVE_HUBS, PageHub, get_hub, owns_point
 
@@ -239,6 +240,13 @@ def _get_json(url: str, params: dict) -> dict | None:
     잦아서, 포기하면 그 실행이 통째로 빈손이 된다.
     """
     ep = _ep(url)
+    # 조사 원장(광주·전주 등)에 같은 요청의 검증된 응답이 있으면 그대로 쓴다 — 쿼터를 쓰지 않으므로 포기 판정보다 먼저 본다.
+    # 기본 켬(끄려면 PLACEOS_LEDGER_CACHE=0) · 전유부·층별개요만 · 표식 해시 대조 → data/collectors/ledger_cache.py
+    hit = ledger_cache.lookup(url, params)
+    if hit is not None:
+        _FAILS[ep] = 0
+        _LAST_RETRYABLE[0] = False
+        return hit
     if ep in _DEAD:
         _LAST_RETRYABLE[0] = True    # 사유는 여전히 레이트 리밋 → rate_limited 로 기록
         return None
