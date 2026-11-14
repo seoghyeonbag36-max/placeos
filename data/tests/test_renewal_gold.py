@@ -36,7 +36,11 @@ HUBS = list(ACTIVE_HUBS)
 # R-ONE 소규모 임대 표본이 없는 상권과 그 앵커를 공유하는 거점. 값은 null로 남긴다.
 # 2026-11-03 공개 36곳 중 5곳도 같은 원천 결측이다(중대형 공실 앵커는 있다).
 NO_RENT_HUBS = {"ajou", "yeongtong", "dandae", "gj-eoryong", "gj-usan", "gj-ilgok", "jj-newtown",
-                "pyeongtaekcity", "gwangnam", "yatap", "jeongja", "maetan"}
+                "pyeongtaekcity", "gwangnam", "yatap", "jeongja", "maetan",
+                # 2026-11-15 광주·전주 2차 — 소규모 임대 표본이 없는 R-ONE 상권(우산동 · 전주서부신시가지)을 공유한 8곳.
+                # 이웃 값으로 채우지 않는다(rone_districts 주석 · docs/decision-gwangju-jeonju-batch2-2026-11-09.md)
+                "gj-heukseok", "gj-jangdeok", "gj-wolgok",
+                "jj-hyoja1", "jj-hyoja2", "jj-hyoja2-south", "jj-junghwasan2", "jj-samcheon1"}
 
 
 def _json(name: str) -> dict:

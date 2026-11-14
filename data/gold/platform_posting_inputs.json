@@ -1,7 +1,7 @@
 {
   "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
   "quarter": "20262",
-  "built_at": "2026-11-14T11:48:45+00:00",
+  "built_at": "2026-11-14T22:56:36+00:00",
   "rent_unit": "천원/㎡·월 (R-ONE 소규모상가, 사실상 1층 기준)",
   "floor_factor": {
     "B2": 0.6,
@@ -628,12 +628,6 @@
       "foot": null,
       "rent_quarter": "20262"
     },
-    "gj-sinyong": {
-      "rent_per_m2_krw_thousand": 14.52,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
     "moran": {
       "rent_per_m2_krw_thousand": 45.66,
       "flpop": null,
@@ -725,12 +719,6 @@
       "rent_quarter": "20262"
     },
     "gj-chonnam": {
-      "rent_per_m2_krw_thousand": 21.9,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "gj-usan-buk": {
       "rent_per_m2_krw_thousand": 21.9,
       "flpop": null,
       "foot": null,

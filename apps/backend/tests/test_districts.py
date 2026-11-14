@@ -78,8 +78,16 @@ def test_recommendations_do_not_silently_vanish():
     (2026-08-23 실측 모델 기준 7/270 = 2.6%, 임대료/매출이 높은 명동·연남에 몰린다).
     """
     data = client.get(f"{V1}/commercial-districts").json()
-    total = sum(sum(d["tier_mix"].values()) for d in data)
-    assert total >= len(data) * 5 * 0.9, f"추천이 사라진 유닛이 10%를 넘는다: {total}"
+    # 분모는 **3-Tier 를 실측으로 계산하는 거점**만이다. 재료(평당매출)가 없는 거점은 세 tier 가 모두 「자료 부족」이라
+    # 추천이 0 인 것이 설계다(2026-10-28 사용자 결정 (b) · posting_revenue.measured_tiers). 2026-11-15 까지는 전 거점을
+    # 분모로 써서, 재료 없는 서울 밖 거점이 늘자(광주·전주 2차 45곳) 비용 모델이 멀쩡한데도 이 검사가 깨졌다.
+    from app.services import posting_revenue
+    priced = [d for d in data if posting_revenue.measured_tiers(d["id"])]
+    assert priced, "3-Tier 를 계산하는 거점이 하나도 없다 — 매출 재료가 통째로 빠졌다"
+    total = sum(sum(d["tier_mix"].values()) for d in priced)
+    assert total >= len(priced) * 5 * 0.9, f"추천이 사라진 유닛이 10%를 넘는다: {total} / {len(priced)}거점"
+    # 재료가 없는 거점이 추천을 내면 계수 폴백이 되살아난 것이다
+    assert all(not sum(d["tier_mix"].values()) for d in data if d not in priced), "재료 없는 거점에서 추천이 나왔다"
     # 추천이 하나라도 있으면 rec_top 이 비면 안 된다 — 첫 유닛만 보던 결함의 회귀 방지
     for d in data:
         if sum(d["tier_mix"].values()):
