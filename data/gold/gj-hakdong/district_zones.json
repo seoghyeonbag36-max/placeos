@@ -1,0 +1,100 @@
+{
+ "slug": "gj-hakdong",
+ "built_at": "2026-11-14T12:20:53+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 119,
+  "knn_vs_pnu_compared": 119,
+  "knn_vs_pnu_agree_pct": 97.5
+ },
+ "dropped_spillover": [],
+ "residual": {
+  "buildings": 0,
+  "capacity": 0,
+  "active": 0
+ },
+ "zones": [
+  {
+   "n": "학동",
+   "grp": "학동",
+   "lat": 35.137001,
+   "lng": 126.924171,
+   "stores": 388,
+   "buildings": 51,
+   "capacity": 95,
+   "active": 68,
+   "vacancy_rate": 28.42,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "방림2동",
+   "grp": "방림동",
+   "lat": 35.133704,
+   "lng": 126.921686,
+   "stores": 130,
+   "buildings": 37,
+   "capacity": 59,
+   "active": 45,
+   "vacancy_rate": 23.73,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "학운동",
+   "grp": "학동",
+   "lat": 35.132523,
+   "lng": 126.929151,
+   "stores": 97,
+   "buildings": 17,
+   "capacity": 55,
+   "active": 35,
+   "vacancy_rate": 36.36,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "방림1동",
+   "grp": "방림동",
+   "lat": 35.134148,
+   "lng": 126.918918,
+   "stores": 100,
+   "buildings": 8,
+   "capacity": 19,
+   "active": 11,
+   "vacancy_rate": 42.11,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  },
+  {
+   "n": "양림동",
+   "grp": "양림동",
+   "lat": 35.138432,
+   "lng": 126.918888,
+   "stores": 70,
+   "buildings": 6,
+   "capacity": 8,
+   "active": 7,
+   "vacancy_rate": 12.5,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z5"
+  }
+ ]
+}

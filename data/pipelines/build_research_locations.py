@@ -30,6 +30,7 @@ import json
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import math
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "data" / "gold" / "platform_research_locations.json"
@@ -150,6 +151,18 @@ def build(root: Path) -> dict:
         ))
     if problems:
         raise ValueError("조사 위치 요약을 만들 수 없다 — " + "; ".join(problems[:10]))
+    # 서빙 거점으로 승격한 조사 위치는 레이어에서 뺀다 — 같은 자리를 거점과 조사 위치로 두 번 그리지 않는다
+    # (2026-11-09 광주·전주 2차 · docs/decision-gwangju-jeonju-batch2-2026-11-09.md). 승격 사실은 `promoted` 에 남긴다.
+    from data.config.page_hubs import ACTIVE_HUBS, GJ_JJ_BATCH2_RESEARCH_ID, GJ_JJ_BATCH2_SERVED_HUBS
+    promoted = {GJ_JJ_BATCH2_RESEARCH_ID[s]: s for s in sorted(GJ_JJ_BATCH2_SERVED_HUBS)}
+    locations = [loc for loc in locations if loc["id"] not in promoted]
+    # 「가까운 거점」은 탐색 당시 값이 아니라 **지금 서빙 중인** 같은 도시 거점에서 다시 잰다 — 승격으로 더 가까운 거점이 생긴다.
+    served = [h for h in ACTIVE_HUBS.values() if h.city in ("gwangju", "jeonju")]
+    for loc in locations:
+        same = [(h.slug, h.cy, h.cx) for h in served if h.city == loc["group"]]
+        if same:
+            slug, dist = min(((slug, _meters(loc["lat"], loc["lng"], lat, lng)) for slug, lat, lng in same), key=lambda x: x[1])
+            loc["nearest_hub"], loc["nearest_hub_m"] = slug, int(round(dist))
     # 같은 라벨(「효자동1가 보완」 등)은 서쪽부터 번호를 붙인다 — 칩에서 구별되게.
     by_name: dict[str, list[dict]] = defaultdict(list)
     for loc in locations:
@@ -168,8 +181,18 @@ def build(root: Path) -> dict:
                     candidates=dict(path=CANDIDATES, sha256=sha256(root / CANDIDATES)),
                     jeonju_added=dict(path=JEONJU_ADDED, sha256=sha256(root / JEONJU_ADDED))),
         counts=dict(Counter(loc["group"] for loc in locations)),
+        promoted=[dict(id=rid, hub=slug) for rid, slug in sorted(promoted.items(), key=lambda kv: kv[1])],
         locations=locations,
     )
+
+
+def _meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """두 점 사이 거리(m) — 하버사인."""
+    r = 6371000.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = p2 - p1, math.radians(lng2 - lng1)
+    h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(h))
 
 
 def main() -> int:

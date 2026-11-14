@@ -415,6 +415,130 @@ JEONJU_HUBS: dict[str, PageHub] = {
     "jj-songcheon": PageHub("jj-songcheon", "전주 송천동", 127.1210250001584, 35.85713199864467, 500, 700, city="jeonju"),
 }
 
+# ── 광주·전주 2차 51곳 (2026-11-09 · **등록** — 서빙은 Gold·앵커를 통과한 거점만 `GJ_JJ_BATCH2_SERVED_HUBS` 로) ──
+# 출처: 광주·전주 탐색 위치 206곳(인허가 관측점 700m 조사 원 · 대장 원본 완주 · 대장 Gold 206/206 검증)
+#   reports/regional_hub_candidates_2026-11-03.json · reports/jeonju_requested_areas_2026-11-06.json
+# 선정(2026-11-09 사용자 결정 「점포 300 이상 · 51곳」): 700m 점포 ≥300 · 건물당 점포 ≤10(밀집 검토 제외) ·
+#   기존 거점·서로 간 중심 1km 이상 — 점포 많은 순으로 탐욕 선택. 「주의」(top10 지번 >25%)는 대장으로 확인한 뒤 판정한다.
+# 중심은 일반음식점 인허가 관측점(조사 중심)이지 **상권 경계가 아니다**. 이름은 기존 R-ONE 상권명과 헷갈리지 않게 「도시 구 동」.
+# R-ONE 표본이 없어 앵커는 가장 가까운 광주·전주 R-ONE 상권을 공유한다(rone_districts.SHARED_RONE).
+# ⚠ 이 51곳은 등록만으로는 서빙되지 않는다 — ACTIVE_HUBS 가 `GJ_JJ_BATCH2_SERVED_HUBS` 로 거른다(경기 3차와 같은 장치).
+# → docs/decision-gwangju-jeonju-batch2-2026-11-09.md
+GWANGJU_BATCH2_HUBS: dict[str, PageHub] = {
+    "gj-gyerim": PageHub("gj-gyerim", "광주 동구 계림동", 126.916226, 35.158808, 500, 700, city="gwangju"),  # 동구 · 점포 1,997 · 건물 1,007 · 건물당 1.98 · top10 20.43% · 통과 · 조사 research-0d6a2980d206
+    "gj-jisan": PageHub("gj-jisan", "광주 동구 지산동", 126.93001, 35.14807, 500, 700, city="gwangju"),  # 동구 · 점포 1,975 · 건물 1,012 · 건물당 1.95 · top10 8.35% · 통과 · 조사 research-480477add26a
+    "gj-usan-buk": PageHub("gj-usan-buk", "광주 북구 우산동", 126.918346, 35.172444, 500, 700, city="gwangju"),  # 북구 · 점포 1,884 · 건물 914 · 건물당 2.06 · top10 11.2% · 통과 · 조사 research-cd44c439bee8
+    "gj-ssangchon": PageHub("gj-ssangchon", "광주 서구 쌍촌동", 126.858916, 35.151462, 500, 700, city="gwangju"),  # 서구 · 점포 1,832 · 건물 777 · 건물당 2.36 · top10 9.99% · 통과 · 조사 research-d3fcc1ea3eb6
+    "gj-yudong": PageHub("gj-yudong", "광주 북구 유동", 126.903151, 35.159476, 500, 700, city="gwangju"),  # 북구 · 점포 1,647 · 건물 787 · 건물당 2.09 · top10 23.13% · 통과 · 조사 research-87fef559bfbe
+    "gj-suwan": PageHub("gj-suwan", "광주 광산구 수완동", 126.825608, 35.191628, 500, 700, city="gwangju"),  # 광산구 · 점포 1,624 · 건물 414 · 건물당 3.92 · top10 23.77% · 통과 · 조사 research-f18e1be4c888
+    "gj-nongseong": PageHub("gj-nongseong", "광주 서구 농성동", 126.885338, 35.152395, 500, 700, city="gwangju"),  # 서구 · 점포 1,566 · 건물 731 · 건물당 2.14 · top10 20.63% · 통과 · 조사 research-a537e60212fc
+    "gj-wolgok": PageHub("gj-wolgok", "광주 광산구 월곡동", 126.807377, 35.171372, 500, 700, city="gwangju"),  # 광산구 · 점포 1,553 · 건물 764 · 건물당 2.03 · top10 8.82% · 통과 · 조사 research-aa198661e1ba
+    "gj-baegun": PageHub("gj-baegun", "광주 남구 백운동", 126.900469, 35.136784, 500, 700, city="gwangju"),  # 남구 · 점포 1,544 · 건물 795 · 건물당 1.94 · top10 13.34% · 통과 · 조사 research-6f147ceb2d99
+    "gj-wolsan-nam": PageHub("gj-wolsan-nam", "광주 남구 월산동", 126.889549, 35.143903, 500, 700, city="gwangju"),  # 남구 · 점포 1,455 · 건물 808 · 건물당 1.8 · top10 9.48% · 통과 · 조사 research-65870e1377cd
+    "gj-unam": PageHub("gj-unam", "광주 북구 운암동", 126.874331, 35.176769, 500, 700, city="gwangju"),  # 북구 · 점포 1,226 · 건물 434 · 건물당 2.82 · top10 13.95% · 통과 · 조사 research-ee2001012de0
+    "gj-gwangcheon": PageHub("gj-gwangcheon", "광주 서구 광천동", 126.878637, 35.161839, 500, 700, city="gwangju"),  # 서구 · 점포 1,221 · 건물 314 · 건물당 3.89 · top10 51.02% · 주의 · 조사 research-ea16871ac664
+    "gj-hwajeong": PageHub("gj-hwajeong", "광주 서구 화정동", 126.874966, 35.147181, 500, 700, city="gwangju"),  # 서구 · 점포 1,205 · 건물 609 · 건물당 1.98 · top10 9.13% · 통과 · 조사 research-f3aa418a9d09
+    "gj-yangnim": PageHub("gj-yangnim", "광주 남구 양림동", 126.912549, 35.138832, 500, 700, city="gwangju"),  # 남구 · 점포 1,093 · 건물 676 · 건물당 1.62 · top10 7.04% · 통과 · 조사 research-75ddbe7f8054
+    "gj-munheung": PageHub("gj-munheung", "광주 북구 문흥동", 126.919255, 35.184672, 500, 700, city="gwangju"),  # 북구 · 점포 1,061 · 건물 490 · 건물당 2.17 · top10 14.23% · 통과 · 조사 research-1dc1323ab5b3
+    "gj-heukseok": PageHub("gj-heukseok", "광주 광산구 흑석동", 126.806597, 35.181369, 500, 700, city="gwangju"),  # 광산구 · 점포 1,005 · 건물 331 · 건물당 3.04 · top10 24.98% · 통과 · 조사 research-3f3c932eeb3d
+    "gj-sinyong": PageHub("gj-sinyong", "광주 북구 신용동", 126.860236, 35.208759, 500, 700, city="gwangju"),  # 북구 · 점포 981 · 건물 141 · 건물당 6.96 · top10 42.61% · 주의 · 조사 research-c791893737b7
+    "gj-jangdeok": PageHub("gj-jangdeok", "광주 광산구 장덕동", 126.811617, 35.191905, 500, 700, city="gwangju"),  # 광산구 · 점포 912 · 건물 293 · 건물당 3.11 · top10 17.65% · 통과 · 조사 research-494b10969020
+    "gj-dongcheon": PageHub("gj-dongcheon", "광주 서구 동천동", 126.862361, 35.170043, 500, 700, city="gwangju"),  # 서구 · 점포 911 · 건물 282 · 건물당 3.23 · top10 20.53% · 통과 · 조사 research-6ce56f421f26
+    "gj-gakhwa": PageHub("gj-gakhwa", "광주 북구 각화동", 126.931315, 35.182404, 500, 700, city="gwangju"),  # 북구 · 점포 888 · 건물 461 · 건물당 1.93 · top10 20.38% · 통과 · 조사 research-dc21ef2315a9
+    "gj-hakdong": PageHub("gj-hakdong", "광주 동구 학동", 126.924057, 35.135341, 500, 700, city="gwangju"),  # 동구 · 점포 795 · 건물 416 · 건물당 1.91 · top10 19.37% · 통과 · 조사 research-7fabf07f0201
+    "gj-jinwol": PageHub("gj-jinwol", "광주 남구 진월동", 126.895074, 35.118806, 500, 700, city="gwangju"),  # 남구 · 점포 772 · 건물 280 · 건물당 2.76 · top10 18.78% · 통과 · 조사 research-1521999833d1
+    "gj-sotae": PageHub("gj-sotae", "광주 동구 소태동", 126.930369, 35.126993, 500, 700, city="gwangju"),  # 동구 · 점포 640 · 건물 337 · 건물당 1.9 · top10 14.84% · 통과 · 조사 research-0422a3ecdea5
+    "gj-pungam": PageHub("gj-pungam", "광주 서구 풍암동", 126.871787, 35.124892, 500, 700, city="gwangju"),  # 서구 · 점포 628 · 건물 259 · 건물당 2.42 · top10 20.86% · 통과 · 조사 research-90108ace326c
+    "gj-sanwol": PageHub("gj-sanwol", "광주 광산구 산월동", 126.846596, 35.207792, 500, 700, city="gwangju"),  # 광산구 · 점포 519 · 건물 150 · 건물당 3.46 · top10 38.92% · 주의 · 조사 research-cf5c25b0e4f7
+    "gj-maegok": PageHub("gj-maegok", "광주 북구 매곡동", 126.889677, 35.18931, 500, 700, city="gwangju"),  # 북구 · 점포 500 · 건물 150 · 건물당 3.33 · top10 23.6% · 통과 · 조사 research-a277ddde3c67
+    "gj-sinchon": PageHub("gj-sinchon", "광주 광산구 신촌동", 126.801338, 35.144166, 500, 700, city="gwangju"),  # 광산구 · 점포 479 · 건물 296 · 건물당 1.62 · top10 12.73% · 통과 · 조사 research-4264ab930f5b
+    "gj-imam": PageHub("gj-imam", "광주 남구 임암동", 126.871609, 35.102345, 500, 700, city="gwangju"),  # 남구 · 점포 414 · 건물 86 · 건물당 4.81 · top10 38.41% · 주의 · 조사 research-ded6e8ebd90b
+    "gj-bia": PageHub("gj-bia", "광주 광산구 비아동", 126.820466, 35.221589, 500, 700, city="gwangju"),  # 광산구 · 점포 397 · 건물 231 · 건물당 1.72 · top10 20.15% · 통과 · 조사 research-c8eb401a7a53
+    "gj-nodae": PageHub("gj-nodae", "광주 남구 노대동", 126.902133, 35.105421, 500, 700, city="gwangju"),  # 남구 · 점포 332 · 건물 84 · 건물당 3.95 · top10 41.27% · 주의 · 조사 research-d8d6e8d988b8
+}
+
+JEONJU_BATCH2_HUBS: dict[str, PageHub] = {
+    "jj-jungang4": PageHub("jj-jungang4", "전주 완산구 중앙동4가", 127.141936, 35.815449, 500, 700, city="jeonju"),  # 완산구 · 점포 2,178 · 건물 1,146 · 건물당 1.9 · top10 9.04% · 통과 · 조사 research-32e5c073c38e
+    "jj-junghwasan2": PageHub("jj-junghwasan2", "전주 완산구 중화산동2가", 127.116738, 35.817889, 500, 700, city="jeonju"),  # 완산구 · 점포 2,089 · 건물 883 · 건물당 2.37 · top10 10.2% · 통과 · 조사 research-d6bf3c9b9146
+    "jj-ua2": PageHub("jj-ua2", "전주 덕진구 우아동2가", 127.168477, 35.832027, 500, 700, city="jeonju"),  # 덕진구 · 점포 1,613 · 건물 801 · 건물당 2.01 · top10 5.02% · 통과 · 조사 research-3d1aec00858a
+    "jj-geumam": PageHub("jj-geumam", "전주 덕진구 금암동", 127.132113, 35.840226, 500, 700, city="jeonju"),  # 덕진구 · 점포 1,463 · 건물 680 · 건물당 2.15 · top10 11.69% · 통과 · 조사 research-97bd6aec8139
+    "jj-samcheon1": PageHub("jj-samcheon1", "전주 완산구 삼천동1가", 127.116382, 35.796827, 500, 700, city="jeonju"),  # 완산구 · 점포 1,333 · 건물 662 · 건물당 2.01 · top10 9.38% · 통과 · 조사 research-ecb5bb327522
+    "jj-jungdong": PageHub("jj-jungdong", "전주 덕진구 중동", 127.057069, 35.836727, 500, 700, city="jeonju"),  # 덕진구 · 점포 1,301 · 건물 232 · 건물당 5.61 · top10 22.67% · 통과 · 조사 research-64b3486bda70
+    "jj-songcheon2": PageHub("jj-songcheon2", "전주 덕진구 송천동2가", 127.123329, 35.869984, 500, 700, city="jeonju"),  # 덕진구 · 점포 1,194 · 건물 336 · 건물당 3.55 · top10 18.43% · 통과 · 조사 research-dc3354a751ab
+    "jj-hyoja1": PageHub("jj-hyoja1", "전주 완산구 효자동1가", 127.115969, 35.806752, 500, 700, city="jeonju"),  # 완산구 · 점포 1,123 · 건물 428 · 건물당 2.62 · top10 20.57% · 통과 · 조사 research-540803c79d05
+    "jj-pyeonghwa1": PageHub("jj-pyeonghwa1", "전주 완산구 평화동1가", 127.132861, 35.795043, 500, 700, city="jeonju"),  # 완산구 · 점포 1,100 · 건물 544 · 건물당 2.02 · top10 9.0% · 통과 · 조사 research-f137b90e1559
+    "jj-hyoja2": PageHub("jj-hyoja2", "전주 완산구 효자동2가", 127.10068, 35.808664, 500, 700, city="jeonju"),  # 점포 1,094 · 건물 500 · 건물당 2.19 · top10 9.23% · 통과 · 조사 research-request-b8f3094b6586
+    "jj-dongseohak": PageHub("jj-dongseohak", "전주 완산구 동서학동", 127.150606, 35.808641, 500, 700, city="jeonju"),  # 완산구 · 점포 1,030 · 건물 652 · 건물당 1.58 · top10 13.11% · 통과 · 조사 research-07d6a6a59621
+    "jj-junghwasan1": PageHub("jj-junghwasan1", "전주 완산구 중화산동1가", 127.129082, 35.813299, 500, 700, city="jeonju"),  # 완산구 · 점포 949 · 건물 485 · 건물당 1.96 · top10 8.75% · 통과 · 조사 research-08f6609cc990
+    "jj-ua3": PageHub("jj-ua3", "전주 덕진구 우아동3가", 127.153715, 35.848845, 500, 700, city="jeonju"),  # 덕진구 · 점포 948 · 건물 486 · 건물당 1.95 · top10 13.5% · 통과 · 조사 research-5e1b321994ff
+    "jj-hyoja3": PageHub("jj-hyoja3", "전주 완산구 효자동3가", 127.098925, 35.8326, 500, 700, city="jeonju"),  # 점포 789 · 건물 476 · 건물당 1.66 · top10 9.76% · 통과 · 조사 research-request-c0cbf6b2f92a
+    "jj-manseong": PageHub("jj-manseong", "전주 덕진구 만성동", 127.073096, 35.843454, 500, 700, city="jeonju"),  # 덕진구 · 점포 785 · 건물 182 · 건물당 4.31 · top10 23.82% · 통과 · 조사 research-ca2e48224f8f
+    "jj-inhu2": PageHub("jj-inhu2", "전주 덕진구 인후동2가", 127.145072, 35.842049, 500, 700, city="jeonju"),  # 덕진구 · 점포 784 · 건물 455 · 건물당 1.72 · top10 13.01% · 통과 · 조사 research-b6145a229665
+    "jj-yeoui2": PageHub("jj-yeoui2", "전주 덕진구 여의동2가", 127.076645, 35.871835, 500, 700, city="jeonju"),  # 덕진구 · 점포 684 · 건물 308 · 건물당 2.22 · top10 17.98% · 통과 · 조사 research-322f11af42a6
+    "jj-deokjin2": PageHub("jj-deokjin2", "전주 덕진구 덕진동2가", 127.109092, 35.844677, 500, 700, city="jeonju"),  # 덕진구 · 점포 523 · 건물 221 · 건물당 2.37 · top10 17.02% · 통과 · 조사 research-67312fb62d44
+    "jj-ecocity": PageHub("jj-ecocity", "전주 에코시티", 127.134449, 35.870602, 500, 700, city="jeonju"),  # 점포 500 · 건물 133 · 건물당 3.76 · top10 32.2% · 주의 · 조사 research-request-45ca584a30cc
+    "jj-hoseong1": PageHub("jj-hoseong1", "전주 덕진구 호성동1가", 127.150583, 35.860749, 500, 700, city="jeonju"),  # 덕진구 · 점포 432 · 건물 126 · 건물당 3.43 · top10 24.07% · 통과 · 조사 research-7edf319f0fac
+    "jj-hyoja2-south": PageHub("jj-hyoja2-south", "전주 완산구 효자동2가 남부", 127.101517, 35.797508, 500, 700, city="jeonju"),  # 점포 355 · 건물 99 · 건물당 3.59 · top10 36.06% · 주의 · 조사 research-request-b96238fbf8b6
+}
+
+GJ_JJ_BATCH2_HUBS: dict[str, PageHub] = {**GWANGJU_BATCH2_HUBS, **JEONJU_BATCH2_HUBS}
+
+# 거점 ↔ 그 거점이 된 조사 위치(data/gold/platform_research_locations.json 의 id). 서빙에 오른 거점의 조사 위치는
+# 지도 「조사 위치」 레이어에서 빠진다(docs/decision-research-locations-layer-2026-11-09.md §5 — 같은 자리를 두 번 그리지 않는다).
+GJ_JJ_BATCH2_RESEARCH_ID: dict[str, str] = {
+    "gj-gyerim": "research-0d6a2980d206",
+    "gj-jisan": "research-480477add26a",
+    "gj-usan-buk": "research-cd44c439bee8",
+    "gj-ssangchon": "research-d3fcc1ea3eb6",
+    "gj-yudong": "research-87fef559bfbe",
+    "gj-suwan": "research-f18e1be4c888",
+    "gj-nongseong": "research-a537e60212fc",
+    "gj-wolgok": "research-aa198661e1ba",
+    "gj-baegun": "research-6f147ceb2d99",
+    "gj-wolsan-nam": "research-65870e1377cd",
+    "gj-unam": "research-ee2001012de0",
+    "gj-gwangcheon": "research-ea16871ac664",
+    "gj-hwajeong": "research-f3aa418a9d09",
+    "gj-yangnim": "research-75ddbe7f8054",
+    "gj-munheung": "research-1dc1323ab5b3",
+    "gj-heukseok": "research-3f3c932eeb3d",
+    "gj-sinyong": "research-c791893737b7",
+    "gj-jangdeok": "research-494b10969020",
+    "gj-dongcheon": "research-6ce56f421f26",
+    "gj-gakhwa": "research-dc21ef2315a9",
+    "gj-hakdong": "research-7fabf07f0201",
+    "gj-jinwol": "research-1521999833d1",
+    "gj-sotae": "research-0422a3ecdea5",
+    "gj-pungam": "research-90108ace326c",
+    "gj-sanwol": "research-cf5c25b0e4f7",
+    "gj-maegok": "research-a277ddde3c67",
+    "gj-sinchon": "research-4264ab930f5b",
+    "gj-imam": "research-ded6e8ebd90b",
+    "gj-bia": "research-c8eb401a7a53",
+    "gj-nodae": "research-d8d6e8d988b8",
+    "jj-jungang4": "research-32e5c073c38e",
+    "jj-junghwasan2": "research-d6bf3c9b9146",
+    "jj-ua2": "research-3d1aec00858a",
+    "jj-geumam": "research-97bd6aec8139",
+    "jj-samcheon1": "research-ecb5bb327522",
+    "jj-jungdong": "research-64b3486bda70",
+    "jj-songcheon2": "research-dc3354a751ab",
+    "jj-hyoja1": "research-540803c79d05",
+    "jj-pyeonghwa1": "research-f137b90e1559",
+    "jj-hyoja2": "research-request-b8f3094b6586",
+    "jj-dongseohak": "research-07d6a6a59621",
+    "jj-junghwasan1": "research-08f6609cc990",
+    "jj-ua3": "research-5e1b321994ff",
+    "jj-hyoja3": "research-request-c0cbf6b2f92a",
+    "jj-manseong": "research-ca2e48224f8f",
+    "jj-inhu2": "research-b6145a229665",
+    "jj-yeoui2": "research-322f11af42a6",
+    "jj-deokjin2": "research-67312fb62d44",
+    "jj-ecocity": "research-request-45ca584a30cc",
+    "jj-hoseong1": "research-7edf319f0fac",
+    "jj-hyoja2-south": "research-request-b96238fbf8b6",
+}
+
 # 거점 id 별칭 → 정규 slug (프론트/레거시 경로 호환).
 ALIASES: dict[str, str] = {
     "gangnam-garosugil": "garosugil",
@@ -430,7 +554,7 @@ ALIASES: dict[str, str] = {
 # 그래서 **이름을 대고 부를 때만** 잡히게 한다.
 ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS,
                                 **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS,
-                                **GWANGJU_HUBS, **JEONJU_HUBS}
+                                **GWANGJU_HUBS, **JEONJU_HUBS, **GJ_JJ_BATCH2_HUBS}
 
 # ── 기본 순회 집합 (2026-09-03) ──────────────────────────────────────────────
 # 위 주석은 "`HUBS`(서울 54)가 기본 순회 집합"이라고 적었는데, 서울 2차 12거점이
@@ -461,6 +585,22 @@ GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
     "sinjungdong", "myeonghak", "sujin", "taepyeong", "yatap", "jeongja", "skku", "maetan",
     "ganeung", "osanst", "gyomun", "gwangmyeongsa", "jukjeon",
 })
+# 광주·전주 2차(2026-11-09 등록) — Tier1 · 정밀 커버리지 ≥80% · 서빙 대표값 앵커 격차 |gap| ≤ 30%p 를 통과한 거점만 넣는다.
+# 빈 집합에서 시작한다. 넣는 근거는 docs/decision-gwangju-jeonju-batch2-2026-11-09.md 의 거점별 표다.
+GJ_JJ_BATCH2_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-14 판정 — 51곳 중 48곳 통과(광주 29 · 전주 19). 기준: Tier1 · 정밀 커버리지 ≥80% ·
+    # 서빙 대표값 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님(scripts/chain_status.py). 거점별 표 → 결정 문서 §5
+    "gj-gyerim", "gj-jisan", "gj-usan-buk", "gj-ssangchon", "gj-yudong", "gj-suwan", "gj-nongseong", "gj-wolgok",
+    "gj-baegun", "gj-wolsan-nam", "gj-unam", "gj-gwangcheon", "gj-hwajeong", "gj-yangnim", "gj-munheung", "gj-heukseok",
+    "gj-sinyong", "gj-jangdeok", "gj-dongcheon", "gj-gakhwa", "gj-hakdong", "gj-jinwol", "gj-sotae", "gj-pungam",
+    "gj-sanwol", "gj-maegok", "gj-sinchon", "gj-bia", "gj-nodae",
+    "jj-jungang4", "jj-junghwasan2", "jj-ua2", "jj-geumam", "jj-samcheon1", "jj-jungdong", "jj-songcheon2", "jj-hyoja1",
+    "jj-pyeonghwa1", "jj-hyoja2", "jj-dongseohak", "jj-junghwasan1", "jj-ua3", "jj-hyoja3", "jj-inhu2", "jj-yeoui2",
+    "jj-ecocity", "jj-hoseong1", "jj-hyoja2-south",
+    # 탈락 3곳(등록·Gold 만 남긴다): gj-imam +36.2%p · jj-deokjin2 +38.6%p — 가드레일 밖 /
+    #   jj-manseong 대표값 미산출(노출 2동 · 정밀 커버리지 0%)
+})
+
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 # 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.
 ACTIVE_CITIES: frozenset[str] = frozenset({
@@ -479,6 +619,7 @@ ACTIVE_HUBS: dict[str, PageHub] = {
     slug: hub for slug, hub in ALL_HUBS.items()
     if hub.city in ACTIVE_CITIES and not hub.deferred
     and (slug not in GYEONGGI_BATCH3_HUBS or slug in GYEONGGI_BATCH3_SERVED_HUBS)
+    and (slug not in GJ_JJ_BATCH2_HUBS or slug in GJ_JJ_BATCH2_SERVED_HUBS)
 }
 
 

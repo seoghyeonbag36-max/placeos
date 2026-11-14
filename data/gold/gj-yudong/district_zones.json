@@ -1,0 +1,99 @@
+{
+ "slug": "gj-yudong",
+ "built_at": "2026-11-14T12:20:52+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 246,
+  "knn_vs_pnu_compared": 246,
+  "knn_vs_pnu_agree_pct": 98.4
+ },
+ "dropped_spillover": [
+  {
+   "n": "양동",
+   "buildings": 2,
+   "stores": 302,
+   "capacity": 2,
+   "active": 2
+  },
+  {
+   "n": "양3동",
+   "buildings": 1,
+   "stores": 18,
+   "capacity": 1,
+   "active": 1
+  }
+ ],
+ "residual": {
+  "buildings": 3,
+  "capacity": 3,
+  "active": 3
+ },
+ "zones": [
+  {
+   "n": "중앙동",
+   "grp": "유동",
+   "lat": 35.158682,
+   "lng": 126.905758,
+   "stores": 442,
+   "buildings": 97,
+   "capacity": 209,
+   "active": 161,
+   "vacancy_rate": 22.97,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "신안동",
+   "grp": "신안동",
+   "lat": 35.163126,
+   "lng": 126.904873,
+   "stores": 480,
+   "buildings": 66,
+   "capacity": 140,
+   "active": 108,
+   "vacancy_rate": 22.86,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "임동",
+   "grp": "임동",
+   "lat": 35.161363,
+   "lng": 126.899544,
+   "stores": 258,
+   "buildings": 52,
+   "capacity": 91,
+   "active": 70,
+   "vacancy_rate": 23.08,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "중흥1동",
+   "grp": "중흥동",
+   "lat": 35.160369,
+   "lng": 126.907799,
+   "stores": 147,
+   "buildings": 28,
+   "capacity": 52,
+   "active": 38,
+   "vacancy_rate": 26.92,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  }
+ ]
+}

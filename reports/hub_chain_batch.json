@@ -59,9 +59,9 @@
   "at": "2026-09-01T22:57:10",
   "minutes": 0.0
  },
- "finished_at": "2026-10-31T17:37:09",
- "stopped_reason": "quota (anseong)",
- "stopped_at": "2026-10-29T01:40:18",
+ "finished_at": "2026-11-14T20:44:53",
+ "stopped_reason": "battery 4%",
+ "stopped_at": "2026-11-10T02:04:59",
  "suwonst": {
   "stage": "anchor",
   "at": "2026-10-30T00:08:12",
@@ -377,5 +377,260 @@
   "stage": "anchor",
   "at": "2026-10-31T17:37:09",
   "minutes": 0.1
+ },
+ "gj-gyerim": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:05:11",
+  "minutes": 0.9
+ },
+ "gj-jisan": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:06:14",
+  "minutes": 1.0
+ },
+ "gj-usan-buk": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:07:26",
+  "minutes": 1.2
+ },
+ "gj-ssangchon": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:08:05",
+  "minutes": 0.6
+ },
+ "gj-yudong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:08:50",
+  "minutes": 0.7
+ },
+ "gj-suwan": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:08:50",
+  "minutes": 0.0
+ },
+ "gj-nongseong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:09:29",
+  "minutes": 0.7
+ },
+ "gj-wolgok": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:09:44",
+  "minutes": 0.3
+ },
+ "gj-baegun": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:10:29",
+  "minutes": 0.7
+ },
+ "gj-wolsan-nam": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:10:29",
+  "minutes": 0.0
+ },
+ "gj-unam": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:10:29",
+  "minutes": 0.0
+ },
+ "gj-gwangcheon": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:10:29",
+  "minutes": 0.0
+ },
+ "gj-hwajeong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:11:00",
+  "minutes": 0.5
+ },
+ "gj-yangnim": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:11:33",
+  "minutes": 0.6
+ },
+ "gj-munheung": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:11:47",
+  "minutes": 0.2
+ },
+ "gj-heukseok": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:06",
+  "minutes": 0.3
+ },
+ "gj-sinyong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:06",
+  "minutes": 0.0
+ },
+ "gj-jangdeok": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:23",
+  "minutes": 0.3
+ },
+ "gj-dongcheon": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:40",
+  "minutes": 0.3
+ },
+ "gj-gakhwa": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:40",
+  "minutes": 0.0
+ },
+ "gj-hakdong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:40",
+  "minutes": 0.0
+ },
+ "gj-jinwol": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-sotae": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-pungam": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-sanwol": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-maegok": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-sinchon": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-imam": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-bia": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "gj-nodae": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "jj-jungang4": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:12:41",
+  "minutes": 0.0
+ },
+ "jj-junghwasan2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:14:46",
+  "minutes": 2.1
+ },
+ "jj-ua2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:18:22",
+  "minutes": 3.6
+ },
+ "jj-geumam": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:21:07",
+  "minutes": 2.7
+ },
+ "jj-samcheon1": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:23:21",
+  "minutes": 2.2
+ },
+ "jj-jungdong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:23:52",
+  "minutes": 0.5
+ },
+ "jj-songcheon2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:25:05",
+  "minutes": 1.2
+ },
+ "jj-hyoja1": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:26:33",
+  "minutes": 1.5
+ },
+ "jj-pyeonghwa1": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:28:50",
+  "minutes": 2.3
+ },
+ "jj-hyoja2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:30:35",
+  "minutes": 1.7
+ },
+ "jj-dongseohak": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:33:10",
+  "minutes": 2.6
+ },
+ "jj-junghwasan1": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:35:02",
+  "minutes": 1.9
+ },
+ "jj-ua3": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:37:00",
+  "minutes": 2.0
+ },
+ "jj-hyoja3": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:38:30",
+  "minutes": 1.5
+ },
+ "jj-manseong": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:39:02",
+  "minutes": 0.5
+ },
+ "jj-inhu2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:40:45",
+  "minutes": 1.7
+ },
+ "jj-yeoui2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:42:10",
+  "minutes": 1.4
+ },
+ "jj-deokjin2": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:43:04",
+  "minutes": 0.9
+ },
+ "jj-ecocity": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:43:40",
+  "minutes": 0.6
+ },
+ "jj-hoseong1": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:44:18",
+  "minutes": 0.6
+ },
+ "jj-hyoja2-south": {
+  "stage": "anchor",
+  "at": "2026-11-14T20:44:53",
+  "minutes": 0.6
  }
 }

@@ -1,0 +1,92 @@
+{
+ "slug": "gj-sotae",
+ "built_at": "2026-11-14T12:20:53+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 102,
+  "knn_vs_pnu_compared": 102,
+  "knn_vs_pnu_agree_pct": 96.1
+ },
+ "dropped_spillover": [
+  {
+   "n": "방림2동",
+   "buildings": 2,
+   "stores": 23,
+   "capacity": 2,
+   "active": 2
+  }
+ ],
+ "residual": {
+  "buildings": 2,
+  "capacity": 2,
+  "active": 2
+ },
+ "zones": [
+  {
+   "n": "지원1동",
+   "grp": "소태동",
+   "lat": 35.127122,
+   "lng": 126.932363,
+   "stores": 233,
+   "buildings": 67,
+   "capacity": 98,
+   "active": 78,
+   "vacancy_rate": 20.41,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "학운동",
+   "grp": "학동",
+   "lat": 35.130818,
+   "lng": 126.931621,
+   "stores": 234,
+   "buildings": 17,
+   "capacity": 31,
+   "active": 24,
+   "vacancy_rate": 22.58,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "학동",
+   "grp": "학동",
+   "lat": 35.130905,
+   "lng": 126.928921,
+   "stores": 91,
+   "buildings": 8,
+   "capacity": 25,
+   "active": 21,
+   "vacancy_rate": 16.0,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "지원2동",
+   "grp": "소태동",
+   "lat": 35.123767,
+   "lng": 126.933667,
+   "stores": 59,
+   "buildings": 8,
+   "capacity": 15,
+   "active": 13,
+   "vacancy_rate": 13.33,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  }
+ ]
+}
