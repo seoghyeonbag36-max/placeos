@@ -1,0 +1,60 @@
+{
+ "slug": "gj-unam",
+ "built_at": "2026-11-14T12:20:53+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 183,
+  "knn_vs_pnu_compared": 183,
+  "knn_vs_pnu_agree_pct": 99.5
+ },
+ "dropped_spillover": [
+  {
+   "n": "운암3동",
+   "buildings": 2,
+   "stores": 182,
+   "capacity": 9,
+   "active": 4
+  }
+ ],
+ "residual": {
+  "buildings": 2,
+  "capacity": 9,
+  "active": 4
+ },
+ "zones": [
+  {
+   "n": "운암1동",
+   "grp": "운암동",
+   "lat": 35.176759,
+   "lng": 126.873787,
+   "stores": 807,
+   "buildings": 162,
+   "capacity": 339,
+   "active": 286,
+   "vacancy_rate": 15.63,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "운암2동",
+   "grp": "운암동",
+   "lat": 35.173202,
+   "lng": 126.878217,
+   "stores": 214,
+   "buildings": 19,
+   "capacity": 39,
+   "active": 34,
+   "vacancy_rate": 12.82,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  }
+ ]
+}

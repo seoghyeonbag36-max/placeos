@@ -1,0 +1,409 @@
+{
+  "source": "Gold 건물 마스터(공실 건물) + 건축물대장 상업면적(silver building_attrs.com_area_flr)",
+  "built_at": "2026-11-14T11:07:23+00:00",
+  "note": "면적은 건물 상업면적 ÷ 호실 수(호실당 평균, 평). 대장 면적이 없는 건물은 제외했다 — 면적을 가정하면 그 위 투자비·매출이 전부 가정이 된다. 층은 층별개요(bldg_flr_raw) 상업층의 **면적 비중**이다(floor_mix) — 유닛이 호실당 평균이므로 임대료도 층 가중평균으로 계산한다. 종전 '전부 1F 가정'은 계수를 최댓값에 고정해 임대료 상한을 만들었다. 그 층 가중평균도 여전히 상한이었다 — 공실 유닛은 점포가 있는 층에 있을 수 없는데 상업층 **전체**를 평균에 넣었기 때문이다. vac_floor_mix 는 점유가 확인된 층(occ_floors)을 덜어낸 것이고, vac_floor_mix_lo 는 층 미상 점포까지 낮은 층부터 점유로 배정한 것이다 — 임대료의 참값은 이 둘 사이에 있고 괄호 폭의 원인은 상가정보 flrNo 공란(약 30%)이다. 권리금은 거점 단위 소스가 없어 유닛에 없다 — 통계(상가건물임대차 실태조사 142006)는 있으나 전국 7,000 표본이라 시도·상권유형 단위다.",
+  "units": [
+    {
+      "id": "vu-1230010100103610004-1",
+      "n": "중흥동 361-4",
+      "grp": "의원",
+      "lat": 35.173422,
+      "lng": 126.913077,
+      "area": 66,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.2384,
+        "2F": 0.2539,
+        "3F": 0.2539,
+        "4F": 0.2539
+      },
+      "vac_floor_mix": {
+        "1F": 0.2384,
+        "2F": 0.2539,
+        "3F": 0.2539,
+        "4F": 0.2539
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.2384,
+        "2F": 0.2539,
+        "3F": 0.2539,
+        "4F": 0.2539
+      },
+      "occ_floors": [],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "의원",
+      "capacity": 4,
+      "active": 0,
+      "vacancy_rate": 100.0,
+      "bld_floors": 5,
+      "com_area_m2": 869.4
+    },
+    {
+      "id": "vu-1230011000102600010-1",
+      "n": "우산동 260-10",
+      "grp": "의약·화장품 소매",
+      "lat": 35.170503,
+      "lng": 126.921402,
+      "area": 54,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.5151,
+        "3F": 0.4849
+      },
+      "vac_floor_mix": {
+        "1F": 0.5151,
+        "3F": 0.4849
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.5151,
+        "3F": 0.4849
+      },
+      "occ_floors": [],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "의약·화장품 소매",
+      "capacity": 2,
+      "active": 0,
+      "vacancy_rate": 100.0,
+      "bld_floors": 5,
+      "com_area_m2": 355.2
+    },
+    {
+      "id": "vu-1230010100102780016-1",
+      "n": "중흥동 278-16",
+      "grp": "도서관·사적지",
+      "lat": 35.173493,
+      "lng": 126.914933,
+      "area": 60,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.3854,
+        "2F": 0.2031,
+        "3F": 0.4114
+      },
+      "vac_floor_mix": {
+        "1F": 0.3854,
+        "2F": 0.2031,
+        "3F": 0.4114
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.3854,
+        "2F": 0.2031,
+        "3F": 0.4114
+      },
+      "occ_floors": [
+        4
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "도서관·사적지",
+      "capacity": 4,
+      "active": 1,
+      "vacancy_rate": 75.0,
+      "bld_floors": 4,
+      "com_area_m2": 788.3
+    },
+    {
+      "id": "vu-1230011000101680001-1",
+      "n": "우산동 168-1",
+      "grp": "기타 교육",
+      "lat": 35.176495,
+      "lng": 126.919622,
+      "area": 56,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.3415,
+        "2F": 0.3292,
+        "4F": 0.3292
+      },
+      "vac_floor_mix": {
+        "1F": 0.3415,
+        "2F": 0.3292,
+        "4F": 0.3292
+      },
+      "vac_floor_mix_lo": {
+        "1F": 0.3415,
+        "2F": 0.3292,
+        "4F": 0.3292
+      },
+      "occ_floors": [
+        3
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "기타 교육",
+      "capacity": 4,
+      "active": 1,
+      "vacancy_rate": 75.0,
+      "bld_floors": 5,
+      "com_area_m2": 742.6
+    },
+    {
+      "id": "vu-1230011000101860037-1",
+      "n": "우산동 186-37",
+      "grp": "의원",
+      "lat": 35.172403,
+      "lng": 126.920048,
+      "area": 33,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.2628,
+        "2F": 0.2628,
+        "3F": 0.257,
+        "4F": 0.2173
+      },
+      "vac_floor_mix": {
+        "1F": 0.2628,
+        "2F": 0.2628,
+        "3F": 0.257,
+        "4F": 0.2173
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.3565,
+        "3F": 0.3487,
+        "4F": 0.2948
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "의원",
+      "capacity": 4,
+      "active": 1,
+      "vacancy_rate": 75.0,
+      "bld_floors": 4,
+      "com_area_m2": 435.4
+    },
+    {
+      "id": "vu-1230010100102760001-1",
+      "n": "중흥동 276-1",
+      "grp": "비알코올 ",
+      "lat": 35.174752,
+      "lng": 126.914415,
+      "area": 30,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.25,
+        "2F": 0.25,
+        "3F": 0.25,
+        "4F": 0.25
+      },
+      "vac_floor_mix": {
+        "1F": 0.25,
+        "2F": 0.25,
+        "3F": 0.25,
+        "4F": 0.25
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.3333,
+        "3F": 0.3333,
+        "4F": 0.3333
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "비알코올 ",
+      "capacity": 4,
+      "active": 1,
+      "vacancy_rate": 75.0,
+      "bld_floors": 5,
+      "com_area_m2": 396.4
+    },
+    {
+      "id": "vu-1230010100101310000-1",
+      "n": "육조빌딩",
+      "grp": "식료품 소매",
+      "lat": 35.171388,
+      "lng": 126.915456,
+      "area": 103,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.256,
+        "2F": 0.372,
+        "3F": 0.372
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "식료품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 1024.6
+    },
+    {
+      "id": "vu-1230010100101310000-2",
+      "n": "육조빌딩",
+      "grp": "식료품 소매",
+      "lat": 35.171594,
+      "lng": 126.915525,
+      "area": 103,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.256,
+        "2F": 0.372,
+        "3F": 0.372
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "식료품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 2,
+      "com_area_m2": 1024.6
+    },
+    {
+      "id": "vu-1230010100101310000-3",
+      "n": "육조빌딩",
+      "grp": "식료품 소매",
+      "lat": 35.171497,
+      "lng": 126.915532,
+      "area": 103,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.256,
+        "2F": 0.372,
+        "3F": 0.372
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "식료품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 1024.6
+    },
+    {
+      "id": "vu-1230010100101310000-4",
+      "n": "육조빌딩",
+      "grp": "식료품 소매",
+      "lat": 35.171461,
+      "lng": 126.915431,
+      "area": 103,
+      "floor": "1~3F",
+      "floor_mix": {
+        "1F": 0.256,
+        "2F": 0.372,
+        "3F": 0.372
+      },
+      "vac_floor_mix": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "3F": 0.5
+      },
+      "occ_floors": [
+        1
+      ],
+      "unknown_n": 0,
+      "floor_basis": "flr_ouln",
+      "was": "식료품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 2,
+      "com_area_m2": 1024.6
+    },
+    {
+      "id": "vu-1230011000101680002-1",
+      "n": "우산동 168-2",
+      "grp": "기타 상품 소매",
+      "lat": 35.17623,
+      "lng": 126.919573,
+      "area": 96,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.3737,
+        "2F": 0.3132,
+        "4F": 0.3132
+      },
+      "vac_floor_mix": {
+        "1F": 0.3737,
+        "2F": 0.3132,
+        "4F": 0.3132
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "4F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "기타 상품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 4,
+      "com_area_m2": 954.8
+    },
+    {
+      "id": "vu-1230011000101680002-2",
+      "n": "우산동 168-2",
+      "grp": "기타 상품 소매",
+      "lat": 35.17633,
+      "lng": 126.919504,
+      "area": 96,
+      "floor": "1~4F",
+      "floor_mix": {
+        "1F": 0.3737,
+        "2F": 0.3132,
+        "4F": 0.3132
+      },
+      "vac_floor_mix": {
+        "1F": 0.3737,
+        "2F": 0.3132,
+        "4F": 0.3132
+      },
+      "vac_floor_mix_lo": {
+        "2F": 0.5,
+        "4F": 0.5
+      },
+      "occ_floors": [],
+      "unknown_n": 1,
+      "floor_basis": "flr_ouln",
+      "was": "기타 상품 소매",
+      "capacity": 3,
+      "active": 1,
+      "vacancy_rate": 66.7,
+      "bld_floors": 1,
+      "com_area_m2": 954.8
+    }
+  ]
+}

@@ -587,7 +587,19 @@ GYEONGGI_BATCH3_SERVED_HUBS: frozenset[str] = frozenset({
 })
 # 광주·전주 2차(2026-11-09 등록) — Tier1 · 정밀 커버리지 ≥80% · 서빙 대표값 앵커 격차 |gap| ≤ 30%p 를 통과한 거점만 넣는다.
 # 빈 집합에서 시작한다. 넣는 근거는 docs/decision-gwangju-jeonju-batch2-2026-11-09.md 의 거점별 표다.
-GJ_JJ_BATCH2_SERVED_HUBS: frozenset[str] = frozenset()
+GJ_JJ_BATCH2_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-14 판정 — 51곳 중 48곳 통과(광주 29 · 전주 19). 기준: Tier1 · 정밀 커버리지 ≥80% ·
+    # 서빙 대표값 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님(scripts/chain_status.py). 거점별 표 → 결정 문서 §5
+    "gj-gyerim", "gj-jisan", "gj-usan-buk", "gj-ssangchon", "gj-yudong", "gj-suwan", "gj-nongseong", "gj-wolgok",
+    "gj-baegun", "gj-wolsan-nam", "gj-unam", "gj-gwangcheon", "gj-hwajeong", "gj-yangnim", "gj-munheung", "gj-heukseok",
+    "gj-sinyong", "gj-jangdeok", "gj-dongcheon", "gj-gakhwa", "gj-hakdong", "gj-jinwol", "gj-sotae", "gj-pungam",
+    "gj-sanwol", "gj-maegok", "gj-sinchon", "gj-bia", "gj-nodae",
+    "jj-jungang4", "jj-junghwasan2", "jj-ua2", "jj-geumam", "jj-samcheon1", "jj-jungdong", "jj-songcheon2", "jj-hyoja1",
+    "jj-pyeonghwa1", "jj-hyoja2", "jj-dongseohak", "jj-junghwasan1", "jj-ua3", "jj-hyoja3", "jj-inhu2", "jj-yeoui2",
+    "jj-ecocity", "jj-hoseong1", "jj-hyoja2-south",
+    # 탈락 3곳(등록·Gold 만 남긴다): gj-imam +36.2%p · jj-deokjin2 +38.6%p — 가드레일 밖 /
+    #   jj-manseong 대표값 미산출(노출 2동 · 정밀 커버리지 0%)
+})
 
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 # 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.

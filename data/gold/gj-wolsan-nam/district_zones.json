@@ -1,0 +1,100 @@
+{
+ "slug": "gj-wolsan-nam",
+ "built_at": "2026-11-14T12:20:53+00:00",
+ "source": "소상공인 상가정보 행정동(adongNm) × gold/page_building_master",
+ "method": "adong_knn9",
+ "note": "건물→행정동 배정은 가장 가까운 점포 9개의 다수결이다. PNU 조인은 79.3% 만 붙고 빠지는 쪽이 공실에 몰려 과소추정을 낳는다. 공실률은 gold_vacancy 와 같은 규칙(집합건물 제외·floor_ouln 분모·polygon_only 제외·지번 중복 제거). 감성(s/d/r/f)은 좌표를 가진 점포 리뷰 채널이 없어 null 이다 — feature-platform §0-K.",
+ "assign": {
+  "counted_buildings": 313,
+  "knn_vs_pnu_compared": 313,
+  "knn_vs_pnu_agree_pct": 97.8
+ },
+ "dropped_spillover": [],
+ "residual": {
+  "buildings": 0,
+  "capacity": 0,
+  "active": 0
+ },
+ "zones": [
+  {
+   "n": "월산4동",
+   "grp": "월산동",
+   "lat": 35.144764,
+   "lng": 126.889736,
+   "stores": 479,
+   "buildings": 125,
+   "capacity": 230,
+   "active": 191,
+   "vacancy_rate": 16.96,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z1"
+  },
+  {
+   "n": "화정2동",
+   "grp": "화정동",
+   "lat": 35.145516,
+   "lng": 126.88544,
+   "stores": 460,
+   "buildings": 88,
+   "capacity": 188,
+   "active": 149,
+   "vacancy_rate": 20.74,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z2"
+  },
+  {
+   "n": "월산5동",
+   "grp": "월산동",
+   "lat": 35.141073,
+   "lng": 126.892417,
+   "stores": 271,
+   "buildings": 68,
+   "capacity": 119,
+   "active": 88,
+   "vacancy_rate": 26.05,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z3"
+  },
+  {
+   "n": "농성2동",
+   "grp": "농성동",
+   "lat": 35.147959,
+   "lng": 126.885877,
+   "stores": 174,
+   "buildings": 18,
+   "capacity": 30,
+   "active": 27,
+   "vacancy_rate": 10.0,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z4"
+  },
+  {
+   "n": "주월2동",
+   "grp": "주월동",
+   "lat": 35.14084,
+   "lng": 126.887127,
+   "stores": 69,
+   "buildings": 14,
+   "capacity": 24,
+   "active": 22,
+   "vacancy_rate": 8.33,
+   "s": null,
+   "d": null,
+   "r": null,
+   "f": [],
+   "id": "z5"
+  }
+ ]
+}

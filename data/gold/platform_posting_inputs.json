@@ -1,7 +1,7 @@
 {
   "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
   "quarter": "20262",
-  "built_at": "2026-10-31T14:07:13+00:00",
+  "built_at": "2026-11-14T11:48:45+00:00",
   "rent_unit": "천원/㎡·월 (R-ONE 소규모상가, 사실상 1층 기준)",
   "floor_factor": {
     "B2": 0.6,
@@ -442,8 +442,62 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-gyerim": {
+      "rent_per_m2_krw_thousand": 19.09,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-jisan": {
+      "rent_per_m2_krw_thousand": 19.09,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-yangnim": {
+      "rent_per_m2_krw_thousand": 19.09,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-hakdong": {
+      "rent_per_m2_krw_thousand": 19.09,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "cheolsan": {
+      "rent_per_m2_krw_thousand": 37.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gwangmyeongsa": {
+      "rent_per_m2_krw_thousand": 37.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "gj-geumho": {
       "rent_per_m2_krw_thousand": 27.57,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-hwajeong": {
+      "rent_per_m2_krw_thousand": 27.57,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-pungam": {
+      "rent_per_m2_krw_thousand": 27.57,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gyeongan": {
+      "rent_per_m2_krw_thousand": 23.9,
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
@@ -454,8 +508,80 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-jinwol": {
+      "rent_per_m2_krw_thousand": 11.22,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-sotae": {
+      "rent_per_m2_krw_thousand": 11.22,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-nodae": {
+      "rent_per_m2_krw_thousand": 11.22,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "guri": {
+      "rent_per_m2_krw_thousand": 35.04,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gyomun": {
+      "rent_per_m2_krw_thousand": 35.04,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "gj-sangmu": {
       "rent_per_m2_krw_thousand": 18.96,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-ssangchon": {
+      "rent_per_m2_krw_thousand": 18.96,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-dongcheon": {
+      "rent_per_m2_krw_thousand": 18.96,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-east": {
+      "rent_per_m2_krw_thousand": 12.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-junghwasan1": {
+      "rent_per_m2_krw_thousand": 12.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-ua3": {
+      "rent_per_m2_krw_thousand": 12.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-inhu2": {
+      "rent_per_m2_krw_thousand": 12.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gimnyangjang": {
+      "rent_per_m2_krw_thousand": 21.68,
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
@@ -466,7 +592,43 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-sinchon": {
+      "rent_per_m2_krw_thousand": 19.28,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-west": {
+      "rent_per_m2_krw_thousand": 13.6,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-geumam": {
+      "rent_per_m2_krw_thousand": 13.6,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-hyoja3": {
+      "rent_per_m2_krw_thousand": 13.6,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "dongducheon": {
+      "rent_per_m2_krw_thousand": 14.05,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "gj-yangsan": {
+      "rent_per_m2_krw_thousand": 14.52,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-sinyong": {
       "rent_per_m2_krw_thousand": 14.52,
       "flpop": null,
       "foot": null,
@@ -484,6 +646,18 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-unam": {
+      "rent_per_m2_krw_thousand": 13.03,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-maegok": {
+      "rent_per_m2_krw_thousand": 13.03,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "byeongjeom": {
       "rent_per_m2_krw_thousand": 24.75,
       "flpop": null,
@@ -496,7 +670,55 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-yudong": {
+      "rent_per_m2_krw_thousand": 15.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-nongseong": {
+      "rent_per_m2_krw_thousand": 15.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-baegun": {
+      "rent_per_m2_krw_thousand": 15.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-wolsan-nam": {
+      "rent_per_m2_krw_thousand": 15.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-gwangcheon": {
+      "rent_per_m2_krw_thousand": 15.76,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "bucheonst": {
+      "rent_per_m2_krw_thousand": 28.5,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "songnae": {
+      "rent_per_m2_krw_thousand": 28.5,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "yeokgok": {
+      "rent_per_m2_krw_thousand": 28.5,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "sinjungdong": {
       "rent_per_m2_krw_thousand": 28.5,
       "flpop": null,
       "foot": null,
@@ -508,7 +730,37 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-usan-buk": {
+      "rent_per_m2_krw_thousand": 21.9,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-munheung": {
+      "rent_per_m2_krw_thousand": 21.9,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-gakhwa": {
+      "rent_per_m2_krw_thousand": 21.9,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "sinheung": {
+      "rent_per_m2_krw_thousand": 27.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "sujin": {
+      "rent_per_m2_krw_thousand": 27.88,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "taepyeong": {
       "rent_per_m2_krw_thousand": 27.88,
       "flpop": null,
       "foot": null,
@@ -520,8 +772,32 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "gj-suwan": {
+      "rent_per_m2_krw_thousand": 21.02,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-sanwol": {
+      "rent_per_m2_krw_thousand": 21.02,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "gj-bia": {
+      "rent_per_m2_krw_thousand": 21.02,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "suwonst": {
       "rent_per_m2_krw_thousand": 51.0,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "songtan": {
+      "rent_per_m2_krw_thousand": 16.61,
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
@@ -532,8 +808,56 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "myeonghak": {
+      "rent_per_m2_krw_thousand": 32.5,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "yeoju": {
+      "rent_per_m2_krw_thousand": 17.44,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "osan": {
+      "rent_per_m2_krw_thousand": 19.2,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "osanst": {
+      "rent_per_m2_krw_thousand": 19.2,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "suji": {
+      "rent_per_m2_krw_thousand": 25.28,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jukjeon": {
+      "rent_per_m2_krw_thousand": 25.28,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "uijeongbust": {
       "rent_per_m2_krw_thousand": 34.43,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "ganeung": {
+      "rent_per_m2_krw_thousand": 34.43,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "icheon": {
+      "rent_per_m2_krw_thousand": 17.14,
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
@@ -592,162 +916,6 @@
       "foot": null,
       "rent_quarter": "20262"
     },
-    "pajang": {
-      "rent_per_m2_krw_thousand": 19.88,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "jj-east": {
-      "rent_per_m2_krw_thousand": 12.88,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "jj-west": {
-      "rent_per_m2_krw_thousand": 13.6,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "jj-hanok": {
-      "rent_per_m2_krw_thousand": 39.75,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "jj-songcheon": {
-      "rent_per_m2_krw_thousand": 12.77,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "cheolsan": {
-      "rent_per_m2_krw_thousand": 37.76,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "gwangmyeongsa": {
-      "rent_per_m2_krw_thousand": 37.76,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "gyeongan": {
-      "rent_per_m2_krw_thousand": 23.9,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "guri": {
-      "rent_per_m2_krw_thousand": 35.04,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "gyomun": {
-      "rent_per_m2_krw_thousand": 35.04,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "gimnyangjang": {
-      "rent_per_m2_krw_thousand": 21.68,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "dongducheon": {
-      "rent_per_m2_krw_thousand": 14.05,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "songnae": {
-      "rent_per_m2_krw_thousand": 28.5,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "yeokgok": {
-      "rent_per_m2_krw_thousand": 28.5,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "sinjungdong": {
-      "rent_per_m2_krw_thousand": 28.5,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "sujin": {
-      "rent_per_m2_krw_thousand": 27.88,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "taepyeong": {
-      "rent_per_m2_krw_thousand": 27.88,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "songtan": {
-      "rent_per_m2_krw_thousand": 16.61,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "myeonghak": {
-      "rent_per_m2_krw_thousand": 32.5,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "yeoju": {
-      "rent_per_m2_krw_thousand": 17.44,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "osan": {
-      "rent_per_m2_krw_thousand": 19.2,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "osanst": {
-      "rent_per_m2_krw_thousand": 19.2,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "suji": {
-      "rent_per_m2_krw_thousand": 25.28,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "jukjeon": {
-      "rent_per_m2_krw_thousand": 25.28,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "ganeung": {
-      "rent_per_m2_krw_thousand": 34.43,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
-    "icheon": {
-      "rent_per_m2_krw_thousand": 17.14,
-      "flpop": null,
-      "foot": null,
-      "rent_quarter": "20262"
-    },
     "pyeongtaekst": {
       "rent_per_m2_krw_thousand": 20.03,
       "flpop": null,
@@ -766,6 +934,36 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "jj-songcheon": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-songcheon2": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-yeoui2": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-ecocity": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-hoseong1": {
+      "rent_per_m2_krw_thousand": 12.77,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "giheung": {
       "rent_per_m2_krw_thousand": 29.82,
       "flpop": null,
@@ -774,6 +972,42 @@
     },
     "sincheonst": {
       "rent_per_m2_krw_thousand": 20.42,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-hanok": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-jungang4": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-ua2": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-pyeonghwa1": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jj-dongseohak": {
+      "rent_per_m2_krw_thousand": 39.75,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "pajang": {
+      "rent_per_m2_krw_thousand": 19.88,
       "flpop": null,
       "foot": null,
       "rent_quarter": "20262"
