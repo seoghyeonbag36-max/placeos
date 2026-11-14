@@ -1,7 +1,7 @@
 {
   "source": "서울 열린데이터 상권분석 추정매출(VwsmTrdarSelngQq) ÷ 점포수(VwsmTrdarStorQq) ÷ 3개월. 단위 만원/월, 점포당.",
   "quarter": "20262",
-  "built_at": "2026-11-14T11:49:06+00:00",
+  "built_at": "2026-11-14T22:56:46+00:00",
   "min_stores": 5,
   "tier_induty": {
     "premium": {
@@ -118,7 +118,7 @@
     }
   },
   "coverage": {
-    "served": 206,
+    "served": 203,
     "full": 79,
     "missing_tiers": {
       "garak": [
@@ -208,7 +208,6 @@
       "jj-songcheon",
       "gj-gyerim",
       "gj-jisan",
-      "gj-usan-buk",
       "gj-ssangchon",
       "gj-yudong",
       "gj-suwan",
@@ -222,7 +221,6 @@
       "gj-yangnim",
       "gj-munheung",
       "gj-heukseok",
-      "gj-sinyong",
       "gj-jangdeok",
       "gj-dongcheon",
       "gj-gakhwa",
@@ -240,7 +238,6 @@
       "jj-ua2",
       "jj-geumam",
       "jj-samcheon1",
-      "jj-jungdong",
       "jj-songcheon2",
       "jj-hyoja1",
       "jj-pyeonghwa1",

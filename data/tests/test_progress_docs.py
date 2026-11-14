@@ -146,9 +146,10 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
                 # 2026-11-03 전주·추가 경기 공개: 점포 업종만 수집됐고 블로그·검색 트렌드는 없다.
                 # 진행률 게이트는 낮은 채 보존한다. 기존 거점 누락까지 허용하지 않는다.
                 import csv
-                from data.config.page_hubs import JEONJU_HUBS
+                from data.config.page_hubs import GJ_JJ_BATCH2_SERVED_HUBS, JEONJU_HUBS
                 expansion = json.loads(_read("reports/regional_hub_candidates_2026-11-03.json"))
-                category_only_hubs = set(JEONJU_HUBS) | set(expansion["added_ids"])
+                # 2026-11-15 광주·전주 2차 서빙 45곳도 같다 — 점포 업종만 있고 블로그·검색 트렌드는 없다.
+                category_only_hubs = set(JEONJU_HUBS) | set(expansion["added_ids"]) | set(GJ_JJ_BATCH2_SERVED_HUBS)
                 required_kind = "blog_keyword" if g["name"] == "상권 콘텐츠 컨텍스트" else "trend"
                 missing = set()
                 for slug in ACTIVE_HUBS:
