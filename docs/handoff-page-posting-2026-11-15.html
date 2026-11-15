@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page·Posting 작업 인계</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --surface: #ffffff;
+    --fg: #1c1e22;
+    --muted: #5a606a;
+    --line: #e2e3e7;
+    --code-bg: #f0f1f3;
+    --team: #1d5fd6;
+    --team-bg: #e7effd;
+    --ours: #6a4bb8;
+    --ours-bg: #efeafa;
+    --decide: #9a5600;
+    --decide-bg: #fdf1df;
+    --ok: #18794e;
+    --ok-bg: #e5f4ec;
+    --warn: #b42318;
+    --warn-bg: #fdecea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111316;
+      --surface: #191c20;
+      --fg: #e6e8eb;
+      --muted: #a0a6af;
+      --line: #2b2f35;
+      --code-bg: #23272c;
+      --team: #86adff;
+      --team-bg: #1a2842;
+      --ours: #bba6f6;
+      --ours-bg: #28213d;
+      --decide: #f1b864;
+      --decide-bg: #382810;
+      --ok: #6fd3a1;
+      --ok-bg: #12301f;
+      --warn: #ff9a8f;
+      --warn-bg: #3a1714;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111316; --surface: #191c20; --fg: #e6e8eb; --muted: #a0a6af; --line: #2b2f35; --code-bg: #23272c;
+    --team: #86adff; --team-bg: #1a2842; --ours: #bba6f6; --ours-bg: #28213d;
+    --decide: #f1b864; --decide-bg: #382810; --ok: #6fd3a1; --ok-bg: #12301f; --warn: #ff9a8f; --warn-bg: #3a1714;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 16px 80px; }
+  header { margin-bottom: 28px; }
+  .eyebrow { color: var(--muted); font-size: 14px; letter-spacing: .02em; margin: 0 0 6px; }
+  h1 { font-size: 30px; line-height: 1.3; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h2 { font-size: 22px; line-height: 1.35; margin: 48px 0 14px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; margin: 28px 0 10px; }
+  h4 { font-size: 16px; margin: 20px 0 6px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin: 4px 0; }
+  a { color: var(--team); }
+  code {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, "D2Coding", monospace;
+    font-size: .88em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 8px 0 14px;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; word-break: normal; }
+
+  .lede { font-size: 17px; color: var(--fg); }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  .chip {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    vertical-align: 2px;
+  }
+  .chip.team { background: var(--team-bg); color: var(--team); }
+  .chip.ours { background: var(--ours-bg); color: var(--ours); }
+  .chip.decide { background: var(--decide-bg); color: var(--decide); }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); }
+
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 18px 0 8px;
+    font-size: 15px;
+  }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  nav.toc a { color: var(--fg); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  .callout {
+    border-left: 4px solid var(--team);
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0 16px;
+  }
+  .callout.decide { border-left-color: var(--decide); }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout > :last-child { margin-bottom: 0; }
+
+  .tbl { overflow-x: auto; margin: 8px 0 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 13.5px; color: var(--muted); font-weight: 600; background: var(--code-bg); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.k { font-weight: 600; white-space: nowrap; }
+
+  /* 역할 분담 레인 */
+  .lanes { display: grid; grid-template-columns: 132px repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0 8px; }
+  .lane-h { font-size: 13px; color: var(--muted); font-weight: 600; padding: 0 2px; align-self: end; }
+  .lane-name { font-weight: 700; font-size: 14px; align-self: center; line-height: 1.4; }
+  .lane-name small { display: block; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    min-height: 92px;
+  }
+  .card.team { border-top-color: var(--team); }
+  .card.ours { border-top-color: var(--ours); }
+  .card.empty { border-style: dashed; background: transparent; border-top-width: 1px; }
+  .card b { display: block; font-size: 15px; margin-bottom: 4px; }
+  .card .dep { display: block; color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  @media (max-width: 720px) {
+    .lanes { grid-template-columns: 1fr; }
+    .lane-h { display: none; }
+    .card.empty { display: none; }
+    .lane-name { margin-top: 10px; }
+    nav.toc ol { columns: 1; }
+    h1 { font-size: 25px; }
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 18px 6px;
+    margin: 14px 0 18px;
+  }
+  .step > h3 { margin-top: 0; }
+  .step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .step-head h3 { margin: 0; }
+
+  .item { border-top: 1px dashed var(--line); padding: 12px 0 8px; }
+  .item:first-of-type { border-top: 0; }
+  .item h4 { margin: 0 0 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  dl.kv { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 12px; margin: 0 0 6px; font-size: 15px; }
+  dl.kv dt { color: var(--muted); font-weight: 600; font-size: 13.5px; padding-top: 2px; }
+  dl.kv dd { margin: 0; }
+  @media (max-width: 520px) {
+    dl.kv { grid-template-columns: 1fr; }
+    dl.kv dt { padding-top: 6px; }
+  }
+
+  footer { margin-top: 56px; color: var(--muted); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  @media print {
+    body { background: #fff; color: #000; font-size: 11pt; }
+    nav.toc { display: none; }
+    .step, .tbl, .card { break-inside: avoid; }
+    a { color: inherit; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">PlaceOS · 작업 인계 · 2026-11-15</p>
+  <h1>Page·Posting 작업 인계 — 「예측」에서 「계약 전 확인」으로</h1>
+  <p class="lede">Posting·Program 을 없애지 않고, 네 트랙이 같은 질문 흐름(계약 전 확인)에 서도록 다시 겁니다.
+  이 문서는 그중 <span class="chip team">팀원</span> 몫인 <b>Page·Posting</b> 의 작업 순서와 방법,
+  그리고 <span class="chip ours">본 작업</span>(Program·Platform)과 맞물리는 지점을 적었습니다.</p>
+  <div class="meta">
+    <span>상태: <span class="chip ok">결정 ①②④ 승인 · ③-b 시행</span> <span class="chip decide">③-a(인테리어 3D) 보류</span> (2026-11-15 · 이 문서는 그날의 스냅샷 — 이후 진행은 결정 문서 §5)</span>
+    <span>저장소: <code>spaceos/</code> (모노레포)</span>
+    <span>숫자는 기준일이 붙어 있고 낡습니다 — 인용 전 <code>python scripts/pppp_status.py</code></span>
+  </div>
+  <nav class="toc" aria-label="목차">
+    <ol>
+      <li><a href="#why">왜 바꾸나</a></li>
+      <li><a href="#questions">바뀌는 네 질문</a></li>
+      <li><a href="#lanes">역할 분담과 순서</a></li>
+      <li><a href="#posting">1단계 · Posting</a></li>
+      <li><a href="#page">2단계 · Page</a></li>
+      <li><a href="#contracts">맞물리는 인터페이스</a></li>
+      <li><a href="#decisions">결정 대기</a></li>
+      <li><a href="#rules">공통 규칙 · 완료 판정</a></li>
+      <li><a href="#ours">본 작업 쪽 순서(참고)</a></li>
+      <li><a href="#refs">참고 자료 · 로컬 함정</a></li>
+    </ol>
+  </nav>
+</header>
+
+<section id="why">
+<h2>1. 왜 바꾸나</h2>
+<p>개발자 모임 피드백(2026-11-15): <b>Platform·Page 는 좋다. Posting·Program 으로 가면서 내용이 산으로 가고,
+그 숫자가 「가설」이라 믿기 어렵다. 인테리어·오프라인 마케팅이 부동산 앱에 필요한가?</b></p>
+<p>저장소 산출물로 확인한 원인은 셋입니다.</p>
+<ol>
+  <li><b>질문이 바뀐다.</b> Platform·Page 는 「어디 · 몇 층」을 실측으로 답하는데, Posting 은 「고급화·가성비·기능중심 중
+  어느 전략」이라는 사업계획 질문으로 넘어간다. 업종이 정해진 창업자는 그렇게 생각하지 않는다.</li>
+  <li><b>결론 숫자가 추정 네 겹이다.</b> 회수기간 = R-ONE 지역 평균 임대료 × 상권·업종 평균 추정매출 × 면적 비례 ×
+  <b>손으로 적은 투자비 계수</b>. 그래서 추천 전략의 회수가 1개월 미만인 유닛이 <b>891 중 296</b>(2026-10-28)이고,
+  화면이 그 자리들에 「한 달 안에 본전」이라고 말한다.</li>
+  <li><b>자리 사실과 사업계획이 한 화면에 섞였다.</b> Posting 7쪽 중 「주변 업종 지도」「찾아오는 길」은 Page 성격의 자리 사실이다.</li>
+</ol>
+<div class="callout">
+  <p><b>방향</b> — 예측을 줄이고 확인을 늘린다. 숫자는 실측·공식 통계·사용자가 들은 금액 위에 세우고,
+  그 위에서 계산만 한다. 「얼마 벌까」 대신 「이 조건이면 얼마나 팔아야 하나」, 「이 층이 비었다」 다음에 「내 업종이 들어갈 수 있나」.</p>
+</div>
+</section>
+
+<section id="questions">
+<h2>2. 바뀌는 네 질문 <span class="chip ok">결정 ② 승인 · 11-15</span></h2>
+<div class="tbl"><table>
+  <thead><tr><th>트랙</th><th>지금</th><th>바뀐 질문</th><th>담당</th></tr></thead>
+  <tbody>
+    <tr><td class="k">Platform</td><td>이 입지는 어떤 플랫폼인가</td><td><b>현행 문구 유지</b> <span class="chip ok">11-15 결정</span> — 승인안 「이 상권은 내 업종에 맞나 — 결과(개업 뒤 생존)로 검증한 순위」는 전방 검증에서 <code>실력</code> 판정이 나온 뒤 옮김(첫 계산이 구분불가)</td><td><span class="chip ours">본 작업</span></td></tr>
+    <tr><td class="k">Page</td><td>어디에 page 자리가 있나</td><td>어느 층이 비었고, <b>내 업종이 들어갈 수 있나</b></td><td><span class="chip team">팀원</span></td></tr>
+    <tr><td class="k">Posting</td><td>어떤 가격대로 posting 할까</td><td><b>이 층 조건이면 얼마에 몇 개를 팔아야 하나</b></td><td><span class="chip team">팀원</span></td></tr>
+    <tr><td class="k">Program</td><td>누구와 잇고 어떻게 알릴까</td><td><b>계약 전에 어떻게 작게 확인하나</b>(답사·팝업 판정)</td><td><span class="chip ours">본 작업</span></td></tr>
+  </tbody>
+</table></div>
+<p>Price→Posting · Promotion→Program 대응은 유지됩니다. 네 트랙 화면·레일·진입로는 그대로 둡니다(아래 공통 규칙).
+문구는 <a href="#decisions">결정 ②</a>로 확정됐습니다(2026-11-15). 화면·문서 문구는 트랙별 구현 PR 이 옮깁니다 — Page·Posting 행과 랜딩 문구는 팀원 PR 에서.</p>
+<p>정체성 문장 개정본: 「업종이 정해진 예비창업자와, 업종을 바꾸거나 상권을 옮기려는 사업자가 <b>계약하기 전에</b> 어느 상권이 내 업종에 맞는지 ·
+어느 건물 몇 층이 비었고 그 층에 내 업종이 들어갈 수 있는지 · 그 조건이면 얼마나 팔아야 하는지 · 계약 전에 작게 확인하는 방법까지 본다.」
+(결정 기록: <code>docs/decision-confirm-before-contract-2026-11-15.md</code>)</p>
+</section>
+
+<section id="lanes">
+<h2>3. 역할 분담과 순서</h2>
+<p>왼쪽부터 순서입니다. 팀원이 둘이면 1단계와 2단계를 나눠 병행할 수 있습니다 — 0단계(후보 조회 #240)는 머지됐으니 2단계를 시작할 수 있습니다.</p>
+<div class="lanes" role="table" aria-label="역할 분담 레인">
+  <div class="lane-h"></div>
+  <div class="lane-h">먼저</div>
+  <div class="lane-h">다음</div>
+  <div class="lane-h">그다음</div>
+  <div class="lane-h">나중</div>
+
+  <div class="lane-name">팀원<small>Page · Posting</small></div>
+  <div class="card team"><b>1 · Posting 사실화</b>P1 투자비 실측 · P2 요구치 · P3 들은 금액 · P4 근거 배지 · 7쪽→3쪽
+    <span class="dep">넘겨줌 → 3단계(요구치)</span></div>
+  <div class="card team"><b>2 · Page 입점 점검</b>「내 업종이 들어갈 수 있나」 · 자리 사실을 Page 로
+    <span class="dep">선행: 0단계 머지됨(#240) · 넘겨줌 → 1·3단계</span></div>
+  <div class="card empty"></div>
+  <div class="card empty"></div>
+
+  <div class="lane-name">본 작업<small>Program · Platform</small></div>
+  <div class="card ours"><b>0 · 정리 · 결정</b>후보 조회 브랜치 머지 · 변경 전 스냅샷 · 결정 받기 <span class="chip ok">결정 ✓ 11-15</span></div>
+  <div class="card ours"><b>3 · Program 작게 확인</b>목표선 = Posting 요구치 · 가설 검증 먼저
+    <span class="dep">선행: 1단계 P2 · 2단계 결과</span></div>
+  <div class="card ours"><b>4 · Platform 결과 검증</b>인허가 생존으로 상권 순위 검증(데이터 작업은 0단계부터 옆에서)</div>
+  <div class="card ours"><b>5 · 현장 고리</b>답사 기록 · 임대료 오차 KPI
+    <span class="dep">처리방침 결정 ④ 승인 · 착수 미정</span></div>
+</div>
+<p style="font-size:14px;color:var(--muted)">사람 몫(병행): 458층 현장 라벨(빈 층 판정 KPI · 지금 0/458) · 지원 공고 50건 라벨.</p>
+</section>
+
+<section id="posting">
+<h2>4. 1단계 · Posting — 숫자를 사실 위로</h2>
+<div class="step">
+  <div class="step-head"><span class="chip team">팀원</span><h3>목표: 「N개월이면 본전」을 근거 있는 요구치로 바꾼다</h3></div>
+
+  <div class="item">
+    <h4>P1 · 투자비 계수를 공정위 실측으로 <span class="chip ok">결정 ① 승인 · 착수 가능</span></h4>
+    <dl class="kv">
+      <dt>지금</dt><dd><code>apps/backend/app/services/districts.py</code> 의 <code>tier_scenarios</code> 안
+        <code>invest = {...}</code>(tier별 평당 계수 + 고정비) — 손으로 적은 값. 회수기간의 분자다.</dd>
+      <dt>방법</dt><dd>공정위 가맹사업 정보공개서의 업종별 인테리어·초기비용(평당)으로 교체. 점포 면적 A 는 이미 같은 원천에서 읽는다
+        (<code>posting_revenue._area_measured</code> ← <code>data/pipelines/build_posting_store_area.py</code>).
+        <b>먼저 그 원천에 인테리어·기타 초기비용 필드가 있는지 1콜로 확인</b>하고 결과를 <code>docs/finding-*.md</code> 로 남긴다.</dd>
+      <dt>통과</dt><dd>0단계 스냅샷과 <b>같은 스크립트</b>로 「추천 회수 1개월 미만 유닛 수」 전·후 보고(10-28 기준 296/891).
+        목표치는 미리 정하지 않는다. <code>apps/backend/tests/test_posting_revenue.py</code> 계열 유지·보강.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>P2 · 예측을 요구치로 뒤집기 <span class="chip warn">3단계가 기다림</span></h4>
+    <dl class="kv">
+      <dt>지금</dt><dd>머리 문장이 「N개월이면 본전」 — 흐름 R5 <code>apps/frontend/src/flow/screens/Cost.tsx</code>,
+        지도 탐색 <code>apps/frontend/src/pages/PostingConsole.tsx</code>.</dd>
+      <dt>방법</dt><dd>월세(들은 금액 → 없으면 R-ONE 범위) · 객단가·원가율(사용자 입력) · 운영비율(KOSIS)로
+        <b>필요한 하루 판매량·월매출</b>을 계산하고, <b>같은 상권·같은 업종 점포당 추정매출 대비 %</b>와
+        <b>서울 상권 분포에서의 분위</b>를 나란히 보인다. <code>components/MenuPlanner.tsx</code> 가 이미 하루 판매량을 계산하니 그 위에 얹는다.
+        예측 모델을 새로 만들지 않는다 — 비교 기준은 공식 통계라 「실력」을 주장할 필요가 없다.</dd>
+      <dt>통과</dt><dd>R5 · Posting 머리 문장이 요구치 문장. 응답에 숫자마다 근거 층위 필드. 백엔드·프론트 테스트. 바뀐 API 실제 응답 확인.
+        응답 모양은 <a href="#contracts">인터페이스 ①</a>.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>P3 · 사용자가 들은 금액을 기본 경로로</h4>
+    <dl class="kv">
+      <dt>방법</dt><dd>흐름 <code>Cost.tsx</code> 의 「들은 계약 금액」 경로(Q8)를 지도 탐색 Posting 에도 같은 순서로:
+        중개사에게 들은 보증금·월세·권리금 → 없을 때만 R-ONE 범위를 「참고 범위」로.</dd>
+      <dt>통과</dt><dd>테스트: 입력값이 있으면 추정치를 이긴다 · 입력이 없으면 범위로만 그린다.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>P4 · 숫자마다 근거 배지 <span class="chip ok">작음 · Codex 위임 가능</span></h4>
+    <dl class="kv">
+      <dt>방법</dt><dd>기존 <code>components/EvidenceBadge.tsx</code>(실측 · 통계 · 추정 · 사용자 입력 · 계산 · 참고 지수)를 Posting 숫자 전부에 붙인다.
+        새 배지 체계를 만들지 않는다. 한 점 대신 범위(상권 분포 25~75%)로 그린다.</dd>
+      <dt>통과</dt><dd>Posting 화면에 배지 없는 숫자 0 — 테스트로 고정.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>화면 · 7쪽을 3쪽으로 <span class="chip decide">인테리어 위치는 결정 ③ — 보류</span></h4>
+    <dl class="kv">
+      <dt>지금</dt><dd>시뮬레이션 결과 · 상권 맞춤 인테리어 · 주변 업종 지도 · 찾아오는 길 · 위험 확인 · 메뉴 설정 · 비용 비교 및 결정
+        (<code>PostingConsole.tsx</code> 의 <code>ConsolePages</code>).</dd>
+      <dt>안</dt><dd>① 이 층의 계약 조건 → ② 감당하려면 얼마나 팔아야 하나(P2) → ③ 계약 전 확인(지금의 「위험 확인」 + 2단계 입점 점검 결과).
+        3전략 비교 · 메뉴는 펼치는 선택 칸(인테리어 3D 를 선택 칸으로 내리는 것은 <b>결정 ③-a 보류</b> — 그 전까지 지금 자리 유지). 첫 문장은 Page 에서 고른 층으로 시작
+        (예: 「가로수길 ○○빌딩 2층 · 156㎡ — 이 층을 계약해도 되나, 돈 쪽」).</dd>
+      <dt>주의</dt><dd>트랙 화면(<code>PostingConsole</code>)과 레일 버튼은 그대로. 쪽 정리는 보존 규칙 대상이 아니다(가드는 트랙 이름·순서만 본다).
+        「주변 업종」「찾아오는 길」은 Posting 에서 빼지 말고 2단계에서 Page 에 <b>더한다</b>.</dd>
+      <dt>통과</dt><dd>/verify 정적 3종 + 실화면 검사 <code>py -3.11 scripts/pppp_screens_check.py</code>(백엔드+Vite 띄운 뒤).</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>같은 PR 에서 함께 고칠 문서</h4>
+    <p><code>CLAUDE.md</code> 의 PPPP 표 Posting 행 · <code>docs/feature-posting.md</code> · 랜딩 Posting 질문 문구(<code>pages/Landing.tsx</code>).</p>
+  </div>
+</div>
+</section>
+
+<section id="page">
+<h2>5. 2단계 · Page — 「이 빈 층에 내 업종이 들어갈 수 있나」</h2>
+<div class="step">
+  <div class="step-head"><span class="chip team">팀원</span><h3>목표: 비었다 → 들어갈 수 있나(대장 기준)까지</h3></div>
+  <div class="callout">
+    <p><b>왜 이 기능인가</b> — 창업자가 실제로 돈을 잃는 지점은 「계약했는데 영업신고가 막힘」이다. 인테리어보다 앞선 질문이고, 법령·공식 대장으로 답하니 가설이 아니다.
+    서울 빈 층 <b>14,520곳 중 7,548곳(52%)</b>의 대장 세부용도가 1종 근린생활시설 계열이다 — 일반음식점을 내려면 대장 기재 변경과 정화조·주차 요건 확인이 필요한 쪽.
+    2종 계열은 5,655곳(39%). <span style="color:var(--muted)">(2026-11-15 실측 · 세부용도 키워드 분류라 근사값)</span></p>
+  </div>
+  <div class="callout decide">
+    <p><b>11-15 진행 — 이미 된 것(PR #238 · main 46e1e92)</b>: 2-C 사전등록 <code>docs/prereg-floor-use-check-2026-11-15.md</code>(<b>채점 전</b>) ·
+    2-D 재료(<code>data/collectors/eum_landuse.py</code> 수집 → <code>data/pipelines/build_use_check_inputs.py</code> → <code>data/gold/page_use_check_inputs.json</code>) ·
+    판정 서비스 <code>apps/backend/app/services/use_check.py</code>(<code>schemas/use_check.py</code> 의 다섯 갈래 <code>ledger_ok</code> · <code>needs_check</code> ·
+    <code>use_change_needed</code> · <code>zoning_prohibited</code> · <code>missing_inputs</code>). 면적 기준은 손으로 적지 않고 토지이음 응답의 별표1 정의에서 읽습니다.
+    서울 행위제한 수집은 21/24구까지 — 남은 곳은 토지이음 일일 한도(약 1,000콜) 때문에 이어서 받습니다. 자세한 것은 <code>docs/finding-eum-landuse-2026-11-15.md</code>.</p>
+    <p>그래서 2단계는 <b>2-A(자리 사실 이동)와 2-E(화면 연결)</b>부터입니다. 2-E 는 후보 조회(#240 머지됨) 위에서 — 그 응답의 <code>regulation_status</code> 를 위 다섯 갈래로 채웁니다.</p>
+  </div>
+
+  <div class="item">
+    <h4>2-A · 자리 사실을 Page 층 상세에도 <span class="chip ok">작음 · Codex 위임 가능</span></h4>
+    <dl class="kv">
+      <dt>방법</dt><dd>주변 업종(<code>components/NearbyCompetition.tsx</code> · <code>IndustryCompetitionPanel</code> in <code>components/IndustryDetailFields.tsx</code>)과
+        찾아오는 길(<code>components/TransitAccessPanel.tsx</code>)을 Page 층 상세에 더한다. Posting 쪽은 그대로 둔다.</dd>
+      <dt>통과</dt><dd>컴포넌트 테스트 + 실화면 검사.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>2-B · 토대 확인 <span class="chip ok">0단계 머지됨 · #240</span></h4>
+    <dl class="kv">
+      <dt>토대</dt><dd>후보 공적 자료 조회 <code>GET /api/v1/buildings/{building_id}/candidate-review</code>
+        (<code>services/candidate_review.py</code> · <code>schemas/candidate_review.py</code>). 지금은 대장 사실(구조·층수·층별 대장 용도)만 내고
+        <code>regulation_status</code> 가 <code>"missing_inputs"</code> 하나로 고정돼 있다 — 이 자리를 채운다. 0단계에서 본 작업 쪽이 머지한다 <span class="chip ok">머지됨 · #240</span>.</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>2-C · 사전등록부터 (규칙·결과를 보기 전에)</h4>
+    <dl class="kv">
+      <dt>지표</dt><dd>인허가가 실제로 났던 층에서, 규칙이 그 업종을 「대장상 가능」으로 보는 비율 — 무정보 규칙과의 차이로 판정.</dd>
+      <dt>정답지</dt><dd>서울 인허가 원본(일반음식점 536,645행 · 휴게음식점 147,053행 등, <code>data/bronze/api_acquisition/2026-10-09/</code> · 인허가일·폐업일·좌표·면적 있음).</dd>
+      <dt>한계</dt><dd>정답지가 <b>양성만</b> 있어 위음성 쪽만 잴 수 있다. 위양성(가능이라 했는데 막힘)은 설계로 막는다 — 1종 계열은 「확인 필요」로 보수적으로.
+        인허가 주소에서 층을 특정할 수 있는 행만 표본이 되니 <b>그 비율을 함께 보고</b>한다.</dd>
+      <dt>통과</dt><dd>사전등록 문서를 <b>채점 전에</b> 커밋(<code>docs/finding-kpi-identity-alignment-2026-10-19.md</code> §4 의 빈 층 판정 사전등록 형식을 따른다).</dd>
+    </dl>
+  </div>
+
+  <div class="item">
+    <h4>2-D · 판정 재료</h4>
+    <div class="tbl"><table>
+      <thead><tr><th>재료</th><th>원천</th><th>상태(2026-11-15)</th></tr></thead>
+      <tbody>
+        <tr><td class="k">층별 대장 용도</td><td>건축물대장(이미 Gold · 빈 층 유닛의 <code>purps</code>)</td><td><span class="chip ok">있음</span> 빈 층 14,520곳 전부</td></tr>
+        <tr><td class="k">업종·면적 한도</td><td>건축법 시행령 별표1 → <b>시행일·조문 출처가 붙은 데이터 파일</b>로 관리. 첫 대상 4~6업종(일반음식점 · 휴게음식점 · 학원 · 노래연습장 …)</td><td><span class="chip ok">#238</span> 토지이음 응답의 별표1 정의(DEF_REF)에서 읽음 — 손으로 적지 않음</td></tr>
+        <tr><td class="k">필지 용도지역</td><td>V-World <code>https://api.vworld.kr/ned/data/getLandUseAttr</code> (<code>pnu</code> · 기존 <code>VWORLD_API_KEY</code>)</td><td><span class="chip ok">정상</span> 가로수길 지번 1콜 14건(예: 일반상업지역 저촉)</td></tr>
+        <tr><td class="k">용도지역별 행위 가능</td><td>토지이음 <code>apis.data.go.kr/1613000/arLandUseInfoService/DTarLandUseInfo</code> (data.go.kr 15058410 「국토교통부_토지이용규제정보서비스」)</td><td><span class="chip ok">승인 · 수집 중</span> 만료 2028-10-09 · <code>DTarLandUseInfo</code> 정상(#238 · 서울 21/24구) · 일일 한도 약 1,000콜</td></tr>
+        <tr><td class="k">학교 주변</td><td>NEIS 학교 위치 + 200m 반경 — 보호구역 도면이 공개되지 않아 <b>「추정」 배지</b></td><td><span class="chip ok">키 있음</span> #238 기록: 교육환경보호구역은 V-World 필지 지역지구로도 온다 — finding 문서 확인 후 반경 추정 여부 결정</td></tr>
+      </tbody>
+    </table></div>
+    <p style="font-size:14px;color:var(--muted)">⚠ <code>data/api-check-result-2026-10-10.md</code> 의 토지이음 「04 / 30」 기록은 낡았습니다(11-15 재실측 정상) — #238 이 정정 머리말을 달았습니다.</p>
+  </div>
+
+  <div class="item">
+    <h4>2-E · 화면과 연결</h4>
+    <dl class="kv">
+      <dt>표시</dt><dd>세 단계 — <b>대장상 가능</b> / <b>확인 필요</b>(이유) / <b>대장상 용도 변경 필요</b>. 늘 「허가 판정 아님 · 대장 기준일 ○○」와 출처.
+        「입점 가능」「허가됨」으로 단정하지 않는다.</dd>
+      <dt>넘겨줌</dt><dd>결과를 Posting ③쪽 「계약 전 확인」과 Program 답사 목록이 읽는다 — <a href="#contracts">인터페이스 ②</a>.</dd>
+      <dt>문서</dt><dd>같은 PR 에서 <code>CLAUDE.md</code> PPPP 표 Page 행 · <code>docs/feature-page.md</code> · 랜딩 Page 문구.</dd>
+      <dt>통과</dt><dd>사전등록대로 채점한 보고서 + 백엔드·프론트 테스트 + 실화면 검사 + 실제 응답.</dd>
+    </dl>
+  </div>
+</div>
+</section>
+
+<section id="contracts">
+<h2>6. 맞물리는 인터페이스</h2>
+<p>아래 필드 이름은 <b>안</b>입니다. 팀원이 확정해 알려 주면 Program·Platform 쪽이 맞춥니다.</p>
+
+<h3>① Posting 요구치 → Program 목표선</h3>
+<p>읽는 곳: Program 「가설 설정」(<code>pages/CampaignStudio.tsx</code> → <code>ValidationStudio</code>) · 흐름 R7(<code>flow/screens/Validate.tsx</code>).
+쓰임: 「팝업 3일, 하루 N개면 이 계약 조건을 감당」.</p>
+<pre><code>requirement: {
+  rent_mn, rent_basis: "user" | "rone_range",
+  price_won, cost_rate, opex_rate, opex_basis: "kosis",
+  daily_units, monthly_sales_mn,
+  benchmark: {                      // 없으면 null — 지어내지 않는다
+    per_store_sales_mn, share_pct, seoul_percentile,
+    quarter, source: "서울시 상권분석서비스 추정매출"
+  } | null,
+  evidence: { [숫자 키]: "실측" | "통계" | "추정" | "사용자 입력" | "계산" }
+}</code></pre>
+
+<h3>② Page 입점 점검 → Posting ③쪽 · Program 답사 목록</h3>
+<p>main 에 이미 있는 판정 스키마(<code>apps/backend/app/schemas/use_check.py</code> · #238)를 따릅니다 — 갈래가 처음 안보다 하나 늘었습니다(<code>zoning_prohibited</code>).
+<code>CandidateReview.regulation_status</code>(지금 <code>"missing_inputs"</code> 고정)를 이 값으로 채우는 것이 2-E 입니다.</p>
+<pre><code>UseCheckStatus  = "ledger_ok" | "needs_check" | "use_change_needed" | "zoning_prohibited" | "missing_inputs"
+CheckItemStatus = "ok" | "check" | "blocked" | "missing"</code></pre>
+
+<h3>③ 저장 결과 호환</h3>
+<p>Program 의 「이 저장 내용으로 가설 설정」은 <code>lib/savedPosting.ts</code> 의 <code>savedPostingHandoff</code> 로 Posting 저장 결과를 읽습니다.
+저장 형식을 바꾸면 <b>옛 형식(10-28 이전 <code>basis: "rent+fitout"</code> 포함) 읽기를 유지</b>하고 테스트를 더해 주세요.</p>
+
+<h3>④ 추정매출 원천은 하나</h3>
+<p>P2 비교 기준과 Platform 「상권 체력」(본 작업)이 같은 서울 추정매출을 읽습니다. 새 파이프라인을 만들지 말고
+<code>services/posting_revenue.py</code> 의 로더를 공용으로 씁니다. 분기 갱신도 함께.</p>
+
+<h3>⑤ 함께 고치는 파일</h3>
+<p><code>apps/frontend/src/lib/api.ts</code>(API 호출 일원화) · <code>CLAUDE.md</code> PPPP 표 · <code>pages/Landing.tsx</code> 네 질문 ·
+<code>scripts/pppp_status.py</code> 게이트 — PR 을 작게, 고치기 전에 서로 알림. 게이트를 바꾸면 <code>data/tests</code> 를 다시 돌립니다.</p>
+</section>
+
+<section id="decisions">
+<h2>7. 사용자 결정 <span class="chip ok">11-15 반영</span></h2>
+<div class="tbl"><table>
+  <thead><tr><th>#</th><th>결정</th><th>상태</th><th>관련 작업</th></tr></thead>
+  <tbody>
+    <tr><td class="k">①</td><td>투자비를 공정위 정보공개서 실측으로 바꾼다 (10-28 부터 대기)</td><td><span class="chip ok">승인</span></td><td>P1 <span class="chip team">팀원</span></td></tr>
+    <tr><td class="k">②</td><td>네 질문 · 정체성 문장 개정안 승인 (2절)</td><td><span class="chip ok">승인</span></td><td>문구 PR 전부 — 트랙별 PR 이 자기 행을 옮김</td></tr>
+    <tr><td class="k">③</td><td>인테리어 3D 를 Posting 기본 경로에서 선택 칸으로 (11-09 결정 변경) · 오프라인 마케팅을 Program 「개업 뒤」 칸으로</td><td><span class="chip ok">오프라인 마케팅 → Program 「개업 뒤」 칸: 승인·시행(11-15)</span> · <span class="chip decide">인테리어 3D → Posting 선택 칸: 보류(미결정)</span> — Posting 쪽은 11-09 결정 유지</td><td>Posting 화면 정리 <span class="chip team">팀원</span> · 3단계 <span class="chip ours">본 작업</span></td></tr>
+    <tr><td class="k">④</td><td>처리방침 목적 추가(사용자 입력 월세·답사 기록을 KPI 에 쓰기)</td><td><span class="chip ok">승인</span> 5단계 몫 · 착수 미정</td><td>5단계만 — 팀원 작업과 무관</td></tr>
+  </tbody>
+</table></div>
+<p>지금 시작할 수 있는 것: P1 · P2 · P3 · P4 · 2-A. 2-E 는 후보 조회(#240 머지됨) 위에서 합니다. 인테리어 3D 위치만 결정 ③-a 를 기다립니다.</p>
+</section>
+
+<section id="rules">
+<h2>8. 공통 규칙 · 완료 판정</h2>
+<div class="callout warn">
+  <p><b>⛔ PPPP 화면 보존(절대 규칙)</b> — 네 트랙 구현 화면(Platform <code>PlatformConsole</code> · Page <code>MapShell</code> · Posting <code>PostingConsole</code> · Program <code>CampaignStudio</code>),
+  지도 탐색 레일, 흐름의 「지도」 진입로(늘 <code>#/explore</code>), 랜딩 네 질문(<code>#how</code>)은 빼거나 숨기거나 다른 화면으로 돌리지 않는다.
+  가드 <code>apps/frontend/src/ppppScreens.test.tsx</code> 를 skip·수정하지 않는다. 트랙 <b>안의 쪽·탭 정리</b>와 질문 <b>문구</b> 변경은 대상이 아니다(가드는 트랙 이름·순서를 본다).</p>
+</div>
+<ul>
+  <li><b>브랜치</b> <code>feat/*</code> · PR 은 작게. main 머지 → CI 전부 통과 뒤 Cloud Run 자동 배포. 새 alembic 리비전이 생기면 Neon 마이그레이션은 따로(수동).</li>
+  <li><b>완료 판정은 실행 결과로</b> — 변경 파일 목록 + /verify 정적 3종(backend <code>pytest</code> · frontend build·lint·vitest · <code>data/tests</code>) +
+    Posting·Page·랜딩·레일을 건드렸으면 <code>py -3.11 scripts/pppp_screens_check.py</code> + 바뀐 API 의 실제 응답. 못 돌린 단계는 「미실행」으로 적는다.</li>
+  <li><b>KPI 네 규칙</b> — 임계값 단독 금지(같은 표본의 무정보 기준과의 <b>차이</b>) · n 과 신뢰구간 동반 · 고르는 데 쓴 표본으로 보고 금지 ·
+    계측기 없는 목표는 KPI 가 아니다. <b>사전등록 → 계산 → 보고</b> 순서, 결과를 본 뒤 기준을 바꾸지 않는다.</li>
+  <li><b>숫자 표기</b> — 근거 배지 필수. 층 계수를 곱한 임대료를 「이 층 월세」라 쓰지 않는다. 「입점 가능」「허가됨」 단정 금지. 재료가 없으면 「자료 부족」(지어내지 않는다).</li>
+  <li><b>비밀값</b> — 키 값을 출력·커밋하지 않는다. <code>data/.env</code> 는 스크립트가 읽게 한다.</li>
+  <li><b>숫자 인용</b>은 문서가 아니라 <code>python scripts/pppp_status.py</code> · <code>python scripts/kpi_baseline.py</code> 출력으로.</li>
+  <li><b>코드 규칙</b> — 응답·주석·문서 한국어(기술 용어 영문 병기) · FastAPI 라우터는 <code>app/api/v1/</code>, 로직은 <code>app/services/</code>, 스키마 <code>app/schemas/</code> ·
+    프론트 API 호출은 <code>src/lib/api.ts</code> 로 · <code>@/</code> 별칭 · 스타일은 CSS 변수(<code>src/styles/tokens.css</code>) — tailwind 를 들이지 않는다.</li>
+</ul>
+</section>
+
+<section id="ours">
+<h2>9. 본 작업 쪽 순서 (참고)</h2>
+<div class="tbl"><table>
+  <thead><tr><th>단계</th><th>내용</th><th>팀원과 닿는 곳</th></tr></thead>
+  <tbody>
+    <tr><td class="k">0</td><td>후보 조회 브랜치 마무리·머지 · 변경 전 스냅샷(추천 회수 1개월 미만 유닛 수 · R5 머리 문장 분포) · 결정 받기</td><td>2-B 토대 · P1 전후 비교 기준</td></tr>
+    <tr><td class="k">3</td><td>Program — 목표선 = Posting 요구치 · 탭 순서 「가설 설정 → 네트워킹 → 지원 프로그램 → 오프라인 마케팅 솔루션(개업 뒤)」 — <b>11-15 시행됨</b>(결정 ③-b) · 사실/생성문 분리 · 지원 공고 매칭 정밀도 측정</td><td>인터페이스 ①② 를 읽는다</td></tr>
+    <tr><td class="k">4</td><td>Platform — 인허가 정제(지위승계·재등록 묶기) 규칙 사전등록 → 생존 분석(영업 중 = 중도절단) → 상권 순위를 24개월 생존과 대조하는 KPI 축 · 상권 체력 추세</td><td>인터페이스 ④(추정매출 원천 공용)</td></tr>
+    <tr><td class="k">5</td><td>현장 고리 — 답사 기록(빈 층 여부 · 시간대 유동 · 들은 월세) → 임대료 추정 오차 KPI</td><td>결정 ④ 뒤 · P3 입력과 같은 칸을 쓸 수 있음</td></tr>
+  </tbody>
+</table></div>
+<p>11-15 마무리 시점: 0단계(후보 조회 #240 · 변경 전 스냅샷 #241)·3단계(#243 · 탭 순서 #250)·4단계(#244 · #246)는 머지됐습니다. 3단계 목표선(G1)은 1단계 P2 가 머지된 뒤 같은 자리에 붙습니다. 남은 것은 결정 ③-a · 팀원 1·2단계 · Program 라벨입니다.</p>
+</section>
+
+<section id="refs">
+<h2>10. 참고 자료 · 로컬 함정</h2>
+<h4>문서</h4>
+<ul>
+  <li><code>CLAUDE.md</code> — 정체성 · PPPP 표 · 화면 보존 규칙 · KPI 규칙</li>
+  <li><code>docs/finding-posting-tier-availability-2026-10-28.md</code> — 3-Tier 자료 부족 처리 · 296/891 · (B) 공정위 안</li>
+  <li><code>docs/feature-posting.md</code> · <code>docs/feature-page.md</code> — 트랙별 구현 이력</li>
+  <li><code>docs/finding-kpi-identity-alignment-2026-10-19.md</code> — 창업자 정체성 KPI · 사전등록 형식(§4) · 막힌 축(§5)</li>
+  <li><code>docs/decision-pppp-screens-always-on-2026-10-21.md</code> — 화면 보존 규칙 경위</li>
+  <li><code>docs/api-keys-and-specs.md</code> §6-B · §8 — 토지이음 · 인허가 · 공정위 · KOSIS 키</li>
+</ul>
+<h4>로컬에서 자주 걸리는 것</h4>
+<ul>
+  <li>전체 vitest 는 <code>--maxWorkers=4</code> — 기본 병렬은 실행마다 다른 몇 건이 타임아웃한다(단독 재실행은 통과).</li>
+  <li>네이버 지도 실화면은 <code>localhost:5173</code> 에서만 — 다른 포트는 인증 401 로 SDK 가 깨진다(회귀 아님).</li>
+  <li>Windows 에서 스크립트 로그를 파일로 보낼 때 <code>PYTHONIOENCODING=utf-8</code> — cp949 가 em dash 에서 죽는다.</li>
+  <li>로컬 <code>KAKAO_REST_API_KEY</code> 가 있으면 travel 테스트 6건이 깨진다 — 비우고 다시 돌리면 통과(회귀 아님).</li>
+</ul>
+</section>
+
+<footer>
+  PlaceOS 내부 작업 문서 · 2026-11-15 작성 · 같은 날 사용자 결정·#238 진행 반영 · 수치는 기준일 시점 값이며 다시 잴 것.
+</footer>
+
+</div>
+</body>
+</html>
