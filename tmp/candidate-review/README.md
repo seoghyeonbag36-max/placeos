@@ -8,8 +8,9 @@
 | `desktop.png` · `mobile.png` · `mobile-final.png` · `print.png` | 후보 비교 창 — 데스크톱 · 휴대폰 · 인쇄(PDF) 캡처(첫 판) |
 | `workflow-desktop.png` · `workflow-mobile.png` · `workflow-print.png` | 「계약 전 확인」 흐름(공적 자료 조회 · 사용자 확인 기록 · 판단 이유)을 붙인 판의 캡처 |
 | `workflow-live.json` | 실서버 `candidate-review` 응답(2026-11-14 · 건축물대장 `ok` · 규제 `missing_inputs` 고정) |
-| `build*.log` · `lint*.log` · `*tests.log` · `targeted.log` | 빌드 · lint · vitest 실행 로그(PowerShell 기본 출력이라 **UTF-16** — 텍스트 편집기에서 글자 사이가 벌어져 보이면 UTF-16 으로 연다) |
 | `tests.json` · `workflow-tests.json` | vitest JSON 리포트(전체 674건 통과) |
+
+빌드 · lint · vitest 실행 로그 9개(`*.log`)는 저장소의 `.gitignore`(`*.log`) 규칙이라 **올리지 않았다** — 결과는 위 JSON 리포트와 PR #240 본문에 있다.
 
 ⚠ 이 증빙의 코드 기준은 `fix/page-candidate-review-20261114`(2026-11-14)다. 머지된 최종 코드와 재검증한 결과는 PR #240 본문을 본다
 (백엔드 pytest 1064 passed · 7 skipped · 프론트 vitest 86 파일 674 passed · `data/tests` 1776 passed).
