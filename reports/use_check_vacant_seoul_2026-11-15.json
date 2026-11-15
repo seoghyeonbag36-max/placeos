@@ -112,43 +112,46 @@
    "zoning_prohibited": 43
   },
   "lodging": {
-   "use_change_needed": 10442,
-   "missing_inputs": 3943,
+   "use_change_needed": 10179,
+   "missing_inputs": 4206,
    "needs_check": 132
   },
   "culture": {
-   "use_change_needed": 10312,
-   "missing_inputs": 3943,
-   "needs_check": 259,
-   "ledger_ok": 3
+   "use_change_needed": 10052,
+   "missing_inputs": 4206,
+   "needs_check": 257,
+   "ledger_ok": 2
   }
  },
  "open_items_by_industry": {
   "cafe": {
    "대장 층 용도:check": 13103,
    "면적 기준:check": 9806,
-   "다른 지역지구:check": 7289,
+   "다른 지역지구:check": 6202,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 1672,
    "대장 층 용도:blocked": 967,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
   },
   "restaurant": {
-   "다른 지역지구:check": 7289,
    "대장 층 용도:check": 6878,
+   "다른 지역지구:check": 6202,
    "대장 층 용도:blocked": 6142,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "필지 용도지역:check": 678,
    "용도지역 행위제한:check": 241,
    "용도지역 행위제한:blocked": 43,
    "필지 용도지역:missing": 1
   },
   "bar": {
-   "다른 지역지구:check": 7289,
    "대장 층 용도:check": 6878,
+   "다른 지역지구:check": 6202,
    "대장 층 용도:blocked": 6142,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "필지 용도지역:check": 678,
    "용도지역 행위제한:check": 241,
    "용도지역 행위제한:blocked": 43,
@@ -156,45 +159,50 @@
   },
   "beauty": {
    "대장 층 용도:check": 9463,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 4938,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 2963,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
   },
   "clinic": {
    "대장 층 용도:check": 8303,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 4938,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 2963,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
   },
   "pharmacy": {
    "대장 층 용도:check": 7495,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 4938,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 2963,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
   },
   "convenience": {
    "대장 층 용도:check": 7495,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 4938,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 2963,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
   },
   "fashion": {
    "대장 층 용도:check": 7495,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 4938,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 2963,
    "필지 용도지역:check": 678,
    "필지 용도지역:missing": 1
@@ -202,9 +210,10 @@
   "education": {
    "면적 기준:check": 10441,
    "대장 층 용도:check": 7484,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 5944,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "필지 용도지역:check": 678,
    "용도지역 행위제한:check": 126,
    "용도지역 행위제한:blocked": 44,
@@ -213,9 +222,10 @@
   "fitness": {
    "면적 기준:check": 10441,
    "대장 층 용도:check": 8294,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6174,
    "대장 층 용도:blocked": 6157,
    "용도지역 행위제한:missing": 3942,
+   "다른 지역지구:missing": 3930,
    "용도지역 행위제한:check": 3061,
    "필지 용도지역:check": 678,
    "용도지역 행위제한:blocked": 43,
@@ -224,7 +234,8 @@
   "lodging": {
    "용도지역 행위제한:check": 10574,
    "대장 층 용도:blocked": 10442,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6078,
+   "다른 지역지구:missing": 4193,
    "대장 층 용도:check": 4075,
    "용도지역 행위제한:missing": 3942,
    "필지 용도지역:check": 678,
@@ -232,7 +243,8 @@
   },
   "culture": {
    "대장 층 용도:blocked": 10312,
-   "다른 지역지구:check": 7261,
+   "다른 지역지구:check": 6078,
+   "다른 지역지구:missing": 4193,
    "대장 층 용도:check": 4149,
    "용도지역 행위제한:missing": 3942,
    "필지 용도지역:check": 678,

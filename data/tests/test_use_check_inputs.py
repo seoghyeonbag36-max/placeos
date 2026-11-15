@@ -72,3 +72,16 @@ def test_act_rules_and_parcel_zones(tmp_path):
     parcels, names, dates = b.parcel_zones(tmp_path)
     assert parcels["1168010800100060013"] == [["UQA220", "저촉"], ["UQQ600", "포함"]]  # 접함 제외 · 중복은 포함 우선
     assert names["UQA122"] == "제2종일반주거지역" and max(dates) == "2026-11-06"
+
+
+def test_requested_but_absent_code_is_no_rule_not_unfetched(tmp_path):
+    """요청했는데 응답에 항목이 없는 코드(「정비구역기타」 등)는 [] — 키가 없을 때만 미조회다(11-15 리뷰 뒤)."""
+    (tmp_path / "eum" / "11680").mkdir(parents=True)
+    rel = "eum/11680/휴게음식점__abcd1234.xml"
+    (tmp_path / rel).write_bytes(XML.encode("cp949"))
+    (tmp_path / "eum_manifest_000000.json").write_text(json.dumps([
+        {"file": rel, "params_wo_key": {"areaCd": "11680", "ucodeList": "UQA111,UNE200,UDT999", "landUseNm": "휴게음식점"}},
+    ], ensure_ascii=False), encoding="utf-8")
+    acts = b.act_rules(tmp_path, b.Interner(), b.Interner())["11680"]["휴게음식점"]
+    assert acts["UDT999"] == [] and len(acts["UQA111"]) == 2   # 응답 항목이 있는 코드는 그대로
+    assert "UQA220" not in acts                                 # 요청하지 않은 코드는 키가 없다 = 미조회

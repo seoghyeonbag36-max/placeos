@@ -19,7 +19,8 @@ LAW = {
 
 INPUTS = {
     "basis": {"vworld_updated_max": "2026-11-06", "eum_fetched": "2026-11-15"},
-    "zone_names": {"UQA111": "제1종전용주거지역", "UQA220": "일반상업지역", "UQA122": "제2종일반주거지역", "UQA123": "제3종일반주거지역",
+    "zone_names": {"UQA111": "제1종전용주거지역", "UQA121": "제1종일반주거지역", "UOC800": "역사문화환경보존지역",
+                   "UQA220": "일반상업지역", "UQA122": "제2종일반주거지역", "UQA123": "제3종일반주거지역",
                    "UQQ300": "지구단위계획구역", "UOA120": "상대보호구역", "UQA01X": "도시지역"},
     "parcels": {
         "1100000000000000001": [["UQA01X", "포함"], ["UQA220", "포함"]],
@@ -28,6 +29,8 @@ INPUTS = {
         "1100000000000000004": [["UQA220", "포함"], ["UQQ300", "포함"]],
         "1100000000000000005": [["UQA220", "포함"], ["UOA120", "포함"]],
         "1100000000000000006": [["UQA111", "포함"]],
+        "1100000000000000007": [["UQA220", "포함"], ["UOC800", "포함"]],   # UOC800 은 행위제한 미조회
+        "1100000000000000008": [["UQA220", "저촉"], ["UQA121", "저촉"]],   # UQA121 은 행위제한 미조회
     },
     "acts": {"11000": {
         "휴게음식점": {
@@ -233,3 +236,23 @@ def test_api_narrows_floor_rows_to_the_unit_use(monkeypatch):
     assert "이(미)용원" in by_item(j)["대장 층 용도"]["reason"] and "업무시설" not in by_item(j)["대장 층 용도"]["reason"]
     j2 = c.get(base, params={"district": "garosugil", "floor": 2, "industry": "restaurant"}).json()   # 없으면 층 전체(가장 넓은 행)
     assert "사무소" in by_item(j2)["대장 층 용도"]["reason"]
+
+
+def test_unfetched_other_district_is_missing_not_ok():
+    """받지 않은 지역지구를 「규정 없음 → 맞음」으로 세지 않는다(11-15 리뷰 — 한도로 못 받은 구가 「대장상 가능」으로 샜다)."""
+    r = use_check.check("1100000000000000007", "restaurant", parts=[part("일반음식점", "04001")], area_m2=80)
+    item = by_item(r)["다른 지역지구"]
+    assert item["status"] == "missing" and "역사문화환경보존지역" in item["reason"]
+    assert r["regulation_status"] == "missing_inputs"
+
+
+def test_any_unfetched_use_zone_blocks_a_verdict():
+    r = use_check.check("1100000000000000008", "restaurant", parts=[part("일반음식점", "04001")], area_m2=80)
+    assert by_item(r)["용도지역 행위제한"]["status"] == "missing" and r["regulation_status"] == "missing_inputs"
+
+
+def test_whole_gu_unfetched_never_reports_ok():
+    """구 전체를 못 받았으면(강남·송파·강동) 어떤 항목도 토지이음을 출처로 「맞음」이라 하지 않는다."""
+    r = use_check.check("1168010100106010001", "cafe", parts=[part("휴게음식점", "03002")], area_m2=80)
+    assert r["regulation_status"] == "missing_inputs"
+    assert not any(c["status"] == "ok" and c["source"] == use_check.SRC_EUM for c in r["checks"])

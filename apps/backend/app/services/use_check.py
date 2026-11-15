@@ -229,8 +229,8 @@ def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: 
             st, hit = _verdict(rows, relevant)
             zone_states.append(st)
             texts.append(f"{names.get(c, c)} · {act}: " + (_rows_text(hit, data) if hit else "응답에 해당 행 없음"))
-        if all(s == "missing" for s in zone_states):
-            z = "missing"
+        if all(s == "missing" for s in zone_states) or any(t.endswith(": 미조회") for t in texts):
+            z = "missing"   # 걸린 용도지역 중 하나라도 미조회면 판정하지 않는다
         elif all(s == "blocked" for s in zone_states):
             z = "blocked"
         elif all(s == "ok" for s in zone_states):
@@ -245,7 +245,7 @@ def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: 
 
     # ④ 다른 지역지구(용도지구·보호구역·지구단위계획 등)
     if zones:
-        flagged = []
+        flagged, unfetched = [], []
         for c, _ in zones:
             if c in dict(use_zones) or c.startswith("UQA0"):
                 continue
@@ -253,12 +253,22 @@ def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: 
             if "지구단위계획" in nm:
                 flagged.append(f"{nm} — 결정도서의 허용·불허 용도는 토지이음 행위제한 응답에 없습니다. 토지이음 열람이나 구청에서 확인하세요")
                 continue
-            hit = [r for r in (rules or {}).get(c) or [] if r["reg"] == "금지" or r["c"]]
+            # 받지 않은 지역지구를 「규정 없음」으로 세지 않는다 — 키가 없으면 미조회다(빈 목록 [] 만이 「규정 없음」).
+            # 2026-11-15 리뷰: 한도로 못 받은 강남·송파·강동과 서초 일부 콜이 「맞음」·「대장상 가능」으로 새고 있었다.
+            if rules is None or c not in rules:
+                unfetched.append(nm)
+                continue
+            hit = [r for r in rules[c] if r["reg"] == "금지" or r["c"]]
             if hit:
                 flagged.append(f"{nm} · {act}: {_rows_text(hit, data)}")
-        add("다른 지역지구", "check" if flagged else "ok",
-            " | ".join(flagged) if flagged else f"용도지역 밖 지역지구 {len(zones) - len(use_zones)}개에서 이 행위를 막거나 조건을 다는 행이 없습니다.",
-            SRC_EUM, eum_date)
+        if unfetched:
+            add("다른 지역지구", "missing",
+                f"토지이음 행위제한을 아직 받지 않은 지역지구가 있습니다: {', '.join(dict.fromkeys(unfetched))}"
+                + (f" | {' | '.join(flagged)}" if flagged else ""), SRC_EUM, eum_date)
+        else:
+            add("다른 지역지구", "check" if flagged else "ok",
+                " | ".join(flagged) if flagged else f"용도지역 밖 지역지구 {len(zones) - len(use_zones)}개에서 이 행위를 막거나 조건을 다는 행이 없습니다.",
+                SRC_EUM, eum_date)
 
     # ⑤ 면적 기준 — 같은 건물의 같은 용도 합계에 따라 별표1 분류가 갈리는가
     split = [l for l in feasible.values() if l.get("max") or l.get("min")]
@@ -271,7 +281,8 @@ def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: 
             SRC_EUM, eum_date)
 
     # 종합
-    if zoning_state == "missing" or ledger_state == "missing":
+    # 자료 없음 항목이 하나라도 있으면 판정하지 않는다 — 받지 않은 것을 「맞음」으로 세지 않는다
+    if zoning_state == "missing" or ledger_state == "missing" or any(c["status"] == "missing" for c in checks):
         status = "missing_inputs"
         lacking = [c["item"] for c in checks if c["status"] == "missing"]
         headline = f"자료 부족 — {', '.join(lacking)}이(가) 없어 점검하지 않았습니다."
