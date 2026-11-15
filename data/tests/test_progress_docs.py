@@ -93,6 +93,12 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     assert floor["in_progress_pct"] is False
     assert floor["available"] is True, floor.get("reason")
     assert floor["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
+    # 2026-11-15: 상권 순위 ↔ 24개월 생존도 같은 자리 — 동시점 대조는 누수가 있어 판정이 무엇이든 늘 「참고」 꼬리표가 붙는다.
+    rank = status["kpi1_rank_survival"]
+    assert rank["in_progress_pct"] is False
+    assert rank["available"] is True, rank.get("reason")
+    assert rank["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
+    assert "참고" in rank.get("kind", "참고")
     # 2026-11-15: Program 지원 공고 매칭 정밀도도 같은 자리 — 표본을 동결하기 전에는 「검정불가」(표본 미동결)다.
     support = status["kpi1_support_precision"]
     assert support["in_progress_pct"] is False

@@ -8,6 +8,19 @@
 > Page 는 `Product/Price` 가 아니라 **Product**, Posting 은 `Promotion` 이 아니라 **Price**,
 > Program 이 **Promotion** 을 단독으로 받는다. 정본은 `CLAUDE.md` §PPPP Framework.
 
+## 0-Z. 상권 순위의 결과 검증 — 개업 뒤 24개월 생존 (2026-11-15)
+
+「내 업종으로 본 상권」 순위(`business_fit`)를 **결과**(서울 인허가 정제본의 개업 뒤 24개월 생존)와 처음으로 대조했다. 결정 기록 →
+[decision-confirm-before-contract-2026-11-15.md](decision-confirm-before-contract-2026-11-15.md)(4단계).
+
+- 사전등록(거점별 칸을 계산하기 전 · main `f607d6a`): [prereg-platform-rank-survival-2026-11-15.md](prereg-platform-rank-survival-2026-11-15.md)
+- 첫 결과: [finding-rank-survival-2026-11-15.md](finding-rank-survival-2026-11-15.md) — 음식점 Δρ −0.038 [−0.304, +0.236] **구분불가**(참고 · 동시점이라 누수 가능).
+  게이트는 동결한 순위(`reports/ranking_snapshot_2026-11-15.json`)로 이후 개업의 생존을 재는 전방 검증(2028-11 이후)이 닫는다.
+- 코드: `data/pipelines/build_platform_survival.py`(정제 · 칸 → `data/gold/platform_survival_cohorts.json`) ·
+  `data/validation/score_rank_survival.py`(채점) · `scripts/freeze_ranking_snapshot.py`(순위 동결) · `scripts/pppp_status.py` 의 `kpi1_rank_survival` 블록(진행률 밖)
+- **창업자에게 하는 말은 그대로다** — 순위는 「이미 모여 있는 정도」이지 매출·생존이 아니다. Platform 질문 문구(「결과로 검증한 순위」)는 `실력` 판정 뒤에 옮긴다(발견 문서 §6).
+- 아직 없는 것: 상권 카드(「새로 연 ○○ 24개월 생존 X% (n, 구간)」 · 사전등록 §9 의 규칙 안에서) · 12개월 지평 · 보존 편향 점검.
+
 ## 0. 구현 현황 (서빙 **66거점** 기준 — LSTM 2026-09-04 · GNN 117열 서빙본)
 
 > 아래 수치는 **서빙 중인 산출물에서 읽은 값**이다(`platform_vacancy_forecast.json` ·
