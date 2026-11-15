@@ -86,12 +86,33 @@ def parcel_zones(root: Path) -> tuple[dict, dict, list[str]]:
     return parcels, names, dates
 
 
+def requested_codes(root: Path) -> dict[str, list[str]]:
+    """수집 매니페스트 → 원문 파일마다 요청한 지역지구 코드. 응답에 항목이 없는 코드를 「요청했으나 규정 없음」으로 적으려고 쓴다."""
+    out: dict[str, list[str]] = {}
+    for m in sorted(root.glob("eum_manifest*.json")):
+        try:
+            rows = json.loads(m.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for r in rows:
+            ul = ((r.get("params_wo_key") or {}).get("ucodeList") or "")
+            if str(r.get("file", "")).startswith("eum/") and ul:
+                out[r["file"]] = [c for c in ul.split(",") if c]
+    return out
+
+
 def act_rules(root: Path, conds: Interner, defs: Interner) -> dict:
+    """구 → 행위 → 지역지구 → 행. 키가 있으면 조회했다는 뜻이다 — [] 는 「요청했으나 규정 없음」
+    (응답에 그 코드의 항목이 없거나 「검색결과 없음」). 키가 없으면 미조회라 서비스가 판정하지 않는다."""
     acts: dict = defaultdict(lambda: defaultdict(dict))
+    asked = requested_codes(root)
     for p in sorted((root / "eum").glob("*/*.xml")):
         gu = p.parent.name
         act = p.stem.split("__")[0]
         doc = parse_eum(p.read_bytes())
+        # 요청한 코드 중 응답에 항목이 없는 것(「정비구역기타」 같은 일반 분류 · 11-15 실측 16종)은 규정 없음으로 둔다
+        for code in asked.get(p.relative_to(root).as_posix(), []):
+            acts[gu][act].setdefault(code, [])
         qtext = {}
         for q in doc.iter("QnodeCond"):
             for rn, desc in zip(q.findall("RNUM"), q.findall("QNODE_DESC")):

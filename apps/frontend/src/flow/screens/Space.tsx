@@ -21,6 +21,7 @@ import {
   SkeletonRows, TextButton, WarnLine,
 } from "../ui";
 import { hasRanking, useDistrictName, useNeed, useWorkIndustry } from "./common";
+import { UseCheckCard } from "../UseCheckCard";
 
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
 
@@ -284,6 +285,12 @@ export function SpaceDetail({ id }: { id: string }) {
               : recRank >= 0 ? `${eun(work.label)} 이 자리 추천 ${recRank + 1}위예요.` : `${eun(work.label)} 이 자리 추천 3위 밖이에요.`}</li>
           : <li>{eun(work.label)} 추천 모델이 다루지 않는 업종이라 자리 추천 순위가 없어요.</li>)}
       </ul>
+      <h2 className="fl-h2">{work && work.key !== "other" ? `이 층에 ${work.label}, 들어갈 수 있나요?` : "이 층에 내 업종이 들어갈 수 있나요?"}</h2>
+      {work && work.key !== "other" && item.buildingId
+        ? <UseCheckCard buildingId={item.buildingId} districtId={did!} floor={item.floor} areaM2={item.areaM2} purps={item.unit?.purps ?? null} industryKey={work.key} />
+        : <p className="fl-note">{!work ? "업종을 정하면 건축물대장·토지이음 기준으로 점검해 드려요."
+            : work.key === "other" ? "직접 적은 업종은 건축물대장·토지이음 점검을 하지 않아요."
+            : "이 자리는 건물을 특정하지 못해 점검하지 않았어요."}</p>}
       <Details summary="근거 더 보기">
         <ul className="fl-facts">
           {item.unit?.purps && <li>건축물대장 용도: {item.unit.purps}</li>}

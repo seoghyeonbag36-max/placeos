@@ -928,6 +928,28 @@ export interface IndustryOption {
 
 export const listIndustries = () => getJSON<{ industries: IndustryOption[] }>("/ai/industries");
 
+/** 입점 점검 — 「이 층에 내 업종이 들어갈 수 있나」(2026-11-15 · services/use_check).
+ *  대장 용도코드(별표1 호) × 필지 용도지역 × 토지이음 행위제한. **허가 판정이 아니다** — `permission` 은 늘 null. */
+export type UseCheckStatus = "ledger_ok" | "needs_check" | "use_change_needed" | "zoning_prohibited" | "missing_inputs";
+export interface UseCheckItem {
+  item: string; status: "ok" | "check" | "blocked" | "missing"; reason: string;
+  source: string; source_date: string | null; estimated: boolean;
+}
+export interface UseCheck {
+  pnu: string; industry: string; industry_label: string; act: string;
+  regulation_status: UseCheckStatus; headline: string; checks: UseCheckItem[];
+  note: string; sources: { name: string; url: string }[]; permission: null; ledger_live_status?: string | null;
+}
+export const getUseCheck = (
+  buildingId: string, districtId: string, floor: number, industry: string, areaM2?: number | null, purps?: string | null,
+) => {
+  const q = new URLSearchParams({ district: districtId, floor: String(floor), industry });
+  if (areaM2 != null && areaM2 > 0) q.set("area_m2", String(areaM2));
+  // 층에 대장 행이 여럿일 때 이 자리의 행으로 좁힌다(사무소 행이 그 층 용도로 잡히지 않게)
+  if (purps) q.set("purps", purps);
+  return getJSON<UseCheck>(`/buildings/${encodeURIComponent(buildingId)}/use-check?${q}`);
+};
+
 /** 업종 하나로 본 상권 한 줄. 공실률은 싣지 않는다 — 상권 목록(`listDistricts`)에서 합친다.
  *  ⚠ `fit` 은 매출·생존이 아니라 "비슷한 입지에 그 업종이 모여 있는 정도"(GNN 상권 평균)이고,
  *     Top-3 근사라 절대값은 낮다 — **순위로만** 읽는다. */
