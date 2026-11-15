@@ -162,6 +162,17 @@ def test_never_asserts_permission(industry):
     assert r["permission"] is None and "허가 판정이 아닙니다" in r["note"]
 
 
+def test_ledger_code_survives_summarise_and_twin_schema():
+    """대장 용도코드가 실시간 요약 → /twin 응답 모델까지 살아남는다(response_model 이 모르는 키는 조용히 버린다)."""
+    from app.schemas.renewal import TwinLedgerFloor
+    from app.services import building_ledger_live as bll
+
+    rows = [{"flrGbCdNm": "지상", "flrNo": 1, "mainPurpsCdNm": "소매점", "mainPurpsCd": "03001", "area": 282.0}]
+    s = bll.summarise([], rows)
+    assert s["floors"]["1"]["parts"][0]["code"] == "03001"
+    assert TwinLedgerFloor(**s["floors"]["1"]).model_dump()["parts"][0]["code"] == "03001"
+
+
 def test_ho_of():
     assert use_check.ho_of("03002") == 3 and use_check.ho_of("14299") == 14
     assert use_check.ho_of(None) is None and use_check.ho_of("x1") is None
