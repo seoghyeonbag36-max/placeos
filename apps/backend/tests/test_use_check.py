@@ -256,3 +256,10 @@ def test_whole_gu_unfetched_never_reports_ok():
     r = use_check.check("1168010100106010001", "cafe", parts=[part("휴게음식점", "03002")], area_m2=80)
     assert r["regulation_status"] == "missing_inputs"
     assert not any(c["status"] == "ok" and c["source"] == use_check.SRC_EUM for c in r["checks"])
+
+
+def test_missing_headline_names_the_missing_data_not_absence():
+    """「다른 지역지구이(가) 없어」처럼 항목이 없다고 읽히지 않게 — 없는 것은 그 자료다(11-15 프로덕션 문구)."""
+    r = use_check.check("1100000000000000007", "restaurant", parts=[part("일반음식점", "04001")], area_m2=80)
+    assert r["regulation_status"] == "missing_inputs"
+    assert "다른 지역지구 자료를 아직 받지 못해" in r["headline"] and "이(가) 없어" not in r["headline"]
