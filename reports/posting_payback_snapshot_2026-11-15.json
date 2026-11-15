@@ -1,0 +1,221 @@
+{
+  "label": "before-P1",
+  "date": "2026-11-15",
+  "what": "서빙 중인 tier_scenarios 를 실호출한 추천 전략 회수기간 분포 — 권리금 0 전제 · 투자비는 손 계수(변경 전)",
+  "provenance": {
+    "git_head": "46e1e92",
+    "districts_py": "9b606a6e740d70ee",
+    "posting_revenue_py": "5134685f15601419",
+    "gold_posting_inputs": "43783602c0f3b71a",
+    "gold_posting_revenue": "6b7d2ef7bc5146b9",
+    "gold_posting_cost_rates": "73c16214420570b9",
+    "gold_posting_store_area": "d8ad7141e64208e0"
+  },
+  "diagnostics": {
+    "pages": 203,
+    "hubs_with_units": 182,
+    "unit_errors": 0,
+    "unit_error_samples": []
+  },
+  "summary": {
+    "units": 1602,
+    "units_with_any_tier": 854,
+    "units_with_recommendation": 836,
+    "units_without_recommendation": 766,
+    "recommended_lt1_month": {
+      "count": 296,
+      "of_units_with_any_tier": 854,
+      "pct_of_units_with_any_tier": 34.7,
+      "of_recommended": 836,
+      "pct_of_recommended": 35.4
+    },
+    "recommended_roi_median": 1.5,
+    "roi_bins": {
+      "<1": 296,
+      "1-3": 324,
+      "3-6": 126,
+      "6-12": 70,
+      "12-24": 12,
+      ">=24": 8
+    },
+    "headline_kinds": {
+      "한 달 안에": 296,
+      "약 n개월": 517,
+      "약 n년 이상": 23
+    },
+    "viable_pairs": {
+      "count": 2122,
+      "lt1": 303,
+      "lt1_pct": 14.3,
+      "roi_median": 3.2
+    },
+    "tier_available_units": {
+      "premium": 828,
+      "value": 854,
+      "factory": 820
+    },
+    "recommended_by_tier": {
+      "premium": 87,
+      "value": 133,
+      "factory": 616
+    },
+    "by_city": {
+      "경기광주": {
+        "units": 12,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 12
+      },
+      "고양": {
+        "units": 18,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 18
+      },
+      "광명": {
+        "units": 14,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 14
+      },
+      "광주": {
+        "units": 245,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 245
+      },
+      "구리": {
+        "units": 19,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 19
+      },
+      "동두천": {
+        "units": 12,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 12
+      },
+      "부천": {
+        "units": 34,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 34
+      },
+      "서울": {
+        "units": 854,
+        "rec_units": 836,
+        "rec_lt1": 296,
+        "no_tier_units": 18
+      },
+      "성남": {
+        "units": 29,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 29
+      },
+      "수원": {
+        "units": 47,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 47
+      },
+      "시흥": {
+        "units": 12,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 12
+      },
+      "안성": {
+        "units": 12,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 12
+      },
+      "안양": {
+        "units": 22,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 22
+      },
+      "양주": {
+        "units": 3,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 3
+      },
+      "여주": {
+        "units": 10,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 10
+      },
+      "오산": {
+        "units": 23,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 23
+      },
+      "용인": {
+        "units": 14,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 14
+      },
+      "의정부": {
+        "units": 24,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 24
+      },
+      "이천": {
+        "units": 12,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 12
+      },
+      "전주": {
+        "units": 116,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 116
+      },
+      "파주": {
+        "units": 19,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 19
+      },
+      "평택": {
+        "units": 13,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 13
+      },
+      "포천": {
+        "units": 16,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 16
+      },
+      "하남": {
+        "units": 11,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 11
+      },
+      "화성": {
+        "units": 11,
+        "rec_units": 0,
+        "rec_lt1": 0,
+        "no_tier_units": 11
+      }
+    }
+  },
+  "reference_1028": {
+    "recommended_lt1_month": "296/891 (33%)",
+    "viable_pairs_lt1": "14.3% of 2,122 · 중앙 3.2개월",
+    "reproduced": "분자 296 · 회수되는 tier×유닛 2,122 · 14.3% · 중앙 3.2개월은 정확히 같다(2026-11-15 실측)",
+    "not_reproduced": "분모 891 — 이 스냅샷에서 만들 수 있는 분모는 tier 자료 있는 유닛(units_with_any_tier)·추천 있는 유닛(of_recommended)이고 둘 다 891 이 아니다. 10-28 에 891 이 무엇을 센 값인지 확인되지 않았다 — 비율은 이 스냅샷의 분모로만 비교한다(전·후는 같은 스크립트라 일관된다)"
+  }
+}
