@@ -285,7 +285,8 @@ def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: 
     if zoning_state == "missing" or ledger_state == "missing" or any(c["status"] == "missing" for c in checks):
         status = "missing_inputs"
         lacking = [c["item"] for c in checks if c["status"] == "missing"]
-        headline = f"자료 부족 — {', '.join(lacking)}이(가) 없어 점검하지 않았습니다."
+        # 「다른 지역지구이(가) 없어」는 「지역지구가 없다」로 읽힌다(11-15 프로덕션 확인) — 없는 것은 항목이 아니라 그 자료다
+        headline = f"자료 부족 — {', '.join(lacking)} 자료를 아직 받지 못해 점검하지 않았습니다."
     elif zoning_state == "blocked":
         status = "zoning_prohibited"
         headline = f"용도지역상 금지 — 토지이음 행위제한에 이 필지의 용도지역에서 {act}이(가) 금지로 나옵니다."
