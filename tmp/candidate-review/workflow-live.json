@@ -1,0 +1,39 @@
+{
+  "building_id": "1168010700105350014-1",
+  "unit_id": null,
+  "pnu": "1168010700105350014",
+  "queried_at": "2026-11-14T14:48:18.110912+00:00",
+  "source_date": null,
+  "ledger_status": "ok",
+  "ledger_note": "건축물대장 기록입니다. 현장 상태·입점 허가를 확인한 결과가 아닙니다.",
+  "facts": [
+    {
+      "label": "건물 구조",
+      "value": "철근콘크리트구조",
+      "scope": "건물"
+    },
+    {
+      "label": "지상 층수",
+      "value": "4",
+      "scope": "건물"
+    },
+    {
+      "label": "지하 층수",
+      "value": "1",
+      "scope": "건물"
+    }
+  ],
+  "regulation_status": "missing_inputs",
+  "regulation_note": "후보에 공적 지역지구 코드와 검토할 토지이용행위가 연결되지 않아 규제를 자동 조회·판정하지 않았습니다. 토지이음에서 주소를 조회하고 관할 기관에 확인해 주세요.",
+  "sources": [
+    {
+      "name": "건축HUB 건축물대장 원천 안내",
+      "url": "https://www.data.go.kr/data/15134735/openapi.do"
+    },
+    {
+      "name": "토지이음 토지이용계획 열람",
+      "url": "https://www.eum.go.kr/web/ar/lu/luLandDet.jsp"
+    }
+  ],
+  "permission": null
+}
