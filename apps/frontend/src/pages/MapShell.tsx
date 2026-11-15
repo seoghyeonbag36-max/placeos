@@ -18,6 +18,7 @@ import type { NaverOverlay, NaverListener, NaverBounds } from "@/lib/naverTypes"
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type ReactNode } from "react";
 import { ExploreStepFooter } from "@/components/ExploreStep";
 import CandidateCompare from "@/components/CandidateCompare";
+import { candidateId, loadCandidates, saveCandidates, type ReviewCandidate } from "@/lib/candidateStore";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
@@ -47,7 +48,7 @@ const BuildingTwinDialog = lazy(() => import("@/components/twin/BuildingTwinDial
 // 가로수길 코어 (강남구 신사동) — poc-building-vacancy.md §0.5. 거점 목록이 오기 전 초기 중심.
 const GAROSU = { lat: 37.5205, lng: 127.023 };
 const EMPTY_BUILDINGS: Building[] = [];
-const EMPTY_IDS: string[] = [];
+
 
 type Layer = "footfall" | "vacancy" | "rent" | "density";
 type VacStatus = "full" | "partial" | "high" | "empty";
@@ -109,7 +110,6 @@ interface Building {
   ring: [number, number][]; // [lng, lat] (GeoJSON 순서)
 }
 
-const vacRate = (b: Building) => Math.round((1 - b.active / b.capacity) * 100);
 /** 층별 공실 필터(2026-11-10 사용자 요청) — 그 층에 빈 층(확정 · 추정)이 있는 건물만. 근거는 층 매물 목록(`/floor-vacancies`) */
 type FloorFilter = "all" | "1" | "2" | "3+";
 const FLOOR_FILTERS: { key: Exclude<FloorFilter, "all">; label: string; test: (floor: number) => boolean }[] = [
@@ -342,13 +342,20 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 합성 거점을 열면 /heatmap/buildings 가 404 라 빈 지도가 된다.
   const [hubs, setHubs] = useState<DistrictSummary[]>([]);
   const [hubListStatus, setHubListStatus] = useState<"loading" | "ready" | "failed">("loading");
-  const savedIds = workspace.savedIds[districtId] ?? EMPTY_IDS;
+  const [candidateState, setCandidateState] = useState(loadCandidates);
+  const candidates = useMemo(() => candidateState.items.filter(c => c.districtId === districtId), [candidateState.items, districtId]);
+  const savedIds = useMemo(() => candidates.filter(c => c.kind === "building").map(c => c.buildingId), [candidates]);
+  const candidateBuildingIds = useMemo(() => candidates.map(c => c.buildingId), [candidates]);
+  const updateCandidates = (items: ReviewCandidate[]) => {
+    const error = saveCandidates(items);
+    setCandidateState({ items, error });
+  };
   const saved = src === "api" ? buildings.filter((b) => savedIds.includes(b.id)) : [];
   useReportCapture("page", src === "api" && selected ? {
     districtId, buildingId: selected.id, name: selected.name, address: selected.roadAddr ?? null,
     status: selected.vacClass ? VAC_CLASS[selected.vacClass].label : STATUS[selected.status].label,
     capacity: selected.capacity, active: selected.active, floors: selected.floors ?? null,
-    candidates: saved.map(b => ({ id: b.id, name: b.name, note: workspace.notes[`${districtId}:${b.id}`] ?? "" })),
+    candidates: saved.map(b => ({ id: b.id, name: b.name, note: candidates.find(c => c.kind === "building" && c.buildingId === b.id)?.note ?? "" })),
   } : null);
   const hasClass = useMemo(() => buildings.some((b) => b.vacClass), [buildings]);
   const floorOn = floorFilter !== "all" && src === "api";
@@ -380,7 +387,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
       || !!b.roadAddr?.includes(q.trim()))
     && matchesStatus(b, workspace.status)
     && floorMatch(b, floorFilter)
-    && (!savedOnly || savedIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, savedIds, floorFilter, floorMatch]);
+    && (!savedOnly || candidateBuildingIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, candidateBuildingIds, floorFilter, floorMatch]);
 
   // 목록에 실제로 그리는 것. **지도 오버레이는 filtered 를 그대로 쓴다** — 뷰포트로
   // 오버레이까지 거르면 지도를 조금 움직일 때마다 폴리곤을 전부 다시 만들게 되고,
@@ -769,20 +776,30 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     if (target) setTwin3dOpen(true);
   }, [wantsTwin, currentInventory, src, selected, setWorkspace]);
 
-  // 후보 저장은 Page 작업공간(이번 작업 동안)과 공용 답사 목록(journey — 이 브라우저)에 함께 남긴다.
-  const toggleSaved = (id: string) => {
-    const ids = workspace.savedIds[districtId] ?? [];
-    const b = buildings.find((x) => x.id === id);
-    if (ids.includes(id)) removeStop({ buildingId: id });
-    else if (b && ids.length < 3) {
-      addStop({ buildingId: id, districtId, name: b.name, lat: b.center.lat, lng: b.center.lng, addedFrom: "page",
-        address: b.roadAddr ?? undefined, vacClass: b.vacClass });
-    }
-    setWorkspace((w) => {
-      const cur = w.savedIds[districtId] ?? [];
-      const next = cur.includes(id) ? cur.filter((x) => x !== id) : cur.length < 3 ? [...cur, id] : cur;
-      return { ...w, savedIds: { ...w.savedIds, [districtId]: next } };
-    });
+  // 후보는 저장 당시 자료와 함께 브라우저에 남긴다. 건물 후보는 기존 답사 목록에도 연결한다.
+  const removeCandidate = (id: string) => {
+    const c = candidateState.items.find(x => x.id === id);
+    if (c?.kind === "building") removeStop({ buildingId: c.buildingId });
+    updateCandidates(candidateState.items.filter(x => x.id !== id));
+  };
+  const toggleSaved = (id: string, floor?: RentListing) => {
+    const key = candidateId(districtId, id, floor?.id);
+    if (candidateState.items.some(c => c.id === key)) { removeCandidate(key); return; }
+    const b = buildings.find(x => x.id === id);
+    if (!b || src !== "api" || candidates.length >= 3) return;
+    const c: ReviewCandidate = {
+      id: key, districtId, buildingId: id, unitId: floor?.id,
+      kind: floor ? "floor" : "building", name: floor ? `${b.name} · ${floor.floor_label}` : b.name,
+      statusLabel: floor ? (floor.certainty === "confirmed" ? "자료 대조상 공실 · 현장 미확인" : "추정 공실 · 현장 미확인") : displayOf(b).label,
+      industry: b.industry, capacity: floor ? null : b.capacity, active: floor ? null : b.active,
+      floors: floor ? undefined : b.floors, floorLabel: floor?.floor_label, areaM2: floor?.area_m2,
+      monthlyRent: floor?.monthly_rent, source: floor ? "층별 공실·임대시세 API · 건축물대장과 점포 자료 대조" : "건물 공실 API · 건축물대장과 점포 자료 대조",
+      sourceDate: null, rentSource: floor ? currentRent?.basis : undefined, rentDate: floor ? currentRent?.quarter : undefined,
+      savedAt: new Date().toISOString(), note: "",
+    };
+    updateCandidates([...candidateState.items, c]);
+    if (!floor) addStop({ buildingId: id, districtId, name: b.name, lat: b.center.lat, lng: b.center.lng,
+      addedFrom: "page", address: b.roadAddr ?? undefined, vacClass: b.vacClass });
   };
   const review = (b: Building) => {
     if (src !== "api") return;
@@ -867,7 +884,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               {f.label}{currentFloorVac?.byPnu ? ` · ${buildings.filter((b) => floorMatch(b, f.key)).length.toLocaleString("ko-KR")}동` : ""}
             </option>)}
           </select></label>
-          <button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly((value) => !value)}>저장한 후보 {saved.length}</button>
+          <button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly((value) => !value)}>저장한 후보 {candidates.length}</button>
           {/* 뷰포트 동기화 스위치(R2). 켜 두는 것이 기본이다 — 화면 밖 매물은 사용자에게
               존재하지 않으므로, 지도를 옮겼는데 목록이 그대로면 둘 다 못 믿게 된다.
               끌 수는 있어야 한다: 거점 전체 건수를 세야 할 때가 있다. */}
@@ -977,7 +994,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               </span>
             </button>
             <button className="save-candidate" type="button" aria-label={`${b.name} 후보 ${savedIds.includes(b.id) ? "해제" : "저장"}`}
-              aria-pressed={savedIds.includes(b.id)} disabled={src !== "api" || (!savedIds.includes(b.id) && savedIds.length >= 3)}
+              aria-pressed={savedIds.includes(b.id)} disabled={src !== "api" || (!savedIds.includes(b.id) && candidates.length >= 3)}
               onClick={() => toggleSaved(b.id)}>{savedIds.includes(b.id) ? "♥ 저장됨" : "♡ 후보 저장"}</button>
             {src === "api" && <button type="button" className="b-twin" aria-label={`${b.name} 3D 트윈으로 보기`}
               onClick={() => { focus(b); setTwin3dOpen(true); }}>3D 트윈으로 보기</button>}
@@ -1007,7 +1024,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                   ? <div className="b-rec-note">이 건물에는 금액을 붙일 빈 층 매물이 없다.</div>
                   : (
                     <table className="b-rent-table is-pickable">
-                      <thead><tr><th><span className="sr-only">비용 확인할 층</span></th><th>층</th><th>면적</th><th>평당/월</th><th>월 임대료</th></tr></thead>
+                      <thead><tr><th><span className="sr-only">비용 확인할 층</span></th><th>층</th><th>면적</th><th>평당/월</th><th>월 임대료</th><th>후보</th></tr></thead>
                       <tbody>
                         {rentByBuilding.get(selected.id)!.map((x) => (
                           <tr key={x.id} className={(x.certainty === "probable" ? "is-probable" : "") + (chosenFloor?.id === x.id ? " is-chosen" : "")}
@@ -1019,6 +1036,10 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                             <td className="num">{x.area_py.toLocaleString("ko-KR")}평</td>
                             <td className="num">{x.rent_per_pyeong.toLocaleString("ko-KR")}만</td>
                             <td className="num"><b>{x.monthly_rent.toLocaleString("ko-KR")}만원</b></td>
+                            <td><button type="button" aria-label={`${selected.name} ${x.floor_label} 후보 ${candidates.some(c => c.id === candidateId(districtId, selected.id, x.id)) ? "해제" : "저장"}`}
+                              disabled={src !== "api" || (candidates.length >= 3 && !candidates.some(c => c.id === candidateId(districtId, selected.id, x.id)))}
+                              onClick={e => { e.stopPropagation(); toggleSaved(selected.id, x); }}>
+                              {candidates.some(c => c.id === candidateId(districtId, selected.id, x.id)) ? "저장됨" : "층 저장"}</button></td>
                           </tr>
                         ))}
                       </tbody>
@@ -1072,7 +1093,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {src === "api" && <a className="b-twin" href={kakaoRoadviewUrl(selected.center)} target="_blank" rel="noopener noreferrer">거리뷰 · 층별 보기<span className="sr-only">(새 창)</span></a>}
             <button className="b-twin" onClick={() => setTwinOpen(true)}>층별 공실 · 공실 이력 보기</button>
             <button className="save-candidate detail-save" type="button" aria-pressed={savedIds.includes(selected.id)}
-              disabled={src !== "api" || (!savedIds.includes(selected.id) && savedIds.length >= 3)}
+              disabled={src !== "api" || (!savedIds.includes(selected.id) && candidates.length >= 3)}
               onClick={() => toggleSaved(selected.id)}>{savedIds.includes(selected.id) ? "✓ 후보 저장됨" : "+ 이 건물 후보 저장"}</button>
             {onReview && <button className="building-review" disabled={src !== "api"} onClick={() => review(selected)}>
               {chosenFloor ? `${chosenFloor.floor_label}로 입점 검토 →` : "이 건물로 입점 검토 →"}</button>}
@@ -1081,8 +1102,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   ) : null;
   const tray = (
         <div className="candidate-tray">
-          <div><strong>저장한 후보 {saved.length}/3</strong><span>현재 상권 · 이번 작업 동안 유지</span></div>
-          <button type="button" disabled={saved.length === 0} onClick={() => setCompareOpen(true)}>후보 비교</button>
+          {candidateState.error && <p role="alert">{candidateState.error}</p>}
+          <div><strong>저장한 후보 {candidates.length}/3</strong><span>현재 상권 · 이 브라우저에 저장</span></div>
+          <button type="button" disabled={candidates.length === 0} onClick={() => setCompareOpen(true)}>후보 비교</button>
         </div>
   );
   const footer = <>
@@ -1237,12 +1259,21 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
       </div>
       )}
 
-      {compareOpen && <CandidateCompare districtName={hub?.name ?? districtId}
-        candidates={saved.map((b) => ({ ...b, statusLabel: STATUS[b.status].label, vacancyRate: b.capacity > 0 ? vacRate(b) : null }))}
-        notes={Object.fromEntries(saved.map((b) => [b.id, workspace.notes[`${districtId}:${b.id}`] ?? ""]))}
-        onNote={(id, value) => setWorkspace((w) => ({ ...w, notes: { ...w.notes, [`${districtId}:${id}`]: value } }))}
-        onRemove={toggleSaved} onClose={() => setCompareOpen(false)}
-        onReview={onReview ? (id) => { const b = saved.find((item) => item.id === id); if (b) review(b); } : undefined} />}
+      {compareOpen && <CandidateCompare districtName={hub?.name ?? districtId} candidates={candidates}
+        error={candidateState.error}
+        availableIds={src === "api" ? buildings.map(b => b.id) : []}
+        onNote={(id, value) => updateCandidates(candidateState.items.map(c => c.id === id ? { ...c, note: value } : c))}
+        onRecord={(id, patch) => setCandidateState(previous => {
+          const items = previous.items.map(c => c.id === id ? { ...c, ...patch } : c);
+          return { items, error: saveCandidates(items) };
+        })}
+        onRemove={removeCandidate} onClose={() => setCompareOpen(false)}
+        onReview={onReview && src === "api" ? (id) => {
+          const c = candidates.find(item => item.id === id);
+          if (!c || !buildings.some(b => b.id === c.buildingId)) return;
+          setCompareOpen(false);
+          onReview({ districtId, buildingId: c.buildingId, buildingName: c.name, ...(c.unitId ? { unitId: c.unitId } : {}) });
+        } : undefined} />}
 
       {/* 유동인구 레이어 전용 시간 슬라이더 = 흐름 축 */}
       {/* 칸 배치(2026-11-08)에서는 지도 칸이 좁아 가운데 시간 막대와 왼쪽 범례가 겹쳤다(범례가 막대를 덮어 시각을 못 바꿨다) —

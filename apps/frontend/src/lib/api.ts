@@ -1751,6 +1751,24 @@ export interface TwinLedgerLive {
   /** 키 = 층 번호(지하 음수) 문자열 */
   floors: Record<string, TwinLedgerFloor> | null;
 }
+
+/** 공적 조회 자료. 사용자 확인 상태나 입점 허가 판정은 포함하지 않는다. */
+export interface CandidateReviewEvidence {
+  building_id: string;
+  unit_id: string | null;
+  pnu: string;
+  queried_at: string;
+  source_date: string | null;
+  ledger_status: string;
+  ledger_note: string;
+  facts: Array<{ label: string; value: string; scope: string }>;
+  regulation_status: "missing_inputs";
+  regulation_note: string;
+  sources: Array<{ name: string; url: string }>;
+  permission: null;
+}
+export const getCandidateReview = (buildingId: string, district: string, unitId?: string, signal?: AbortSignal) =>
+  getOptional<CandidateReviewEvidence>(`/buildings/${encodeURIComponent(buildingId)}/candidate-review${query({ district, unit_id: unitId })}`, signal);
 /** 건물 지번 월별 가스 · 전기 사용량 — 건축HUB 건물에너지정보 실시간(서버 services/building_energy_live · 2026-11-09) */
 export interface BuildingEnergy {
   /** ok · refused(활용신청 전 · 키 거절 등) · no_key · no_pnu(산 지번 등) · backoff · error */
