@@ -1,0 +1,374 @@
+{
+ "seed": 20261115,
+ "per_stage": 25,
+ "n_pairs": 50,
+ "n_dropped": 0,
+ "queries_used": [
+  "banpo|founder|미용·네일",
+  "banpo|founder|음식점",
+  "banpo|founder|카페·디저트",
+  "banpo|pre_founder|미용·네일",
+  "banpo|pre_founder|음식점",
+  "banpo|pre_founder|카페·디저트",
+  "jangan|founder|미용·네일",
+  "jangan|founder|음식점",
+  "jangan|founder|카페·디저트",
+  "jangan|pre_founder|미용·네일",
+  "jangan|pre_founder|음식점",
+  "jangan|pre_founder|카페·디저트",
+  "seochon|founder|미용·네일",
+  "seochon|founder|음식점",
+  "seochon|founder|카페·디저트",
+  "seochon|pre_founder|미용·네일",
+  "seochon|pre_founder|음식점",
+  "seochon|pre_founder|카페·디저트",
+  "yeonnam|founder|미용·네일",
+  "yeonnam|founder|음식점",
+  "yeonnam|founder|카페·디저트",
+  "yeonnam|pre_founder|미용·네일",
+  "yeonnam|pre_founder|음식점",
+  "yeonnam|pre_founder|카페·디저트"
+ ],
+ "excluded_queries": [],
+ "frozen_at": "2026-11-15T09:44:27.706814+00:00",
+ "source_status": [
+  {
+   "id": "kstartup",
+   "name": "K-Startup",
+   "status": "ok",
+   "count": 119,
+   "fetched_at": "2026-11-15T09:44:26+00:00",
+   "note": null
+  },
+  {
+   "id": "bizinfo",
+   "name": "기업마당",
+   "status": "ok",
+   "count": 248,
+   "fetched_at": "2026-11-15T09:44:27+00:00",
+   "note": null
+  },
+  {
+   "id": "gov24",
+   "name": "정부24 혜택",
+   "status": "ok",
+   "count": 130,
+   "fetched_at": "2026-11-15T09:44:26+00:00",
+   "note": null
+  }
+ ],
+ "districts": [
+  "banpo",
+  "jangan",
+  "seochon",
+  "yeonnam"
+ ],
+ "industries": [
+  "카페·디저트",
+  "음식점",
+  "미용·네일"
+ ],
+ "prereg": "docs/prereg-program-support-precision-2026-11-15.md",
+ "pairs": [
+  {
+   "pair_id": "P001",
+   "qid": "jangan|pre_founder|음식점",
+   "M": "biz-PBLN_000000000127417",
+   "C": "biz-PBLN_000000000127881"
+  },
+  {
+   "pair_id": "P002",
+   "qid": "yeonnam|pre_founder|카페·디저트",
+   "M": "ks-179790",
+   "C": "biz-PBLN_000000000124676"
+  },
+  {
+   "pair_id": "P003",
+   "qid": "jangan|pre_founder|카페·디저트",
+   "M": "ks-179024",
+   "C": "biz-PBLN_000000000127745"
+  },
+  {
+   "pair_id": "P004",
+   "qid": "yeonnam|pre_founder|음식점",
+   "M": "ks-179208",
+   "C": "biz-PBLN_000000000123842"
+  },
+  {
+   "pair_id": "P005",
+   "qid": "banpo|pre_founder|미용·네일",
+   "M": "ks-179559",
+   "C": "gov24-O00082800001"
+  },
+  {
+   "pair_id": "P006",
+   "qid": "yeonnam|pre_founder|음식점",
+   "M": "ks-179184",
+   "C": "biz-PBLN_000000000124651"
+  },
+  {
+   "pair_id": "P007",
+   "qid": "banpo|pre_founder|음식점",
+   "M": "ks-179762",
+   "C": "gov24-611000000164"
+  },
+  {
+   "pair_id": "P008",
+   "qid": "banpo|pre_founder|카페·디저트",
+   "M": "ks-179749",
+   "C": "biz-PBLN_000000000127533"
+  },
+  {
+   "pair_id": "P009",
+   "qid": "jangan|pre_founder|카페·디저트",
+   "M": "ks-177864",
+   "C": "biz-PBLN_000000000127533"
+  },
+  {
+   "pair_id": "P010",
+   "qid": "seochon|pre_founder|음식점",
+   "M": "ks-179688",
+   "C": "ks-179639"
+  },
+  {
+   "pair_id": "P011",
+   "qid": "banpo|pre_founder|카페·디저트",
+   "M": "ks-179766",
+   "C": "biz-PBLN_000000000121221"
+  },
+  {
+   "pair_id": "P012",
+   "qid": "yeonnam|pre_founder|미용·네일",
+   "M": "ks-179710",
+   "C": "biz-PBLN_000000000119698"
+  },
+  {
+   "pair_id": "P013",
+   "qid": "jangan|pre_founder|카페·디저트",
+   "M": "ks-179776",
+   "C": "biz-PBLN_000000000127298"
+  },
+  {
+   "pair_id": "P014",
+   "qid": "jangan|pre_founder|카페·디저트",
+   "M": "ks-179795",
+   "C": "biz-PBLN_000000000127506"
+  },
+  {
+   "pair_id": "P015",
+   "qid": "seochon|pre_founder|미용·네일",
+   "M": "ks-179653",
+   "C": "biz-PBLN_000000000123336"
+  },
+  {
+   "pair_id": "P016",
+   "qid": "yeonnam|pre_founder|카페·디저트",
+   "M": "ks-179430",
+   "C": "biz-PBLN_000000000123842"
+  },
+  {
+   "pair_id": "P017",
+   "qid": "banpo|pre_founder|미용·네일",
+   "M": "ks-179707",
+   "C": "ks-179639"
+  },
+  {
+   "pair_id": "P018",
+   "qid": "banpo|pre_founder|음식점",
+   "M": "ks-179714",
+   "C": "ks-179639"
+  },
+  {
+   "pair_id": "P019",
+   "qid": "seochon|pre_founder|음식점",
+   "M": "ks-179682",
+   "C": "gov24-O00082800005"
+  },
+  {
+   "pair_id": "P020",
+   "qid": "banpo|pre_founder|음식점",
+   "M": "ks-179559",
+   "C": "biz-PBLN_000000000123844"
+  },
+  {
+   "pair_id": "P021",
+   "qid": "banpo|pre_founder|음식점",
+   "M": "ks-179650",
+   "C": "ks-179630"
+  },
+  {
+   "pair_id": "P022",
+   "qid": "jangan|pre_founder|음식점",
+   "M": "ks-179795",
+   "C": "biz-PBLN_000000000127506"
+  },
+  {
+   "pair_id": "P023",
+   "qid": "yeonnam|pre_founder|음식점",
+   "M": "biz-PBLN_000000000124045",
+   "C": "biz-PBLN_000000000120187"
+  },
+  {
+   "pair_id": "P024",
+   "qid": "jangan|pre_founder|음식점",
+   "M": "ks-178445",
+   "C": "biz-PBLN_000000000127298"
+  },
+  {
+   "pair_id": "P025",
+   "qid": "yeonnam|pre_founder|음식점",
+   "M": "ks-179650",
+   "C": "ks-179530"
+  },
+  {
+   "pair_id": "P026",
+   "qid": "banpo|founder|카페·디저트",
+   "M": "ks-179759",
+   "C": "ks-179562"
+  },
+  {
+   "pair_id": "P027",
+   "qid": "jangan|founder|카페·디저트",
+   "M": "biz-PBLN_000000000127270",
+   "C": "ks-179777"
+  },
+  {
+   "pair_id": "P028",
+   "qid": "seochon|founder|카페·디저트",
+   "M": "biz-PBLN_000000000127298",
+   "C": "ks-179710"
+  },
+  {
+   "pair_id": "P029",
+   "qid": "seochon|founder|카페·디저트",
+   "M": "ks-177278",
+   "C": "ks-179353"
+  },
+  {
+   "pair_id": "P030",
+   "qid": "seochon|founder|카페·디저트",
+   "M": "ks-179611",
+   "C": "ks-179714"
+  },
+  {
+   "pair_id": "P031",
+   "qid": "yeonnam|founder|미용·네일",
+   "M": "gov24-611000000164",
+   "C": "ks-179777"
+  },
+  {
+   "pair_id": "P032",
+   "qid": "yeonnam|founder|미용·네일",
+   "M": "biz-PBLN_000000000126214",
+   "C": "ks-179795"
+  },
+  {
+   "pair_id": "P033",
+   "qid": "seochon|founder|미용·네일",
+   "M": "ks-179776",
+   "C": "ks-179353"
+  },
+  {
+   "pair_id": "P034",
+   "qid": "banpo|founder|미용·네일",
+   "M": "ks-179018",
+   "C": "ks-179741"
+  },
+  {
+   "pair_id": "P035",
+   "qid": "banpo|founder|카페·디저트",
+   "M": "biz-PBLN_000000000126611",
+   "C": "ks-179638"
+  },
+  {
+   "pair_id": "P036",
+   "qid": "jangan|founder|미용·네일",
+   "M": "ks-179744",
+   "C": "ks-179688"
+  },
+  {
+   "pair_id": "P037",
+   "qid": "seochon|founder|미용·네일",
+   "M": "biz-PBLN_000000000122153",
+   "C": "ks-179740"
+  },
+  {
+   "pair_id": "P038",
+   "qid": "banpo|founder|음식점",
+   "M": "biz-PBLN_000000000127881",
+   "C": "ks-179617"
+  },
+  {
+   "pair_id": "P039",
+   "qid": "seochon|founder|미용·네일",
+   "M": "biz-PBLN_000000000121221",
+   "C": "ks-179208"
+  },
+  {
+   "pair_id": "P040",
+   "qid": "seochon|founder|카페·디저트",
+   "M": "biz-PBLN_000000000124045",
+   "C": "ks-179777"
+  },
+  {
+   "pair_id": "P041",
+   "qid": "jangan|founder|미용·네일",
+   "M": "ks-179790",
+   "C": "ks-179655"
+  },
+  {
+   "pair_id": "P042",
+   "qid": "yeonnam|founder|미용·네일",
+   "M": "biz-PBLN_000000000121221",
+   "C": "ks-179688"
+  },
+  {
+   "pair_id": "P043",
+   "qid": "banpo|founder|카페·디저트",
+   "M": "ks-179530",
+   "C": "ks-179741"
+  },
+  {
+   "pair_id": "P044",
+   "qid": "jangan|founder|카페·디저트",
+   "M": "ks-179555",
+   "C": "ks-179208"
+  },
+  {
+   "pair_id": "P045",
+   "qid": "banpo|founder|카페·디저트",
+   "M": "ks-179018",
+   "C": "ks-179751"
+  },
+  {
+   "pair_id": "P046",
+   "qid": "banpo|founder|미용·네일",
+   "M": "gov24-O00082800004",
+   "C": "ks-179655"
+  },
+  {
+   "pair_id": "P047",
+   "qid": "banpo|founder|음식점",
+   "M": "biz-PBLN_000000000122153",
+   "C": "ks-179767"
+  },
+  {
+   "pair_id": "P048",
+   "qid": "banpo|founder|음식점",
+   "M": "ks-179658",
+   "C": "ks-179714"
+  },
+  {
+   "pair_id": "P049",
+   "qid": "yeonnam|founder|음식점",
+   "M": "biz-PBLN_000000000127643",
+   "C": "ks-179775"
+  },
+  {
+   "pair_id": "P050",
+   "qid": "yeonnam|founder|음식점",
+   "M": "ks-176741",
+   "C": "ks-179751"
+  }
+ ]
+}
