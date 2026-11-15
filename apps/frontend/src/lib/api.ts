@@ -1784,13 +1784,17 @@ export interface CandidateReviewEvidence {
   ledger_status: string;
   ledger_note: string;
   facts: Array<{ label: string; value: string; scope: string }>;
-  regulation_status: "missing_inputs";
+  /** 업종 없이 조회하거나 층·대장을 후보에 잇지 못하면 missing_inputs. 업종을 보내면 입점 점검의 다섯 갈래(2026-11-15) */
+  regulation_status: UseCheckStatus;
   regulation_note: string;
   sources: Array<{ name: string; url: string }>;
   permission: null;
+  industry?: string | null;
+  /** 입점 점검 결과 — 허가 판정이 아니다 */
+  use_check?: UseCheck | null;
 }
-export const getCandidateReview = (buildingId: string, district: string, unitId?: string, signal?: AbortSignal) =>
-  getOptional<CandidateReviewEvidence>(`/buildings/${encodeURIComponent(buildingId)}/candidate-review${query({ district, unit_id: unitId })}`, signal);
+export const getCandidateReview = (buildingId: string, district: string, unitId?: string, signal?: AbortSignal, industry?: string) =>
+  getOptional<CandidateReviewEvidence>(`/buildings/${encodeURIComponent(buildingId)}/candidate-review${query({ district, unit_id: unitId, industry })}`, signal);
 /** 건물 지번 월별 가스 · 전기 사용량 — 건축HUB 건물에너지정보 실시간(서버 services/building_energy_live · 2026-11-09) */
 export interface BuildingEnergy {
   /** ok · refused(활용신청 전 · 키 거절 등) · no_key · no_pnu(산 지번 등) · backoff · error */
