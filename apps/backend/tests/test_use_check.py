@@ -263,3 +263,23 @@ def test_missing_headline_names_the_missing_data_not_absence():
     r = use_check.check("1100000000000000007", "restaurant", parts=[part("일반음식점", "04001")], area_m2=80)
     assert r["regulation_status"] == "missing_inputs"
     assert "다른 지역지구 자료를 아직 받지 못해" in r["headline"] and "이(가) 없어" not in r["headline"]
+
+
+def test_gold_fallback_refuses_multi_dong_floor(monkeypatch):
+    """실시간 대장이 실패한 채 Gold 층 대장에 같은 층 다른 동 행이 섞이면 이 자리에 잇지 않는다(11-15 리뷰)."""
+    from app.services import building_floors
+
+    doc = {"floor_fields": ["dong", "kind", "no", "raw", "area_m2", "purps", "etc", "strct", "atch"],
+           "lots": {"1100000000000000001": {"floors": [
+               ["가동", "G", 1, "1층", 100.0, "일반음식점", None, "철근", 0],
+               ["나동", "G", 1, "1층", 300.0, "소매점", None, "철근", 0],
+               ["가동", "G", 1, "1층", 20.0, "계단실", None, "철근", 1],      # 부속 행은 빠진다
+           ]}}}
+    monkeypatch.setattr(building_floors, "load", lambda d: doc)
+    parts, basis = use_check.floor_parts({"status": "error"}, "garosugil", "1100000000000000001", 1, "일반음식점")
+    assert parts is None and "동이 여럿" in basis
+    one = {**doc, "lots": {"1100000000000000001": {"floors": [doc["lots"]["1100000000000000001"]["floors"][0],
+                                                            doc["lots"]["1100000000000000001"]["floors"][2]]}}}
+    monkeypatch.setattr(building_floors, "load", lambda d: one)
+    parts, _ = use_check.floor_parts({"status": "error"}, "garosugil", "1100000000000000001", 1, None)
+    assert [p["purps"] for p in parts] == ["일반음식점"]

@@ -87,6 +87,20 @@ describe("후보 계약 전 확인 흐름", () => {
     const dialog = screen.getByRole("dialog");
     expect((await within(dialog).findAllByText(/입점 점검\(음식점\): 대장상 용도 변경 필요/)).length).toBeGreaterThan(0);
     expect(within(dialog).getAllByText(/허가 판정이 아닙니다/).length).toBeGreaterThan(0);
+    expect(within(dialog).getAllByText("점검 항목 전부 · 기준일").length).toBeGreaterThan(0);   // 맞은 항목·기준일도 남는다
+    expect(dialog.textContent ?? "").toContain("실시간 조회 2026-11-15");
     expect(dialog.textContent ?? "").not.toMatch(/허가됨|입점 가능/);
+  });
+
+  it("업종 목록을 못 받으면 선택 칸을 숨기고, 흐름 업종을 몰래 보내지 않는다", async () => {
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "restaurant", districtId: "a" }));
+    vi.mocked(listIndustries).mockRejectedValueOnce(new Error("down"));
+    vi.mocked(getCandidateReview).mockResolvedValueOnce(null);
+    const floor: ReviewCandidate = { ...candidate("G"), id: candidateId("a", "G", "G-1"), unitId: "G-1", kind: "floor", floorLabel: "1층" };
+    render(<CandidateCompare districtName="상권" candidates={[floor]} availableIds={["G"]} onClose={() => {}} onRemove={() => {}} onNote={() => {}} onRecord={() => {}} />);
+    await waitFor(() => expect(listIndustries).toHaveBeenCalled());
+    expect(screen.queryByLabelText("G 내 업종", { exact: true })).toBeNull();
+    fireEvent.click(within(screen.getByRole("region", { name: "G 계약 전 확인" })).getByRole("button", { name: "공적 자료 조회 / 갱신" }));
+    await waitFor(() => expect(getCandidateReview).toHaveBeenCalledWith("G", "a", "G-1", expect.any(AbortSignal)));
   });
 });

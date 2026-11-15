@@ -140,8 +140,10 @@ def gold_floor_parts(district: str, pnu: str, floor: int) -> list[dict] | None:
         return None
     floors, _ = building_floors.rows_of(doc, lot)
     kind, no = ("G", floor) if floor > 0 else ("B", -floor)
-    parts = [{"purps": r.get("purps"), "etc": r.get("etc"), "area_m2": float(r.get("area_m2") or 0), "code": None}
-             for r in floors if r.get("kind") == kind and r.get("no") == no]
+    # 부속 행(atch)은 뺀다 — building_twin._ledger_by_level 과 같은 규칙. dong 은 같은 지번 여러 동을 가르려고 싣는다
+    parts = [{"purps": r.get("purps"), "etc": r.get("etc"), "area_m2": float(r.get("area_m2") or 0), "code": None,
+              "dong": r.get("dong") or ""}
+             for r in floors if r.get("kind") == kind and r.get("no") == no and not r.get("atch")]
     return parts or None
 
 
@@ -156,7 +158,11 @@ def floor_parts(live: dict, district: str, pnu: str, floor: int, purps: str | No
     parts = (((live.get("floors") or {}).get(str(floor)) or {}).get("parts")) if live.get("status") == "ok" else None
     basis: str | None = f"실시간 조회 {date.today().isoformat()}"
     if not parts:
-        parts = gold_floor_parts(district, pnu, floor)
+        raw = gold_floor_parts(district, pnu, floor)
+        if raw and len({p.get("dong") or "" for p in raw}) > 1:
+            # 실시간 대장은 표제부의 동으로 행을 거르지만 Gold 는 못 거른다 — 다른 건물의 용도를 이 자리에 붙이지 않는다(11-15 리뷰)
+            return None, "Gold 층 대장 — 같은 지번에 동이 여럿이라 이 자리에 잇지 못함"
+        parts = raw
         basis = "Gold 층 대장(용도코드 없음)" if parts else None
     if parts and purps:
         parts = [p for p in parts if (p.get("purps") or "").strip() == purps.strip()] or parts

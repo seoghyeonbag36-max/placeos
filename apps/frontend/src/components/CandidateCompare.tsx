@@ -106,7 +106,8 @@ function CandidateWorkflow({ candidate: c, onRecord }: { candidate: ReviewCandid
     controller.current = request;
     setLoading(true); setError(null);
     try {
-      const withIndustry = c.kind === "floor" && industry;
+      // 고를 수 있게 보인 업종만 보낸다 — 업종 목록을 못 받아 선택 칸이 숨었으면 점검 없이 조회한다(11-15 리뷰)
+      const withIndustry = c.kind === "floor" && industry && options.some(o => o.key === industry);
       const external = withIndustry
         ? await getCandidateReview(c.buildingId, c.districtId, c.unitId, request.signal, industry)
         : await getCandidateReview(c.buildingId, c.districtId, c.unitId, request.signal);
@@ -171,7 +172,9 @@ function ExternalEvidence({ candidate: c }: { candidate: ReviewCandidate }) {
     {e.sources.map(source => <p key={source.url}>{safeEvidenceUrl(source.url) ? <a href={safeEvidenceUrl(source.url)!} target="_blank" rel="noopener noreferrer">{source.name} (새 창)</a> : source.name}</p>)}
   </div>;
 }
-/** 입점 점검(대장 용도코드 × 토지이음 행위제한) — 막히거나 확인할 항목만 펼치고, 허가 판정이 아님을 늘 밝힌다 */
+const CHECK_ITEM_LABEL: Record<UseCheck["checks"][number]["status"], string> = { ok: "맞음", check: "확인", blocked: "막힘", missing: "자료 없음" };
+
+/** 입점 점검(대장 용도코드 × 토지이음 행위제한) — 막히거나 확인할 항목을 먼저 펼치고, 허가 판정이 아님(note)을 늘 밝힌다 */
 function UseCheckEvidence({ u }: { u: UseCheck }) {
   const label = USE_CHECK_LABEL[u.regulation_status];
   const head = u.headline.startsWith(label) ? u.headline.slice(label.length).replace(/^\s*—\s*/, "") : u.headline;
@@ -179,7 +182,11 @@ function UseCheckEvidence({ u }: { u: UseCheck }) {
   return <div className="candidate-usecheck">
     <p><strong>입점 점검({u.industry_label}): {label}</strong> — {head}</p>
     {open.length > 0 && <ul>{open.map(x => <li key={x.item}>{x.item}: {x.reason} <small>({x.source}{x.source_date ? ` · ${x.source_date}` : ""})</small></li>)}</ul>}
-    <p>허가 판정이 아닙니다. 영업신고·용도변경이 되는지는 관할 구청에서 정해집니다.</p>
+    {/* 「대장상 가능」이어도 기준일·범위를 늘 남긴다 — 맞은 항목도 출처·기준일과 함께, 점검 밖 범위(note)는 그대로(11-15 리뷰) */}
+    <details><summary>점검 항목 전부 · 기준일</summary>
+      <ul>{u.checks.map(x => <li key={x.item}>{x.item} · {CHECK_ITEM_LABEL[x.status]} — {x.reason} <small>({x.source}{x.source_date ? ` · ${x.source_date}` : ""})</small></li>)}</ul>
+    </details>
+    <p>{u.note}</p>
   </div>;
 }
 function ReviewRecord({ candidate: c }: { candidate: ReviewCandidate }) {
