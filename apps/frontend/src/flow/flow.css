@@ -207,6 +207,16 @@ button.fl-row-btn:hover { background: var(--grey-50); }
 .fl-badge.is-obs { background: var(--grey-100); color: var(--grey-700); }
 .fl-badge.is-primary { background: var(--primary-soft); color: var(--primary-pressed); }
 
+/* 입점 점검(R4 · 2026-11-15) — 다섯 갈래. 색은 판정이 아니라 「얼마나 더 알아봐야 하나」의 정도다 */
+.fl-usecheck { display: grid; gap: var(--sp-2); }
+.fl-usecheck-status { justify-self: start; margin: 0; padding: 4px 10px; border-radius: 6px; font-size: .875rem; font-weight: var(--fw-bold); }
+.fl-usecheck-status.is-ledger_ok { background: var(--source-real-soft); color: var(--source-real); }
+.fl-usecheck-status.is-needs_check { background: var(--caution-soft); color: var(--caution-ink); }
+.fl-usecheck-status.is-use_change_needed,
+.fl-usecheck-status.is-zoning_prohibited { background: var(--danger-soft); color: var(--danger-text); }
+.fl-usecheck-status.is-missing_inputs { background: var(--grey-100); color: var(--grey-700); }
+.fl-usecheck-head { margin: 0; font-size: 1rem; font-weight: var(--fw-semibold); color: var(--grey-900); line-height: 1.5; }
+
 .fl-details { border-top: 1px solid var(--grey-100); padding-top: var(--sp-2); }
 .fl-details summary { min-height: 44px; display: flex; align-items: center; font-size: .9375rem; font-weight: var(--fw-semibold); color: var(--grey-700); cursor: pointer; }
 .fl-details-body { display: grid; gap: var(--sp-2); padding-bottom: var(--sp-2); }

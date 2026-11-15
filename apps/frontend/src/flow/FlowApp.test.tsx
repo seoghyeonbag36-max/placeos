@@ -492,6 +492,25 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(loadNaverMaps).not.toHaveBeenCalled();
   });
 
+  it("R4 입점 점검 — 고른 업종으로 이 층을 점검하고, 허가를 단정하지 않는다(2026-11-15)", async () => {
+    const api = stub([{ match: /\/buildings\/B1\/use-check\?/, body: {
+      pnu: "B1", industry: "cafe", industry_label: "카페·디저트", act: "휴게음식점", regulation_status: "needs_check",
+      headline: "확인 필요 — 2가지를 관할 구청에 확인해야 합니다.",
+      checks: [{ item: "면적 기준", status: "check", reason: "300㎡ 기준에 따라 1종/2종이 갈립니다.", source: "토지이음", source_date: "2026-11-15", estimated: false }],
+      note: "허가 판정이 아닙니다.", sources: [], permission: null, ledger_live_status: "ok",
+    } }]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/space/vfu-B1-1");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 2, name: "이 층에 카페·디저트, 들어갈 수 있나요?" })).toBeTruthy();
+    expect(await screen.findByText("확인 필요")).toBeTruthy();
+    expect(screen.getAllByText(/300㎡ 기준/).length).toBeGreaterThan(0);
+    const url = api.calls.find((c) => c.url.includes("/use-check"))!.url;
+    expect(url).toContain("district=seongsu");
+    expect(url).toContain("industry=cafe");
+    expect(document.body.textContent ?? "").not.toMatch(/허가됨|입점 가능/);
+  });
+
   it("F-09 본전 시점: 처음 드는 돈은 invest_mn × 100 만원(백만원 단위)이고 결론은 체감 단위다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu", spaceId: "vfu-B1-1", premium: { kind: "unknown" } }));

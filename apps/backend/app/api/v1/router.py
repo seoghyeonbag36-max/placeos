@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from app.api.deps import track_access
 from app.api.v1 import (
     admin, ai, auth, benchmark, buildings, campaigns, corridors, districts, feedback, founder, heatmap, marketing, metrics, program,
-    travel, visitor_feedback,
+    travel, use_check, visitor_feedback,
 )
 
 # 분석 API 공통 — 자격증명이 오면 신원을 밝히고 사용량을 남긴다(익명은 그대로 통과).
@@ -20,6 +20,9 @@ api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmar
 api_router.include_router(travel.router, prefix="/travel", tags=["travel"], dependencies=_tracked)
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(buildings.router, prefix="/buildings", tags=["buildings"],
+                          dependencies=_tracked)
+# 입점 점검(2026-11-15) — 대장 용도코드 × 토지이음 행위제한. 같은 /buildings 아래 · 같은 계측.
+api_router.include_router(use_check.router, prefix="/buildings", tags=["buildings"],
                           dependencies=_tracked)
 api_router.include_router(districts.router, prefix="/commercial-districts", tags=["districts"],
                           dependencies=_tracked)

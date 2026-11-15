@@ -122,9 +122,13 @@
 
 - **채점.** 사전등록 `docs/prereg-floor-use-check-2026-11-15.md` 는 규칙 코드와 같은 커밋으로 남겼다. 다음은 인허가 표본 필지를
   `eum_landuse --pnus-file` 로 더 받고 채점 스크립트(`data.validation.score_use_check_licensing` · 아직 없음)를 만든다.
-- **화면 연결(2-B · 2-E)은 0단계 머지 뒤.** 후보 조회 `GET /api/v1/buildings/{building_id}/candidate-review` 의
-  `regulation_status`(지금 `"missing_inputs"` 고정)를 `use_check.check(pnu, industry, parts=그 층 대장 행, area_m2=층 면적)` 로 채운다.
-  그 브랜치(`fix/page-candidate-review-20261114`)는 메인 체크아웃에서 아직 커밋 전이라 이 작업은 손대지 않았다.
+- **화면 연결(2-E) — 흐름 R4 자리 상세에 붙였다(11-15).** `GET /api/v1/buildings/{building_id}/use-check?district&floor&industry[&area_m2]`
+  (`api/v1/use_check.py`)가 실시간 대장 용도코드로 `use_check.check` 를 돌리고, 실패하면 Gold 층 대장(코드 없음 → 확인 필요)으로 물러난다.
+  카드 `flow/UseCheckCard.tsx` 는 다섯 갈래 이름 · 열린 항목 · 출처 · 「허가 판정 아님」을 늘 보인다.
+- **후보 조회(2-B)는 그 브랜치 머지 뒤.** `candidate-review` 의 `regulation_status`(지금 `"missing_inputs"` 고정)를 같은 서비스로 채운다.
+  그 브랜치(`fix/page-candidate-review-20261114`)는 메인 체크아웃에서 아직 커밋 전이라 손대지 않았다.
+- **남은 156콜** — 예약 작업 `PlaceOS-EumLanduse-Resume`(`scripts/eum_landuse_resume.py --status`)이 2026-11-16 00:20 부터 매일 돈다.
+  다 받으면 Gold·빈 층 분포를 다시 짓고 스스로 지운다. 커밋·PR 은 사람 몫이다.
 - 서울 밖: 수집기·빌더는 `--city` 를 받는다. 사이트가 서울만 보이므로(11-10 결정) 서울만 받았다.
 
 ## 부록 — 다시 재는 명령

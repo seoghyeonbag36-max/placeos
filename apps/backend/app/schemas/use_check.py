@@ -37,3 +37,4 @@ class UseCheck(BaseModel):
     note: str
     sources: list[UseCheckSource]
     permission: None = None  # 허가 여부는 만들지 않는다
+    ledger_live_status: str | None = None  # 건축HUB 실시간 대장 상태(ok · no_key · error …) — ok 가 아니면 Gold 층 대장으로 물러났다

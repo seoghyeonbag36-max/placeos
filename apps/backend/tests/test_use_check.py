@@ -176,3 +176,60 @@ def test_ledger_code_survives_summarise_and_twin_schema():
 def test_ho_of():
     assert use_check.ho_of("03002") == 3 and use_check.ho_of("14299") == 14
     assert use_check.ho_of(None) is None and use_check.ho_of("x1") is None
+
+
+# ── API — GET /api/v1/buildings/{building_id}/use-check ───────────────────────
+
+def _client(monkeypatch, live: dict, gold_lot: dict | None = None):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.services import building_floors, building_ledger_live
+
+    doc = {"floor_fields": ["dong", "kind", "no", "raw", "area_m2", "purps", "etc", "strct", "atch"],
+           "lots": {"1100000000000000001": gold_lot} if gold_lot else {}}
+    monkeypatch.setattr(building_ledger_live, "ledger", lambda pnu: live)
+    monkeypatch.setattr(building_floors, "load", lambda d: doc if d == "garosugil" else None)
+    return TestClient(app)
+
+
+def test_api_uses_live_ledger_code(monkeypatch):
+    live = {"status": "ok", "floors": {"1": {"parts": [part("소매점", "03001", 120)]}}}
+    c = _client(monkeypatch, live)
+    r = c.get("/api/v1/buildings/1100000000000000001-1/use-check",
+              params={"district": "garosugil", "floor": 1, "industry": "restaurant"})
+    assert r.status_code == 200
+    j = r.json()
+    assert j["regulation_status"] == "use_change_needed" and j["ledger_live_status"] == "ok"
+    assert j["permission"] is None and "실시간 조회" in by_item(j)["대장 층 용도"]["source_date"]
+
+
+def test_api_falls_back_to_gold_without_code(monkeypatch):
+    """실시간 대장이 실패하면 Gold 층 대장 — 용도코드가 없어 호를 정하지 못하니 확인 필요."""
+    lot = {"floors": [["", "G", 1, "1층", 120.0, "일반음식점", None, "철근콘크리트구조", 0]]}
+    c = _client(monkeypatch, {"status": "error", "floors": None}, gold_lot=lot)
+    j = c.get("/api/v1/buildings/1100000000000000001-1/use-check",
+              params={"district": "garosugil", "floor": 1, "industry": "restaurant"}).json()
+    assert j["ledger_live_status"] == "error" and j["regulation_status"] == "needs_check"
+    assert "용도코드가 없어" in by_item(j)["대장 층 용도"]["reason"]
+
+
+def test_api_rejects_unknown_inputs(monkeypatch):
+    c = _client(monkeypatch, {"status": "ok", "floors": {}})
+    base = "/api/v1/buildings/1100000000000000001-1/use-check"
+    assert c.get(base, params={"district": "garosugil", "floor": 1, "industry": "spaceship"}).status_code == 400
+    assert c.get(base, params={"district": "nowhere", "floor": 1, "industry": "cafe"}).status_code == 404
+    assert c.get("/api/v1/buildings/abc/use-check",
+                 params={"district": "garosugil", "floor": 1, "industry": "cafe"}).status_code == 404
+    assert c.get(base, params={"district": "garosugil", "industry": "cafe"}).status_code == 422
+
+
+def test_api_narrows_floor_rows_to_the_unit_use(monkeypatch):
+    """층에 사무소 행이 더 넓어도, 자리의 대장 용도(purps)로 좁혀 그 행을 본다(가로수길 2층 미용원 오판 · 11-15 리뷰)."""
+    live = {"status": "ok", "floors": {"2": {"parts": [part("사무소", "14204", 246.4), part("이(미)용원", "03003", 240.3)]}}}
+    c = _client(monkeypatch, live)
+    base = "/api/v1/buildings/1100000000000000001-1/use-check"
+    j = c.get(base, params={"district": "garosugil", "floor": 2, "industry": "restaurant", "purps": "이(미)용원"}).json()
+    assert "이(미)용원" in by_item(j)["대장 층 용도"]["reason"] and "업무시설" not in by_item(j)["대장 층 용도"]["reason"]
+    j2 = c.get(base, params={"district": "garosugil", "floor": 2, "industry": "restaurant"}).json()   # 없으면 층 전체(가장 넓은 행)
+    assert "사무소" in by_item(j2)["대장 층 용도"]["reason"]
