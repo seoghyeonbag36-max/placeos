@@ -422,7 +422,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
 
           <fieldset className="prelaunch-step">
           <legend>3. 실행 준비</legend>
-          <p>시험할 장소와 사용할 예산을 준비하세요. 계획을 만든 뒤 오프라인 마케팅 솔루션·네트워킹·지원 프로그램에서 실행에 필요한 조건을 살펴볼 수 있습니다.</p>
+          <p>시험할 장소와 사용할 예산을 준비하세요. 계획을 만든 뒤 네트워킹·지원 프로그램에서 실행에 필요한 조건을 살펴볼 수 있고, 개업 뒤에는 오프라인 마케팅 솔루션을 쓸 수 있습니다.</p>
             <Field label="자리 주소">
               <input value={form.address} onChange={(e) => changeField("address", e.target.value)} placeholder="예: 서울 강남구 신사동 …" />
             </Field>

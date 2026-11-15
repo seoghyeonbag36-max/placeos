@@ -19,8 +19,11 @@ const EventLinkPlanner = lazy(() => import("@/components/EventLinkPlanner"));
 
 
 type Tab = "network" | "support" | "marketing" | "hypothesis";
+/** 탭 순서 — 가설 설정이 먼저(기본 탭), 오프라인 마케팅은 「개업 뒤」 칸이라 맨 뒤(2026-11-15 결정 ③). 이름은 pppp_status 가 글자로 찾는다. */
+const ORDER: Tab[] = ["hypothesis", "network", "support", "marketing"];
 
-/** Program은 앞선 세 단계의 근거로 가설을 세운 뒤 지원·네트워킹·마케팅을 준비한다.
+/** Program은 앞선 세 단계의 근거로 가설을 세운 뒤 네트워킹·지원을 살펴보고, 오프라인 마케팅은 **개업 뒤** 실행 도구로 맨 뒤에 둔다
+ * (2026-11-15 결정 ③ — Program 의 「개업 뒤」 칸 · docs/decision-confirm-before-contract-2026-11-15.md).
  * PPPP 네 구현 화면은 유지하고 종합 보고서는 왼쪽 전용 메뉴에서 연다. */
 export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory, onArrivalDismiss, businessGoal,
   industryKey, industryLabel, reportHandoff }: {
@@ -56,8 +59,10 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
       description: "내 단계·업종·지역에 지금 신청할 수 있는 국가·지자체 지원과 마감일 — 자격 판정이 아니라 조건이 맞을 수 있는 공고.",
       content: needDistrict(districtId && <SupportPrograms key={districtId} districtId={districtId} stage={stage} industryLabel={industryLabel} />) },
     { id: "marketing", label: "오프라인 마케팅 솔루션",
-      description: "지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록(합의·참여 증빙·비용·결과).",
+      description: "개업 뒤 — 지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록(합의·참여 증빙·비용·결과).",
       content: <>
+        <p className="program-note" data-after-open>「개업 뒤」 칸입니다 — 계약 전 확인은 앞의 가설 설정·네트워킹·지원 프로그램에서 하고,
+          이 칸은 팝업·가오픈·개업을 시작한 뒤 실행할 때 쓰는 도구입니다.</p>
         {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
         {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
         <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
@@ -75,12 +80,12 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
           handoff={linkedPosting} onArrivalDismiss={onArrivalDismiss}
           defaultCategory={defaultCategory} businessGoal={businessGoal} />
       </Suspense> },
-  ].sort((a, b) => ["hypothesis", "marketing", "network", "support"].indexOf(a.id) - ["hypothesis", "marketing", "network", "support"].indexOf(b.id));
+  ].sort((a, b) => ORDER.indexOf(a.id as Tab) - ORDER.indexOf(b.id as Tab));
 
   const intro = (title: ReactNode) => <header>
     <p className="campaign-eyebrow">Promotion ▶ Program</p>
     {title}
-    <p>창업 전에 <b>가설 설정 → 검증 설계 → 실행 준비</b>를 마치고, 오프라인 마케팅·네트워킹·지원 프로그램을 살펴보세요.</p>
+    <p>창업 전에 <b>가설 설정 → 검증 설계 → 실행 준비</b>를 마치고, 네트워킹·지원 프로그램을 살펴보세요. 오프라인 마케팅 솔루션은 개업 뒤에 씁니다.</p>
   </header>;
   // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
   // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.
