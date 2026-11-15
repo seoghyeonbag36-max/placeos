@@ -1661,6 +1661,49 @@ def print_floor_kpi(fk: dict) -> None:
         print("  ▶ 라벨은 사람 몫이다(labels.csv · GUIDE.md). 판정 규칙은 라벨 전에 고정했다.")
 
 
+# ─────────────────── KPI① Program — 지원 공고 매칭 정밀도 ───────────────────
+# Program 「지원 프로그램」이 스스로 하는 말(「조건이 맞을 수 있는 공고」)이 맞는가를 재는 축이다(2026-11-15 추가 · 3단계 G3).
+# 판정 규칙은 표본을 뽑기 전·라벨이 0 인 상태에서 사전등록했다 → data/validation/score_support_labels.py ·
+# docs/prereg-program-support-precision-2026-11-15.md. 트랙 진행률에는 섞지 않는다 — Program 100% 는 「화면 배선이 끝났다」는
+# 뜻이지 「공고 매칭이 맞다」는 뜻이 아니다. 업종은 거르는 기준이 아니라 이 축이 재지 않는다(사전등록 §0).
+
+def _support_kpi() -> dict:
+    """사전등록 표본의 짝 단위 정밀도 차 — 채점기를 그대로 부른다. 표본 미동결·실패는 그 사실을 적는다(없음과 구분)."""
+    try:
+        sys.path.insert(0, str(ROOT))
+        from data.validation.score_support_labels import _OUT, KPI_SAMPLE_TAG, score
+        d = _OUT / f"support_sample_{KPI_SAMPLE_TAG}"
+        if not (d / "labels.csv").exists():
+            return {"available": True, "frozen": False, "sample": f"support_sample_{KPI_SAMPLE_TAG}",
+                    "gate": {"verdict": "검정불가", "reason": "표본 미동결 — 키가 있는 환경에서 "
+                             "`python -m data.validation.support_sample --freeze` (사전등록 §6)"},
+                    "measured_by": "python -m data.validation.score_support_labels"}
+        res = score(d)
+    except Exception as exc:
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"}
+    return {"available": True, "frozen": True, "sample": res["sample"], "answered": res["answered"],
+            "drawn": res["drawn"], "pairs": res["pairs"], "sample_verdict": res["verdict"], "gate": res["gate"],
+            "measured_by": "python -m data.validation.score_support_labels"}
+
+
+def print_support_kpi(sk: dict) -> None:
+    print("\n" + "=" * 78)
+    print("KPI① Program — 지원 공고 매칭 정밀도 (사전등록 2026-11-15) — 위 진행률에 **포함되지 않는다**")
+    if not sk["available"]:
+        print(f"  ⚠ 판정 실패 — {sk['reason']} (표본이 없다는 뜻이 아니다)")
+        return
+    g = sk["gate"]
+    if not sk["frozen"]:
+        print(f"  {sk['sample']} · {g['verdict']} — {g['reason']}")
+    else:
+        detail = (f"실력 {g['lift_pp']:+.1f}%p [{g['ci95_pp'][0]:+.1f}, {g['ci95_pp'][1]:+.1f}] · 유효한 짝 {g['n_pairs']}"
+                  if "lift_pp" in g else g["reason"])
+        print(f"  {sk['sample']} · 응답 {sk['answered']}/{sk['drawn']} → {g['verdict']} — {detail}")
+        if sk["answered"] == 0:
+            print("  ▶ 라벨은 사람 몫이다(labels.csv · GUIDE.md). 판정 규칙은 표본을 뽑기 전에 고정했다.")
+    print("  기준: 매칭이 보여 준 공고의 지역·단계 정밀도 − 같은 질의에는 걸러졌지만 다른 질의에는 보인 공고(질문을 안 보는 기준)")
+
+
 def main() -> int:
     total = _hubs()
     tracks = [page_track(total), platform_track(), posting_track(total), program_track(total)]
@@ -1686,6 +1729,8 @@ def main() -> int:
             },
             # 창업자 답의 첫 축 — 진행률에 섞지 않는다(위 §KPI① 창업자 답).
             "kpi1_floor_vacancy": {"in_progress_pct": False, **_floor_kpi()},
+            # Program 지원 공고 매칭 정밀도 — 같은 이유로 진행률 밖(2026-11-15 · 3단계 G3).
+            "kpi1_support_precision": {"in_progress_pct": False, **_support_kpi()},
         }, ensure_ascii=False, indent=1))
         return 0
 
@@ -1744,6 +1789,7 @@ def main() -> int:
     print(f"게이트 {tot}개 중 선언 {dec}개 — 선언이 많을수록 이 숫자를 믿을 이유가 줄어든다.")
     print("가중치는 두지 않았다(전부 동일 가중). 평균이 아니라 게이트를 보고 판단할 것.")
     print_floor_kpi(_floor_kpi())
+    print_support_kpi(_support_kpi())
     print_kpi3()
     return 0
 
