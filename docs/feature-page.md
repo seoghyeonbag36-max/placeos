@@ -27,7 +27,7 @@
 `services/use_check.check(pnu, 업종, parts=그 층 대장 행)` 이 대장 용도코드(별표1 호) × 용도지역 행위제한으로
 대장상 가능 · 확인 필요 · 대장상 용도 변경 필요 · 용도지역상 금지 · 자료 부족 다섯 갈래로 답한다(**허가 판정 아님**).
 빈 층의 음식점 58%가 「대장상 용도 변경 필요」(1종 근생 층)다. ⚠ 강남·송파·강동은 토지이음 일일 한도(1,000콜)에 걸려
-아직 「자료 부족」 — 예약 작업 `PlaceOS-EumLanduse-Resume`(`scripts/eum_landuse_resume.py` · 매일 00:20 · 다 받으면 스스로 지운다)이 이어 받고 Gold 를 다시 짓는다(커밋은 사람). 화면: 흐름 R4 `flow/UseCheckCard.tsx` ← `GET /api/v1/buildings/{id}/use-check`(`api/v1/use_check.py` · 실시간 대장 용도코드, 실패하면 Gold 층 대장으로 물러나 확인 필요). 후보 조회(`candidate-review`)의 `regulation_status` 도 같은 서비스로 채운다(그 브랜치 머지 뒤).
+아직 「자료 부족」 — 예약 작업 `PlaceOS-EumLanduse-Resume`(`scripts/eum_landuse_resume.py` · 매일 00:20 · 다 받으면 스스로 지운다)이 이어 받고 Gold 를 다시 짓는다(커밋은 사람). 화면: 흐름 R4 `flow/UseCheckCard.tsx` ← `GET /api/v1/buildings/{id}/use-check`(`api/v1/use_check.py` · 실시간 대장 용도코드, 실패하면 Gold 층 대장으로 물러나 확인 필요). 후보 비교(`candidate-review` · `components/CandidateCompare.tsx`)도 「내 업종」을 보내 같은 서비스로 `regulation_status` 를 채운다(11-15).
 실력은 사전등록(`docs/prereg-floor-use-check-2026-11-15.md` · 등록 11-15 · 채점 전)대로 잰다. → docs/finding-eum-landuse-2026-11-15.md
 
 **10월 갱신과 학원 층 근거 — 정렬 격차 중앙 +9.6 → +7.6%p (2026-10-11).**

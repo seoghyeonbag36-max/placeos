@@ -6,8 +6,6 @@ Gold 층 대장(`building_floors` · 용도코드 없음)으로 물러난다 —
 """
 from __future__ import annotations
 
-from datetime import date
-
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.concurrency import run_in_threadpool
 
@@ -15,19 +13,6 @@ from app.schemas.use_check import UseCheck
 from app.services import building_floors, building_ledger_live, use_check
 
 router = APIRouter()
-
-
-def _gold_parts(district: str, pnu: str, floor: int) -> list[dict] | None:
-    """Gold 층 대장 → 그 층의 행(용도코드 없음). 지번·층이 없으면 None."""
-    doc = building_floors.load(district)
-    lot = ((doc or {}).get("lots") or {}).get(pnu)
-    if not doc or not lot:
-        return None
-    floors, _ = building_floors.rows_of(doc, lot)
-    kind, no = ("G", floor) if floor > 0 else ("B", -floor)
-    parts = [{"purps": r.get("purps"), "etc": r.get("etc"), "area_m2": float(r.get("area_m2") or 0), "code": None}
-             for r in floors if r.get("kind") == kind and r.get("no") == no]
-    return parts or None
 
 
 @router.get("/{building_id}/use-check", response_model=UseCheck)
@@ -47,16 +32,7 @@ async def get_use_check(
     if building_floors.load(district) is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {district}")
     live = await run_in_threadpool(building_ledger_live.ledger, pnu)
-    parts = (((live.get("floors") or {}).get(str(floor)) or {}).get("parts")) if live.get("status") == "ok" else None
-    basis = f"실시간 조회 {date.today().isoformat()}"
-    if not parts:
-        parts = _gold_parts(district, pnu, floor)
-        basis = "Gold 층 대장(용도코드 없음)" if parts else None
-    # 층에 대장 행이 여럿이면(소매점 + 사무소 + 계단실 …) 서비스는 가장 넓은 행을 그 층 용도로 본다. 빈 자리의 용도가
-    # 아닌 행(사무소 등)이 잡히지 않게, 자리의 대장 용도와 같은 행으로 좁힌다 — 같은 행이 없으면 층 전체를 둔다
-    # (scripts/use_check_vacant_summary.py 와 같은 규칙 · 2026-11-15 리뷰).
-    if parts and purps:
-        parts = [p for p in parts if (p.get("purps") or "").strip() == purps.strip()] or parts
+    parts, basis = use_check.floor_parts(live, district, pnu, floor, purps)
     if area_m2 is None and parts:
         area_m2 = max(p.get("area_m2") or 0 for p in parts) or None
     out = use_check.check(pnu, industry, parts=parts, area_m2=area_m2, ledger_date=basis)

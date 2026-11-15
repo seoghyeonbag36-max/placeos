@@ -130,6 +130,39 @@ def _rows_text(hit: list[dict], data: dict) -> str:
     return "; ".join(parts)
 
 
+def gold_floor_parts(district: str, pnu: str, floor: int) -> list[dict] | None:
+    """Gold 층 대장(`building_floors`) → 그 층의 행. 용도코드가 없어 별표1 호는 못 정한다(확인 필요로 간다)."""
+    from app.services import building_floors
+
+    doc = building_floors.load(district)
+    lot = ((doc or {}).get("lots") or {}).get(pnu)
+    if not doc or not lot:
+        return None
+    floors, _ = building_floors.rows_of(doc, lot)
+    kind, no = ("G", floor) if floor > 0 else ("B", -floor)
+    parts = [{"purps": r.get("purps"), "etc": r.get("etc"), "area_m2": float(r.get("area_m2") or 0), "code": None}
+             for r in floors if r.get("kind") == kind and r.get("no") == no]
+    return parts or None
+
+
+def floor_parts(live: dict, district: str, pnu: str, floor: int, purps: str | None) -> tuple[list[dict] | None, str | None]:
+    """그 층의 대장 행과 기준 — 실시간 건축HUB(용도코드 포함)를 먼저, 실패하면 Gold 층 대장.
+
+    층에 대장 행이 여럿이면(소매점 + 사무소 + 계단실 …) `check` 는 가장 넓은 행을 그 층 용도로 본다. 빈 자리의 용도가
+    아닌 행이 잡히지 않게 자리의 대장 용도(`purps`)와 같은 행으로 좁힌다 — 같은 행이 없으면 층 전체를 둔다(11-15 리뷰).
+    """
+    from datetime import date
+
+    parts = (((live.get("floors") or {}).get(str(floor)) or {}).get("parts")) if live.get("status") == "ok" else None
+    basis: str | None = f"실시간 조회 {date.today().isoformat()}"
+    if not parts:
+        parts = gold_floor_parts(district, pnu, floor)
+        basis = "Gold 층 대장(용도코드 없음)" if parts else None
+    if parts and purps:
+        parts = [p for p in parts if (p.get("purps") or "").strip() == purps.strip()] or parts
+    return parts, basis
+
+
 def check(pnu: str, industry: str, *, parts: list[dict] | None = None, area_m2: float | None = None,
           ledger_date: str | None = None) -> dict | None:
     """한 층의 입점 점검. 모르는 업종이면 None(호출자가 400). 재료가 없으면 missing_inputs 로 답한다."""

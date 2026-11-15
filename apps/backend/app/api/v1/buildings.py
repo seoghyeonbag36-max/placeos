@@ -6,7 +6,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.schemas.building import BuildingHistory
 from app.schemas.candidate_review import CandidateReview
-from app.services import candidate_review
+from app.services import candidate_review, use_check
 from app.schemas.renewal import BuildingTwin
 from app.services import building_energy_live, building_floors, building_ledger_live, building_twin, store_units, twin_roads
 from app.services.building_history import get_history
@@ -19,9 +19,12 @@ async def get_candidate_review(
     building_id: str,
     district: str = Query(..., min_length=1, max_length=40),
     unit_id: str | None = Query(None, max_length=120),
+    industry: str | None = Query(None, max_length=20, description="내 업종(services/business_fit key) — 주면 층 입점 점검"),
 ) -> CandidateReview:
     """선택한 자리의 공적 자료. 입점 허가 판정이나 사용자 확인 완료를 생성하지 않는다."""
-    result = await run_in_threadpool(candidate_review.review, district, building_id, unit_id)
+    if industry is not None and industry not in use_check.INDUSTRY_ACTS:
+        raise HTTPException(status_code=400, detail=f"unknown industry: {industry}")
+    result = await run_in_threadpool(candidate_review.review, district, building_id, unit_id, industry)
     if result is None:
         raise HTTPException(status_code=404, detail="선택한 건물·층을 현재 자료에서 확인할 수 없습니다")
     return result

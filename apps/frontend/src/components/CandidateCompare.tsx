@@ -1,8 +1,17 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { candidateFacts, CHECK_TARGETS, CHECK_STATUSES, DECISIONS, emptyCheck, checkError, safeEvidenceUrl, type CandidateCheck, type ReviewCandidate } from "@/lib/candidateStore";
-import { getCandidateReview } from "@/lib/api";
+import { getCandidateReview, listIndustries, type IndustryOption, type UseCheck } from "@/lib/api";
+import { loadFlow } from "@/flow/state";
+import { USE_CHECK_LABEL } from "@/flow/useCheckLabels";
 import "./CandidateCompare.css";
+
+/** 흐름에서 고른 업종(피벗이면 옮길 업종) — 직접 적은 업종(other)은 점검 대상이 아니다 */
+function flowIndustry(): string {
+  const f = loadFlow();
+  const key = f.goal === "pivot" ? f.targetIndustryKey : f.industryKey;
+  return key && key !== "other" ? key : "";
+}
 
 interface Props {
   districtName: string;
@@ -81,14 +90,26 @@ function CandidateWorkflow({ candidate: c, onRecord }: { candidate: ReviewCandid
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const controller = useRef<AbortController | null>(null);
+  // 입점 점검 업종 — 층을 고른 후보만. 저장된 조회 기록의 업종이 먼저, 없으면 흐름에서 고른 업종
+  const [industry, setIndustry] = useState(() => c.external?.industry ?? flowIndustry());
+  const [options, setOptions] = useState<IndustryOption[]>([]);
   useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    if (c.kind !== "floor") return;
+    let live = true;
+    listIndustries().then(r => { if (live) setOptions(r.industries.filter(o => o.key !== "other")); }).catch(() => { /* 업종 목록이 없으면 점검 없이 조회한다 */ });
+    return () => { live = false; };
+  }, [c.kind]);
   async function loadEvidence() {
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;
     setLoading(true); setError(null);
     try {
-      const external = await getCandidateReview(c.buildingId, c.districtId, c.unitId, request.signal);
+      const withIndustry = c.kind === "floor" && industry;
+      const external = withIndustry
+        ? await getCandidateReview(c.buildingId, c.districtId, c.unitId, request.signal, industry)
+        : await getCandidateReview(c.buildingId, c.districtId, c.unitId, request.signal);
       if (request.signal.aborted) return;
       if (!external) setError("현재 자료에서 이 건물·층을 찾지 못했습니다. 확인 상태는 바뀌지 않습니다.");
       else onRecord({ external });
@@ -106,6 +127,10 @@ function CandidateWorkflow({ candidate: c, onRecord }: { candidate: ReviewCandid
     onRecord({ checks: { ...c.checks, [key]: check } });
   }
   return <section aria-label={`${c.name} 계약 전 확인`} className="candidate-workflow">
+    {c.kind === "floor" && options.length > 0 && <label>내 업종 (입점 점검 · 허가 판정 아님)<select aria-label={`${c.name} 내 업종`} value={industry} onChange={e => setIndustry(e.target.value)}>
+      <option value="">고르지 않음 — 점검 없이 조회</option>
+      {options.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
+    </select></label>}
     <button type="button" disabled={loading} onClick={loadEvidence}>{loading ? "공적 자료 조회 중…" : "공적 자료 조회 / 갱신"}</button>
     {error && <p role="alert">{error}</p>}
     <ExternalEvidence candidate={c} />
@@ -142,8 +167,19 @@ function ExternalEvidence({ candidate: c }: { candidate: ReviewCandidate }) {
     <p>대장 조회: {e.ledger_status === "ok" ? "응답 수신" : "자료 확인 불가"} · {e.ledger_note}</p>
     <p>지번 식별자: {e.pnu}</p>
     {e.facts.length ? <ul>{e.facts.map((fact, i) => <li key={i}>{fact.scope} · {fact.label}: {fact.value}</li>)}</ul> : <p>이 후보에 확실히 연결된 대장 항목이 없습니다.</p>}
-    <p>토지이용규제: 미확인 · {e.regulation_note}</p>
+    {e.use_check ? <UseCheckEvidence u={e.use_check} /> : <p>토지이용규제: 미확인 · {e.regulation_note}</p>}
     {e.sources.map(source => <p key={source.url}>{safeEvidenceUrl(source.url) ? <a href={safeEvidenceUrl(source.url)!} target="_blank" rel="noopener noreferrer">{source.name} (새 창)</a> : source.name}</p>)}
+  </div>;
+}
+/** 입점 점검(대장 용도코드 × 토지이음 행위제한) — 막히거나 확인할 항목만 펼치고, 허가 판정이 아님을 늘 밝힌다 */
+function UseCheckEvidence({ u }: { u: UseCheck }) {
+  const label = USE_CHECK_LABEL[u.regulation_status];
+  const head = u.headline.startsWith(label) ? u.headline.slice(label.length).replace(/^\s*—\s*/, "") : u.headline;
+  const open = u.checks.filter(x => x.status !== "ok");
+  return <div className="candidate-usecheck">
+    <p><strong>입점 점검({u.industry_label}): {label}</strong> — {head}</p>
+    {open.length > 0 && <ul>{open.map(x => <li key={x.item}>{x.item}: {x.reason} <small>({x.source}{x.source_date ? ` · ${x.source_date}` : ""})</small></li>)}</ul>}
+    <p>허가 판정이 아닙니다. 영업신고·용도변경이 되는지는 관할 구청에서 정해집니다.</p>
   </div>;
 }
 function ReviewRecord({ candidate: c }: { candidate: ReviewCandidate }) {
