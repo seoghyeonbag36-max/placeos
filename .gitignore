@@ -61,6 +61,9 @@ apps/frontend/tsconfig.tsbuildinfo
 !data/gold/platform_vacancy_forecast.json
 # 2026-11-08 — 일반건축물 전용면적 추정 근거(상업층 전용률). services/exclusive_estimate 가 읽는다.
 !data/gold/platform_exclusive_ratio.json
+# 2026-11-15 — 개업 뒤 24개월 생존(거점 × 업종 칸 · ~70KB). data/validation/score_rank_survival.py · pppp_status 가 읽고, 상권 카드(후속)가
+# 이 **정제본만** 서빙한다(정제 전 기록을 생존율로 내보내지 않는다 — 사전등록 §9). → docs/prereg-platform-rank-survival-2026-11-15.md
+!data/gold/platform_survival_cohorts.json
 # 예외: Platform GNN 업종 추천(~8.0MB, 40,388노드) — recommend-industry 가 정적 서빙.
 !data/gold/platform_industry_recommend.json
 # 예외: 층·용도별 업종 관측 분포(66거점 69,735건 조인) — services/industry_fit 이 읽어

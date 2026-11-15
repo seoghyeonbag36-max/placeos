@@ -1661,6 +1661,45 @@ def print_floor_kpi(fk: dict) -> None:
         print("  ▶ 라벨은 사람 몫이다(labels.csv · GUIDE.md). 판정 규칙은 라벨 전에 고정했다.")
 
 
+# ─────────────────── KPI① Platform — 상권 순위 ↔ 개업 뒤 24개월 생존 (참고 · 동시점) ───────────────────
+# 「내 업종으로 본 상권」 순위가 개업 뒤 24개월 생존을 `same_share` 순위보다 잘 따르는가(2026-11-15 추가 · 4단계).
+# 규칙은 거점별 칸을 계산하기 전에 사전등록했다 → docs/prereg-platform-rank-survival-2026-11-15.md.
+# ⚠ 동시점 대조는 누수가 있어(현재 점포 스냅샷 = 생존자만) **참고 판정**이다 — 게이트는 순위를 동결한 뒤 그 이후 개업의 생존으로 재는
+# 전방 검증(2028-11 이후)이 닫는다. 트랙 진행률에는 섞지 않는다.
+
+def _rank_survival_kpi() -> dict:
+    """채점기를 그대로 부른다. 산출물이 없으면 그 사실을 적는다(없음과 구분)."""
+    try:
+        sys.path.insert(0, str(ROOT))
+        import json as _json
+        from data.validation.score_rank_survival import SNAPSHOT, SURVIVAL, score
+        if not SURVIVAL.exists():
+            return {"available": True, "built": False,
+                    "gate": {"verdict": "검정불가", "reason": "생존 산출물 없음 — python -m data.pipelines.build_platform_survival"}}
+        res = score(_json.loads(SURVIVAL.read_text(encoding="utf-8")), _json.loads(SNAPSHOT.read_text(encoding="utf-8")))
+    except Exception as exc:
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"}
+    p = res["industries"][res["primary"]]
+    return {"available": True, "built": True, "kind": res["kind"], "primary": res["primary"], "snapshot": res["snapshot"],
+            "gate": res["gate"], "n_hubs": p["n_hubs"], "rho_fit": p["rho_fit"], "rho_share": p["rho_share"],
+            "measured_by": "python -m data.validation.score_rank_survival"}
+
+
+def print_rank_survival_kpi(rk: dict) -> None:
+    print("\n" + "=" * 78)
+    print("KPI① Platform — 상권 순위 ↔ 개업 뒤 24개월 생존 (사전등록 2026-11-15) — 위 진행률에 **포함되지 않는다**")
+    if not rk["available"]:
+        print(f"  ⚠ 판정 실패 — {rk['reason']} (산출물이 없다는 뜻이 아니다)")
+        return
+    g = rk["gate"]
+    if not rk["built"]:
+        print(f"  {g['verdict']} — {g['reason']}")
+        return
+    detail = (f"Δρ {g['delta']:+.3f} [{g['ci95'][0]:+.3f}, {g['ci95'][1]:+.3f}] · eligible 거점 {g['n_hubs']}"
+              if "delta" in g else g["reason"])
+    print(f"  {rk['primary']} → {g['verdict']} — {detail}  (ρ_fit {rk['rho_fit']:+.3f} · ρ_share {rk['rho_share']:+.3f})")
+    print(f"  ⚠ {rk['kind']}")
+    print("  기준: 순위(fit)가 생존을 따르는 정도 − same_share(이미 몰려 있는 정도) 순위가 따르는 정도 · 정제본(같은 상호 90일 이내 재개업 = 한 업소)")
 # ─────────────────── KPI① Program — 지원 공고 매칭 정밀도 ───────────────────
 # Program 「지원 프로그램」이 스스로 하는 말(「조건이 맞을 수 있는 공고」)이 맞는가를 재는 축이다(2026-11-15 추가 · 3단계 G3).
 # 판정 규칙은 표본을 뽑기 전·라벨이 0 인 상태에서 사전등록했다 → data/validation/score_support_labels.py ·
@@ -1729,6 +1768,8 @@ def main() -> int:
             },
             # 창업자 답의 첫 축 — 진행률에 섞지 않는다(위 §KPI① 창업자 답).
             "kpi1_floor_vacancy": {"in_progress_pct": False, **_floor_kpi()},
+            # 상권 순위 ↔ 24개월 생존(참고 · 동시점) — 같은 이유로 진행률 밖(2026-11-15 · 4단계).
+            "kpi1_rank_survival": {"in_progress_pct": False, **_rank_survival_kpi()},
             # Program 지원 공고 매칭 정밀도 — 같은 이유로 진행률 밖(2026-11-15 · 3단계 G3).
             "kpi1_support_precision": {"in_progress_pct": False, **_support_kpi()},
         }, ensure_ascii=False, indent=1))
@@ -1789,6 +1830,7 @@ def main() -> int:
     print(f"게이트 {tot}개 중 선언 {dec}개 — 선언이 많을수록 이 숫자를 믿을 이유가 줄어든다.")
     print("가중치는 두지 않았다(전부 동일 가중). 평균이 아니라 게이트를 보고 판단할 것.")
     print_floor_kpi(_floor_kpi())
+    print_rank_survival_kpi(_rank_survival_kpi())
     print_support_kpi(_support_kpi())
     print_kpi3()
     return 0
