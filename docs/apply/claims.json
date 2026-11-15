@@ -27,8 +27,8 @@
         "서울 81"
       ],
       "condition": "건축물대장",
-      "why": "서빙 거점 수(data/config/page_hubs.ACTIVE_HUBS). Tier1 판정·대표 집계 커버리지·R-ONE 앵커 대조가 모두 81/81. '건축물대장 기반'이라는 한정 없이 쓰면 실측 정확도 주장으로 읽힌다. ID 에 숫자를 박지 않는다 — 거점이 늘면 value 만 바꾼다",
-      "source": "scripts/pppp_status.py · data/config/page_hubs.py ACTIVE_HUBS"
+      "why": "사이트에 공개되는 서울 서빙 거점 수(2026-11-15 사용자 결정 — 신청서는 사이트가 보여 주는 서울 81곳으로 쓴다). 서빙 전체(ACTIVE_HUBS · pppp_status)는 서울 밖을 포함해 더 많지만 사이트는 서울만 보인다(lib/siteScope.ts · docs/decision-seoul-only-site-2026-11-10.md). Tier1 판정·대표 집계 커버리지·R-ONE 앵커 대조가 서울 81곳 모두 실측이다. '건축물대장 기반'이라는 한정 없이 쓰면 실측 정확도 주장으로 읽힌다. 거점 수를 서울 밖까지 넓혀 쓰려면 새 결정이 필요하다",
+      "source": "data/config/page_hubs.py ACTIVE_HUBS 중 city == seoul · apps/frontend/src/lib/siteScope.ts"
     },
     {
       "id": "POLY",

@@ -44,7 +44,11 @@ async def generate_program(
     stub_reason: str | None = None
     if allow_llm and settings.llm_api_key and not rate_limit.try_llm(principal.org.id):
         allow_llm, stub_reason = False, "llm_quota"
-    plan = mkt.generate_program(brief.model_dump(), allow_llm=allow_llm)
+    # 시연·파일럿 조직만 상위 모델로 간다(설정이 비면 None → 기본 모델 · config.llm_premium_*).
+    model = mkt.program_model_for_org(principal.org.id) if allow_llm else None
+    plan = mkt.generate_program(
+        brief.model_dump(), allow_llm=allow_llm,
+        model=model if model != settings.llm_model else None)
     return {**plan, "stub_reason": stub_reason} if stub_reason else plan
 
 

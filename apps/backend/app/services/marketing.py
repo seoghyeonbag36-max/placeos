@@ -489,9 +489,26 @@ def _site_context(brief: dict) -> str | None:
     return program_site.site_context(brief.get("district_id"), brief["unit_id"])
 
 
+def program_model_for_org(org_id: str | None) -> str:
+    """이 조직의 검증 프로그램 생성에 쓸 모델 — 기본은 `settings.llm_model`.
+
+    `LLM_PREMIUM_MODEL` 과 `LLM_PREMIUM_ORG_IDS` 가 **둘 다** 있고 조직이 그 목록에 있을 때만
+    상위 모델을 준다(시연·파일럿 조직용 · 2026-11-15). 그 밖에는 전부 기본 모델이라, 설정을
+    비워 두면 동작이 바뀌지 않는다. id 는 하이픈이 섞인 표기도 저장 형식(hex 32자)으로 맞춘다
+    (`kpi_scope.env_excluded_ids` 와 같은 정규화).
+    """
+    premium = settings.llm_premium_model.strip()
+    if not premium or not org_id:
+        return settings.llm_model
+    allowed = {tok.replace("-", "").lower()
+               for tok in re.split(r"[,\s]+", settings.llm_premium_org_ids) if tok.strip()}
+    return premium if str(org_id).replace("-", "").lower() in allowed else settings.llm_model
+
+
 def _call_llm(brief: dict, district_ctx: str | None,
               site_ctx: str | None = None,
-              brief_ctx: str | None = None) -> LLMProgramPlan:
+              brief_ctx: str | None = None,
+              model: str | None = None) -> LLMProgramPlan:
     """Claude 실호출 — 검증 브리프 + 자리 + 상권 → 구조화 검증 프로그램.
 
     세 층을 **따로** 싣는 이유는 사실의 등급이 다르기 때문이다: 상권층은 주변의 관측,
@@ -518,7 +535,7 @@ def _call_llm(brief: dict, district_ctx: str | None,
 
     client = anthropic.Anthropic(api_key=settings.llm_api_key)
     response = client.messages.parse(
-        model=settings.llm_model,
+        model=model or settings.llm_model,
         max_tokens=8192,
         thinking={"type": "adaptive"},
         system=_SYSTEM_PROMPT,
@@ -531,7 +548,8 @@ def _call_llm(brief: dict, district_ctx: str | None,
     return parsed
 
 
-def generate_program(brief: dict, *, allow_llm: bool = False) -> dict:
+def generate_program(brief: dict, *, allow_llm: bool = False,
+                     model: str | None = None) -> dict:
     """검증 프로그램(모객 · 자리·연계 · 검증 지표) 생성.
 
     `allow_llm` 이 참이고 LLM 키(settings.llm_api_key)가 있으면 LLM 생성, 그 밖(익명 호출·
@@ -555,7 +573,10 @@ def generate_program(brief: dict, *, allow_llm: bool = False) -> dict:
             ctx = _district_context(brief.get("district_id"))
             site_ctx = _site_context(brief)
             brief_ctx = program_brief.brief_context(brief)
-            parsed = _call_llm(brief, ctx, site_ctx, brief_ctx)
+            # `model` 은 기본 모델과 다를 때만 넘긴다(`program_model_for_org`) — 없으면
+            # `_call_llm` 이 settings.llm_model 을 쓴다.
+            parsed = _call_llm(brief, ctx, site_ctx, brief_ctx,
+                               **({"model": model} if model else {}))
             # HA 검증에도 **자리층을 넣는다.** 빼면 자리의 수치(면적·공실률·직전 업종)를
             # 정상 인용한 문장이 근거 없는 주장으로 걸린다 — 행사 요금을 컨텍스트에
             # 넣어야 했던 것(2026-08-06)과 같은 이유다.
