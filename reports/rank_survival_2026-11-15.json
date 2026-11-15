@@ -1,0 +1,173 @@
+{
+ "kind": "참고(동시점 · 누수 가능) — 게이트는 전방 검증(2028-11 이후)",
+ "primary": "restaurant",
+ "snapshot": "2026-11-15",
+ "rules": {
+  "gap_days": 90,
+  "min_n": 30,
+  "cohort": [
+   "2016-01-01",
+   "2024-07-01"
+  ],
+  "horizon_days": 730
+ },
+ "industries": {
+  "cafe": {
+   "label": "카페·디저트",
+   "n_hubs": 81,
+   "excluded": {
+    "hub_not_in_snapshot": 0,
+    "no_fit": 0,
+    "no_same_share": 0,
+    "not_eligible": 0
+   },
+   "rho_fit": -0.1062,
+   "rho_share": 0.0036,
+   "delta": -0.1097942512851174,
+   "ci95": [
+    -0.2895,
+    0.067
+   ],
+   "top10_gap_fit": -0.0029,
+   "top10_gap_share": 0.0292,
+   "median_cohort_n": 530
+  },
+  "clinic": {
+   "label": "병·의원",
+   "n_hubs": 72,
+   "excluded": {
+    "hub_not_in_snapshot": 0,
+    "no_fit": 0,
+    "no_same_share": 0,
+    "not_eligible": 9
+   },
+   "rho_fit": -0.2135,
+   "rho_share": -0.2117,
+   "delta": -0.0017806534094156334,
+   "ci95": [
+    -0.1468,
+    0.1459
+   ],
+   "top10_gap_fit": -0.0173,
+   "top10_gap_share": -0.0221,
+   "median_cohort_n": 97
+  },
+  "convenience": {
+   "label": "편의점·생활",
+   "n_hubs": 76,
+   "excluded": {
+    "hub_not_in_snapshot": 0,
+    "no_fit": 0,
+    "no_same_share": 0,
+    "not_eligible": 5
+   },
+   "rho_fit": 0.1595,
+   "rho_share": 0.2173,
+   "delta": -0.057798427879186876,
+   "ci95": [
+    -0.2405,
+    0.146
+   ],
+   "top10_gap_fit": 0.0087,
+   "top10_gap_share": 0.0126,
+   "median_cohort_n": 110
+  },
+  "restaurant": {
+   "label": "음식점",
+   "n_hubs": 81,
+   "excluded": {
+    "hub_not_in_snapshot": 0,
+    "no_fit": 0,
+    "no_same_share": 0,
+    "not_eligible": 0
+   },
+   "rho_fit": 0.2508,
+   "rho_share": 0.289,
+   "delta": -0.03815709556836361,
+   "ci95": [
+    -0.304,
+    0.2363
+   ],
+   "top10_gap_fit": 0.039,
+   "top10_gap_share": 0.0581,
+   "median_cohort_n": 1223
+  }
+ },
+ "sensitivity": {
+  "gap180": {
+   "cafe": {
+    "n_hubs": 81,
+    "rho_fit": -0.0918,
+    "rho_share": 0.0183,
+    "delta": -0.1101,
+    "ci95": null
+   },
+   "clinic": {
+    "n_hubs": 71,
+    "rho_fit": -0.2341,
+    "rho_share": -0.2628,
+    "delta": 0.0287,
+    "ci95": null
+   },
+   "convenience": {
+    "n_hubs": 76,
+    "rho_fit": 0.186,
+    "rho_share": 0.2184,
+    "delta": -0.0324,
+    "ci95": null
+   },
+   "restaurant": {
+    "n_hubs": 81,
+    "rho_fit": 0.247,
+    "rho_share": 0.2899,
+    "delta": -0.0429,
+    "ci95": [
+     -0.3124,
+     0.231
+    ]
+   }
+  },
+  "gap30": {
+   "cafe": {
+    "n_hubs": 81,
+    "rho_fit": -0.0996,
+    "rho_share": 0.0093,
+    "delta": -0.1089,
+    "ci95": null
+   },
+   "clinic": {
+    "n_hubs": 72,
+    "rho_fit": -0.2213,
+    "rho_share": -0.2165,
+    "delta": -0.0048,
+    "ci95": null
+   },
+   "convenience": {
+    "n_hubs": 76,
+    "rho_fit": 0.1616,
+    "rho_share": 0.2261,
+    "delta": -0.0645,
+    "ci95": null
+   },
+   "restaurant": {
+    "n_hubs": 81,
+    "rho_fit": 0.2528,
+    "rho_share": 0.2944,
+    "delta": -0.0417,
+    "ci95": [
+     -0.3108,
+     0.2343
+    ]
+   }
+  }
+ },
+ "gate": {
+  "verdict": "구분불가",
+  "delta": -0.038,
+  "ci95": [
+   -0.304,
+   0.2363
+  ],
+  "n_hubs": 81
+ }
+}

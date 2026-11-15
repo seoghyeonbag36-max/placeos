@@ -93,6 +93,12 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     assert floor["in_progress_pct"] is False
     assert floor["available"] is True, floor.get("reason")
     assert floor["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
+    # 2026-11-15: 상권 순위 ↔ 24개월 생존도 같은 자리 — 동시점 대조는 누수가 있어 판정이 무엇이든 늘 「참고」 꼬리표가 붙는다.
+    rank = status["kpi1_rank_survival"]
+    assert rank["in_progress_pct"] is False
+    assert rank["available"] is True, rank.get("reason")
+    assert rank["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
+    assert "참고" in rank.get("kind", "참고")
     # 2026-09-04 Page 99.7 → 100.0. 수집으로 올린 것이 **아니다** — 그날 오전까지
     # 미달이던 doksan 83.5% 의 정체가 결손이 아니라 **분류 오류**였다: 잔여 13동은
     # 층별개요를 이미 받았고 지상 상업층이 0 으로 확정된 건물인데(재호출해도 안 바뀐다)
