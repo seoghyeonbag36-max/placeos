@@ -118,6 +118,15 @@ class Settings(BaseSettings):
     # (docs/api-keys-and-specs.md·.env.example 과 동일 기준 — 2026-08-01 정합).
     # 품질이 더 필요한 거점 시연에서는 .env 의 LLM_MODEL 로 claude-opus-5 를 덮어쓴다.
     llm_model: str = "claude-sonnet-5"
+    # 조직 단위 상위 모델(2026-11-15). **둘 다 채워야 켜진다** — 하나라도 비면 모든 호출이
+    # 위 llm_model 로 간다(기본 동작 불변). 시연·파일럿 조직의 검증 프로그램 생성
+    # (`POST /marketing/generate`)에만 쓴다. 상권 문구(`GET /marketing/{id}`)는 결과를
+    # 거점 단위로 캐시해 모든 호출자가 나눠 쓰므로 조직별로 모델을 가르지 않는다.
+    # 예: LLM_PREMIUM_MODEL=claude-fable-5-2 · LLM_PREMIUM_ORG_IDS=<org id>,<org id>
+    # ⚠ 한도(llm_daily_quota_per_org 등)는 모델과 무관하게 횟수로 센다 — 상위 모델은 같은
+    # 횟수에 비용이 더 나간다. 조직 목록을 좁게 유지할 것.
+    llm_premium_model: str = ""
+    llm_premium_org_ids: str = ""              # 쉼표·공백 구분 org id (hex 32자 · 하이픈 허용)
     # 외부 AI 창업 코파일럿 (Posting) — 미설정 시 내부 3-Tier 폴백
     posting_copilot_url: str = ""
     posting_copilot_key: str = ""
