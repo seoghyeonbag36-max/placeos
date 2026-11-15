@@ -192,6 +192,20 @@
 ### 조인 키
 - **필지 PNU(19자리)** 또는 지번(§1-A `lnoMnno`/`lnoSlno`) → 건물(`bdMgtSn`) ↔ 점포(`bizesId`)와 연결.
 
+### 실제로 쓰는 두 콜 (2026-11-15 실측 · 서울 빈 층 필지 전수 수집)
+위 표는 07월에 적은 기대치다. 필지 용도지역은 토지이음이 아니라 V-World 가, 행위 가능여부는 토지이음이 답한다.
+
+| 질문 | 엔드포인트 · 키 | 파라미터 | 함정 |
+|---|---|---|---|
+| 이 필지에 어떤 지역지구가 걸리나 | V-World `https://api.vworld.kr/ned/data/getLandUseAttr` · `VWORLD_API_KEY`(+`domain`) | `pnu` · `format=json` · `numOfRows` · `pageNo` | `cnflcAtNm` 이 포함·저촉·**접함** — 접함은 그 필지에 걸리지 않는다 |
+| 그 지역지구에서 이 행위가 되나 | 토지이음 `https://apis.data.go.kr/1613000/arLandUseInfoService/DTarLandUseInfo` · `DATA_GO_KR_SERVICE_KEY` | `areaCd`(시군구 5자리) · `ucodeList`(쉼표 · **10개까지**) · `landUseNm`(정확한 행위명) | 응답이 **cp949**(선언 없음 · 오류는 EUC-KR 선언) · `UQA01X` 오류 98 · 11개부터 오류 10 |
+| 행위명 표기 | 토지이음 `.../DTsearchLunCd` | `landUseNm` · `pageNum` · `numOfRows` | 「소매점」은 정확한 행위명이 없고 「일용품을 판매하는 소매점」이 답한다 · 「공연장」「전시장」은 행위제한이 빈 응답 |
+
+- 행위제한 응답의 한 행 = 가능/금지 × 조건 번호(`QNODE_CONDS/RNUM` → 끝의 `QnodeCond` 문구) × 건축법 시행령 별표1 조문들(`luInfoList` ·
+  `LU_REF_LAW_NM1` · 정의 `DEF_REF`). 면적 기준(「바닥면적의 합계가 300제곱미터 미만」)이 정의에 들어 있어 손으로 적지 않는다.
+- 수집기 `data/collectors/eum_landuse.py` → 빌더 `data/pipelines/build_use_check_inputs.py` → `data/gold/page_use_check_inputs.json`
+  → `apps/backend/app/services/use_check.py`. 경위·수치 → [docs/finding-eum-landuse-2026-11-15.md](finding-eum-landuse-2026-11-15.md)
+
 ---
 
 ## 7. `.env` 체크리스트 (A+B단계 통합)

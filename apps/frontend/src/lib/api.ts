@@ -1738,7 +1738,8 @@ export interface TwinStoresLive {
   units_total: number; units_matched: number; units_unchecked: number;
 }
 export interface TwinLedgerFloor {
-  parts: { purps: string | null; etc: string | null; area_m2: number }[];
+  // code = 대장 용도코드(앞 두 자리 = 건축법 시행령 별표1 호 · 2026-11-15 추가 — 입점 점검이 읽는다)
+  parts: { purps: string | null; etc: string | null; area_m2: number; code?: string | null }[];
   stair_m2: number | null; ev_m2: number | null;
 }
 export interface TwinLedgerLive {
