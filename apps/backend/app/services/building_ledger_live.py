@@ -147,7 +147,10 @@ def summarise(titles: list[dict], floor_rows: list[dict]) -> dict:
             continue
         purps, etc, area = str(r.get("mainPurpsCdNm") or "").strip(), str(r.get("etcPurps") or "").strip(), _num(r.get("area"))
         f = floors.setdefault(str(lv), {"parts": [], "stair_m2": 0.0, "ev_m2": 0.0})
-        f["parts"].append({"purps": purps or None, "etc": (etc if etc and etc != purps else None), "area_m2": round(area, 2)})
+        # code = 대장 용도코드(5자리 · 앞 두 자리 = 건축법 시행령 별표1 호). 「휴게음식점」「학원」처럼 이름만으로는
+        # 1종·2종 근생이 갈리는 용도가 있어(서울 원본 37종 · 2026-11-15) 입점 점검(services/use_check)이 이 값을 본다.
+        f["parts"].append({"purps": purps or None, "etc": (etc if etc and etc != purps else None), "area_m2": round(area, 2),
+                           "code": str(r.get("mainPurpsCd") or "").strip() or None})
         text = f"{purps} {etc}"
         if _STAIR.search(text):
             f["stair_m2"] = round(f["stair_m2"] + area, 2)

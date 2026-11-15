@@ -164,6 +164,7 @@ class TwinLedgerPart(BaseModel):
     purps: str | None = None
     etc: str | None = None
     area_m2: float
+    code: str | None = None   # 2026-11-15 — 대장 용도코드(앞 두 자리 = 별표1 호). 빠지면 /twin 응답에서 조용히 사라진다
 
 
 class TwinLedgerFloor(BaseModel):

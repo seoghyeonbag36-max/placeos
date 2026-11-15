@@ -128,6 +128,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # 예외: 광주·전주 조사 위치 요약(206곳 · ~190KB) — services/research_locations 가 디스크에서 읽는다(2026-11-09).
 # 원천 대장 Gold(data/gold/regional_research_ledgers)는 git 밖이라 빠지면 배포에서 레이어가 조용히 사라진다.
 !data/gold/platform_research_locations.json
+# 예외: Page 입점 점검 재료(~1MB · 서울 빈 층 필지 지역지구 + 토지이음 행위제한, 2026-11-15) — services/use_check 가 정적 서빙.
+# 원천은 V-World·토지이음 API 응답(bronze)이라 배포에서 다시 만들 수 없다. 빠지면 점검이 조용히 전부 「자료 부족」으로 물러난다.
+# 재생성: data.collectors.eum_landuse → data.pipelines.build_use_check_inputs
+!data/gold/page_use_check_inputs.json
 !data/gold/platform_store_brands.json
 !data/gold/platform_industry_colocation.json
 !data/gold/platform_rone_history.json

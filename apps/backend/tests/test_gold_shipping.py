@@ -44,6 +44,9 @@ _SHIPPED = [
     # 2026-11-08 추가 — services/exclusive_estimate 가 읽는 상업층 전용률(일반건축물 전용면적 추정 근거).
     # 빠지면 배포 환경에서 추정이 조용히 「자료 없음」으로 내려간다.
     "platform_exclusive_ratio.json",
+    # 2026-11-15 추가 — services/use_check 가 읽는 입점 점검 재료(필지 지역지구 + 토지이음 행위제한).
+    # 빠지면 배포 환경에서 점검이 전부 「자료 부족」(missing_inputs)으로 물러나 멀쩡해 보인다.
+    "page_use_check_inputs.json",
     "platform_page_footfall.json",
     "page_footfall_hourly.json",
     # 2026-08-25 추가 — posting_inputs._unit_jipgyegu_flpop 이 읽는다.

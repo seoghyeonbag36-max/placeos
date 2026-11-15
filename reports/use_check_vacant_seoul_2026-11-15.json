@@ -1,0 +1,243 @@
+{
+ "city": "seoul",
+ "date": "2026-11-15",
+ "hubs": 81,
+ "units": 14517,
+ "units_without_ledger_floor": 0,
+ "note": "서술 통계 — 규칙이 빈 층을 어떻게 나누나. 규칙의 실력(인허가 정답지 대조)이 아니다.",
+ "inputs_basis": {
+  "vworld_updated_min": "2026-11-06",
+  "vworld_updated_max": "2026-11-06",
+  "eum_fetched": "2026-11-15"
+ },
+ "ledger_ho": {
+  "제1종 근린생활시설": 7472,
+  "제2종 근린생활시설": 5989,
+  "교육연구시설": 310,
+  "문화 및 집회시설": 224,
+  "판매시설": 159,
+  "분류 미상": 125,
+  "노유자시설": 74,
+  "의료시설": 52,
+  "위락시설": 48,
+  "운동시설": 19,
+  "숙박시설": 14,
+  "별표1 제19호": 13,
+  "별표1 제20호": 8,
+  "업무시설": 5,
+  "별표1 제27호": 2,
+  "별표1 제21호": 1,
+  "단독주택": 1,
+  "별표1 제24호": 1
+ },
+ "use_zones": {
+  "제2종일반주거지역": 4226,
+  "제3종일반주거지역": 3754,
+  "일반상업지역": 3418,
+  "준주거지역": 932,
+  "준공업지역": 617,
+  "제3종일반주거지역 + 일반상업지역": 431,
+  "제1종일반주거지역": 404,
+  "중심상업지역": 373,
+  "근린상업지역": 50,
+  "제2종일반주거지역 + 일반상업지역": 44,
+  "제1종전용주거지역": 43,
+  "준주거지역 + 일반상업지역": 43,
+  "제1종전용주거지역 + 제1종일반주거지역": 40,
+  "제2종일반주거지역 + 제3종일반주거지역": 36,
+  "제3종일반주거지역 + 준주거지역": 23
+ },
+ "status_by_industry": {
+  "cafe": {
+   "needs_check": 9603,
+   "missing_inputs": 3943,
+   "use_change_needed": 967,
+   "ledger_ok": 4
+  },
+  "restaurant": {
+   "use_change_needed": 6099,
+   "missing_inputs": 3943,
+   "needs_check": 3941,
+   "ledger_ok": 491,
+   "zoning_prohibited": 43
+  },
+  "bar": {
+   "use_change_needed": 6099,
+   "missing_inputs": 3943,
+   "needs_check": 3941,
+   "ledger_ok": 491,
+   "zoning_prohibited": 43
+  },
+  "beauty": {
+   "needs_check": 5601,
+   "use_change_needed": 4938,
+   "missing_inputs": 3943,
+   "ledger_ok": 35
+  },
+  "clinic": {
+   "needs_check": 5244,
+   "use_change_needed": 4938,
+   "missing_inputs": 3943,
+   "ledger_ok": 392
+  },
+  "pharmacy": {
+   "needs_check": 5167,
+   "use_change_needed": 4938,
+   "missing_inputs": 3943,
+   "ledger_ok": 469
+  },
+  "convenience": {
+   "needs_check": 5167,
+   "use_change_needed": 4938,
+   "missing_inputs": 3943,
+   "ledger_ok": 469
+  },
+  "fashion": {
+   "needs_check": 5167,
+   "use_change_needed": 4938,
+   "missing_inputs": 3943,
+   "ledger_ok": 469
+  },
+  "education": {
+   "use_change_needed": 5900,
+   "needs_check": 4629,
+   "missing_inputs": 3943,
+   "zoning_prohibited": 44,
+   "ledger_ok": 1
+  },
+  "fitness": {
+   "use_change_needed": 6114,
+   "needs_check": 4417,
+   "missing_inputs": 3943,
+   "zoning_prohibited": 43
+  },
+  "lodging": {
+   "use_change_needed": 10442,
+   "missing_inputs": 3943,
+   "needs_check": 132
+  },
+  "culture": {
+   "use_change_needed": 10312,
+   "missing_inputs": 3943,
+   "needs_check": 259,
+   "ledger_ok": 3
+  }
+ },
+ "open_items_by_industry": {
+  "cafe": {
+   "대장 층 용도:check": 13103,
+   "면적 기준:check": 9806,
+   "다른 지역지구:check": 7289,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 1672,
+   "대장 층 용도:blocked": 967,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "restaurant": {
+   "다른 지역지구:check": 7289,
+   "대장 층 용도:check": 6878,
+   "대장 층 용도:blocked": 6142,
+   "용도지역 행위제한:missing": 3942,
+   "필지 용도지역:check": 678,
+   "용도지역 행위제한:check": 241,
+   "용도지역 행위제한:blocked": 43,
+   "필지 용도지역:missing": 1
+  },
+  "bar": {
+   "다른 지역지구:check": 7289,
+   "대장 층 용도:check": 6878,
+   "대장 층 용도:blocked": 6142,
+   "용도지역 행위제한:missing": 3942,
+   "필지 용도지역:check": 678,
+   "용도지역 행위제한:check": 241,
+   "용도지역 행위제한:blocked": 43,
+   "필지 용도지역:missing": 1
+  },
+  "beauty": {
+   "대장 층 용도:check": 9463,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 4938,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 2963,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "clinic": {
+   "대장 층 용도:check": 8303,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 4938,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 2963,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "pharmacy": {
+   "대장 층 용도:check": 7495,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 4938,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 2963,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "convenience": {
+   "대장 층 용도:check": 7495,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 4938,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 2963,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "fashion": {
+   "대장 층 용도:check": 7495,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 4938,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 2963,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "education": {
+   "면적 기준:check": 10441,
+   "대장 층 용도:check": 7484,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 5944,
+   "용도지역 행위제한:missing": 3942,
+   "필지 용도지역:check": 678,
+   "용도지역 행위제한:check": 126,
+   "용도지역 행위제한:blocked": 44,
+   "필지 용도지역:missing": 1
+  },
+  "fitness": {
+   "면적 기준:check": 10441,
+   "대장 층 용도:check": 8294,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:blocked": 6157,
+   "용도지역 행위제한:missing": 3942,
+   "용도지역 행위제한:check": 3061,
+   "필지 용도지역:check": 678,
+   "용도지역 행위제한:blocked": 43,
+   "필지 용도지역:missing": 1
+  },
+  "lodging": {
+   "용도지역 행위제한:check": 10574,
+   "대장 층 용도:blocked": 10442,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:check": 4075,
+   "용도지역 행위제한:missing": 3942,
+   "필지 용도지역:check": 678,
+   "필지 용도지역:missing": 1
+  },
+  "culture": {
+   "대장 층 용도:blocked": 10312,
+   "다른 지역지구:check": 7261,
+   "대장 층 용도:check": 4149,
+   "용도지역 행위제한:missing": 3942,
+   "필지 용도지역:check": 678,
+   "용도지역 행위제한:check": 284,
+   "필지 용도지역:missing": 1
+  }
+ }
+}
