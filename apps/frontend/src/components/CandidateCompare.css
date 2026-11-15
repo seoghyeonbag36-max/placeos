@@ -21,3 +21,29 @@
 .candidate-empty { padding: var(--sp-6); text-align: center; }
 .candidate-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 768px) { .candidate-dialog { padding: var(--sp-4); width: calc(100vw - var(--sp-4)); max-height: 90dvh; } .candidate-dialog table { min-width: 650px; } .candidate-dialog h2 { font-size: var(--fs-heading); } }
+.candidate-dialog h3 { font-size: var(--fs-body); margin-block: var(--sp-3) var(--sp-2); }
+.candidate-dialog header > div { min-width: 0; }
+.candidate-dialog header > button { flex-shrink: 0; }
+.candidate-dialog h2 { white-space: normal; overflow-wrap: anywhere; }
+.candidate-dialog ul { padding-left: var(--sp-4); }
+.candidate-print { display: none; }
+.candidate-workflow fieldset { margin: var(--sp-4) 0; padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); min-width: 0; }
+.candidate-workflow legend { font-weight: var(--fw-bold); }
+.candidate-workflow summary { cursor: pointer; padding-block: var(--sp-3); border-bottom: 1px solid var(--line); }
+.candidate-workflow label { display: block; margin-block: var(--sp-2); font-size: var(--fs-caption); }
+.candidate-workflow input, .candidate-workflow select { box-sizing: border-box; width: 100%; min-height: 44px; padding: var(--sp-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; }
+.candidate-evidence { padding: var(--sp-2); background: var(--bg); }
+@media (max-width: 768px) {
+  .candidate-dialog table.candidate-single { min-width: 0; }
+  .candidate-dialog table.candidate-single th:first-child { width: 76px; }
+  .candidate-dialog table.candidate-single th, .candidate-dialog table.candidate-single td { padding: var(--sp-2); }
+}
+@media print {
+  body:has(> .candidate-print) > :not(.candidate-print) { display: none !important; }
+  body > .candidate-print { display: block; color: black; background: white; font: 11pt sans-serif; }
+  .candidate-print article { break-before: page; }
+  .candidate-print article:first-of-type { break-before: auto; }
+  .candidate-print h2, .candidate-print h3 { break-after: avoid; }
+  .candidate-print p, .candidate-print li { overflow-wrap: anywhere; }
+  .candidate-print .candidate-note { white-space: pre-wrap; }
+}

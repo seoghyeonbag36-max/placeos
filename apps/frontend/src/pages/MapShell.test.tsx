@@ -116,6 +116,41 @@ describe("MapShell — 후보 탐색과 비교", () => {
     HTMLDialogElement.prototype.close = function () { this.open = false; };
   });
 
+  it("후보와 메모가 화면 재방문 후에도 복원되고 인쇄 자료에 출처가 표시된다", async () => {
+    const first = mount();
+    fireEvent.click(await screen.findByRole("button", { name: "가로수 A 후보 저장" }));
+    fireEvent.click(screen.getByRole("button", { name: "후보 비교" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "가로수 A 선택 이유" }), { target: { value: "답사 후 동선 확인" } });
+    first.unmount();
+    mount();
+    fireEvent.click(await screen.findByRole("button", { name: "후보 비교" }));
+    expect((screen.getByRole("textbox", { name: "가로수 A 선택 이유" }) as HTMLTextAreaElement).value).toBe("답사 후 동선 확인");
+    const printable = document.querySelector(".candidate-print")!;
+    expect(printable.textContent).toContain("원천 기준일: 확인되지 않음");
+    expect(printable.textContent).toContain("사용자 직접 입력");
+    expect(printable.textContent).toContain("건물 공실 API");
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    fireEvent.click(screen.getByRole("button", { name: "검토 자료 인쇄 / PDF 저장" }));
+    expect(print).toHaveBeenCalledOnce();
+  });
+
+  it("같은 건물의 층 두 개를 별도 후보로 저장한다", async () => {
+    mount({ rent: rentHeatmap("garosugil", [
+      rentListing("g1", 1, { id: "f1", floor: 1, floor_label: "1F" }),
+      rentListing("g1", 2, { id: "f2", floor: 2, floor_label: "2F" }),
+    ]) });
+    fireEvent.click((await screen.findByText("가로수 A")).closest("button")!);
+    fireEvent.click(await screen.findByRole("button", { name: "가로수 A 1F 후보 저장" }));
+    fireEvent.click(screen.getByRole("button", { name: "가로수 A 2F 후보 저장" }));
+    fireEvent.click(screen.getByRole("button", { name: "후보 비교" }));
+    expect(screen.getByRole("columnheader", { name: "가로수 A · 1F" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "가로수 A · 2F" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "후보 비교 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "저장한 후보 2" }));
+    expect(screen.getAllByText("가로수 A").length).toBeGreaterThan(0);
+    expect(screen.queryByText("가로수 B")).toBeNull();
+  });
+
   it("검색과 상태 조건이 목록과 지도에 함께 적용되고 초기화된다", async () => {
     mount();
     await polygonMode();
@@ -135,7 +170,7 @@ describe("MapShell — 후보 탐색과 비교", () => {
     fireEvent.click(await screen.findByRole("button", { name: "가로수 A 후보 저장" }));
     fireEvent.click(screen.getByRole("button", { name: "가로수 C 후보 저장" }));
     fireEvent.click(screen.getByRole("button", { name: "후보 비교" }));
-    const dialog = within(screen.getByRole("dialog", { name: "가로수길에서 고른 건물" }));
+    const dialog = within(screen.getByRole("dialog", { name: "가로수길에서 고른 자리" }));
     expect(dialog.getByRole("columnheader", { name: "가로수 A" })).toBeTruthy();
     expect(dialog.queryByRole("columnheader", { name: "가로수 B" })).toBeNull();
     expect(dialog.getByText(/실측 자료 기반 공실 추정/)).toBeTruthy();
