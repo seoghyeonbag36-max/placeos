@@ -1,0 +1,101 @@
+{
+ "garosugil": {
+  "rows_union": 46140,
+  "polygons": 1252,
+  "offset_m": [
+   -256.6,
+   0.5
+  ],
+  "calib_points": 1633,
+  "alive": {
+   "rows": 10635,
+   "no_xy": 419,
+   "in_hub_bbox": 1871,
+   "in_building": 1591,
+   "building_hit_rate_of_in_bbox": 0.85,
+   "addr_pnu_crosscheck": {
+    "n": 1540,
+    "same": 1488,
+    "rate": 0.966
+   }
+  },
+  "closed": {
+   "rows": 34996,
+   "no_xy": 1550,
+   "in_hub_bbox": 4699,
+   "in_building": 4087,
+   "building_hit_rate_of_in_bbox": 0.87,
+   "addr_pnu_crosscheck": {
+    "n": 3887,
+    "same": 3697,
+    "rate": 0.951
+   }
+  }
+ },
+ "hongdae": {
+  "rows_union": 35681,
+  "polygons": 2204,
+  "offset_m": [
+   -255.5,
+   -0.1
+  ],
+  "calib_points": 2411,
+  "alive": {
+   "rows": 8810,
+   "no_xy": 148,
+   "in_hub_bbox": 2803,
+   "in_building": 2405,
+   "building_hit_rate_of_in_bbox": 0.858,
+   "addr_pnu_crosscheck": {
+    "n": 2247,
+    "same": 2242,
+    "rate": 0.998
+   }
+  },
+  "closed": {
+   "rows": 26602,
+   "no_xy": 1673,
+   "in_hub_bbox": 7800,
+   "in_building": 6594,
+   "building_hit_rate_of_in_bbox": 0.845,
+   "addr_pnu_crosscheck": {
+    "n": 6000,
+    "same": 5985,
+    "rate": 0.998
+   }
+  }
+ },
+ "gangnam": {
+  "rows_union": 74679,
+  "polygons": 1653,
+  "offset_m": [
+   -256.3,
+   0.3
+  ],
+  "calib_points": 1726,
+  "alive": {
+   "rows": 18353,
+   "no_xy": 616,
+   "in_hub_bbox": 3760,
+   "in_building": 2666,
+   "building_hit_rate_of_in_bbox": 0.709,
+   "addr_pnu_crosscheck": {
+    "n": 1384,
+    "same": 1281,
+    "rate": 0.926
+   }
+  },
+  "closed": {
+   "rows": 55428,
+   "no_xy": 2646,
+   "in_hub_bbox": 9455,
+   "in_building": 6810,
+   "building_hit_rate_of_in_bbox": 0.72,
+   "addr_pnu_crosscheck": {
+    "n": 3251,
+    "same": 2964,
+    "rate": 0.912
+   }
+  }
+ }
+}
