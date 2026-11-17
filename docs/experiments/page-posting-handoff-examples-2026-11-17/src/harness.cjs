@@ -2,7 +2,8 @@
 // 유형마다 데스크톱(1280×800)·폰(390×844) 라이트, 폰 다크로 열어 잰다. 판정·점수는 report.py 가 낸다(여기서는 원값만).
 const {chromium} = require('playwright');
 const fs = require('fs'), path = require('path');
-const [X, roundName = 'r0'] = process.argv.slice(2);
+const [Xarg = '.', roundName = 'r0'] = process.argv.slice(2);
+const X = path.resolve(Xarg);  // 상대 경로(.)도 file:// 주소가 되게 — 측정은 그대로
 const cfg = JSON.parse(fs.readFileSync(path.join(X, 'out/types/check-config.json'), 'utf8'));
 const shots = path.join(X, 'out/compare/shots'); fs.mkdirSync(shots, {recursive: true});
 

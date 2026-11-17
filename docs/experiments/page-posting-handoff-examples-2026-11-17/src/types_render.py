@@ -101,6 +101,21 @@ TYPE_CSS = {
 .core{margin:0;padding-left:20px} .core li{margin:6px 0}
 .toc{columns:2;column-gap:28px;font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px 12px 34px}
 @media (max-width:720px){.toc{columns:1}}
+/* r1 — 폰에서 글 표는 행 단위 블록으로 쌓는다(열 이름은 칸 앞에). 숫자 표(메뉴·구간)는 그대로 */
+@media (max-width:640px){
+.stack .tbl{border:0;background:none;overflow:visible}
+.stack table,.stack tbody,.stack tr,.stack th,.stack td{display:block;width:auto}
+.stack thead{display:none}
+.stack tr{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.stack th,.stack td{border:0;padding:3px 0}
+.stack tbody th{font-size:16px;min-width:0}
+.stack td::before{display:inline-block;margin-right:8px;font-size:13px;font-weight:600;color:var(--muted)}
+.st-claims td:nth-of-type(1)::before{content:"확인한 것"} .st-claims td:nth-of-type(2)::before{content:"판정"}
+.st-dec td:nth-of-type(1)::before{content:"상태"} .st-dec td:nth-of-type(2)::before{content:"무엇이 바뀌나"}
+.st-dec td:nth-of-type(3)::before{content:"예시"} .st-dec td:nth-of-type(4)::before{content:"다음"}
+.st-met td:nth-of-type(1)::before{content:"지금"} .st-met td:nth-of-type(2)::before{content:"바뀐 뒤(기대)"} .st-met td:nth-of-type(3)::before{content:"근거"}
+.st-ovl td:nth-of-type(1)::before{content:"닿는 작업"} .st-ovl td:nth-of-type(2)::before{content:"처리"}
+}
 """,
     "B": """
 .dash{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin:12px 0}
@@ -115,19 +130,23 @@ TYPE_CSS = {
 .board .card{padding:10px 12px} .board .card h4{font-size:15px;margin:0 0 6px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .panel h3{margin:0 0 8px;font-size:16px}
+/* r1 — 「열기」 줄을 누르기 쉬운 단추로(높이 44px) */
+details>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--muted)} details[open]>summary::before{content:"▾"}
+details[open]>summary{margin-bottom:8px}
 """,
     "C": """
 .deck{position:relative}
-.slide{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;min-height:520px;margin:10px 0}
+.slide{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:10px 0}
 .slide h2{border:0;margin:0 0 12px;padding:0;font-size:24px}
 .slide .lead{font-size:18px}
 .ctl{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bg);padding:8px 0}
 .ctl button{font:inherit;font-size:15px;padding:6px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 .ctl button:disabled{opacity:.45;cursor:default}
 .ctl #ctr{font-variant-numeric:tabular-nums;color:var(--muted)}
-body.show-all .slide{min-height:0}
 .core{margin:0;padding-left:20px;font-size:17px} .core li{margin:8px 0}
-@media (max-width:720px){.slide{min-height:0;padding:16px}}
+@media (max-width:720px){.slide{padding:16px}}
 """,
     "D": """
 .col{max-width:540px;margin:0 auto}
@@ -139,6 +158,9 @@ body.show-all .slide{min-height:0}
 .c .one{margin:0} .c .why{font-size:13px;color:var(--muted);margin:6px 0 0}
 .sec{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.04em;margin:22px 0 4px}
 .sumcard ul{margin:6px 0 0;padding-left:18px} .sumcard li{margin:4px 0}
+/* r1 — 검증 카드는 판정을 크게, 주장은 본문 굵기로 */
+.c .big.ok{color:var(--ok)} .c .big.warn{color:var(--warn)} .c .big.info{color:var(--accent)} .c .big.decide{color:var(--decide)}
+.c .one.claim{font-weight:600}
 """,
     "E": """
 .qindex{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px 10px 32px;font-size:15px}
@@ -149,6 +171,7 @@ details.qa>summary::before{content:"Q. ";color:var(--accent)}
 details.qa[open]>summary{margin-bottom:8px}
 .ans::before{content:"A. ";font-weight:700;color:var(--ok)}
 .core{margin:6px 0 0;padding-left:20px} .core li{margin:6px 0}
+.qhead{font-size:14px;font-weight:700;color:var(--muted);margin:18px 0 4px}
 """,
 }
 
@@ -160,15 +183,15 @@ def render_a(c):
 <div class="callout ok"><p><b>요약</b></p>{core_list(c)}</div>
 {tnav("type-a-report.html")}
 <ol class="toc">{"".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in toc)}</ol>
-<h2 id="s1">1. 「왜 바꾸나」 검증표</h2>{claims_table(c)}
+<h2 id="s1">1. 「왜 바꾸나」 검증표</h2><div class="stack st-claims">{claims_table(c)}</div>
 <h2 id="s2">2. 새로 보인 것 — 회수기간이 짧게 나오는 두 지렛대</h2>{levers_tiles(c)}
 <p>투자비만 서울 인테리어 평균으로 바꾸면 「1개월 미만」은 {c["base"]["lt1"]} → {c["s545"]["lt1"]}곳, 회수 중앙은 {c["base"]["median"]}개월 → {c["s545"]["median"]}개월입니다.</p>
-<h2 id="s3">3. 결정 ①~④ — 정한 대로 하면</h2>{decisions_table(c)}
-<h2 id="s4">4. 전/후 기대값</h2>{metrics_table(c)}{scen_heat(c)}{hist_heat(c)}
+<h2 id="s3">3. 결정 ①~④ — 정한 대로 하면</h2><div class="stack st-dec">{decisions_table(c)}</div>
+<h2 id="s4">4. 전/후 기대값</h2><div class="stack st-met">{metrics_table(c)}</div>{scen_heat(c)}{hist_heat(c)}
 <p>추천 자리의 <b>{c["p2"]["share_over_avg"]}%</b>는 월세만 감당하려 해도 서울 점포 평균 이상을, <b>{c["p2"]["share_over_2x"]}%</b>는 2배 이상을 팔아야 합니다.</p>
 {usecheck_bars(c)}
 <h2 id="s5">5. 메뉴 「예시 채우기」 v2</h2><p>{MENU_LINE}.</p>{menu_table(c)}
-<h2 id="s6">6. 아직 배포 안 된 브랜치와 겹치는 곳</h2>{overlap_table(c)}
+<h2 id="s6">6. 아직 배포 안 된 브랜치와 겹치는 곳</h2><div class="stack st-ovl">{overlap_table(c)}</div>
 <h2 id="s7">7. 출처 · 다시 재는 법</h2>{sources_list(c)}
 <p class="src">재현: <code>python scripts/posting_payback_snapshot.py</code> · 공정위 1콜 확인은 미실행(이 환경 권한).</p>"""
     return shell("type-a-report.html", "보고서형", "PlaceOS · Page·Posting 인계 · 표현 유형 A 보고서형", body, TYPE_CSS["A"])
@@ -242,11 +265,14 @@ if(e.key==='ArrowRight'||e.key==='PageDown')show(i+1);if(e.key==='ArrowLeft'||e.
 
 # ───────── D 카드형
 def render_d(c):
-    def card(tag, big, one, why=""):
-        return f'<div class="c"><div class="tag">{tag}</div><div class="big">{big}</div><p class="one">{one}</p>{f"<p class=why>{why}</p>" if why else ""}</div>'
+    def card(tag, big, one, why="", bigcls="", onecls=""):
+        return (f'<div class="c"><div class="tag">{tag}</div><div class="big{(" " + bigcls) if bigcls else ""}">{big}</div>'
+                f'<p class="one{(" " + onecls) if onecls else ""}">{one}</p>{f"<p class=why>{why}</p>" if why else ""}</div>')
     secs = [("d-sum", "요약"), ("d-ver", "검증"), ("d-dec", "결정"), ("d-ba", "전/후"), ("d-menu", "메뉴"), ("d-br", "브랜치"), ("d-src", "출처")]
     sumcard = '<div class="c sumcard"><div class="tag">한눈에</div><ul>' + "".join(f'<li><b>{x["tag"]}</b> {x["head"]}</li>' for x in c["core"]) + "</ul></div>"
-    ver = "".join(card("검증 · " + v, esc(a), esc(b)) for a, b, v, _k in c["claims"])
+    # r1 — 검증 카드: 판정(짧다)을 크게, 주장(길다)은 본문으로, 확인한 것은 작게
+    n_cl = len(c["claims"])
+    ver = "".join(card(f"검증 {i + 1}/{n_cl}", esc(v), esc(a), esc(b), k, "claim") for i, (a, b, v, k) in enumerate(c["claims"]))
     lev = "".join(card("지렛대", v, k, s) for k, v, s in c["levers"])
     dec = "".join(card(f'결정 {d["id"]} · {d["status"]}', esc(d["name"]), esc(d["change"]), f'전 {esc(d["before"])} → 후 {esc(d["after"])}') for d in c["decisions"])
     ba = "".join(card(f"전/후 · {k}", esc(n), f"지금 {esc(b)}", f"바뀐 뒤 {esc(a)}") for n, b, a, k in c["metrics"])
@@ -289,12 +315,16 @@ def render_e(c):
         ("아직 배포 안 된 브랜치는 어떻게 해요?", overlap_table(c)),
         ("출처는요?", sources_list(c)),
     ]
-    idx = "".join(f'<li><a href="#q{i}">{q}</a></li>' for i, (q, _a) in enumerate(qs))
-    items = "".join(f'<details class="qa" id="q{i}"{" open" if i == 0 else ""}><summary>{q}</summary><div class="ans">{a}</div></details>' for i, (q, a) in enumerate(qs))
+    # r1 — 첫 질문(결론)의 답을 맨 위에 두고, 질문 목록은 그 아래 「다른 질문」으로 — 폰 첫 화면에 결론이 들어오게
+    idx = "".join(f'<li><a href="#q{i}">{q}</a></li>' for i, (q, _a) in enumerate(qs) if i)
+    item = lambda i, q, a: f'<details class="qa" id="q{i}"{" open" if i == 0 else ""}><summary>{q}</summary><div class="ans">{a}</div></details>'
+    first = item(0, *qs[0])
+    rest = "".join(item(i, q, a) for i, (q, a) in enumerate(qs) if i)
     js = r"""<script>document.querySelectorAll('.qindex a').forEach(a=>a.addEventListener('click',()=>{const d=document.querySelector(a.getAttribute('href'));if(d)d.open=true;}));</script>"""
     body = f"""<h1 style="font-size:24px">{c["title"]} — 질문으로 보기</h1>
 {tnav("type-e-qa.html")}
-<ol class="qindex">{idx}</ol>{items}"""
+{first}
+<p class="qhead">다른 질문</p><ol class="qindex" start="2">{idx}</ol>{rest}"""
     return shell("type-e-qa.html", "질문 흐름형", "PlaceOS · Page·Posting 인계 · 표현 유형 E 질문 흐름형", body, TYPE_CSS["E"], js)
 
 

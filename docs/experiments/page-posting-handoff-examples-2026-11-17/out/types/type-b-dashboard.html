@@ -108,6 +108,11 @@ details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weigh
 .board .card{padding:10px 12px} .board .card h4{font-size:15px;margin:0 0 6px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .panel h3{margin:0 0 8px;font-size:16px}
+/* r1 — 「열기」 줄을 누르기 쉬운 단추로(높이 44px) */
+details>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--muted)} details[open]>summary::before{content:"▾"}
+details[open]>summary{margin-bottom:8px}
 </style></head>
 <body><div class="wrap">
 <p class="eyebrow">PlaceOS · Page·Posting 인계 · 표현 유형 B 대시보드형</p>
