@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # `python scripts/…` 로 직접 돌려도 `data.` 를 찾도록 저장소 루트
 from probe_licensing_parcel_join import assign_rows  # noqa: E402
 
 from data.collectors.common import BRONZE  # noqa: E402
