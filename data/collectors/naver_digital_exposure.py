@@ -15,6 +15,7 @@
     python -m data.collectors.naver_digital_exposure --blog
     python -m data.collectors.naver_digital_exposure --blog --hubs garosugil,hongdae
     python -m data.collectors.naver_digital_exposure --datalab-long
+    python -m data.collectors.naver_digital_exposure --panel-rebuild   # Bronze 스냅샷 → data/panel CSV 재구성
 
 ⚠ 감성 점수는 만들지 않는다 — 블로그 감성은 분산이 없다(docs/feature-platform.md §0-K).
 ⚠ 공간 단위는 거점이다. 점포·필지로 내려가지 않는다(블로그에는 좌표가 없다).
@@ -163,6 +164,11 @@ def collect_blog_exposure(only: set[str] | None = None) -> dict:
         prev = (load_latest(SLUG, "naver_blog_exposure.json") or {}).get("hubs") or {}
         out["hubs"] = {**{k: v for k, v in prev.items() if k not in only}, **hubs}
     save_json(out, SLUG, "naver_blog_exposure.json")
+    # 압축 패널(git 추적) — 이번에 새로 받은 거점만 같은 (날짜·거점·질의) 행을 덮어쓴다
+    from data.collectors import digital_exposure_panel as panel
+
+    n = panel.upsert_panel(panel.snapshot_rows({"collected_at": out["collected_at"], "hubs": hubs}))
+    print(f"[exposure:blog] 패널 {panel.PANEL_PATH.name} — 전체 {n}행")
     return out
 
 
@@ -217,5 +223,10 @@ if __name__ == "__main__":
         collect_blog_exposure(only)
     if "--datalab-long" in sys.argv:
         collect_datalab_long(only)
-    if not ({"--blog", "--datalab-long"} & set(sys.argv)):
+    if "--panel-rebuild" in sys.argv:  # Bronze 의 모든 스냅샷에서 패널 CSV 를 다시 짓는다(복구·최초 적재)
+        from data.collectors import digital_exposure_panel as panel
+        from data.collectors.common import BRONZE
+
+        print(f"[exposure:panel] {panel.rebuild_from_bronze(BRONZE / SLUG)}행 → {panel.PANEL_PATH}")
+    if not ({"--blog", "--datalab-long", "--panel-rebuild"} & set(sys.argv)):
         print(__doc__)
