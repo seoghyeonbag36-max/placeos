@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>네 질문 정체성 예시</title>
+<style>
+:root{
+  --bg:#f6f6f3;--surface:#ffffff;--fg:#1c1e22;--muted:#5a606a;--line:#e2e3e7;--code-bg:#f0f1f3;
+  --accent:#1d5fd6;--accent-bg:#e7effd;--violet:#6a4bb8;--violet-bg:#efeafa;
+  --decide:#9a5600;--decide-bg:#fdf1df;--ok:#18794e;--ok-bg:#e5f4ec;--warn:#b42318;--warn-bg:#fdecea;
+  --chart-surface:#fcfcfb;
+  --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;
+  --st-good:#0ca30c;--st-warn:#fab219;--st-serious:#ec835a;--st-critical:#d03b3b;--st-none:#c9c7c0;
+  --mock-bg:#f9f9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+    --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+    --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+    --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+  --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+  --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+  --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.eyebrow{color:var(--muted);font-size:14px;margin:0 0 6px}
+h1{font-size:29px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;line-height:1.35;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:16px;margin:16px 0 6px}
+p{margin:0 0 12px} ul,ol{margin:0 0 12px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,"D2Coding",monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:8px 0 14px}
+pre code{background:none;padding:0;word-break:normal}
+.lede{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px;margin-top:8px}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.decide{background:var(--decide-bg);color:var(--decide)} .chip.info{background:var(--accent-bg);color:var(--accent)}
+.chip.v{background:var(--violet-bg);color:var(--violet)} .chip.mute{background:var(--code-bg);color:var(--muted)}
+nav.files{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px;font-size:13.5px}
+nav.files a{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none}
+nav.files a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.files a[aria-current="page"]{color:#0b1220}}
+:root[data-theme="dark"] nav.files a[aria-current="page"]{color:#0b1220}
+.callout{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0 16px}
+.callout.decide{border-left-color:var(--decide)} .callout.warn{border-left-color:var(--warn)} .callout.ok{border-left-color:var(--ok)}
+.callout>:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:8px 0 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+caption{caption-side:top;text-align:left;padding:10px 12px 0;color:var(--muted);font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tbody th{background:transparent;color:var(--fg);font-size:14.5px;min-width:7.5em}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--muted);font-size:13.5px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.25;margin:4px 0;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:13.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2>*{min-width:0} .mock pre{max-width:100%}
+@media (max-width:720px){.grid2{grid-template-columns:1fr} h1{font-size:24px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin-top:0}
+.mock{background:var(--mock-bg);border:1px dashed var(--line);border-radius:12px;padding:14px}
+.mock .label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.before{border-top:4px solid var(--st-none)} .after{border-top:4px solid var(--accent)}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:52px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tip{position:absolute;z-index:50;display:none;max-width:300px;background:var(--fg);color:var(--bg);font-size:13px;line-height:1.5;padding:6px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+/* 차트: 구간 표(순차 파랑) */
+.heat td.cell{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;min-width:56px}
+.heat td.cell:focus{outline:2px solid var(--fg);outline-offset:-2px}
+/* 차트: 상태 100% 막대 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin:6px 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sbar-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;margin:6px 0}
+.sbar-row .nm{font-size:14px}
+.sbar{display:flex;gap:2px;height:22px;background:var(--chart-surface);border-radius:4px}
+.sbar b{display:block;height:100%;min-width:2px}
+.sbar b:first-child{border-radius:4px 0 0 4px} .sbar b:last-child{border-radius:0 4px 4px 0}
+.sbar b:focus{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){.sbar-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000} nav.files{display:none} .card,.tbl,.tile{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="eyebrow">PlaceOS · Page·Posting 인계 예시 · 2026-11-17</p>
+<h1>결정 ② 네 질문 · 정체성 문장 — 화면 문구 전/후</h1>
+<p class="lede">승인된 질문 개정이 랜딩·Posting 머리 문장·Page 층 상세·정체성 문장에서 어떻게 보이는지 실제 자리 값으로 목업했습니다.</p>
+<div class="meta"><span class="chip ok">승인 · 11-15</span> <span class="chip mute">Platform 현행 유지</span> <span class="chip ok">Program 반영됨</span><span>기준: main 79890bc3(2026-11-15 머지분) · 재측정 2026-11-17</span></div>
+<nav class="files" aria-label="예시 파일"><a href="placeos-00-verify.html">00 · 「왜 바꾸나」 검증 · 목차</a><a href="placeos-01-invest.html">01 · 결정 ① 투자비 실측</a><a href="placeos-02-questions.html" aria-current="page">02 · 결정 ② 네 질문·정체성</a><a href="placeos-03-interior-marketing.html">03 · 결정 ③ 인테리어·마케팅 칸</a><a href="placeos-04-privacy.html">04 · 결정 ④ 처리방침 목적</a><a href="placeos-05-before-after.html">05 · 전/후 기대값</a><a href="placeos-06-menu-fill.html">06 · 메뉴 「예시 채우기」</a></nav>
+</header>
+<main>
+
+<div class="callout ok"><p><b>상태</b> — 11-15 승인. 단 <b>Platform 문구는 현행 유지</b>입니다(결과 대조 첫 계산이 구분불가).
+Program 은 #243 에서 이미 바뀌었고, Page·Posting 문구는 <b>구현 PR 에서 함께</b> 바꿉니다 — 기능 없이 문구만 먼저 바꾸지 않습니다.</p></div>
+
+<h2>1. 네 질문 — 지금과 바뀐 뒤</h2>
+<div class="tbl"><table>
+<thead><tr><th scope="col">트랙</th><th scope="col">지금(CLAUDE.md 표)</th><th scope="col">승인안</th><th scope="col">반영</th></tr></thead>
+<tbody>
+<tr><th scope="row">Platform</th><td>이 입지·상권은 어떤 플랫폼인가</td><td>현행 유지</td><td><span class="chip mute">바꾸지 않음</span></td></tr>
+<tr><th scope="row">Page</th><td>이 platform 안에 어떤 page 가 만들어져야 하는가</td><td>어느 층이 비었고, <b>내 업종이 들어갈 수 있나</b></td><td><span class="chip decide">2단계 PR</span></td></tr>
+<tr><th scope="row">Posting</th><td>어떤 가격대의 page 가 posting 되어야 하는가</td><td><b>이 층 조건이면 얼마에 몇 개를 팔아야 하나</b></td><td><span class="chip decide">1단계 PR</span></td></tr>
+<tr><th scope="row">Program</th><td>누구와 잇고 · 무엇을 지원받고 · 어떻게 알려…</td><td><b>계약 전에 어떻게 작게 확인하나</b></td><td><span class="chip ok">반영됨 #243</span></td></tr>
+</tbody></table></div>
+
+<h2>2. 예시 ① — 랜딩 「네 질문」 목업</h2>
+<div class="grid2"><div><div class="label src">지금(placeos.co.kr #how)</div><div style="display:grid;gap:8px"><div class="card before"><div class="src">Platform</div><h4>이 상권은 어떤 곳이지?</h4><p class="src" style="margin:0">상권의 성격을 읽고, 자리마다 어울리는 업종을 순위로 봅니다.</p></div><div class="card before"><div class="src">Page</div><h4>어느 건물 몇 층이 비었지?</h4><p class="src" style="margin:0">공실 히트맵과 건물·층별 매물 목록, 공실 이력의 확인 상태로 비어 있는 자리를 살펴봅니다.</p></div><div class="card before"><div class="src">Posting</div><h4>얼마짜리 자리가 맞지?</h4><p class="src" style="margin:0">고급화 · 가성비 · 기능중심, 세 가지 가격대로 비용과 회수 기간을 계산합니다.</p></div><div class="card before"><div class="src">Program</div><h4>계약하기 전에, 작게 먼저 어떻게 확인하지?</h4><p class="src" style="margin:0">(11-15 이미 반영) 팝업스토어 · 가오픈 · 시험 판매로 통하는지 확인할 계획을 세웁니다.</p></div></div></div>
+<div><div class="label src">바뀐 뒤(안)</div><div style="display:grid;gap:8px"><div class="card after"><div class="src">Platform</div><h4>이 상권은 어떤 곳이지?</h4><p class="src" style="margin:0"><b>현행 유지</b>(11-15 사용자 결정) — 결과 대조가 「실력」 판정을 받은 뒤에 바꿉니다.</p></div><div class="card after"><div class="src">Page</div><h4>어느 층이 비었고, 내 업종이 들어갈 수 있지?</h4><p class="src" style="margin:0">빈 층을 찾고, 건축물대장·토지이음 기준으로 내 업종이 그 층에 들어갈 수 있는지(대장상 가능 · 확인 필요 · 대장상 용도 변경 필요)를 함께 봅니다. 허가 판정은 아닙니다.</p></div><div class="card after"><div class="src">Posting</div><h4>이 층 조건이면 얼마에 몇 개를 팔아야 하지?</h4><p class="src" style="margin:0">들은 월세(없으면 시세 범위)와 메뉴 가격·원가로, 이 층을 감당하려면 하루 몇 개를 팔아야 하는지 계산하고 같은 상권·업종 점포 매출과 나란히 봅니다.</p></div><div class="card after"><div class="src">Program</div><h4>계약하기 전에, 작게 먼저 어떻게 확인하지?</h4><p class="src" style="margin:0">그대로 — 목표선은 Posting 요구치(P2)에서 가져옵니다.</p></div></div></div></div>
+
+<h2>3. 예시 ② — 실제 자리의 Posting 머리 문장</h2>
+<p>같은 자리, 같은 공식 통계로 문장만 「예측」에서 「요구치」로 바꿨습니다. 요구 월매출 = 월세 ÷ (1 − KOSIS 비임차 비용률 0.8696) — 서빙 중인 비용 구조 그대로, 매출 추정 없이 계산합니다.</p>
+<div class="grid2">
+<div class="mock before"><div class="label">지금 · 압구정로데오 61평 · 월세 814만원(추정)</div>
+<p style="font-size:19px;font-weight:700">「기능중심 하면 한 달 안에 본전이에요」</p>
+<p class="src">회수 0.7개월 = 투자 1,330만원(손 계수) ÷ 월순익 1,891만원(월매출 20,743만원 추정)</p></div>
+<div class="mock after"><div class="label">바뀐 뒤(안)</div>
+<p style="font-size:19px;font-weight:700">「이 층을 감당하려면 한 달에 6,242만원, 하루 약 240만원어치를 팔아야 해요」</p>
+<p class="src">서울 같은 업종군 점포 평균 월매출(3,391만원 · KOSIS)의 <b>1.8배</b> · <span class="chip mute">월세: 추정 — 들은 금액이 있으면 그 값</span> <span class="chip mute">비용률: 통계 KOSIS</span></p></div>
+<div class="mock before"><div class="label">지금 · 경희대 89평 · 월세 905만원(추정)</div>
+<p style="font-size:19px;font-weight:700">「기능중심 하면 약 2개월이면 본전이에요」</p>
+<p class="src">회수 1.6개월 = 투자 1,890만원 ÷ 월순익 1,187만원(월매출 16,044만원 추정)</p></div>
+<div class="mock after"><div class="label">바뀐 뒤(안) — 메뉴를 넣었을 때</div>
+<p style="font-size:19px;font-weight:700">「한식 백반이면 하루 약 100그릇을 팔아야 해요」</p>
+<p class="src">(월세 905 + 인건비 3명 647 + 공과금·주기 구매 98만원) ÷ (1 − 원가율 36.4%) = 월 2,595만원 ÷ 객단가 9,650원 ÷ 27일 —
+메뉴·원가는 <a href="placeos-06-menu-fill.html">06 · 메뉴 「예시 채우기」</a> 의 한식 가성비 예시</p></div>
+</div>
+
+<h2>4. 예시 ③ — Page 층 상세에 붙는 한 줄</h2>
+<div class="grid2">
+<div class="mock before"><div class="label">지금</div><p><b>2F · 35평</b> · 빈 층(확정) · 월 259만원(추정)</p></div>
+<div class="mock after"><div class="label">바뀐 뒤(안) — 내 업종: 음식점 · 판정은 모양을 보이는 예시</div><p><b>2F · 35평</b> · 빈 층(확정) · 월 259만원(추정)</p>
+<p><span class="chip warn">↺ 대장상 용도 변경 필요</span> (예) 대장 층 용도가 제1종 근린생활시설(소매점)이면 일반음식점을 하려면 대장 기재 변경이 필요해요.</p>
+<p class="src">허가 판정 아님 · 건축물대장·토지이음 기준(기준일 표시) · 관할 구청 확인 — 문구는 main 의 <code>flow/useCheckLabels.ts</code> 다섯 갈래를 그대로 씁니다.</p></div>
+</div>
+
+<h2>5. 정체성 문장</h2>
+<div class="grid2">
+<div class="mock before"><div class="label">지금(CLAUDE.md)</div><p>…<b>계약하기 전에</b> 어느 상권 · 어느 건물 몇 층이 비었는지 · 월 얼마고 몇 달이면 본전인지 · 작게 먼저 확인할 방법까지 본다.</p></div>
+<div class="mock after"><div class="label">승인본(11-15)</div><p>…<b>계약하기 전에</b> 어느 상권이 내 업종에 맞는지 · 어느 건물 몇 층이 비었고 <b>그 층에 내 업종이 들어갈 수 있는지</b> · <b>그 조건이면 얼마나 팔아야 하는지</b> · 계약 전에 작게 확인하는 방법까지 본다.</p></div>
+</div>
+
+<h2>6. 예시 ④ — 예비창업자 A 의 질문으로 따라가 보기</h2>
+<p class="src">가정: 한식 백반 · 회기동 · 월세 414만원 자리 · 3명 운영. 숫자는 06 파일의 한식 가성비 예시에서 왔습니다.</p>
+<div class="grid2">
+<div class="card before"><h4>지금 흐름</h4>
+<p><b>A</b>: 이 층에서 백반집 해도 돼요?<br><b>PlaceOS</b>: (답 없음 — 빈 층과 월세 추정까지만)</p>
+<p><b>A</b>: 그럼 얼마나 벌어요?<br><b>PlaceOS</b>: 고급화·가성비·기능중심 중 기능중심 하면 한 달 안에 본전이에요.</p>
+<p><b>A</b>: 한 달이요…? 믿어도 되나요?</p></div>
+<div class="card after"><h4>바뀐 흐름</h4>
+<p><b>A</b>: 이 층에서 백반집 해도 돼요?<br><b>PlaceOS</b>: 대장상 용도 변경이 필요해요(1종 근생 소매점). 구청에 기재 변경을 물어보세요. 허가 판정은 아니에요.</p>
+<p><b>A</b>: 월세 414만원이면 얼마나 팔아야 해요?<br><b>PlaceOS</b>: 객단가 9,650원 · 원가율 36% 기준으로 하루 약 <b>70그릇</b>이에요. 중개사에게 들은 월세를 넣으면 다시 계산해요.</p>
+<p><b>A</b>: 계약 전에 확인하려면요?<br><b>PlaceOS</b>: 주말 팝업 3일, 하루 70그릇을 못 넘으면 접는 기준으로 시험해 보세요(Program).</p></div>
+</div>
+
+</main>
+<footer>
+PlaceOS 내부 검토용 예시 · 숫자는 기준일 값이라 낡습니다 — 인용 전에 <code>python scripts/pppp_status.py</code> ·
+<code>python scripts/posting_payback_snapshot.py</code> 로 다시 재세요. 법률·세무 자문이 아닙니다.
+</footer>
+</div>
+<script>
+(()=>{const tip=document.createElement('div');tip.className='tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+function place(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';const r=t.getBoundingClientRect();
+const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+let y=r.top-h-8;if(y<8)y=r.bottom+8;tip.style.left=(x+window.scrollX)+'px';tip.style.top=(y+window.scrollY)+'px';}
+const on=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)place(t)};
+const off=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)tip.style.display='none'};
+document.addEventListener('mouseover',on);document.addEventListener('mouseout',off);
+document.addEventListener('focusin',on);document.addEventListener('focusout',off);})();
+</script>
+
+</body>
+</html>

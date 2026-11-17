@@ -1,0 +1,174 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>표현 유형 비교</title><style>
+:root{
+  --bg:#f6f6f3;--surface:#ffffff;--fg:#1c1e22;--muted:#5a606a;--line:#e2e3e7;--code-bg:#f0f1f3;
+  --accent:#1d5fd6;--accent-bg:#e7effd;--violet:#6a4bb8;--violet-bg:#efeafa;
+  --decide:#9a5600;--decide-bg:#fdf1df;--ok:#18794e;--ok-bg:#e5f4ec;--warn:#b42318;--warn-bg:#fdecea;
+  --chart-surface:#fcfcfb;
+  --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;
+  --st-good:#0ca30c;--st-warn:#fab219;--st-serious:#ec835a;--st-critical:#d03b3b;--st-none:#c9c7c0;
+  --mock-bg:#f9f9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+    --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+    --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+    --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+  --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+  --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+  --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.eyebrow{color:var(--muted);font-size:14px;margin:0 0 6px}
+h1{font-size:29px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;line-height:1.35;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:16px;margin:16px 0 6px}
+p{margin:0 0 12px} ul,ol{margin:0 0 12px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,"D2Coding",monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:8px 0 14px}
+pre code{background:none;padding:0;word-break:normal}
+.lede{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px;margin-top:8px}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.decide{background:var(--decide-bg);color:var(--decide)} .chip.info{background:var(--accent-bg);color:var(--accent)}
+.chip.v{background:var(--violet-bg);color:var(--violet)} .chip.mute{background:var(--code-bg);color:var(--muted)}
+nav.files{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px;font-size:13.5px}
+nav.files a{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none}
+nav.files a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.files a[aria-current="page"]{color:#0b1220}}
+:root[data-theme="dark"] nav.files a[aria-current="page"]{color:#0b1220}
+.callout{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0 16px}
+.callout.decide{border-left-color:var(--decide)} .callout.warn{border-left-color:var(--warn)} .callout.ok{border-left-color:var(--ok)}
+.callout>:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:8px 0 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+caption{caption-side:top;text-align:left;padding:10px 12px 0;color:var(--muted);font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tbody th{background:transparent;color:var(--fg);font-size:14.5px;min-width:7.5em}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--muted);font-size:13.5px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.25;margin:4px 0;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:13.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2>*{min-width:0} .mock pre{max-width:100%}
+@media (max-width:720px){.grid2{grid-template-columns:1fr} h1{font-size:24px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin-top:0}
+.mock{background:var(--mock-bg);border:1px dashed var(--line);border-radius:12px;padding:14px}
+.mock .label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.before{border-top:4px solid var(--st-none)} .after{border-top:4px solid var(--accent)}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:52px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tip{position:absolute;z-index:50;display:none;max-width:300px;background:var(--fg);color:var(--bg);font-size:13px;line-height:1.5;padding:6px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+/* 차트: 구간 표(순차 파랑) */
+.heat td.cell{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;min-width:56px}
+.heat td.cell:focus{outline:2px solid var(--fg);outline-offset:-2px}
+/* 차트: 상태 100% 막대 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin:6px 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sbar-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;margin:6px 0}
+.sbar-row .nm{font-size:14px}
+.sbar{display:flex;gap:2px;height:22px;background:var(--chart-surface);border-radius:4px}
+.sbar b{display:block;height:100%;min-width:2px}
+.sbar b:first-child{border-radius:4px 0 0 4px} .sbar b:last-child{border-radius:0 4px 4px 0}
+.sbar b:focus{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){.sbar-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000} nav.files{display:none} .card,.tbl,.tile{break-inside:avoid}}
+:root{--sA:#2a78d6;--sB:#eb6834;--sC:#1baf7a;--sD:#eda100;--sE:#e87ba4;}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sA:#3987e5;--sB:#d95926;--sC:#199e70;--sD:#c98500;--sE:#d55181;}}:root[data-theme="dark"]{--sA:#3987e5;--sB:#d95926;--sC:#199e70;--sD:#c98500;--sE:#d55181;}.shot{width:100%;max-width:220px;border:1px solid var(--line);border-radius:10px} .tcard{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px}@media (max-width:640px){.tcard{grid-template-columns:1fr}} .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}</style></head><body><div class="wrap">
+<p class="eyebrow">PlaceOS · Page·Posting 인계 예시 · 표현 유형 비교</p><h1>표현 유형 비교 — r0</h1>
+<p class="lede">같은 내용(검증 · 결정 ①~④ · 전/후 · 메뉴 예시)을 다섯 가지 방식으로 그리고, 같은 자동 검증으로 점수를 매겼습니다. 매시간 유형마다 한 번씩 고치고 다시 잽니다.</p>
+<div class="meta"><span class="chip info">A 보고서형</span><span class="chip info">B 대시보드형</span><span class="chip info">C 슬라이드형</span><span class="chip info">D 카드형</span><span class="chip info">E 질문 흐름형</span><span>0라운드(시작) — 매시 1라운드 · 유형마다 1번씩 고치고 다시 잼 · 최대 6라운드, 1위가 3라운드 연속 같으면 일찍 끝냄</span></div>
+<nav class="files" aria-label="유형 열기"><a href="../types/type-a-report.html">A · 보고서형</a><a href="../types/type-b-dashboard.html">B · 대시보드형</a><a href="../types/type-c-slides.html">C · 슬라이드형</a><a href="../types/type-d-cards.html">D · 카드형</a><a href="../types/type-e-qa.html">E · 질문 흐름형</a><a href="../set/placeos-00-verify.html">원본 7개 묶음</a></nav>
+<div class="callout ok"><p><b>지금 1위: C 슬라이드형</b>(100.0점) · 2위 B 대시보드형(96.2점).
+점수는 자동 검증만으로 냈습니다 — 실제 독자 반응이 아니라, 같은 기준으로 잰 비교입니다.</p></div>
+<h2>1. 이번 라운드 순위</h2>
+<div class="tbl"><table><thead><tr><th scope="col">유형</th><th scope="col" class="num">총점</th><th scope="col" class="num">완전성<br><span class="src">/25</span></th><th scope="col" class="num">첫 화면<br><span class="src">/20</span></th><th scope="col" class="num">탐색 비용<br><span class="src">/15</span></th><th scope="col" class="num">모바일<br><span class="src">/15</span></th><th scope="col" class="num">접근성<br><span class="src">/15</span></th><th scope="col" class="num">안정성<br><span class="src">/10</span></th></tr></thead><tbody><tr><th scope="row"><span class="sw" style="background:var(--sC)"></span>1위 · C 슬라이드형</th><td class="num"><b>100.0</b></td><td class="num">25.0</td><td class="num">20.0</td><td class="num">15.0</td><td class="num">15.0</td><td class="num">15.0</td><td class="num">10.0</td></tr><tr><th scope="row"><span class="sw" style="background:var(--sB)"></span>2위 · B 대시보드형</th><td class="num"><b>96.2</b></td><td class="num">25.0</td><td class="num">20.0</td><td class="num">13.9</td><td class="num">12.5</td><td class="num">14.8</td><td class="num">10.0</td></tr><tr><th scope="row"><span class="sw" style="background:var(--sD)"></span>3위 · D 카드형</th><td class="num"><b>93.2</b></td><td class="num">25.0</td><td class="num">20.0</td><td class="num">8.8</td><td class="num">14.7</td><td class="num">14.8</td><td class="num">10.0</td></tr><tr><th scope="row"><span class="sw" style="background:var(--sE)"></span>4위 · E 질문 흐름형</th><td class="num"><b>90.7</b></td><td class="num">25.0</td><td class="num">14.0</td><td class="num">14.8</td><td class="num">12.0</td><td class="num">14.8</td><td class="num">10.0</td></tr><tr><th scope="row"><span class="sw" style="background:var(--sA)"></span>5위 · A 보고서형</th><td class="num"><b>88.3</b></td><td class="num">25.0</td><td class="num">20.0</td><td class="num">5.0</td><td class="num">13.4</td><td class="num">14.8</td><td class="num">10.0</td></tr></tbody></table></div>
+<h2>2. 라운드별 총점</h2>
+<div class="legend" aria-hidden="true"><span><i style="background:var(--sA)"></i>A 보고서형</span><span><i style="background:var(--sB)"></i>B 대시보드형</span><span><i style="background:var(--sC)"></i>C 슬라이드형</span><span><i style="background:var(--sD)"></i>D 카드형</span><span><i style="background:var(--sE)"></i>E 질문 흐름형</span></div>
+<div class="card"><svg viewBox="0 0 760 300" role="img" aria-label="라운드별 총점 — 아래 표와 같은 값" style="width:100%;height:auto;max-width:760px"><line x1="46" x2="640" y1="266.0" y2="266.0" stroke="var(--line)"/><text x="38" y="270.0" text-anchor="end" font-size="12" fill="var(--muted)">70</text><line x1="46" x2="640" y1="182.7" y2="182.7" stroke="var(--line)"/><text x="38" y="186.7" text-anchor="end" font-size="12" fill="var(--muted)">80</text><line x1="46" x2="640" y1="99.3" y2="99.3" stroke="var(--line)"/><text x="38" y="103.3" text-anchor="end" font-size="12" fill="var(--muted)">90</text><line x1="46" x2="640" y1="16.0" y2="16.0" stroke="var(--line)"/><text x="38" y="20.0" text-anchor="end" font-size="12" fill="var(--muted)">100</text><text x="343.0" y="290" text-anchor="middle" font-size="12" fill="var(--muted)">r0</text><circle cx="343.0" cy="113.2" r="5" fill="var(--sA)" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="A 보고서형 · r0: 88.3점"/><text x="353.0" y="117.2" font-size="12.5" fill="var(--fg)">A 보고서형 88.3</text><circle cx="343.0" cy="47.7" r="5" fill="var(--sB)" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="B 대시보드형 · r0: 96.2점"/><text x="353.0" y="51.7" font-size="12.5" fill="var(--fg)">B 대시보드형 96.2</text><circle cx="343.0" cy="16.0" r="5" fill="var(--sC)" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="C 슬라이드형 · r0: 100.0점"/><text x="353.0" y="20.0" font-size="12.5" fill="var(--fg)">C 슬라이드형 100.0</text><circle cx="343.0" cy="72.3" r="5" fill="var(--sD)" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="D 카드형 · r0: 93.2점"/><text x="353.0" y="76.3" font-size="12.5" fill="var(--fg)">D 카드형 93.2</text><circle cx="343.0" cy="93.9" r="5" fill="var(--sE)" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="E 질문 흐름형 · r0: 90.7점"/><text x="353.0" y="97.9" font-size="12.5" fill="var(--fg)">E 질문 흐름형 90.7</text></svg></div>
+<div class="tbl"><table><caption>표로 보기 — 라운드별 총점</caption><thead><tr><th scope="col">라운드</th><th scope="col" class="num">A 보고서형</th><th scope="col" class="num">B 대시보드형</th><th scope="col" class="num">C 슬라이드형</th><th scope="col" class="num">D 카드형</th><th scope="col" class="num">E 질문 흐름형</th></tr></thead><tbody><tr><th scope="row">r0<br><span class="src">2026-11-17 08:45 UTC</span></th><td class="num">88.3</td><td class="num">96.2</td><td class="num">100.0</td><td class="num">93.2</td><td class="num">90.7</td></tr></tbody></table></div>
+<h2>3. 유형별 — 폰 첫 화면 · 강점 · 약점 · 이번 개선</h2><div class="card tcard"><a href="shots/C-m.jpg"><img class="shot" src="shots/C-m.jpg" alt="C 슬라이드형 폰 첫 화면"></a><div>
+<h3 style="margin-top:0"><span class="sw" style="background:var(--sC)"></span>C 슬라이드형 — 100.0점</h3>
+<p class="src">사실 25/25 · 첫 화면 핵심 폰 5/5 · PC 5/5 · 폰 1.2화면 ·
+펼치거나 넘겨야 보이는 블록 14 · 최소 글자 13.0px · 터치 대상 100% ·
+대비 100%/100%(라이트/다크) · 오류 0 · 46KB</p>
+<p><b>강점</b> 탐색 비용 · 첫 화면 · 접근성 · 완전성 · 안정성 · 모바일 · <b>약점</b> 없음(모든 기준 만점)</p>
+<p><b>검토 메모</b> 1장 1메시지라 발표에 맞음. 끝까지 보려면 14번 넘겨야 하고, 슬라이드 높이 고정(520px)으로 PC에 빈 공간이 생김.</p>
+<p><b>이번 라운드 개선</b> 처음 만듦</p>
+<p><a href="../types/type-c-slides.html">이 유형 열기</a></p></div></div><div class="card tcard"><a href="shots/B-m.jpg"><img class="shot" src="shots/B-m.jpg" alt="B 대시보드형 폰 첫 화면"></a><div>
+<h3 style="margin-top:0"><span class="sw" style="background:var(--sB)"></span>B 대시보드형 — 96.2점</h3>
+<p class="src">사실 25/25 · 첫 화면 핵심 폰 5/5 · PC 5/5 · 폰 5.4화면 ·
+펼치거나 넘겨야 보이는 블록 7 · 최소 글자 12.5px · 터치 대상 50% ·
+대비 98%/98%(라이트/다크) · 오류 0 · 44KB</p>
+<p><b>강점</b> 첫 화면 · 완전성 · 안정성 · <b>약점</b> 모바일</p>
+<p><b>검토 메모</b> 핵심 타일과 결정 보드로 한눈에 보임. PC 결정 보드의 긴 상태 칩이 카드 밖으로 넘치고, 세부 6칸은 눌러야 보이며 펼치기 버튼이 작음(터치 대상 50%).</p>
+<p><b>이번 라운드 개선</b> 처음 만듦</p>
+<p><a href="../types/type-b-dashboard.html">이 유형 열기</a></p></div></div><div class="card tcard"><a href="shots/D-m.jpg"><img class="shot" src="shots/D-m.jpg" alt="D 카드형 폰 첫 화면"></a><div>
+<h3 style="margin-top:0"><span class="sw" style="background:var(--sD)"></span>D 카드형 — 93.2점</h3>
+<p class="src">사실 25/25 · 첫 화면 핵심 폰 5/5 · PC 5/5 · 폰 13.5화면 ·
+펼치거나 넘겨야 보이는 블록 1 · 최소 글자 12.5px · 터치 대상 93% ·
+대비 97%/97%(라이트/다크) · 오류 0 · 40KB</p>
+<p><b>강점</b> 첫 화면 · 완전성 · 안정성 · <b>약점</b> 탐색 비용</p>
+<p><b>검토 메모</b> 휴대폰 한 손 읽기에 좋음. 검증 카드의 큰 글씨가 긴 주장 문장이라 무겁고, 약 13.5화면.</p>
+<p><b>이번 라운드 개선</b> 처음 만듦</p>
+<p><a href="../types/type-d-cards.html">이 유형 열기</a></p></div></div><div class="card tcard"><a href="shots/E-m.jpg"><img class="shot" src="shots/E-m.jpg" alt="E 질문 흐름형 폰 첫 화면"></a><div>
+<h3 style="margin-top:0"><span class="sw" style="background:var(--sE)"></span>E 질문 흐름형 — 90.7점</h3>
+<p class="src">사실 25/25 · 첫 화면 핵심 폰 2/5 · PC 5/5 · 폰 2.3화면 ·
+펼치거나 넘겨야 보이는 블록 12 · 최소 글자 12.5px · 터치 대상 40% ·
+대비 98%/98%(라이트/다크) · 오류 0 · 45KB</p>
+<p><b>강점</b> 완전성 · 안정성 · <b>약점</b> 첫 화면</p>
+<p><b>검토 메모</b> 독자 질문 순서가 자연스러움. 폰 첫 화면이 질문 목록 12줄로 차서 핵심 5개 중 2개만 보이고, 목록 링크가 작음(터치 대상 40%).</p>
+<p><b>이번 라운드 개선</b> 처음 만듦</p>
+<p><a href="../types/type-e-qa.html">이 유형 열기</a></p></div></div><div class="card tcard"><a href="shots/A-m.jpg"><img class="shot" src="shots/A-m.jpg" alt="A 보고서형 폰 첫 화면"></a><div>
+<h3 style="margin-top:0"><span class="sw" style="background:var(--sA)"></span>A 보고서형 — 88.3점</h3>
+<p class="src">사실 25/25 · 첫 화면 핵심 폰 5/5 · PC 5/5 · 폰 23.9화면 ·
+펼치거나 넘겨야 보이는 블록 1 · 최소 글자 11.4px · 터치 대상 88% ·
+대비 98%/98%(라이트/다크) · 오류 0 · 42KB</p>
+<p><b>강점</b> 첫 화면 · 완전성 · 안정성 · <b>약점</b> 탐색 비용</p>
+<p><b>검토 메모</b> 요약이 첫 화면에 다 들어오고 근거가 가장 자세함. 폰에서 약 24화면이라 길고, 11px대 작은 글자가 있음.</p>
+<p><b>이번 라운드 개선</b> 처음 만듦</p>
+<p><a href="../types/type-a-report.html">이 유형 열기</a></p></div></div>
+<h2>4. 용도별로 고르면</h2>
+<div class="tbl"><table><thead><tr><th scope="col">용도</th><th scope="col">유형</th></tr></thead><tbody><tr><th scope="row">빨리 파악(첫 화면 + 탐색 비용)</th><td>C 슬라이드형</td></tr><tr><th scope="row">빠짐없이 근거까지(완전성 + 접근성 + 안정성)</th><td>C 슬라이드형</td></tr><tr><th scope="row">휴대폰으로(모바일 + 첫 화면)</th><td>C 슬라이드형</td></tr><tr><th scope="row">회의 발표</th><td>C 슬라이드형(형식상 — 점수와 별개)</td></tr></tbody></table></div>
+<h2>5. 어떻게 쟀나</h2>
+<ul>
+<li><b>완전성 25</b> — 꼭 들어가야 할 사실 25개(296 · 836 · 35.4% · 14,517 · 7,472 · ③-a · 보류 · 48.8% · 주기 구매 · 개업 첫 주문 …)가 글자 그대로 있는가</li>
+<li><b>첫 화면 20</b> — 폰(390×844)·PC(1280×800) 첫 화면에 핵심 5가지(「모두 사실」 · 296 · ③-a · 요구치 · 48.8%)가 그려졌는가</li>
+<li><b>탐색 비용 15</b> — 폰에서 끝까지 보는 데 드는 스크롤 화면 수 + 펼치거나 넘겨야 보이는 블록 × 0.5. 이번 라운드 가장 싼 유형이 만점</li>
+<li><b>모바일 15</b> — 가로 넘침 · 가장 작은 글자 · 터치 대상(32px 이상)</li>
+<li><b>접근성 15</b> — 글자 대비(라이트·다크, WCAG 4.5:1 · 큰 글자 3:1) · 조작 요소 이름 · 그림 대체 텍스트</li>
+<li><b>안정성 10</b> — 콘솔 오류 · 깨진 링크 · 파일 크기</li>
+</ul>
+<p class="src">원값: <code>out/compare/metrics-&lt;라운드&gt;.json</code> · 기록: <code>out/compare/history.json</code> · 다시 재기: <code>python3 src/build.py && node src/harness.cjs . &lt;라운드&gt; && python3 src/report.py &lt;라운드&gt;</code></p>
+
+<footer>자동 검증 점수 · 기준은 라운드 사이에 바꾸지 않습니다. 숫자 내용의 기준: main 79890bc3 · 2026-11-17.</footer></div>
+<script>
+(()=>{const tip=document.createElement('div');tip.className='tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+function place(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';const r=t.getBoundingClientRect();
+const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+let y=r.top-h-8;if(y<8)y=r.bottom+8;tip.style.left=(x+window.scrollX)+'px';tip.style.top=(y+window.scrollY)+'px';}
+const on=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)place(t)};
+const off=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)tip.style.display='none'};
+document.addEventListener('mouseover',on);document.addEventListener('mouseout',off);
+document.addEventListener('focusin',on);document.addEventListener('focusout',off);})();
+</script></body></html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>처리방침 목적 추가</title>
+<style>
+:root{
+  --bg:#f6f6f3;--surface:#ffffff;--fg:#1c1e22;--muted:#5a606a;--line:#e2e3e7;--code-bg:#f0f1f3;
+  --accent:#1d5fd6;--accent-bg:#e7effd;--violet:#6a4bb8;--violet-bg:#efeafa;
+  --decide:#9a5600;--decide-bg:#fdf1df;--ok:#18794e;--ok-bg:#e5f4ec;--warn:#b42318;--warn-bg:#fdecea;
+  --chart-surface:#fcfcfb;
+  --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;
+  --st-good:#0ca30c;--st-warn:#fab219;--st-serious:#ec835a;--st-critical:#d03b3b;--st-none:#c9c7c0;
+  --mock-bg:#f9f9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+    --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+    --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+    --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+  --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+  --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+  --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.eyebrow{color:var(--muted);font-size:14px;margin:0 0 6px}
+h1{font-size:29px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;line-height:1.35;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:16px;margin:16px 0 6px}
+p{margin:0 0 12px} ul,ol{margin:0 0 12px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,"D2Coding",monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:8px 0 14px}
+pre code{background:none;padding:0;word-break:normal}
+.lede{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px;margin-top:8px}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.decide{background:var(--decide-bg);color:var(--decide)} .chip.info{background:var(--accent-bg);color:var(--accent)}
+.chip.v{background:var(--violet-bg);color:var(--violet)} .chip.mute{background:var(--code-bg);color:var(--muted)}
+nav.files{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px;font-size:13.5px}
+nav.files a{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none}
+nav.files a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.files a[aria-current="page"]{color:#0b1220}}
+:root[data-theme="dark"] nav.files a[aria-current="page"]{color:#0b1220}
+.callout{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0 16px}
+.callout.decide{border-left-color:var(--decide)} .callout.warn{border-left-color:var(--warn)} .callout.ok{border-left-color:var(--ok)}
+.callout>:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:8px 0 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+caption{caption-side:top;text-align:left;padding:10px 12px 0;color:var(--muted);font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tbody th{background:transparent;color:var(--fg);font-size:14.5px;min-width:7.5em}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--muted);font-size:13.5px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.25;margin:4px 0;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:13.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2>*{min-width:0} .mock pre{max-width:100%}
+@media (max-width:720px){.grid2{grid-template-columns:1fr} h1{font-size:24px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin-top:0}
+.mock{background:var(--mock-bg);border:1px dashed var(--line);border-radius:12px;padding:14px}
+.mock .label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.before{border-top:4px solid var(--st-none)} .after{border-top:4px solid var(--accent)}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:52px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tip{position:absolute;z-index:50;display:none;max-width:300px;background:var(--fg);color:var(--bg);font-size:13px;line-height:1.5;padding:6px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+/* 차트: 구간 표(순차 파랑) */
+.heat td.cell{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;min-width:56px}
+.heat td.cell:focus{outline:2px solid var(--fg);outline-offset:-2px}
+/* 차트: 상태 100% 막대 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin:6px 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sbar-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;margin:6px 0}
+.sbar-row .nm{font-size:14px}
+.sbar{display:flex;gap:2px;height:22px;background:var(--chart-surface);border-radius:4px}
+.sbar b{display:block;height:100%;min-width:2px}
+.sbar b:first-child{border-radius:4px 0 0 4px} .sbar b:last-child{border-radius:0 4px 4px 0}
+.sbar b:focus{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){.sbar-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000} nav.files{display:none} .card,.tbl,.tile{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="eyebrow">PlaceOS · Page·Posting 인계 예시 · 2026-11-17</p>
+<h1>결정 ④ 처리방침에 목적 더하기 — 문구 전/후와 데이터 흐름</h1>
+<p class="lede">사용자가 입력한 월세·답사 기록을 임대료 추정 오차 KPI 에 쓰려면 무엇을 고지하고 어떻게 동의를 받는지, 문구와 화면 목업으로 보였습니다.</p>
+<div class="meta"><span class="chip ok">승인 · 11-15</span> <span class="chip mute">착수 미정 · 5단계</span><span>기준: main 79890bc3(2026-11-15 머지분) · 재측정 2026-11-17</span></div>
+<nav class="files" aria-label="예시 파일"><a href="placeos-00-verify.html">00 · 「왜 바꾸나」 검증 · 목차</a><a href="placeos-01-invest.html">01 · 결정 ① 투자비 실측</a><a href="placeos-02-questions.html">02 · 결정 ② 네 질문·정체성</a><a href="placeos-03-interior-marketing.html">03 · 결정 ③ 인테리어·마케팅 칸</a><a href="placeos-04-privacy.html" aria-current="page">04 · 결정 ④ 처리방침 목적</a><a href="placeos-05-before-after.html">05 · 전/후 기대값</a><a href="placeos-06-menu-fill.html">06 · 메뉴 「예시 채우기」</a></nav>
+</header>
+<main>
+
+<div class="callout ok"><p><b>상태</b> — 11-15 승인 · 5단계 몫이라 착수 시점은 미정입니다. 늦게 해도 1~4단계는 막히지 않습니다.
+다만 <b>사용자가 입력한 월세를 KPI 에 쓰는 일</b>은 이 고지가 먼저입니다 — 지금 처리방침의 목적은 「저장한 작업 불러오기」까지라서입니다.</p></div>
+
+<h2>1. 받는 것과 쓰는 곳 — 지금과 바뀐 뒤</h2>
+<div class="tbl"><table>
+<thead><tr><th scope="col">항목</th><th scope="col">지금 처리방침(시행 2026-10-25)</th><th scope="col">바뀐 뒤(안)</th></tr></thead>
+<tbody>
+<tr><th scope="row">사업 정보 — 직접 저장한 후보 자리·계산·검증 결과</th><td>목적: 입력한 업종·상권에 맞춘 분석 제공, 저장한 작업 불러오기</td>
+<td>목적에 더함: <b>「직접 입력한 계약 조건(보증금·월세·권리금)과 추정값의 차이를 재어 임대료 추정의 정확도를 높이는 통계 — 동의한 경우에만, 개인·조직을 알아볼 수 없는 집계로」</b></td></tr>
+<tr><th scope="row">현장 확인 기록(답사) — <b>새 항목</b></th><td>—</td><td>방문일 · 빈 층 여부 · 시간대 유동 메모 · 들은 월세. 목적: 저장한 작업 불러오기 + (동의 시) 위 통계</td></tr>
+<tr><th scope="row">보관·파기</th><td>탈퇴하면 바로 지움</td><td>그대로 — 원래 값은 탈퇴 즉시 삭제, 통계 결과(오차 평균·구간)만 식별자 없이 남음</td></tr>
+</tbody></table></div>
+
+<h2>2. 짧은 고지(PrivacyNote) 문구 비교</h2>
+<div class="grid2">
+<div class="mock before"><div class="label">지금</div><p>가입하면 이메일(로그인용)과 직접 적은 사업 정보·오프라인 캠페인 기록·피드백, 직접 저장한 후보 자리·계산·검증 결과, 이용 기록(어떤 분석을 불렀는지)을 보관합니다. …</p></div>
+<div class="mock after"><div class="label">바뀐 뒤(안) — 한 문장 추가</div><p>… 직접 입력한 계약 조건(보증금·월세)과 답사 기록은 <b>동의한 경우에만</b> 임대료 추정이 얼마나 맞는지 재는 통계에 쓰고, 이 통계는 개인·조직을 알아볼 수 없게 집계합니다.</p></div>
+</div>
+
+<h2>3. 예시 — 저장할 때 묻는 동의(선택)</h2>
+<div class="mock" style="max-width:560px"><div class="label">Posting ① 이 층의 계약 조건 · 저장</div>
+<p>들은 월세 <b>380만원</b> · 보증금 <b>5,000만원</b></p>
+<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="consent"> <span>이 금액을 임대료 추정 정확도 통계(익명 집계)에 써도 됩니다 <span class="src">(선택 — 안 해도 계산·저장은 그대로)</span></span></label>
+<p id="consent-out" class="src" style="margin-top:8px" aria-live="polite"></p></div>
+
+<h2>4. 데이터 흐름</h2>
+<div class="card"><svg viewBox="0 0 880 210" role="img" aria-label="데이터 흐름: 사용자 입력에서 계정 저장, 동의 시 익명 통계, 탈퇴 시 삭제" style="width:100%;height:auto;max-width:880px">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+<g font-size="14" fill="currentColor" style="color:var(--fg)">
+<rect x="10" y="20" width="190" height="70" rx="10" fill="var(--surface)" stroke="var(--line)"/><text x="105" y="50" text-anchor="middle">사용자 입력</text><text x="105" y="72" text-anchor="middle" fill="var(--muted)" font-size="12.5">들은 월세 · 답사 기록</text>
+<rect x="250" y="20" width="190" height="70" rx="10" fill="var(--surface)" stroke="var(--line)"/><text x="345" y="50" text-anchor="middle">계정 저장(지금도 있음)</text><text x="345" y="72" text-anchor="middle" fill="var(--muted)" font-size="12.5">저장한 작업 불러오기</text>
+<rect x="490" y="20" width="190" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/><text x="585" y="50" text-anchor="middle">새 목적(④)</text><text x="585" y="72" text-anchor="middle" fill="var(--muted)" font-size="12.5">동의한 값만 · 익명 통계</text>
+<rect x="710" y="20" width="160" height="70" rx="10" fill="var(--surface)" stroke="var(--line)"/><text x="790" y="50" text-anchor="middle">KPI 집계</text><text x="790" y="72" text-anchor="middle" fill="var(--muted)" font-size="12.5">층별 임대료 오차</text>
+<line x1="200" y1="55" x2="246" y2="55" stroke="var(--muted)" marker-end="url(#ar)"/>
+<line x1="440" y1="55" x2="486" y2="55" stroke="var(--accent)" marker-end="url(#ar)"/>
+<line x1="680" y1="55" x2="706" y2="55" stroke="var(--muted)" marker-end="url(#ar)"/>
+<rect x="250" y="130" width="190" height="64" rx="10" fill="var(--warn-bg)" stroke="var(--warn)"/><text x="345" y="158" text-anchor="middle">탈퇴</text><text x="345" y="180" text-anchor="middle" fill="var(--muted)" font-size="12.5">원래 값 바로 삭제</text>
+<line x1="345" y1="90" x2="345" y2="126" stroke="var(--warn)" marker-end="url(#ar)"/>
+<text x="500" y="152" fill="var(--muted)" font-size="12.5"><tspan x="500">탈퇴해도 통계 숫자(오차 평균·구간)만</tspan><tspan x="500" dy="18">누구 것인지 모르는 집계로 남음</tspan></text>
+</g></svg></div>
+
+<h2>5. 같은 PR 에서 함께 고칠 것</h2>
+<ul>
+<li><code>components/PrivacyNote.tsx</code> 문구 · <code>public/privacy.html</code> 표와 시행일 — 받는 항목을 늘리는 PR 과 같은 PR(<code>docs/decision-lightweight-first-2026-10-05.md</code>)</li>
+<li><code>auth_service.delete_account</code> — 답사 기록 테이블도 지우는지 테스트로 고정</li>
+<li>KPI 계측: 오차 = |입력 월세 − 추정 월세| ÷ 입력 월세 · 표본 단위는 자리(조직당 최신 1건) · 내부 조직 제외(<code>services/kpi_scope</code>) · n 과 구간 동반 · 동의한 사람만이라 표본 치우침을 함께 적는다</li>
+</ul>
+<div class="callout warn"><p><b>법률 메모(자문 아님)</b> — 개인정보 보호법은 수집 때 알린 목적 밖의 이용을 제한합니다(제15조·제18조). 통계 작성은 가명 처리로도 할 수 있지만(제28조의2) 안전조치가 따로 필요합니다.
+여기서는 가장 가벼운 길(선택 동의 + 익명 집계)을 예시로 들었고, 문구 확정 전에 검토를 받으세요.</p></div>
+
+</main>
+<footer>
+PlaceOS 내부 검토용 예시 · 숫자는 기준일 값이라 낡습니다 — 인용 전에 <code>python scripts/pppp_status.py</code> ·
+<code>python scripts/posting_payback_snapshot.py</code> 로 다시 재세요. 법률·세무 자문이 아닙니다.
+</footer>
+</div>
+<script>
+(()=>{const tip=document.createElement('div');tip.className='tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+function place(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';const r=t.getBoundingClientRect();
+const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+let y=r.top-h-8;if(y<8)y=r.bottom+8;tip.style.left=(x+window.scrollX)+'px';tip.style.top=(y+window.scrollY)+'px';}
+const on=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)place(t)};
+const off=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)tip.style.display='none'};
+document.addEventListener('mouseover',on);document.addEventListener('mouseout',off);
+document.addEventListener('focusin',on);document.addEventListener('focusout',off);})();
+</script>
+<script>
+(()=>{const cb=document.getElementById('consent');const out=document.getElementById('consent-out');
+function draw(){out.innerHTML=cb.checked
+?'<b>저장</b>: 들은 월세 380만원 · 보증금 5,000만원(내 계정에만 보임)<br><b>추가로</b>: 이 자리의 추정 월세(R-ONE)와의 차이를 <b>개인·조직을 알아볼 수 없는 통계</b>(층·상권 단위 오차)로만 씁니다. 탈퇴하면 원래 값은 지우고 통계 숫자만 남습니다.'
+:'<b>저장</b>: 들은 월세 380만원 · 보증금 5,000만원(내 계정에만 보임)<br><b>쓰지 않음</b>: 임대료 추정 정확도 통계에는 넣지 않습니다.';}
+cb.addEventListener('change',draw);draw();})();
+</script>
+</body>
+</html>

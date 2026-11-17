@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인테리어 마케팅 칸</title>
+<style>
+:root{
+  --bg:#f6f6f3;--surface:#ffffff;--fg:#1c1e22;--muted:#5a606a;--line:#e2e3e7;--code-bg:#f0f1f3;
+  --accent:#1d5fd6;--accent-bg:#e7effd;--violet:#6a4bb8;--violet-bg:#efeafa;
+  --decide:#9a5600;--decide-bg:#fdf1df;--ok:#18794e;--ok-bg:#e5f4ec;--warn:#b42318;--warn-bg:#fdecea;
+  --chart-surface:#fcfcfb;
+  --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;
+  --st-good:#0ca30c;--st-warn:#fab219;--st-serious:#ec835a;--st-critical:#d03b3b;--st-none:#c9c7c0;
+  --mock-bg:#f9f9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+    --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+    --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+    --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+  --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+  --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+  --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.eyebrow{color:var(--muted);font-size:14px;margin:0 0 6px}
+h1{font-size:29px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;line-height:1.35;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:16px;margin:16px 0 6px}
+p{margin:0 0 12px} ul,ol{margin:0 0 12px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,"D2Coding",monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:8px 0 14px}
+pre code{background:none;padding:0;word-break:normal}
+.lede{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px;margin-top:8px}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.decide{background:var(--decide-bg);color:var(--decide)} .chip.info{background:var(--accent-bg);color:var(--accent)}
+.chip.v{background:var(--violet-bg);color:var(--violet)} .chip.mute{background:var(--code-bg);color:var(--muted)}
+nav.files{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px;font-size:13.5px}
+nav.files a{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none}
+nav.files a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.files a[aria-current="page"]{color:#0b1220}}
+:root[data-theme="dark"] nav.files a[aria-current="page"]{color:#0b1220}
+.callout{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0 16px}
+.callout.decide{border-left-color:var(--decide)} .callout.warn{border-left-color:var(--warn)} .callout.ok{border-left-color:var(--ok)}
+.callout>:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:8px 0 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+caption{caption-side:top;text-align:left;padding:10px 12px 0;color:var(--muted);font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tbody th{background:transparent;color:var(--fg);font-size:14.5px;min-width:7.5em}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--muted);font-size:13.5px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.25;margin:4px 0;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:13.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2>*{min-width:0} .mock pre{max-width:100%}
+@media (max-width:720px){.grid2{grid-template-columns:1fr} h1{font-size:24px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin-top:0}
+.mock{background:var(--mock-bg);border:1px dashed var(--line);border-radius:12px;padding:14px}
+.mock .label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.before{border-top:4px solid var(--st-none)} .after{border-top:4px solid var(--accent)}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:52px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tip{position:absolute;z-index:50;display:none;max-width:300px;background:var(--fg);color:var(--bg);font-size:13px;line-height:1.5;padding:6px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+/* 차트: 구간 표(순차 파랑) */
+.heat td.cell{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;min-width:56px}
+.heat td.cell:focus{outline:2px solid var(--fg);outline-offset:-2px}
+/* 차트: 상태 100% 막대 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin:6px 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sbar-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;margin:6px 0}
+.sbar-row .nm{font-size:14px}
+.sbar{display:flex;gap:2px;height:22px;background:var(--chart-surface);border-radius:4px}
+.sbar b{display:block;height:100%;min-width:2px}
+.sbar b:first-child{border-radius:4px 0 0 4px} .sbar b:last-child{border-radius:0 4px 4px 0}
+.sbar b:focus{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){.sbar-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000} nav.files{display:none} .card,.tbl,.tile{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="eyebrow">PlaceOS · Page·Posting 인계 예시 · 2026-11-17</p>
+<h1>결정 ③ 인테리어 3D · 오프라인 마케팅 — 눌러 보는 탭 목업</h1>
+<p class="lede">이미 시행된 Program 「개업 뒤」 칸(③-b)과, 아직 정하지 않은 인테리어 3D 위치(③-a)의 세 가지 안을 눌러 비교해 볼 수 있게 했습니다.</p>
+<div class="meta"><span class="chip ok">③-b 시행</span> <span class="chip decide">③-a 보류</span><span>기준: main 79890bc3(2026-11-15 머지분) · 재측정 2026-11-17</span></div>
+<nav class="files" aria-label="예시 파일"><a href="placeos-00-verify.html">00 · 「왜 바꾸나」 검증 · 목차</a><a href="placeos-01-invest.html">01 · 결정 ① 투자비 실측</a><a href="placeos-02-questions.html">02 · 결정 ② 네 질문·정체성</a><a href="placeos-03-interior-marketing.html" aria-current="page">03 · 결정 ③ 인테리어·마케팅 칸</a><a href="placeos-04-privacy.html">04 · 결정 ④ 처리방침 목적</a><a href="placeos-05-before-after.html">05 · 전/후 기대값</a><a href="placeos-06-menu-fill.html">06 · 메뉴 「예시 채우기」</a></nav>
+</header>
+<main>
+<style>
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.opts button{font:inherit;font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.opts button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.rail{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.rail span{font-size:13.5px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.rail span.opt{border-style:dashed;color:var(--muted)} .rail span.new{border-color:var(--accent);color:var(--accent);font-weight:600}
+.rail span.moved{border-color:var(--decide);color:var(--decide)}
+.mtabs [role="tablist"]{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.mtabs [role="tab"]{font:inherit;font-size:14px;padding:6px 10px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);cursor:pointer}
+.mtabs [role="tab"][aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+</style>
+<div class="callout ok"><p><b>③-b 승인·시행</b> — Program 탭 순서가 「가설 설정 → 네트워킹 → 지원 프로그램 → 오프라인 마케팅 솔루션(개업 뒤)」로 바뀌었습니다(main <code>pages/CampaignStudio.tsx</code> 의 <code>ORDER</code>). 탭 이름·PPPP 화면·가드는 그대로입니다.</p></div>
+<div class="callout decide"><p><b>③-a 보류(유일한 미결)</b> — 인테리어 3D 를 Posting 기본 경로에서 「펼치는 선택 칸」으로 내릴지. 결정 전까지 11-09 결정(인테리어 쪽은 Posting 2번째)을 그대로 둡니다.
+Posting 7쪽→3쪽 정리가 이 결정을 기다립니다.</p></div>
+
+<h2>1. Program 탭 — 11-07 과 지금</h2>
+<div class="opts" data-group="program" role="group" aria-label="Program 탭 순서 보기">
+<button type="button" data-opt="old" aria-pressed="false">11-07 순서</button><button type="button" data-opt="now" aria-pressed="true">지금(11-15~)</button></div>
+<div data-pane-group="program">
+<div class="mock" data-pane="old" hidden><div class="label">11-07 리뉴얼 순서</div>
+<div class="rail"><span>네트워킹</span><span>지원 프로그램</span><span>오프라인 마케팅 솔루션</span><span>가설 검증</span></div>
+<p class="src">마케팅이 가설보다 앞 — 「계약 전 확인」보다 「알리기」가 먼저 보였습니다.</p></div>
+<div class="mock" data-pane="now"><div class="label">지금 — 계약 전 확인이 먼저, 마케팅은 개업 뒤</div>
+<div class="rail"><span class="new">가설 설정</span><span>네트워킹</span><span>지원 프로그램</span><span class="moved">오프라인 마케팅 솔루션 · 개업 뒤</span></div>
+<p class="src">탭 안에 「개업 뒤 칸입니다 — 계약 전 확인은 앞의 가설 설정·네트워킹·지원 프로그램에서」 안내가 붙습니다.</p></div>
+</div>
+
+<h2>2. Posting 쪽 구성 — ③-a 선택지 눌러 보기</h2>
+<div class="opts" data-group="posting" role="group" aria-label="Posting 쪽 구성 안">
+<button type="button" data-opt="A" aria-pressed="true">A · 지금(7쪽)</button>
+<button type="button" data-opt="B" aria-pressed="false">B · 3쪽 + 인테리어 선택 칸(인계 문서 안)</button>
+<button type="button" data-opt="C" aria-pressed="false">C · 3쪽 + 인테리어는 「계약 뒤 준비」</button></div>
+<div data-pane-group="posting">
+<div class="mock" data-pane="A"><div class="label">A · 지금 — 질문 「어떤 비용과 전략으로 입점할까요?」</div>
+<div class="rail"><span>1 시뮬레이션 결과</span><span>2 상권 맞춤 인테리어(3D)</span><span>3 주변 업종 지도</span><span>4 찾아오는 길</span><span>5 위험 확인</span><span>6 메뉴 설정</span><span>7 비용 비교 및 결정</span></div>
+<p class="src">자리 사실(3·4)과 사업계획(1·6·7)과 인테리어(2)가 한 줄에 섞여 있습니다.</p></div>
+<div class="mock" data-pane="B" hidden><div class="label">B · 3쪽 — 질문 「이 층 조건이면 얼마에 몇 개를 팔아야 하나」</div>
+<div class="mtabs"><div role="tablist" aria-label="B 안 쪽">
+<button type="button" role="tab" aria-selected="true" aria-controls="b1">① 이 층의 계약 조건</button>
+<button type="button" role="tab" aria-selected="false" aria-controls="b2">② 얼마나 팔아야 하나</button>
+<button type="button" role="tab" aria-selected="false" aria-controls="b3">③ 계약 전 확인</button></div>
+<div class="mpane" id="b1"><p>들은 보증금·월세·권리금 → 없으면 R-ONE 범위(참고) · 면적 · 층. 첫 문장은 Page 에서 고른 층으로 시작(예: 「회기동 ○○빌딩 2층 · 35평 — 이 층을 계약해도 되나, 돈 쪽」).</p></div>
+<div class="mpane" id="b2" hidden><p>요구치(P2): 하루 판매 개수 · 월매출 · 같은 상권·업종 점포 평균 대비 %. 메뉴 설정이 여기로 들어옵니다.</p>
+<div class="rail"><span class="opt">펼치기 · 세 가격대 비교</span><span class="opt">펼치기 · 메뉴 설정</span><span class="opt">펼치기 · 상권 맞춤 인테리어(3D)</span></div></div>
+<div class="mpane" id="b3" hidden><p>위험 확인 + 2단계 입점 점검 결과 + 계약 전 체크리스트. 주변 업종 지도·찾아오는 길은 Page 에 <b>더하고</b> 여기에도 링크로 남깁니다.</p></div></div></div>
+<div class="mock" data-pane="C" hidden><div class="label">C · 3쪽 + 계약 뒤 준비</div>
+<div class="rail"><span>① 이 층의 계약 조건</span><span>② 얼마나 팔아야 하나</span><span>③ 계약 전 확인</span><span class="opt">계약 뒤 준비 · 상권 맞춤 인테리어(3D)</span></div>
+<p class="src">인테리어를 계약 뒤 단계로 분명히 미룹니다. Program 의 「개업 뒤」 칸(③-b)과 같은 원리입니다.</p></div>
+</div>
+
+<div class="tbl"><table>
+<thead><tr><th scope="col">안</th><th scope="col">좋은 점</th><th scope="col">걸리는 점</th><th scope="col">인테리어까지 클릭</th></tr></thead>
+<tbody>
+<tr><th scope="row">A 지금</th><td>11-09 결정 그대로 · 작업 없음</td><td>개발자 모임 지적(「부동산 앱에 인테리어가?」) 그대로 · 7쪽 혼재</td><td class="num">1</td></tr>
+<tr><th scope="row">B 선택 칸</th><td>질문 하나(요구치)에 집중 · 3D 기능은 지우지 않음 · 인계 문서 안과 같음</td><td>11-09 결정 변경 필요 · 펼치기 칸 구현</td><td class="num">2</td></tr>
+<tr><th scope="row">C 계약 뒤</th><td>순서가 가장 분명(계약 전 → 뒤) · ③-b 와 같은 원리</td><td>11-09 결정 변경 · 「계약 뒤」 칸이 Posting 에 새로 생김</td><td class="num">2</td></tr>
+</tbody></table></div>
+<div class="callout"><p><b>제 의견: B</b> — 「예측을 줄이고 확인을 늘린다」는 방향과 개발자 모임의 지적에 맞고, 3D 트윈은 한 번 더 눌러 바로 열려서 11-09 결정의 기능을 지우지 않습니다.
+다만 ③-a 는 사용자 결정 사항이라, 정해지기 전까지는 A 를 유지합니다.</p></div>
+<p class="src">보존 규칙: Posting 트랙 화면(<code>PostingConsole</code>)과 레일 버튼은 그대로입니다. 트랙 안의 쪽 정리는 가드(<code>ppppScreens.test.tsx</code> — 트랙 이름·순서)의 대상이 아닙니다.</p>
+
+</main>
+<footer>
+PlaceOS 내부 검토용 예시 · 숫자는 기준일 값이라 낡습니다 — 인용 전에 <code>python scripts/pppp_status.py</code> ·
+<code>python scripts/posting_payback_snapshot.py</code> 로 다시 재세요. 법률·세무 자문이 아닙니다.
+</footer>
+</div>
+<script>
+(()=>{const tip=document.createElement('div');tip.className='tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+function place(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';const r=t.getBoundingClientRect();
+const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+let y=r.top-h-8;if(y<8)y=r.bottom+8;tip.style.left=(x+window.scrollX)+'px';tip.style.top=(y+window.scrollY)+'px';}
+const on=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)place(t)};
+const off=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)tip.style.display='none'};
+document.addEventListener('mouseover',on);document.addEventListener('mouseout',off);
+document.addEventListener('focusin',on);document.addEventListener('focusout',off);})();
+</script>
+<script>
+(()=>{function wire(group){const btns=[...document.querySelectorAll('[data-group="'+group+'"] [data-opt]')];
+const panes=[...document.querySelectorAll('[data-pane-group="'+group+'"] [data-pane]')];
+btns.forEach(b=>b.addEventListener('click',()=>{btns.forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+panes.forEach(p=>p.hidden=p.dataset.pane!==b.dataset.opt);}));}
+wire('posting');wire('program');
+document.querySelectorAll('.mtabs [role="tab"]').forEach(t=>t.addEventListener('click',()=>{const box=t.closest('.mtabs');
+box.querySelectorAll('[role="tab"]').forEach(x=>x.setAttribute('aria-selected',x===t?'true':'false'));
+box.querySelectorAll('.mpane').forEach(p=>p.hidden=p.id!==t.getAttribute('aria-controls'));}));})();
+</script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투자비 실측 예시</title>
+<style>
+:root{
+  --bg:#f6f6f3;--surface:#ffffff;--fg:#1c1e22;--muted:#5a606a;--line:#e2e3e7;--code-bg:#f0f1f3;
+  --accent:#1d5fd6;--accent-bg:#e7effd;--violet:#6a4bb8;--violet-bg:#efeafa;
+  --decide:#9a5600;--decide-bg:#fdf1df;--ok:#18794e;--ok-bg:#e5f4ec;--warn:#b42318;--warn-bg:#fdecea;
+  --chart-surface:#fcfcfb;
+  --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;
+  --st-good:#0ca30c;--st-warn:#fab219;--st-serious:#ec835a;--st-critical:#d03b3b;--st-none:#c9c7c0;
+  --mock-bg:#f9f9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+    --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+    --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+    --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111316;--surface:#191c20;--fg:#e6e8eb;--muted:#a0a6af;--line:#2b2f35;--code-bg:#23272c;
+  --accent:#86adff;--accent-bg:#1a2842;--violet:#bba6f6;--violet-bg:#28213d;
+  --decide:#f1b864;--decide-bg:#382810;--ok:#6fd3a1;--ok-bg:#12301f;--warn:#ff9a8f;--warn-bg:#3a1714;
+  --chart-surface:#1a1a19;--st-none:#55534e;--mock-bg:#15181c;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.eyebrow{color:var(--muted);font-size:14px;margin:0 0 6px}
+h1{font-size:29px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;line-height:1.35;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:16px;margin:16px 0 6px}
+p{margin:0 0 12px} ul,ol{margin:0 0 12px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,"D2Coding",monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:8px 0 14px}
+pre code{background:none;padding:0;word-break:normal}
+.lede{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px;margin-top:8px}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.decide{background:var(--decide-bg);color:var(--decide)} .chip.info{background:var(--accent-bg);color:var(--accent)}
+.chip.v{background:var(--violet-bg);color:var(--violet)} .chip.mute{background:var(--code-bg);color:var(--muted)}
+nav.files{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px;font-size:13.5px}
+nav.files a{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none}
+nav.files a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav.files a[aria-current="page"]{color:#0b1220}}
+:root[data-theme="dark"] nav.files a[aria-current="page"]{color:#0b1220}
+.callout{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0 16px}
+.callout.decide{border-left-color:var(--decide)} .callout.warn{border-left-color:var(--warn)} .callout.ok{border-left-color:var(--ok)}
+.callout>:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:8px 0 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+caption{caption-side:top;text-align:left;padding:10px 12px 0;color:var(--muted);font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tbody th{background:transparent;color:var(--fg);font-size:14.5px;min-width:7.5em}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--muted);font-size:13.5px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.25;margin:4px 0;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:13.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2>*{min-width:0} .mock pre{max-width:100%}
+@media (max-width:720px){.grid2{grid-template-columns:1fr} h1{font-size:24px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin-top:0}
+.mock{background:var(--mock-bg);border:1px dashed var(--line);border-radius:12px;padding:14px}
+.mock .label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.before{border-top:4px solid var(--st-none)} .after{border-top:4px solid var(--accent)}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:52px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+details{margin:8px 0 14px} summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tip{position:absolute;z-index:50;display:none;max-width:300px;background:var(--fg);color:var(--bg);font-size:13px;line-height:1.5;padding:6px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+/* 차트: 구간 표(순차 파랑) */
+.heat td.cell{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;min-width:56px}
+.heat td.cell:focus{outline:2px solid var(--fg);outline-offset:-2px}
+/* 차트: 상태 100% 막대 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin:6px 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sbar-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;margin:6px 0}
+.sbar-row .nm{font-size:14px}
+.sbar{display:flex;gap:2px;height:22px;background:var(--chart-surface);border-radius:4px}
+.sbar b{display:block;height:100%;min-width:2px}
+.sbar b:first-child{border-radius:4px 0 0 4px} .sbar b:last-child{border-radius:0 4px 4px 0}
+.sbar b:focus{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){.sbar-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000} nav.files{display:none} .card,.tbl,.tile{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="eyebrow">PlaceOS · Page·Posting 인계 예시 · 2026-11-17</p>
+<h1>결정 ① 투자비를 공정위 실측으로 — 계산으로 대조해 보기</h1>
+<p class="lede">손으로 적은 투자비 계수를 공정위 정보공개서 실측으로 바꾸면 회수기간이 어떻게 달라지는지, 실제 자리 3곳과 836곳 분포로 미리 계산했습니다.</p>
+<div class="meta"><span class="chip ok">승인 · 11-15</span> <span class="chip decide">구현 전 · P1</span> <span class="chip warn">1콜 확인 미실행</span><span>기준: main 79890bc3(2026-11-15 머지분) · 재측정 2026-11-17</span></div>
+<nav class="files" aria-label="예시 파일"><a href="placeos-00-verify.html">00 · 「왜 바꾸나」 검증 · 목차</a><a href="placeos-01-invest.html" aria-current="page">01 · 결정 ① 투자비 실측</a><a href="placeos-02-questions.html">02 · 결정 ② 네 질문·정체성</a><a href="placeos-03-interior-marketing.html">03 · 결정 ③ 인테리어·마케팅 칸</a><a href="placeos-04-privacy.html">04 · 결정 ④ 처리방침 목적</a><a href="placeos-05-before-after.html">05 · 전/후 기대값</a><a href="placeos-06-menu-fill.html">06 · 메뉴 「예시 채우기」</a></nav>
+</header>
+<main>
+
+<div class="callout ok"><p><b>상태</b> — 11-15 승인(10-28 finding 의 (B) 안). 구현은 팀원 몫 P1 입니다. 첫 단계는 공정위 원천 1콜 확인이고, 목표치는 미리 정하지 않습니다(KPI 규칙 1).</p></div>
+
+<h2>1. 식이 이렇게 바뀝니다</h2>
+<div class="grid2">
+<div class="mock before"><div class="label">지금 — <code>districts.tier_scenarios</code></div>
+<pre><code>투자비(백만원) = 권리금/100 + 면적(평) × a + c
+  고급화   a=0.55  c=4.0
+  가성비   a=0.32  c=2.2
+  기능중심 a=0.20  c=1.1     ← 손으로 적은 값</code></pre>
+<p class="src">35평 기능중심이면 810만원 — 인테리어 평당 약 23만원꼴</p></div>
+<div class="mock after"><div class="label">바뀐 뒤(안) — 공정위 정보공개서 실측</div>
+<pre><code>투자비 = 권리금(들은 금액)
+       + 단위면적 인테리어 금액[업종×가격대] × 면적
+       + 최초 부담금(가맹금·교육비 등)[업종×가격대]
+       (보증금은 돌려받는 돈이라 뺀다)
+표본(브랜드) 부족 칸 → 「자료 부족」</code></pre>
+<p class="src">가맹점 수로 가중한 중앙값 — 지금 면적 A 를 만들 때와 같은 규칙(<code>build_posting_store_area.py</code>)</p></div>
+</div>
+
+<h2>2. 예시 ① — 실제 자리 3곳에 넣어 보기</h2>
+<p>서빙 코드가 지금 내는 값 그대로입니다. <b>월순익은 두고 투자비만</b> 바꿨습니다(P1 단독 효과).</p>
+<div class="grid2"><div class="card"><h4>압구정로데오 · 61평 · 월세 814만원(추정)</h4>
+<p class="src">추천 전략 기능중심 · 월매출 20,743만원 − 월비용 18,852만원 = 월순익 1,891만원(추정 · 그대로 둠)</p>
+<div class="tbl"><table><thead><tr><th scope="col">투자비</th><th scope="col" class="num">금액</th><th scope="col" class="num">회수</th></tr></thead><tbody>
+<tr><th scope="row">지금 · 손 계수</th><td class="num">1,330만원</td><td class="num"><b>0.7개월</b></td></tr>
+<tr><th scope="row">서울 인테리어 평균</th><td class="num">5,450만원</td><td class="num">2.9개월</td></tr>
+<tr><th scope="row">서울 외식업 창업비 평균</th><td class="num">9,610만원</td><td class="num">5.1개월</td></tr>
+</tbody></table></div>
+<p class="src">지금 화면(R5): 「기능중심 하면 한 달 안에 본전이에요」</p></div><div class="card"><h4>경희대 · 89평 · 월세 905만원(추정)</h4>
+<p class="src">추천 전략 기능중심 · 월매출 16,044만원 − 월비용 14,857만원 = 월순익 1,187만원(추정 · 그대로 둠)</p>
+<div class="tbl"><table><thead><tr><th scope="col">투자비</th><th scope="col" class="num">금액</th><th scope="col" class="num">회수</th></tr></thead><tbody>
+<tr><th scope="row">지금 · 손 계수</th><td class="num">1,890만원</td><td class="num"><b>1.6개월</b></td></tr>
+<tr><th scope="row">서울 인테리어 평균</th><td class="num">5,450만원</td><td class="num">4.6개월</td></tr>
+<tr><th scope="row">서울 외식업 창업비 평균</th><td class="num">9,610만원</td><td class="num">8.1개월</td></tr>
+</tbody></table></div>
+<p class="src">지금 화면(R5): 「기능중심 하면 약 2개월이면 본전이에요」</p></div><div class="card"><h4>이태원 · 21평 · 월세 354만원(추정)</h4>
+<p class="src">추천 전략 고급화 · 월매출 5,362만원 − 월비용 5,089만원 = 월순익 273만원(추정 · 그대로 둠)</p>
+<div class="tbl"><table><thead><tr><th scope="col">투자비</th><th scope="col" class="num">금액</th><th scope="col" class="num">회수</th></tr></thead><tbody>
+<tr><th scope="row">지금 · 손 계수</th><td class="num">1,555만원</td><td class="num"><b>5.7개월</b></td></tr>
+<tr><th scope="row">서울 인테리어 평균</th><td class="num">5,450만원</td><td class="num">20.0개월</td></tr>
+<tr><th scope="row">서울 외식업 창업비 평균</th><td class="num">9,610만원</td><td class="num">35.2개월</td></tr>
+</tbody></table></div>
+<p class="src">지금 화면(R5): 「고급화 하면 약 6개월이면 본전이에요」</p></div></div>
+<p class="src">투자비 비교값 — 서울시 「2025년 서울시 가맹사업 등록현황」(2026-06 발표): 가맹점 창업비 평균 1억 1,350만원 · 외식업 9,610만원 · 인테리어 평균 5,450만원(48.0%).
+P1 이 실제로 쓸 값은 업종·가격대별 공정위 단위면적 인테리어 금액이라 위 숫자와 다를 수 있습니다.</p>
+
+<h2>3. 예시 ② — 836곳 분포가 어떻게 움직이나</h2>
+<div class="tbl heat"><table><caption>추천 전략 회수기간 구간별 자리 수 — 서빙 코드 실호출(2026-11-17) · 투자비만 바꾼 재계산</caption><thead><tr><th scope="col">시나리오</th><th scope="col" class="num">1개월 미만</th><th scope="col" class="num">1~3개월</th><th scope="col" class="num">3~6개월</th><th scope="col" class="num">6~12개월</th><th scope="col" class="num">12~24개월</th><th scope="col" class="num">24개월 이상</th><th scope="col">비고</th></tr></thead><tbody><tr><th scope="row">현행 손 계수(재현)</th><td class="cell" tabindex="0" style="background:var(--seq-600);color:#ffffff" data-tip="현행 손 계수(재현) · 1개월 미만: 296곳">296</td><td class="cell" tabindex="0" style="background:var(--seq-600);color:#ffffff" data-tip="현행 손 계수(재현) · 1~3개월: 324곳">324</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="현행 손 계수(재현) · 3~6개월: 126곳">126</td><td class="cell" tabindex="0" style="background:var(--seq-200);color:#0b0b0b" data-tip="현행 손 계수(재현) · 6~12개월: 70곳">70</td><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="현행 손 계수(재현) · 12~24개월: 12곳">12</td><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="현행 손 계수(재현) · 24개월 이상: 8곳">8</td><td class="src">중앙 1.5개월 · 사분위 0.7~3.1개월 · 지금 화면</td></tr><tr><th scope="row">투자비 ×2</th><td class="cell" tabindex="0" style="background:var(--seq-200);color:#0b0b0b" data-tip="투자비 ×2 · 1개월 미만: 68곳">68</td><td class="cell" tabindex="0" style="background:var(--seq-600);color:#ffffff" data-tip="투자비 ×2 · 1~3개월: 353곳">353</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×2 · 3~6개월: 199곳">199</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="투자비 ×2 · 6~12개월: 130곳">130</td><td class="cell" tabindex="0" style="background:var(--seq-200);color:#0b0b0b" data-tip="투자비 ×2 · 12~24개월: 67곳">67</td><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="투자비 ×2 · 24개월 이상: 19곳">19</td><td class="src">중앙 2.9개월 · 사분위 1.5~6.2개월</td></tr><tr><th scope="row">투자비 ×3</th><td class="cell" tabindex="0" style="background:transparent;color:var(--muted)" data-tip="투자비 ×3 · 1개월 미만: 0곳">0</td><td class="cell" tabindex="0" style="background:var(--seq-600);color:#ffffff" data-tip="투자비 ×3 · 1~3개월: 304곳">304</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×3 · 3~6개월: 224곳">224</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="투자비 ×3 · 6~12개월: 155곳">155</td><td class="cell" tabindex="0" style="background:var(--seq-200);color:#0b0b0b" data-tip="투자비 ×3 · 12~24개월: 100곳">100</td><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="투자비 ×3 · 24개월 이상: 53곳">53</td><td class="src">중앙 4.4개월 · 사분위 2.2~9.4개월</td></tr><tr><th scope="row">투자비 ×5</th><td class="cell" tabindex="0" style="background:transparent;color:var(--muted)" data-tip="투자비 ×5 · 1개월 미만: 0곳">0</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="투자비 ×5 · 1~3개월: 130곳">130</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×5 · 3~6개월: 223곳">223</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×5 · 6~12개월: 225곳">225</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="투자비 ×5 · 12~24개월: 138곳">138</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="투자비 ×5 · 24개월 이상: 120곳">120</td><td class="src">중앙 7.3개월 · 사분위 3.7~15.5개월</td></tr><tr><th scope="row">투자비 ×8</th><td class="cell" tabindex="0" style="background:transparent;color:var(--muted)" data-tip="투자비 ×8 · 1개월 미만: 0곳">0</td><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="투자비 ×8 · 1~3개월: 20곳">20</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×8 · 3~6개월: 193곳">193</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×8 · 6~12개월: 213곳">213</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×8 · 12~24개월: 195곳">195</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="투자비 ×8 · 24개월 이상: 215곳">215</td><td class="src">중앙 11.7개월 · 사분위 5.9~24.8개월</td></tr><tr><th scope="row">인테리어 서울 평균 5,450만원(면적 무관)</th><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 1개월 미만: 14곳">14</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 1~3개월: 173곳">173</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 3~6개월: 207곳">207</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 6~12개월: 192곳">192</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 12~24개월: 128곳">128</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="인테리어 서울 평균 5,450만원(면적 무관) · 24개월 이상: 122곳">122</td><td class="src">중앙 6.5개월 · 사분위 3.2~14.2개월 · 서울시 2025 가맹사업 등록현황</td></tr><tr><th scope="row">외식업 창업비용 서울 평균 9,610만원(면적 무관)</th><td class="cell" tabindex="0" style="background:var(--seq-100);color:#0b0b0b" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 1개월 미만: 2곳">2</td><td class="cell" tabindex="0" style="background:var(--seq-200);color:#0b0b0b" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 1~3개월: 60곳">60</td><td class="cell" tabindex="0" style="background:var(--seq-300);color:#0b0b0b" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 3~6개월: 163곳">163</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 6~12개월: 205곳">205</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 12~24개월: 183곳">183</td><td class="cell" tabindex="0" style="background:var(--seq-400);color:#ffffff" data-tip="외식업 창업비용 서울 평균 9,610만원(면적 무관) · 24개월 이상: 223곳">223</td><td class="src">중앙 11.3개월 · 사분위 5.6~25.1개월 · 같은 자료</td></tr></tbody></table></div>
+<ul>
+<li>투자비를 <b>3배</b>만 올려도 「1개월 미만」이 0 이 됩니다 — 「한 달 안에 본전이에요」는 거의 손 계수 때문에 나옵니다.</li>
+<li>그래도 중앙 회수는 4~11개월로 짧은 편입니다. 매출 추정(면적 비례)이 그대로라서입니다 → P2 요구치가 머리 문장을 맡아야 합니다(<a href="placeos-05-before-after.html">05 · 전/후 기대값</a>).</li>
+</ul>
+
+<h2>4. 예시 ③ — 원천 필드 대조와 1콜 확인 목록</h2>
+<div class="tbl"><table>
+<thead><tr><th scope="col">공공데이터</th><th scope="col">주는 것</th><th scope="col">지금 쓰임</th></tr></thead>
+<tbody>
+<tr><th scope="row">15110241 브랜드별 가맹점 현황 (<code>FftcBrandFrcsStatsService</code>)</th><td>평균 매출액 · 면적 단위 평균 매출액 · 가맹점 수</td><td>tier별 평균 면적 A(고급화 20.8 · 가성비 18.5 · 기능중심 17.1평)</td></tr>
+<tr><th scope="row">15143711 가맹사업자 부담금·인테리어비용</th><td>단위면적 인테리어 금액 · 인테리어 금액 · 점포 기준면적 · 가맹금 · 최초 상품 금액 · 예치 금액</td><td><b>아직 안 씀 — P1 원천</b></td></tr>
+</tbody></table></div>
+<ol>
+<li>15143711 활용 신청 상태 확인(기존 <code>DATA_GO_KR_SERVICE_KEY</code> 공용 — 키 값은 출력하지 않는다)</li>
+<li>기준연도 1개 · 1페이지 호출 → 응답 필드 이름·단위(천원/원)·면적 단위(3.3㎡ 여부) 확인</li>
+<li>브랜드 업종 분류 ↔ 우리 tier(고급화·가성비·기능중심) 대응표 확인 — 면적 A 와 같은 대응을 쓴다</li>
+<li>결과를 <code>docs/finding-ftc-interior-*.md</code> 로 남기고, 그다음 <code>tier_scenarios</code> 교체</li>
+<li>교체 뒤 <code>python scripts/posting_payback_snapshot.py --label after-P1</code> → before 와 나란히. <code>provenance</code> 로 입력 갱신과 투자비 교체를 가른다</li>
+</ol>
+<div class="callout warn"><p><b>주의</b> — 공정위 값은 <b>전국 가맹점</b> 평균입니다. 개인 창업은 더 싸거나 비쌀 수 있어, 화면에는 「통계 · 공정위 정보공개서(전국 가맹점)」 배지를 달고,
+사용자가 받은 견적(P3 · 브랜치 N1)이 있으면 그 값이 이깁니다.</p></div>
+<p class="src">출처: <a href="https://www.data.go.kr/data/15143711/openapi.do">공공데이터포털 15143711</a> ·
+<a href="https://www.hankyung.com/article/202606229186Y">한국경제 — 서울 프랜차이즈 창업비용(2026-06)</a> ·
+<a href="https://www.fnnews.com/news/202606220601394155">파이낸셜뉴스 — 같은 발표</a></p>
+
+</main>
+<footer>
+PlaceOS 내부 검토용 예시 · 숫자는 기준일 값이라 낡습니다 — 인용 전에 <code>python scripts/pppp_status.py</code> ·
+<code>python scripts/posting_payback_snapshot.py</code> 로 다시 재세요. 법률·세무 자문이 아닙니다.
+</footer>
+</div>
+<script>
+(()=>{const tip=document.createElement('div');tip.className='tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+function place(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';const r=t.getBoundingClientRect();
+const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+let y=r.top-h-8;if(y<8)y=r.bottom+8;tip.style.left=(x+window.scrollX)+'px';tip.style.top=(y+window.scrollY)+'px';}
+const on=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)place(t)};
+const off=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)tip.style.display='none'};
+document.addEventListener('mouseover',on);document.addEventListener('mouseout',off);
+document.addEventListener('focusin',on);document.addEventListener('focusout',off);})();
+</script>
+
+</body>
+</html>
