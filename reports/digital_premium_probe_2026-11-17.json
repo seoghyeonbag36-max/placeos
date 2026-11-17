@@ -2,72 +2,243 @@
   "probe": "digital-premium-inputs",
   "date": "2026-11-17",
   "question": "서울 81거점에서 「디지털 노출 > 입지(접도) 프리미엄」을 검정할 입력 자료가 지금 있는가",
-  "scope": {"hubs": 81, "city": "seoul", "source_of_hub_list": "data.config.page_hubs.ACTIVE_HUBS (city == 'seoul')"},
+  "scope": {
+    "hubs": 81,
+    "city": "seoul",
+    "source_of_hub_list": "data.config.page_hubs.ACTIVE_HUBS (city == 'seoul')"
+  },
   "datalab_long": {
     "call": "naver_datalab.fetch_hub_trends(months=129, only=<서울 81>) — 21콜",
     "window": "2016-01 ~ 2026-10 (월 단위)",
     "hubs_received": 81,
-    "months_per_hub": {"min": 108, "median": 130, "max": 130},
+    "months_per_hub": {
+      "min": 108,
+      "median": 130,
+      "max": 130
+    },
     "hubs_starting_2016_01": 79,
-    "hubs_with_missing_months": {"n": 3, "worst": {"bonseobu": 22, "songridan": 19, "jamsilsaenae": 3}},
+    "hubs_with_missing_months": {
+      "n": 3,
+      "worst": {
+        "bonseobu": 22,
+        "songridan": 19,
+        "jamsilsaenae": 3
+      }
+    },
     "existing_collector_window_months": 24,
     "existing_collector_series_len": 25,
-    "peak_ratio_quartiles": [2.5, 8.2, 16.8],
+    "peak_ratio_quartiles": [
+      2.5,
+      8.2,
+      16.8
+    ],
     "hubs_peak_below_5": 35,
     "hubs_peak_below_2": 16,
     "log_ratio_variance": {
-      "2016_2026": {"between_hubs": 1.37, "within_hub": 0.167},
-      "2024-11_2026-10": {"between_hubs": 1.489, "within_hub": 0.048}
+      "2016_2026": {
+        "between_hubs": 1.37,
+        "within_hub": 0.167
+      },
+      "2024-11_2026-10": {
+        "between_hubs": 1.489,
+        "within_hub": 0.048
+      }
     },
     "scale_across_requests": {
       "within_hub_scale_sd": 0.0001,
-      "batches_with_other_scale": {"x0.632": ["cheonho", "chungmuro", "cityhall", "daerim"], "x0.107": ["hyehwa", "ikseon", "itaewon", "jamsil"]},
+      "batches_with_other_scale": {
+        "x0.632": [
+          "cheonho",
+          "chungmuro",
+          "cityhall",
+          "daerim"
+        ],
+        "x0.107": [
+          "hyehwa",
+          "ikseon",
+          "itaewon",
+          "jamsil"
+        ]
+      },
       "other_73_hubs_scale": 0.982,
       "reading": "같은 거점의 시간 비교는 요청이 달라도 정확히 상수배 → 로그 차분·거점 고정효과는 안전. 거점 간 수준 비교는 배치 눈금이 달라 기준어 시계열이 있어야 복원된다(기존 수집기는 기준어를 버린다)."
     }
   },
   "parcel_road_frontage": {
     "api": "V-World ned/data/getLandCharacteristics (pnu 1콜 · VWORLD_API_KEY · 토지이음 일일 한도와 별개 키)",
-    "pnu_universe": {"source": "data/gold/<거점>/page_building_master.geojson", "unique_pnu": 46809, "hubs": 81},
-    "sample": {"n": 243, "design": "거점당 3필지 · seed 20261117 · 거점 층화(모집단 비율 아님)"},
+    "pnu_universe": {
+      "source": "data/gold/<거점>/page_building_master.geojson",
+      "unique_pnu": 46809,
+      "hubs": 81
+    },
+    "sample": {
+      "n": 243,
+      "design": "거점당 3필지 · seed 20261117 · 거점 층화(모집단 비율 아님)"
+    },
     "response_ok": 241,
     "response_empty": 1,
     "road_side_unspecified": 1,
     "join_rate": 0.9918,
     "panel_years": "2013 ~ 2026",
-    "rows_per_parcel": {"min": 8, "median": 18, "max": 19},
+    "rows_per_parcel": {
+      "min": 8,
+      "median": 18,
+      "max": 19
+    },
     "public_land_price_nonnull": "241/241",
-    "road_side_latest_group_share_in_sample": {"광대*(대로변)": 0.191, "중로*": 0.154, "그외(소로·세로·기타)": 0.656},
-    "road_side_code_changed_2016plus": {"code": "103/241", "group": "4/241"},
+    "road_side_latest_group_share_in_sample": {
+      "광대*(대로변)": 0.191,
+      "중로*": 0.154,
+      "그외(소로·세로·기타)": 0.656
+    },
+    "road_side_code_changed_2016plus": {
+      "code": "103/241",
+      "group": "4/241"
+    },
     "reading": "대로변(광대*) 군은 2016 이후 거의 안 바뀐다(4/241). 세부 코드(한면↔각지 등)는 자주 바뀌므로 사전등록은 군 단위로 한다."
   },
   "store_to_parcel": {
-    "stores_lite_pnu_fill": {"rows": 318948, "with_19digit_pnu": 318925, "rate": 0.9999, "note": "소상공인 현재 스냅샷 — 폐업 점포가 없다"},
+    "stores_lite_pnu_fill": {
+      "rows": 318948,
+      "with_19digit_pnu": 318925,
+      "rate": 0.9999,
+      "note": "소상공인 현재 스냅샷 — 폐업 점포가 없다"
+    },
     "licensing_to_parcel": {
       "probe": "scripts/probe_licensing_parcel_join.py garosugil hongdae gangnam",
       "result_file": "reports/licensing_parcel_join_2026-11-17.json",
-      "closed_rows_building_hit_rate_of_hub_bbox": {"garosugil": 0.87, "hongdae": 0.845, "gangnam": 0.72},
-      "alive_rows_building_hit_rate_of_hub_bbox": {"garosugil": 0.85, "hongdae": 0.858, "gangnam": 0.709},
-      "pip_vs_address_pnu_agreement_closed": {"garosugil": 0.951, "hongdae": 0.998, "gangnam": 0.912},
+      "closed_rows_building_hit_rate_of_hub_bbox": {
+        "garosugil": 0.87,
+        "hongdae": 0.845,
+        "gangnam": 0.72
+      },
+      "alive_rows_building_hit_rate_of_hub_bbox": {
+        "garosugil": 0.85,
+        "hongdae": 0.858,
+        "gangnam": 0.709
+      },
+      "pip_vs_address_pnu_agreement_closed": {
+        "garosugil": 0.951,
+        "hongdae": 0.998,
+        "gangnam": 0.912
+      },
       "caveat": "3/81 거점 표본 · 누락이 대로변에 몰리는지 미확인 · 이전 판의 「pyproj 없음」은 오기 — pyproj 3.7.2 는 있었고 shapely 만 없었다(11-17 설치)"
     }
   },
   "existing_outcomes": {
-    "sales_panel": {"file": "data/gold/features/industry_outcome_panel_2026-10-16.parquet", "rows": 142984, "quarters": "20211 ~ 20262", "districts": 81, "trdar": 343, "industries": 63, "limit": "2021Q1 부터 — 2019~2020 배달 채널 충격의 사전 기간이 없다"},
-    "licensing_survival": {"hubs_checked": ["gangnam", "garosugil", "hongdae"], "gangnam": {"rows": 74679, "with_close_date": 55428, "closures_2016plus": 25993, "coord_fill": 0.956}}
+    "sales_panel": {
+      "file": "data/gold/features/industry_outcome_panel_2026-10-16.parquet",
+      "rows": 142984,
+      "quarters": "20211 ~ 20262",
+      "districts": 81,
+      "trdar": 343,
+      "industries": 63,
+      "limit": "2021Q1 부터 — 2019~2020 배달 채널 충격의 사전 기간이 없다"
+    },
+    "licensing_survival": {
+      "hubs_checked": [
+        "gangnam",
+        "garosugil",
+        "hongdae"
+      ],
+      "gangnam": {
+        "rows": 74679,
+        "with_close_date": 55428,
+        "closures_2016plus": 25993,
+        "coord_fill": 0.956
+      }
+    }
   },
   "blog_exposure": {
     "collector": "data/collectors/naver_digital_exposure.py --blog",
     "bronze": "data/bronze/platform13/2026-11-17/naver_blog_exposure.json (gitignored — 이 기계에만)",
-    "queries": 162, "errors": 0, "capped_at_1000": 162,
-    "window_days_quartiles": [5, 9, 23], "queries_window_le_31d": 137,
-    "first_run_loose_query": {"valid": false, "file": "naver_blog_exposure_loose_query_invalid.json", "example": "서울 숙대입구 맛집 total 5,948,281 · 최신 100건 중 2건 포함 (정확일치 186,666 · 92건)", "spearman_vs_datalab": 0.315},
+    "queries": 162,
+    "errors": 0,
+    "capped_at_1000": 162,
+    "window_days_quartiles": [
+      5,
+      9,
+      23
+    ],
+    "queries_window_le_31d": 137,
+    "first_run_loose_query": {
+      "valid": false,
+      "file": "naver_blog_exposure_loose_query_invalid.json",
+      "example": "서울 숙대입구 맛집 total 5,948,281 · 최신 100건 중 2건 포함 (정확일치 186,666 · 92건)",
+      "spearman_vs_datalab": 0.315
+    },
     "exact_phrase_run": {
-      "precision_quartiles": [0.38, 0.62, 0.87], "queries_precision_lt_0.5": 63, "hubs_both_queries_precision_ge_0.5": 45,
-      "spearman_vs_datalab": {"all_81": 0.365, "precision_filtered_45": 0.403}
+      "precision_quartiles": [
+        0.38,
+        0.62,
+        0.87
+      ],
+      "queries_precision_lt_0.5": 63,
+      "hubs_both_queries_precision_ge_0.5": 45,
+      "spearman_vs_datalab": {
+        "all_81": 0.365,
+        "precision_filtered_45": 0.403
+      }
     },
     "verdict": "주 변수 아님 — 데이터랩이 주, 블로그 율은 정밀도≥0.5 45거점의 보조·강건성 검정",
     "cadence": "주 1회 (월 1회는 인기 거점 창이 며칠이라 부족) — scripts/digital_exposure_weekly.py --install (월 10:10)",
     "detail": "docs/finding-digital-premium-inputs-2026-11-17.md §4"
+  },
+  "new_opening_location": {
+    "scope": "3/81 거점(garosugil·hongdae·gangnam) · 음식점(일반·휴게) 인허가일 · 접도 군=최신 연도 값 · 인과 아님",
+    "script": "scripts/analyze_opening_location.py",
+    "result_file": "reports/new_opening_location_2026-11-17.json",
+    "pooled_daebyeonro_share": {
+      "2016-2018": 0.164,
+      "2019-2020": 0.149,
+      "2021-2026": 0.163
+    },
+    "baseline_share": 0.118,
+    "lift": {
+      "2016-2018": 1.39,
+      "2019-2020": 1.26,
+      "2021-2026": 1.38
+    },
+    "by_hub_daebyeonro_share": {
+      "garosugil": [
+        0.053,
+        0.071,
+        0.138
+      ],
+      "gangnam": [
+        0.327,
+        0.266,
+        0.294
+      ],
+      "hongdae": [
+        0.111,
+        0.071,
+        0.075
+      ]
+    },
+    "reading": "합산은 쿠팡이츠 시기 전·중·후에 거의 같다. 거점별 방향은 엇갈린다(가로수길↑ 홍대↓ 강남 일시↓)."
+  },
+  "landchar": {
+    "collector": "data/collectors/vworld_landchar.py",
+    "three_hubs": {
+      "parcels": 2952,
+      "failures": 0
+    },
+    "seoul_all": {
+      "parcels": 46809,
+      "status": "2026-11-17 이어받기 시작(약 4~5시간)"
+    }
+  },
+  "delivery_channel_events": {
+    "file": "data/panel/delivery_channel_events.csv",
+    "seoul_gu_dated": 10,
+    "seoul_gu_unknown": 15,
+    "note": "강남3구 2019-05 · 동대문·종로 2020-06-01 · 강북·성북·중랑 2020-06-08 · 노원·도봉 2020-06-15(예고 보도) · 나머지 15구 미확인(보도 상충)"
+  },
+  "extra_sources_checked": {
+    "seoul_subway_station_master": "784행 받음",
+    "trdar_api_2018_2020": "0건(2021Q1~)",
+    "OA-15572_file_dataset": "서비스 종료 페이지",
+    "living_population_api": "날짜별 일부만 응답"
   }
 }

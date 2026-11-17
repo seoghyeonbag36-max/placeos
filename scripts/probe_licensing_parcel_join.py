@@ -7,6 +7,7 @@
     python scripts/probe_licensing_parcel_join.py garosugil hongdae
     python scripts/probe_licensing_parcel_join.py gangnam --out reports/licensing_parcel_join_gangnam.json
 
+`assign_rows(slug)` 는 행마다 배정된 PNU 를 돌려주는 재사용 함수다(신규 개업 위치 분석이 쓴다 — scripts/analyze_opening_location.py).
 읽기 전용 — Bronze/Gold 를 바꾸지 않는다. 필요: pyproj · shapely (`pip install pyproj shapely`).
 
 ⚠ 분모는 「거점 폴리곤 bbox 안의 행」이다. 인허가는 구 단위로 받아 거점 밖 행이 대부분이다.
@@ -38,6 +39,10 @@ def _alive(r: dict) -> bool:
     return not (r.get("DCBYMD") or "").strip() and (r.get("TRDSTATEGBN") == "01" or "영업" in str(r.get("TRDSTATENM", "")))
 
 
+def status_of(r: dict) -> str:
+    return "alive" if _alive(r) else ("closed" if (r.get("DCBYMD") or "").strip() else "other")
+
+
 def _xy(r: dict) -> tuple[float, float] | None:
     try:
         return float(str(r["X"]).strip()), float(str(r["Y"]).strip())
@@ -45,7 +50,12 @@ def _xy(r: dict) -> tuple[float, float] | None:
         return None
 
 
-def probe(slug: str) -> dict:
+def assign_rows(slug: str) -> tuple[dict, list[dict]]:
+    """거점의 인허가 행(날짜별 파일 합집합, MGTNO 기준)마다 건물 PNU 를 배정한다.
+
+    반환: (메타, 행 목록). 행 = {"row": 원본, "status": alive|closed|other, "has_xy": bool,
+    "in_bbox": 거점 폴리곤 bbox 안인가, "pnu": PIP 로 붙은 PNU 또는 None, "addr_pnu": 지번주소로 만든 PNU(폴리곤에 있을 때만)}.
+    """
     polys = load_latest(slug, "bldg_polygons.geojson")
     stores = [s for s in (load_latest(slug, "stores_raw.json") or []) if s.get("indsLclsNm") not in bpm.NON_STOREFRONT_LCLS]
     dong_code = {v: k for k, v in bpm._build_dong_map(stores).items()}
@@ -87,29 +97,46 @@ def probe(slug: str) -> dict:
     dn.sort()
     off_e, off_n = de[len(de) // 2], dn[len(dn) // 2]
 
-    stat: collections.Counter = collections.Counter()
+    out = []
     for r in rows:
-        st = "alive" if _alive(r) else ("closed" if (r.get("DCBYMD") or "").strip() else "other")
-        stat[(st, "rows")] += 1
+        item = {"row": r, "status": status_of(r), "has_xy": False, "in_bbox": False, "pnu": None, "addr_pnu": None}
         c = _xy(r)
-        if not c:
+        if c:
+            item["has_xy"] = True
+            lon, lat = tr.transform(*c)
+            lon -= off_e / (_DEG_M_LON * math.cos(math.radians(lat)))
+            lat -= off_n / _DEG_M_LAT
+            if minx <= lon <= maxx and miny <= lat <= maxy:
+                item["in_bbox"] = True
+                hit = tree.query(Point(lon, lat), predicate="within")
+                if len(hit):
+                    item["pnu"] = pnus[hit[0]]
+                    p_adr = bpm._addr_pnu(str(r.get("SITEWHLADDR", "")), dong_code, sigungu)
+                    item["addr_pnu"] = p_adr if p_adr in cent else None
+        out.append(item)
+    meta = {"rows_union": len(rows), "polygons": len(geoms), "offset_m": [round(off_e, 1), round(off_n, 1)],
+            "calib_points": len(de), "building_pnus": sorted(set(pnus))}
+    return meta, out
+
+
+def probe(slug: str) -> dict:
+    meta, items = assign_rows(slug)
+    stat: collections.Counter = collections.Counter()
+    for it in items:
+        st = it["status"]
+        stat[(st, "rows")] += 1
+        if not it["has_xy"]:
             stat[(st, "no_xy")] += 1
             continue
-        lon, lat = tr.transform(*c)
-        lon -= off_e / (_DEG_M_LON * math.cos(math.radians(lat)))
-        lat -= off_n / _DEG_M_LAT
-        if not (minx <= lon <= maxx and miny <= lat <= maxy):
+        if not it["in_bbox"]:
             continue
         stat[(st, "in_bbox")] += 1
-        hit = tree.query(Point(lon, lat), predicate="within")
-        if len(hit):
+        if it["pnu"]:
             stat[(st, "in_building")] += 1
-            p_adr = bpm._addr_pnu(str(r.get("SITEWHLADDR", "")), dong_code, sigungu)
-            if p_adr in cent:
+            if it["addr_pnu"]:
                 stat[(st, "addr_n")] += 1
-                stat[(st, "addr_same")] += p_adr == pnus[hit[0]]
-
-    out = {"rows_union": len(rows), "polygons": len(geoms), "offset_m": [round(off_e, 1), round(off_n, 1)], "calib_points": len(de)}
+                stat[(st, "addr_same")] += it["addr_pnu"] == it["pnu"]
+    out = {k: meta[k] for k in ("rows_union", "polygons", "offset_m", "calib_points")}
     for st in ("alive", "closed"):
         b, h, n = stat[(st, "in_bbox")], stat[(st, "in_building")], stat[(st, "addr_n")]
         out[st] = {"rows": stat[(st, "rows")], "no_xy": stat[(st, "no_xy")], "in_hub_bbox": b, "in_building": h,
