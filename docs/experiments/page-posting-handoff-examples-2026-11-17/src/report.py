@@ -111,12 +111,19 @@ def render(hist):
     picks = "".join(f'<tr><th scope="row">{u}</th><td>{k} {NAMES[k]}</td></tr>' for u, k in pick.items())
     picks += '<tr><th scope="row">회의 발표</th><td>C 슬라이드형(형식상 — 점수와 별개)</td></tr>'
     state = cur.get("state", "")
+    final = cur.get("final") or []
+    final_html = ""
+    if final:  # 비교를 끝낼 때만 — 사람 판단(용도별 추천). 점수 계산과는 무관하다
+        rows_f = "".join(f'<tr><th scope="row">{esc(u)}</th><td style="white-space:nowrap"><b>{esc(t)}</b></td><td>{esc(w)}</td></tr>' for u, t, w in final)
+        final_html = (f'<h2>최종 정리 — 용도별 추천(사람 판단)</h2><div class="tbl"><table><thead><tr><th scope="col">용도</th><th scope="col">추천</th>'
+                      f'<th scope="col">이유 · 주의</th></tr></thead><tbody>{rows_f}</tbody></table></div><p>{esc(cur.get("final_note", ""))}</p>')
     body = f"""<h1>표현 유형 비교 — {esc(cur["round"])}</h1>
 <p class="lede">같은 내용(검증 · 결정 ①~④ · 전/후 · 메뉴 예시)을 다섯 가지 방식으로 그리고, 같은 자동 검증으로 점수를 매겼습니다. 매시간 유형마다 한 번씩 고치고 다시 잽니다.</p>
 <div class="meta">{"".join(f'<span class="chip info">{k} {NAMES[k]}</span>' for k in NAMES)}<span>{esc(state)}</span></div>
 <nav class="files" aria-label="유형 열기">{"".join(f'<a href="../types/{FILES[k]}">{k} · {NAMES[k]}</a>' for k in NAMES)}<a href="../set/placeos-00-verify.html">원본 7개 묶음</a></nav>
 <div class="callout ok"><p><b>지금 1위: {order[0]} {NAMES[order[0]]}</b>({sc[order[0]]["total"]:.1f}점) · 2위 {order[1]} {NAMES[order[1]]}({sc[order[1]]["total"]:.1f}점).
 점수는 자동 검증만으로 냈습니다 — 실제 독자 반응이 아니라, 같은 기준으로 잰 비교입니다.</p></div>
+{final_html}
 <h2>1. 이번 라운드 순위</h2>
 <div class="tbl"><table><thead><tr><th scope="col">유형</th><th scope="col" class="num">총점</th>{head}</tr></thead><tbody>{rank}</tbody></table></div>
 <h2>2. 라운드별 총점</h2>
@@ -124,7 +131,7 @@ def render(hist):
 <div class="card">{line_chart(hist)}</div>
 <div class="tbl"><table><caption>표로 보기 — 라운드별 총점</caption><thead><tr><th scope="col">라운드</th>{hist_head}</tr></thead><tbody>{hist_rows}</tbody></table></div>
 <h2>3. 유형별 — 폰 첫 화면 · 강점 · 약점 · 이번 개선</h2>{"".join(cards)}
-<h2>4. 용도별로 고르면</h2>
+<h2>4. 용도별로 고르면 — 자동 점수 기준</h2>
 <div class="tbl"><table><thead><tr><th scope="col">용도</th><th scope="col">유형</th></tr></thead><tbody>{picks}</tbody></table></div>
 <h2>5. 어떻게 쟀나</h2>
 <ul>
@@ -152,7 +159,8 @@ if __name__ == "__main__":
     hist = json.loads(hp.read_text()) if hp.exists() else []
     hist = [h for h in hist if h["round"] != rnd]
     hist.append({"round": rnd, "at": metrics["at"], "scores": score(metrics), "metrics": metrics,
-                 "changes": notes.get("changes", {}), "notes": notes.get("notes", {}), "state": notes.get("state", "")})
+                 "changes": notes.get("changes", {}), "notes": notes.get("notes", {}), "state": notes.get("state", ""),
+                 "final": notes.get("final", []), "final_note": notes.get("final_note", "")})
     hp.write_text(json.dumps(hist, ensure_ascii=False, indent=1))
     (C / "compare.html").write_text(render(hist), encoding="utf-8")
     for k, v in sorted(hist[-1]["scores"].items(), key=lambda kv: -kv[1]["total"]):

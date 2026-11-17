@@ -118,6 +118,8 @@ TYPE_CSS = {
 }
 /* r2 — 재현 줄의 코드 글자 11.4px → 본문 작은 글자와 같은 13px */
 .src code{font-size:1em}
+/* r3 — 구간 표의 「비고」 칸이 좁게 접혀 행이 위아래로 늘어나던 것 — 비고 칸에 최소 폭 */
+.heat td.src{min-width:15em}
 """,
     "B": """
 .dash{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin:12px 0}
@@ -139,6 +141,8 @@ details>summary::before{content:"▸";color:var(--muted)} details[open]>summary:
 details[open]>summary{margin-bottom:8px}
 /* r2 — 결정 보드의 긴 상태 칩이 카드 밖으로 넘치지 않게(줄바꿈 허용) */
 .board .chip{white-space:normal;max-width:100%;border-radius:10px}
+/* r3 — 구간 표가 반폭 패널에서 접혀 행이 늘어나던 것 — PC 는 전체 폭 패널로, 폰은 비고 칸 최소 폭 */
+.heat td.src{min-width:15em}
 """,
     "C": """
 .deck{position:relative}
@@ -151,6 +155,8 @@ details[open]>summary{margin-bottom:8px}
 .ctl #ctr{font-variant-numeric:tabular-nums;color:var(--muted)}
 /* r2 — 원하는 장으로 바로 가는 목차 */
 .ctl select{font:inherit;font-size:15px;padding:6px 10px;min-height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);flex:1 1 200px;min-width:0;max-width:100%}
+/* r3 — 폰(키보드 없음)에서는 「키보드 ← →」 안내를 빼고 조작 줄 간격을 줄여 슬라이드를 덜 가리게 */
+@media (max-width:720px){.ctl .src{display:none} .ctl{gap:6px;padding:6px 0}}
 .core{margin:0;padding-left:20px;font-size:17px} .core li{margin:8px 0}
 @media (max-width:720px){.slide{padding:16px}}
 """,
@@ -174,6 +180,8 @@ details[open]>summary{margin-bottom:8px}
 .c table.mini thead th{font-size:12.5px;line-height:1.3;background:transparent;vertical-align:bottom}
 .c table.mini tbody th{min-width:0;font-size:13.5px;white-space:nowrap}
 .c table.mini tr:last-child th,.c table.mini tr:last-child td{border-bottom:0}
+/* r3 — 구간 표 카드의 「비고」 칸이 좁게 접혀 카드가 길어지던 것 — 비고 칸에 최소 폭 */
+.heat td.src{min-width:15em}
 """,
     "E": """
 .qindex{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px 10px 32px;font-size:15px}
@@ -188,6 +196,9 @@ details.qa[open]>summary{margin-bottom:8px}
 /* r2 — 펼치기 줄(질문 · 표로 보기)을 손가락 크기(44px)로 */
 details.qa>summary{display:flex;align-items:center;gap:6px;min-height:44px} details.qa>summary::before{content:"Q.";flex:none}
 details:not(.qa)>summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+/* r3 — 질문을 한 번에 모두 펼치기/접기 */
+.qbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 4px} .qbar .qhead{margin:0}
+#openall{font:inherit;font-size:15px;min-height:44px;padding:6px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 """,
 }
 
@@ -228,8 +239,8 @@ def render_b(c):
 <div class="dash">{kpi_html}</div>
 <div class="panel"><h3>결정 보드</h3><div class="board">{board}</div></div>
 <div class="dash">
-<div class="panel span6"><h3>회수기간 분포 — P1 전/후</h3>{scen_heat(c)}</div>
-<div class="panel span6"><h3>요구치(P2) 미리보기</h3>{hist_heat(c)}<p class="src">2배 이상 {c["p2"]["share_over_2x"]}%</p></div>
+<div class="panel span12"><h3>회수기간 분포 — P1 전/후</h3>{scen_heat(c)}</div>
+<div class="panel span12"><h3>요구치(P2) 미리보기</h3>{hist_heat(c)}<p class="src">2배 이상 {c["p2"]["share_over_2x"]}%</p></div>
 <div class="panel span8"><h3>Page — 「내 업종이 들어갈 수 있나」</h3>{usecheck_bars(c)}</div>
 <div class="panel span4"><h3>두 지렛대</h3>{"".join(f'<p><b>{k}</b><br>{v} <span class="src">{s}</span></p>' for k, v, s in c["levers"])}</div>
 </div>
@@ -345,11 +356,13 @@ def render_e(c):
     item = lambda i, q, a: f'<details class="qa" id="q{i}"{" open" if i == 0 else ""}><summary>{q}</summary><div class="ans">{a}</div></details>'
     first = item(0, *qs[0])
     rest = "".join(item(i, q, a) for i, (q, a) in enumerate(qs) if i)
-    js = r"""<script>document.querySelectorAll('.qindex a').forEach(a=>a.addEventListener('click',()=>{const d=document.querySelector(a.getAttribute('href'));if(d)d.open=true;}));</script>"""
+    js = r"""<script>document.querySelectorAll('.qindex a').forEach(a=>a.addEventListener('click',()=>{const d=document.querySelector(a.getAttribute('href'));if(d)d.open=true;}));
+const ob=document.getElementById('openall');ob.onclick=()=>{const all=ob.getAttribute('aria-pressed')!=='true';
+document.querySelectorAll('details.qa').forEach((d,j)=>{if(j)d.open=all;});ob.setAttribute('aria-pressed',String(all));ob.textContent=all?'모두 접기':'모두 펼치기';};</script>"""
     body = f"""<h1 style="font-size:24px">{c["title"]} — 질문으로 보기</h1>
 {tnav("type-e-qa.html")}
 {first}
-<p class="qhead">다른 질문</p><ol class="qindex" start="2">{idx}</ol>{rest}"""
+<div class="qbar"><p class="qhead">다른 질문</p><button type="button" id="openall" aria-pressed="false">모두 펼치기</button></div><ol class="qindex" start="2">{idx}</ol>{rest}"""
     return shell("type-e-qa.html", "질문 흐름형", "PlaceOS · Page·Posting 인계 · 표현 유형 E 질문 흐름형", body, TYPE_CSS["E"], js)
 
 
