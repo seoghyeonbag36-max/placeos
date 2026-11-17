@@ -8,6 +8,7 @@
   접근성 15   = 5 × 글자 대비(라이트) + 4 × 글자 대비(다크) + 3 × 이름 있는 조작 요소 + 3 × 대체 텍스트
   안정성 10   = 5 × 오류 없음 + 3 × 링크가 살아 있는 비율 + 2 × 크기(300KB 이하면 1)
 """
+import base64
 import json
 import sys
 from pathlib import Path
@@ -91,7 +92,9 @@ def render(hist):
     cards = []
     for k in order:
         m = met[k]; best, worst = strengths(sc[k])
-        cards.append(f"""<div class="card tcard"><a href="shots/{k}-m.jpg"><img class="shot" src="shots/{k}-m.jpg" alt="{k} {NAMES[k]} 폰 첫 화면"></a><div>
+        shot = C / "shots" / f"{k}-m.jpg"
+        src = "data:image/jpeg;base64," + base64.b64encode(shot.read_bytes()).decode() if shot.exists() else f"shots/{k}-m.jpg"
+        cards.append(f"""<div class="card tcard"><img class="shot" src="{src}" alt="{k} {NAMES[k]} 폰 첫 화면"><div>
 <h3 style="margin-top:0"><span class="sw" style="background:var(--s{k})"></span>{k} {NAMES[k]} — {sc[k]["total"]:.1f}점</h3>
 <p class="src">사실 {len(m["desktop"]["factsFound"])}/25 · 첫 화면 핵심 폰 {len(m["mobile"]["coreAbove"])}/5 · PC {len(m["desktop"]["coreAbove"])}/5 · 폰 {m["mobile"]["screens"]:.1f}화면 ·
 펼치거나 넘겨야 보이는 블록 {m["mobile"]["closedDetails"] + m["mobile"]["hiddenBlocks"]} · 최소 글자 {m["mobile"]["minFont"]:.1f}px · 터치 대상 {m["mobile"]["tap"] * 100:.0f}% ·
