@@ -113,6 +113,8 @@ details>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:
 details>summary::-webkit-details-marker{display:none}
 details>summary::before{content:"▸";color:var(--muted)} details[open]>summary::before{content:"▾"}
 details[open]>summary{margin-bottom:8px}
+/* r2 — 결정 보드의 긴 상태 칩이 카드 밖으로 넘치지 않게(줄바꿈 허용) */
+.board .chip{white-space:normal;max-width:100%;border-radius:10px}
 </style></head>
 <body><div class="wrap">
 <p class="eyebrow">PlaceOS · Page·Posting 인계 · 표현 유형 B 대시보드형</p>

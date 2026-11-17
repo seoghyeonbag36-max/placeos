@@ -105,6 +105,9 @@ details.qa[open]>summary{margin-bottom:8px}
 .ans::before{content:"A. ";font-weight:700;color:var(--ok)}
 .core{margin:6px 0 0;padding-left:20px} .core li{margin:6px 0}
 .qhead{font-size:14px;font-weight:700;color:var(--muted);margin:18px 0 4px}
+/* r2 — 펼치기 줄(질문 · 표로 보기)을 손가락 크기(44px)로 */
+details.qa>summary{display:flex;align-items:center;gap:6px;min-height:44px} details.qa>summary::before{content:"Q.";flex:none}
+details:not(.qa)>summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 </style></head>
 <body><div class="wrap">
 <p class="eyebrow">PlaceOS · Page·Posting 인계 · 표현 유형 E 질문 흐름형</p>

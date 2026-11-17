@@ -116,6 +116,8 @@ TYPE_CSS = {
 .st-met td:nth-of-type(1)::before{content:"지금"} .st-met td:nth-of-type(2)::before{content:"바뀐 뒤(기대)"} .st-met td:nth-of-type(3)::before{content:"근거"}
 .st-ovl td:nth-of-type(1)::before{content:"닿는 작업"} .st-ovl td:nth-of-type(2)::before{content:"처리"}
 }
+/* r2 — 재현 줄의 코드 글자 11.4px → 본문 작은 글자와 같은 13px */
+.src code{font-size:1em}
 """,
     "B": """
 .dash{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin:12px 0}
@@ -135,6 +137,8 @@ details>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:
 details>summary::-webkit-details-marker{display:none}
 details>summary::before{content:"▸";color:var(--muted)} details[open]>summary::before{content:"▾"}
 details[open]>summary{margin-bottom:8px}
+/* r2 — 결정 보드의 긴 상태 칩이 카드 밖으로 넘치지 않게(줄바꿈 허용) */
+.board .chip{white-space:normal;max-width:100%;border-radius:10px}
 """,
     "C": """
 .deck{position:relative}
@@ -145,6 +149,8 @@ details[open]>summary{margin-bottom:8px}
 .ctl button{font:inherit;font-size:15px;padding:6px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 .ctl button:disabled{opacity:.45;cursor:default}
 .ctl #ctr{font-variant-numeric:tabular-nums;color:var(--muted)}
+/* r2 — 원하는 장으로 바로 가는 목차 */
+.ctl select{font:inherit;font-size:15px;padding:6px 10px;min-height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);flex:1 1 200px;min-width:0;max-width:100%}
 .core{margin:0;padding-left:20px;font-size:17px} .core li{margin:8px 0}
 @media (max-width:720px){.slide{padding:16px}}
 """,
@@ -161,6 +167,13 @@ details[open]>summary{margin-bottom:8px}
 /* r1 — 검증 카드는 판정을 크게, 주장은 본문 굵기로 */
 .c .big.ok{color:var(--ok)} .c .big.warn{color:var(--warn)} .c .big.info{color:var(--accent)} .c .big.decide{color:var(--decide)}
 .c .one.claim{font-weight:600}
+/* r2 — 메뉴 예시 카드의 작은 표 */
+.minibox{overflow-x:auto;margin-top:6px}
+.c table.mini{font-size:13.5px}
+.c table.mini th,.c table.mini td{padding:5px 5px;border-bottom:1px solid var(--line)}
+.c table.mini thead th{font-size:12.5px;line-height:1.3;background:transparent;vertical-align:bottom}
+.c table.mini tbody th{min-width:0;font-size:13.5px;white-space:nowrap}
+.c table.mini tr:last-child th,.c table.mini tr:last-child td{border-bottom:0}
 """,
     "E": """
 .qindex{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px 10px 32px;font-size:15px}
@@ -172,6 +185,9 @@ details.qa[open]>summary{margin-bottom:8px}
 .ans::before{content:"A. ";font-weight:700;color:var(--ok)}
 .core{margin:6px 0 0;padding-left:20px} .core li{margin:6px 0}
 .qhead{font-size:14px;font-weight:700;color:var(--muted);margin:18px 0 4px}
+/* r2 — 펼치기 줄(질문 · 표로 보기)을 손가락 크기(44px)로 */
+details.qa>summary{display:flex;align-items:center;gap:6px;min-height:44px} details.qa>summary::before{content:"Q.";flex:none}
+details:not(.qa)>summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 """,
 }
 
@@ -247,10 +263,12 @@ def render_c(c):
         ("출처 · 다음 단계", f'{sources_list(c)}<p>다음: 공정위 15143711 1콜 확인(P1) · 결정이 필요 없는 P2·P3·P4·2-A 착수 · ③-a 결정</p>'),
     ]
     html = "".join(f'<section class="slide" aria-label="{i + 1}. {esc(t)}"{" hidden" if i else ""}><h2>{i + 1}. {t}</h2>{b}</section>' for i, (t, b) in enumerate(slides))
-    js = r"""<script>(()=>{const ss=[...document.querySelectorAll('.slide')];let i=0;const ctr=document.getElementById('ctr');
+    jump = "".join(f'<option value="{i}">{i + 1}. {esc(t)}</option>' for i, (t, _b) in enumerate(slides))
+    js = r"""<script>(()=>{const ss=[...document.querySelectorAll('.slide')];let i=0;const ctr=document.getElementById('ctr');const jp=document.getElementById('jump');
 const show=n=>{i=Math.max(0,Math.min(ss.length-1,n));if(!document.body.classList.contains('show-all'))ss.forEach((s,j)=>s.hidden=j!==i);
-ctr.textContent=(i+1)+' / '+ss.length;document.getElementById('prev').disabled=i===0;document.getElementById('next').disabled=i===ss.length-1;};
+ctr.textContent=(i+1)+' / '+ss.length;jp.value=String(i);document.getElementById('prev').disabled=i===0;document.getElementById('next').disabled=i===ss.length-1;};
 document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);
+jp.onchange=()=>{show(+jp.value);if(document.body.classList.contains('show-all'))window.scrollTo(0,ss[i].getBoundingClientRect().top+scrollY-document.querySelector('.ctl').offsetHeight-8);};
 document.getElementById('all').onclick=e=>{const all=document.body.classList.toggle('show-all');e.target.setAttribute('aria-pressed',String(all));
 e.target.textContent=all?'한 장씩 보기':'모두 펼치기';ss.forEach((s,j)=>s.hidden=all?false:j!==i);};
 document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,select,textarea'))return;
@@ -258,6 +276,7 @@ if(e.key==='ArrowRight'||e.key==='PageDown')show(i+1);if(e.key==='ArrowLeft'||e.
     body = f"""<h1 style="font-size:22px">{c["title"]} — 발표용</h1>
 {tnav("type-c-slides.html")}
 <div class="ctl"><button type="button" id="prev">← 이전</button><span id="ctr" aria-live="polite"></span><button type="button" id="next">다음 →</button>
+<select id="jump" aria-label="장으로 바로 가기">{jump}</select>
 <button type="button" id="all" aria-pressed="false">모두 펼치기</button><span class="src">키보드 ← → 로 넘깁니다</span></div>
 <div class="deck">{html}</div>"""
     return shell("type-c-slides.html", "슬라이드형", "PlaceOS · Page·Posting 인계 · 표현 유형 C 슬라이드형", body, TYPE_CSS["C"], js)
@@ -276,9 +295,15 @@ def render_d(c):
     lev = "".join(card("지렛대", v, k, s) for k, v, s in c["levers"])
     dec = "".join(card(f'결정 {d["id"]} · {d["status"]}', esc(d["name"]), esc(d["change"]), f'전 {esc(d["before"])} → 후 {esc(d["after"])}') for d in c["decisions"])
     ba = "".join(card(f"전/후 · {k}", esc(n), f"지금 {esc(b)}", f"바뀐 뒤 {esc(a)}") for n, b, a, k in c["metrics"])
-    menu = "".join(card(f'메뉴 예시 · {m["label"]}', f'하루 {m["tiers"]["value"]["daily"]:,}개(가성비)',
-                        " · ".join(f'{TN[tk]} 객단가 {t["price"]:,.0f}원 · 원가율 {t["rate"]*100:.0f}%' for tk, t in m["tiers"].items()),
-                        " · ".join(f'{TN[tk]} 주기 구매 월 {t["pm"]:.0f}만원 · 개업 첫 주문 {t["first"]:.0f}만원' for tk, t in m["tiers"].items())) for m in c["menu"])
+    # r2 — 메뉴 예시 카드: 세 가격대를 이어 쓴 문장 두 줄 → 가격대 3행 작은 표(숫자를 세로로 맞춰 비교)
+    def mini(m):
+        rows = "".join(f'<tr><th scope="row">{TN[tk]}</th><td class="num">{t["price"]:,.0f}</td><td class="num">{t["rate"]*100:.0f}%</td>'
+                       f'<td class="num">{t["daily"]:,}</td><td class="num">{t["pm"]:.0f}</td><td class="num">{t["first"]:.0f}</td></tr>' for tk, t in m["tiers"].items())
+        return ('<div class="minibox"><table class="mini"><thead><tr><th scope="col">가격대</th><th scope="col" class="num">객단가<br>원</th>'
+                '<th scope="col" class="num">원가율</th><th scope="col" class="num">하루<br>개</th><th scope="col" class="num">주기 구매<br>만원/월</th>'
+                f'<th scope="col" class="num">첫 주문<br>만원</th></tr></thead><tbody>{rows}</tbody></table></div>')
+    menu = "".join(f'<div class="c"><div class="tag">메뉴 예시 · {m["label"]}</div><div class="big">하루 {m["tiers"]["value"]["daily"]:,}개(가성비)</div>{mini(m)}</div>'
+                   for m in c["menu"])
     br = "".join(card("브랜치 · " + b, esc(a), esc(d)) for a, b, d in c["overlap"])
     body = f"""<div class="col">
 <h1 style="font-size:23px">{c["title"]}</h1>
