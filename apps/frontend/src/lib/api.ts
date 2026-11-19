@@ -697,6 +697,20 @@ export const simulateRevenue = (req: {
   area_py_override?: number;
 }) => postJSON<SimulateResult>("/ai/simulate-revenue", req);
 
+/** 「이 층 조건이면 하루 몇 개를 팔아야 하나」 — 예측이 아니라 요구치(결정 P2 · 2026-11-19). 재료가 없으면 available:false. */
+export interface PostingRequirement {
+  available: boolean; reason?: string;
+  tier?: string; rent_mn?: number; rent_basis?: "user" | "rone_estimate";
+  price_won?: number; nonrent_rate?: number; nonrent_floor?: boolean; open_days?: number;
+  monthly_sales_mn?: number; daily_units?: number;
+  benchmark?: { per_store_sales_mn: number; p25_mn: number | null; p75_mn: number | null; scope: "district" | "seoul";
+    share_pct: number; band: string | null; n_obs: number | null; quarter: string | null; source: string } | null;
+  evidence: Record<string, "실측" | "통계" | "추정" | "사용자 입력" | "계산">;
+}
+export const postingRequirement = (req: {
+  district_id: string; tier: string; price_won: number; rent_mn?: number; unit_id?: string; cost_rate?: number; open_days?: number;
+}) => postJSON<PostingRequirement>("/ai/posting-requirement", req);
+
 export interface OperatingField {
   key: string; label: string; unit: string; min: number; max: number;
 }

@@ -1,3 +1,4 @@
+import RequirementPanel from "@/components/RequirementPanel";
 import { savedPostingHandoff } from "@/lib/savedPosting";
 import NearbyCompetition from "@/components/NearbyCompetition";
 import InteriorPlanner from "@/components/InteriorPlanner";
@@ -522,6 +523,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, 검증 program 버튼은 「비용 비교 및 결정」 맨 아래, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
             세부 업종을 고르면 세 가격대 대신 그 업종 운영 시나리오가 계산 결과다 — 그래서 그것만은 여기에 남는다. ── */}
         <div className="results">
+          <RequirementPanel districtId={districtId} unitId={effectiveUnit?.id ?? (unitId || undefined)} tier={strategy || undefined} />
           <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
           {result?.unavailable_reason && <p role="status">{result.unavailable_reason}</p>}
           {result?.economics && <IndustryEconomicsResult result={result.economics} />}
