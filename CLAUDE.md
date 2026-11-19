@@ -1,5 +1,7 @@
 # Memory — PlaceOS Project
 
+> **새 세션 첫 턴**: [docs/HISTORY.md](docs/HISTORY.md) 위쪽 20줄(최근 결정·함정·날짜 약속)만 읽는다. 세션 끝에 한 줄 추가한다.
+
 ## Me
 **sh.pac** (seoghyeonbag36@gmail.com) — PlaceOS 창업자 겸 디지털 트윈 AI/IT 개발자. 지역 상권의 리뷰 데이터와 공실 히스토리를 결합해 물리적 상권을 디지털 트윈 SaaS로 플랫폼화하는 프로젝트를 진행 중.
 
