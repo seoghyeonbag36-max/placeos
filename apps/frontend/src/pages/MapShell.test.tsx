@@ -341,6 +341,13 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     expect(screen.getByRole("button", { name: "임대시세" }).getAttribute("aria-pressed")).toBe("true");
   });
 
+  it("건물 상세에 자리 사실 「주변 업종」이 있다 — Posting 쪽에만 있던 것을 Page 에도 더했다(2-A · 2026-11-19)", async () => {
+    mount({ rent: RENT });
+    await screen.findByText("가로수 C");
+    fireEvent.click(screen.getByRole("button", { name: /^가로수 C 카페/ }));
+    expect(await screen.findByLabelText("공실 주변 업종 지도")).toBeTruthy();
+  });
+
   it("빈 층 임대료 표에서 층을 고르면 입점 검토 · 이 자리 비용 확인이 그 층 매물로 넘어간다(2026-11-10)", async () => {
     const review = vi.fn();
     mount({ rent: RENT, onReview: review });

@@ -20,6 +20,7 @@ import { ExploreStepFooter } from "@/components/ExploreStep";
 import CandidateCompare from "@/components/CandidateCompare";
 import { candidateId, loadCandidates, saveCandidates, type ReviewCandidate } from "@/lib/candidateStore";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
+import NearbyCompetition from "@/components/NearbyCompetition";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
 import { useReportCapture } from "@/lib/ppppReportContext";
@@ -1014,6 +1015,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             {src === "api" && <SelectedTravel key={selected.id} target={selected.center} name={selected.name} />}
             {src === "api" && <TransitAccessPanel key={`${districtId}:${selected.id}:${selected.center.lat}:${selected.center.lng}`}
               destination={selected.center} destinationName={selected.name} />}
+            {/* 2-A(2026-11-19): 자리 사실 「주변 업종」을 Page 건물 상세에도 둔다 — Posting 쪽은 그대로(더하지 대신하지 않는다). */}
+            {src === "api" && <NearbyCompetition key={`nearby:${districtId}:${selected.id}`} districtId={districtId}
+              lat={selected.center.lat} lng={selected.center.lng} industry={selected.industry || ""} />}
 
             {/* 이 건물의 빈 층이 **각각 월 얼마인가** — 임대시세 레이어의 답이 건물 단위로 내려온 자리.
                 층이 없으면(빈 층 없음 · R-ONE 미제공) 그 사실을 적는다 — 0 원처럼 비워 두지 않는다. */}
