@@ -827,10 +827,15 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
   // ② 회수된다.
   const [bestKey, bestTier] = best;
   const bestName = label(bestKey, bestTier);
+  // 요구치(P2 · 2026-11-19): 월세를 감당하는 월매출 = 월세 ÷ (1 − 임차 외 비용률). 임차 외 비용률은 이 전략 카드의 값에서 거꾸로 푼다
+  // (월 비용 = 월세 + 매출 × 비율 → 월세 ÷ (월 순익 + 월세) × 월 매출). 월 순익이 0 이하인 전략은 best 가 될 수 없어 분모는 양수다.
+  const requiredSales = unit && unit.rent > 0 && bestTier.month_net + unit.rent > 0
+    ? Math.round((unit.rent * bestTier.month_rev) / (bestTier.month_net + unit.rent)) : null;
   return {
     verdict: (
       <>
-        <b>{where}</b>는 <b>{bestName}</b> 전략으로 <b>{bestTier.roi_months}개월</b>에 회수가 예상됩니다
+        <b>{where}</b>는 {requiredSales != null && unit ? <>월 매출 <b>{won(requiredSales)}</b> 이상이어야 월세 {won(unit.rent)}을 감당합니다(계산). 이 자리에서 </> : null}
+        <b>{bestName}</b> 전략의 추정 월매출은 {won(bestTier.month_rev)}이고 <b>{bestTier.roi_months}개월</b>에 회수가 예상됩니다
         {premAbsent && <> — 단 <b>권리금 0 을 전제</b>로 한 값이다</>}.
       </>
     ),
