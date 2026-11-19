@@ -9,7 +9,7 @@ from app.schemas.interior import InteriorQuota, InteriorRequest, InteriorResult
 from app.services import interior as interior_svc
 from app.services import interior_quota as quota_svc
 
-from app.schemas.posting import SimulateRequest, SimulateResult, SimulateResultWithInputs
+from app.schemas.posting import SimulateRequest, SimulateResult, SimulateResultWithInputs, RequirementRequest
 from app.services import business_fit as fit_svc
 from app.services import industry_recommend as industry_svc
 from app.services import posting as posting_svc
@@ -196,3 +196,15 @@ async def simulate_revenue(req: SimulateRequest) -> dict:
     if result is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {req.district_id}")
     return result
+
+
+@router.post("/posting-requirement")
+async def posting_requirement(req: RequirementRequest) -> dict:
+    """「이 층 조건이면 하루 몇 개를 팔아야 하나」 — 예측이 아니라 요구치(결정 P2 · 2026-11-19)."""
+    from app.services import posting_requirement as svc_req
+
+    try:
+        return svc_req.compute(req.district_id, req.tier, req.price_won, rent_mn=req.rent_mn,
+                               unit_id=req.unit_id, cost_rate=req.cost_rate, open_days=req.open_days)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

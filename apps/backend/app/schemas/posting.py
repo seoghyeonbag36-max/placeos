@@ -62,3 +62,14 @@ class SimulateResult(BaseModel):
 class SimulateResultWithInputs(SimulateResult):
     """층 매물·내부면적 계산에서만 돌려주는 입력값. 기존 건물 응답의 키 집합은 보존한다."""
     resolved_inputs: ResolvedPostingInputs
+
+
+class RequirementRequest(BaseModel):
+    """요구치 요청 — 월세를 모르면 `unit_id` 의 R-ONE 추정으로 폴백하고, 아는 금액이 있으면 그것이 이긴다."""
+    district_id: str
+    tier: str
+    price_won: int = Field(gt=0, le=10_000_000)
+    rent_mn: float | None = Field(default=None, gt=0, le=100_000, allow_inf_nan=False)
+    unit_id: str | None = None
+    cost_rate: float | None = Field(default=None, ge=0, lt=1, allow_inf_nan=False)
+    open_days: int = Field(default=26, ge=1, le=31)
