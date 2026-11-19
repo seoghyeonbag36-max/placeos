@@ -17,7 +17,7 @@
 ## 로그 (최신 위)
 | 날짜 | 한 일 | 이유 · ⚠ 남은 함정 | 근거 |
 |---|---|---|---|
-| 11-19 | `docs/HISTORY.md` 신설 | 새 창마다 같은 설명을 반복하는 토큰 낭비를 줄이려고 | 이 파일 |
+| 11-19 | `docs/HISTORY.md` 신설 + CLAUDE.md 에 「새 세션 첫 턴」 한 줄 (#258 머지, `62018f2`) | 새 창마다 같은 설명을 반복하는 토큰 낭비를 줄이려고. ⚠ 로컬 CLAUDE.md 의 11-16 압축판(+77/−352줄)과 `docs/claude-md-full-2026-11-16.md` 는 **아직 커밋 전** — 올릴 때 main 의 CLAUDE.md 와 충돌하면 압축판을 유지하고 머리말 HISTORY.md 한 줄만 남긴다 | PR #258 |
 | 11-18 | 직거래 층 구현(worktree owner-direct 브랜치) · 성사 수수료 금지 결정 | 법적 한계. ⚠ **미커밋.** Neon 마이그레이션·가격·계좌는 대기 | memory: matching-revenue-legal-limits |
 | 11-17 | 디지털 프리미엄 검정 입력 수집 (#255 머지) | 블로그 적재 매일+로그온, OneDrive 복사. ⚠ 12-08 이후 total 증가분 확인 | docs/finding-digital-premium-inputs-2026-11-17.md |
 | 11-16 | CLAUDE.md 42KB→13KB 압축 · Ruflo mods·swarm 플러그인 끔 | 프롬프트마다 라우팅 주입이 토큰 낭비. 원문은 `docs/claude-md-full-2026-11-16.md` | memory: ruflo-install-state |
