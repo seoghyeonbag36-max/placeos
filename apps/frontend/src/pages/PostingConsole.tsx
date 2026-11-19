@@ -1,3 +1,4 @@
+import EvidenceBadge from "@/components/EvidenceBadge";
 import RequirementPanel from "@/components/RequirementPanel";
 import { savedPostingHandoff } from "@/lib/savedPosting";
 import NearbyCompetition from "@/components/NearbyCompetition";
@@ -705,17 +706,17 @@ function TierCard({ tierKey, s, before }: { tierKey: string; s: TierScenario; be
 
       {/* ⚠ invest_mn 은 **백만원** 단위다(백엔드 services/districts: inv × 100 ÷ net = roi_months). 2026-10-13 까지 이 칸이
           만원으로 찍혀 초기 투자가 100배 작게 보였다 — 화면설계서 5판 §12 U8. #board(PageDashboard)는 「백만」으로 맞게 찍는다 */}
-      <div className="trow"><span>초기 투자</span><span>{won(s.invest_mn * 100)}</span></div>
-      <div className="trow"><span>월 비용</span><span>{won(s.month_cost)}</span></div>
-      <div className="trow"><span>월 매출</span><span>{won(s.month_rev)}</span></div>
+      <div className="trow"><span>초기 투자</span><span>{won(s.invest_mn * 100)} <EvidenceBadge kind="추정" /></span></div>
+      <div className="trow"><span>월 비용</span><span>{won(s.month_cost)} <EvidenceBadge kind="추정" /></span></div>
+      <div className="trow"><span>월 매출</span><span>{won(s.month_rev)} <EvidenceBadge kind="추정" /></span></div>
       <div className="trow big">
         <span>월 순익</span>
-        <span className={s.month_net > 0 ? "pos" : "neg"}>{won(s.month_net)}</span>
+        <span className={s.month_net > 0 ? "pos" : "neg"}>{won(s.month_net)} <EvidenceBadge kind="계산" /></span>
       </div>
       <div className="trow">
         <span>회수기간</span>
         {/* "모른다"와 "안 된다"는 다른 정보다 — 순익이 0 이하면 회수기간이 정의되지 않는다 */}
-        <span>{s.viable ? `${s.roi_months}개월` : "회수 불가"}</span>
+        <span>{s.viable ? `${s.roi_months}개월` : "회수 불가"} <EvidenceBadge kind="계산" /></span>
       </div>
       {prev && <div className="tier-difference" aria-label={`${meta.name} 직전 계산과 비교`}>
         <b>직전 계산 대비</b>

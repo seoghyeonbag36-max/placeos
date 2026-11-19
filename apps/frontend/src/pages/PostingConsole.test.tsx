@@ -110,6 +110,13 @@ describe("PostingConsole — 결과 패널", () => {
     expect(screen.getByText("기본 계산", { selector: ".badge" })).toBeTruthy();
   });
 
+  it("전략 카드의 숫자(초기 투자·월 비용·월 매출·월 순익·회수기간)마다 근거 배지가 붙는다(P4 · 2026-11-19)", async () => {
+    await waitFor(() => expect(tierPanel()).not.toBeNull());
+    const rows = Array.from(tierPanel().querySelectorAll(".trow")).filter((r) => /초기 투자|월 비용|월 매출|월 순익|회수기간/.test(r.textContent ?? ""));
+    expect(rows.length).toBeGreaterThanOrEqual(15); // 세 전략 × 다섯 숫자
+    for (const r of rows) expect(r.querySelector(".evid"), r.textContent ?? "").not.toBeNull();
+  });
+
   /* 2026-09-13: 화면 머리를 공용 `Verdict` 로 바꿨다 — 그전에는 질문(h1)만 있고
      **답이 없었다**. Platform·Program 은 이미 결론 한 문장을 내는데 Posting 만
      안 냈다. 결론이 조용히 사라지면(예: 근거 배열만 남기고 verdict 를 비우면)

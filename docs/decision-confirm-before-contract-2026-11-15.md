@@ -89,3 +89,9 @@
 - **결정 ③-b 시행(2026-11-15)**: Program 탭 순서를 바꿔 오프라인 마케팅 솔루션을 맨 뒤 「개업 뒤」 칸으로(`pages/CampaignStudio.tsx` · 테스트는 탭을 이름으로 고른다 ·
   랜딩 Program 본문·가설 설정 3번 안내문·CLAUDE.md Program 행·feature-program §0-X 를 같은 PR 에서 맞춤). 탭 이름·PPPP 화면·가드는 그대로다.
 - **남은 것**: 결정 ③-a(인테리어 3D 선택 칸 — 미결정) · 팀원 1·2단계(Posting P1~P4 · Page 2-A·2-E) · Program 라벨 · 5단계(④ 승인 · 착수 미정) · 상권 카드(사전등록 §9 규칙 안에서) · 전방 검증(2028-11 이후).
+
+- **2026-11-19 진행(1·2단계 일부)**: P2 요구치 — `services/posting_requirement.py` · `POST /api/v1/ai/posting-requirement`(월세 들은 금액 우선 P3 · 임차 외 비용률 KOSIS ·
+  점포당 추정매출 대비 %와 분위 구간 · 숫자마다 `evidence` · 재료 없으면 `available:false`) + 지도 탐색 Posting 결과 위 `RequirementPanel`.
+  P4 — 전략 카드 다섯 숫자에 근거 배지(테스트로 고정 · 추정/계산 — 투자비·비용·매출은 아직 손 계수·통계 추정이라 「추정」). 2-A — Page 건물 상세에 주변 업종(찾아오는 길은 이미 있었음).
+  **미완**: ① R5 `Cost.tsx` 와 Posting 머리 문장은 아직 「N개월이면 본전」 — 요구치 문장으로 바꾸는 것(P2 완료 조건)은 남았다 · ② 7쪽→3쪽 · ③ 랜딩·CLAUDE.md Posting/Page 행 문구는 그 PR 이 옮긴다(이번엔 안 옮겼다).
+  **P1 막힘**: 공정위 정보공개서 인테리어·초기비용 필드 확인은 data.go.kr 서비스키가 있는 환경에서 1콜이 필요하다 — 이 클라우드 세션에는 키가 없어 추측으로 finding 을 쓰지 않았다.
