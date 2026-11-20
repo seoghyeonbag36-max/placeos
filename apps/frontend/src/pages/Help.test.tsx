@@ -15,8 +15,10 @@ it("랜딩은 FAQ 대신 고객센터로 연결하고 돌아올 수 있다", asy
   render(<App />);
   expect(screen.queryByText("비용이 드나요?")).toBeNull();
   expect(screen.getByRole("link", { name: "고객센터" }).getAttribute("href")).toBe("#help");
-  const summary = screen.getByText("주요 이용 순서 보기");
-  expect(summary.closest("details")?.open).toBe(false);
+  // 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다 — 「…보기」 토글이 아니라 정적 라벨 + 목록이다(10-17 간소화의 접힘을 되돌림)
+  const label = screen.getByText("주요 이용 순서");
+  expect(label.closest("details")).toBeNull();
+  expect(screen.getByRole("list", { name: "주요 이용 순서" })).toBeTruthy();
   act(() => { window.location.hash = "#help"; window.dispatchEvent(new HashChangeEvent("hashchange")); });
   expect(await screen.findByRole("heading", { name: "고객센터" })).toBeTruthy();
   expect(screen.getByText("비용이 드나요?").closest("details")?.open).toBe(false);

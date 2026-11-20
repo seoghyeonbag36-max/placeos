@@ -100,7 +100,7 @@ export default function Landing() {
         <section className="lp-hero" aria-labelledby="lp-h1">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다.</h1>
+              <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다</h1>
               <p className="lp-lede">
                 창업자 전용 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
                 고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
@@ -114,7 +114,6 @@ export default function Landing() {
             <figure className="lp-hero-art">
               <img src={illustration} width={800} height={800}
                 alt="4층 상가 건물 일러스트 — 1층과 4층은 입주해 있고 2~3층이 비어 있다" />
-              <figcaption>비어 있는 층을 층 단위로 가려냅니다.</figcaption>
             </figure>
           </div>
         </section>
@@ -125,14 +124,15 @@ export default function Landing() {
             <ul className="lp-results">
               <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
             </ul>
-            <details className="lp-quick lp-details">
-              <summary>주요 이용 순서 보기</summary>
-              <ol className="lp-quick-steps">
+            {/* 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다. 10-17 간소화가 <details> 로 접었다(「보기」 토글 → 정적 라벨). */}
+            <div className="lp-quick">
+              <p className="lp-quick-label" id="lp-quick-label">주요 이용 순서</p>
+              <ol className="lp-quick-steps" aria-labelledby="lp-quick-label">
                 {QUICK_STEPS.map((step) => <li key={step.title}>
                   <h3>{step.title}</h3><p>{step.body}</p>
                 </li>)}
               </ol>
-            </details>
+            </div>
             <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분을 위한 서비스입니다.</p>
           </div>
         </section>
@@ -141,8 +141,8 @@ export default function Landing() {
             <details> 안에 넣어 첫 화면에서 Platform·Page·Posting·Program 이 사라졌고, 10-21 에 되돌렸다. */}
         <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
-            <h2 id="lp-how">네 가지 질문이 한 줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다.</p>
+            <h2 id="lp-how">네 가지 질문이 한&nbsp;줄로 이어집니다</h2>
+            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다</p>
             <ol className="lp-steps">
               {STEPS.map((s, i) => (
                 <li key={s.track} className="lp-step" data-track={s.track}>
@@ -160,7 +160,8 @@ export default function Landing() {
 
         <section className="lp-section lp-detail-section" aria-labelledby="lp-method">
           <div className="lp-wrap">
-            <details className="lp-details">
+            {/* 2026-11-19 사용자 결정(랜딩 점검 #4): 기본으로 펼쳐 둔다 — 근거 문장 세 개가 닫힌 채 얇은 띠로만 보였다. 접을 수는 있다. */}
+            <details className="lp-details" open>
               <summary id="lp-method">데이터 출처·산출 방법 보기</summary>
               <ul className="lp-cards lp-cards-3">
                 {METHOD.map((m) => (
@@ -177,7 +178,7 @@ export default function Landing() {
         <section className="lp-section lp-section-alt" aria-labelledby="lp-limits">
           <div className="lp-wrap lp-narrow">
             <h2 id="lp-limits">아직 못 하는 것</h2>
-            <p className="lp-sub">시범 운영 단계라 먼저 밝혀 둡니다.</p>
+            <p className="lp-sub">시범 운영 단계라 먼저 밝혀 둡니다</p>
             <ul className="lp-limits">
               {LIMITS.map((l) => <li key={l}>{l}</li>)}
             </ul>
@@ -186,7 +187,7 @@ export default function Landing() {
 
         <section className="lp-final" aria-labelledby="lp-final-h">
           <div className="lp-wrap">
-            <h2 id="lp-final-h">내 업종으로 상권을 먼저 읽어 보세요.</h2>
+            <h2 id="lp-final-h">내 업종으로 상권을 먼저 읽어 보세요</h2>
             <div className="lp-cta-row lp-cta-center">
               <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
             </div>
