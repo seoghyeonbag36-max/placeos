@@ -29,6 +29,12 @@ description: PPPP 네 트랙 산출물을 하나의 앱으로 묶는 디자인�
 - 대시보드 1화면에서 4트랙을 본다: 감성(Platform)·히트맵(Page)·입점(Posting)·마케팅(Program).
 - 색상은 **토큰만** 사용(하드코딩 금지). 네이버 green은 네이버 연동 맥락만, brand teal은 PlaceOS 고유 기능.
 
+## 외부 확장 스킬 (2026-11-19 설치 · local scope · 정본 docs/decision-claude-extensions-2026-11-19.md)
+- `/unslop` — 완성된 화면의 「AI 티」 점검·수정. 한 번에 한 화면. 구성·순서·기능은 그대로, 「자료 부족」 · 「구분 불가」 같은 근거 표기는 지우지 않는다.
+- `ui-ux-pro-max` — 접근성·차트 **질의용**(`--domain ux|chart`). `--design-system` · `--persist` 는 쓰지 않는다(Glassmorphism·Cinzel 을 권해 Pretendard+토큰과 충돌, MASTER.md 를 저장소에 씀). 스킬이 `python3` 를 부르면 `py -3.11` 로.
+- `/diagram-design` — 도식(데이터 3계층·흐름·로드맵). 프로젝트 마커 `.diagram-design` 가 PlaceOS 스킨을 고른다. accent 는 brand teal 계열만, 트랙 색·네이버 green 금지.
+- 공통: Tailwind·shadcn 도입 금지. 스킬 권고가 PPPP 화면 보존 규칙과 부딪히면 규칙이 이긴다.
+
 ## 이번 목표
 
 호출 인수로 받은 목표 한 문장. 비어 있으면 진행하기 전에 묻는다.
