@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 976 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="pppp-four-steps-title pppp-four-steps-desc" id="pppp-four-steps-root">
+        <title id="pppp-four-steps-title">창업자가 계약 전에 따져 보는 네 단계</title>
+        <desc id="pppp-four-steps-desc">Platform, Page, Posting, Program 네 단계가 한 줄 레일에 같은 간격으로 놓이고, 시작점인 Platform 이 강조된다.</desc>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #pppp-four-steps-root { --color-paper:  #F4F7FB;   
+      --color-ink:    #1C2533;   
+      --color-muted:  #5A6B85;   
+      --color-accent: #0A7686;   
+      --font-sans:  'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:  'Geist Mono', ui-monospace, monospace; }
+      #pppp-four-steps-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #pppp-four-steps-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#pppp-four-steps-root .diagram-container { overflow-x: visible; }
+}</style><pattern id="pppp-four-steps-dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="#1c2533" fill-opacity="0.10"/></pattern></defs>
+        <rect width="100%" height="100%" fill="#F4F7FB"/>
+        <rect width="100%" height="100%" fill="url(#pppp-four-steps-dots)" opacity="0.55"/>
+
+        <!-- 레일: 네 칸이 이어진 한 줄. 화살표는 두지 않는다(순서는 배치가 말한다) -->
+        <g aria-hidden="true">
+          <rect x="40" y="124" width="224" height="48" fill="#0a7686" data-role="rail" data-step="platform" data-index="1" data-focal="true" fill-opacity="0.08"/>
+          <line x1="40" y1="124" x2="264" y2="124" stroke="#0A7686" stroke-width="1"/>
+          <line x1="40" y1="172" x2="264" y2="172" stroke="#0A7686" stroke-width="1"/>
+          <rect x="264" y="124" width="224" height="48" fill="#1c2533" data-role="rail" data-step="page" data-index="2" fill-opacity="0.09"/>
+          <rect x="488" y="124" width="224" height="48" fill="#1c2533" data-role="rail" data-step="posting" data-index="3" fill-opacity="0.05"/>
+          <rect x="712" y="124" width="224" height="48" fill="#1c2533" data-role="rail" data-step="program" data-index="4" fill-opacity="0.09"/>
+        </g>
+
+        <!-- 번호 + 가이드선 -->
+        <g font-family="'Geist Mono', monospace" font-size="8" font-weight="600" letter-spacing="0.14em" text-anchor="middle">
+          <text x="152" y="48" fill="#0A7686" data-role="number" data-step="platform">01</text><line x1="152" y1="68" x2="152" y2="104" stroke="#0A7686"/>
+          <text x="376" y="48" fill="#5A6B85" data-role="number" data-step="page">02</text><line x1="376" y1="68" x2="376" y2="104" stroke="#C5CEDB"/>
+          <text x="600" y="48" fill="#5A6B85" data-role="number" data-step="posting">03</text><line x1="600" y1="68" x2="600" y2="104" stroke="#C5CEDB"/>
+          <text x="824" y="48" fill="#5A6B85" data-role="number" data-step="program">04</text><line x1="824" y1="68" x2="824" y2="104" stroke="#C5CEDB"/>
+        </g>
+
+        <!-- 메달리온 -->
+        <g aria-hidden="true" fill="#F4F7FB" stroke-width="1">
+          <circle cx="152" cy="148" r="36" fill="#F4F7FB" stroke="none"/>
+          <circle cx="152" cy="148" r="36" fill="#0a7686" stroke="#0A7686" data-role="medallion" data-step="platform" data-focal="true" fill-opacity="0.08"/>
+          <circle cx="376" cy="148" r="36" stroke="#1C2533" data-role="medallion" data-step="page"/>
+          <circle cx="600" cy="148" r="36" stroke="#1C2533" data-role="medallion" data-step="posting"/>
+          <circle cx="824" cy="148" r="36" stroke="#1C2533" data-role="medallion" data-step="program"/>
+        </g>
+
+        <!-- 아이콘: 앱 레일·랜딩과 같은 트랙 아이콘(components/TrackIcons.tsx), 24×24 -->
+        <g aria-hidden="true" fill="none" stroke="#1C2533" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <g transform="translate(140 136)" stroke="#0A7686"><circle cx="6" cy="17" r="2.2"/><circle cx="12.5" cy="9" r="2.2"/><circle cx="19" cy="15" r="2.2"/><path d="m7.6 15.3 3.5-4.4m3 .3 3.3 3"/></g>
+          <g transform="translate(364 136)"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></g>
+          <g transform="translate(588 136)"><circle cx="8" cy="15" r="3.4"/><path d="m10.5 12.5 8-8"/><path d="m16.5 6.5 2 2"/><path d="m14 9 2 2"/></g>
+          <g transform="translate(812 136)"><path d="M4 10v4a1 1 0 0 0 1 1h3l7 4V5L8 9H5a1 1 0 0 0-1 1Z"/><path d="M18.5 9.5a3.5 3.5 0 0 1 0 5"/></g>
+        </g>
+
+        <!-- 전통 4P → PPPP 대응 -->
+        <g font-family="'Geist Mono', monospace" font-size="8" font-weight="500" letter-spacing="0.14em" text-anchor="middle" fill="#617086">
+          <text x="152" y="220">PLACE → PLATFORM</text>
+          <text x="376" y="220">PRODUCT → PAGE</text>
+          <text x="600" y="220">PRICE → POSTING</text>
+          <text x="824" y="220">PROMOTION → PROGRAM</text>
+        </g>
+
+        <!-- 이름 + 질문(랜딩 #how 의 네 질문과 같은 문구). 한글은 12px 산세리프 -->
+        <g font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">
+          <text x="152" y="248" fill="#0A7686" font-size="12" font-weight="600">Platform</text>
+          <text x="152" y="276" fill="#5A6B85" font-size="12" font-weight="500">이 상권은</text><text x="152" y="296" fill="#5A6B85" font-size="12" font-weight="500">어떤 곳이지?</text>
+          <text x="376" y="248" fill="#1C2533" font-size="12" font-weight="600">Page</text>
+          <text x="376" y="276" fill="#5A6B85" font-size="12" font-weight="500">어느 건물</text><text x="376" y="296" fill="#5A6B85" font-size="12" font-weight="500">몇 층이 비었지?</text>
+          <text x="600" y="248" fill="#1C2533" font-size="12" font-weight="600">Posting</text>
+          <text x="600" y="276" fill="#5A6B85" font-size="12" font-weight="500">얼마짜리</text><text x="600" y="296" fill="#5A6B85" font-size="12" font-weight="500">자리가 맞지?</text>
+          <text x="824" y="248" fill="#1C2533" font-size="12" font-weight="600">Program</text>
+          <text x="824" y="276" fill="#5A6B85" font-size="12" font-weight="500">누구와 손잡고, 무엇을 지원받고,</text><text x="824" y="296" fill="#5A6B85" font-size="12" font-weight="500">통하는지 어떻게 판정하지?</text>
+        </g>
+
+        <!-- 범례 -->
+        <line x1="40" y1="340" x2="936" y2="340" stroke="#1c2533" stroke-width="0.8" stroke-opacity="0.10"/>
+        <text x="40" y="360" fill="#617086" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+        <circle cx="52" cy="380" r="8" fill="#F4F7FB" stroke="#1C2533"/><text x="68" y="384" fill="#5A6B85" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">단계</text>
+        <circle cx="132" cy="380" r="8" fill="#0a7686" stroke="#0A7686" fill-opacity="0.08"/><text x="148" y="384" fill="#5A6B85" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">시작점</text>
+        <text x="228" y="384" fill="#5A6B85" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">강조는 시작점일 뿐, 네 화면은 모두 로그인 없이 열린다.</text>
+      </svg>
