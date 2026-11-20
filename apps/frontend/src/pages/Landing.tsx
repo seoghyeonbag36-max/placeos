@@ -70,7 +70,8 @@ const METHOD: { title: string; body: string }[] = [
 const LIMITS: string[] = [
   "서울만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
   "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
-  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 중개·계약·건물주 연결은 하지 않습니다.",
+  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 중개·계약은 하지 않습니다.",
+  "건물주가 빈 층을 직접 알리는 기능은 준비 중입니다. 지금은 등록 문의만 받습니다.",
 ];
 
 const QUICK_STEPS = [
@@ -102,8 +103,8 @@ export default function Landing() {
             <div className="lp-hero-copy">
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다</h1>
               <p className="lp-lede">
-                창업자 전용 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
-                고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
+                건물주와 창업자를 잇는 상권 플랫폼. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
+                창업자는 계약하기 전에 자리를 따져 보고, 건물주는 비어 있는 층을 찾는 창업자에게 알려집니다.
               </p>
               <div className="lp-cta-row">
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
@@ -155,6 +156,19 @@ export default function Landing() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        <section className="lp-section" id="owners" aria-labelledby="lp-owners">
+          <div className="lp-wrap lp-narrow">
+            <h2 id="lp-owners">건물주라면</h2>
+            <p className="lp-sub">
+              비어 있는 층의 위치와 조건을 알려 주시면, 그 자리를 찾는 창업자가 Page 에서 볼 수 있도록 준비하고 있습니다.
+              시범 운영 중이라 지금은 이메일 문의만 받으며, 중개나 계약은 하지 않습니다.
+            </p>
+            <div className="lp-cta-row">
+              <a className="lp-btn lp-btn-ghost" href="mailto:seoghyeonbag36@gmail.com?subject=%EA%B1%B4%EB%AC%BC%EC%A3%BC%20%EB%B9%88%20%EC%B8%B5%20%EB%93%B1%EB%A1%9D%20%EB%AC%B8%EC%9D%98">빈 층 등록 문의</a>
+            </div>
           </div>
         </section>
 
