@@ -264,7 +264,7 @@ def test_fallback_anchor_is_todo_not_ok(tmp_path, monkeypatch):
 # 화성을 서빙 도시로 넣자(병점역 1곳) 같은 도시의 봉담이 「_is_measured 확인」으로 보고됐다 — 배선 결손이 아니라 제품 판단이다.
 
 def test_unserved_batch_hub_in_served_city_is_paused(tmp_path, monkeypatch):
-    monkeypatch.setattr(chain, "_batch_unserved", lambda s: True)
+    monkeypatch.setattr(chain, "_batch_gate", lambda s: ("GYEONGGI_BATCH3_SERVED_HUBS", "경기 3차", ""))
     report = _serving_report(tmp_path, monkeypatch, city="hwaseong", served=frozenset({"hwaseong"}))
     stage = _serving_stage(report)
     assert stage["status"] == chain.PAUSED and not stage["next"], stage
@@ -275,4 +275,71 @@ def test_batch_unserved_reads_the_real_lists():
     assert chain._batch_unserved("bongdam") is False         # 2026-11-03 실측 검증 뒤 추가 서빙
     assert chain._batch_unserved("byeongjeom") is False      # 화성 — 10-31 재판정 뒤 서빙
     assert chain._batch_unserved("garosugil") is False       # 배치 밖 — 판단 대상이 아니다
+
+
+# ── 광주·전주 2차 거점 단위 서빙 판단 (2026-11-20) ────────────────────────────────
+# 2차(11-09 등록)는 `GJ_JJ_BATCH2_SERVED_HUBS` 로 서빙 거점을 거르는데, 위 경기 3차와 달리 이 프로버에는 그 장치가 없었다.
+# 그래서 의도적으로 뺀 6곳(gj-sinyong · gj-usan-buk · jj-jungdong · jj-manseong + 앵커 밖 gj-imam · jj-deokjin2)이
+# 「Gold 가 섰는데 목록에 없다 — _is_measured 조건 확인」으로 보고됐다. `_is_measured` 는 통과하고 있었다.
+
+def _patch_gj_jj_batch(monkeypatch, *, served: frozenset[str]):
+    from data.config import page_hubs as ph
+    monkeypatch.setattr(ph, "GJ_JJ_BATCH2_HUBS", {"serving-probe": object()})
+    monkeypatch.setattr(ph, "GJ_JJ_BATCH2_SERVED_HUBS", served)
+
+
+def test_gj_jj_batch2_excluded_hub_is_paused_with_its_reason(tmp_path, monkeypatch):
+    _patch_gj_jj_batch(monkeypatch, served=frozenset())
+    report = _serving_report(tmp_path, monkeypatch, city="gwangju", served=frozenset({"gwangju"}))
+    stage = _serving_stage(report)
+
+    assert stage["status"] == chain.PAUSED, stage
+    assert not stage["next"], "고칠 코드가 없다 — `_is_measured` 를 디버깅하라고 시키면 안 된다"
+    assert "광주·전주 2차" in stage["evidence"] and "GJ_JJ_BATCH2_SERVED_HUBS" in stage["evidence"]
+    assert "decision-gwangju-jeonju-batch2-2026-11-09.md" in stage["evidence"]      # 사유가 어디 적혀 있는지
+    assert report["next_stage"] != "서빙등재" and report["serving_paused"] is True
+
+
+def test_gj_jj_batch2_served_hub_missing_from_listing_is_still_a_defect(tmp_path, monkeypatch):
+    """서빙 목록에 **넣기로 한** 거점이 목록에 없으면 그것은 진짜 결손이다 — 보류로 삼키지 않는다."""
+    _patch_gj_jj_batch(monkeypatch, served=frozenset({"serving-probe"}))
+    report = _serving_report(tmp_path, monkeypatch, city="gwangju", served=frozenset({"gwangju"}))
+    stage = _serving_stage(report)
+
+    assert stage["status"] == chain.TODO and "_is_measured" in stage["next"], stage
+    assert report["serving_paused"] is False
+
+
+def test_gj_jj_batch2_anchor_blocked_hub_does_not_claim_gold_is_missing(tmp_path, monkeypatch):
+    """앵커 가드레일 밖(gj-imam +36.2%p 꼴)인 제외 거점에 「Gold 도 아직 안 섰다」를 달면 틀린 말이다 — Gold 는 서 있다."""
+    _patch_gj_jj_batch(monkeypatch, served=frozenset())
+    slug = "serving-probe"
+    g = tmp_path / "gold" / slug
+    g.mkdir(parents=True)
+    (g / "page_building_master.geojson").write_text("{}", encoding="utf-8")
+    (g / "calibration.json").write_text(json.dumps({"anchor_pct": 10.0}), encoding="utf-8")
+    # 대표공실은 서빙과 같은 기준(`_served_vac` = floor_ouln 만)에서 읽는다 — 대표 50% vs 앵커 10% = +40%p
+    (g / "coverage.json").write_text(
+        json.dumps({"tier": "Tier1", "reference_coverage_pct": 100, "shown": 90,
+                    "by_capacity_method": {"floor_ouln": {"vacancy_pct": 50.0}}}), encoding="utf-8")
+    monkeypatch.setattr(chain, "BRONZE", tmp_path / "bronze")
+    monkeypatch.setattr(chain, "GOLD", tmp_path / "gold")
+    monkeypatch.setattr(chain, "_hubs", lambda: {slug: PageHub(slug, "앵커 밖 검증 거점", 127.0, 37.5, city="gwangju")})
+    monkeypatch.setattr(chain, "_city_of", lambda _hub: ("gwangju", "gwangju"))
+    monkeypatch.setattr(chain, "_served_ids", lambda: set())
+    monkeypatch.setattr(chain, "_served_cities", lambda: frozenset({"gwangju"}))
+
+    report = chain.summarize(slug)
+    assert "앵커" in report["blocked"], "전제 — 격차 +40%p 는 가드레일(30%p) 밖이다"
+    stage = _serving_stage(report)
+    assert stage["status"] == chain.PAUSED
+    assert "Gold 도 아직 안 섰다" not in stage["evidence"] and "가드레일" in stage["evidence"], stage
+
+
+def test_gj_jj_batch2_unserved_matches_the_real_served_list():
+    """실제 목록과 일관: 2차 등록 거점 중 서빙 목록에 없으면 모두 미서빙, 있으면 하나도 미서빙이 아니다(승격해도 안 깨진다)."""
+    from data.config import page_hubs as ph
+    for slug in ph.GJ_JJ_BATCH2_HUBS:
+        assert chain._batch_unserved(slug) is (slug not in ph.GJ_JJ_BATCH2_SERVED_HUBS), slug
+    assert chain._batch_unserved("gj-gakhwa") is False       # 2차 서빙 거점 — 판단 대상이 아니다(배치 안·서빙 목록 안)
 
