@@ -17,13 +17,14 @@
 ## 로그 (최신 위)
 | 날짜 | 한 일 | 이유 · ⚠ 남은 함정 | 근거 |
 |---|---|---|---|
+| 11-20 | CLAUDE.md 압축판 머지 (#262, `6448bca`) — 46KB→15.7KB · 압축 직전 `main` 의 CLAUDE.md 를 원문으로 `docs/claude-md-full-2026-11-20.md` 에 그대로 보존(개인 이메일 한 곳만 제거) | 로컬 압축판이 11-14 기준이라 그대로 올리면 11-15 「계약 전 확인」 개정 · Program 질문/「개업 뒤」 칸 · KPI 신설 두 축이 CLAUDE.md 에서 사라질 뻔해 `main` 기준으로 다시 반영. 새로 쓴 문장은 개정 단락 · Page/Program 표 행 · KPI① 한 문장뿐. ⚠ 압축판에서 빠진 항목이 있으면 원문에서 되살린다. 옛 로컬 압축판과 untracked `docs/claude-md-full-2026-11-16.md` 는 폐기 대상. ⚠ 오래 두었던 로컬 작업은 올리기 전에 `main` 과의 거리부터 잴 것 | PR #262 |
 | 11-19 | 랜딩 `/unslop` 점검 12건 전부 적용 — 의견 보내기가 푸터를 덮던 것 · #how 4번 행 정렬 · 접힌 이용 순서·데이터 출처 펼침(**사용자 결정, 10-17 간소화 되돌림**) · 히어로 캡션 삭제 · 제목 마침표 · 어두운 띠 · h1 자간 · 로고 · 헤더 링크 · 「한 줄로」 NBSP · 제목·버튼 굵기 700→600 | 항목마다 실측 후 적용(스킬 제안 `align-content:center` 는 효과 없어 버림 · `--grey-300` 은 없는 토큰이라 `--text-subtle`). `Help.test.tsx` 가 접힌 `<details>` 를 단언해 새 결정에 맞게 고침. 검증: main 기준 tsc 0 · eslint 0 · vitest 681 통과 · PPPP 실화면 22/22. ⚠ 랜딩이 앱 안(700 위주)보다 가볍다 — 되돌리려면 `Landing.css` 의 `--fw-semibold` 4곳 | docs/finding-landing-unslop-audit-2026-11-19.md |
 | 11-19 | Claude 확장 10개 중 4개 설치(unslop · ui-ux-pro-max · diagram-design · humanizer, local scope) + diagram-design PlaceOS 스킨(`.diagram-design` 마커) + PPPP 도식 `docs/diagrams/` | 훅 0 · 상시 ~2.1k 토큰. 나머지 6개는 보류·제외(근거 표). ⚠ ui-ux-pro-max `--design-system` 금지(PlaceOS 정체성과 충돌) · 새로 설치한 스킬은 세션 시작 때 목록이 고정돼 별도 `claude -p` 로 호출 | docs/decision-claude-extensions-2026-11-19.md |
 | 11-19 | `/verify` 에서 로컬 브랜치가 main 보다 **55커밋 뒤처진 채 일부만 스테이징**돼 build·백엔드가 import 오류로 깨진 것을 발견 → main 기준 새 worktree 에서 작업·검증 | ⚠ 처음엔 「`use-check` 미합류」로 **오진**했다(그 모듈은 main 에 있다) — import 오류로 깨지면 먼저 `git fetch` 로 main 과의 거리부터 잴 것. ⚠ 접힘 단언 테스트가 없다는 오보는 `grep|head` 로 잘라 낸 것 | docs/finding-landing-unslop-audit-2026-11-19.md |
-| 11-19 | `docs/HISTORY.md` 신설 + CLAUDE.md 에 「새 세션 첫 턴」 한 줄 (#258 머지, `62018f2`) | 새 창마다 같은 설명을 반복하는 토큰 낭비를 줄이려고. ⚠ 로컬 CLAUDE.md 의 11-16 압축판(+77/−352줄)과 `docs/claude-md-full-2026-11-16.md` 는 **아직 커밋 전** — 올릴 때 main 의 CLAUDE.md 와 충돌하면 압축판을 유지하고 머리말 HISTORY.md 한 줄만 남긴다 | PR #258 |
+| 11-19 | `docs/HISTORY.md` 신설 + CLAUDE.md 에 「새 세션 첫 턴」 한 줄 (#258 머지, `62018f2`) | 새 창마다 같은 설명을 반복하는 토큰 낭비를 줄이려고. (11-16 에 만든 로컬 압축판은 11-20 에 `main` 기준으로 다시 압축해 머지 → 위 11-20 줄) | PR #258 |
 | 11-18 | 직거래 층 구현(worktree owner-direct 브랜치) · 성사 수수료 금지 결정 | 법적 한계. ⚠ **미커밋.** Neon 마이그레이션·가격·계좌는 대기 | memory: matching-revenue-legal-limits |
 | 11-17 | 디지털 프리미엄 검정 입력 수집 (#255 머지) | 블로그 적재 매일+로그온, OneDrive 복사. ⚠ 12-08 이후 total 증가분 확인 | docs/finding-digital-premium-inputs-2026-11-17.md |
-| 11-16 | CLAUDE.md 42KB→13KB 압축 · Ruflo mods·swarm 플러그인 끔 | 프롬프트마다 라우팅 주입이 토큰 낭비. 원문은 `docs/claude-md-full-2026-11-16.md` | memory: ruflo-install-state |
+| 11-16 | CLAUDE.md 42KB→13KB 압축 · Ruflo mods·swarm 플러그인 끔 | 프롬프트마다 라우팅 주입이 토큰 낭비. 로컬에서만 만든 압축(미커밋)이라 11-20 에 `main` 기준으로 다시 압축해 머지 — 원문은 `docs/claude-md-full-2026-11-20.md` | memory: ruflo-install-state |
 | 11-16 | 제품 전략 세션 제안 | 결정 없음. 1순위 제안 = 인터뷰+컨시어지 | memory: product-strategy-session-20261116 |
 | 11-15 | 「계약 전 확인」 결정·진행 | ⚠ ③-a(인테리어 3D) 보류 | memory: confirm-before-contract-decisions-20261115 |
 | 11-15 | Fable 5.2 활용 4항목 점검 | claims.json 09-30 판. 상위 모델 설정은 미커밋 | memory: fable-usage-checks-20261115 |
