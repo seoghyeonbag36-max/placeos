@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import CampaignStudio from "./CampaignStudio";
-import PpppReportProvider from "@/components/PpppReportProvider";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import WorkspaceRecordsProvider from "@/components/WorkspaceRecordsProvider";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import { saveToken, clearToken } from "@/lib/session";
 import { installFetchStub } from "@/test/fetchStub";
 import { district, simulateResult } from "@/test/fixtures";
@@ -13,9 +13,9 @@ const handoff: ProgramHandoff = { districtId: "garosugil", unitId: "saved-u1", u
   area: 24, floor: "2F", rent: 180, lat: 37.5, lng: 127, industry: "한식", strategy: null,
   inputsSource: { area: "seed", rent: "rone" } };
 function PriorSteps() {
-  useReportCapture("platform", { districtId: "garosugil", districtName: "검토 상권", industry: "한식",
+  useRecordCapture("platform", { districtId: "garosugil", districtName: "검토 상권", industry: "한식",
     archetype: "검토 유형", archetypeRule: null, source: "test-seed", recommendations: [], recommendationSource: null, candidates: [] });
-  useReportCapture("page", { districtId: "garosugil", buildingId: "b1", name: "검토 건물", address: "검토 주소",
+  useRecordCapture("page", { districtId: "garosugil", buildingId: "b1", name: "검토 건물", address: "검토 주소",
     status: "공실의심", capacity: 3, active: 1, floors: 2, candidates: [] });
   return null;
 }
@@ -29,8 +29,8 @@ it("계정에 저장한 Posting을 Program에서 열어 앞선 근거와 함께 
       payload: { handoff, input: { district_id: "garosugil", unit_id: "saved-u1" }, result: simulateResult("garosugil", "saved-u1") } }] },
     { match: /\/program\/support\?/, body: { items: [], sources: [], region: { label: "서울" } } },
   ]);
-  const tree = (visible: boolean) => <PpppReportProvider districtId="garosugil"><PriorSteps />
-    {visible && <CampaignStudio mapDistrictId="garosugil" />}</PpppReportProvider>;
+  const tree = (visible: boolean) => <WorkspaceRecordsProvider districtId="garosugil"><PriorSteps />
+    {visible && <CampaignStudio mapDistrictId="garosugil" />}</WorkspaceRecordsProvider>;
   const view = render(tree(true));
   const postingList = (await screen.findByText("저장 비용")).closest("section")!;
   fireEvent.click(await within(postingList).findByRole("button", { name: "보기" }));

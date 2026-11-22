@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import PlatformConsole from "./PlatformConsole";
 import type { OpeningSite, PlatformProfile } from "@/lib/api";
 import type { BusinessProfile } from "@/lib/businessProfile";
@@ -369,5 +369,32 @@ describe("PlatformConsole — 내 업종 자리 순서(site-ranking)", () => {
     expect(await screen.findByText(/어떤 단어가 알고리즘에 유리한지는 측정하지 않았습니다/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "인스타 태그" }).getAttribute("href")).toContain("/explore/tags/");
     expect(screen.getByRole("link", { name: "네이버 블로그" }).getAttribute("href")).toContain(encodeURIComponent("가로수길 맛집"));
+    expect(screen.getByText(/인스타그램은 공식 API 연결 전이라 단어별 수치가 없고/)).toBeTruthy();   // 인스타 칸이 없거나 수집 전
+  });
+
+  it("인스타그램(2026-11-22) — 수집된 상권만 결론 줄에 최근 24시간 표본을 더하고, 수집 전이면 아무것도 더하지 않는다", async () => {
+    const ig = { hashtag: "가로수길", connected: true, source: "합성 인스타 출처", built_at: "2026-11-22T00:00:00+00:00", window: "최근 24시간",
+      stale_after_days: 30, api_version: "v27.0", shared_with: [] };
+    const withIg = (instagram: object) => ({ ...profile("garosugil", []), identity: { ...profile("garosugil", []).identity!,
+      keywords: { words: [{ word: "맛집", n: 3 }], dropped: 0, scanned: 3 }, instagram } });
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
+      { match: /\/garosugil\/platform$/, body: withIg({ ...ig, status: "collected", collected_at: "2026-11-21T00:00:00+00:00",
+        recent_24h: 200, recent_capped: true, top_n: 50, top_likes_median: 10, top_likes_hidden: 0, top_comments_median: 1,
+        media_mix: { IMAGE: 1 }, co_tags: [] }) },
+    ]);
+    const view = render(<PlatformConsole />);
+    expect(await screen.findByText(/인스타 #가로수길 최근 24시간/)).toBeTruthy();
+    expect(document.body.textContent).toContain("200건 이상");
+    expect(screen.getByText(/인스타그램 수치는 「상권 특성 자세히 보기」의 인스타그램 칸에 있어요/)).toBeTruthy();
+    view.unmount();
+    cleanup();
+    installFetchStub([
+      { match: /\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
+      { match: /\/garosugil\/platform$/, body: withIg({ ...ig, connected: false, status: "pending" }) },
+    ]);
+    render(<PlatformConsole />);
+    expect(await screen.findByText(/인스타그램은 공식 API 연결 전이라/)).toBeTruthy();
+    expect(screen.queryByText(/인스타 #가로수길 최근 24시간/)).toBeNull();               // 수집 전 — 결론 줄에 지어 넣지 않는다
   });
 });

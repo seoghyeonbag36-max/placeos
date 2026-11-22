@@ -183,3 +183,93 @@ def _signal(name="일 방문객 수", method="입장 카운터 일별 기록",
     기각 조건이 적혀 있다. 그 둘이 빠진 경우는 본문에서 일부러 비워 검증한다."""
     from app.schemas.marketing import LLMValidationSignal
     return LLMValidationSignal(name=name, method=method, target=target, decision=decision)
+
+
+# ── 직거래 연결 층(2026-11-18) 공용 환경 ─────────────────────────────────────
+# 계정층 테스트와 같은 방식(SQLite 인메모리 + get_db 오버라이드 · 이전 값 복원)에 외래키를 켠다 — 프로덕션(Neon)은
+# 외래키를 보므로 삭제 순서가 틀리면 여기서 먼저 운다(test_auth_account_delete.py 와 같은 이유).
+
+DIRECT_ADMIN_TOKEN = "direct-admin-token"
+DIRECT_REGISTRY = "1101-2026-012345"
+
+
+@pytest.fixture
+def direct_env(monkeypatch):
+    from fastapi.testclient import TestClient
+    from sqlalchemy import create_engine, event
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    import app.models.direct  # noqa: F401  — 직거래 표를 메타데이터에 올린다
+    from app.core.db import Base, get_db
+    from app.main import app
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+
+    @event.listens_for(engine, "connect")
+    def _fk_on(dbapi_connection, _record):
+        dbapi_connection.execute("PRAGMA foreign_keys=ON")
+
+    factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+    def _db():
+        db = factory()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    Base.metadata.create_all(bind=engine)
+    previous = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = _db
+    monkeypatch.setenv("ADMIN_TOKEN", DIRECT_ADMIN_TOKEN)
+    client = TestClient(app)
+
+    class _Env:
+        pass
+
+    env = _Env()
+    env.client = client
+    env.session = factory
+    env.admin = {"X-Admin-Token": DIRECT_ADMIN_TOKEN}
+    env.base = "/api/v1/direct"
+
+    def signup(email: str) -> dict:
+        r = client.post("/api/v1/auth/signup", json={"org_name": "직거래 테스트", "email": email,
+                                                     "password": "hunter2hunter"})
+        assert r.status_code == 201, r.text
+        return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+    def listing_body(**overrides) -> dict:
+        body = dict(district_id="garosugil", address="서울 강남구 신사동 000-0", floor=2, unit_label="201호",
+                    area_m2=66.0, use_type="제1종 근린생활시설", ledger_use="", deal_type="lease",
+                    deposit_manwon=3000, monthly_rent_manwon=250, maintenance_manwon=20, rent_free_months=2,
+                    min_term_months=24, preferred_industries=["education"], excluded_industries=["bar"],
+                    description="테스트 전용 합성 매물")
+        body.update(overrides)
+        return body
+
+    def publish(owner: dict, **overrides) -> str:
+        r = client.post(f"{env.base}/listings", headers=owner, json=listing_body(**overrides))
+        assert r.status_code == 201, r.text
+        lid = r.json()["id"]
+        r = client.post(f"{env.base}/listings/{lid}/submit", headers=owner,
+                        json={"relation": "owner", "registry_number": DIRECT_REGISTRY, "owner_name": "홍길동"})
+        assert r.status_code == 200, r.text
+        pending = client.get("/api/v1/admin/direct/verifications", headers=env.admin).json()["items"]
+        vid = next(v["id"] for v in pending if v["listing_id"] == lid)
+        r = client.post(f"/api/v1/admin/direct/verifications/{vid}", headers=env.admin, json={"decision": "verified"})
+        assert r.status_code == 200, r.text
+        return lid
+
+    env.signup = signup
+    env.listing_body = listing_body
+    env.publish = publish
+    try:
+        yield env
+    finally:
+        if previous is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous
+        Base.metadata.drop_all(bind=engine)

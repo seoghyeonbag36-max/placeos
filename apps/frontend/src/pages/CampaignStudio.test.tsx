@@ -14,10 +14,6 @@ vi.mock("@/pages/ProgramStudio", async () => {
   const { createElement } = await import("react");
   return { default: () => createElement("div", { "data-testid": "validation-studio" }, "검증 계획(ProgramStudio)") };
 });
-vi.mock("@/components/PpppReport", async () => {
-  const { createElement } = await import("react");
-  return { default: () => createElement("div", { "data-testid": "pppp-report" }, "결과 리포트") };
-});
 
 const LOAD = { timeout: 10000 };
 const region = { sido: "서울특별시", local: "강남구", label: "서울특별시 강남구" };
@@ -105,12 +101,30 @@ describe("Program 허브 — 네 기능", () => {
     expect(await screen.findByRole("region", { name: "실행 카드" }, LOAD)).toBeTruthy();   // 실행 도구 자체는 그대로 있다
   });
 
+  it("오프라인 마케팅은 건물주 보기도 있다 — 이미 있는 세 도구를 잇는 것으로 마무리하고, 없는 것을 약속하지 않는다(2026-11-22)", async () => {
+    render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" />);
+    fireEvent.click(tab("오프라인 마케팅 솔루션"));
+    // 기본은 창업자 — 기존 화면(실행 카드)이 그대로다
+    expect(screen.getByRole("button", { name: "창업자" }).getAttribute("aria-pressed")).toBe("true");
+    expect(await screen.findByRole("region", { name: "실행 카드" }, LOAD)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "건물주" }));
+    const panel = screen.getByRole("region", { name: "건물주 오프라인 마케팅" });
+    expect(within(panel).getByRole("link", { name: /팝업 설정하기/ }).getAttribute("href")).toBe("#/owner");
+    expect(within(panel).getByRole("link", { name: /입점 희망서 보기/ }).getAttribute("href")).toBe("#/owner/briefs");
+    expect(await within(panel).findByLabelText("행사명", {}, LOAD)).toBeTruthy();       // 행사 연계 계획 도구
+    expect(panel.textContent).toContain("행사를 열거나 섭외·대행하지 않아요");          // 하는 것과 하지 않는 것을 밝힌다
+    expect(panel.textContent).not.toContain("준비 중");                                     // 11-22 사용자 결정: 이 세 도구로 마무리 — 지키지 않을 약속을 쓰지 않는다
+    expect(panel.textContent).not.toMatch(/수수료|보수/);                                   // 이 칸에서 돈이 오가지 않는다
+    expect(screen.queryByRole("region", { name: "실행 카드" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "창업자" }));
+    expect(await screen.findByRole("region", { name: "실행 카드" }, LOAD)).toBeTruthy();
+  });
+
   it("Posting 인계로 오면 가설 설정부터 연다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" handoff={{ districtId: "garosugil", unitId: "vu-1", unitName: "자리",
       lat: 37.5, lng: 127, area: 20, floor: "1F", rent: 300, industry: "카페", strategy: null }} />);
     expect(tabs()[0].getAttribute("aria-current")).toBe("page");
     expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
-    expect(screen.queryByTestId("pppp-report")).toBeNull();
   });
 
   it("지원 프로그램 — 원천이 비면 왜 비었는지 보이고, 담은 공고는 이 브라우저에 남는다", async () => {

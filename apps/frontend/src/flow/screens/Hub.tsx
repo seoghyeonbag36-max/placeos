@@ -233,6 +233,11 @@ export function Home() {
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}
       {token && results && <CompareEntry districtId={mapDistrict} results={results} />}
       <div className="fl-actions">
+        <TextButton onClick={() => go("/listings")}>건물주 확인 매물 보기</TextButton>
+        <TextButton onClick={() => go("/brief")}>입점 희망서 쓰기</TextButton>
+        <TextButton onClick={() => go("/owner")}>건물주이신가요? 빈 자리 직접 올리기</TextButton>
+      </div>
+      <div className="fl-actions">
         <TextButton onClick={() => setReset(true)}>처음부터</TextButton>
         <TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton>
       </div>
@@ -289,6 +294,14 @@ export function Me() {
         <Row title="저장한 것" right={<b>{results?.length ?? "…"}</b>} onClick={() => setShowSaved((v) => !v)} />
       </RowList>
       {showSaved && results && <SavedList items={results} onRemove={removeResult} />}
+      {/* 직거래 연결 층(2026-11-18) — 건물주 확인 매물 · 문의함 · 정액 상품(성사 수수료 없음) */}
+      <RowList label="직거래">
+        <Row title="문의함" meta="건물주와 직접 주고받은 문의·방문 예약·조건 제안" onClick={() => go("/inbox")} />
+        <Row title="내 입점 희망서(창업자)" meta="원하는 자리 조건을 남기면 건물주가 먼저 제안해요" onClick={() => go("/brief")} />
+        <Row title="내 빈 자리(건물주)" meta="빈 자리 직접 올리기 · 소유자 확인 · 공실 진단" onClick={() => go("/owner")} />
+        <Row title="입점 희망서 보기(건물주)" meta="내 확인 매물 상권을 희망한 창업자" onClick={() => go("/owner/briefs")} />
+        <Row title="정액 상품" meta="상단 노출 · 리포트 — 성사·중개 수수료 없음" onClick={() => go("/plans")} />
+      </RowList>
       <RowList label="도움">
         <Row title="의견 보내기" meta="후기·오류·개선 요청" onClick={openVisitorFeedback} />
         <Row title="추천 의향 · 결제 의향 남기기" meta="시범 운영 조직 설문" onClick={() => openAccount("feedback")} />

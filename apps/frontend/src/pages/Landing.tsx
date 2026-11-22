@@ -5,6 +5,7 @@
  * 가입부터 요구받았다. 이 페이지가 그 앞에서 「무엇을 하고, 무엇을 못 하고, 가입하면 무엇을 받는지」를 말한다.
  *
  * 독자는 **창업자**다(2026-09-13 주요 고객 재정의 — 업종이 정해진 창업자 · 업종을 바꾸거나 상권을 옮기려는 사업자).
+ * 2026-11-22: **건물주**가 PPPP 네 단계의 두 번째 사용자가 됐다(사용자 정의 → docs/decision-pppp-owner-founder-2026-11-22.md).
  * 투자자를 독자로 못 박은 docs/prd-landing.md(09-07)와 다르다 → docs/spec-landing-founders-2026-10-08.md.
  *
  * 규칙 (어기면 거짓 광고가 된다)
@@ -26,29 +27,31 @@ import "./Landing.css";
 
 type Track = "platform" | "page" | "posting" | "program";
 
-/** 네 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program). 순서를 바꾸지 말 것. */
+/** 네 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program). 순서를 바꾸지 말 것.
+ *  2026-11-22 사용자 정의로 문구를 옮겼다 — 창업자와 건물주가 같은 네 단계를 각자의 자리에서 쓴다(docs/decision-pppp-owner-founder-2026-11-22.md).
+ *  본문에 적는 것은 화면에 **있는** 것뿐이다 — 인스타그램은 수집하지 않고 검색 링크만 있어 적지 않는다(PlatformConsole). */
 const STEPS: { track: Track; name: string; question: string; body: string; icon: JSX.Element }[] = [
   {
     track: "platform", name: "Platform", icon: <IconSpark />,
     question: "이 상권은 어떤 곳이지?",
-    body: "상권의 성격을 읽고, 자리마다 어울리는 업종을 순위로 봅니다. 내 업종이 이 상권에 맞는지 먼저 가늠합니다.",
+    body: "상권의 성격과 온라인 언급(블로그·카페글·뉴스), 검색 트렌드를 한곳에 보여 주고, 어울리는 업종을 순위로 봅니다. 창업자는 내 업종이 맞는지, 건물주는 내 건물이 있는 상권이 어떻게 읽히는지 같은 자료로 확인합니다.",
   },
   {
     track: "page", name: "Page", icon: <IconPin />,
     question: "어느 건물 몇 층이 비었지?",
-    body: "공실 히트맵과 건물·층별 매물 목록, 공실 이력의 확인 상태로 비어 있는 자리를 살펴봅니다.",
+    body: "건물주가 자기 건물의 빈 층 정보와 층별 배치도 사진을 올리면, 공공데이터로 그린 개략 배치도가 건물주가 올린 실제 배치도로 바뀝니다. 창업자는 공실 히트맵과 건물·층별 목록에서 비어 있는 자리를 찾아봅니다.",
   },
   {
     track: "posting", name: "Posting", icon: <IconKey />,
-    question: "얼마짜리 자리가 맞지?",
-    body: "고급화 · 가성비 · 기능중심, 세 가지 가격대로 비용과 회수 기간을 계산합니다. 임대료와 회수 기간이 곧 가격대 판단입니다.",
+    question: "이 자리, 어떤 조건으로 건물주에게 전하지?",
+    body: "고른 층의 비용과 회수 기간을 계산한 뒤, 입점 희망서(업종·면적·층·예산)를 건물주에게 전합니다. 건물주와 창업자는 문의·방문 예약·조건 제안을 주고받고, 계약은 두 사람이 직접 합니다. PlaceOS 는 중개하지 않고 수수료를 받지 않습니다.",
   },
   {
     track: "program", name: "Program", icon: <IconMegaphone />,
-    question: "계약하기 전에, 작게 먼저 어떻게 확인하지?",
+    question: "오프라인에서는 어떻게 알리고 이어지지?",
     // 2026-11-07 리뉴얼(결정 D1) — 네 기능: 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증
-    // 2026-11-15 질문 개정(결정 ② 승인 → docs/decision-confirm-before-contract-2026-11-15.md): 「계약 전에 어떻게 작게 확인하나」
-    body: "계약하기 전에 팝업스토어 · 가오픈 · 시험 판매로 통하는지 확인할 계획을 세웁니다. Posting 손익분기에서 끌어낸 목표선과 「이 숫자가 안 나오면 접는다」는 기각 조건까지 적습니다. 그 지역의 창업 행사·지원기관과 물어볼 이웃 가게, 지금 신청할 수 있는 지원 공고를 함께 보고, 개업 뒤에는 지역 행사와 시간대로 짠 실행 카드를 씁니다.",
+    // 2026-11-15 질문 개정(「계약 전에 어떻게 작게 확인하나」) → 2026-11-22 사용자 정의로 대상이 건물주·창업자 모두인 오프라인 마케팅으로 옮겼다.
+    body: "건물주와 창업자를 위한 오프라인 마케팅입니다. 지역 행사·시간대·이웃 업종으로 짠 실행 카드와 행사 연계 계획을 씁니다. 창업자는 팝업스토어 · 가오픈 · 시험 판매로 통하는지 확인할 가설과 지원 공고·네트워킹을 함께 보고, 건물주는 공실을 채울 팝업(단기 사용)과 지역 행사 연계를 계획합니다.",
   },
 ];
 
@@ -70,7 +73,7 @@ const METHOD: { title: string; body: string }[] = [
 const LIMITS: string[] = [
   "서울만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
   "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
-  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 중개·계약·건물주 연결은 하지 않습니다.",
+  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 부동산 중개와 계약 대행은 하지 않습니다 — 건물주와 창업자가 직접 이야기하고 계약합니다.",
 ];
 
 const QUICK_STEPS = [
@@ -102,8 +105,8 @@ export default function Landing() {
             <div className="lp-hero-copy">
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다</h1>
               <p className="lp-lede">
-                창업자 전용 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
-                고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
+                창업자와 건물주를 잇는 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴보고,
+                고른 자리의 비용과 회수 기간을 따져 입점 희망서로 건물주에게 먼저 말을 겁니다.
               </p>
               <div className="lp-cta-row">
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
@@ -122,7 +125,7 @@ export default function Landing() {
           <div className="lp-wrap">
             <h2 id="lp-results">살펴보고 얻는 것</h2>
             <ul className="lp-results">
-              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
+              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>입점 희망서</li><li>오프라인 마케팅</li>
             </ul>
             {/* 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다. 10-17 간소화가 <details> 로 접었다(「보기」 토글 → 정적 라벨). */}
             <div className="lp-quick">
@@ -133,7 +136,7 @@ export default function Landing() {
                 </li>)}
               </ol>
             </div>
-            <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분을 위한 서비스입니다.</p>
+            <p className="lp-audience">{GOALS.map((g) => g.label).join(" · ")}를 준비하는 분과, 빈 자리를 직접 올리는 건물주를 위한 서비스입니다.</p>
           </div>
         </section>
 
@@ -142,7 +145,7 @@ export default function Landing() {
         <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
             <h2 id="lp-how">네 가지 질문이 한&nbsp;줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다</p>
+            <p className="lp-sub">상권을 읽고, 빈 자리를 찾고, 입점 희망서로 건물주에게 전하고, 오프라인으로 알리는 순서입니다 — 창업자와 건물주가 같은 네 단계를 각자의 자리에서 씁니다</p>
             <ol className="lp-steps">
               {STEPS.map((s, i) => (
                 <li key={s.track} className="lp-step" data-track={s.track}>
@@ -155,6 +158,24 @@ export default function Landing() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        {/* 직거래 연결 층(2026-11-18) — 건물주 소개를 **더한다**. 위 #how 의 PPPP 네 질문은 그대로 펼쳐 둔다(PPPP 화면 보존 규칙). */}
+        <section className="lp-section" id="owners" aria-labelledby="lp-owners">
+          <div className="lp-wrap">
+            <h2 id="lp-owners">건물주이신가요? 빈 자리를 직접 올리세요</h2>
+            <p className="lp-sub">
+              소유자 확인을 거친 매물만 창업자에게 보이고, 창업자의 문의·방문 예약·조건 제안을 직접 받습니다. 오래 비어 있는 자리 · 2층 이상 · 팝업(단기 사용)도 올릴 수 있고,
+              층별 배치도 사진을 올리면 지도의 개략 배치도가 실제 배치도로 바뀝니다. 등록·게시는 무료입니다.
+              창업자가 남긴 입점 희망서(업종·면적·층·예산)를 보고 내 매물로 먼저 제안할 수도 있습니다.
+              PlaceOS 는 부동산 중개를 하지 않으며 중개보수·성사 수수료를 받지 않습니다.
+            </p>
+            <div className="lp-cta-row">
+              <a className="lp-btn lp-btn-ghost" href="#/owner">빈 자리 직접 올리기</a>
+              <a className="lp-btn lp-btn-ghost" href="#/listings">건물주 확인 매물 보기</a>
+              <a className="lp-btn lp-btn-ghost" href="#/brief">입점 희망서 쓰기(창업자)</a>
+            </div>
           </div>
         </section>
 

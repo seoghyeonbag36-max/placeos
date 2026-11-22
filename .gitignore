@@ -95,6 +95,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # 재생성: data.collectors.culture_portal · tourapi_festivals → data.pipelines.build_national_events
 !data/gold/platform_events_national.json
 !data/gold/platform_collected_context.json
+# 예외: Platform 인스타그램 해시태그(공식 Graph API · 2026-11-22) — services/instagram_context 가 정적 서빙한다.
+# 수집 전에도 서울 거점별 대표 해시태그와 「pending」을 싣는다(컨테이너에는 data/config 가 없다). 빠지면 Platform 의 인스타 칸이 조용히 사라진다.
+# 재생성: data.collectors.instagram_hashtags → data.pipelines.build_instagram_gold
+!data/gold/platform_instagram.json
 # 예외: Page 유동·밀도 레이어(81KB, 54거점 190상권) — services/footfall_layer 가
 # 정적 서빙한다. 원천은 features/trdar_demand.parquet 이지만 **파케이는 배포에
 # 없다**(pandas·pyarrow 미탑재). 빠지면 유동 레이어가 조용히 비고, 예전처럼

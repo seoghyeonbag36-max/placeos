@@ -93,6 +93,14 @@ def fit_for(floor: int | None, purps: str | None, *, top_k: int = 3) -> dict | N
     }
 
 
+def ledger_uses() -> list[str]:
+    """관측 표가 아는 대장 세부 용도(예: 일반음식점·학원) — 직거래 등록 화면이 이 말로 고르게 해 `fit_for` 가 맞물린다(2026-11-18)."""
+    d = _load()
+    if d is None:
+        return []
+    return sorted({k.split("|", 1)[0] for k in (d.get("by_purps_floor") or {})})
+
+
 def meta() -> dict | None:
     """표 자체의 근거·한계. 화면이 목록 하단에 근거를 밝히는 데 쓴다."""
     d = _load()

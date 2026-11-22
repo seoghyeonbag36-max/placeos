@@ -4,10 +4,11 @@ import { useMapLayout } from "@/components/mapLayoutContext";
 import CampaignLedger from "@/components/program/CampaignLedger";
 import ExecutionCards from "@/components/program/ExecutionCards";
 import NetworkingPanel from "@/components/program/NetworkingPanel";
+import OwnerMarketing, { AudienceSwitch, type MarketingAudience } from "@/components/program/OwnerMarketing";
 import SupportPrograms from "@/components/program/SupportPrograms";
 import { stageForGoal } from "@/lib/api";
 import type { BusinessGoal } from "@/lib/businessProfile";
-import { usePpppReport } from "@/lib/ppppReportContext";
+import { useWorkspaceRecords } from "@/lib/workspaceRecords";
 import SavedResults from "@/components/SavedResults";
 import { savedPostingHandoff } from "@/lib/savedPosting";
 import type { ProgramHandoff } from "@/lib/workspaceState";
@@ -24,25 +25,27 @@ const ORDER: Tab[] = ["hypothesis", "network", "support", "marketing"];
 
 /** Program은 앞선 세 단계의 근거로 가설을 세운 뒤 네트워킹·지원을 살펴보고, 오프라인 마케팅은 **개업 뒤** 실행 도구로 맨 뒤에 둔다
  * (2026-11-15 결정 ③ — Program 의 「개업 뒤」 칸 · docs/decision-confirm-before-contract-2026-11-15.md).
- * PPPP 네 구현 화면은 유지하고 종합 보고서는 왼쪽 전용 메뉴에서 연다. */
+ * (2026-11-22 「PPPP 보고서는 뺀다」 — 레일의 「상권 분석 보고서」와 이 허브의 종합 리포트를 지웠다. PPPP 네 구현 화면은 그대로다.) */
 export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory, onArrivalDismiss, businessGoal,
-  industryKey, industryLabel, reportHandoff }: {
+  industryKey, industryLabel, postingResult }: {
   handoff?: ProgramHandoff; mapDistrictId?: string | null; defaultCategory?: string;
   onArrivalDismiss?: () => void; businessGoal?: BusinessGoal;
   /** 「내 사업」 업종 키(/ai/industries 의 key) — 함께 모이는 업종·실행 카드에 쓴다 */
   industryKey?: string;
   /** 업종 이름 — 공고 문구의 업종 언급 표시에만 쓴다(거르지 않는다) */
   industryLabel?: string;
-  /** Posting 이 넘긴 최신 계산(결과 리포트용) */
-  reportHandoff?: ProgramHandoff;
+  /** Posting 이 넘긴 최신 계산 — 가설 설정이 이어받는다 */
+  postingResult?: ProgramHandoff;
 } = {}) {
   // 직접 진입과 Posting 인계 모두 가설 설정부터 시작한다.
   const [tab, setTab] = useState<Tab>("hypothesis");
+  // 오프라인 마케팅은 창업자·건물주 둘 다를 위한 것이다(2026-11-22) — 기본은 창업자(기존 화면 그대로)
+  const [audience, setAudience] = useState<MarketingAudience>("founder");
   const inSlots = useMapLayout() !== null;
   const districtId = mapDistrictId ?? handoff?.districtId ?? null;
-  const workspace = usePpppReport();
+  const workspace = useWorkspaceRecords();
   const [imported, setImported] = useState<{ handoff: ProgramHandoff; id: string }>();
-  const linkedPosting = [imported?.handoff, reportHandoff, handoff, workspace.posting].find(value => value?.districtId === districtId);
+  const linkedPosting = [imported?.handoff, postingResult, handoff, workspace.posting].find(value => value?.districtId === districtId);
   const stage = stageForGoal(businessGoal);
   const needDistrict = (body: ReactNode) => districtId ? body
     : <p className="program-note">지도에서 상권을 먼저 고르면 이 상권 기준으로 보여 드려요.</p>;
@@ -59,14 +62,17 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
       description: "내 단계·업종·지역에 지금 신청할 수 있는 국가·지자체 지원과 마감일 — 자격 판정이 아니라 조건이 맞을 수 있는 공고.",
       content: needDistrict(districtId && <SupportPrograms key={districtId} districtId={districtId} stage={stage} industryLabel={industryLabel} />) },
     { id: "marketing", label: "오프라인 마케팅 솔루션",
-      description: "개업 뒤 — 지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록(합의·참여 증빙·비용·결과).",
+      description: "개업 뒤 — 지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록(합의·참여 증빙·비용·결과). 건물주는 「건물주」 보기에서 공실을 알릴 행사와 팝업을 계획합니다.",
       content: <>
-        <p className="program-note" data-after-open>「개업 뒤」 칸입니다 — 계약 전 확인은 앞의 가설 설정·네트워킹·지원 프로그램에서 하고,
-          이 칸은 팝업·가오픈·개업을 시작한 뒤 실행할 때 쓰는 도구입니다.</p>
-        {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
-        {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
-        <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
-          onArrivalDismiss={onArrivalDismiss} businessGoal={businessGoal} />
+        <AudienceSwitch value={audience} onChange={setAudience} />
+        {audience === "owner" ? <OwnerMarketing districtId={districtId} /> : <>
+          <p className="program-note" data-after-open>「개업 뒤」 칸입니다 — 계약 전 확인은 앞의 가설 설정·네트워킹·지원 프로그램에서 하고,
+            이 칸은 팝업·가오픈·개업을 시작한 뒤 실행할 때 쓰는 도구입니다.</p>
+          {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
+          {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
+          <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
+            onArrivalDismiss={onArrivalDismiss} businessGoal={businessGoal} />
+        </>}
       </> },
     { id: "hypothesis", label: "가설 설정",
       description: "창업 전에 앞선 세 단계의 근거로 가설을 세우고, 검증 방법·판정 기준과 실행 준비까지 설계합니다.",
@@ -85,7 +91,7 @@ export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory
   const intro = (title: ReactNode) => <header>
     <p className="campaign-eyebrow">Promotion ▶ Program</p>
     {title}
-    <p>창업 전에 <b>가설 설정 → 검증 설계 → 실행 준비</b>를 마치고, 네트워킹·지원 프로그램을 살펴보세요. 오프라인 마케팅 솔루션은 개업 뒤에 씁니다.</p>
+    <p>건물주와 창업자를 위한 오프라인 마케팅입니다. 창업자는 창업 전에 <b>가설 설정 → 검증 설계 → 실행 준비</b>를 마치고 네트워킹·지원 프로그램을 살펴보세요. 오프라인 마케팅 솔루션은 개업 뒤에 쓰고, 건물주는 같은 칸의 「건물주」 보기에서 공실을 알릴 행사와 팝업을 계획합니다.</p>
   </header>;
   // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
   // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.

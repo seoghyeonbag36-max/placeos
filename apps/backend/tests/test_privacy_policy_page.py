@@ -45,6 +45,19 @@ TABLE_TO_POLICY_WORD = {
     "visitor_feedback": "방문자 의견",
     "social_identities": "고유 사용자 ID",
     "program_campaigns": "오프라인 캠페인 기록",
+    # 직거래 연결 층(2026-11-18 · models/direct.py)
+    "direct_listings": "직거래 매물",
+    "direct_listing_verifications": "소유자 확인",
+    "direct_inquiries": "직거래 문의",
+    "direct_messages": "직거래 문의",
+    "direct_listing_reports": "매물 신고",
+    "purchase_intents": "정액 상품 신청",
+    # 입점 희망서 · 조건 제안서 층(2026-11-21 · models/direct.py)
+    "direct_briefs": "입점 희망서",
+    "direct_brief_disclosures": "희망서 상세 공개",
+    "direct_offers": "조건 제안서",
+    # 층 배치도 사진(2026-11-22 · models/direct.py)
+    "direct_floor_plans": "층 배치도 사진",
 }
 
 

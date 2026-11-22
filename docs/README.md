@@ -17,6 +17,8 @@ Claude Code(CLI) 기반 PlaceOS 개발 가이드. PPPP 프레임워크 4기능�
 | [api-keys-and-specs.md](api-keys-and-specs.md) · [api-key-checklist.md](api-key-checklist.md) | 인증키 5종과 응답 필드 스펙 |
 | [poc-building-vacancy.md](poc-building-vacancy.md) | 건물 단위 공실 PoC 설계 (D1 스키마) |
 | [decision-infra-layer-2026-08-25.md](decision-infra-layer-2026-08-25.md) | **결정·구현 기록** — PPPP 게이트가 세지 않는 층(DB·인증·과금·오케스트레이션) |
+| [decision-owner-direct-matching-2026-11-18.md](decision-owner-direct-matching-2026-11-18.md) | **결정·구현 기록** — 건물주 직거래 연결 층(확인 매물·문의·방문 예약). 성사·중개 수수료 없이 정액 광고·구독 + 정보 판매. 법적 불변식 L1~L10 |
+| [decision-founder-brief-2026-11-21.md](decision-founder-brief-2026-11-21.md) | **결정·구현 기록** — 입점 희망서(3단계 공개 · 신용 점수 없음) · 건물주 제안 · 조건 제안서·팝업 신청 · 계약 진행 방법(직접/제휴 중개사 정액) · 1층 밖 쏠림 계측. 불변식 L11~L16 · Program 재정의는 다음 PR |
 | [prep-sgis-application.md](prep-sgis-application.md) | SGIS 집계구 경계 취득 기록 (막힘 5 해소 · 재신청 절차 보존) |
 
 ### 계획 (plan-*) — 무엇을 어떤 순서로 할 것인가

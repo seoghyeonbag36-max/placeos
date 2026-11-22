@@ -11,7 +11,11 @@ export type RouteName =
   | "startup-order" | "startup-region" | "startup-district" | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
-  | "home" | "me" | "explore" | "compare" | "corridor";
+  | "home" | "me" | "explore" | "compare" | "corridor"
+  // 직거래 연결 층(2026-11-18) — 건물주 확인 매물 · 건물주 등록·관리 · 문의함 · 정액 상품. PPPP 네 화면을 대신하지 않고 더한다
+  | "listings" | "listing" | "owner" | "owner-new" | "owner-listing" | "inbox" | "inquiry" | "plans"
+  // 입점 희망서(2026-11-21) — 창업자 희망서 · 건물주가 보는 희망서 목록/한 장. 흐름에 더한 화면이다
+  | "brief" | "owner-briefs" | "owner-brief";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
@@ -25,6 +29,8 @@ const SIMPLE: Record<string, RouteName> = {
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
   "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check", "/validate": "validate", "/item": "item",
   "/period": "period", "/test-budget": "test-budget", "/plan": "plan", "/home": "home", "/me": "me", "/explore": "explore",
+  "/listings": "listings", "/owner": "owner", "/owner/new": "owner-new", "/inbox": "inbox", "/plans": "plans",
+  "/brief": "brief", "/owner/briefs": "owner-briefs",
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다).
@@ -34,9 +40,17 @@ export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
-  const m = /^\/(district|space|compare|corridor)\/([^/]+)$/.exec(path);
+  const m = /^\/(district|space|compare|corridor|listing|inquiry)\/([^/]+)$/.exec(path);
   if (m) {
     try { return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path }; } catch { return null; }
+  }
+  const owned = /^\/owner\/listing\/([^/]+)$/.exec(path);
+  if (owned) {
+    try { return { name: "owner-listing", param: decodeURIComponent(owned[1]), path }; } catch { return null; }
+  }
+  const brief = /^\/owner\/brief\/([^/]+)$/.exec(path);
+  if (brief) {
+    try { return { name: "owner-brief", param: decodeURIComponent(brief[1]), path }; } catch { return null; }
   }
   return null;
 }

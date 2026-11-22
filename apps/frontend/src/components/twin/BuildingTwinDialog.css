@@ -176,3 +176,13 @@
 .twin3d-plan-legend .k-stair { background: repeating-linear-gradient(90deg, #F1F5F9 0 3px, #94A3B8 3px 4px); border: 1px solid #64748B; }
 .twin3d-plan-legend .k-ev { background: linear-gradient(45deg, transparent 45%, #475569 45% 55%, transparent 55%), linear-gradient(-45deg, #CBD5E1 45%, #475569 45% 55%, #CBD5E1 55%); border: 1px solid #475569; }
 .twin3d-unit-label.is-ev { color: #FFFFFF; background: #334155; border-color: #334155; }
+
+/* 건물주가 올린 실제 배치도 · 건물주 확인 매물 줄(2026-11-22) */
+.twin3d-owner { margin: var(--sp-3) 0; padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.twin3d-owner p { margin: 0; overflow-wrap: anywhere; }
+.twin3d-owner-links { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-2) !important; }
+.twin3d-owner-links a { display: inline-flex; align-items: center; min-height: 36px; color: var(--track-page); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.twin3d-owner-toggle { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0 var(--sp-2); }
+.twin3d-owner-fig { margin: 0 0 var(--sp-3); }
+.twin3d-owner-fig img { display: block; width: 100%; height: auto; max-height: 420px; object-fit: contain; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; }
+.twin3d-owner-fig figcaption { margin-top: var(--sp-2); }

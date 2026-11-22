@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # PostgreSQL + PostGIS — 계정/DB 이름 spaceos 는 이미 만들어진 로컬·컨테이너 DB 다.
     # 브랜드(PlaceOS)와 별개로 두지 않으면 기존 개발 DB 에 붙지 못한다(2026-09-12).
     database_url: str = "postgresql://spaceos:spaceos@localhost:5432/spaceos"
+    # 직거래 정액 상품의 입금 계좌 안내(2026-11-18 · services/direct_purchases). 비어 있으면 「담당자가 따로 안내」.
+    # 비밀값처럼 다룬다 — 사용자가 직접 환경변수(DIRECT_BANK_ACCOUNT)로 넣는다.
+    direct_bank_account: str = ""
     # 방문자 의견 SMTP 연결. 비밀값은 환경변수로만 주입한다.
     feedback_smtp_host: str = ""
     feedback_smtp_port: int = 587

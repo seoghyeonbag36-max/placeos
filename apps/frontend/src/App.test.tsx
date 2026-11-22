@@ -43,7 +43,7 @@ const TAB_LOAD = { timeout: 20000 };
 const MULTI_TAB = { timeout: 60000 };
 
 describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
-  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 상권 분석 보고서와 맨 아래 「의견 보내기」·「계정」이 있다 — 서울·거점 탭은 없다", async () => {
+  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 맨 아래 「의견 보내기」·「계정」이 있다 — 서울·거점 탭도 보고서 단추도 없다", async () => {
     mount(true);
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
     expect(rail.textContent).toContain("PlaceOS");
@@ -51,9 +51,10 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     const tracks = Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent);
     // 레일 순서는 PPPP 프레임워크 순서 그대로다(2026-09-26).
     expect(tracks).toEqual(["Platform", "Page", "Posting", "Program"]);
-    // 보고서는 Program 아래, 의견 보내기·계정은 맨 아래에 있다.
+    // 의견 보내기·계정은 트랙 바로 아래(맨 아래)에 있다. 「상권 분석 보고서」 단추는 2026-11-22 에 지웠다(PPPP 보고서는 뺀다).
     const labels = Array.from(rail.querySelectorAll("button")).map((b) => b.textContent);
-    expect(labels).toEqual([...tracks, "상권 분석 보고서", "의견 보내기", "계정"]);
+    expect(labels).toEqual([...tracks, "의견 보내기", "계정"]);
+    expect(screen.queryByRole("button", { name: "상권 분석 보고서" })).toBeNull();
     expect(screen.queryByRole("button", { name: "서울" })).toBeNull();
     expect(screen.queryByRole("button", { name: "거점" })).toBeNull();
     // 레일 맨 위와 첫 화면은 같은 트랙이다(2026-09-26) — 어긋나면 여기가 운다.

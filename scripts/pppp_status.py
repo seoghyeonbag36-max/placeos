@@ -1627,6 +1627,67 @@ def print_kpi3() -> None:
         print("  ▶ 계측이 덜 섰다 — 파일럿을 받아도 무엇을 얼마나 썼는지 셀 수 없다.")
 
 
+# ─────────────────── 직거래 연결 층 (2026-11-18) ───────────────────
+# 건물주가 빈 자리를 직접 올리고(소유자 확인 뒤 게시) 창업자가 직접 문의·방문 예약하는 층이다
+# (docs/decision-owner-direct-matching-2026-11-18.md). KPI③ 처럼 **퍼센트를 만들지 않는다** — 매물·문의 건수는
+# 산출물이 아니라 계정 DB 에 살고 이 스크립트는 네트워크를 타지 않는다. 여기서는 배선과 법적 잠금만 센다.
+# 배선 100% 는 확인 매물 0건과 양립한다 — 실적은 `GET /api/v1/admin/direct/funnel` 로만 본다.
+
+def _direct_instrumentation() -> list[tuple[bool, str]]:
+    """직거래 층 배선·법적 잠금 — 소스에서 직접 확인한다(선언이 아니라 실물)."""
+    be = ROOT / "apps" / "backend"
+    v1 = be / "app" / "api" / "v1"
+
+    def _has(p: Path, *needles: str) -> bool:
+        try:
+            text = p.read_text(encoding="utf-8")
+        except OSError:
+            return False
+        return all(n in text for n in needles)
+
+    migrations = sorted((be / "migrations" / "versions").glob("*owner_direct*.py"))
+    direct_tests = sorted((be / "tests").glob("test_direct_*.py"))
+    return [
+        ((be / "app" / "models" / "direct.py").exists() and bool(migrations),
+         "표·마이그레이션 (models/direct.py · migrations/versions/*owner_direct*) — 프로덕션 반영은 수동(alembic upgrade)"),
+        (_has(v1 / "direct.py", "public_router", "account_router") and _has(v1 / "router.py", "direct."),
+         "공개(계측) · 계정(비계측 — KPI③ 오염 방지) 라우터 등록 (api/v1/direct.py · router.py)"),
+        (_has(v1 / "admin.py", "/direct/verifications", "/direct/funnel"),
+         "관리자 창구 — 소유자 확인 · 신고 · 입금 확인 · 퍼널 (/api/v1/admin/direct/*)"),
+        (_has(be / "app" / "services" / "direct_listings.py", "DIRECT_NOTICE"),
+         "고지문 DIRECT_NOTICE — 「중개하지 않으며 중개보수·성사 수수료를 받지 않습니다」"),
+        (_has(be / "app" / "services" / "auth_service.py", "direct"),
+         "탈퇴 시 직거래 개인정보 파기·결제 신청 익명화 (services/auth_service.delete_account)"),
+        (any(p.name == "test_direct_compliance.py" for p in direct_tests),
+         f"법적 불변식 잠금 테스트 (tests/test_direct_*.py {len(direct_tests)}개 — 성사 수수료 없음 · 확인 뒤 공개 · 마스킹 · 광고 표시)"),
+        # 2026-11-21 — 입점 희망서 · 조건 제안서 층(docs/decision-founder-brief-2026-11-21.md)
+        (bool(sorted((be / "migrations" / "versions").glob("*founder_brief*.py")))
+         and _has(be / "app" / "models" / "direct.py", "class DirectBrief", "class DirectOffer"),
+         "입점 희망서·공개 동의·조건 제안서 표 (models/direct.py · migrations/versions/*founder_brief*) — 프로덕션 반영은 수동"),
+        (_has(be / "app" / "services" / "direct_briefs.py", "CONSENT_FIELDS", "PRIVATE_FIELDS", "owner_district_ids",
+              "DEMAND_MIN_N"),
+         "희망서 단계별 공개 — ① 확인 매물 있는 건물주 · ② 창업자 동의 · ③ 본인만 · 묶음 수요 n≥3 (services/direct_briefs)"),
+        (_has(be / "app" / "services" / "direct_connect.py", "propose_offer", "set_contract_path", "PARTNER_BROKERS")
+         and _has(be / "app" / "services" / "direct_fit.py", "required_sales"),
+         "조건 제안서·팝업 신청·계약 진행 방법 · 조건표/요구 판매량 (services/direct_connect · direct_fit)"),
+        (_has(be / "tests" / "test_direct_briefs.py", "test_no_credit_score_anywhere"),
+         "신용 점수·등급·순위 없음 잠금 (tests/test_direct_briefs.py — 신용정보법 · KPI 규칙)"),
+    ]
+
+
+def print_direct_layer() -> None:
+    checks = _direct_instrumentation()
+    done = sum(1 for ok, _ in checks if ok)
+    print("\n" + "=" * 78)
+    print("직거래 연결 층 (건물주 확인 매물 · 입점 희망서 · 문의 · 방문 · 조건 제안 · 2026-11-18/21) — 위 진행률에 **포함되지 않는다**")
+    print(f"  배선 {done}/{len(checks)}")
+    for ok, label in checks:
+        print(f"    {'✅' if ok else '⛔'} {label}")
+    print("  ▶ 배선 100% 는 확인 매물 0건과 양립한다 — 실적(매물·문의·방문·결과 자기보고)은 다음으로 본다:")
+    print("      curl -H \"X-Admin-Token: $ADMIN_TOKEN\" .../api/v1/admin/direct/funnel")
+    print("    돈은 정액 광고·구독 + 정보 판매뿐이다(성사·중개 수수료 금지 — CLAUDE.md §직거래 연결 규칙).")
+
+
 # ─────────────────── KPI① 창업자 답 — 빈 층 판정 실력 ───────────────────
 # 창업자 앱의 첫 약속(「계약하기 전에 어느 건물 몇 층이 비었는지」)이 맞는가를 재는 축이다(2026-10-19 추가).
 # 판정 규칙은 라벨이 0/458 인 상태에서 사전등록했다 → data/validation/score_floor_labels.py §판정 ·
@@ -1772,6 +1833,12 @@ def main() -> int:
             "kpi1_rank_survival": {"in_progress_pct": False, **_rank_survival_kpi()},
             # Program 지원 공고 매칭 정밀도 — 같은 이유로 진행률 밖(2026-11-15 · 3단계 G3).
             "kpi1_support_precision": {"in_progress_pct": False, **_support_kpi()},
+            # 직거래 연결 층(2026-11-18) — 배선·법적 잠금만. 실적은 계정 DB(/admin/direct/funnel)에 산다.
+            "direct_layer": {
+                "in_progress_pct": False,
+                "instrumentation": [{"ok": ok, "what": what} for ok, what in _direct_instrumentation()],
+                "measured_by": "GET /api/v1/admin/direct/funnel",
+            },
         }, ensure_ascii=False, indent=1))
         return 0
 
@@ -1833,6 +1900,7 @@ def main() -> int:
     print_rank_survival_kpi(_rank_survival_kpi())
     print_support_kpi(_support_kpi())
     print_kpi3()
+    print_direct_layer()
     return 0
 
 
