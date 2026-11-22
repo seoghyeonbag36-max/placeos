@@ -26,7 +26,7 @@ description: PPPP 트랙 — Program(2026-11-22 · 계약을 맺고 개업한 �
   (지도 탐색 Program 입구) · 업종 바꾸기 「바꾼 뒤 이웃과 잇고 알릴게요」
 - ⛔ **다시 들이지 말 것(사용자 지시 없이)**: 지원 프로그램(지원 공고 매칭) · 가설 설정/검증 계획(ProgramStudio · 흐름 ④ 작게 확인 · AI 생성) ·
   검증 방식(팝업·가오픈·MVP) 고르기 · 건물주 공실 알리기 보기 · 계약 전 질문(권리금·임대인 응대) · 지원사업 신청 창구. 서버의
-  `/marketing/generate` · `/program/support` · `/marketing/sites` 는 남아 있지만 **부르는 화면이 없다** — 화면에서 부르지 말 것
+  `/marketing/generate` · `/program/support` · `/marketing/sites` 는 **지웠다**(2026-11-22) — 되살리려면 사용자 결정이 먼저다
 - 윤리 기준(필수): **Humanistic Authority** — 균형(Balance)·공생(Symbiosis)·공감(Empathy). PlaceOS 는 대신 홍보하거나 행사를 열지 않는다.
 - ⛔ **이 트랙의 구현 화면(`CampaignStudio` · `#/explore` 레일 「Program」 · TrackMapFrame 「오프라인 캠페인」)은 절대 화면에서 빼지 않는다**
   (2026-10-21 PPPP 화면 보존 규칙). 화면 안 기능은 사용자가 그 턴에 명시할 때만 줄인다. 정본 `CLAUDE.md` · 가드 `src/ppppScreens.test.tsx`.
@@ -63,7 +63,7 @@ description: PPPP 트랙 — Program(2026-11-22 · 계약을 맺고 개업한 �
 - GET  `/api/v1/program/plan`           ← 실행 카드(기본 `mode=actual_open` · 근거 있는 카드만 · 금액 없음)
 - GET/POST `/api/v1/program/campaigns`  ← 실행 기록(캠페인 원장 · 로그인)
 - GET  `/api/v1/marketing/events`       ← 행사 연계 후보(LLM 안 부름)
-- (화면이 부르지 않음 · 남김) `/program/support` · `POST /marketing/generate` · `/marketing/sites` — 지울지는 사용자 결정
+- (지웠다 · 11-22) `/program/support` · `POST /marketing/generate` · `/marketing/sites`
 
 ## 이번 목표
 

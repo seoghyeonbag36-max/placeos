@@ -1325,7 +1325,7 @@ def program_track(total: int) -> Track:
     네트워킹 · 오프라인 마케팅 솔루션(실행 카드 · 행사 연계 · 실행 기록) 두 기능이 **코드에 배선됐는지**를 센다.
     그전 게이트 — 생성 엔진 · 화면 · HA 검증 / 검증 브리프·지표 계약 / 입력 계약 3층 / 출력 분리 / 지원 프로그램 · 공고 원천 3종 배선 /
     가설 검증 · 목표선 = Posting 손익분기 / 상권 콘텐츠 컨텍스트 / 검색 트렌드 라벨 — 은 걷었다: 그 기능(검증 계획 생성 · 지원 공고 ·
-    그 입력 자료)이 Program 에서 제외돼 화면이 부르지 않는다. 서버 코드(/marketing/generate · /program/support)는 남았다.
+    그 입력 자료)이 Program 에서 제외돼 화면이 부르지 않는다. 서버 코드(/marketing/generate · /program/support · /marketing/sites)도 지웠다.
     그전 정의(2026-09-17 검증하려는 창업자 · 11-07 네 기능)의 게이트는 git 이력에 있다.
     """
     t = Track("Program", "Phase 6-2 (계약·개업한 자리)")
@@ -1618,7 +1618,7 @@ def print_rank_survival_kpi(rk: dict) -> None:
 # ─────────────────── KPI① Program — 지원 공고 매칭 정밀도 ───────────────────
 # ⚠ 2026-11-22 추적 중단 — Program 에서 「지원 프로그램」을 제외했다(사용자 정의 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인
 # 마케팅으로만」 → docs/decision-program-post-opening-2026-11-22.md). 화면이 그 매칭을 보이지 않으니 이 축은 KPI 가 아니다. 계측 코드·
-# 사전등록 표본은 남겼다(서버 /program/support 경로와 함께) — 판정은 기록으로만 싣고 어디에도 게이트로 쓰지 않는다.
+# 사전등록 표본과 채점기는 남겼다(서버 /program/support 경로는 지웠다 — 표본 재동결은 못 한다) — 판정은 기록으로만 싣고 어디에도 게이트로 쓰지 않는다.
 # Program 「지원 프로그램」이 스스로 하는 말(「조건이 맞을 수 있는 공고」)이 맞는가를 재는 축이었다(2026-11-15 추가 · 3단계 G3).
 # 판정 규칙은 표본을 뽑기 전·라벨이 0 인 상태에서 사전등록했다 → data/validation/score_support_labels.py ·
 # docs/prereg-program-support-precision-2026-11-15.md. 트랙 진행률에는 섞지 않는다 — Program 100% 는 「화면 배선이 끝났다」는

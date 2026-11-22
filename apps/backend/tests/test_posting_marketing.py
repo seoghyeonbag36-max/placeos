@@ -3,7 +3,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from tests.conftest import _act, _perf, _signal
 
 client = TestClient(app)
 V1 = "/api/v1"
@@ -203,29 +202,6 @@ def test_falls_back_to_seed_when_gold_missing(monkeypatch):
     monkeypatch.setattr(posting_inputs, "_cache", {})   # 뒤 테스트에 캐시 오염 방지
 
 
-def test_generate_program_stub(monkeypatch):
-    """LLM 키 미설정 시 규칙 기반 스텁이 ProgramPlan 스키마로 응답한다."""
-    from app.core.config import settings
-    monkeypatch.setattr(settings, "llm_api_key", "")
-    brief = {
-        "item": "산미 중심 스페셜티 원두 팝업",
-        "category": "카페",
-        "mode": "popup",
-        "stage": "pre_founder",
-        "district_id": "gangnam-garosugil",
-    }
-    r = client.post(f"{V1}/marketing/generate", json=brief)
-    assert r.status_code == 200
-    body = r.json()
-    assert body["item"] == "산미 중심 스페셜티 원두 팝업"
-    assert body["mode"] == "popup" and body["stage"] == "pre_founder"
-    assert body["source"] == "rule-stub"
-    assert len(body["online"]) >= 1 and len(body["offline"]) >= 1
-    assert body["signals"], "검증 지표 없이 내려보내면 홍보 생성기로 되돌아간다"
-    assert all(p["kind"] == "online" for p in body["online"])
-    assert all(p["kind"] == "offline" for p in body["offline"])
-
-
 _BRIEF = {
     "item": "제철 해산물 오마카세 가오픈",
     "category": "F&B",
@@ -236,56 +212,6 @@ _BRIEF = {
     "start_date": "2026-10-05",
     "run_days": 14,
 }
-
-
-def test_generate_program_llm(monkeypatch, signed_in):
-    """로그인 + LLM 키 설정 시 _call_llm 결과가 ProgramPlan(source=llm)으로 매핑된다."""
-    from app.core.config import settings
-    from app.schemas.marketing import LLMProgramPlan
-    from app.services import marketing as mkt
-
-    monkeypatch.setattr(settings, "llm_api_key", "test-key")
-    fake = LLMProgramPlan(
-        online=[_perf(channel="인스타그램", content="릴스 게시", rationale="자리 근거")],
-        offline=[_act(channel="전단", content="시식 이벤트", rationale="유동객 근거")],
-        signals=[_signal()],
-        ha_check="균형·공생·공감 점검 통과",
-    )
-    monkeypatch.setattr(mkt, "_call_llm",
-                        lambda brief, ctx, site=None, brief_ctx=None: fake)
-
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
-    assert r.status_code == 200
-    body = r.json()
-    assert body["source"] == "llm"
-    assert body["online"][0]["kind"] == "online"
-    assert body["offline"][0]["kind"] == "offline"
-    assert body["signals"][0]["decision"], "판정선이 응답에서 사라졌다"
-
-
-def test_generate_program_llm_error_falls_back(monkeypatch, signed_in):
-    """LLM 호출 실패 시 규칙 기반 스텁으로 폴백한다 (요청은 200 유지)."""
-    from app.core.config import settings
-    from app.services import marketing as mkt
-
-    monkeypatch.setattr(settings, "llm_api_key", "test-key")
-
-    def boom(brief, ctx, site=None, brief_ctx=None):
-        raise RuntimeError("api down")
-
-    monkeypatch.setattr(mkt, "_call_llm", boom)
-
-    # 로그인해서 LLM 경로에 실제로 들어가게 한다 — 익명이면 호출 전에 스텁이라 폴백을 재지 못한다.
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
-    assert r.status_code == 200
-    assert r.json()["source"] == "rule-stub"
-
-
-def test_generate_rejects_a_half_budget_band():
-    """예산은 하한·상한을 함께 준다 — 반쪽짜리를 구간처럼 인용하게 두지 않는다."""
-    r = client.post(f"{V1}/marketing/generate",
-                    json={**_BRIEF, "budget_krw_min": 300000})
-    assert r.status_code == 422, r.text
 
 
 def test_district_context_mapping():
@@ -422,54 +348,6 @@ def test_trend_summary_direction_rule():
 # 상호 검색(/places)과 네이버 블로그 스니펫(/reviews)은 **영업 중인 가게**를 특정하는
 # 표면인데, 대상이 아직 그 자리에서 장사한 적 없는 창업자로 바뀌면서 특정할 가게가
 # 없어졌다. 그 자리를 대신하는 것이 아래 세 검사다 — 브리프가 실제로 쓰이는가.
-
-
-def test_brief_reaches_llm_prompt(monkeypatch, signed_in):
-    """브리프가 LLM 컨텍스트에 실린다 — 스키마에만 있고 안 쓰이면 죽은 필드다."""
-    from app.core.config import settings
-    from app.schemas.marketing import LLMProgramPlan
-    from app.services import marketing as mkt
-
-    monkeypatch.setattr(settings, "llm_api_key", "test-key")
-    seen: dict = {}
-
-    def spy(brief, ctx, site=None, brief_ctx=None):
-        seen["brief_ctx"] = brief_ctx
-        seen["prompt"] = mkt._SYSTEM_PROMPT
-        return LLMProgramPlan(
-            online=[_perf(channel="a", content="b", rationale="c")],
-            offline=[_act(channel="d", content="e", rationale="f")],
-            signals=[_signal()], ha_check="ok")
-
-    monkeypatch.setattr(mkt, "_call_llm", spy)
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=signed_in)
-    assert r.status_code == 200
-    assert "제철 해산물 오마카세 가오픈" in seen["brief_ctx"]
-    assert "가오픈" in seen["brief_ctx"], "검증 방식이 컨텍스트에 없다"
-    assert "2026-10-05" in seen["brief_ctx"], "검증 기간이 컨텍스트에 없다"
-    assert "검증 지표" in seen["prompt"], "시스템 프롬프트가 판정을 다루지 않는다"
-
-
-def test_brief_context_marks_claims_as_unverified():
-    """차별점은 **주장**이라고 밝혀 싣는다 — 관측값과 같은 자리에 두면 출처가 섞인다."""
-    from app.services import program_brief
-
-    ctx = program_brief.brief_context({
-        **_BRIEF, "differentiators": ["당일 경매 직송"]})
-    assert "당일 경매 직송" in ctx
-    assert "검증된 사실 아님" in ctx
-
-
-def test_brief_context_always_warns_about_absent_track_record():
-    """③층이 있으면 '이 자리에서 해 본 적 없다'를 **항상** 싣는다.
-
-    종전에는 개업예정일이 있을 때만 이 경고가 붙었다. 대상이 전부 미검증으로 바뀌어
-    가를 '영업 중'이 없으므로 조건이 사라졌다.
-    """
-    from app.services import program_brief
-
-    minimal = {"item": "x", "category": "카페", "mode": "mvp", "stage": "pre_founder"}
-    assert "장사한 적이 **없다**" in program_brief.brief_context(minimal)
 
 
 # ── foot 거점 내 서열: 시드 → 최근접 상권 실측 (2026-08-24) ─────────────────

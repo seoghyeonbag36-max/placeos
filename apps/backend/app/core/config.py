@@ -121,23 +121,13 @@ class Settings(BaseSettings):
     # (docs/api-keys-and-specs.md·.env.example 과 동일 기준 — 2026-08-01 정합).
     # 품질이 더 필요한 거점 시연에서는 .env 의 LLM_MODEL 로 claude-opus-5 를 덮어쓴다.
     llm_model: str = "claude-sonnet-5"
-    # 조직 단위 상위 모델(2026-11-15). **둘 다 채워야 켜진다** — 하나라도 비면 모든 호출이
-    # 위 llm_model 로 간다(기본 동작 불변). 시연·파일럿 조직의 검증 프로그램 생성
-    # (`POST /marketing/generate`)에만 쓴다. 상권 문구(`GET /marketing/{id}`)는 결과를
-    # 거점 단위로 캐시해 모든 호출자가 나눠 쓰므로 조직별로 모델을 가르지 않는다.
-    # 예: LLM_PREMIUM_MODEL=claude-fable-5-2 · LLM_PREMIUM_ORG_IDS=<org id>,<org id>
-    # ⚠ 한도(llm_daily_quota_per_org 등)는 모델과 무관하게 횟수로 센다 — 상위 모델은 같은
-    # 횟수에 비용이 더 나간다. 조직 목록을 좁게 유지할 것.
-    llm_premium_model: str = ""
-    llm_premium_org_ids: str = ""              # 쉼표·공백 구분 org id (hex 32자 · 하이픈 허용)
+    # (2026-11-22) 조직 단위 상위 모델 설정(LLM_PREMIUM_MODEL · LLM_PREMIUM_ORG_IDS)은 제거했다 — 쓰던 `POST /marketing/generate` 가 없다.
     # 외부 AI 창업 코파일럿 (Posting) — 미설정 시 내부 3-Tier 폴백
     posting_copilot_url: str = ""
     posting_copilot_key: str = ""
     # 요청량 제어(2026-10-06 · services/rate_limit.py). **인스턴스마다 따로 센다** — 실효 상한은
     # 값 × 인스턴스 수(최대 3대). 값은 도출이 아니라 고른 것이다: 파일럿 5~10조직이 하루에 쓰는
     # 양보다 넉넉하고, 남이 반복 호출해도 하루 비용이 정해진 선을 넘지 않을 만큼 작다.
-    llm_daily_quota_per_org: int = 20          # 조직당 24시간 LLM 생성 횟수
-    llm_daily_cap_per_instance: int = 100      # 인스턴스 전체 24시간 LLM 생성 횟수
     signup_hourly_cap_per_instance: int = 20   # 1시간에 새로 만드는 계정 수(비밀번호·구글 합산)
     login_failures_per_email: int = 10         # 15분 안에 이 횟수를 틀리면 그 이메일의 비밀번호 로그인 429
     # 관리자 화면은 한 번 열 때 관리자 API 를 여러 개 부른다 — 토큰을 잘못 넣은 한 번이 실패 여러 건이다.
