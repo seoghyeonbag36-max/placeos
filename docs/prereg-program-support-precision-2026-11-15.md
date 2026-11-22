@@ -2,7 +2,7 @@
 
 > ⚠ **상태: 2026-11-22 추적 중단.** 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅으로만, 나머지 기능은 제외」로
 > 「지원 프로그램」이 Program 에서 빠져 화면이 이 매칭을 보이지 않는다 — KPI 는 사용자가 보는 답을 재는 것이라 이 축은 KPI 가 아니다.
-> 계측 코드(`data/validation/score_support_labels.py` · `support_sample.py`)와 서버 경로(`GET /program/support`)는 남겼고,
+> 채점기(`data/validation/score_support_labels.py`)와 이미 동결한 표본은 남겼고(`support_sample.py` 는 라이브 동결 단계만 걷었다 · 서버 경로 `GET /program/support` 는 같은 날 지웠다),
 > `pppp_status.py --json` 의 `kpi1_support_precision` 은 `retired` 꼬리표를 달고 기록으로만 싣는다. 다시 켜려면 지원 프로그램을 화면에 되돌리는 결정이 먼저다
 > → [decision-program-post-opening-2026-11-22.md](decision-program-post-opening-2026-11-22.md). 아래는 등록 당시 그대로다.
 >

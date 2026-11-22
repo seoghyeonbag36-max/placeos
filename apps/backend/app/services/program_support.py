@@ -22,13 +22,12 @@ from datetime import date
 from html import unescape
 
 from app.services import districts as svc
-from app.services import events, program_sources as src
+from app.services import program_sources as src
 
 # founder 의 이름표는 2026-11-22 「기창업자(개업 후)」 — Program 네트워킹이 개업한 자리 기준으로 이 단계만 쓴다
 # (그전 「기창업자(업종 바꾸기·상권 옮기기)」 · 지원 공고 매칭(/program/support)은 화면에서 뺐고 서버 경로만 남았다).
 STAGES = {"pre_founder": "예비창업자", "founder": "기창업자(개업 후)"}
 _FOUNDER_ENYY = ("1년미만", "2년미만", "3년미만", "5년미만", "7년미만", "10년미만")
-_MAX_ITEMS = 80
 _SUMMARY_MAX = 200
 
 # K-Startup supt_regin · 기업마당 해시태그가 쓰는 짧은 지역 이름. 광주는 2026 통합으로 원천마다 표기가 갈린다.
@@ -187,92 +186,9 @@ def kstartup_item(r: dict, region: Region, stage: str | None, terms: list[str], 
     }
 
 
-# ── 정부24 혜택 ────────────────────────────────────────────────────────────
-def gov24_region(r: dict, region: Region) -> str | None:
-    """정부24 혜택이 이 거점 지역 것인가 — 맞으면 이유 문구, 아니면 None.
-
-    중앙행정기관·공공기관 → 전국. 광역시도 → 시도 이름. 시군구 → 「서울특별시 성동구」처럼 시도 + 시군구.
-    지방 출자·출연기관·지방공기업 → 이름에 지역이 있을 때만(없으면 어느 지역 기관인지 모른다).
-    「경기도 광주시」가 광주(전남광주) 거점에 섞이지 않도록 시군구는 시 이름 전체(「광주광역시」)로 맞춘다.
-    """
-    typ = str(r.get("소관기관유형") or "")
-    org = str(r.get("소관기관명") or "")
-    in_sido = region.sido in org or region.city in org or any(t in org for t in region.tags)
-    if typ in ("중앙행정기관", "공공기관"):
-        return "전국(중앙·공공기관)"
-    if typ == "광역시도":
-        return f"지역: {org}" if in_sido else None
-    if typ == "시군구":
-        return f"지역: {org}" if (in_sido and region.local and region.local in org) else None
-    return f"지역 기관: {org}" if any(t in org for t in region.tags) else None
 
 
-def gov24_item(r: dict, region: Region, stage: str | None, terms: list[str]) -> dict | None:
-    why = gov24_region(r, region)
-    if not why:
-        return None
-    title = clean(r.get("서비스명")) or "(서비스명 없음)"
-    target = clean(r.get("지원대상"), _SUMMARY_MAX)
-    summary = clean(r.get("서비스목적요약"), _SUMMARY_MAX) or clean(r.get("지원내용"), _SUMMARY_MAX)
-    text = " ".join(filter(None, [title, target, summary, clean(r.get("선정기준"))]))
-    startup = "창업" in text or "예비" in text or str(r.get("서비스분야") or "") == "고용·창업"
-    if stage == "pre_founder" and not startup:
-        return None          # 영업 중 사업자만 받는 혜택은 예비창업자에게 소음이다
-    matched = [why]
-    if stage:
-        matched.append(f"단계: {STAGES[stage]}" + (" · 창업 언급" if startup else ""))
-    if (hits := _mentions(text, terms)):
-        matched.append("업종 언급: " + "·".join(hits))
-    return {
-        "source": "gov24", "source_label": src.SOURCE_LABEL["gov24"], "id": f"gov24-{r.get('서비스ID')}",
-        "title": title, "org": clean(r.get("소관기관명")), "region": None, "category": clean(r.get("서비스분야")),
-        "target": target, "start": None, "end": None, "deadline_text": clean(r.get("신청기한"), 120),
-        "url": clean(r.get("상세조회URL")), "apply_url": None, "summary": summary, "matched": matched,
-    }
 
-
-# ── 기업마당 지원사업정보 ────────────────────────────────────────────────────
-def _pick(r: dict, *keys: str) -> object:
-    for k in keys:
-        if r.get(k) not in (None, ""):
-            return r.get(k)
-    return None
-
-
-def bizinfo_item(r: dict, region: Region, stage: str | None, terms: list[str], today: date) -> dict | None:
-    start, end = parse_range(_pick(r, "reqstBeginEndDe", "reqstDt"))
-    if end and end < today:
-        return None
-    title = clean(_pick(r, "pblancNm", "title")) or "(공고명 없음)"
-    category = clean(_pick(r, "pldirSportRealmLclasCodeNm", "lcategory"))
-    summary = clean(_pick(r, "bsnsSumryCn", "description"), _SUMMARY_MAX)
-    target = clean(r.get("trgetNm"))
-    text = " ".join(filter(None, [title, summary, target, category, clean(r.get("hashTags"))]))
-    startup = "창업" in text
-    if stage == "pre_founder" and not startup:
-        return None
-    inst = clean(_pick(r, "jrsdInsttNm", "author"))
-    inst_sido = sido_of_org(inst)
-    if inst_sido and inst_sido != region.sido:
-        return None          # 다른 시도청 공고 — 해시태그는 17개 시도를 다 달아 거르지 못한다(위 _SIDO_GOV)
-    matched = [f"지역: {inst}" if inst_sido else f"전국({inst or '중앙·공공기관'})"]
-    if stage:
-        matched.append(f"단계: {STAGES[stage]}" + (" · 창업 언급" if startup else ""))
-    if (hits := _mentions(text, terms)):
-        matched.append("업종 언급: " + "·".join(hits))
-    pid = clean(_pick(r, "pblancId", "seq"))
-    return {
-        "source": "bizinfo", "source_label": src.SOURCE_LABEL["bizinfo"], "id": f"biz-{pid}",
-        "title": title, "org": inst, "region": region.bizinfo_tag if inst_sido else "전국",
-        "category": category, "target": target, "start": _iso(start), "end": _iso(end),
-        "deadline_text": None if end else clean(_pick(r, "reqstBeginEndDe", "reqstDt"), 60),
-        "url": clean(_pick(r, "pblancUrl", "link")), "apply_url": clean(r.get("rceptEngnHmpgUrl")),
-        "summary": summary, "matched": matched,
-    }
-
-
-# ── 묶기 ───────────────────────────────────────────────────────────────────
-_SOURCE_ORDER = {"kstartup": 0, "bizinfo": 1, "gov24": 2}
 
 
 # 기업마당 제목 머리 「[경기] 안성시 …」·「[전남광주] 해남군 …」 — 그 시·군 주민·기업 대상인 경우가 많다.
@@ -298,46 +214,3 @@ def region_rank(it: dict, region: Region) -> int:
         return 0 if local and m.group(1) == local else 3
     return 1
 
-
-def support_programs(district_id: str, stage: str | None = None, industry: str | None = None,
-                     *, today: date | None = None) -> dict | None:
-    region = region_of(district_id)
-    if region is None:
-        return None
-    if stage not in (None, *STAGES):
-        raise ValueError("stage 는 pre_founder · founder 중 하나다")
-    today = today or events.today_kst()
-    terms = industry_terms(industry)
-    items: list[dict] = []
-    statuses: list[dict] = []
-
-    # 세 원천을 동시에 부른다 — 응답 시간이 합이 아니라 가장 느린 하나다(program_sources.fetch_all)
-    ks, bz, gv = src.fetch_all(src.kstartup_open, lambda: src.bizinfo("support", region.bizinfo_tag),
-                               src.gov24_smallbiz)
-    got = [it for r in ks.rows if not is_network_category(clean(r.get("supt_biz_clsfc")))
-           if (it := kstartup_item(r, region, stage, terms, today))]
-    items += got
-    statuses.append(src.status_of("kstartup", ks, len(got)))
-
-    got = [it for r in bz.rows if (it := bizinfo_item(r, region, stage, terms, today))]
-    items += got
-    statuses.append(src.status_of("bizinfo", bz, len(got)))
-
-    got = [it for r in gv.rows if (it := gov24_item(r, region, stage, terms))]
-    items += got
-    statuses.append(src.status_of("gov24", gv, len(got)))
-
-    # 마감 임박 순 — 마감일이 있는 공고 먼저, 같은 날이면 업종 언급이 있는 것 먼저, 그다음 원천 순.
-    def sort_key(it: dict) -> tuple:
-        has_terms = any(m.startswith("업종 언급") for m in it["matched"])
-        # 지역이 좁은 순 → 업종 언급 → 마감이 가까운 순(마감일 없는 혜택은 뒤) — 화면이 이 순서를 그대로 밝힌다
-        return (region_rank(it, region), not has_terms, it["end"] is None, it["end"] or "",
-                _SOURCE_ORDER[it["source"]], it["title"])
-
-    items.sort(key=sort_key)
-    return {
-        "district_id": district_id, "region": region.as_dict(), "stage": stage, "industry": industry,
-        "items": items[:_MAX_ITEMS], "total": len(items), "sources": statuses,
-        "note": ("조건이 맞을 수 있는 공고입니다 — 지역·단계·업종 문구만 맞춰 봤어요. 자격·선정 여부와 "
-                 "지원 금액은 공고 원문에서 확인하세요. 지원금은 Posting 회수기간 계산에 넣지 않아요."),
-    }

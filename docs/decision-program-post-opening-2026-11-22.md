@@ -11,6 +11,7 @@
 | **남긴 것** | **네트워킹**(공식 행사·네트워크 공고 · 함께 모이는 이웃 업종 · 개업 뒤 이웃·상인 조직과 이야기할 것 · 교육·상담·네트워크 기관) → **오프라인 마케팅 솔루션**(실행 카드 — 개업 뒤만 · 행사 연계 계획 · 실행 기록(캠페인 원장)) |
 | **뺀 것(Program 에서)** | 지원 프로그램(지원 공고 매칭) · 가설 설정(검증 계획 · `ProgramStudio`) · 흐름 ④ 「작게 확인」(Q10 방식~R7 검증 계획 · AI 생성) · 오프라인 마케팅의 창업자/건물주 보기 중 **건물주 「비어 있는 자리를 알리고 채우기」**(계약 전 일) |
 | **두 기능 안에서 뺀 계약 전 요소** | 네트워킹의 「계약 전에 물어볼 것」(권리금 · 임대인 응대 · 폐업 이유) · 지원사업 신청 창구(소상공인24 · K-Startup 공고 · 기업마당 공고 · 보증) · 실행 카드의 「검증 방식」(팝업 · 가오픈 · MVP) 고르기 · 카드 측정을 「가설 검증 판정표」로 넘기던 안내 |
+| **서버에서 지운 것**(같은 날 사용자 확인) | `POST /marketing/generate` · `GET /program/support` · `GET /marketing/sites` 와 그것만 쓰던 코드(§3) |
 | **그대로 둔 것** | Program **화면**(레일 · 지도 탐색 트랙 · TrackMapFrame 「오프라인 캠페인」) · 흐름·랜딩의 진입로 · 랜딩 네 질문(문구만 바꿈) · 가드 `ppppScreens.test.tsx`(무수정 통과) · 건물주의 팝업 설정·받은 입점 희망서(건물주 화면 `#/owner` · `#/owner/briefs` · Posting 첫 쪽 「건물주라면」에 그대로) · 서버 경로(§3) |
 
 ## 1. 해석 — 이렇게 정했다(사용자가 바꿀 수 있다)
@@ -36,7 +37,12 @@ PPPP 보고서 제거(같은 날)와 같은 성격이라 CLAUDE.md 보존 규칙
 ## 3. 서버 · 계측
 
 - **바꾼 것**: `services/program_network.py`(질문 → 개업 뒤 이웃과 이야기할 것 · 기관 → 교육·상담·네트워크 · 안내 문장) · `services/program_plan.py`(기본값 `actual_open` · 개업 뒤 문구 — 이웃 카드 「개업 뒤」, 자체 접점 「QR 첫 방문 쿠폰·소식 알림」 · 측정은 실행 기록으로) · `services/program_support.STAGES["founder"]` 이름표 「기창업자(개업 후)」 · `GET /program/plan` 기본값 `actual_open`. 백엔드 테스트 2건 추가(`test_network_is_for_the_opened_space_not_before_contract` · `test_plan_defaults_to_after_opening_and_measures_into_the_ledger`).
-- **남긴 것(부르는 화면 없음)**: `POST /marketing/generate`(검증 계획 생성 · LLM — 로그인 + 조직 한도 · 익명은 규칙 스텁) · `GET /program/support`(지원 공고) · `GET /marketing/sites`. 지우면 `ha_guard` · `rate_limit` · `program_brief` · 테스트 10여 개 · 데이터 KPI 표본(`data/validation/support_sample.py`)이 함께 움직여 이번 범위(화면의 기능)를 넘는다. ⚠ `/marketing/generate` 는 화면이 없어도 로그인한 계정이면 한도 안에서 LLM 을 부른다 — 지울지는 사용자 결정(§6).
+- **지운 것(2026-11-22 사용자 「네 가지 해석 모두 괜찮아 · 세 경로 삭제해줘」)**: `POST /marketing/generate`(검증 프로그램 생성 · LLM) · `GET /program/support`(지원 공고) · `GET /marketing/sites`(공실 유닛 목록) 와 그것만 쓰던 코드 —
+  `services/program_brief.py` · `services/program_site.py` · `marketing.generate_program`·`_call_llm`·`_rule_stub`·시스템 프롬프트 · `ha_guard.check_program` 과 그 규칙 8개(미검증 경험 · 검증 지표 · 채널 균형 · 행사 인용 · 예산 …) ·
+  `program_support.support_programs`·정부24 원천(`program_sources.gov24_smallbiz`) · 스키마(`ProgramBrief`·`ProgramPlan`·`ChannelPlan`·`ValidationSignal`·`LLMProgramPlan`·`VacantSite*`·`SupportItem`·`SupportPrograms`) ·
+  LLM 생성 한도(`rate_limit.try_llm` · `llm_daily_*` · `llm_premium_*` 설정 · `.env.example`) · 테스트(`test_program_site` · `_output_split` · `_premium_model` · `_actual_open` · `_break_even` · `ha_guard` 의 프로그램 검사 · LLM 문 · 실호출 · 한도).
+  **남긴 것**: 상권 마케팅 `GET /marketing/{id}`(LLM · 시드 폴백) · `/marketing/events` · `ha_guard.check_district`(상권 카피 검사 — 규칙 테스트를 `check_district` 직접 호출로 옮겼다) · `program_support` 의 지역·공고 판정 도우미(네트워킹이 쓴다).
+  KPI 표본(`data/validation/support_sample.py`)은 라이브 동결 단계(`--freeze`)만 걷었다 — 순수 로직·이미 동결한 표본·채점기는 기록으로 남는다.
 - **`scripts/pppp_status.py` Program 트랙**: 두 기능 기준으로 게이트를 다시 세웠다 — 「Program 두 기능 화면 (네트워킹 · 오프라인 마케팅)」(제외한 탭·불러오기가 다시 들어오면 0) · 「네트워킹 · 연락처 없음 계약」(단계 founder 포함) · 「실행 카드 · 개업 뒤(actual_open)」 · 「상권 수요신호 결합」 · 「행사 신선도」 · 「지역 행사 커버리지」(관측). 검증 계획·지원 공고와 그 입력 자료(블로그 키워드·검색 트렌드) 게이트는 걷었다. **진행률 숫자는 분모가 바뀌어 그전 값과 견주지 않는다.**
 - **KPI① 지원 공고 매칭 정밀도** — **추적 중단**(`kpi1_support_precision.retired`). 키·판정은 기록으로 남고 어디에도 게이트로 쓰지 않는다 → [prereg-program-support-precision-2026-11-15.md](prereg-program-support-precision-2026-11-15.md).
 - **데이터 테스트**: `test_program_status_modes.py` 삭제(걷은 검증 모드 게이트의 도우미 `_literal_options` 를 재던 테스트) · `test_progress_docs.py` 단언을 새 게이트로.
@@ -68,6 +74,6 @@ PPPP 보고서 제거(같은 날)와 같은 성격이라 CLAUDE.md 보존 규칙
 
 1. ~~푸시 · PR · 머지 · 배포 승인~~ → 사용자 「작업을 마무리할 것」(2026-11-22) — 앞 커밋 `749ac7a`(Posting 첫 쪽 · Program 첫 탭)와 함께
    브랜치 `feat/posting-program-screens-20261122` 를 PR 로 머지한다(CI 통과 뒤 Cloud Run 자동 배포).
-2. **화면 없는 서버 경로**(`/marketing/generate` · `/program/support` · `/marketing/sites`)를 지울지 — 지우면 관련 테스트·KPI 표본·사전등록 문서를 같은 PR 에서 정리한다.
+2. ~~화면 없는 서버 경로를 지울지~~ → **지웠다**(사용자 11-22 · 별도 PR `chore/remove-unused-program-endpoints-20261122`).
 3. **해석 확인**(§1): 건물주 공실 알리기를 Program 에서 뺀 것 · 흐름 ④ 를 「개업 후」 입구로 바꾼 것 · ③ 의 다음 단추를 「입점 희망서 쓰기」로 한 것 · 네트워킹의 기관 목록에서 지원사업 창구를 뺀 것.
 4. **Neon 마이그레이션**(앞 결정의 §6-3) — 그전엔 프로덕션의 Posting 첫 쪽 칸이 「준비 중」이다. Program 두 기능은 계정 DB 와 무관하게 선다(실행 기록 저장만 로그인 필요).

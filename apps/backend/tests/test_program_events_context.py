@@ -19,7 +19,6 @@
 """
 from __future__ import annotations
 
-from tests.conftest import _act, _perf
 
 import pytest
 
@@ -114,30 +113,6 @@ def test_cache_key_covers_events_file():
     assert events.source_mtime() > 0
     # 행사 mtime 이 키에 섞여 있으므로, 컨텍스트 파일이 없는 거점이라도 0 이 아니다
     assert mkt._context_mtime("garosugil") >= events.source_mtime()
-
-
-def test_event_fee_is_not_fabricated_price():
-    """컨텍스트에 실린 금액을 인용한 것은 지어낸 가격이 아니다 (HA 검증기 연계).
-
-    행사가 컨텍스트에 들어오면서 요금·기간의 숫자가 거기 실린다. 이걸 근거에서 빼면
-    정상 인용이 violation 으로 폐기된다.
-    """
-    from app.schemas.marketing import LLMProgramPlan
-    from app.services import ha_guard
-    from tests.conftest import _signal
-
-    ctx = "상권 행사(공공 문화행사 실데이터, 가까운 순): 재즈 공연(참가비 5,000원, 거점에서 957m)"
-    parsed = LLMProgramPlan(
-        online=[_perf(channel="인스타그램", content="공연 연계 게시",
-                      rationale="인근 행사와 시간대를 맞춘다")],
-        offline=[_act(channel="입간판", content="참가비 5,000원 공연 안내 병기",
-                      rationale="행사 관람객 동선을 잡는다")],
-        signals=[_signal()],
-        ha_check="점검 통과")
-
-    findings = ha_guard.check_program(
-        parsed, {"item": "원두 팝업", "category": "카페"}, ctx)
-    assert "fabricated_price" not in {f.code for f in findings}
 
 
 def test_context_reads_without_pandas(monkeypatch):

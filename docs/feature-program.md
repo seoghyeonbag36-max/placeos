@@ -2,7 +2,7 @@
 
 > ⚠ **2026-11-22 정본은 §0-Z 다.** 사용자 정의 「Program에서는 '개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅'으로만 기능을 집중하고,
 > 나머지 기능은 제외」로 **네트워킹 · 오프라인 마케팅 솔루션 두 기능만** 남았다. 아래 §0-X·§0-W·§0-V 의 지원 프로그램 · 가설 검증(검증 브리프 ·
-> 검증 지표 · 입력 계약 3층) · 흐름 ④ 작게 확인은 **이력**이다(서버 코드 `services/program_brief.py` · `POST /marketing/generate` 는 남았고 부르는 화면이 없다).
+> 검증 지표 · 입력 계약 3층) · 흐름 ④ 작게 확인은 **이력**이다(서버 코드 `services/program_brief.py` · `program_site.py` · `POST /marketing/generate` · `GET /program/support` · `GET /marketing/sites` 는 2026-11-22 에 지웠다 — 부르는 화면이 없었다).
 
 ## 0-Z. Program = 계약을 맺고 개업한 자리의 네트워킹 · 오프라인 마케팅 (2026-11-22)
 

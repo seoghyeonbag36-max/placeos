@@ -5,9 +5,8 @@
 2026-10-06 점검(docs/finding-project-review-4roles-2026-10-06.md §6 ①)에서 `app/` 에 요청량
 제한이 **0줄**이었다. 그 결과 둘이 열려 있었다.
 
-- **LLM 비용.** `POST /marketing/generate` 는 호출 1회가 곧 LLM 1회이고 캐시가 없다. 익명은
-  막아 두었지만(2026-10-03) 가입이 무료이고 무제한이라, 계정을 만들어 반복 호출하면 막은 의미가
-  없었다.
+- **LLM 비용.** `POST /marketing/generate`(검증 프로그램 생성)는 호출 1회가 곧 LLM 1회이고 캐시가 없어 조직·전역 24시간 한도를 두었다.
+  2026-11-22 그 엔드포인트를 지우면서 LLM 한도(`try_llm`)도 지웠다(상권 문구는 거점 단위 캐시를 모두가 나눠 쓴다).
 - **무차별 대입.** 로그인 비밀번호와 관리자 토큰을 몇 번 틀려도 아무 일이 없었다.
 
 ## 키에 클라이언트 IP 를 쓰지 않는다
@@ -20,7 +19,6 @@
 |---|---|---|---|
 | 로그인 실패 | 이메일(계정 단위) | 15분 | 그 이메일의 비밀번호 로그인 429 (구글 로그인은 그대로) |
 | 새 계정 생성 | 전역 | 1시간 | 가입 429 (기존 계정 로그인은 그대로) |
-| LLM 생성 | 조직 + 전역 | 24시간 | 같은 200 에 규칙 스텁(`stub_reason: "llm_quota"`) |
 | 관리자 토큰 실패 | 전역 | 15분 | 관리자 API 429 — **맞는 토큰도** 창이 끝날 때까지 막힌다 |
 
 관리자 쪽이 전역인 것은 의도다. 계정마다 나눌 키가 없고(토큰 하나), 막지 않으면 대입 속도에
@@ -51,7 +49,6 @@ MAX_KEYS = 10_000
 LOGIN_WINDOW_S = 15 * 60
 ADMIN_WINDOW_S = 15 * 60
 SIGNUP_WINDOW_S = 60 * 60
-LLM_WINDOW_S = 24 * 60 * 60
 
 # 테스트가 시계를 바꿔 끼운다(창이 끝난 뒤를 기다리지 않고 재기 위해).
 _clock = time.monotonic
@@ -97,8 +94,6 @@ class _Window:
 _login_failures = _Window(LOGIN_WINDOW_S)
 _admin_failures = _Window(ADMIN_WINDOW_S, max_keys=1)
 _signups = _Window(SIGNUP_WINDOW_S, max_keys=1)
-_llm_by_org = _Window(LLM_WINDOW_S)
-_llm_global = _Window(LLM_WINDOW_S, max_keys=1)
 
 
 def _blocked(window: _Window, key: str, limit: int, now: float) -> int:
@@ -149,22 +144,8 @@ def try_signup() -> int:
         return retry
 
 
-# ── LLM 생성 (조직 + 전역) ────────────────────────────────────────────────────
-
-def try_llm(org_id: str) -> bool:
-    """LLM 1회를 써도 되면 조직·전역 양쪽에 세고 True. 어느 한쪽이라도 한도면 세지 않고 False."""
-    with _lock:
-        now = _clock()
-        if (_llm_by_org.count(org_id, now) >= settings.llm_daily_quota_per_org
-                or _llm_global.count(GLOBAL, now) >= settings.llm_daily_cap_per_instance):
-            return False
-        _llm_by_org.add(org_id, now)
-        _llm_global.add(GLOBAL, now)
-        return True
-
-
 def reset() -> None:
     """테스트용. 운영 경로에서는 부르지 않는다."""
     with _lock:
-        for w in (_login_failures, _admin_failures, _signups, _llm_by_org, _llm_global):
+        for w in (_login_failures, _admin_failures, _signups):
             w.reset()

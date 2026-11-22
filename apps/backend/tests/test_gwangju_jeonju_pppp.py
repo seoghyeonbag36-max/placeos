@@ -28,10 +28,6 @@ def test_verified_regional_hub_gold_reaches_all_four_tracks(slug):
     for route in ('floor-vacancies', 'rent-history', 'report'):
         response = CLIENT.get(f'{V1}/commercial-districts/{slug}/{route}')
         assert response.status_code == 200, (slug, route, response.text)
-    sites = CLIENT.get(f'{V1}/marketing/sites', params={'district_id': slug})
-    assert sites.status_code == 200, sites.text
-    assert sites.json()['site_source'] != 'unavailable'
-    assert {u['id'] for u in sites.json()['sites']} == {u['id'] for u in vacant_inventory.units(slug)}
     events = CLIENT.get(f'{V1}/marketing/events', params={'district_id': slug})
     assert events.status_code == 200, events.text
     if events.json()['events_source'] == 'none':
@@ -44,11 +40,6 @@ def test_verified_regional_hub_gold_reaches_all_four_tracks(slug):
         assert body['calculation_status'] == 'unavailable'
         assert body['source'] == 'unavailable' and body['scenarios'] == {}
         assert body['unavailable_reason']
-    plan = CLIENT.post(f'{V1}/marketing/generate', json={
-        'district_id': slug, 'unit_id': units[0]['id'] if units else None,
-        'item': '검증용 아이템', 'category': '카페', 'mode': 'actual_open', 'stage': 'pre_founder'})
-    assert plan.status_code == 200, plan.text
-    assert plan.json()['source'] == 'rule-stub'  # LLM 실호출 검증으로 오인하지 않는다.
 
 
 @pytest.mark.parametrize('slug', ['gj-usan', 'gj-ilgok', 'jj-newtown'])

@@ -153,38 +153,6 @@ def signed_in():
         Base.metadata.drop_all(bind=engine)
 
 
-# ── 출력 계약 헬퍼 (2026-08-23 · 2026-09-17 signals 추가) ────────────────────
-# 온라인(모객)과 오프라인(자리·연계)은 대칭이 아니라 필요한 속성이 다르고, 검증
-# 지표(signals)는 또 다른 모양이다(schemas/marketing.py). 테스트들이 검증하는 것은
-# 대개 ha_guard 의 **규칙**이지 계약 자체가 아니므로, 계약이 요구하는 필드는 여기서
-# 기본값으로 채워 본문이 규칙에만 집중하게 한다.
-# 계약 자체는 test_program_output_split.py 가 본다.
-
-def _perf(channel, content, rationale, target="20~30대 직장인",
-          budget_share=100, kpi="저장 수"):
-    from app.schemas.marketing import LLMPerformancePlan
-    return LLMPerformancePlan(channel=channel, content=content, rationale=rationale,
-                              target=target, budget_share=budget_share, kpi=kpi)
-
-
-def _act(channel, content, rationale, timing="주말 오전",
-         actors=None, mode="own"):
-    from app.schemas.marketing import LLMActivationPlan
-    return LLMActivationPlan(channel=channel, content=content, rationale=rationale,
-                             # `or` 를 쓰면 actors=[] 를 기본값이 덮어써서 "주체 없음"을
-                             # 검증할 수 없다. None 만 기본값으로 친다.
-                             timing=timing,
-                             actors=["상인회"] if actors is None else actors, mode=mode)
-
-
-def _signal(name="일 방문객 수", method="입장 카운터 일별 기록",
-            target="일 60명", decision="누적 300명 미만이면 가설을 기각한다"):
-    """검증 지표 1건. 기본값은 **검사를 통과하는** 모양이다 — 목표선에 숫자가 있고
-    기각 조건이 적혀 있다. 그 둘이 빠진 경우는 본문에서 일부러 비워 검증한다."""
-    from app.schemas.marketing import LLMValidationSignal
-    return LLMValidationSignal(name=name, method=method, target=target, decision=decision)
-
-
 # ── 직거래 연결 층(2026-11-18) 공용 환경 ─────────────────────────────────────
 # 계정층 테스트와 같은 방식(SQLite 인메모리 + get_db 오버라이드 · 이전 값 복원)에 외래키를 켠다 — 프로덕션(Neon)은
 # 외래키를 보므로 삭제 순서가 틀리면 여기서 먼저 운다(test_auth_account_delete.py 와 같은 이유).

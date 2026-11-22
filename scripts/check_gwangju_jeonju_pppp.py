@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'apps/backend'))
 
 from data.config.page_hubs import GWANGJU_HUBS, JEONJU_HUBS
-from app.services import districts, marketing, platform_profile, posting, posting_inputs, program_site, vacant_inventory
+from app.services import districts, marketing, platform_profile, posting, posting_inputs, vacant_inventory
 from scripts.chain_status import summarize
 
 ARTIFACTS = ('coverage.json', 'calibration.json', 'page_building_master.geojson',
@@ -61,7 +61,6 @@ def check() -> dict:
                 calculation_status=simulated.get('calculation_status') if simulated else None,
                 unavailable_reason=simulated.get('unavailable_reason') if simulated else None),
             program=dict(context_rows=len(context), context_kinds=sorted({r[0] for r in context}),
-                site_source=program_site.provenance(slug)['site_source'],
                 events_source=marketing.get_district_events(slug)['events_source'], live_llm_verified=False))
         if not coverage['tier'].startswith('Tier1') or cal['anchor_is_fallback'] is not False:
             raise ValueError(f'{slug}: Tier1·실앵커 조건 미충족')
