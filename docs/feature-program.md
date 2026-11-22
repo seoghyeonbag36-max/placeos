@@ -1,4 +1,26 @@
-# Program — 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증
+# Program — 개업한 자리의 네트워킹 · 오프라인 마케팅 솔루션 (2026-11-22 · 그전: 네 기능)
+
+> ⚠ **2026-11-22 정본은 §0-Z 다.** 사용자 정의 「Program에서는 '개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅'으로만 기능을 집중하고,
+> 나머지 기능은 제외」로 **네트워킹 · 오프라인 마케팅 솔루션 두 기능만** 남았다. 아래 §0-X·§0-W·§0-V 의 지원 프로그램 · 가설 검증(검증 브리프 ·
+> 검증 지표 · 입력 계약 3층) · 흐름 ④ 작게 확인은 **이력**이다(서버 코드 `services/program_brief.py` · `POST /marketing/generate` 는 남았고 부르는 화면이 없다).
+
+## 0-Z. Program = 계약을 맺고 개업한 자리의 네트워킹 · 오프라인 마케팅 (2026-11-22)
+
+결정 기록 → [decision-program-post-opening-2026-11-22.md](decision-program-post-opening-2026-11-22.md).
+
+| 기능 | 무엇 | 화면 · 서버 |
+|---|---|---|
+| **네트워킹**(첫 탭) | 이 상권에서 개업한 자리가 함께할 공식 행사·네트워크(K-Startup 「행사ㆍ네트워크」 · 기업마당 행사정보) · 함께 모이는 이웃 업종(lift — 관측일 뿐) · 개업 뒤 이웃·상인 조직과 이야기할 것(체크·메모는 이 브라우저에만) · 교육·상담·네트워크 기관 누리집 | `components/program/NetworkingPanel.tsx` → `GET /program/network?stage=founder` · `services/program_network.py` |
+| **오프라인 마케팅 솔루션** | 실행 카드(개업 뒤 `actual_open` 만 — 행사 · 빈 시간대 · 이웃 교차 쿠폰 · 자리 앞 QR 첫 방문 쿠폰) → 행사 연계 계획(이 브라우저에 저장) → 실행 기록(캠페인 원장 — 운영 여건 · 후보 · 합의/참여 증빙 · 비용/결과 · 수동 결제 증빙, 로그인) | `ExecutionCards.tsx` → `GET /program/plan`(기본 `actual_open`) · `EventLinkPlanner.tsx` → `GET /marketing/events` · `CampaignLedger.tsx` → `/program/campaigns` |
+
+- **뺀 것**: 지원 프로그램(지원 공고 매칭 · KPI① 축 추적 중단) · 가설 설정(`ProgramStudio` — 검증 계획 AI 생성) · 흐름 ④ 「작게 확인」(Q10~R7) · 오프라인 마케팅의 창업자/건물주 보기(건물주 공실 알리기 — 계약 전 일) ·
+  네트워킹의 계약 전 질문 · 지원사업 신청 창구 · 실행 카드의 검증 방식 고르기.
+- **진입**: 지도 탐색 레일 Program(바로 열면 네트워킹) · Posting 「비용 비교 및 결정」의 「이 자리로 개업 후 Program 열기」(실행 기록부터 · 업종·건물 주소 인계) · 흐름 홈 ④ 「개업 후 · PROGRAM」(지도 탐색 Program 을 그 상권으로) · 업종 바꾸기 「바꾼 뒤 이웃과 잇고 알릴게요」.
+- **하지 않는 것(그대로)**: 가게 연락처 수집·연락 대행(정보통신망법 제50조) · 예산·예상 매출 짓기 · 행사 주최·섭외·대행 · 결제(PG 없음 — 수동 증빙만).
+- **테스트**: `pages/CampaignStudio.test.tsx` · `CampaignStudio.handoff.test.tsx` · `components/program/CampaignLedger.test.tsx` · `apps/backend/tests/test_program_renewal.py`
+  (`test_network_is_for_the_opened_space_not_before_contract` · `test_plan_defaults_to_after_opening_and_measures_into_the_ledger`) · 검증 `npm run build` · `npm run lint` · `npm run test`.
+
+---
 
 > PPPP: **Promotion ▶ Program** — ***계약 전에 어떻게 작게 확인하나*** *(2026-11-15 질문 개정 → §0-X) — 이 상권에서 누구와 연결하고,
 > 무엇을 지원받고, 어떻게 알리며, 그 결과로 아이템이 통하는지 어떤 기준으로 판정할 것인가?* Humanistic Authority(균형·공생·공감)를 윤리 기준으로 적용.
@@ -18,7 +40,10 @@
   **「계약 전에 어떻게 작게 확인하나」**(답사·팝업·가오픈 판정). 네 기능과 대상(예비창업자 · 검증하려는 기창업자)은 **그대로다.**
   CLAUDE.md PPPP 표 Program 행과 랜딩 `#how` 질문(`pages/Landing.tsx`)을 같은 PR 에서 옮겼다. 화면 보존 규칙(⛔)·가드(`ppppScreens.test.tsx`)는
   트랙 이름·순서만 보므로 문구 변경은 대상이 아니다.
-- **탭 순서(결정 ③-b · 2026-11-15 시행)**: **가설 설정 → 네트워킹 → 지원 프로그램 → 오프라인 마케팅 솔루션**(`pages/CampaignStudio.tsx` `ORDER`). 기본 탭은 가설 설정이다
+- ⚠ **2026-11-22 대체** — 사용자 정의 「Program = 건물주와 창업자 대상 오프라인 마케팅」과 지적(「Program 이 화면에 구현되지 않은 것으로 보인다」)으로 순서를 바꿨다:
+  **오프라인 마케팅 솔루션(첫 탭 · 맨 위 창업자 · 건물주) → 네트워킹 → 지원 프로그램 → 가설 설정**. Posting 의 「이 자리로 검증 program 만들기」로 오면 가설 설정부터 연다
+  → [decision-pppp-owner-founder-2026-11-22.md](decision-pppp-owner-founder-2026-11-22.md) §9. 아래 ③-b 문단은 그 전의 기록이다.
+- **탭 순서(결정 ③-b · 2026-11-15 시행 · 11-22 대체)**: **가설 설정 → 네트워킹 → 지원 프로그램 → 오프라인 마케팅 솔루션**(`pages/CampaignStudio.tsx` `ORDER`). 기본 탭은 가설 설정이다
   (#232~#234 — 위 §0-W 「첫 탭은 네트워킹이다」는 낡았다). 오프라인 마케팅은 **「개업 뒤」 칸**이라 맨 뒤로 갔다 — 사용자 결정 「Program은 「개업 뒤」 칸으로」.
   - 탭 **이름은 그대로**다(`pppp_status` 가 `label: "오프라인 마케팅 솔루션"` 글자로 찾는다). 「개업 뒤」는 탭 설명(「개업 뒤 — 지역 행사·…」)과 탭 본문 맨 위 안내(`data-after-open`)·
     허브 머리글(「…오프라인 마케팅 솔루션은 개업 뒤에 씁니다」)·가설 설정 3번 안내문·랜딩 Program 본문에 둔다.

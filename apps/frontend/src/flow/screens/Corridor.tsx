@@ -61,9 +61,9 @@ function borrowedRent(n: CorridorNode): "all" | "some" | null {
   return !shared ? null : shared === rated.length ? "all" : "some";
 }
 
-function Synergy({ s, byId, onCompare, onValidate }: {
+function Synergy({ s, byId, onCompare, onOpenDistrict }: {
   s: CorridorSynergy; byId: Map<string, CorridorNode>;
-  onCompare: (ids: string[]) => void; onValidate: (seoulHub: string) => void;
+  onCompare: (ids: string[]) => void; onOpenDistrict: (seoulHub: string) => void;
 }) {
   const g = byId.get(s.node);
   const other = byId.get(s.from === s.node ? s.to : s.from);
@@ -113,7 +113,8 @@ function Synergy({ s, byId, onCompare, onValidate }: {
       {rentLine && <p className="fl-cor-fact">{rentLine}</p>}
       <div className="fl-actions">
         {gHub && oHub && <TextButton onClick={() => onCompare([gHub, oHub])}>두 상권 나란히 보기</TextButton>}
-        {seoulHub && s.kind === "visit_link" && <TextButton onClick={() => onValidate(seoulHub)}>{other.name}에서 작게 확인하기</TextButton>}
+        {/* 2026-11-22: 「…에서 작게 확인하기」(④ 검증 계획)를 뺐다 — Program 범위 축소. 그 서울 상권 소개로 잇는다 */}
+        {seoulHub && s.kind === "visit_link" && <TextButton onClick={() => onOpenDistrict(seoulHub)}>{other.name} 상권 보기</TextButton>}
       </div>
     </li>
   );
@@ -213,7 +214,7 @@ export function Corridor({ id }: { id: string }) {
     ? [focus, ...gyeonggiNodes.map((n) => n.id).filter((x) => x !== focus)] : gyeonggiNodes.map((n) => n.id);
   const synergies = order.flatMap((nid) => c.synergies.filter((s) => s.node === nid && s.kind !== "commute"));
   const compare = (ids: string[]) => go(comparePath(ids));
-  const validate = (hub: string) => { update((s) => setDistrict(s, hub)); go("/validate"); };
+  const openDistrict = (hub: string) => { update((s) => setDistrict(s, hub)); go(`/district/${encodeURIComponent(hub)}`); };
   return (
     <FlowScreen wide back="/home" right={<CloseButton />} caption={caption}
       title="파주 → 고양 → 서울, 사람들이 이렇게 오가요"
@@ -250,9 +251,9 @@ export function Corridor({ id }: { id: string }) {
       })}
 
       <h2 className="fl-h2">이렇게 이어 볼 수 있어요</h2>
-      <p className="fl-note">이동 수까지가 측정이에요. 「이렇게 해 볼 수 있다」는 가설이라 매출이나 성공을 약속하지 않아요 — 작게 먼저 확인해 보세요.</p>
+      <p className="fl-note">이동 수까지가 측정이에요. 「이렇게 해 볼 수 있다」는 가설이라 매출이나 성공을 약속하지 않아요.</p>
       <ul className="fl-cor-syns" aria-label="시너지 후보">
-        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} onValidate={validate} />)}
+        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} onOpenDistrict={openDistrict} />)}
       </ul>
 
       <Details summary="자료와 한계">

@@ -1,4 +1,4 @@
-import type { IndustryRec, ProgramPlan } from "./api";
+import type { IndustryRec } from "./api";
 import type { Campaign } from "./campaign";
 import type { ProgramHandoff } from "./workspaceState";
 
@@ -18,20 +18,9 @@ export interface RecordPageFloor {
   districtId: string; buildingId: string; label: string; area: number | null; areaSource: string | null;
   status: string; unitId: string | null;
 }
-export interface RecordProgram {
-  draft?: {
-    item: string; category: string; mode: import("./api").ValidationMode; stage: import("./api").FounderStage;
-    districtId: string; address: string; hypothesis: string; targetCustomer: string;
-    startDate: string; runDays: string; budgetMin: string; budgetMax: string; differentiatorsText: string;
-  };
-  rejectRatio?: string;
-  postingSnapshot?: string;
-  districtId: string; unitId?: string;
-  linkedDistrictId?: string | null;
-  item: string; category: string; hypothesis: string; targetCustomer: string;
-  period: string; budget: string; differentiators: string; plan: ProgramPlan | null;
-}
+/** 2026-11-22 Program 의 「가설 설정」(검증 계획 · ProgramStudio)을 제외하면서 그 초안 기록(`program`)도 걷었다 —
+ *  Program 은 이제 Posting 결과(`posting` — 업종·주소)를 실행 기록이 이어받는 데만 이 보관소를 읽는다. */
 export interface WorkspaceRecords {
   platform?: RecordPlatform; page?: RecordPage; pageFloor?: RecordPageFloor;
-  posting?: ProgramHandoff; program?: RecordProgram; campaign?: Campaign;
+  posting?: ProgramHandoff; campaign?: Campaign;
 }

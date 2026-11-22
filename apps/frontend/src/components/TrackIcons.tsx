@@ -61,7 +61,7 @@ export function IconFeedback() {
   );
 }
 
-/* Program — 검증 program 을 알린다는 뜻의 확성기 */
+/* Program — 개업한 자리를 알린다는 뜻의 확성기(2026-11-22 · 그전 검증 program) */
 export function IconMegaphone() {
   return (
     <svg {...SVG}>

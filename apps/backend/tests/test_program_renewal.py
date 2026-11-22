@@ -280,6 +280,21 @@ def test_network_without_industry_explains_complements(sources):
     assert out["complements"] == [] and "업종을 고르면" in out["complements_note"]
 
 
+def test_network_is_for_the_opened_space_not_before_contract(sources):
+    """2026-11-22 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 — 계약 전 질문과 지원사업 신청 창구를 싣지 않는다."""
+    out = program_network.network("garosugil", "cafe", "카페·디저트", "founder", today=TODAY)
+    questions = " ".join(out["questions"])
+    for pre_contract in ("권리금", "임대인", "원상복구", "문을 닫거나"):
+        assert pre_contract not in questions, f"계약 전 질문이 남았다: {pre_contract}"
+    assert "상인회" in questions and "교차 쿠폰" in questions, "개업 뒤 이웃·상인 조직과 이야기할 것"
+    urls = {d["url"] for d in out["directory"]}
+    for grant in ("sbiz24.kr", "k-startup.go.kr", "bizinfo.go.kr", "gjsinbo.or.kr"):
+        assert not any(grant in u for u in urls), f"지원사업 신청·보증 창구가 남았다: {grant}"
+    assert "개업한 자리" in out["note"]
+    founder = [e for e in out["events"] if any(m.startswith("단계:") for m in e["matched"])]
+    assert all("기창업자(개업 후)" in " ".join(e["matched"]) for e in founder)
+
+
 # ── 실행 카드 ──────────────────────────────────────────────────────────────
 _MONEY = re.compile(r"\d[\d,]*\s*(원|만원)|예산\s*\d|\d+\s*%")
 
@@ -307,6 +322,25 @@ def test_plan_cards_from_evidence_only(monkeypatch):
         blob = " ".join([c["title"], c["when"], c["where"], c["who"], c["what"], c["measure"]])
         assert not _MONEY.search(blob), f"금액·비율을 지어냈다: {blob}"
     assert "17~21시" in out["cards"][3]["when"]
+
+
+def test_plan_defaults_to_after_opening_and_measures_into_the_ledger(monkeypatch):
+    """2026-11-22 — 화면은 개업 뒤(actual_open)만 부른다. 기본값도 그렇고, 카드의 측정은 없어진 가설 판정표가 아니라 실행 기록으로 간다."""
+    monkeypatch.setattr(events, "for_district", lambda d, today=None: [])
+    monkeypatch.setattr(mkt, "get_district_events", lambda d: {"events_source": "public-open-data"})
+    monkeypatch.setattr(mkt, "_events_unavailable_note", lambda d: None)
+    monkeypatch.setattr(mkt, "context_rows", lambda d: None)
+    monkeypatch.setattr(nearby_stores, "colocated_top", lambda d, ind: [
+        {"key": "bar", "label": "술집", "lift": 1.39, "n_both": 2263}])
+    out = program_plan.plan("garosugil", "cafe")
+    assert out["mode"] == "actual_open"
+    neighbor = next(c for c in out["cards"] if c["kind"] == "neighbor")
+    own = next(c for c in out["cards"] if c["kind"] == "own")
+    assert neighbor["when"] == "개업 뒤" and own["when"] == "개업 뒤"
+    assert "사전 예약" not in own["title"] + own["what"] and "다시 방문" in own["measure"]
+    assert "실행 기록" in out["note"] and "가설" not in out["note"]
+    body = client.get(f"{API}/plan", params={"district_id": "garosugil", "industry": "cafe"}).json()
+    assert body["mode"] == "actual_open", "API 기본값도 개업 뒤"
 
 
 def test_plan_without_evidence_still_gives_own_card_and_says_why(monkeypatch):

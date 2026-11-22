@@ -1,6 +1,12 @@
 # 사전등록 — Program 지원 공고 매칭 정밀도 (2026-11-15)
 
-> **상태: 등록(2026-11-15) — 표본 미동결 · 라벨 0.** 이 문서와 채점 규칙 코드(`data/validation/score_support_labels.py`)를
+> ⚠ **상태: 2026-11-22 추적 중단.** 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅으로만, 나머지 기능은 제외」로
+> 「지원 프로그램」이 Program 에서 빠져 화면이 이 매칭을 보이지 않는다 — KPI 는 사용자가 보는 답을 재는 것이라 이 축은 KPI 가 아니다.
+> 계측 코드(`data/validation/score_support_labels.py` · `support_sample.py`)와 서버 경로(`GET /program/support`)는 남겼고,
+> `pppp_status.py --json` 의 `kpi1_support_precision` 은 `retired` 꼬리표를 달고 기록으로만 싣는다. 다시 켜려면 지원 프로그램을 화면에 되돌리는 결정이 먼저다
+> → [decision-program-post-opening-2026-11-22.md](decision-program-post-opening-2026-11-22.md). 아래는 등록 당시 그대로다.
+>
+> **상태(등록 당시): 등록(2026-11-15) — 표본 미동결 · 라벨 0.** 이 문서와 채점 규칙 코드(`data/validation/score_support_labels.py`)를
 > 같은 커밋으로 남긴다. 그 커밋 전에는 표본을 뽑은 적도, 라벨을 본 적도, 아래 지표를 계산한 적도 없다.
 > 라벨을 본 뒤 기준을 바꾸려면 새 사전등록이 필요하다(KPI 규칙 3). 형식은 빈 층 판정 사전등록
 > (docs/finding-kpi-identity-alignment-2026-10-19.md §4)과 입점 점검 사전등록(docs/prereg-floor-use-check-2026-11-15.md)을 따른다.

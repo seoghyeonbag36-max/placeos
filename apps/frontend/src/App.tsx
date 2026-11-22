@@ -25,8 +25,13 @@ import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type P
 import FlowApp from "@/flow/FlowApp";
 import { explorePath, isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
 import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
-import { clearPlan } from "@/flow/plan";
 import "./App.css";
+
+/** 흐름 ④ 「작게 확인」이 이 탭에 남기던 검증 계획(아이템·브리프)의 옛 열쇠. 2026-11-22 그 화면을 뺐지만(Program 범위 축소),
+ *  그 전에 만든 계획이 이 탭 저장소에 남아 있을 수 있어 계정이 바뀔 때는 여전히 지운다(공용 PC — 다음 사람이 앞사람 아이템을 보지 않게). */
+const clearLegacyPlan = () => {
+  try { window.sessionStorage.removeItem("placeos.flow.plan.v1"); } catch { /* 지울 것이 없다 */ }
+};
 
 // 네 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
 // 거리뷰·층 스택·차트 같은 무거운 자식이 있어 청크를 나눈다.
@@ -37,9 +42,9 @@ const loadProgram = () => import("@/pages/CampaignStudio");
 const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
-const ProgramStudio = lazy(loadProgram);
-// 검증 계획(ProgramStudio)·행사 연계·결과 리포트는 2026-11-07 리뉴얼로 Program 허브(pages/CampaignStudio) 안의
-// 「오프라인 마케팅 솔루션」·「가설 검증」 탭으로 옮겼다 — App 은 Program 레일에서 그 모듈 하나만 그린다(PPPP 가드).
+const ProgramHub = lazy(loadProgram);   // pages/CampaignStudio — Program 허브(11-22 전에는 이 이름이 ProgramStudio 였다 · 그 모듈은 지웠다)
+// Program 레일은 Program 허브(pages/CampaignStudio) 모듈 하나만 그린다(PPPP 가드). 2026-11-22 사용자 정의로 허브 안 기능은
+// 「네트워킹」·「오프라인 마케팅 솔루션」 둘만 남았다(계약을 맺고 개업한 자리 기준) — 검증 계획(ProgramStudio)·지원 프로그램은 제외했다.
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -64,7 +69,7 @@ const PRELOAD_DELAY_MS = 1500;
  *   Platform → PlatformConsole  (상권 정체성 + 자리별 업종)
  *   Page     → MapShell         (공실 히트맵 4레이어 + 2D 층 스택·거리뷰)
  *   Posting  → PostingConsole   (3-Tier 비용-효용 + 권리금 입력 계약)
- *   Program  → CampaignStudio   (Program 허브 — 네트워킹·지원 프로그램·오프라인 마케팅 솔루션·가설 검증, 2026-11-07)
+ *   Program  → CampaignStudio   (Program 허브 — 개업한 자리의 네트워킹·오프라인 마케팅 솔루션, 2026-11-22 · 그전 11-07 은 네 기능)
  *
  * 2026-08-29: 상단 네비바를 **좌측 아이콘 레일**로 옮겼다(네이버지도식).
  *
@@ -463,9 +468,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           {view === "program" && (
             <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" onNavigate={navigateStep} />}
               footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
-              <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
+              <ProgramHub key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal}
+                defaultCategory={customIndustry ?? workIndustry?.input}
                 industryKey={customIndustry ? undefined : workIndustry?.key}
                 industryLabel={customIndustry ?? workIndustry?.label}
                 postingResult={postingResult?.districtId === districtId ? postingResult : undefined} />
@@ -544,7 +549,7 @@ function AppContent() {
       setToken((prev) => {
         // 계정이 바뀌거나 로그아웃하면 이 브라우저의 흐름 답을 지운다 — 공용 PC 에서 다음 사람이 앞사람의 금액·아이템을
         // 보지 않게. 로그인 전 → 로그인은 지우지 않는다(그때까지 고른 것을 계정으로 옮긴다 · 5판 C5)
-        if (prev && prev !== next) { clearFlow(); clearPlan(); }
+        if (prev && prev !== next) { clearFlow(); clearLegacyPlan(); }
         return next;
       });
     };

@@ -49,9 +49,18 @@ describe("랜딩 — 말하는 것", () => {
     expect(text()).toContain("앞날을 맞힌다는 약속은 하지 않습니다");
   });
 
-  it("영업 중인 가게 마케팅이 아니라는 것을 분명히 한다(Program 의 대상 — 2026-09-17)", () => {
+  it("Program 의 대상을 분명히 한다 — 계약을 맺고 개업한 자리의 네트워킹·오프라인 마케팅만, 대행 없음(2026-11-22 · 그전 09-17 은 「영업 중인 가게는 다루지 않는다」)", () => {
     render(<Help />);
-    expect(text()).toContain("이미 영업 중인 가게의 홍보는 다루지 않습니다");
+    expect(text()).toContain("계약을 맺고 개업한 자리라면 Program 에서");
+    expect(text()).toContain("PlaceOS 가 대신 홍보하거나 행사를 열지는 않습니다");
+    expect(text()).toContain("개업 전 검증 계획이나 지원 공고 안내는 하지 않습니다");
+  });
+
+  it("랜딩 Program 질문은 개업한 자리의 네트워킹·오프라인 마케팅을 말한다(2026-11-22)", () => {
+    render(<Landing />);
+    const program = document.querySelector('#how li[data-track="program"]')!;
+    expect(program.textContent).toContain("계약을 맺고 개업한 자리");
+    expect(program.textContent).not.toMatch(/가오픈|지원 공고|가설/);
   });
 });
 

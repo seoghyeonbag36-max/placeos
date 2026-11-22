@@ -149,14 +149,14 @@ export default function BusinessSetup({
 
           {industryKey === "other" && <label className="acct-field"><span>기타 업종명 (필수)</span>
             <input maxLength={120} value={customIndustry} placeholder="예: 도자기 공방" onChange={(e) => setCustomIndustry(e.target.value)} />
-            <small>직접 입력한 업종으로 저장합니다. 업종별 추천·자동 수익 계산은 제공되지 않으며, 지도 탐색·계약 비용 검토·검증 program을 사용할 수 있습니다.</small>
+            <small>직접 입력한 업종으로 저장합니다. 업종별 추천·자동 수익 계산은 제공되지 않으며, 지도 탐색·계약 비용 검토·개업 후 Program 을 사용할 수 있습니다.</small>
           </label>}
           {industryKey && industryKey !== "other" && <IndustryDetailSelect parent={industryKey} value={detailKey} onChange={setDetailKey} />}
 
           {goal === "pivot" && list && (
             <fieldset className="biz-inds">
               <legend>무엇으로 바꿀지 정했나요? (선택)</legend>
-              <p className="biz-hint">고르면 입점 계산·검증 program 이 이 업종으로 시작합니다. 아직 모르면 비워 두고 Platform 의 업종 순위에서 고르세요.</p>
+              <p className="biz-hint">고르면 입점 계산·개업 후 Program 이 이 업종으로 시작합니다. 아직 모르면 비워 두고 Platform 의 업종 순위에서 고르세요.</p>
               <div className="biz-ind-grid">
                 <label className={"biz-ind" + (target === null ? " on" : "")}>
                   <input type="radio" name={`${cardId}-target`} value="" checked={target === null}
@@ -180,7 +180,7 @@ export default function BusinessSetup({
           )}
           {goal === "pivot" && target === "other" && <label className="acct-field"><span>바꿀 기타 업종명 (필수)</span>
             <input maxLength={120} value={targetCustomIndustry} placeholder="예: 도자기 공방" onChange={(e) => setTargetCustomIndustry(e.target.value)} />
-            <small>업종별 추천·자동 수익 계산은 미지원입니다. 검증 program에는 입력한 업종명을 사용합니다.</small>
+            <small>업종별 추천·자동 수익 계산은 미지원입니다. Program 실행 기록에는 입력한 업종명을 사용합니다.</small>
           </label>}
           {goal === "pivot" && target && target !== "other" && <IndustryDetailSelect parent={target} value={targetDetail} onChange={setTargetDetail} />}
 

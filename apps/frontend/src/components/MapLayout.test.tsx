@@ -72,17 +72,17 @@ describe("F-20 지도 탐색 칸 배치 — 머리 · 왼쪽 · 지도 · 오른
   it("ConsolePages 의 navSlot 은 쪽 목록을 왼쪽 칸의 세로 메뉴(이름 + 한 줄 설명)로 세운다 — 버튼 이름은 쪽 이름 그대로다", async () => {
     render(<MapHost active>
       <TrackMapFrame track="program" label="오프라인 캠페인">
-        <ConsolePages label="Program 네 기능" navSlot="left" navTrack="program" pages={[
-          { id: "a", label: "네트워킹", description: "누구에게 묻나", content: <p>네트워킹 본문</p> },
-          { id: "b", label: "지원 프로그램", description: "지금 신청할 공고", content: <p>지원 본문</p> },
+        <ConsolePages label="Program 기능" navSlot="left" navTrack="program" pages={[
+          { id: "a", label: "네트워킹", description: "누구와 함께하나", content: <p>네트워킹 본문</p> },
+          { id: "b", label: "오프라인 마케팅 솔루션", description: "어떻게 알리나", content: <p>마케팅 본문</p> },
         ]} />
       </TrackMapFrame>
     </MapHost>);
-    const nav = await screen.findByRole("navigation", { name: "Program 네 기능" });
+    const nav = await screen.findByRole("navigation", { name: "Program 기능" });
     expect(slot("left").contains(nav)).toBe(true);
     expect(nav.classList.contains("is-side")).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "지원 프로그램" }));
-    expect(screen.getByText("지원 본문")).toBeTruthy();
-    expect(slot("right").contains(screen.getByText("지원 본문"))).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "오프라인 마케팅 솔루션" }));
+    expect(screen.getByText("마케팅 본문")).toBeTruthy();
+    expect(slot("right").contains(screen.getByText("마케팅 본문"))).toBe(true);
   });
 });

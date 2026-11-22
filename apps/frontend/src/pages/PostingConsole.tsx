@@ -25,6 +25,7 @@ import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult,
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
 import ConsolePages from "@/components/ConsolePages";
+import PostingMatch from "@/components/posting/PostingMatch";
 import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 
@@ -75,7 +76,8 @@ interface PostingConsoleProps {
    *  안 주면 종전대로 화면이 스스로 상권을 든다(단독 렌더·테스트). */
   districtId?: string;
   onDistrictChange?: (id: string) => void;
-  /** Posting → Program 인계(화면설계서 2판). 주면 결과 아래 「이 자리로 검증 program 만들기 →」가 뜬다. */
+  /** Posting → Program 인계(화면설계서 2판). 주면 「비용 비교 및 결정」 아래 「이 자리로 개업 후 Program 열기 →」가 뜬다
+   *  (2026-11-22 — 그전 「이 자리로 검증 program 만들기」는 Program 가설 설정으로 갔다. 지금은 오프라인 마케팅 실행 기록으로 간다). */
   onMakeProgram?: (handoff: ProgramHandoff) => void;
   /** 「내 사업」 업종의 입력어(화면설계서 3판). 업종칸의 기본값이다 — 상권·자리를 바꾸면 빈칸이 아니라 이 값으로 돌아간다. */
   defaultIndustry?: string;
@@ -112,9 +114,14 @@ export default function PostingConsole({ selection, districtId, onDistrictChange
 function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onResultChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
   // 첫 화면은 「시뮬레이션 결과」(2026-11-10 사용자 요청 — 오른쪽 칸 순서: 시뮬레이션 결과 → 상권 맞춤 인테리어 → 주변 업종 지도 →
-  // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정(그 안에 이 자리로 검증 program 만들기)). 11-09 에는 인테리어가 첫 화면이었다.
+  // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정(그 안에 이 자리로 개업 후 Program 열기)). 11-09 에는 인테리어가 첫 화면이었다.
   // 자리 · 비용 입력은 늘 그려 둔다(keepMounted) — 지도 탐색에서는 왼쪽 칸에 서 있어 어느 쪽을 보면서도 자리를 바꿀 수 있다
-  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
+  // 2026-11-22 사용자 정의 — Posting = 「공실을 확인한 창업자가 건물주에게 입점 희망서를 전달하고, 건물주와 매칭·계약을 논의한다」.
+  // 사용자 지적(「Posting 이 화면에 구현되지 않은 것으로 보인다」)으로 첫 화면을 「입점 희망서 · 계약」으로 옮겼다(위 11-10 순서를 대신한다).
+  // Page 에서 「이 자리로 입점 계산」으로 넘어오면(선택 인계) 종전처럼 「시뮬레이션 결과」를 연다(아래 인계 처리).
+  // 저장된 초안이 이미 없어진 계산 탭(「계산 결과」 등)을 열고 있었으면 그 계산을 이어 보게 「시뮬레이션 결과」로 연다.
+  const [page, setPage] = useState(() => (draft?.page ? (RETIRED_PAGES.has(draft.page) ? "input" : draft.page)
+    : selection ? "input" : "match"));
   const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
@@ -419,6 +426,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} keepMounted={["input"]} pages={[
+        { id: "match", label: "입점 희망서 · 계약", description: "공실을 확인했다면 건물주에게 입점 희망서를 보내고, 조건표로 맞춰 본 뒤 문의·방문·조건 제안으로 매칭·계약을 논의하세요.",
+          content: <PostingMatch districtId={districtId} districtName={districts.find((d) => d.id === districtId)?.name ?? districtId}
+            buildingId={unit?.id.startsWith("vu-") ? unit.id.slice(3) : null} /> },
         { id: "input", label: "시뮬레이션 결과", description: inSlots
           ? "왼쪽에서 자리와 비용 조건을 고르고 「시뮬레이션」을 누르면 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 여기에 나옵니다."
           : "조건을 입력하면 바로 아래에 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 나옵니다.", content: <>
@@ -519,7 +529,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </MapSlot>
 
         {/* ── 결과 — 「시뮬레이션 결과」(2026-11-10 사용자 요청): 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간만 둔다.
-            결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, 검증 program 버튼은 「비용 비교 및 결정」 맨 아래, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
+            결론(Verdict) · 결과 저장은 「비용 비교 및 결정」, Program 버튼(11-22 「이 자리로 개업 후 Program 열기」)은 「비용 비교 및 결정」 맨 아래, 세부 업종 경쟁점은 「주변 업종 지도」로 옮겼다.
             세부 업종을 고르면 세 가격대 대신 그 업종 운영 시나리오가 계산 결과다 — 그래서 그것만은 여기에 남는다. ── */}
         <div className="results">
           <div className="posting-result-heading"><h2>{detailKey ? "업종별 운영 시나리오" : "세 가격대의 비용과 회수기간"}</h2><p>처음 필요한 돈 · 매달 나가는 돈 · 투자 회수까지</p></div>
@@ -602,7 +612,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
             busy={busy} stale={!!changedInput} /> },
         { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
           <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
-        { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요. 정했으면 아래에서 이 자리로 검증 program 을 만듭니다.", content: <div className="pstep">
+        { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요. 계약하고 개업하면 아래에서 이 자리로 Program(네트워킹 · 오프라인 마케팅)을 엽니다.", content: <div className="pstep">
           <Verdict
             eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
             question="어떤 비용과 전략으로 입점할까요?"
@@ -622,23 +632,23 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null, handoff: postingResult } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} onMakeProgram={onMakeProgram} />} />
           {inSlots && <p className="pstep-pointer">후보를 3곳까지 담아 계약 조건 · 답사 체크리스트로 비교하려면 화면 오른쪽 위 「입점 준비」를 쓰세요.</p>}
-          {/* 정했으면 바로 검증 program 으로 — 2026-11-10 사용자 요청으로 따로 있던 마지막 쪽을 이 쪽 안으로 합쳤다 */}
+          {/* 계약하고 개업하면 이 자리로 Program — 2026-11-10 사용자 요청으로 따로 있던 마지막 쪽을 이 쪽 안으로 합쳤다.
+              2026-11-22 Program 이 「개업 후 계약을 맺은 공실의 네트워킹·오프라인 마케팅」으로 좁혀져 「검증 program 만들기(가설 설정)」를
+              개업 뒤 실행 기록으로 바꿨다(→ docs/decision-program-post-opening-2026-11-22.md) */}
           <section className="pstep-program" aria-labelledby="posting-program-title">
-          <h3 id="posting-program-title">이 자리로 검증 program 만들기</h3>
-          <p className="pstep-lede">정한 자리와 계산을 Program 「가설 설정」으로 넘겨, 작게 먼저 확인할 계획을 세웁니다.</p>
+          <h3 id="posting-program-title">계약하고 개업하면 — 이 자리로 Program</h3>
+          <p className="pstep-lede">이 자리에 계약하고 개업하면, 정한 자리와 업종을 Program 「오프라인 마케팅 솔루션」으로 넘겨 실행 기록을 시작합니다 —
+            그 자리의 네트워킹과 오프라인 마케팅을 계획하고 기록해요.</p>
           {unit ? <dl>
             <dt>자리</dt><dd>{unit.n} · {effectiveUnit?.area ?? unit.area}평 · {unit.floor}</dd>
             <dt>업종</dt><dd>{calculation?.result.industry_type || calculation?.input.industry_type || unit.was?.trim() || "자리 기본 업종"}</dd>
             <dt>계산</dt><dd>{calculation ? (result?.economics ? `${result.economics.label} 운영 시나리오` : "세 가격대 비용과 회수기간") : "아직 없음 — 「시뮬레이션」을 먼저 하세요"}</dd>
           </dl> : <p className="pstep-empty">왼쪽에서 자리를 먼저 고르세요.</p>}
-          <p className="pstep-lede">{result?.economics?.status === "calculated"
-            ? "세부 업종 운영 계산의 하루 손익분기 건수가 가설 검증의 목표선이 됩니다."
-            : "세부 업종 운영 계산(단가 · 영업일 · 비용)까지 하면 하루 손익분기 건수가 가설 검증의 목표선으로 함께 넘어갑니다."}</p>
           {changedInput && <p className="pstep-note" role="status">입력이 바뀌어 다시 계산하는 중입니다 — 계산이 끝나면 넘길 수 있습니다.</p>}
           {onMakeProgram ? (
             <Button type="button" variant="ghost" className="posting-to-program" disabled={!unit || busy || !!changedInput}
-              onClick={makeProgram}>이 자리로 검증 program 만들기 →</Button>
-          ) : <p className="pstep-empty">지도 탐색의 Posting 에서 열면 이 자리로 Program 을 바로 만듭니다.</p>}
+              onClick={makeProgram}>이 자리로 개업 후 Program 열기 →</Button>
+          ) : <p className="pstep-empty">지도 탐색의 Posting 에서 열면 이 자리로 Program 을 바로 엽니다.</p>}
           </section>
         </div> },
       ]} />
@@ -652,7 +662,7 @@ function SavedPostingView({ item, onMakeProgram }: { item: SavedResult; onMakePr
   const r = saved.result;
   const savedHandoff = savedPostingHandoff(item);
   const handoffAction = onMakeProgram && (savedHandoff
-    ? <Button type="button" onClick={() => onMakeProgram(savedHandoff)}>저장한 내용으로 가설 설정 →</Button>
+    ? <Button type="button" onClick={() => onMakeProgram(savedHandoff)}>저장한 내용으로 개업 후 Program 열기 →</Button>
     : <p className="saved-note">이전 저장 결과에는 자리 연결 정보가 없습니다. Posting에서 자리를 선택하고 다시 저장해 주세요.</p>);
   if (r?.economics) return <div className="saved-posting">{handoffAction}<IndustryEconomicsResult result={r.economics} /></div>;
   if (!r?.scenarios) return <p className="saved-note">이 결과는 다시 그릴 수 없는 형식입니다.</p>;
