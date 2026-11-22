@@ -21,8 +21,10 @@ export default function ConsolePages({ label, pages, enabled = true, activeId, o
   /** 처음부터 늘 그려 둘 쪽 — 다른 쪽이 첫 화면이어도 그 쪽의 칸(MapSlot) 입력이 왼쪽에 서 있어야 할 때(Posting 「자리와 비용 조건」 · 2026-11-09) */
   keepMounted?: string[];
 }) {
-  const [active, setActive] = useState(pages[0].id);
-  const [visited, setVisited] = useState(() => new Set([pages[0].id, ...(keepMounted ?? [])]));
+  // 처음 그리는 쪽은 **처음 열린 쪽**이다(2026-11-22) — 그전에는 늘 첫 쪽(pages[0])을 함께 그려, 인계로 다른 쪽이 먼저 열려도
+  // 숨은 첫 쪽이 마운트되며 자기 API 를 불렀다(Program 이 「가설 설정」으로 열렸는데 오프라인 마케팅의 캠페인 원장이 불림).
+  const [active, setActive] = useState(activeId ?? pages[0].id);
+  const [visited, setVisited] = useState(() => new Set([activeId ?? pages[0].id, ...(keepMounted ?? [])]));
   const id = useId();
   const heading = useRef<HTMLHeadingElement>(null);
   const layout = useMapLayout();

@@ -171,11 +171,12 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     fireEvent.click(screen.getByRole("button", { name: "Posting" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
-    // Posting 오른쪽 칸 순서(2026-11-10 사용자 요청) — 첫 화면은 「시뮬레이션 결과」, 검증 program 만들기는 「비용 비교 및 결정」 안
+    // Posting 오른쪽 칸 순서 — 2026-11-22 사용자 정의로 첫 화면은 「입점 희망서 · 계약」(그전 11-10 은 「시뮬레이션 결과」),
+    // 검증 program 만들기는 「비용 비교 및 결정」 안
     const pages = screen.getByRole("navigation", { name: "비용 검토" });
-    expect(within(pages).getAllByRole("button").map((b) => b.textContent)).toEqual(["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도",
-      "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"]);
-    expect(within(pages).getByRole("button", { name: "시뮬레이션 결과" }).getAttribute("aria-current")).toBe("page");
+    expect(within(pages).getAllByRole("button").map((b) => b.textContent)).toEqual(["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어",
+      "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"]);
+    expect(within(pages).getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
     fireEvent.click(within(pages).getByRole("button", { name: "비용 비교 및 결정" }));
     fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
 

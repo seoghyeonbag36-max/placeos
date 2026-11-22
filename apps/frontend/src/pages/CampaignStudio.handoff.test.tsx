@@ -32,6 +32,9 @@ it("계정에 저장한 Posting을 Program에서 열어 앞선 근거와 함께 
   const tree = (visible: boolean) => <WorkspaceRecordsProvider districtId="garosugil"><PriorSteps />
     {visible && <CampaignStudio mapDistrictId="garosugil" />}</WorkspaceRecordsProvider>;
   const view = render(tree(true));
+  // 2026-11-22 — 첫 탭은 오프라인 마케팅(건물주·창업자)이다. 저장한 Posting 으로 가설을 쓰려면 「가설 설정」을 연다
+  const openHypothesis = () => fireEvent.click(within(screen.getByRole("navigation", { name: "Program 네 기능" })).getByRole("button", { name: "가설 설정" }));
+  openHypothesis();
   const postingList = (await screen.findByText("저장 비용")).closest("section")!;
   fireEvent.click(await within(postingList).findByRole("button", { name: "보기" }));
   fireEvent.click(screen.getByRole("button", { name: "이 저장 내용으로 가설 설정" }));
@@ -43,6 +46,7 @@ it("계정에 저장한 Posting을 Program에서 열어 앞선 근거와 함께 
   fireEvent.change(screen.getByRole("textbox", { name: "검증 가설" }), { target: { value: "직접 작성한 아이템 수요 가설" } });
   view.rerender(tree(false));
   view.rerender(tree(true));
+  openHypothesis();                                   // 다시 열면 첫 탭(오프라인 마케팅)부터 — 탭을 옮겨도 가설은 남아 있어야 한다
   await waitFor(() => expect((screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value).toBe("직접 작성한 아이템 수요 가설"));
   expect(screen.getByRole("region", { name: "가설 설정의 근거" }).textContent).toContain("저장한 후보 자리");
 });

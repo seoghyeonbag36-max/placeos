@@ -1,4 +1,6 @@
-/** Program 허브 — 가설 설정 · 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션(「개업 뒤」 칸 · 2026-11-15 결정 ③).
+/** Program 허브 — 오프라인 마케팅 솔루션(첫 화면 · 창업자/건물주) · 네트워킹 · 지원 프로그램 · 가설 설정.
+ *  2026-11-22 사용자 정의 「Program = 건물주와 창업자 대상 오프라인 마케팅 서비스」 · 사용자 지적 「화면에 구현되지 않은 것으로 보인다」로
+ *  오프라인 마케팅을 맨 앞(기본 탭)에 옮겼다(그전 11-15 결정 ③ 은 「개업 뒤」 칸이라 맨 뒤).
  *
  *  못 박는 것: 네 탭이 이 순서로 로그인 없이 열린다 · Posting 인계로 오면 가설 설정부터 · 원천이 비면 왜 비었는지
  *  보인다 · 연락처 입력 칸이 없다 · 실행 카드마다 측정이 있다 · 전국 행사("public-open-data")가 실데이터로 보인다
@@ -73,15 +75,18 @@ beforeEach(() => { clearToken(); localStorage.clear(); stub(); });
 afterEach(() => { cleanup(); clearToken(); localStorage.clear(); });
 
 const tabs = () => within(screen.getByRole("navigation", { name: "Program 네 기능" })).getAllByRole("button");
-/** 탭은 이름으로 고른다 — 순서가 바뀌어도(2026-11-15 결정 ③) 흔들리지 않게 */
+/** 탭은 이름으로 고른다 — 순서가 바뀌어도(2026-11-15 결정 ③ · 2026-11-22 재배치) 흔들리지 않게 */
 const tab = (name: string) => within(screen.getByRole("navigation", { name: "Program 네 기능" })).getByRole("button", { name });
 
 describe("Program 허브 — 네 기능", () => {
-  it("네 탭이 이 순서로 있고(오프라인 마케팅은 「개업 뒤」 칸이라 맨 뒤), 로그인 없이 가설 설정이 먼저 열린다", async () => {
+  it("네 탭이 이 순서로 있고 로그인 없이 오프라인 마케팅(창업자·건물주)이 먼저 열린다(2026-11-22)", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" industryLabel="카페·디저트" businessGoal="start" />);
-    expect(tabs().map((b) => b.textContent)).toEqual(["가설 설정", "네트워킹", "지원 프로그램", "오프라인 마케팅 솔루션"]);
+    expect(tabs().map((b) => b.textContent)).toEqual(["오프라인 마케팅 솔루션", "네트워킹", "지원 프로그램", "가설 설정"]);
     expect(tabs()[0].getAttribute("aria-current")).toBe("page");
-    expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
+    expect(screen.getByRole("group", { name: "오프라인 마케팅 사용자" })).toBeTruthy();       // 창업자 · 건물주를 맨 위에서 고른다
+    expect(await screen.findByRole("region", { name: "실행 카드" }, LOAD)).toBeTruthy();
+    fireEvent.click(tab("가설 설정"));
+    expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();          // 가설 설정은 그대로 있다
     fireEvent.click(tab("네트워킹"));
     expect(await screen.findByText("서울 창업 세미나", {}, LOAD)).toBeTruthy();
     const call = api.matching(/\/program\/network\?/)[0];
@@ -89,15 +94,14 @@ describe("Program 허브 — 네 기능", () => {
     expect(call.url).toContain("stage=pre_founder");
   });
 
-  it("오프라인 마케팅 솔루션은 「개업 뒤」 칸임을 설명과 본문 안내로 밝힌다(탭 이름은 그대로)", async () => {
+  it("오프라인 마케팅 솔루션은 건물주와 창업자 대상이라고 설명과 본문 안내로 밝힌다(탭 이름은 그대로)", async () => {
     const { container } = render(<CampaignStudio mapDistrictId="garosugil" industryKey="cafe" />);
-    // 탭 이름은 pppp_status 가 글자로 찾는다 — 「개업 뒤」는 이름이 아니라 설명·본문에 둔다
-    expect(tabs()[3].textContent).toBe("오프라인 마케팅 솔루션");
-    fireEvent.click(tab("오프라인 마케팅 솔루션"));
+    // 탭 이름은 pppp_status 가 글자로 찾는다 — 대상·때는 이름이 아니라 설명·본문에 둔다
+    expect(tabs()[0].textContent).toBe("오프라인 마케팅 솔루션");
     const note = container.querySelector("[data-after-open]");
-    expect(note?.textContent).toContain("「개업 뒤」 칸입니다");
-    expect(note?.textContent).toContain("계약 전 확인은 앞의 가설 설정·네트워킹·지원 프로그램");
-    expect(container.textContent).toContain("개업 뒤 — 지역 행사");           // 탭 설명
+    expect(note?.textContent).toContain("팝업·가오픈·개업을 시작한 뒤");
+    expect(note?.textContent).toContain("가설 설정과 네트워킹·지원 프로그램은 다음 탭");
+    expect(container.textContent).toContain("건물주와 창업자를 위한 오프라인 마케팅 — ");           // 탭 설명
     expect(await screen.findByRole("region", { name: "실행 카드" }, LOAD)).toBeTruthy();   // 실행 도구 자체는 그대로 있다
   });
 
@@ -123,7 +127,9 @@ describe("Program 허브 — 네 기능", () => {
   it("Posting 인계로 오면 가설 설정부터 연다", async () => {
     render(<CampaignStudio mapDistrictId="garosugil" handoff={{ districtId: "garosugil", unitId: "vu-1", unitName: "자리",
       lat: 37.5, lng: 127, area: 20, floor: "1F", rent: 300, industry: "카페", strategy: null }} />);
-    expect(tabs()[0].getAttribute("aria-current")).toBe("page");
+    // 「이 자리로 검증 program 만들기」가 가리키는 곳 — 첫 탭(오프라인 마케팅)이 아니라 가설 설정을 연다
+    expect(tab("가설 설정").getAttribute("aria-current")).toBe("page");
+    expect(tabs()[0].getAttribute("aria-current")).toBeNull();
     expect(await screen.findByTestId("validation-studio", {}, LOAD)).toBeTruthy();
   });
 
@@ -168,7 +174,8 @@ describe("Program 허브 — 네 기능", () => {
   it("상권이 없으면 고르라고 말하고 원천을 부르지 않는다", async () => {
     render(<CampaignStudio />);
     fireEvent.click(tab("네트워킹"));
-    expect(screen.getByText(/상권을 먼저 고르면/)).toBeTruthy();
+    // 첫 탭(오프라인 마케팅)도 같은 안내를 품고 숨은 채 남는다 — 지금 연 탭 안에서 찾는다
+    expect(within(screen.getByRole("region", { name: "네트워킹" })).getByText(/상권을 먼저 고르면/)).toBeTruthy();
     await waitFor(() => expect(api.count(/\/program\/network/)).toBe(0));
   });
 });

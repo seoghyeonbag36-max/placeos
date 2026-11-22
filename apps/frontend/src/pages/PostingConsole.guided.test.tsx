@@ -4,8 +4,9 @@ import PostingConsole, { type PostingDraft } from "./PostingConsole";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings, simulateResult } from "@/test/fixtures";
 
-// 오른쪽 칸 순서(2026-11-10 사용자 요청) — 왼쪽 입력 칸은 그대로다. 검증 program 만들기는 「비용 비교 및 결정」 안에 있다
-const POSTING_PAGES = ["시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
+// 오른쪽 칸 순서 — 2026-11-22 사용자 정의(Posting = 입점 희망서를 건물주에게 전달 → 매칭·계약 논의)로 「입점 희망서 · 계약」이 맨 앞이다
+// (그전 11-10 사용자 요청은 「시뮬레이션 결과」가 첫 화면이었다). 왼쪽 입력 칸은 그대로다. 검증 program 만들기는 「비용 비교 및 결정」 안에 있다
+const POSTING_PAGES = ["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
 
 // 테스트 전용 합성 응답 — 실제는 /travel/access 의 카카오 Local · TMAP 보행 경로 · 서울 열린데이터
 const ACCESS = {
@@ -59,13 +60,15 @@ describe("단계형 비용 검토", () => {
     expect(await screen.findByText("전제(0)")).toBeTruthy();
   });
 
-  it("오른쪽 쪽 순서는 시뮬레이션 결과 → … → 비용 비교 및 결정이고, 첫 화면은 「시뮬레이션 결과」다", async () => {
+  it("오른쪽 쪽 순서는 입점 희망서 · 계약 → 시뮬레이션 결과 → … → 비용 비교 및 결정이고, 첫 화면은 「입점 희망서 · 계약」이다(계산은 뒤에서 그대로 돈다)", async () => {
     const api = installApi();
     render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
     const nav = screen.getByRole("navigation", { name: "비용 검토" });
     expect([...nav.querySelectorAll("button")].map((b) => b.textContent)).toEqual(POSTING_PAGES);
-    expect(screen.getByRole("button", { name: "시뮬레이션 결과" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("list", { name: "Posting 흐름" }).textContent).toContain("건물주에게 전달");   // 정의가 첫 화면에 보인다
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "시뮬레이션 결과" }));
     expect(screen.getByPlaceholderText("만원 — 비우면 0 전제")).toBeTruthy();
     expect(await screen.findByText("전제(0)")).toBeTruthy();
     // 「시뮬레이션 결과」에는 세 가격대 비용 · 회수기간만 — 결론(Verdict) · 저장 · program 버튼은 다른 쪽이다

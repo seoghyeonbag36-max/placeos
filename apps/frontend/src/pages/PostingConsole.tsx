@@ -25,6 +25,7 @@ import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult,
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
 import ConsolePages from "@/components/ConsolePages";
+import PostingMatch from "@/components/posting/PostingMatch";
 import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 
@@ -114,7 +115,12 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 첫 화면은 「시뮬레이션 결과」(2026-11-10 사용자 요청 — 오른쪽 칸 순서: 시뮬레이션 결과 → 상권 맞춤 인테리어 → 주변 업종 지도 →
   // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정(그 안에 이 자리로 검증 program 만들기)). 11-09 에는 인테리어가 첫 화면이었다.
   // 자리 · 비용 입력은 늘 그려 둔다(keepMounted) — 지도 탐색에서는 왼쪽 칸에 서 있어 어느 쪽을 보면서도 자리를 바꿀 수 있다
-  const [page, setPage] = useState(() => (draft?.page && !RETIRED_PAGES.has(draft.page) ? draft.page : "input"));
+  // 2026-11-22 사용자 정의 — Posting = 「공실을 확인한 창업자가 건물주에게 입점 희망서를 전달하고, 건물주와 매칭·계약을 논의한다」.
+  // 사용자 지적(「Posting 이 화면에 구현되지 않은 것으로 보인다」)으로 첫 화면을 「입점 희망서 · 계약」으로 옮겼다(위 11-10 순서를 대신한다).
+  // Page 에서 「이 자리로 입점 계산」으로 넘어오면(선택 인계) 종전처럼 「시뮬레이션 결과」를 연다(아래 인계 처리).
+  // 저장된 초안이 이미 없어진 계산 탭(「계산 결과」 등)을 열고 있었으면 그 계산을 이어 보게 「시뮬레이션 결과」로 연다.
+  const [page, setPage] = useState(() => (draft?.page ? (RETIRED_PAGES.has(draft.page) ? "input" : draft.page)
+    : selection ? "input" : "match"));
   const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
@@ -419,6 +425,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} keepMounted={["input"]} pages={[
+        { id: "match", label: "입점 희망서 · 계약", description: "공실을 확인했다면 건물주에게 입점 희망서를 보내고, 조건표로 맞춰 본 뒤 문의·방문·조건 제안으로 매칭·계약을 논의하세요.",
+          content: <PostingMatch districtId={districtId} districtName={districts.find((d) => d.id === districtId)?.name ?? districtId}
+            buildingId={unit?.id.startsWith("vu-") ? unit.id.slice(3) : null} /> },
         { id: "input", label: "시뮬레이션 결과", description: inSlots
           ? "왼쪽에서 자리와 비용 조건을 고르고 「시뮬레이션」을 누르면 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 여기에 나옵니다."
           : "조건을 입력하면 바로 아래에 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 나옵니다.", content: <>

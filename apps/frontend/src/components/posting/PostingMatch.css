@@ -1,0 +1,50 @@
+/* Posting › 「입점 희망서 · 계약」(2026-11-22) — 토큰만 쓴다(Tailwind 없음). */
+.pmatch { display: grid; gap: var(--sp-3); min-width: 0; font-size: 14px; line-height: var(--lh-body); color: var(--ink); }
+.pmatch a { color: var(--track-posting); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.pmatch h4 { margin: 0 0 var(--sp-2); font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.pmatch p { margin: 0; overflow-wrap: anywhere; }
+
+.pm-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); counter-reset: pm; }
+.pm-steps li {
+  counter-increment: pm; display: grid; grid-template-columns: 26px 1fr; column-gap: var(--sp-2); align-items: start;
+  padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface);
+}
+.pm-steps li::before {
+  content: counter(pm); grid-row: span 2; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--track-posting); color: #fff; font-size: 12px; font-weight: 700;
+}
+.pm-steps li b { font-size: 14px; }
+.pm-steps li span { color: var(--sub); font-size: var(--fs-caption); line-height: var(--lh-caption, 1.5); }
+
+.pm-card { padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); display: grid; gap: var(--sp-2); min-width: 0; }
+.pm-sub, .pm-note { color: var(--sub); font-size: var(--fs-caption); }
+.pm-links { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); }
+.pm-links a { display: inline-flex; align-items: center; min-height: 36px; }
+
+.pm-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; border: 1px solid var(--line);
+  font-size: 12px; font-weight: 600; color: var(--sub); background: var(--surface); }
+.pm-chip.is-on { border-color: var(--track-posting); color: var(--track-posting); background: var(--track-posting-soft, var(--surface)); }
+.pm-chip.is-here { border-color: var(--ink); color: var(--ink); }
+.pm-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.pm-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.pm-listing { display: grid; gap: 6px; padding: var(--sp-2) 0; border-top: 1px solid var(--line); }
+.pm-listing:first-child { border-top: 0; padding-top: 0; }
+.pm-title { font-size: 14px; }
+.pm-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.pm-btn { min-height: 40px; padding: 0 var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface);
+  color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.pm-btn.is-strong { background: var(--track-posting); border-color: var(--track-posting); color: #fff; }
+.pm-btn:disabled { opacity: .6; cursor: wait; }
+.pm-btn:focus-visible { outline: 2px solid var(--track-posting); outline-offset: 2px; }
+
+.pm-fit, .pm-send { display: grid; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-md); background: var(--surface-sunken, var(--surface)); }
+.pm-fit ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 13px; }
+.pm-fit li[data-status="gap"] b { color: var(--caution-ink, var(--ink)); }
+.pm-field { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.pm-field textarea { min-height: 72px; padding: var(--sp-2); border: 1px solid var(--line); border-radius: var(--radius-md); font: inherit; font-weight: 400; resize: vertical; }
+.pm-ok { color: var(--ink); font-size: 13px; }
+.pm-error { color: var(--danger-ink, #b42318); font-size: 13px; }
+.pm-thread { display: grid; gap: 2px; }
+.pm-notice { padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-md); background: var(--caution-soft, var(--surface)); border: 1px solid var(--caution-line, var(--line));
+  color: var(--sub); font-size: var(--fs-caption); line-height: var(--lh-caption, 1.5); }
