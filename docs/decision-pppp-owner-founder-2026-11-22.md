@@ -7,7 +7,7 @@
 > - **Program** — 건물주와 창업자 **대상** 오프라인 마케팅 서비스.
 >
 > 이 정의는 11-15 「계약 전 확인」 질문 개정(Page·Posting·Program 문구)을 **대체**한다. 11-18/21 직거래 층([decision-owner-direct-matching-2026-11-18.md](decision-owner-direct-matching-2026-11-18.md) ·
-> [decision-founder-brief-2026-11-21.md](decision-founder-brief-2026-11-21.md)) 위에 더한다 — 이 변경도 그 브랜치(`feat/owner-direct-matching-20261118`)에 **미커밋**이다.
+> [decision-founder-brief-2026-11-21.md](decision-founder-brief-2026-11-21.md)) 위에 더한다 — 세 층을 함께 PR #266 머지·배포(2026-11-22 · `7baa274`)했다. ⚠ Neon 마이그레이션 세 단계는 사용자가 따로 적용한다(§6-3).
 > 이 문서는 법률 자문이 아니다.
 
 ## 0. 한눈에
@@ -77,7 +77,7 @@ Program 「오프라인에서는 어떻게 알리고 이어지지?」(11-15 의 
 
 1. ~~Platform 의 「SNS/IT 데이터」 범위~~ → **결정됨(사용자 11-22 ①): 인스타그램도 수집** — 공식 API 로 만들었다. 남은 몫은 **Meta 앱 심사·토큰**(finding-instagram-official-api-2026-11-22.md §5).
 2. ~~Program 의 건물주 서비스 설계~~ → **결정됨(사용자 11-22 ②): 있는 도구를 잇는 것으로 마무리.**
-3. **Neon 마이그레이션** `c9d0e1f2a3b4`(+ 앞의 두 단계) · **가격·입금 계좌**(11-18 몫) · **커밋·PR 승인**(이 브랜치는 11-18 분과 함께 미커밋).
+3. **Neon 마이그레이션** `c9d0e1f2a3b4`(+ 앞의 두 단계) · **가격·입금 계좌**(11-18 몫) · ~~커밋·PR 승인~~(→ 11-22 PR #266 머지·배포).
 4. **변호사 자문(E4) 추가 질문**: ⑧ 건물주가 올린 배치도 사진의 **저작권·허위 표시** 책임과 플랫폼의 삭제 의무(신고→숨김 절차로 충분한가) · ⑨ 도면에 든 제3자 개인정보 · ⑩ 인스타 해시태그 **집계**가 Meta 플랫폼 약관의 비식별 예외(§3.d.i.2.d)에 드는가 · 보관 기간.
 5. **11-15 질문 개정 대체 확인** — Posting·Program 의 질문이 바뀌었다(위 §5). 11-15 의 「요구 판매량」·「답사·팝업 판정」 기능은 그대로 있고 **질문 문구만** 대체됐다. 되돌리려면 `Landing.tsx` `STEPS` 와 `ExploreStep.tsx`.
 6. ~~메인 트리에서 `npm uninstall jspdf`~~ → 11-22 마무리 때 `package.json`·`package-lock.json` 에서 뺐다(`npm uninstall --package-lock-only` — 공유 `node_modules` 는 건드리지 않음). 메인 트리의 `node_modules/jspdf` 는 남아 있어도 해롭지 않다.
