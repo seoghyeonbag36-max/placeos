@@ -3,8 +3,7 @@
  *  Program 허브(pages/CampaignStudio)의 「오프라인 마케팅 솔루션」 탭 안에서 그린다. 동작은 옮기기 전과 같다 —
  *  운영 여건·후보·합의/참여 증빙·비용/결과·수동 결제 증빙을 사용자별로 저장한다(로그인 필요).
  *  PPPP 화면 보존 규칙: 지우지 않고 옮겼다(더하기 원칙 · docs/renewal-program-2026-11-07.md §1-2). */
-import PpppReport from "@/components/PpppReport";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ApiError, commandCampaign, createCampaign, eventsSourceLabel, getDistrictEvents, isRealEventsSource, listCampaigns, type MarketingEvent } from "@/lib/api";
 import type { Campaign, CampaignAction, CampaignConditions, CampaignEvidence, CampaignRun } from "@/lib/campaign";
@@ -112,7 +111,7 @@ function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: C
   const inFlight = useRef(false);
   const requestScope = useRef<{ active: boolean } | null>(null);
   const selected = items.find(c => c.id === selectedId);
-  useReportCapture("campaign", selected ?? null);
+  useRecordCapture("campaign", selected ?? null);
   useEffect(() => {
     const scope = { active: true };
     requestScope.current = scope;
@@ -167,9 +166,6 @@ function CampaignWorkspace({ handoff, mapDistrictId, defaultCategory, token }: C
         ]} save={v => save(() => createCampaign(token, { ...v, capacity: Number(v.capacity), budget_krw: Number(v.budget_krw),
           district_id: handoff?.districtId ?? mapDistrictId ?? null } as CampaignConditions))} />
       </Card>}
-      {selected && <PpppReport key={selected.id}
-        handoff={selected.conditions.district_id === handoff?.districtId && selected.conditions.address === handoff?.address ? handoff : undefined}
-        campaign={selected} />}
       {selected && <CampaignDetail key={selected.id} campaign={selected} busy={busy} command={command} />}
     </>}
   </div>;

@@ -28,6 +28,11 @@ import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
 import { Item, Period, Plan, TestBudgetQ, ValidateMode } from "./screens/Validate";
+import { ListingDetail, Listings } from "./screens/Direct";
+import { InquiryThread, Inbox } from "./screens/Inbox";
+import { OwnerHome, OwnerListing, OwnerNew } from "./screens/Owner";
+import { Plans } from "./screens/Plans";
+import { MyBrief, OwnerBriefDetail, OwnerBriefs } from "./screens/Brief";
 import "./flow.css";
 
 const Login = lazy(() => import("@/pages/Login"));
@@ -68,6 +73,19 @@ function Screen({ route }: { route: Route }) {
     case "plan": return <Plan />;
     case "home": return <Home />;
     case "me": return <Me />;
+    // 직거래 연결 층(2026-11-18) — 흐름에 더한 화면. PPPP 네 화면(#/explore)은 그대로다
+    case "listings": return <Listings />;
+    case "listing": return <ListingDetail id={route.param!} />;
+    case "owner": return <OwnerHome />;
+    case "owner-new": return <OwnerNew />;
+    case "owner-listing": return <OwnerListing id={route.param!} />;
+    case "inbox": return <Inbox />;
+    case "inquiry": return <InquiryThread id={route.param!} />;
+    case "plans": return <Plans />;
+    // 입점 희망서(2026-11-21) — 창업자 희망서 · 건물주가 보는 희망서. 역시 더한 화면이다
+    case "brief": return <MyBrief />;
+    case "owner-briefs": return <OwnerBriefs />;
+    case "owner-brief": return <OwnerBriefDetail id={route.param!} />;
     default: return null;
   }
 }

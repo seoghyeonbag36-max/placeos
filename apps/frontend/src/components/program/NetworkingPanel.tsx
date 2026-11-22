@@ -66,7 +66,7 @@ export default function NetworkingPanel({ districtId, industryKey, industryLabel
         {data.questions.map((q) => <label key={q}>
           <input type="checkbox" checked={notes.checked.includes(q)} onChange={() => toggleQuestion(q)} /> {q}
         </label>)}
-        <label>들은 내용 메모(이 브라우저에만 저장 · 결과 리포트에 실립니다)
+        <label>들은 내용 메모(이 브라우저에만 저장)
           <textarea rows={3} maxLength={1500} value={notes.memo} onChange={(e) => update({ ...notes, memo: e.target.value })}
             placeholder="예: 상인회 월 회비 있음 · 권리금은 층마다 다르다고 함" />
         </label>

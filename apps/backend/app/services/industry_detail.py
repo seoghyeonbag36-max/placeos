@@ -87,6 +87,16 @@ def competition(district_id: str, detail_key: str) -> dict:
             "recommendation_available": False, "fit": None, "fit_rank": None}
 
 
+def break_even_revenue(fixed_monthly: float, variable_cost_rate: float) -> float | None:
+    """월 손익분기 매출(만원) = 월 고정비 ÷ (1 − 변동비율). 변동비율이 1 이상이면 계산할 수 없다(None).
+
+    Posting 세부 업종 계산(`calculate`)과 직거래 「요구 판매량」(services/direct_fit)이 **같은 식**을 쓰도록 한 자리에 둔다.
+    """
+    if not 0 <= variable_cost_rate < 1:
+        return None
+    return round(fixed_monthly / (1 - variable_cost_rate), 2)
+
+
 def calculate(detail_key: str, inputs: dict[str, Any]) -> dict:
     item = get(detail_key)
     if item is None:
@@ -141,7 +151,7 @@ def calculate(detail_key: str, inputs: dict[str, Any]) -> dict:
     surplus = revenue - cost
     out.update(monthly_revenue=round(revenue, 2), monthly_cost=round(cost, 2),
                monthly_surplus=round(surplus, 2), formula=formula,
-               break_even_revenue=round(fixed / (1 - v["variable_cost_rate"]), 2) if v["variable_cost_rate"] < 1 else None,
+               break_even_revenue=break_even_revenue(fixed, v["variable_cost_rate"]),
                payback_months=round(v["investment"] / surplus, 1) if surplus > 0 else None,
                payback_unavailable_reason=None if surplus > 0 else "월 운영 잉여가 0 이하라 단순 회수기간을 계산할 수 없습니다")
     return out

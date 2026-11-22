@@ -21,7 +21,7 @@ export default function EventLinkPlanner({ districtId }: { districtId: string })
     return () => { live = false; };
   }, [districtId]);
   function save() {
-    try { localStorage.setItem(`placeos.event-link.${districtId}`, JSON.stringify(draft)); setNotice("연계 계획을 이 브라우저에 저장했습니다. 검증 리포트에 포함됩니다."); }
+    try { localStorage.setItem(`placeos.event-link.${districtId}`, JSON.stringify(draft)); setNotice("연계 계획을 이 브라우저에 저장했습니다. 서버로 보내지 않습니다."); }
     catch { setNotice("저장하지 못했습니다. 브라우저 저장 공간을 확인하세요."); }
   }
   return <section className="renewal-tool" aria-label="온·오프라인 행사 연계">

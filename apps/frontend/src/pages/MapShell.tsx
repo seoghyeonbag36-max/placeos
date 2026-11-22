@@ -22,7 +22,7 @@ import { candidateId, loadCandidates, saveCandidates, type ReviewCandidate } fro
 import TransitAccessPanel from "@/components/TransitAccessPanel";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import { useMapHost } from "@/components/mapHostContext";
 import MapSlot from "@/components/MapSlot";
@@ -351,7 +351,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     setCandidateState({ items, error });
   };
   const saved = src === "api" ? buildings.filter((b) => savedIds.includes(b.id)) : [];
-  useReportCapture("page", src === "api" && selected ? {
+  useRecordCapture("page", src === "api" && selected ? {
     districtId, buildingId: selected.id, name: selected.name, address: selected.roadAddr ?? null,
     status: selected.vacClass ? VAC_CLASS[selected.vacClass].label : STATUS[selected.status].label,
     capacity: selected.capacity, active: selected.active, floors: selected.floors ?? null,

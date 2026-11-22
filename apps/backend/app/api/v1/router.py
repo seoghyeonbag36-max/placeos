@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends
 
 from app.api.deps import track_access
 from app.api.v1 import (
-    admin, ai, auth, benchmark, buildings, campaigns, corridors, districts, feedback, founder, heatmap, marketing, metrics, program,
-    travel, use_check, visitor_feedback,
+    admin, ai, auth, benchmark, buildings, campaigns, corridors, direct, districts, feedback, founder, heatmap, marketing, metrics,
+    program, travel, use_check, visitor_feedback,
 )
 
 # 분석 API 공통 — 자격증명이 오면 신원을 밝히고 사용량을 남긴다(익명은 그대로 통과).
@@ -44,6 +44,11 @@ api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 # 사용량 계측(_tracked)은 걸지 않는다(2026-10-19) — 피드백 제출은 분석 사용이 아니다. 걸려 있던
 # 동안에는 4주차 설문 제출이 W4 「활성 주」로 세졌다(services/usage.NON_ANALYSIS_PREFIXES).
 api_router.include_router(feedback.router, prefix="/feedback", tags=["feedback"])
+
+# 직거래 연결 층(2026-11-18) — 공개 열람(목록·상세·조건·신호·상품)은 계측을 걸고, 등록·문의·방문·신청은 걸지 않는다.
+# 건물주 활동이 창업자 파일럿 KPI③ W4 「분석 접근」으로 세지면 판정이 오염된다 → docs/decision-owner-direct-matching-2026-11-18.md
+api_router.include_router(direct.public_router, prefix="/direct", tags=["direct"], dependencies=_tracked)
+api_router.include_router(direct.account_router, prefix="/direct", tags=["direct"])
 
 # 방문자 의견은 분석 사용량과 별도로 접수한다.
 api_router.include_router(visitor_feedback.router, prefix="/visitor-feedback", tags=["visitor-feedback"])

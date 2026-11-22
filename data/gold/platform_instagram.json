@@ -1,0 +1,421 @@
+{
+ "built_at": "2026-11-21T23:04:58+00:00",
+ "source": "인스타그램 공식 Graph API — 해시태그 검색(인기 게시물 · 최근 24시간 게시물) · 거점마다 대표 해시태그 하나 · 계정·본문·링크는 저장하지 않음",
+ "connected": false,
+ "api_version": null,
+ "window": "최근 24시간",
+ "stale_after_days": 30,
+ "target_n": 81,
+ "collected_n": 0,
+ "hubs": {
+  "garosugil": {
+   "hashtag": "가로수길",
+   "status": "pending",
+   "shared_with": []
+  },
+  "apgujeong-rodeo": {
+   "hashtag": "압구정로데오",
+   "status": "pending",
+   "shared_with": []
+  },
+  "hongdae": {
+   "hashtag": "홍대",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yeonnam": {
+   "hashtag": "연남동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "ikseon": {
+   "hashtag": "익선동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "seochon": {
+   "hashtag": "서촌",
+   "status": "pending",
+   "shared_with": []
+  },
+  "myeongdong": {
+   "hashtag": "명동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "euljiro": {
+   "hashtag": "을지로",
+   "status": "pending",
+   "shared_with": []
+  },
+  "seongsu": {
+   "hashtag": "성수동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "seoulsup": {
+   "hashtag": "서울숲",
+   "status": "pending",
+   "shared_with": []
+  },
+  "itaewon": {
+   "hashtag": "이태원",
+   "status": "pending",
+   "shared_with": []
+  },
+  "hannam": {
+   "hashtag": "한남동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "songridan": {
+   "hashtag": "송리단길",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gangnam": {
+   "hashtag": "강남역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "hapjeong": {
+   "hashtag": "합정",
+   "status": "pending",
+   "shared_with": []
+  },
+  "mangwon": {
+   "hashtag": "망원동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "samcheong": {
+   "hashtag": "삼청동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gwangjang": {
+   "hashtag": "광장시장",
+   "status": "pending",
+   "shared_with": []
+  },
+  "dongdaemun": {
+   "hashtag": "동대문",
+   "status": "pending",
+   "shared_with": []
+  },
+  "jamsil": {
+   "hashtag": "잠실",
+   "status": "pending",
+   "shared_with": [
+    "jamsil-tour"
+   ]
+  },
+  "konkuk": {
+   "hashtag": "건대입구",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yeouido": {
+   "hashtag": "여의도",
+   "status": "pending",
+   "shared_with": []
+  },
+  "mullae": {
+   "hashtag": "문래동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "banpo": {
+   "hashtag": "고속터미널",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sinchon": {
+   "hashtag": "신촌",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yeonhui": {
+   "hashtag": "연희동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "cheongnyangni": {
+   "hashtag": "청량리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sharosugil": {
+   "hashtag": "샤로수길",
+   "status": "pending",
+   "shared_with": []
+  },
+  "nokdu": {
+   "hashtag": "녹두거리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sillim": {
+   "hashtag": "신림역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "noryangjin": {
+   "hashtag": "노량진",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sungshin": {
+   "hashtag": "성신여대",
+   "status": "pending",
+   "shared_with": []
+  },
+  "anam": {
+   "hashtag": "안암",
+   "status": "pending",
+   "shared_with": []
+  },
+  "cheongdam": {
+   "hashtag": "청담동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "dosan": {
+   "hashtag": "도산공원",
+   "status": "pending",
+   "shared_with": []
+  },
+  "nonhyeon": {
+   "hashtag": "논현동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "teheran": {
+   "hashtag": "역삼",
+   "status": "pending",
+   "shared_with": []
+  },
+  "seolleung": {
+   "hashtag": "선릉",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yongsan": {
+   "hashtag": "용산역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "namdaemun": {
+   "hashtag": "남대문시장",
+   "status": "pending",
+   "shared_with": []
+  },
+  "cityhall": {
+   "hashtag": "시청역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "jamsilsaenae": {
+   "hashtag": "잠실새내",
+   "status": "pending",
+   "shared_with": []
+  },
+  "garak": {
+   "hashtag": "가락시장",
+   "status": "pending",
+   "shared_with": []
+  },
+  "jangan": {
+   "hashtag": "장안동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gongdeok": {
+   "hashtag": "공덕역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gunja": {
+   "hashtag": "군자역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "chungmuro": {
+   "hashtag": "충무로",
+   "status": "pending",
+   "shared_with": []
+  },
+  "nambu": {
+   "hashtag": "남부터미널",
+   "status": "pending",
+   "shared_with": []
+  },
+  "kyunghee": {
+   "hashtag": "경희대",
+   "status": "pending",
+   "shared_with": []
+  },
+  "wangsimni": {
+   "hashtag": "왕십리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sadang": {
+   "hashtag": "사당역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sukmyung": {
+   "hashtag": "숙대입구",
+   "status": "pending",
+   "shared_with": []
+  },
+  "hyehwa": {
+   "hashtag": "대학로",
+   "status": "pending",
+   "shared_with": []
+  },
+  "dangsan": {
+   "hashtag": "당산",
+   "status": "pending",
+   "shared_with": []
+  },
+  "miasageori": {
+   "hashtag": "미아사거리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "suyu": {
+   "hashtag": "수유역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "bulgwang": {
+   "hashtag": "불광역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yeonsinnae": {
+   "hashtag": "연신내",
+   "status": "pending",
+   "shared_with": []
+  },
+  "hwagok": {
+   "hashtag": "화곡역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "kkachisan": {
+   "hashtag": "까치산역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "mokdong-yc": {
+   "hashtag": "목동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sanggye": {
+   "hashtag": "상계동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "sangbong": {
+   "hashtag": "상봉역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "oryudong": {
+   "hashtag": "오류동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "doksan": {
+   "hashtag": "독산동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "cheonho": {
+   "hashtag": "천호동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "bangbang": {
+   "hashtag": "뱅뱅사거리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gildong": {
+   "hashtag": "길동역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "nowon": {
+   "hashtag": "노원역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gurodigital": {
+   "hashtag": "구로디지털단지",
+   "status": "pending",
+   "shared_with": []
+  },
+  "ydp-gucheong": {
+   "hashtag": "영등포구청역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "seochoyeok": {
+   "hashtag": "서초역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "poi": {
+   "hashtag": "포이사거리",
+   "status": "pending",
+   "shared_with": []
+  },
+  "dogok": {
+   "hashtag": "도곡동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "yangjae": {
+   "hashtag": "양재역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "jamsil-tour": {
+   "hashtag": "잠실",
+   "status": "pending",
+   "shared_with": [
+    "jamsil"
+   ]
+  },
+  "daerim": {
+   "hashtag": "대림동",
+   "status": "pending",
+   "shared_with": []
+  },
+  "guui": {
+   "hashtag": "구의역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "maebong": {
+   "hashtag": "매봉역",
+   "status": "pending",
+   "shared_with": []
+  },
+  "gurojeonhwa": {
+   "hashtag": "구로전화국",
+   "status": "pending",
+   "shared_with": []
+  },
+  "bonseobu": {
+   "hashtag": "본서부병원",
+   "status": "pending",
+   "shared_with": []
+  }
+ }
+}

@@ -109,9 +109,9 @@ export default function InteriorPlanner({ handoff, district, industry }: {
         <button type="button" onClick={() => {
           try {
             localStorage.setItem(`placeos.interior-brief.${handoff?.districtId ?? district ?? ""}`, JSON.stringify({ brief: `${brief}\n${designBrief}`, design, source: "user_input", unitId: handoff?.unitId ?? null }));
-            setSaved("인테리어 조건을 이 브라우저에 저장했습니다. 검증 리포트에 포함됩니다.");
+            setSaved("인테리어 조건을 이 브라우저에 저장했습니다.");
           } catch { setSaved("저장하지 못했습니다. 브라우저 저장 공간을 확인하세요."); }
-        }}>리포트에 인테리어 조건 저장</button>
+        }}>인테리어 조건 저장</button>
         <button type="button" onClick={() => download("placeos-interior-brief.json", JSON.stringify({ source: "user_input", brief: `${brief}\n${designBrief}`, design, layout: layoutSummary, posting: handoff?.calculation ?? null }, null, 2))}>인테리어 조건·비용 결과 저장</button>
       </div>
     </fieldset>

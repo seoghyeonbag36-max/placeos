@@ -1,7 +1,7 @@
 import type { SupportItem } from "@/lib/api";
 
 /** Program 리뉴얼(2026-11-07) — 담은 지원 공고·이웃 방문 메모를 이 브라우저에 둔다(행사 연계 계획과 같은 방식).
- *  서버에 저장하지 않으므로 개인정보 처리 범위가 늘지 않는다. 가설 검증의 결과 리포트(PpppReport)가 읽는다.
+ *  서버에 저장하지 않으므로 개인정보 처리 범위가 늘지 않는다. (종합 리포트(PpppReport)는 2026-11-22 에 지웠다.)
  *  저장소를 못 쓰는 브라우저(사생활 보호 창 등)에서도 화면은 그대로 돈다 — 실패하면 조용히 비운다. */
 export interface SavedSupport {
   id: string; title: string; source_label: string; org?: string | null; end?: string | null;

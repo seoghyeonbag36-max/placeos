@@ -1,6 +1,5 @@
 import VisitorFeedback, { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
-import PpppReportProvider from "@/components/PpppReportProvider";
-import AnalysisReportDialog from "@/components/AnalysisReportDialog";
+import WorkspaceRecordsProvider from "@/components/WorkspaceRecordsProvider";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -154,7 +153,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const [view, updateView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
   // 입력 초안은 이번 작업 동안만 보관한다. 지도 표식은 비활성 트랙과 함께 해제한다.
   const [postingDrafts] = useState(() => new Map<string, PostingDraft>());
-  const [reportOpen, setReportOpen] = useState(false);
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
   // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
@@ -198,7 +196,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   };
   // Posting → Program 인계는 상권 변경 시 함께 비운다.
   const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
-  const [reportHandoff, setReportHandoff] = useState<ProgramHandoff>();
+  const [postingResult, setPostingResult] = useState<ProgramHandoff>();
   // 네 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
@@ -207,7 +205,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       postingDrafts.clear();
       setPostingSelection(undefined);
       setProgramHandoff(undefined);
-      setReportHandoff(undefined);
+      setPostingResult(undefined);
     }
     setPageWorkspace((w) => (w.districtId === id ? w
       : { ...w, districtId: id, query: "", status: "all", selectedId: null }));
@@ -226,7 +224,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // Posting → Program: 인계마다 requestId 를 올려 Program 을 새로 마운트한다(초기값으로만 채운다).
   const makeProgram = useCallback((handoff: ProgramHandoff) => {
     setDistrictId(handoff.districtId);
-    setReportHandoff(handoff);
+    setPostingResult(handoff);
     setProgramHandoff((prev) => ({ ...handoff, requestId: (prev?.requestId ?? 0) + 1 }));
     setView("program", handoff);
   }, [setView, setDistrictId]);
@@ -416,10 +414,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <span>{n.label}</span>
           </button>
         ))}
-        <button type="button" className="rail-btn rail-report" aria-haspopup="dialog" onClick={() => setReportOpen(true)}>
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
-          <span>상권 분석 보고서</span>
-        </button>
         {/* 2026-11-08: 의견 보내기를 오른쪽 아래 떠 있는 버튼에서 레일로 옮겼다 — 지도·패널 글을 가리던 자리다.
             「계정」 바로 위(= 도움·의견은 내비게이션 맨 아래, 의견이 그 위)에 두고, 의견창(VisitorFeedback)은
             OPEN_VISITOR_FEEDBACK 로 같은 창을 연다. 누른 버튼을 실어 보내 닫을 때 초점이 이 버튼으로 돌아온다. */}
@@ -439,8 +433,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       {/* 지도는 앱 수명 동안 **하나**다. 탭이 바뀌어도 언마운트하지 않고 오버레이만
           갈아끼운다 — 그래야 사용자가 맞춰 둔 중심·줌이 탭 왕복에도 남는다. */}
       <MapHost active>
-        <PpppReportProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
-        {reportOpen && <AnalysisReportDialog districtId={districtId} handoff={reportHandoff} onClose={() => setReportOpen(false)} />}
+        <WorkspaceRecordsProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
             <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" onNavigate={navigateStep} />}
@@ -460,7 +453,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
               </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
+                onMakeProgram={makeProgram} onResultChange={setPostingResult} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
@@ -475,13 +468,13 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal}
                 industryKey={customIndustry ? undefined : workIndustry?.key}
                 industryLabel={customIndustry ?? workIndustry?.label}
-                reportHandoff={reportHandoff?.districtId === districtId ? reportHandoff : undefined} />
+                postingResult={postingResult?.districtId === districtId ? postingResult : undefined} />
             </TrackMapFrame>
           )}
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
-        </PpppReportProvider>
+        </WorkspaceRecordsProvider>
       </MapHost>
       <FounderPlanner selection={postingSelection} />
       {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}

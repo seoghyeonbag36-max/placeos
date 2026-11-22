@@ -3,7 +3,6 @@ import { expect, it, vi } from "vitest";
 import * as api from "@/lib/api";
 import NearbyCompetition from "./NearbyCompetition";
 import EventLinkPlanner from "./EventLinkPlanner";
-import PpppReport from "./PpppReport";
 import { MapHostCtx } from "./mapHostContext";
 import { installNaverStub } from "@/test/naverStub";
 import type { NaverMap } from "@/lib/naverTypes";
@@ -81,19 +80,18 @@ it("맞는 업종이 없으면 고르라고 안내하고 업종 없이 전체 �
   expect((await screen.findByLabelText("표시할 점포") as HTMLSelectElement).value).toBe("all");
 });
 
-it("없는 행사 후보를 만들지 않고 작성·저장한 온라인·오프라인 계획을 리포트에 싣는다", async () => {
+it("없는 행사 후보를 만들지 않고, 직접 작성한 온라인·오프라인 계획을 이 브라우저에만 저장한다", async () => {
   vi.spyOn(api, "getDistrictEvents").mockResolvedValue({ district_id: "test", events: [], events_source: "none" });
   const districtReport = vi.spyOn(api, "getDistrictReport");
-  render(<><EventLinkPlanner districtId="test" /><PpppReport districtId="test" /></>);
+  render(<EventLinkPlanner districtId="test" />);
   await screen.findByText(/확인된 행사 후보가 없습니다/);
   fireEvent.change(screen.getByLabelText("행사명"), { target: { value: "직접 확인한 행사" } });
   fireEvent.change(screen.getByLabelText("온라인 홍보·쿠폰·예약 계획"), { target: { value: "예약 링크 안내" } });
   fireEvent.change(screen.getByLabelText("오프라인 참여·방문 혜택·측정 방법"), { target: { value: "현장 방문 코드 집계" } });
   fireEvent.click(screen.getByRole("button", { name: "행사 연계 계획 저장" }));
-  fireEvent.click(screen.getByRole("button", { name: "상권 분석 보고서 만들기" }));
-  const report = screen.getByRole("article", { name: "상권 분석 보고서 미리보기" });
-  expect(report.textContent).toContain("예약 링크 안내");
-  expect(report.textContent).toContain("현장 방문 코드 집계");
-  expect(report.textContent).toContain("실행 성과 미확인");
-  expect(districtReport).not.toHaveBeenCalled();
+  expect(screen.getByText(/연계 계획을 이 브라우저에 저장했습니다/)).toBeTruthy();
+  const saved = JSON.parse(localStorage.getItem("placeos.event-link.test")!);
+  expect(saved.online).toBe("예약 링크 안내");
+  expect(saved.offline).toBe("현장 방문 코드 집계");
+  expect(districtReport).not.toHaveBeenCalled();    // 서버에 보내지 않는다
 });

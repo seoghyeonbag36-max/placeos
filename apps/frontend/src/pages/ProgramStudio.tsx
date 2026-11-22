@@ -1,4 +1,4 @@
-import { useReportCapture, usePpppReport } from "@/lib/ppppReportContext";
+import { useRecordCapture, useWorkspaceRecords } from "@/lib/workspaceRecords";
 import { eventRange, splitEvents } from "@/lib/programEvents";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CaveatNote } from "@/components/DistrictPicker";
@@ -108,7 +108,7 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   businessGoal?: BusinessGoal;
 } = {}) {
   const baseStage = stageOf(businessGoal);
-  const workspace = usePpppReport();
+  const workspace = useWorkspaceRecords();
   const previous = workspace.program?.districtId === mapDistrictId ? workspace.program : undefined;
   const [form, setForm] = useState<FormState>(() => handoff
     ? { ...emptyForm(baseStage), ...previous?.draft, districtId: handoff.districtId, category: handoff.industry ?? defaultCategory ?? "", address: handoff.address ?? (previous?.unitId === handoff.unitId ? previous?.draft?.address : "") ?? "" }
@@ -168,8 +168,8 @@ export default function ProgramStudio({ mapDistrictId, handoff, onArrivalDismiss
   const canSubmit = form.item.trim() !== "" && form.category.trim() !== "" && !halfBudget && !badRatio && !busy;
 
   const hub = (districts ?? []).find((d) => d.id === form.districtId);
-  useReportCapture("posting", arrival);
-  useReportCapture("program", (form.districtId || mapDistrictId) ? {
+  useRecordCapture("posting", arrival);
+  useRecordCapture("program", (form.districtId || mapDistrictId) ? {
     districtId: form.districtId || mapDistrictId!, linkedDistrictId: form.districtId || null, unitId: siteUnitId,
     item: form.item, category: form.category, hypothesis: form.hypothesis, targetCustomer: form.targetCustomer,
     period: [form.startDate, form.runDays ? `${form.runDays}일` : ""].filter(Boolean).join(" · "),

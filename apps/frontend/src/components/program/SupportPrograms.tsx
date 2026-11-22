@@ -36,7 +36,7 @@ export default function SupportPrograms({ districtId, stage: initialStage, indus
   function toggle(it: SupportItem) {
     const r = toggleSavedSupport(districtId, it);
     setSaved(r.saved);
-    setNotice(r.ok ? "이 브라우저에 담았습니다 — 가설 검증의 결과 리포트에 실립니다." : "저장하지 못했습니다(브라우저 저장 공간).");
+    setNotice(r.ok ? "이 브라우저에 담았습니다." : "저장하지 못했습니다(브라우저 저장 공간).");
   }
 
   return <div className="program-panel">

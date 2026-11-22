@@ -177,7 +177,7 @@ function ChairIcon({ style }: { style: ChairStyle }) {
 // ── 편집기 ─────────────────────────────────────────────────────────────
 export default function InteriorEditor({ twin, floor, keywords, industry, strategy, onSummary }: {
   twin: BuildingTwin; floor: TwinFloor; keywords: readonly string[]; industry?: string | null; strategy?: InteriorStrategy | null;
-  /** 배치 요약(공간 · 좌석 · 디자인) — 리포트 · 저장에 싣는다 */
+  /** 배치 요약(공간 · 좌석 · 디자인) — 저장에 싣는다 */
   onSummary?: (lines: string[]) => void;
 }) {
   const st: InteriorStrategy = strategy ?? "가성비";
@@ -238,7 +238,7 @@ export default function InteriorEditor({ twin, floor, keywords, industry, strate
     } else { setBanner(true); setNotice(null); }
   }
 
-  // 요약 — 저장 · 리포트에 싣는다
+  // 요약 — 저장에 싣는다
   const summary = useMemo(() => {
     const sets = objs.filter((o) => o.kind === "set");
     const loose = objs.filter((o) => o.kind === "chair").reduce((t, o) => t + seatsOf(o), 0);

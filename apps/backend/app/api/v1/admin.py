@@ -167,3 +167,66 @@ def usage(days: int = 30, db: Session = Depends(get_db)) -> dict:
     보이므로** 이 엔드포인트가 그 구분을 드러내는 자리다.
     """
     return usage_service.usage_summary(db, days=days)
+
+
+# ── 직거래 연결 층(2026-11-18) — 소유자 확인 · 신고 · 입금 확인 · 퍼널 ─────────────────────────
+# 관리자는 매물 내용을 고치지 않는다(L2) — 확인·반려·숨김·복구와 입금 확인만 한다.
+# 소유자명·등기 고유번호는 이 창구에서만 원문으로 보인다(L5) → docs/decision-owner-direct-matching-2026-11-18.md
+
+from app.schemas.direct import AdminDecisionIn, AdminPurchaseActionIn, AdminReportActionIn  # noqa: E402
+from app.services import direct_admin, direct_listings, direct_purchases  # noqa: E402
+
+
+def _direct_ready(db: Session) -> None:
+    if not direct_listings.schema_ready(db):
+        raise HTTPException(status_code=503, detail="직거래 표가 아직 없습니다 — alembic upgrade head 를 먼저 돌리세요")
+
+
+def _direct_call(fn, *args):
+    try:
+        return fn(*args)
+    except direct_listings.DirectError as exc:
+        raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+
+
+@router.get("/direct/verifications", dependencies=[Depends(require_admin)])
+def direct_verifications(status: str = "pending", db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return {"items": direct_admin.verifications(db, status)}
+
+
+@router.post("/direct/verifications/{verification_id}", dependencies=[Depends(require_admin)])
+def direct_verification_decide(verification_id: str, body: AdminDecisionIn, db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return _direct_call(direct_admin.decide, db, verification_id, body.decision, body.note)
+
+
+@router.get("/direct/reports", dependencies=[Depends(require_admin)])
+def direct_reports(status: str = "open", db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return {"items": direct_admin.reports(db, status)}
+
+
+@router.post("/direct/reports/{report_id}", dependencies=[Depends(require_admin)])
+def direct_report_act(report_id: str, body: AdminReportActionIn, db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return _direct_call(direct_admin.act_on_report, db, report_id, body.action)
+
+
+@router.get("/direct/purchases", dependencies=[Depends(require_admin)])
+def direct_purchases_list(status: str | None = None, db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return {"items": direct_purchases.admin_list(db, status)}
+
+
+@router.post("/direct/purchases/{purchase_id}", dependencies=[Depends(require_admin)])
+def direct_purchase_act(purchase_id: str, body: AdminPurchaseActionIn, db: Session = Depends(get_db)) -> dict:
+    _direct_ready(db)
+    return _direct_call(direct_purchases.admin_act, db, purchase_id, body.action)
+
+
+@router.get("/direct/funnel", dependencies=[Depends(require_admin)])
+def direct_funnel(db: Session = Depends(get_db)) -> dict:
+    """직거래 퍼널 — 계측기다. 배선 100% 는 매물 0건과 양립하고, n 이 작으면 비율을 말하지 않는다."""
+    _direct_ready(db)
+    return direct_admin.funnel(db)

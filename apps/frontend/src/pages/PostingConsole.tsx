@@ -1,7 +1,7 @@
 import { savedPostingHandoff } from "@/lib/savedPosting";
 import NearbyCompetition from "@/components/NearbyCompetition";
 import InteriorPlanner from "@/components/InteriorPlanner";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingSelection, ProgramHandoff } from "@/lib/workspaceState";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
@@ -66,7 +66,7 @@ const AUTO_RUN_MS = 600;
 const RETIRED_PAGES = new Set(["report", "result", "program"]);
 
 interface PostingConsoleProps {
-  onReportChange?: (handoff: ProgramHandoff | undefined) => void;
+  onResultChange?: (handoff: ProgramHandoff | undefined) => void;
   guided?: boolean;
   drafts?: Map<string, PostingDraft>;
   draftKey?: string;
@@ -102,14 +102,14 @@ export interface PostingDraft {
   page: string;
 }
 
-export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided, drafts }: PostingConsoleProps = {}) {
+export default function PostingConsole({ selection, districtId, onDistrictChange, onMakeProgram, onResultChange, defaultIndustry, defaultDetailKey, industryRequest, guided, drafts }: PostingConsoleProps = {}) {
   const draftKey = `${districtId ?? DEFAULT_DISTRICT}|${selection ? `${selection.districtId}:${selection.buildingId}:${selection.unitId ?? ""}:${selection.requestId}` : "direct"}|${industryRequest?.requestId ?? 0}|${defaultIndustry ?? ""}|${defaultDetailKey ?? ""}`;
   return <PostingSession key={draftKey} guided={guided} drafts={drafts} draftKey={draftKey}
-    selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram} onReportChange={onReportChange}
+    selection={selection} districtId={districtId} onDistrictChange={onDistrictChange} onMakeProgram={onMakeProgram} onResultChange={onResultChange}
     defaultIndustry={defaultIndustry} defaultDetailKey={defaultDetailKey} industryRequest={industryRequest} />;
 }
 
-function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onReportChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
+function PostingSession({ selection, districtId: sharedDistrict, onDistrictChange, onMakeProgram, onResultChange, defaultIndustry, defaultDetailKey, industryRequest, guided = false, drafts, draftKey = "direct" }: PostingConsoleProps) {
   const [draft] = useState(() => drafts?.get(draftKey));
   // 첫 화면은 「시뮬레이션 결과」(2026-11-10 사용자 요청 — 오른쪽 칸 순서: 시뮬레이션 결과 → 상권 맞춤 인테리어 → 주변 업종 지도 →
   // 찾아오는 길 → 위험 확인 → 메뉴 설정 → 비용 비교 및 결정(그 안에 이 자리로 검증 program 만들기)). 11-09 에는 인테리어가 첫 화면이었다.
@@ -387,7 +387,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     || calculation.input.strategy !== (strategy || undefined)
     || calculation.input.prem !== (prem.trim() === "" ? undefined : Number(prem))
     || calculation.input.area_py_override !== undefined);
-  const reportHandoff: ProgramHandoff | undefined = effectiveUnit ? {
+  const postingResult: ProgramHandoff | undefined = effectiveUnit ? {
     buildingId: selection && (effectiveUnit.id === selection.unitId || effectiveUnit.id === `vu-${selection.buildingId}`)
       ? selection.buildingId : effectiveUnit.id.startsWith("vu-") ? effectiveUnit.id.slice(3) : undefined,
     districtId, districtName: districts.find(d => d.id === districtId)?.name,
@@ -396,11 +396,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
     industry: industry.trim() || null, strategy: strategy || null, inputsSource: effectiveUnit.inputs_source,
     calculation: calculation && !changedInput ? { input: calculation.input, result: calculation.result } : undefined,
   } : undefined;
-  const reportSnapshot = JSON.stringify(reportHandoff);
-  useReportCapture("posting", reportHandoff ?? null);
+  const resultSnapshot = JSON.stringify(postingResult);
+  useRecordCapture("posting", postingResult ?? null);
   useEffect(() => {
-    onReportChange?.(reportSnapshot ? JSON.parse(reportSnapshot) as ProgramHandoff : undefined);
-  }, [onReportChange, reportSnapshot]);
+    onResultChange?.(resultSnapshot ? JSON.parse(resultSnapshot) as ProgramHandoff : undefined);
+  }, [onResultChange, resultSnapshot]);
   const tiers = result ? Object.entries(result.scenarios) : [];
 
 
@@ -585,7 +585,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         </div>
         </> },
         { id: "interior", label: "상권 맞춤 인테리어", description: "고른 자리의 3D 디지털 트윈에서 키워드로 가구를 놓고, 테이블 · 의자를 골라 직접 배치하세요.", content:
-          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={reportHandoff} district={districtId} industry={industry} /> },
+          guided && <InteriorPlanner key={`${districtId}:${unitId}`} handoff={postingResult} district={districtId} industry={industry} /> },
         { id: "nearby", label: "주변 업종 지도", description: "업종을 확인하고 「조회」를 누르면 공실 주변 50~100m의 같은 업종과 체인점을 보여 줍니다.", content:
           page === "nearby" && <>
             {detailKey && <IndustryCompetitionPanel districtId={districtId} detailKey={detailKey} />}
@@ -615,11 +615,11 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               title: `${districts.find((d) => d.id === calculation.input.district_id)?.name ?? calculation.input.district_id}`
                 + ` · ${unit?.n ?? calculation.result.unit_id} · ${calculation.result.industry_type || calculation.input.industry_type || "자리 기본 업종"}`,
               districtId: calculation.input.district_id,
-              payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null, handoff: reportHandoff },
+              payload: { input: calculation.input, result: calculation.result, unitName: unit?.n ?? null, handoff: postingResult },
             }} />}
           {result?.economics?.status === "calculated" && calculation && <SaveResultButton disabled={busy || !!changedInput} onSaved={() => setSavedTick((n) => n + 1)}
             build={() => ({ kind: "posting", title: `${districts.find((d) => d.id === districtId)?.name ?? districtId} · ${result.economics!.label} 운영 시나리오`,
-              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null, handoff: reportHandoff } })} />}
+              districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null, handoff: postingResult } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} onMakeProgram={onMakeProgram} />} />
           {inSlots && <p className="pstep-pointer">후보를 3곳까지 담아 계약 조건 · 답사 체크리스트로 비교하려면 화면 오른쪽 위 「입점 준비」를 쓰세요.</p>}
           {/* 정했으면 바로 검증 program 으로 — 2026-11-10 사용자 요청으로 따로 있던 마지막 쪽을 이 쪽 안으로 합쳤다 */}
