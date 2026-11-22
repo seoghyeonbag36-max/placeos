@@ -5,7 +5,7 @@ import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings, simulateResult } from "@/test/fixtures";
 
 // 오른쪽 칸 순서 — 2026-11-22 사용자 정의(Posting = 입점 희망서를 건물주에게 전달 → 매칭·계약 논의)로 「입점 희망서 · 계약」이 맨 앞이다
-// (그전 11-10 사용자 요청은 「시뮬레이션 결과」가 첫 화면이었다). 왼쪽 입력 칸은 그대로다. 검증 program 만들기는 「비용 비교 및 결정」 안에 있다
+// (그전 11-10 사용자 요청은 「시뮬레이션 결과」가 첫 화면이었다). 왼쪽 입력 칸은 그대로다. 개업 후 Program 열기(그전 검증 program 만들기)는 「비용 비교 및 결정」 안에 있다
 const POSTING_PAGES = ["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
 
 // 테스트 전용 합성 응답 — 실제는 /travel/access 의 카카오 Local · TMAP 보행 경로 · 서울 열린데이터
@@ -100,9 +100,10 @@ describe("단계형 비용 검토", () => {
     expect(menu.getByRole("table", { name: /추정 월매출/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "비용 비교 및 결정" }));
     expect(screen.getByText("어떤 비용과 전략으로 입점할까요?")).toBeTruthy();
-    // 검증 program 만들기는 같은 쪽 안 — 따로 된 쪽이 없다
-    expect(screen.getByRole("region", { name: "이 자리로 검증 program 만들기" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기" })).toBeNull();
+    // 개업 후 Program 으로 넘기는 칸은 같은 쪽 안 — 따로 된 쪽이 없다(2026-11-22 · 그전 「이 자리로 검증 program 만들기」)
+    expect(screen.getByRole("region", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeNull();
+    expect(screen.queryByText(/검증 program|가설 검증/)).toBeNull();
   });
 
   it("Posting 「업종」을 바꾸면 상권 맞춤 인테리어의 공간 키워드가 그 업종 기본값으로 바뀐다", async () => {
@@ -135,7 +136,7 @@ describe("단계형 비용 검토", () => {
     let view = render(<PostingConsole guided drafts={drafts} districtId="garosugil" />);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션 결과" }));
-    expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기 →" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "이 자리로 개업 후 Program 열기 →" })).toBeNull();
     fireEvent.change(screen.getByPlaceholderText("만원 — 비우면 0 전제"), { target: { value: "200" } });
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션" }));
     expect(await screen.findByText(/권리금 200만원/)).toBeTruthy();

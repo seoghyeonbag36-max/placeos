@@ -29,7 +29,6 @@
 """
 from __future__ import annotations
 
-import ast
 import json
 import sys
 from dataclasses import dataclass, field
@@ -1274,23 +1273,6 @@ def _context_kinds() -> dict[str, int]:
     return out
 
 
-def _literal_options(source: str, alias: str) -> set[str]:
-    """Literal 별칭의 실제 선언을 읽는다. 주석·표기 순서에 기대지 않는다."""
-    for node in ast.parse(source).body:
-        if not isinstance(node, ast.Assign):
-            continue
-        if not any(isinstance(target, ast.Name) and target.id == alias for target in node.targets):
-            continue
-        value = node.value
-        if not (isinstance(value, ast.Subscript)
-                and isinstance(value.value, ast.Name) and value.value.id == "Literal"):
-            return set()
-        items = value.slice.elts if isinstance(value.slice, ast.Tuple) else [value.slice]
-        return {item.value for item in items
-                if isinstance(item, ast.Constant) and isinstance(item.value, str)}
-    return set()
-
-
 # 행사 판정 실패를 삼키지 않기 위한 자리(`_KPI_ERROR` 와 같은 계열 · 2026-11-07).
 _EVENTS_ERROR: str = ""
 
@@ -1337,197 +1319,69 @@ def _read(rel: str) -> str:
 
 
 def program_track(total: int) -> Track:
-    """대상 재정의(2026-09-17) 기준 — 예비창업자와, 팝업스토어·가오픈·MVP 로 아이템을 검증하려는
-    기창업자. 2026-11-07 네 기능 리뉴얼(네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증)
-    게이트를 더했다(docs/feature-program.md §0-W).
+    """2026-11-22 사용자 정의 — Program = 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」
+    (→ docs/decision-program-post-opening-2026-11-22.md).
 
-    옛 정의(영업 중 점주의 홍보 · 08-29 상용 온보딩)로 재면 삭제된 경로를 세게 된다. 게이트는
-    검증 브리프 입력 · 검증 지표 출력 · 미검증 경험 검사가 **코드에 배선됐는지**를 센다
-    (docs/feature-program.md §0-V).
+    네트워킹 · 오프라인 마케팅 솔루션(실행 카드 · 행사 연계 · 실행 기록) 두 기능이 **코드에 배선됐는지**를 센다.
+    그전 게이트 — 생성 엔진 · 화면 · HA 검증 / 검증 브리프·지표 계약 / 입력 계약 3층 / 출력 분리 / 지원 프로그램 · 공고 원천 3종 배선 /
+    가설 검증 · 목표선 = Posting 손익분기 / 상권 콘텐츠 컨텍스트 / 검색 트렌드 라벨 — 은 걷었다: 그 기능(검증 계획 생성 · 지원 공고 ·
+    그 입력 자료)이 Program 에서 제외돼 화면이 부르지 않는다. 서버 코드(/marketing/generate · /program/support)는 남았다.
+    그전 정의(2026-09-17 검증하려는 창업자 · 11-07 네 기능)의 게이트는 git 이력에 있다.
     """
-    t = Track("Program", "Phase 6-2 (검증하려는 창업자 대상)")
+    t = Track("Program", "Phase 6-2 (계약·개업한 자리)")
     kinds = _context_kinds()
 
-    t.gates.append(Gate(
-        "생성 엔진 · 화면 · HA 검증", 1.0,
-        "POST /marketing/generate + ProgramStudio + ha_guard 후처리 — 기반은 서 있다",
-        auto=False, evidence="services/marketing.py · services/ha_guard.py · pages/ProgramStudio.tsx",
-    ))
-
-    schema_src = (ROOT / "apps/backend/app/schemas/marketing.py").read_text(encoding="utf-8")
-    mkt_src = (ROOT / "apps/backend/app/services/marketing.py").read_text(encoding="utf-8")
-    ha_src = (ROOT / "apps/backend/app/services/ha_guard.py").read_text(encoding="utf-8")
-    studio_src = (ROOT / "apps/frontend/src/pages/ProgramStudio.tsx").read_text(encoding="utf-8")
-    # 검증 계약 — 선언이 아니라 배선을 센다. 스키마에 필드가 있는 것만으로는 안 올라간다:
-    # 지표에 기각 조건(decision)이 **필수**이고, ha_guard 가 지표 형식과 미검증 경험을 실제로
-    # 검사하며, 화면이 생성 함수를 부르고 판정표를 그려야 한다.
-    validation_ok = (
-        "class ProgramBrief" in schema_src
-        and {"popup", "soft_open", "mvp"}.issubset(_literal_options(schema_src, "ValidationMode"))
-        and "class ValidationSignal" in schema_src and "decision: str" in schema_src
-        and "signals" in mkt_src and "_MODE_SIGNAL" in mkt_src
-        and "unproven_experience_claim" in ha_src and "missing_decision_rule" in ha_src
-        and "generateProgram" in studio_src and "SignalTable" in studio_src
-    )
-    t.gates.append(Gate(
-        "검증 브리프·지표 계약", 1.0 if validation_ok else 0.0,
-        "2026-09-17 배선 — 입력은 검증 브리프(아이템·검증 방식 popup/soft_open/mvp·단계·가설·"
-        "기간·예산 구간·차별점), 출력은 모객·자리·연계에 더해 **검증 지표**(지표·측정 방법·"
-        "목표선·기각 조건)다. 무엇을 세면 통했다고 할지 시작 전에 정하지 않은 검증은 판정이 "
-        "아니라 지출이라, 규칙 기반 스텁도 방식별 지표를 채운다. ha_guard 는 단골·기존 고객처럼 "
-        "아직 없는 경험을 전제한 제안을 폐기하되(unproven_experience_claim) 재방문율 집계 같은 "
-        "**측정 문장은 면제**한다. 영업 중인 가게 홍보(리뷰·사진·메뉴 입력 · 상호 검색 · 상용 "
-        "온보딩)는 대상에서 빠져 삭제됐다"
-        if validation_ok else
-        "미배선 — 브리프 스키마·지표 기각 조건·HA 검사·판정표 중 하나 이상이 없다",
-        evidence=("docs/feature-program.md §0-V · apps/backend/tests/test_ha_guard.py · "
-                  "apps/backend/tests/test_program_output_split.py · "
-                  "apps/frontend/src/pages/ProgramStudio.test.tsx"),
-    ))
-
-    ctx = kinds.get("blog_keyword", 0)
-    t.gates.append(Gate(
-        "상권 콘텐츠 컨텍스트", ctx / total if total else 0.0,
-        f"{ctx}/{total}거점 — 블로그 키워드·업종 분포 (CSV·표준라이브러리 서빙)",
-    ))
-
-    dem = kinds.get("demand", 0)
-    t.gates.append(Gate(
-        "상권 수요신호 결합", dem / total if total else 0.0,
-        f"{dem}/{total}거점 — TRDAR 시간대·연령·성별. 리뷰가 없는 대상에게 근거를 대는 "
-        "자리이자, 온라인(전환 구간)·오프라인(빈 구간) 두 출력이 갈리는 표다",
-    ))
-
-    tr = kinds.get("trend", 0)
-    t.gates.append(Gate(
-        "검색 트렌드 라벨 (HA 안전장치)", tr / total if total else 0.0,
-        f"{tr}/{total}거점 — 라벨이 없으면 ha_guard 의 트렌드 역행 검사가 **조용히 통과**한다. "
-        "거점 단위 수집(naver_datalab --hubs) + build_program_trend 로 켰다",
-    ))
-
-    # 이 게이트는 2026-08-23 까지 **선언**이었고, 그래서 "공실 유닛 49/54" 라고 적힌 채
-    # 08-22 의 54/54 완주를 두 번의 상태 점검 동안 놓쳤다. 층마다 배선의 흔적을
-    # 코드에서 직접 센다 — 문구만 고쳐서는 올라가지 않게.
-    site_mod = ROOT / "apps/backend/app/services/program_site.py"
-    # ① 자리 — 모듈이 산출물을 읽고, marketing 이 실제로 그 모듈을 부른다
-    site_ok = (site_mod.exists()
-               and "vacant_units.json" in site_mod.read_text(encoding="utf-8")
-               and "program_site" in mkt_src)
-    # ② 상권 — 기존 컨텍스트 빌더
-    market_ok = "_district_context" in mkt_src
-    # ③ 검증 브리프 — 필드가 **있는 것만으로는 안 센다.** ①층과 같은 기준으로, 모듈이 있고
-    # marketing 과 ha_guard 가 실제로 그것을 부르는지까지 본다. (2026-09-17 창업계획층
-    # program_venture 를 대체했다 — 그 모듈을 계속 세면 삭제된 파일 때문에 0 이 된다.)
-    brief_mod = ROOT / "apps/backend/app/services/program_brief.py"
-    brief_ok = (brief_mod.exists()
-                and all(f in schema_src for f in ("budget_krw_min", "hypothesis", "run_days"))
-                and "program_brief" in mkt_src
-                and "program_brief" in ha_src)
-    done = [n for n, ok in (("자리", site_ok), ("상권", market_ok),
-                            ("검증 브리프", brief_ok)) if ok]
-    miss = [n for n in ("자리", "상권", "검증 브리프") if n not in done]
-    t.gates.append(Gate(
-        "입력 계약 3층 (자리·상권·검증 브리프)", len(done) / 3,
-        f"{'·'.join(done)}층 배선됨" + (f" / {'·'.join(miss)}층 미구현" if miss else "")
-        + ". 자리층은 08-23(services/program_site + GET /marketing/sites), 검증 브리프층은 "
-        "**09-17**(services/program_brief — 08-23 의 창업계획층 program_venture 를 대체)이다. "
-        "③층은 앞의 둘과 성격이 다르다 — 아직 해 보지 않은 아이템의 가설은 어떤 데이터에도 "
-        "없어서 **창업자가 넣는다**. 그래서 수집이 아니라 계약·검증 과제다. 종전에는 개업예정일이 "
-        "있을 때만 방문·후기 전제 검사를 켰지만, 대상이 전부 미검증이 되어 **항상** 켠다. "
-        "예산은 ③층에만 절대액이 있고(출력 budget_share 는 int 퍼센트) 그 범위를 HA allowed_text "
-        "에 싣는다. ⚠ 차별점은 검증된 사실이 아니라 **창업자 주장**이라 컨텍스트에 그렇게 밝혀 "
-        "싣는다 — 우리가 관측한 수치와 같은 자리에 두면 근거가 오염된다",
-        evidence=("docs/feature-program.md §0-V · §0-B · services/program_brief.py · "
-                  "apps/backend/tests/test_posting_marketing.py (브리프 배선)"),
-    ))
-
-    t.gates.append(Gate(
-        "출력 분리 (퍼포먼스 / 상권활성화)", 1.0,
-        "배선 완료 2026-08-23. ChannelPlan 에 자리를 냈다 — 온라인은 target·"
-        "budget_share·kpi, 오프라인은 timing·actors·mode. LLM 계약은 둘로 갈랐고"
-        "(LLMPerformancePlan / LLMActivationPlan) API 응답은 한 모양을 유지해 프론트가 "
-        "안 깨진다. 예산은 **int 퍼센트**라 '월 30만원' 같은 절대액이 구조적으로 못 "
-        "들어간다 — 원칙을 문구가 아니라 타입으로 강제한다. 충돌하던 신규 행사 제안 "
-        "금지 조항은 없애지 않고 mode 로 갈랐다: cite(기존 인용, 사실 주장) · "
-        "propose(신규 공동 행사, 빈 시간대 수치 요구) · own(매장 자체 접점, 행사 아님). "
-        "서버 검증 4종 신설(fabricated_event violation + unsupported_event_proposal · "
-        "missing_actors · budget_share_mismatch warning). own 은 오탐 대조 테스트가 "
-        "찾아낸 것이다 — 없으면 입간판 제안이 '수치 없는 행사 제안'으로 잘못 걸린다. "
-        "곁가지로 리뷰 없는 입력(=공실)에 '방문 후기형 포스팅'을 제안하던 스텁을 고쳤다. "
-        "그때 '근본 해소는 아니다 — ③층(창업계획)은 여전히 미구현'이라고 적어 뒀는데 "
-        "**같은 날 오후에 해소됐다**(services/program_venture.py · 08-23). 스텁의 판정은 "
-        "`reviews 가 비었나`라는 추정이었고, ③층의 개업예정일이 그걸 확정 판정으로 "
-        "바꿨다 — 위 `입력 계약 3층` 게이트가 그 자리다. "
-        "⚠ 2026-08-27 이 문구가 낡은 채 남아 있어 고쳤다. 같은 출력 안에서 두 게이트가 "
-        "③층을 두고 서로 다른 말을 하고 있었다 — 선언이 낡는 이 양식이 이 저장소의 "
-        "주된 실패 모양이라, 지우지 않고 경위를 남긴다",
-        auto=False,
-        evidence=("docs/feature-program.md §0-F · apps/backend/tests/"
-                  "test_program_output_split.py · services/ha_guard.py · "
-                  "③층은 2026-09-17 services/program_brief.py 로 대체"),
-    ))
-
-    # ── 2026-11-07 네 기능 리뉴얼 — 배선을 코드에서 센다(문구만 고쳐서는 안 올라가게) ──
+    # ── 두 기능 화면 — 배선을 코드에서 센다(문구만 고쳐서는 안 올라가게) ──
     hub_src = _read("apps/frontend/src/pages/CampaignStudio.tsx")
     app_src = _read("apps/frontend/src/App.tsx")
-    hub_ok = (all(f'label: "{n}"' in hub_src for n in ("가설 설정", "지원 프로그램", "네트워킹", "오프라인 마케팅 솔루션"))
-              and "ConsolePages" in hub_src and "CampaignLedger" in hub_src
+    labels = [n for n in ("네트워킹", "오프라인 마케팅 솔루션") if f'label: "{n}"' in hub_src]
+    excluded = [n for n in ("가설 설정", "지원 프로그램") if f'label: "{n}"' in hub_src]
+    # 제외한 기능은 **불러오는 줄**로 본다 — 머리 주석이 그 이름(ProgramStudio 등)을 경위로 적는 것은 괜찮다
+    excluded_imports = [m for m in ('"@/pages/ProgramStudio"', '"@/components/program/SupportPrograms"',
+                                    '"@/components/program/OwnerMarketing"') if m in hub_src]
+    hub_ok = (len(labels) == 2 and not excluded and not excluded_imports
+              and all(c in hub_src for c in ("ConsolePages", "NetworkingPanel", "ExecutionCards", "CampaignLedger"))
               and 'import("@/pages/CampaignStudio")' in app_src)
     t.gates.append(Gate(
-        "Program 네 기능 화면", 1.0 if hub_ok else 0.0,
-        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 가설 설정 · 지원 프로그램 · "
-        "네트워킹 · 오프라인 마케팅 솔루션 네 탭. 예전 네 장(캠페인 원장 · 검증 계획 · 행사 연계 · 검증 리포트)은 "
-        "지우지 않고 새 기능 아래로 옮겼다"
-        if hub_ok else "미배선 — 허브의 네 탭 · 캠페인 원장 · App 의 Program 모듈 중 하나 이상이 없다",
+        "Program 두 기능 화면 (네트워킹 · 오프라인 마케팅)", 1.0 if hub_ok else 0.0,
+        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 네트워킹 · 오프라인 마케팅 솔루션 두 탭만. "
+        "2026-11-22 사용자 정의로 지원 프로그램 · 가설 설정 · 건물주 공실 알리기 보기를 뺐다"
+        "(Program 화면 · 레일 · TrackMapFrame 「오프라인 캠페인」은 그대로)"
+        if hub_ok else
+        "미배선이거나 제외한 기능이 남았다 — 두 탭 · 네트워킹 · 실행 카드 · 캠페인 원장 · App 의 Program 모듈 중 하나가 없거나 "
+        f"제외한 기능이 다시 들어왔다(탭 {'·'.join(excluded) or '—'} · 불러오기 {'·'.join(excluded_imports) or '—'})",
     ))
 
-    sources_src = _read("apps/backend/app/services/program_sources.py")
-    router_src = _read("apps/backend/app/api/v1/router.py")
     api_src = _read("apps/frontend/src/lib/api.ts")
-    support_ok = (all(f"def {fn}(" in sources_src for fn in ("kstartup_open", "gov24_smallbiz", "bizinfo"))
-                  and "def support_programs(" in _read("apps/backend/app/services/program_support.py")
-                  and "program.router" in router_src and "getSupportPrograms" in api_src)
-    t.gates.append(Gate(
-        "지원 프로그램 · 공고 원천 3종 배선", 1.0 if support_ok else 0.0,
-        "K-Startup(모집 중) · 정부24 혜택 · 기업마당 지원사업정보 → GET /program/support. **배선만 센다** — "
-        "이 스크립트는 네트워크를 타지 않아 키·응답 상태를 모른다. 지금 상태는 그 응답의 sources[].status"
-        "(ok · no_key · error)가 말한다. 프로덕션은 Cloud Run 에 키를 넣기 전까지 no_key 다"
-        if support_ok else "미배선 — 원천 클라이언트 · 매칭 서비스 · 라우터 · 화면 호출 중 하나 이상이 없다",
-    ))
-
     net_schema = _read("apps/backend/app/schemas/program.py")
     import re as _re
     net_block = net_schema.split("class ProgramNetwork", 1)[0] if "class ProgramNetwork" in net_schema else ""
     no_contact = bool(net_schema) and not _re.search(r"^\s+(phone|tel|email|contact)\w*\s*:", net_schema, _re.M)
     net_ok = ("def network(" in _read("apps/backend/app/services/program_network.py")
-              and bool(net_block) and no_contact and "getProgramNetwork" in api_src)
+              and bool(net_block) and no_contact and "getProgramNetwork" in api_src and 'stage="founder"' in hub_src)
     t.gates.append(Gate(
         "네트워킹 · 연락처 없음 계약", 1.0 if net_ok else 0.0,
-        "공식 행사·네트워크 공고 + 함께 모이는 업종 + 물어볼 질문 + 지원기관 → GET /program/network. 응답 스키마에 "
-        "연락처 필드가 없다(가게 연락처 수집·연락 대행 금지 — 정보통신망법 제50조). 사용자끼리 잇기는 파일럿 뒤(결정 D3)"
-        if net_ok else "미배선이거나 계약 위반 — 네트워킹 서비스·스키마·화면 호출이 없거나, 스키마에 연락처 필드가 있다",
+        "공식 행사·네트워크 공고 + 함께 모이는 업종 + 개업 뒤 이웃과 이야기할 것 + 교육·상담 기관 → GET /program/network"
+        "(개업한 자리라 단계 founder). 응답 스키마에 연락처 필드가 없다(가게 연락처 수집·연락 대행 금지 — 정보통신망법 제50조). "
+        "사용자끼리 잇기는 파일럿 뒤(결정 D3)"
+        if net_ok else "미배선이거나 계약 위반 — 네트워킹 서비스·스키마·화면 호출(단계 founder)이 없거나, 스키마에 연락처 필드가 있다",
     ))
 
-    # 고정 목표선이 되살아났는지는 주석이 아니라 **값**으로 본다 — _MODE_SIGNAL 리터럴을 읽어 팝업·가오픈의
-    # 목표 칸이 비었는지(None) 확인한다(주석에 남긴 옛 문구 「일 60명」에 걸리지 않게).
-    def _mode_signal() -> dict:
-        for node in ast.parse(mkt_src).body:
-            if (isinstance(node, ast.Assign)
-                    and any(isinstance(x, ast.Name) and x.id == "_MODE_SIGNAL" for x in node.targets)):
-                try:
-                    return ast.literal_eval(node.value)
-                except ValueError:
-                    return {}
-        return {}
-    ms = _mode_signal()
-    no_fixed = bool(ms) and all(ms.get(m, (0, 0, "x"))[2] is None for m in ("popup", "soft_open"))
-    target_ok = ("def _break_even_target(" in mkt_src and "break_even_daily" in schema_src
-                 and "reject_ratio" in schema_src and "breakEvenDaily" in studio_src and no_fixed)
+    plan_src = _read("apps/backend/app/services/program_plan.py")
+    cards_src = _read("apps/frontend/src/components/program/ExecutionCards.tsx")
+    plan_ok = ('mode: str = "actual_open"' in plan_src and 'mode: "actual_open"' in cards_src
+               and "<select" not in cards_src and "getExecutionPlan" in api_src)
     t.gates.append(Gate(
-        "가설 검증 · 목표선 = Posting 손익분기", 1.0 if target_ok else 0.0,
-        "팝업·가오픈 목표선은 Posting 하루 손익분기 건수에서만 나온다 · 기각선은 창업자가 시작 전에 고른 비율 · "
-        "인계가 없으면 「미정」(KPI 규칙 1 — 예전 「일 60명」·「전환율 8%」 같은 고정값을 지어내지 않는다)"
-        if target_ok else "미배선 — 손익분기 목표선 · 기각선 비율 · 화면 인계 중 하나 이상이 없거나 고정 목표선이 남아 있다",
+        "실행 카드 · 개업 뒤(actual_open)", 1.0 if plan_ok else 0.0,
+        "GET /program/plan 기본값과 화면 호출이 actual_open(개업 뒤)이고 검증 방식 고르기가 없다 — 카드는 근거가 있는 것만(행사·빈 시간대·"
+        "이웃 업종·자체 접점), 예산·예상 매출은 짓지 않고, 측정은 같은 탭의 실행 기록에 적는다"
+        if plan_ok else "미배선 — 실행 카드가 개업 뒤만 부르지 않거나(검증 방식 고르기가 남음) 서버 기본값이 개업 뒤가 아니다",
+    ))
+
+    dem = kinds.get("demand", 0)
+    t.gates.append(Gate(
+        "상권 수요신호 결합", dem / total if total else 0.0,
+        f"{dem}/{total}거점 — TRDAR 시간대·연령·성별. 실행 카드의 「빈 시간대」(유동 대비 매출이 가장 빈 시간대)가 이 표로 선다",
     ))
 
     ev = _program_events()
@@ -1762,10 +1616,17 @@ def print_rank_survival_kpi(rk: dict) -> None:
     print(f"  ⚠ {rk['kind']}")
     print("  기준: 순위(fit)가 생존을 따르는 정도 − same_share(이미 몰려 있는 정도) 순위가 따르는 정도 · 정제본(같은 상호 90일 이내 재개업 = 한 업소)")
 # ─────────────────── KPI① Program — 지원 공고 매칭 정밀도 ───────────────────
-# Program 「지원 프로그램」이 스스로 하는 말(「조건이 맞을 수 있는 공고」)이 맞는가를 재는 축이다(2026-11-15 추가 · 3단계 G3).
+# ⚠ 2026-11-22 추적 중단 — Program 에서 「지원 프로그램」을 제외했다(사용자 정의 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인
+# 마케팅으로만」 → docs/decision-program-post-opening-2026-11-22.md). 화면이 그 매칭을 보이지 않으니 이 축은 KPI 가 아니다. 계측 코드·
+# 사전등록 표본은 남겼다(서버 /program/support 경로와 함께) — 판정은 기록으로만 싣고 어디에도 게이트로 쓰지 않는다.
+# Program 「지원 프로그램」이 스스로 하는 말(「조건이 맞을 수 있는 공고」)이 맞는가를 재는 축이었다(2026-11-15 추가 · 3단계 G3).
 # 판정 규칙은 표본을 뽑기 전·라벨이 0 인 상태에서 사전등록했다 → data/validation/score_support_labels.py ·
 # docs/prereg-program-support-precision-2026-11-15.md. 트랙 진행률에는 섞지 않는다 — Program 100% 는 「화면 배선이 끝났다」는
 # 뜻이지 「공고 매칭이 맞다」는 뜻이 아니다. 업종은 거르는 기준이 아니라 이 축이 재지 않는다(사전등록 §0).
+
+SUPPORT_KPI_RETIRED = ("2026-11-22 추적 중단 — 지원 프로그램이 Program 에서 제외돼 화면이 이 매칭을 보이지 않는다"
+                       "(계측 코드·표본은 남김 · docs/decision-program-post-opening-2026-11-22.md)")
+
 
 def _support_kpi() -> dict:
     """사전등록 표본의 짝 단위 정밀도 차 — 채점기를 그대로 부른다. 표본 미동결·실패는 그 사실을 적는다(없음과 구분)."""
@@ -1789,6 +1650,7 @@ def _support_kpi() -> dict:
 def print_support_kpi(sk: dict) -> None:
     print("\n" + "=" * 78)
     print("KPI① Program — 지원 공고 매칭 정밀도 (사전등록 2026-11-15) — 위 진행률에 **포함되지 않는다**")
+    print(f"  ⚠ {SUPPORT_KPI_RETIRED}")
     if not sk["available"]:
         print(f"  ⚠ 판정 실패 — {sk['reason']} (표본이 없다는 뜻이 아니다)")
         return
@@ -1831,8 +1693,8 @@ def main() -> int:
             "kpi1_floor_vacancy": {"in_progress_pct": False, **_floor_kpi()},
             # 상권 순위 ↔ 24개월 생존(참고 · 동시점) — 같은 이유로 진행률 밖(2026-11-15 · 4단계).
             "kpi1_rank_survival": {"in_progress_pct": False, **_rank_survival_kpi()},
-            # Program 지원 공고 매칭 정밀도 — 같은 이유로 진행률 밖(2026-11-15 · 3단계 G3).
-            "kpi1_support_precision": {"in_progress_pct": False, **_support_kpi()},
+            # Program 지원 공고 매칭 정밀도 — 같은 이유로 진행률 밖(2026-11-15 · 3단계 G3). 2026-11-22 추적 중단(지원 프로그램 제외).
+            "kpi1_support_precision": {"in_progress_pct": False, "retired": SUPPORT_KPI_RETIRED, **_support_kpi()},
             # 직거래 연결 층(2026-11-18) — 배선·법적 잠금만. 실적은 계정 DB(/admin/direct/funnel)에 산다.
             "direct_layer": {
                 "in_progress_pct": False,

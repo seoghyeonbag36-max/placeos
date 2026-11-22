@@ -12,11 +12,13 @@
  * 저장이 막혀도(사생활 보호 창) 이번 방문 동안은 메모리 값으로 돈다.
  *
  * ## 답을 바꾸면 그 뒤만 비운다(§2-3)
- * 업종을 바꾸면 상권·자리·비용·검증을, 상권을 바꾸면 자리·비용을 비운다. 앞 답은 남긴다 —
+ * 업종을 바꾸면 상권·자리·비용을, 상권을 바꾸면 자리·비용을 비운다. 앞 답은 남긴다 —
  * `setGoal` · `setIndustry` · `setDistrict` · `setSpace` 가 그 규칙의 유일한 자리다.
+ *
+ * 2026-11-22: ④ 「작게 확인」의 답(검증 방식 mode · 아이템 item · 기간 runDays · 검증 예산 testBudget)을 걷었다 — Program 이
+ * 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로 좁혀져 그 질문 화면이 없다. 옛 저장값의 그 칸은 읽지 않고 버린다.
  */
 import type { BusinessGoal, BusinessState } from "@/lib/businessProfile";
-import type { ValidationMode } from "@/lib/api";
 import { isSiteRegion } from "@/lib/siteScope";
 
 /** 권리금 답 — 없음(0, 관측) · 모름(null, 0 전제) · 금액(만원) */
@@ -35,9 +37,6 @@ export interface CostAnswers {
   otherMonthly: number | null;
   reserveMonths: number;
 }
-
-/** 검증 예산 구간 — Q13 */
-export type TestBudget = "under100" | "100to300" | "300to1000" | "unknown";
 
 /** 목록과 지도는 같은 검색 조건을 쓴다. 상권을 바꾸면 초기화한다. */
 export interface SpaceBrowse {
@@ -83,10 +82,6 @@ export interface FlowState {
   /** R5 에서 고른 가격대(premium/value/factory) */
   tier: string | null;
   costs: CostAnswers;
-  mode: ValidationMode | null;
-  item: string | null;
-  runDays: number | null;
-  testBudget: TestBudget | null;
   /** 마지막으로 연 흐름 주소 — 홈의 「이어서」 */
   lastPath: string | null;
 }
@@ -101,7 +96,7 @@ export const emptyCosts = (): CostAnswers => ({
 export const emptyFlow = (): FlowState => ({
   v: 1, startupOrder: null, startupRegion: null, goal: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null,
   districtId: null, rentCap: null, rentCapAnswered: false, spaceId: null, spaceLabel: null, spaceAt: null, premium: null, tier: null,
-  costs: emptyCosts(), spaceBrowse: emptySpaceBrowse(), mode: null, item: null, runDays: null, testBudget: null, lastPath: null,
+  costs: emptyCosts(), spaceBrowse: emptySpaceBrowse(), lastPath: null,
 });
 
 let memory: FlowState | null = null;
@@ -155,10 +150,7 @@ export function loadFlow(): FlowState {
         premium: num(c.premium), fitout: num(c.fitout), equipment: num(c.equipment), otherMonthly: num(c.otherMonthly),
         reserveMonths: num(c.reserveMonths) ?? 3,
       },
-      mode: ["popup", "soft_open", "mvp", "actual_open"].includes(v?.mode) ? v.mode : null,
-      item: str(v?.item),
-      runDays: num(v?.runDays),
-      testBudget: ["under100", "100to300", "300to1000", "unknown"].includes(v?.testBudget) ? v.testBudget : null,
+      // 옛 답의 mode · item · runDays · testBudget(④ 작게 확인 · 11-22 제외)은 읽지 않는다
       lastPath: str(v?.lastPath),
     };
   } catch {
@@ -182,11 +174,10 @@ const clearSpaceOn = (s: FlowState): FlowState => ({
   ...s, spaceId: null, spaceLabel: null, spaceAt: null, premium: null, tier: null, costs: { ...emptyCosts(), budget: s.costs.budget },
 });
 const clearDistrictOn = (s: FlowState): FlowState => ({ ...clearSpaceOn(s), districtId: null, rentCap: null, rentCapAnswered: false, spaceBrowse: emptySpaceBrowse() });
-const clearValidateOn = (s: FlowState): FlowState => ({ ...s, mode: null, item: null, runDays: null, testBudget: null });
 
 export function setGoal(s: FlowState, goal: BusinessGoal): FlowState {
   if (s.goal === goal) return s;
-  return clearValidateOn(clearDistrictOn({ ...s, goal, startupOrder: null, startupRegion: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null }));
+  return clearDistrictOn({ ...s, goal, startupOrder: null, startupRegion: null, industryKey: null, customIndustry: null, homeDistrictId: null, targetIndustryKey: null });
 }
 
 /** 선택 순서와 지역을 바꾸면 뒤의 답을 비운다. */
@@ -198,8 +189,8 @@ export function setStartupOrder(s: FlowState, startupOrder: "region" | "industry
 export function setIndustry(s: FlowState, industryKey: string, customIndustry: string | null = null): FlowState {
   if (s.industryKey === industryKey && s.customIndustry === customIndustry) return s;
   const keepHome = s.goal !== "start";
-  const next = clearValidateOn(clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
-    homeDistrictId: keepHome ? s.homeDistrictId : null }));
+  const next = clearDistrictOn({ ...s, industryKey, customIndustry, targetIndustryKey: null,
+    homeDistrictId: keepHome ? s.homeDistrictId : null });
   // 상권별 창업은 상권을 업종보다 먼저 고른다. 업종을 바꿔도 앞 답인 상권은 유지한다.
   return s.goal === "start" && s.startupOrder === "region" ? { ...next, districtId: s.districtId } : next;
 }
@@ -207,7 +198,7 @@ export function setIndustry(s: FlowState, industryKey: string, customIndustry: s
 /** 상권별 창업의 앞 답인 상권을 바꾸면 업종부터 다시 고른다. */
 export function setStartupDistrict(s: FlowState, id: string): FlowState {
   if (s.districtId === id) return s;
-  return clearValidateOn({ ...setDistrict(s, id), industryKey: null, customIndustry: null, targetIndustryKey: null });
+  return { ...setDistrict(s, id), industryKey: null, customIndustry: null, targetIndustryKey: null };
 }
 
 export function setHomeDistrict(s: FlowState, id: string): FlowState {
@@ -233,17 +224,6 @@ export function setSpace(s: FlowState, spaceId: string, label: string | null = n
   }
   return { ...clearSpaceOn(s), spaceId, spaceLabel: label, spaceAt: at };
 }
-
-/** 검증 계획이 쓸 업종 — 바꾸기는 바꿀 업종, 그 밖은 할 업종(lib/businessProfile.workIndustryKey 와 같은 규칙) */
-export const workKey = (s: FlowState): string | null => (s.goal === "pivot" ? s.targetIndustryKey : s.industryKey);
-
-/** 검증 예산 구간 → 브리프의 한 쌍(원). 서버는 반쪽만 오면 422 다 */
-export const TEST_BUDGET_RANGE: Record<TestBudget, [number, number] | null> = {
-  under100: [100_000, 1_000_000],
-  "100to300": [1_000_000, 3_000_000],
-  "300to1000": [3_000_000, 10_000_000],
-  unknown: null,
-};
 
 /** 흐름 답 → 계정의 「내 사업」. 목적·업종이 없으면 옮길 것이 없다 */
 export function flowToBusiness(s: FlowState): BusinessState {

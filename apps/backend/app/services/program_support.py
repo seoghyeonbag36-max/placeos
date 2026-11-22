@@ -24,7 +24,9 @@ from html import unescape
 from app.services import districts as svc
 from app.services import events, program_sources as src
 
-STAGES = {"pre_founder": "예비창업자", "founder": "기창업자(업종 바꾸기·상권 옮기기)"}
+# founder 의 이름표는 2026-11-22 「기창업자(개업 후)」 — Program 네트워킹이 개업한 자리 기준으로 이 단계만 쓴다
+# (그전 「기창업자(업종 바꾸기·상권 옮기기)」 · 지원 공고 매칭(/program/support)은 화면에서 뺐고 서버 경로만 남았다).
+STAGES = {"pre_founder": "예비창업자", "founder": "기창업자(개업 후)"}
 _FOUNDER_ENYY = ("1년미만", "2년미만", "3년미만", "5년미만", "7년미만", "10년미만")
 _MAX_ITEMS = 80
 _SUMMARY_MAX = 200

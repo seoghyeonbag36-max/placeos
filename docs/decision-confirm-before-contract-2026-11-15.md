@@ -2,6 +2,7 @@
 
 > **상태: 사용자 결정(2026-11-15)** — ①②④ 승인 · ③-b(Program 「개업 뒤」 칸) 승인·시행 · ③-a(인테리어 3D 선택 칸) 보류. 구현은 트랙별 PR 로 이어진다(§4).
 > ⚠ **③-b 는 2026-11-22 대체됐다** — 사용자 정의 「Program = 건물주와 창업자 대상 오프라인 마케팅」으로 오프라인 마케팅이 **첫 탭**이 됐다(→ [decision-pppp-owner-founder-2026-11-22.md](decision-pppp-owner-founder-2026-11-22.md) §9). 질문 개정(②)도 같은 날 Page·Posting·Program 문구가 대체됐다(같은 문서 §5).
+> ⚠ **같은 날 다시**: Program 은 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 두 기능만 — Program 의 「계약 전에 작게 확인하나」(가설 설정 · 흐름 ④ 작게 확인 · 답사·팝업 판정)와 지원 프로그램(G3 정밀도 축)은 Program 에서 제외됐다 → [decision-program-post-opening-2026-11-22.md](decision-program-post-opening-2026-11-22.md).
 > 이 문서는 결정과 그 근거만 적는다. 단계별 방법·인터페이스 안은 같은 날 팀원(Page·Posting 담당)에게 보낸 인계 문서
 > [handoff-page-posting-2026-11-15.html](handoff-page-posting-2026-11-15.html)에 있다(브라우저로 열면 된다 · 2026-11-15 시점의 스냅샷이라 이후 진행은 아래 §5).
 

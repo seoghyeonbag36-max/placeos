@@ -6,7 +6,8 @@ import { useRecordCapture, useWorkspaceRecords } from "@/lib/workspaceRecords";
 import type { WorkspaceRecords } from "@/lib/workspaceRecordTypes";
 
 // 모든 상호·계산·실적은 테스트 전용 합성값이다.
-// 이 보관소는 한때 「상권 분석 보고서」가 읽었다(2026-11-22 에 보고서를 지웠다). 지금은 Program 가설 설정이 앞선 단계의 결과를 이어받는 데 쓴다.
+// 이 보관소는 한때 「상권 분석 보고서」와 Program 「가설 설정」이 읽었다(둘 다 2026-11-22 에 뺐다). 지금은 Program 실행 기록이
+// Posting 결과(업종·주소)를 이어받는 데 쓴다.
 const records: Required<Pick<WorkspaceRecords, "platform" | "page" | "pageFloor">> = {
   platform: { districtId: "test", districtName: "검토한 상권", industry: "카페", archetype: "검토 유형", archetypeRule: "유형 판정 근거", source: "test-seed",
     recommendations: [{ industry: "음식", score: 0.4 }], recommendationSource: "test-model", candidates: [{ id: "u1", name: "상권 단계 후보" }] },

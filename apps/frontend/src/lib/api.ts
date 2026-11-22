@@ -1093,97 +1093,15 @@ export interface DistrictIndustries {
 export const getDistrictIndustries = (districtId: string) =>
   getJSON<DistrictIndustries>(`/ai/district-industries/${encodeURIComponent(districtId)}`);
 
-/* ===== 검증 프로그램(Program) — POST /marketing/generate =====
+/* ===== Program 실행 카드의 방식 값 =====
  *
- * 2026-09-17 대상 재정의. 종전에는 **영업 중인 가게의 리뷰·사진·메뉴**를 보내고 홍보안을
- * 받았다. 지금 대상은 예비창업자와, 팝업·가오픈·MVP 로 아이템을 확인하려는 기창업자다 —
- * 그 자리에서 장사한 적이 없어 리뷰가 존재하지 않는다. 그래서 보내는 것은 과거의 축적이
- * 아니라 **앞으로의 계획**(검증 브리프)이고, 받는 것은 홍보안이 아니라 **검증 프로그램**이다.
- *
- * 함께 사라진 것: 카카오 상호검색(`/places`)·네이버 블로그 스니펫(`/reviews`)·상용 온보딩
- * (`/onboarding/generate`). 특정할 가게도, 받을 점주 원문도 없다.
+ * 2026-11-22 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로 **검증 프로그램 생성
+ * (POST /marketing/generate · 검증 브리프 → 모객·연계·검증 지표)** 을 부르던 화면(Program 「가설 설정」 · 흐름 ④ 「작게 확인」)을
+ * 뺐다 — 그 함수·타입(ProgramBriefInput · ProgramPlan · ValidationSignal · VALIDATION_MODES …)도 함께 지웠다. 서버 경로는 남았다
+ * (부르는 화면 없음 → docs/decision-program-post-opening-2026-11-22.md). 아래 값은 실행 카드(GET /program/plan)의 mode 로만 남는다 —
+ * 화면은 actual_open(개업 뒤)만 보낸다.
  */
-
-/** 검증 방식. 셋을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다 —
- *  팝업은 유입, 가오픈은 객단가·회전, MVP 는 사전 수요를 본다. */
 export type ValidationMode = "popup" | "soft_open" | "mvp" | "actual_open";
-
-/** 누가 묻는가. 예비창업자는 자리부터 찾고, 기창업자는 옮길지를 묻는다. */
-export type FounderStage = "pre_founder" | "founder";
-
-export const VALIDATION_MODES: { key: ValidationMode; label: string; hint: string }[] = [
-  { key: "popup", label: "팝업스토어", hint: "빈 자리를 며칠~몇 주 빌려 유입과 구매를 본다" },
-  { key: "soft_open", label: "가오픈", hint: "운영을 축소해 열고 객단가·회전을 본다" },
-  { key: "actual_open", label: "실제 창업", hint: "정식 개업 후 매출·비용을 기록해 손익과 운영을 검증한다" },
-  { key: "mvp", label: "MVP 테스트", hint: "점포 없이 사전예약·사전주문으로 수요만 본다" },
-];
-
-export const MODE_LABEL: Record<string, string> = {
-  popup: "팝업스토어", soft_open: "가오픈", mvp: "MVP 테스트", actual_open: "실제 창업",
-};
-export const STAGE_LABEL: Record<string, string> = {
-  pre_founder: "예비창업자", founder: "기창업자",
-};
-
-/** 검증 브리프 — Program 의 유일한 입력 계약.
- *  백엔드 schemas/marketing.py::ProgramBrief 와 1:1 대응한다.
- *  ⚠ `budget_krw_min/max` 는 **함께** 보내거나 둘 다 비운다(반쪽은 422). */
-export interface ProgramBriefInput {
-  item: string;
-  category: string;
-  mode: ValidationMode;
-  stage: FounderStage;
-  district_id?: string;
-  unit_id?: string;
-  address?: string;
-  hypothesis?: string;
-  target_customer?: string;
-  /** YYYY-MM-DD */
-  start_date?: string;
-  run_days?: number;
-  budget_krw_min?: number;
-  budget_krw_max?: number;
-  /** 차별점 — 창업자 주장이지 확인된 사실이 아니다. 이게 통하는지가 검증 대상이다 */
-  differentiators?: string[];
-  tier?: string;
-  /** (2026-11-07) Posting 세부 업종 계산에서 끌어낸 하루 손익분기 건수 — 목표선을 지어내지 않고 여기서 끌어낸다 */
-  break_even_daily?: number;
-  break_even_basis?: string;
-  /** 기각선 — 목표선의 몇 %(10~100). 창업자가 시작 전에 고른 값이다 */
-  reject_ratio?: number;
-}
-
-/** 제안 1건 — 채널·실행안·근거. 근거 없는 제안은 만들지 않는 것이 Program 의 원칙이다.
- *
- *  온라인(모객)과 오프라인(자리·연계)은 대칭이 아니라 **주체가 다르다**. 온라인은 창업자
- *  단독이고 오프라인은 건물주·상인회와 함께해야 한다 — 그래서 유효한 필드가 갈린다.
- *  `kind` 로 어느 쪽인지 가른다. */
-export interface ChannelPlan {
-  channel: string;
-  kind: "online" | "offline";
-  content: string;
-  rationale: string;
-  /** 온라인 전용 — 목표 세그먼트 · 예산 배분 비율(%) · 이 채널의 목표 지표.
-   *  budget_share 가 int 퍼센트인 것이 설계다: 절대액이 구조적으로 못 들어간다. */
-  target?: string | null;
-  budget_share?: number | null;
-  kpi?: string | null;
-  /** 오프라인 전용 — 시기 · 협업 주체 · 성격(cite 인용 | propose 신규제안 | own 자체접점) */
-  timing?: string | null;
-  actors?: string[];
-  mode?: string | null;
-}
-
-/** 검증 지표 1건 — **이 트랙의 결론**이다.
- *
- *  `decision`(가설을 기각할 조건)이 요점이다. 목표선만 있고 판정선이 없으면 결과를 보고
- *  사후에 말을 맞추게 된다 — 그건 검증이 아니라 지출이다. */
-export interface ValidationSignal {
-  name: string;
-  method: string;
-  target: string;
-  decision: string;
-}
 
 /** Humanistic Authority 후처리 검증 결과 1건 (백엔드 services/ha_guard.py).
  *
@@ -1195,30 +1113,6 @@ export interface HAFinding {
   severity: "violation" | "warning" | string;
   code: string; message: string; evidence: string | null;
 }
-
-/** 생성 결과. `source` 가 "rule-stub" 이면 LLM 을 못 탄 폴백이라 내용이 일반론이다 —
- *  화면에서 반드시 구분해 보여준다(실호출 결과처럼 읽히면 안 된다). */
-export interface ProgramPlan {
-  item: string;
-  category: string;
-  mode: string;
-  stage: string;
-  online: ChannelPlan[];
-  offline: ChannelPlan[];
-  signals: ValidationSignal[];
-  ha_check: string;
-  source: "llm" | "rule-stub" | string;
-  /** 서버 후처리 검증 결과. rule-stub 인데 violation 이 있으면 **키가 없어서가 아니라
-   *  생성물이 검증에 걸려 폐기된 것**이다 — 화면이 두 경우를 구분해야 한다. */
-  ha_findings?: HAFinding[];
-  /** 스텁인 이유가 **한도**일 때만 온다(2026-10-06): "llm_quota" = 로그인했지만 조직의 24시간 AI 생성 한도를
-   *  넘었다. 실패가 아니므로 "다시 생성해 주세요"라고 하지 않는다. 그 밖의 스텁은 null/없음. */
-  stub_reason?: "llm_quota" | string | null;
-}
-
-/** 검증 프로그램 생성 — 모객 · 자리·연계 · 검증 지표 한 벌 */
-export const generateProgram = (brief: ProgramBriefInput) =>
-  postJSON<ProgramPlan>("/marketing/generate", brief);
 
 /* ===== 계정 — 가입·로그인·조직 API 키 (2026-09-23 B9) =====
  * 계약의 정본은 백엔드다: app/api/v1/auth.py · app/schemas/auth.py. 필드를 여기서 짓지 않는다.
@@ -1971,33 +1865,18 @@ export const getDistrictReport = (id: string, params: {
   getOptional<DistrictReport>(`/commercial-districts/${encodeURIComponent(id)}/report${query(params)}`, signal);
 
 
-/* ===== Program 리뉴얼(2026-11-07) — 지원 프로그램 · 네트워킹 · 오프라인 마케팅 실행 카드 =====
- * 셋 다 공개 분석 API(로그인 없이 열린다)이고 LLM 을 부르지 않는다. 원천마다 상태(ok · no_key · error)를 밝힌다 —
- * 키가 없거나 원천이 실패하면 그 원천만 비고, 지난 목록을 최신처럼 보이지 않는다. */
+/* ===== Program — 네트워킹 · 오프라인 마케팅 실행 카드 (2026-11-07 리뉴얼 · 2026-11-22 두 기능으로 좁힘) =====
+ * 둘 다 공개 분석 API(로그인 없이 열린다)이고 LLM 을 부르지 않는다. 원천마다 상태(ok · no_key · error)를 밝힌다 —
+ * 키가 없거나 원천이 실패하면 그 원천만 비고, 지난 목록을 최신처럼 보이지 않는다.
+ * 지원 공고(GET /program/support)는 2026-11-22 Program 에서 제외돼 부르는 함수를 지웠다(서버 경로는 남았다).
+ * Program 은 계약을 맺고 개업한 자리 기준이라 네트워킹은 단계 founder(기창업자)로 부른다. */
 export type ProgramStage = "pre_founder" | "founder";
-export const stageForGoal = (goal?: string | null): ProgramStage | undefined =>
-  goal === "start" ? "pre_founder" : goal === "pivot" || goal === "move" ? "founder" : undefined;
 
 export interface ProgramSourceStatus {
   id: string; name: string; status: "ok" | "no_key" | "error"; count: number;
   fetched_at?: string | null; note?: string | null;
 }
 export interface ProgramRegion { sido: string; local?: string | null; label: string }
-
-export interface SupportItem {
-  source: "kstartup" | "gov24" | "bizinfo"; source_label: string; id: string; title: string;
-  org?: string | null; region?: string | null; category?: string | null; target?: string | null;
-  start?: string | null; end?: string | null;
-  /** 정부24처럼 신청기한이 자유 문구인 원천 — 날짜로 읽지 않고 원문 그대로 */
-  deadline_text?: string | null;
-  url?: string | null; apply_url?: string | null; summary?: string | null;
-  /** 맞춘 이유(지역·단계·업종 언급) — 자격 판정이 아니다 */
-  matched: string[];
-}
-export interface SupportPrograms {
-  district_id: string; region: ProgramRegion; stage?: ProgramStage | null; industry?: string | null;
-  items: SupportItem[]; total: number; sources: ProgramSourceStatus[]; note: string;
-}
 
 export interface NetworkEvent {
   source: "kstartup" | "bizinfo_event"; source_label: string; id: string; title: string;
@@ -2021,8 +1900,6 @@ export interface ExecutionPlan {
   district_id: string; mode: ValidationMode; cards: ExecutionCard[]; events_source: string; notes: string[]; note: string;
 }
 
-export const getSupportPrograms = (districtId: string, opts: { stage?: ProgramStage; industry?: string } = {}) =>
-  getJSON<SupportPrograms>(`/program/support${query({ district_id: districtId, stage: opts.stage, industry: opts.industry })}`);
 export const getProgramNetwork = (districtId: string,
   opts: { industry?: string; industryLabel?: string; stage?: ProgramStage } = {}) =>
   getJSON<ProgramNetwork>(`/program/network${query({ district_id: districtId, industry: opts.industry,

@@ -3,12 +3,15 @@
  *
  * 3·4판은 지도를 배경으로 깔고 네 트랙 패널을 띄웠다. 처음 온 사람은 로그인부터 했고, 한 패널에 질문이
  * 4~6개 겹쳐 있었다. 5판은 PPPP 순서 그대로 **한 화면에 한 질문씩** 묻는다:
- *   ① 상권(어떤 플랫폼인가) → ② 빈 자리(어떤 page) → ③ 비용(어느 가격대로 posting) → ④ 작게 확인(어떤 program)
+ *   ① 상권(어떤 플랫폼인가) → ② 빈 자리(어떤 page) → ③ 비용(어느 가격대로 posting) → ④ 개업 후(program)
+ * 2026-11-22: ④ 는 「작게 확인」(Q10 방식~R7 검증 계획 · AI 생성)이었다. 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한
+ *   네트워킹·오프라인 마케팅」으로 그 질문 화면들을 뺐고, ④ 는 홈에서 지도 탐색의 Program(개업한 자리의 네트워킹·오프라인 마케팅)을
+ *   여는 칸이 됐다(→ docs/decision-program-post-opening-2026-11-22.md). 옛 주소(#/validate 등)는 모르는 주소라 홈으로 간다.
  * 종전 지도 화면은 지우지 않고 「지도」 탭(#/explore)으로 남는다(App.tsx).
  * ⛔ 그 지도 탐색이 PPPP 네 구현 화면이다 — 흐름의 어떤 「지도」도 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙 ·
  *   CLAUDE.md). 10-18 에 흐름 안 지도로 갈아끼웠다가 네 화면으로 가는 길이 UI 에서 사라졌다.
  *
- * 이 컴포넌트가 하는 일: 주소 → 화면 · 답 저장 · 로그인 시트(저장·AI 생성에서만) · 종전 계정 창 · 토스트 ·
+ * 이 컴포넌트가 하는 일: 주소 → 화면 · 답 저장 · 로그인 시트(저장에서만 — AI 검증 계획 생성은 11-22 에 뺐다) · 종전 계정 창 · 토스트 ·
  * 로그인하는 순간 흐름 답을 계정의 「내 사업」으로 옮기기.
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,7 +30,6 @@ import { showsCrossRegion } from "@/lib/siteScope";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion, StartupDistrict } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
-import { Item, Period, Plan, TestBudgetQ, ValidateMode } from "./screens/Validate";
 import { ListingDetail, Listings } from "./screens/Direct";
 import { InquiryThread, Inbox } from "./screens/Inbox";
 import { OwnerHome, OwnerListing, OwnerNew } from "./screens/Owner";
@@ -66,11 +68,6 @@ function Screen({ route }: { route: Route }) {
     case "contract": return <Contract />;
     case "fitout": return <Fitout />;
     case "budget-check": return <BudgetCheck />;
-    case "validate": return <ValidateMode />;
-    case "item": return <Item />;
-    case "period": return <Period />;
-    case "test-budget": return <TestBudgetQ />;
-    case "plan": return <Plan />;
     case "home": return <Home />;
     case "me": return <Me />;
     // 직거래 연결 층(2026-11-18) — 흐름에 더한 화면. PPPP 네 화면(#/explore)은 그대로다
@@ -123,7 +120,7 @@ export default function FlowApp({ token }: { token: string | null }) {
     }
   }
 
-  /* ── 로그인 시트 — 저장·AI 생성에서만 ─────────────────────────────────── */
+  /* ── 로그인 시트 — 저장에서만 ─────────────────────────────────────────── */
   const [login, setLogin] = useState<LoginReason | null>(null);
   const pending = useRef<((t: string) => void) | null>(null);
   const [seenToken, setSeenToken] = useState(token);

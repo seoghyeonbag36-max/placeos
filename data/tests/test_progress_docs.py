@@ -70,7 +70,10 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     index = _read("docs/README.md")
 
     assert "공식 공개 소스를 다시 탐색했지만 적격 후보는 0건" in status
-    assert "검증 브리프·지표 계약" in status
+    # 2026-11-22 Program = 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 — 검증 브리프·지표 계약 게이트(09-17)는 그 기능이
+    # Program 에서 제외돼 걷었다. 상태 계산기가 지금 계약(두 기능 화면 · 실행 카드 개업 뒤)을 말해야 한다.
+    assert "Program 두 기능 화면" in status
+    assert "실행 카드 · 개업 뒤(actual_open)" in status
     assert "finding-posting-unit-area-sources-2026-08-29.md" in index
     # 2026-10-19: PMF 는 09-16 재정의로 KPI③ 이다(② = 표면 성능). 번호만 옮겼다.
     assert "기술 계약 통과와 KPI③" in index
@@ -100,7 +103,9 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     assert rank["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}
     assert "참고" in rank.get("kind", "참고")
     # 2026-11-15: Program 지원 공고 매칭 정밀도도 같은 자리 — 표본을 동결하기 전에는 「검정불가」(표본 미동결)다.
+    # 2026-11-22: 지원 프로그램이 Program 에서 제외돼 추적을 멈췄다 — 키와 판정은 기록으로 남고, 멈춘 사실을 함께 싣는다.
     support = status["kpi1_support_precision"]
+    assert "추적 중단" in support.get("retired", "")
     assert support["in_progress_pct"] is False
     assert support["available"] is True, support.get("reason")
     assert support["gate"]["verdict"] in {"실력", "구분불가", "열위", "검정불가"}

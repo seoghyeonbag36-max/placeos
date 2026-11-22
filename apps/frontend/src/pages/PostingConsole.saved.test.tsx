@@ -80,7 +80,7 @@ describe("PostingConsole — 결과 저장", () => {
     expect(payload.handoff).toMatchObject({ districtId: "garosugil", unitId: "garosugil-u1" });
     const list = screen.getByRole("region", { name: "저장한 결과" });
     fireEvent.click(await within(list).findByRole("button", { name: "보기" }));
-    fireEvent.click(within(list).getByRole("button", { name: "저장한 내용으로 가설 설정 →" }));
+    fireEvent.click(within(list).getByRole("button", { name: "저장한 내용으로 개업 후 Program 열기 →" }));   // 2026-11-22 · 그전 「가설 설정 →」
     expect(next).toHaveBeenCalledWith({ ...payload.handoff, calculation: { input: payload.input, result: payload.result } });
   });
 });

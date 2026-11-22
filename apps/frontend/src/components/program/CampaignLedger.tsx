@@ -2,6 +2,8 @@
  *
  *  Program 허브(pages/CampaignStudio)의 「오프라인 마케팅 솔루션」 탭 안에서 그린다. 동작은 옮기기 전과 같다 —
  *  운영 여건·후보·합의/참여 증빙·비용/결과·수동 결제 증빙을 사용자별로 저장한다(로그인 필요).
+ *  2026-11-22 Program 이 「계약을 맺고 개업한 자리」 기준으로 좁혀졌다 — 이 원장은 처음부터 실제 영업 주소·매장 운영 여건을 받는
+ *  개업 뒤 도구라 동작은 그대로다(→ docs/decision-program-post-opening-2026-11-22.md).
  *  PPPP 화면 보존 규칙: 지우지 않고 옮겼다(더하기 원칙 · docs/renewal-program-2026-11-07.md §1-2). */
 import { useRecordCapture } from "@/lib/workspaceRecords";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -9,7 +11,6 @@ import { ApiError, commandCampaign, createCampaign, eventsSourceLabel, getDistri
 import type { Campaign, CampaignAction, CampaignConditions, CampaignEvidence, CampaignRun } from "@/lib/campaign";
 import { loadToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import type { ProgramHandoff } from "@/lib/workspaceState";
-import type { BusinessGoal } from "@/lib/businessProfile";
 import { Button } from "@/design/components/Button";
 import { Card } from "@/design/components/Card";
 import "@/pages/CampaignStudio.css";
@@ -87,7 +88,7 @@ function Opportunities({ districtId, address }: { districtId?: string | null; ad
 
 type CampaignLedgerProps = {
   handoff?: ProgramHandoff; mapDistrictId?: string | null; defaultCategory?: string;
-  onArrivalDismiss?: () => void; businessGoal?: BusinessGoal;
+  onArrivalDismiss?: () => void;
 };
 
 export default function CampaignLedger(props: CampaignLedgerProps = {}) {

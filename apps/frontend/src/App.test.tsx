@@ -172,20 +172,20 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     // Posting 오른쪽 칸 순서 — 2026-11-22 사용자 정의로 첫 화면은 「입점 희망서 · 계약」(그전 11-10 은 「시뮬레이션 결과」),
-    // 검증 program 만들기는 「비용 비교 및 결정」 안
+    // 「이 자리로 개업 후 Program 열기」(11-22 전 「검증 program 만들기」)는 「비용 비교 및 결정」 안
     const pages = screen.getByRole("navigation", { name: "비용 검토" });
     expect(within(pages).getAllByRole("button").map((b) => b.textContent)).toEqual(["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어",
       "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"]);
     expect(within(pages).getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
     fireEvent.click(within(pages).getByRole("button", { name: "비용 비교 및 결정" }));
-    fireEvent.click(await screen.findByRole("button", { name: "이 자리로 검증 program 만들기 →" }));
+    fireEvent.click(await screen.findByRole("button", { name: "이 자리로 개업 후 Program 열기 →" }));
 
-    // 2026-11-07 리뉴얼 — 인계는 그 버튼이 약속한 「가설 설정」부터 연다. 캠페인 폼은 「오프라인 마케팅 솔루션」에 있고
-    // 같은 인계를 받아 업종을 채운다(탭을 옮겨도 인계가 사라지지 않는다).
-    const program = await screen.findByRole("navigation", { name: "Program 네 기능" }, TAB_LOAD);
-    expect(within(program).getByRole("button", { name: "가설 설정" }).getAttribute("aria-current")).toBe("page");
-    expect(api.count(/program\/campaigns$/)).toBe(0);   // 원장은 그 탭을 열 때 부른다
-    fireEvent.click(within(program).getByRole("button", { name: "오프라인 마케팅 솔루션" }));
+    // 2026-11-22 — Program 은 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」이다. 인계는 그 자리로 실행 기록을 시작하는
+    // 「오프라인 마케팅 솔루션」부터 연다(그전 11-07 리뉴얼은 「가설 설정」부터 — 가설 설정은 Program 에서 제외됐다).
+    const program = await screen.findByRole("navigation", { name: "Program 기능" }, TAB_LOAD);
+    expect(within(program).getAllByRole("button")).toHaveLength(2);         // 네트워킹 · 오프라인 마케팅 솔루션 둘뿐
+    expect(within(program).getByRole("button", { name: "네트워킹" })).toBeTruthy();
+    expect(within(program).getByRole("button", { name: "오프라인 마케팅 솔루션" }).getAttribute("aria-current")).toBe("page");
     await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);
     expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("카페");
     expect((screen.getByRole("textbox", { name: "실제 영업 주소 *" }) as HTMLInputElement).value).toBe("");

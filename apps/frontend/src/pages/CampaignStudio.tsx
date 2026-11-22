@@ -4,107 +4,82 @@ import { useMapLayout } from "@/components/mapLayoutContext";
 import CampaignLedger from "@/components/program/CampaignLedger";
 import ExecutionCards from "@/components/program/ExecutionCards";
 import NetworkingPanel from "@/components/program/NetworkingPanel";
-import OwnerMarketing, { AudienceSwitch, type MarketingAudience } from "@/components/program/OwnerMarketing";
-import SupportPrograms from "@/components/program/SupportPrograms";
-import { stageForGoal } from "@/lib/api";
-import type { BusinessGoal } from "@/lib/businessProfile";
+import { useProgramMapEvents } from "@/components/program/useProgramMapEvents";
 import { useWorkspaceRecords } from "@/lib/workspaceRecords";
-import SavedResults from "@/components/SavedResults";
-import { savedPostingHandoff } from "@/lib/savedPosting";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 import "./CampaignStudio.css";
 import "@/components/program/ProgramHub.css";
 
-const ValidationStudio = lazy(() => import("@/pages/ProgramStudio"));
 const EventLinkPlanner = lazy(() => import("@/components/EventLinkPlanner"));
 
 
-type Tab = "network" | "support" | "marketing" | "hypothesis";
-/** 탭 순서 — **오프라인 마케팅이 먼저**(기본 탭 · 2026-11-22 사용자 정의 「Program = 건물주와 창업자 대상 오프라인 마케팅 서비스」 ·
- *  사용자 지적 「Program 이 화면에 구현되지 않은 것으로 보인다」 — 그전 11-15 결정 ③ 은 오프라인 마케팅을 「개업 뒤」 칸이라 맨 뒤에 뒀다).
- *  네 탭은 그대로다(빼지 않는다 · PPPP 화면 보존 규칙). 이름은 pppp_status 가 글자로 찾는다. */
-const ORDER: Tab[] = ["marketing", "network", "support", "hypothesis"];
+type Tab = "network" | "marketing";
+/** 탭 순서 — 사용자 정의 그대로 **네트워킹 → 오프라인 마케팅**(2026-11-22 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」).
+ *  탭 이름은 pppp_status 가 글자로 찾는다. */
+const ORDER: Tab[] = ["network", "marketing"];
 
-/** Program = 건물주와 창업자 대상 오프라인 마케팅(2026-11-22 사용자 정의 → docs/decision-pppp-owner-founder-2026-11-22.md §9).
- * 첫 화면은 「오프라인 마케팅 솔루션」 — 맨 위에서 창업자·건물주를 고른다. 창업자의 계약 전 확인(가설 설정)·네트워킹·지원 프로그램은 그 뒤 탭이다.
- * Posting 의 「이 자리로 검증 program 만들기」로 넘어오면 그 계산으로 가설 설정을 연다(그 단추가 가리키는 곳이다).
- * (2026-11-22 「PPPP 보고서는 뺀다」 — 레일의 「상권 분석 보고서」와 이 허브의 종합 리포트를 지웠다. PPPP 네 구현 화면은 그대로다.) */
-export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory, onArrivalDismiss, businessGoal,
+/** Program = **계약을 맺고 개업한 자리**의 네트워킹과 오프라인 마케팅 — 이 두 기능만 둔다
+ * (2026-11-22 사용자 정의 「Program에서는 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅으로만 기능을 집중하고, 나머지 기능은 제외」
+ *  → docs/decision-program-post-opening-2026-11-22.md).
+ * 제외한 것: 지원 프로그램(지원 공고) · 가설 설정(계약 전 검증 계획 · ProgramStudio) · 오프라인 마케팅의 건물주 공실 알리기 보기
+ *   (빈 자리를 채우는 일은 계약 전이다 — 건물주의 팝업 설정·받은 입점 희망서는 Page·Posting 쪽 건물주 화면에 그대로 있다).
+ * PPPP 화면 보존 규칙: Program **화면**(레일 · 지도 탐색 트랙 · TrackMapFrame 「오프라인 캠페인」)은 그대로다 — 화면 안의 기능을 사용자 지시로 줄였다.
+ * Posting 의 「이 자리로 개업 후 Program 열기」로 넘어오면 그 자리·업종으로 오프라인 마케팅(실행 기록)을 연다. */
+export default function CampaignStudio({ handoff, mapDistrictId, defaultCategory, onArrivalDismiss,
   industryKey, industryLabel, postingResult }: {
   handoff?: ProgramHandoff; mapDistrictId?: string | null; defaultCategory?: string;
-  onArrivalDismiss?: () => void; businessGoal?: BusinessGoal;
+  onArrivalDismiss?: () => void;
   /** 「내 사업」 업종 키(/ai/industries 의 key) — 함께 모이는 업종·실행 카드에 쓴다 */
   industryKey?: string;
-  /** 업종 이름 — 공고 문구의 업종 언급 표시에만 쓴다(거르지 않는다) */
+  /** 업종 이름 — 행사 문구의 업종 언급 표시에만 쓴다(거르지 않는다) */
   industryLabel?: string;
-  /** Posting 이 넘긴 최신 계산 — 가설 설정이 이어받는다 */
+  /** Posting 이 넘긴 최신 계산 — 실행 기록의 업종·주소를 채운다 */
   postingResult?: ProgramHandoff;
 } = {}) {
-  // 바로 열면 오프라인 마케팅부터(2026-11-22) — Posting 인계(「검증 program 만들기」)로 오면 가설 설정부터.
-  const [tab, setTab] = useState<Tab>(() => (handoff ? "hypothesis" : "marketing"));
-  // 오프라인 마케팅은 창업자·건물주 둘 다를 위한 것이다(2026-11-22) — 기본은 창업자(기존 화면 그대로)
-  const [audience, setAudience] = useState<MarketingAudience>("founder");
+  // 바로 열면 네트워킹부터 — Posting 인계(「이 자리로 개업 후 Program 열기」)로 오면 그 자리로 실행 기록을 채우는 오프라인 마케팅부터.
+  const [tab, setTab] = useState<Tab>(() => (handoff ? "marketing" : "network"));
   const inSlots = useMapLayout() !== null;
   const districtId = mapDistrictId ?? handoff?.districtId ?? null;
   const workspace = useWorkspaceRecords();
-  const [imported, setImported] = useState<{ handoff: ProgramHandoff; id: string }>();
-  const linkedPosting = [imported?.handoff, postingResult, handoff, workspace.posting].find(value => value?.districtId === districtId);
-  const stage = stageForGoal(businessGoal);
+  const linkedPosting = [postingResult, handoff, workspace.posting].find(value => value?.districtId === districtId);
+  // 지도 — 공공 행사 칩(누르면 행사 연계 계획이 있는 오프라인 마케팅 탭) · Posting 에서 넘어온 내 자리. 지도 밖(단독 렌더)에서는 아무것도 안 한다
+  useProgramMapEvents({ districtId, place: handoff ?? null, onPick: () => setTab("marketing") });
   const needDistrict = (body: ReactNode) => districtId ? body
-    : <p className="program-note">지도에서 상권을 먼저 고르면 이 상권 기준으로 보여 드려요.</p>;
+    : <p className="program-note">지도에서 계약한 자리의 상권을 먼저 고르면 그 상권 기준으로 보여 드려요.</p>;
   const fallback = <p role="status">불러오는 중…</p>;
-  // 허브는 상권이 바뀌어도 다시 마운트되지 않는다(App 의 key 는 인계 요청 id) — 이 브라우저에 두는 메모·담은 공고가
+  // 허브는 상권이 바뀌어도 다시 마운트되지 않는다(App 의 key 는 인계 요청 id) — 이 브라우저에 두는 메모가
   // 상권마다 따로라서, 그 상태를 든 패널은 상권 id 로 key 를 준다(지난 상권 메모가 새 상권 키로 저장되지 않게).
 
   const pages = [
     { id: "network", label: "네트워킹",
-      description: "계약 전에 누구에게 묻고, 개업 뒤 누구와 함께할 수 있나 — 공식 행사·지원기관과 직접 찾아가 물어볼 이웃 가게.",
+      description: "개업한 자리가 이 상권에서 누구와 함께할 수 있나 — 공식 행사·네트워크와, 직접 찾아가 인사할 이웃 가게.",
+      // 개업 뒤라 단계는 기창업자(founder)다 — 예비창업자 전용 공고는 거른다(서버 program_support.kstartup_item)
       content: needDistrict(districtId && <NetworkingPanel key={districtId} districtId={districtId} industryKey={industryKey}
-        industryLabel={industryLabel} stage={stage} />) },
-    { id: "support", label: "지원 프로그램",
-      description: "내 단계·업종·지역에 지금 신청할 수 있는 국가·지자체 지원과 마감일 — 자격 판정이 아니라 조건이 맞을 수 있는 공고.",
-      content: needDistrict(districtId && <SupportPrograms key={districtId} districtId={districtId} stage={stage} industryLabel={industryLabel} />) },
+        industryLabel={industryLabel} stage="founder" />) },
     { id: "marketing", label: "오프라인 마케팅 솔루션",
-      description: "건물주와 창업자를 위한 오프라인 마케팅 — 창업자는 지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록, 건물주는 공실을 알릴 행사 연계·팝업(단기 사용)·입점 희망서.",
+      description: "개업한 자리를 오프라인으로 알리기 — 지역 행사·시간대·이웃 업종으로 본 실행 카드 → 행사 연계 계획 → 실행 기록(합의·참여 증빙·비용·결과).",
       content: <>
-        <AudienceSwitch value={audience} onChange={setAudience} />
-        {audience === "owner" ? <OwnerMarketing districtId={districtId} /> : <>
-          <p className="program-note" data-after-open>창업자 — 팝업·가오픈·개업을 시작한 뒤 실행하는 오프라인 마케팅이에요.
-            계약 전에 작게 확인하는 가설 설정과 네트워킹·지원 프로그램은 다음 탭에 있어요.</p>
-          {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
-          {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
-          <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
-            onArrivalDismiss={onArrivalDismiss} businessGoal={businessGoal} />
-        </>}
+        {needDistrict(districtId && <ExecutionCards districtId={districtId} industryKey={industryKey} />)}
+        {districtId && <Suspense fallback={fallback}><EventLinkPlanner key={districtId} districtId={districtId} /></Suspense>}
+        <CampaignLedger handoff={linkedPosting} mapDistrictId={mapDistrictId} defaultCategory={defaultCategory}
+          onArrivalDismiss={onArrivalDismiss} />
       </> },
-    { id: "hypothesis", label: "가설 설정",
-      description: "창업자 — 계약 전에 앞선 세 단계의 근거로 가설을 세우고, 검증 방법·판정 기준과 실행 준비까지 설계합니다.",
-      content: <Suspense fallback={fallback}>
-        {districtId && <SavedResults key={districtId} kind="posting" districtId={districtId} refreshKey={0} render={item => {
-          const saved = savedPostingHandoff(item);
-          return saved ? <button type="button" onClick={() => setImported({ handoff: saved, id: item.id })}>이 저장 내용으로 가설 설정</button>
-            : <p>이전 저장 결과에는 자리 연결 정보가 없습니다. Posting에서 자리를 선택하고 다시 저장해 주세요.</p>;
-        }} />}
-        <ValidationStudio key={`${districtId}:${linkedPosting?.unitId ?? "none"}:${imported?.id ?? "current"}`} mapDistrictId={districtId ?? undefined}
-          handoff={linkedPosting} onArrivalDismiss={onArrivalDismiss}
-          defaultCategory={defaultCategory} businessGoal={businessGoal} />
-      </Suspense> },
   ].sort((a, b) => ORDER.indexOf(a.id as Tab) - ORDER.indexOf(b.id as Tab));
 
   const intro = (title: ReactNode) => <header>
     <p className="campaign-eyebrow">Promotion ▶ Program</p>
     {title}
-    <p>건물주와 창업자를 위한 <b>오프라인 마케팅</b>입니다. 「오프라인 마케팅 솔루션」 맨 위에서 <b>창업자 · 건물주</b>를 골라 쓰세요.
-      창업자는 네트워킹·지원 프로그램과, 계약 전에 작게 확인하는 가설 설정도 함께 볼 수 있어요.</p>
+    <p><b>계약을 맺고 개업한 자리</b>의 <b>네트워킹</b>과 <b>오프라인 마케팅</b>입니다. 지도에서 그 자리의 상권을 고르고,
+      실행 기록에는 실제 영업 주소를 적어요. PlaceOS 는 대신 홍보하거나 행사를 열지 않아요.</p>
   </header>;
-  // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 네 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 넷을 한눈에), 고른 기능의
+  // 2026-11-08 칸 배치: 지도 탐색에서는 머리말과 기능 메뉴가 **왼쪽 칸**에 서고(한 줄 설명과 함께 한눈에), 고른 기능의
   // 본문이 오른쪽 칸에 선다. 머리 칸에 이미 단계 제목(h1)이 있어 여기 이름은 h2 로 내린다. 단독 렌더는 예전 그대로다.
   if (inSlots) return <div className="campaign-studio program-hub">
-    <ConsolePages label="Program 네 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)}
+    <ConsolePages label="Program 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)}
       navSlot="left" navTrack="program" navIntro={intro(<h2>Program</h2>)} />
   </div>;
   return <div className="campaign-studio program-hub">
     {intro(<h1>Program</h1>)}
-    <ConsolePages label="Program 네 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)} />
+    <ConsolePages label="Program 기능" pages={pages} activeId={tab} onChange={(id) => setTab(id as Tab)} />
   </div>;
 }

@@ -22,7 +22,7 @@ export default function ConsolePages({ label, pages, enabled = true, activeId, o
   keepMounted?: string[];
 }) {
   // 처음 그리는 쪽은 **처음 열린 쪽**이다(2026-11-22) — 그전에는 늘 첫 쪽(pages[0])을 함께 그려, 인계로 다른 쪽이 먼저 열려도
-  // 숨은 첫 쪽이 마운트되며 자기 API 를 불렀다(Program 이 「가설 설정」으로 열렸는데 오프라인 마케팅의 캠페인 원장이 불림).
+  // 숨은 첫 쪽이 마운트되며 자기 API 를 불렀다(인계로 Posting 이 「시뮬레이션 결과」에서 열렸는데 첫 쪽 「입점 희망서 · 계약」의 매물 API 가 불림).
   const [active, setActive] = useState(activeId ?? pages[0].id);
   const [visited, setVisited] = useState(() => new Set([activeId ?? pages[0].id, ...(keepMounted ?? [])]));
   const id = useId();
