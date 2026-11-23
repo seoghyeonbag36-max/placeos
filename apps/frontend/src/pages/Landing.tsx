@@ -21,9 +21,13 @@
 import illustration from "@/design/assets/iso-commercial-building.svg";
 import { IconKey, IconMegaphone, IconPin, IconSpark } from "@/components/TrackIcons";
 import { GOALS } from "@/lib/businessProfile";
-import { LANDING_HUBS, LANDING_REGION } from "@/lib/landingFacts";
+import { landingFacts } from "@/lib/landingFacts";
+import { SITE_SCOPE_KEY, scopeHref } from "@/lib/siteScope";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import "./Landing.css";
+
+// 이 탭의 범위(서울 기본 · 고양·파주 전용 — lib/siteScope)가 말하는 지역 이름과 거점 수. 모듈이 불릴 때 한 번 정해진다.
+const FACTS = landingFacts();
 
 type Track = "platform" | "page" | "posting" | "program";
 
@@ -59,7 +63,7 @@ const STEPS: { track: Track; name: string; question: string; body: string; icon:
 const METHOD: { title: string; body: string }[] = [
   {
     title: "건물을 하나씩 셉니다",
-    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. ${LANDING_REGION} ${LANDING_HUBS}개 상권이 모두 이 방식입니다.`,
+    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. ${FACTS.region} ${FACTS.hubs}개 상권이 모두 이 방식입니다.`,
   },
   {
     title: "공식 통계와 나란히 놓습니다",
@@ -73,7 +77,7 @@ const METHOD: { title: string; body: string }[] = [
 ];
 
 const LIMITS: string[] = [
-  "서울만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
+  `${FACTS.region}만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.`,
   "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
   "임대 시세는 실제 매물 호가와 다를 수 있습니다. 부동산 중개와 계약 대행은 하지 않습니다 — 건물주와 창업자가 직접 이야기하고 계약합니다.",
 ];
@@ -105,9 +109,12 @@ export default function Landing() {
         <section className="lp-hero" aria-labelledby="lp-h1">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
+              {SITE_SCOPE_KEY !== "seoul" && (
+                <p className="lp-scope-note">{FACTS.region} 전용 화면 · <a href={scopeHref("seoul")}>서울 상권 보기</a></p>
+              )}
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다</h1>
               <p className="lp-lede">
-                창업자와 건물주를 잇는 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴보고,
+                창업자와 건물주를 잇는 부동산 앱. {FACTS.region} {FACTS.hubs}개 상권의 공실을 건물·층 단위로 살펴보고,
                 고른 자리의 비용과 회수 기간을 따져 입점 희망서로 건물주에게 먼저 말을 겁니다.
               </p>
               <div className="lp-cta-row">
@@ -226,6 +233,7 @@ export default function Landing() {
             <a href={PRIVACY_POLICY_PATH} target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>
             {" "}
             <a href="#help">자주 묻는 것 · 고객센터</a>
+            {SITE_SCOPE_KEY !== "seoul" && <a href={scopeHref("seoul")}>서울 상권 보기</a>}
             <a href="mailto:seoghyeonbag36@gmail.com">문의</a>
           </p>
         </div>

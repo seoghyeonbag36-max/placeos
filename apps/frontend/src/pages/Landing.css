@@ -136,3 +136,7 @@
  .lp-bar-actions { flex-wrap: wrap; column-gap: var(--space-md); }
  .lp-cta-row { row-gap: var(--space-lg); }
 }
+
+/* 고양·파주 전용 범위(2026-11-23 · lib/siteScope) — 서울 기본 화면에는 나오지 않는다 */
+.lp-scope-note { margin: 0 0 var(--sp-3, 12px); font-size: .875rem; color: var(--text-subtle, #6b7684); }
+.lp-scope-note a { color: inherit; text-decoration: underline; }
