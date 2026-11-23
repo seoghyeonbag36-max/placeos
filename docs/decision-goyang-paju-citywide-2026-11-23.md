@@ -29,7 +29,7 @@
 | 레지스트리 | `data/config/page_hubs.py`(`GOYANG_PAJU_CITYWIDE_HUBS` 6 · `…_SERVED_HUBS` 빈 집합 · `ACTIVE_HUBS` 문지기) · `data/config/rone_districts.py`(6곳 공유 매핑) · `scripts/chain_status.py`(`_BATCH_GATES`) · `scripts/run_hub_chain_batch.py`(`--batch gpcity`) |
 | 요구 판매량 | `flow/RequiredSales.tsx` · `flow/screens/Space.tsx` · `flow/spaces.ts`(`rentShared`) |
 | 주의 17곳 | `GOYANG_PAJU_CAUTION_HUBS`(등록만 · 서빙 문지기 빈 집합) · `--batch gpcaution` — 12곳이 끝난 뒤 시작해 **27분에 완료**(게이트 15 통과 · 1 탈락 · 1 대표값 미산출 → finding §6). 대장 뒤 채택·기각 판정은 사람 몫 — 단일시설로 읽히면 `deferred="단일시설"` |
-| 장항2동 | 사용자 선택 「기존 3곳에 partition_with + 반경 확대」: 라페스타·웨스턴돔 500/700 · 마두역 470/670(백석역과 닿지 않게) + 짝 `ilsan↔westerndom↔madu` · `ilsan↔juyeop` · `madu↔madu-east`(서로 선언). 가드 `test_janghang_partition_group_is_symmetric_and_does_not_touch_served_hubs`. **재수집(`scripts/recollect_hubs.py`)이 진행 중이다 — 11-23 21:36 기준 마두역·주엽역 인허가 스캔을 마치고 라페스타부터 대장을 이어받는 중. 끝나기 전까지 이 5곳의 Gold 는 옛 반경 기준이다** |
+| 장항2동 | 사용자 선택 「기존 3곳에 partition_with + 반경 확대」: 라페스타·웨스턴돔 500/700 · 마두역 470/670(백석역과 닿지 않게) + 짝 `ilsan↔westerndom↔madu` · `ilsan↔juyeop` · `madu↔madu-east`(서로 선언). 가드 `test_janghang_partition_group_is_symmetric_and_does_not_touch_served_hubs`. **재수집(`scripts/recollect_hubs.py`) 완료(11-23 21:21~21:40 · 19분)** — 5곳 모두 앵커까지 ok, 격차 −9.22~+29.42%p(finding §8). 보류 거점이라 서빙 영향 없음 |
 | 문서 | [finding-goyang-paju-sales-proxy](finding-goyang-paju-sales-proxy-2026-11-23.md) · [prereg-citywide-page-quality](prereg-citywide-page-quality-2026-11-23.md) · [handoff-3d-twin](handoff-3d-twin-goyang-paju-2026-11-23.md) |
 | 가드 | `tests/test_city_registry`(배치 합 · 슬러그 충돌) · `tests/test_active_cities_match_serving`(서빙 문지기) · `RequiredSales.test`(5) · `FlowApp.test`(고양·파주 노출 · 서울 비노출) |
 
@@ -42,7 +42,7 @@
 
 ## 5. 다음 한 수
 
-0. **재수집 확인**: `reports/logs/recollect-janghang.log` 에 「배치 완료」가 찍혔는지 · 5곳 `python scripts/chain_status.py ilsan westerndom madu juyeop madu-east --include-paused` 가 앵커까지 ok 인지. 끝나면 앵커 격차를 보고하고(보류 거점이라 서빙 영향 없음), 안 끝났으면 같은 명령을 다시 돌린다.
+0. (완료) 장항2동 5곳 재수집 — finding §8.
 
 1. 12곳 수집(`--batch gpcity`)이 끝나면 같은 방식으로 `--batch gpcaution`(「주의」 17곳). 쿼터가 끝나는 날마다 같은 명령을 다시 돌려야 이어받는다.
 2. 앵커 대조 전에 `rone_rent` 를 새 매핑으로 다시 돌린다(폴백 앵커 10.0 함정 — hub-chain 「앵커 폴백」).
