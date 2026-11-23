@@ -2,6 +2,8 @@
 
 고양·파주 확장(2026-11-23 사용자 결정 ①)의 첫 단계다. 거점 9곳(+보류 11곳)이 도시 점포의 몇 %를 덮는지 **분모부터 센다.**
 - 점포 원천: 소상공인 상가정보 `storeListInDong` (`divId=signguCd`) — 부산 조사(`run_busan_research.fetch_stores`)와 같은 호출.
+- ⚠ `reports/citywide_census_*.json` 은 **2026-11-23 등록 전 스냅샷**이다(서빙 거점 커버 12.4% · 24.3%). 이 스크립트를 다시 돌리면 그 뒤 등록된 29곳이 반영돼 후보가 달라지고
+  덮어쓴다 — 기준선이 필요하면 보고서를 먼저 옮겨 둘 것.
 - 후보 중심은 **관측된 점포 한 곳의 좌표**다(추정 중심 생성 금지 — `audit_regional_hub_candidates` 와 같은 원칙).
 - 후보 판정은 hub-chain §0 두 단계(건물당 점포 >10 기각 · top10 지번 집중도 >25% 주의). 판정은 **등록 전 탐색**이다 —
   대장·앵커·Gold 를 통과하기 전에는 서빙하지 않는다. 이 스크립트는 레지스트리·Gold 를 고치지 않는다.
@@ -131,7 +133,6 @@ def analyze(city: str, rows: list[dict], root: Path) -> dict:
     mat = np.vstack([d_hub[s] for s in names]) if names else np.empty((0, n))
     nearest = mat.argmin(axis=0) if names else np.zeros(n, dtype=int)
     nearest_d = mat.min(axis=0) if names else np.full(n, np.inf)
-    covered_store = np.zeros(n, dtype=bool)
     hub_rows = []
     for i, s in enumerate(names):
         h = hubs[s]
@@ -146,12 +147,16 @@ def analyze(city: str, rows: list[dict], root: Path) -> dict:
                              stores_in_collection_radius=int(in_store_r.sum()),
                              stores_in_polygon_radius=int(in_poly_r.sum()), radius_m=h.radius_m,
                              stores_radius_m=h.stores_radius_m))
-        if state == "서빙":
-            covered_store |= in_store_r
-    served_cov = covered_store.copy()
+    # 커버 판정은 **중복 허용**이다 — 어느 거점이든 자기 점포 반경 안이면 덮인다. 가장 가까운 거점에만 귀속시킨 뒤 그 반경을 따지면
+    # 새 거점이 생길 때 서빙 거점 반경 안의 점포가 새 거점(반경 밖)으로 넘어가 커버율이 거꾸로 줄어든다(2026-11-23 · 서빙 12.4 → 11.2%).
+    # 거점별 점포 수(`stores_in_collection_radius`)는 가까운 쪽 귀속(이중 계수 없음)을 그대로 쓴다.
+    served_cov = np.zeros(n, dtype=bool)
     reg_cov = np.zeros(n, dtype=bool)
-    for i, s in enumerate(names):
-        reg_cov |= (nearest == i) & (nearest_d <= hubs[s].stores_radius_m)
+    for s in names:
+        within = d_hub[s] <= hubs[s].stores_radius_m
+        reg_cov |= within
+        if s in ACTIVE_HUBS:
+            served_cov |= within
 
     # 행정동 표
     by_dong: dict[str, dict] = defaultdict(lambda: dict(stores=0, served=0, registered=0))

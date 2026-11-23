@@ -7,8 +7,8 @@
 
 | 축 | 계측기 | 현재(2026-11-23) | 목표 |
 |---|---|---|---|
-| **도시 커버리지** — 서빙 거점이 도시 점포를 얼마나 덮나 | `python scripts/citywide_store_census.py --city goyang\|paju` → `reports/citywide_census_{city}.json` 의 `served_hub_cover.pct` | 고양 **12.4%** · 파주 **24.3%** | **사용자 결정 대기** — 베이스라인만 고정한다(숫자를 지어내지 않는다) |
-| **거점 단위 공실률의 앵커 일치** | `calibrate_vacancy` → `calibration.json` 의 서빙 대표값 vs R-ONE 앵커 격차 | 새 6곳 **미측정**(대장 전) | 서빙 게이트(아래 §2) — 일치는 **정확도 주장이 아니다**(§3) |
+| **도시 커버리지** — 서빙 거점이 도시 점포를 얼마나 덮나 | `python scripts/citywide_store_census.py --city goyang\|paju` → `reports/citywide_census_{city}.json` 의 `served_hub_cover.pct` | 고양 **12.4%** · 파주 **24.3%** (서빙 목록 불변). 등록·수집 기준은 29곳 수집 뒤 고양 68.7% · 파주 56.0% | **사용자 결정 대기** — 베이스라인만 고정한다(숫자를 지어내지 않는다) |
+| **거점 단위 공실률의 앵커 일치** | `calibrate_vacancy` → `calibration.json` 의 서빙 대표값 vs R-ONE 앵커 격차 | 통과 후보 6곳 **5곳 통과 · 1곳 탈락**(대화동 북동 +31.12%p — 노출 26동) · 11-23 20:47 재보정 값 → [finding §5](finding-citywide-census-goyang-paju-2026-11-23.md) · 「주의」 17곳은 **15 통과 · 1 탈락(향동 남측 +30.98%p) · 1 미산출(지축동)** → [§6](finding-citywide-census-goyang-paju-2026-11-23.md) | 서빙 게이트(아래 §2) — 일치는 **정확도 주장이 아니다**(§3) |
 | 빈 층 판정의 정확도 | 현장 라벨 | 라벨 **0/458 → 검정불가**(10-19 사전등록) | 주장하지 않는다 — 라벨이 사람 몫이다 |
 
 「도시 커버리지」는 점포 수 비율이지 상권 품질이 아니다. 거점을 늘려 이 비율이 올라도 **공실 판정이 맞아졌다는 뜻이 아니다.**

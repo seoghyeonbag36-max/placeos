@@ -55,4 +55,19 @@ def test_new_hubs_use_observed_separation_and_do_not_overlap_store_radius():
                 continue
             d = _m(hub, other)
             assert d >= 1000, (slug, other_slug, round(d))
+            if other_slug in hub.partition_with and slug in other.partition_with:
+                continue  # 가까운 쪽 귀속을 서로 선언한 짝은 겹쳐도 점포가 이중 계수되지 않는다(2026-11-23 마두동 동측 ↔ 마두역)
             assert d + 1 >= hub.stores_radius_m + other.stores_radius_m, (slug, other_slug, round(d))
+
+
+def test_janghang_partition_group_is_symmetric_and_does_not_touch_served_hubs():
+    """장항2동(2026-11-23) — 라페스타 · 웨스턴돔 · 마두역 반경 확대의 가까운 쪽 귀속 짝은 서로 선언하고, 서빙 거점과는 겹치지 않는다."""
+    group = ("ilsan", "westerndom", "madu", "juyeop", "madu-east")
+    for slug in group:
+        for partner in ph.ALL_HUBS[slug].partition_with:
+            assert slug in ph.ALL_HUBS[partner].partition_with, (slug, partner)
+    for slug in ("ilsan", "westerndom", "madu"):
+        hub = ph.ALL_HUBS[slug]
+        assert (hub.radius_m, hub.stores_radius_m) in {(500, 700), (470, 670)} and hub.deferred == "계획상가"
+        for other_slug, other in ph.ACTIVE_HUBS.items():  # 서빙 중인 거점의 점포 반경과는 닿지 않는다
+            assert _m(hub, other) + 1 >= hub.stores_radius_m + other.stores_radius_m, (slug, other_slug)
