@@ -62,6 +62,7 @@
     --batch gj       광주광역시 13상권(2026-10-30 등록 · 10-31 서빙)
     --batch gjjj2    광주·전주 2차 51곳(2026-11-09 등록 — 서빙은 통과분만 GJ_JJ_BATCH2_SERVED_HUBS)
     --batch gpcity   고양·파주 도시 전체 6곳(서빙은 통과분만 GOYANG_PAJU_CITYWIDE_SERVED_HUBS) + 계획상가 보류 6곳(2026-11-23 · 통과 6곳이 앞이다)
+    --batch gpcaution 고양·파주 「주의」 후보 17곳(2026-11-23 등록 — gpcity 12곳이 끝난 뒤 · 서빙은 판정 뒤 GOYANG_PAJU_CAUTION_SERVED_HUBS)
     --hubs a,b,c     직접 지정
     --skip-ledger    대장을 건너뛴다(쿼터 0 · 점포·폴리곤만)
 """
@@ -301,6 +302,8 @@ def hubs_of(batch: str) -> list[str]:
     if batch == "gpcity":
         # 통과 6곳이 앞이다 — 건축HUB 쿼터는 먼저 오는 거점이 쓴다. 보류 6곳(계획상가)은 그 뒤에 받는다.
         return [*ph.GOYANG_PAJU_CITYWIDE_HUBS, *ph.GOYANG_PAJU_CEILING_HUBS]
+    if batch == "gpcaution":
+        return list(ph.GOYANG_PAJU_CAUTION_HUBS)   # 「주의」 17곳 — 대장을 받은 뒤에야 채택·기각을 정한다
     raise SystemExit(f"모르는 배치: {batch}")
 
 

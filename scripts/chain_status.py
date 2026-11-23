@@ -120,6 +120,8 @@ _BATCH_GATES: tuple[tuple[str, str, str, str], ...] = (
      "docs/decision-gwangju-jeonju-batch2-2026-11-09.md §5"),
     ("GOYANG_PAJU_CITYWIDE_HUBS", "GOYANG_PAJU_CITYWIDE_SERVED_HUBS", "고양·파주 도시 전체",
      "docs/decision-goyang-paju-citywide-2026-11-23.md"),
+    ("GOYANG_PAJU_CAUTION_HUBS", "GOYANG_PAJU_CAUTION_SERVED_HUBS", "고양·파주 「주의」 후보",
+     "docs/decision-goyang-paju-citywide-2026-11-23.md"),
 )
 
 

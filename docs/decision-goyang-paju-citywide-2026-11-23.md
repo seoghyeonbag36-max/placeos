@@ -28,6 +28,7 @@
 | 결과 | `reports/citywide_census_goyang.json` · `reports/citywide_census_paju.json` · [finding-citywide-census-goyang-paju-2026-11-23.md](finding-citywide-census-goyang-paju-2026-11-23.md) |
 | 레지스트리 | `data/config/page_hubs.py`(`GOYANG_PAJU_CITYWIDE_HUBS` 6 · `…_SERVED_HUBS` 빈 집합 · `ACTIVE_HUBS` 문지기) · `data/config/rone_districts.py`(6곳 공유 매핑) · `scripts/chain_status.py`(`_BATCH_GATES`) · `scripts/run_hub_chain_batch.py`(`--batch gpcity`) |
 | 요구 판매량 | `flow/RequiredSales.tsx` · `flow/screens/Space.tsx` · `flow/spaces.ts`(`rentShared`) |
+| 주의 17곳 | `GOYANG_PAJU_CAUTION_HUBS`(등록만 · 서빙 문지기 빈 집합) · `run_hub_chain_batch.py --batch gpcaution` — **12곳(`--batch gpcity`)이 끝난 뒤 시작**(11-23 사용자 결정). 대장 뒤 판정에서 채택하면 서빙 목록에, 단일시설·계획상가면 `deferred` 로 |
 | 문서 | [finding-goyang-paju-sales-proxy](finding-goyang-paju-sales-proxy-2026-11-23.md) · [prereg-citywide-page-quality](prereg-citywide-page-quality-2026-11-23.md) · [handoff-3d-twin](handoff-3d-twin-goyang-paju-2026-11-23.md) |
 | 가드 | `tests/test_city_registry`(배치 합 · 슬러그 충돌) · `tests/test_active_cities_match_serving`(서빙 문지기) · `RequiredSales.test`(5) · `FlowApp.test`(고양·파주 노출 · 서울 비노출) |
 
@@ -40,6 +41,6 @@
 
 ## 5. 다음 한 수
 
-1. 메인 트리에서 `python scripts/run_hub_chain_batch.py --batch gpcity`(autorun · AC 연결 · 건축HUB 쿼터는 한 번에 한 거점) — 키(`.env`)와 bronze 는 메인 트리에 있다.
+1. 12곳 수집(`--batch gpcity`)이 끝나면 같은 방식으로 `--batch gpcaution`(「주의」 17곳). 쿼터가 끝나는 날마다 같은 명령을 다시 돌려야 이어받는다.
 2. 앵커 대조 전에 `rone_rent` 를 새 매핑으로 다시 돌린다(폴백 앵커 10.0 함정 — hub-chain 「앵커 폴백」).
 3. 서빙 등재는 게이트를 통과한 거점만 `GOYANG_PAJU_CITYWIDE_SERVED_HUBS` 에 넣고, **공통 피처판 GNN 을 다시 학습**한다(거점 원핫 열 수가 바뀐다).

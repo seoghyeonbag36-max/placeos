@@ -191,6 +191,24 @@ DISTRICT_RONE: dict[str, str] = {
     "geumchon2dong": "경기>파주시청", # 금촌2동 (1.41km)
     "unjeong1dong": "경기>파주시청",  # 운정1동 (3.31km)
     "unjeong6dong": "경기>파주시청",  # 운정6동 (7.54km) ⚠ 멀다 — 탄현역(고양) 4.25km 는 도시가 달라 빌리지 않는다
+    # 「주의」 후보 17곳(2026-11-23) — 같은 규칙(실측 거리 · 같은 도시 표본). 전부 공유.
+    "samsong2dong": "경기>고양시청",  # 삼송2동 (3.84km)
+    "haengsin1dong": "경기>고양시청",  # 행신1동 (3.88km)
+    "hyangdong-south": "경기>고양시청",  # 향동 남측 (8.49km)
+    "jichuk": "경기>고양시청",  # 지축동 (7.35km)
+    "siksa": "경기>고양시청",  # 식사동 (2.71km)
+    "pungsan": "경기>고양시청",  # 풍산동 (2.92km)
+    "wonheung": "경기>고양시청",  # 원흥동 (4.35km)
+    "wonsin": "경기>고양시청",  # 원신동 (5.15km)
+    "goyangdong": "경기>고양시청",  # 고양동 (8.05km)
+    "tanhyeon2dong": "경기>탄현역",  # 탄현2동 (1.36km)
+    "haengsin4dong": "경기>고양시청",  # 행신4동 (4.47km)
+    "unjeong5dong": "경기>파주시청",  # 운정5동 (6.68km)
+    "waedong": "경기>파주시청",  # 와동동 (3.80km)
+    "unjeong3dong": "경기>파주시청",  # 운정3동 (6.25km)
+    "unjeong2dong": "경기>파주시청",  # 운정2동 (5.53km)
+    "munbal": "경기>파주시청",  # 문발동 (8.85km)
+    "munsaneup": "경기>파주시청",  # 문산읍 (11.73km)
     # ── 경기 3차 확장 50거점(2026-10-28) — 앵커 자리 35곳은 정확, 두 번째 거점 15곳은 공유
     # ⚠ 중대형 표에만 있는 앵커(단대오거리역·아주대삼거리·영통역·평택시청·광주광남동·분당역세권)는 소규모 임대 행이 없어
     #   그 앵커를 쓰는 8거점(dandae·ajou·yeongtong·pyeongtaekcity·gwangnam + 공유 yatap·jeongja·maetan)의
@@ -344,6 +362,8 @@ SHARED_RONE: frozenset[str] = frozenset({
     # 고양·파주 도시 전체 6곳(2026-11-23) — 표본이 고양 2·파주 1 뿐이라 전부 공유다(주교동은 고양시청 소재지지만 화정과 같은 표본)
     "ilsan2dong", "jugyo", "todang", "madu1dong", "daehwadong-ne", "jori",
     "hyangdong", "madu-east", "ilsan3dong", "geumchon2dong", "unjeong1dong", "unjeong6dong",
+    # 「주의」 후보 17곳(2026-11-23)
+    "samsong2dong", "haengsin1dong", "hyangdong-south", "jichuk", "siksa", "pungsan", "wonheung", "wonsin", "goyangdong", "tanhyeon2dong", "haengsin4dong", "unjeong5dong", "waedong", "unjeong3dong", "unjeong2dong", "munbal", "munsaneup",
     # 2차 확장 13거점 — 전부 공유
     "wondang", "bamgasi", "daehwa", "juyeop", "kintex", "baekseok", "madu",
     "haengsin", "samsong", "starfield", "mokdong", "pajuoutlet", "munsan",

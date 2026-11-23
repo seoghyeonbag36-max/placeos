@@ -20,6 +20,15 @@ def test_registered_but_not_served_until_gate_passes():
     assert not (new & set(ph.HUBS))
 
 
+def test_caution_hubs_are_registered_not_served_until_judged():
+    """「주의」 17곳 — 대장 뒤 판정 전에는 서빙·기본 순회에 오르지 않고, 계획상가·단일시설로 미리 단정하지도 않는다."""
+    caution = set(ph.GOYANG_PAJU_CAUTION_HUBS)
+    assert len(caution) == 17 and caution <= set(ph.ALL_HUBS)
+    assert caution & set(ph.ACTIVE_HUBS) == set(ph.GOYANG_PAJU_CAUTION_SERVED_HUBS)
+    for slug, hub in ph.GOYANG_PAJU_CAUTION_HUBS.items():
+        assert not hub.deferred and not hub.caveat and hub.city in {"goyang", "paju"}, slug
+
+
 def test_ceiling_hubs_are_deferred_and_never_served():
     """계획상가 밀집 보류 6곳 — 수집만 하고 서빙·기본 순회에는 오르지 않는다(deferred)."""
     ceiling = set(ph.GOYANG_PAJU_CEILING_HUBS)
@@ -30,7 +39,7 @@ def test_ceiling_hubs_are_deferred_and_never_served():
 
 
 def test_every_new_hub_has_a_shared_rone_anchor():
-    for slug in {*ph.GOYANG_PAJU_CITYWIDE_HUBS, *ph.GOYANG_PAJU_CEILING_HUBS}:
+    for slug in {*ph.GOYANG_PAJU_CITYWIDE_HUBS, *ph.GOYANG_PAJU_CEILING_HUBS, *ph.GOYANG_PAJU_CAUTION_HUBS}:
         assert DISTRICT_RONE[slug] in {"경기>고양시청", "경기>탄현역", "경기>파주시청"}, slug
         # 표본이 고양 2 · 파주 1 뿐이라 신규 거점은 전부 공유다 — 화면이 「*」·rone-shared 로 밝힌다
         assert slug in SHARED_RONE, slug
@@ -38,7 +47,7 @@ def test_every_new_hub_has_a_shared_rone_anchor():
 
 def test_new_hubs_use_observed_separation_and_do_not_overlap_store_radius():
     """이격 ≥1.0km + 점포 반경이 이웃의 점포 반경과 겹치지 않는다(이중 계수 방지 · hub-chain 규칙)."""
-    for slug, hub in {**ph.GOYANG_PAJU_CITYWIDE_HUBS, **ph.GOYANG_PAJU_CEILING_HUBS}.items():
+    for slug, hub in {**ph.GOYANG_PAJU_CITYWIDE_HUBS, **ph.GOYANG_PAJU_CEILING_HUBS, **ph.GOYANG_PAJU_CAUTION_HUBS}.items():
         assert hub.city in {"goyang", "paju"} and (hub.deferred == "계획상가") == (slug in ph.GOYANG_PAJU_CEILING_HUBS), slug
         assert 200 <= hub.radius_m <= hub.stores_radius_m <= 700, slug
         for other_slug, other in ph.ALL_HUBS.items():
