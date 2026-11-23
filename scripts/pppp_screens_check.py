@@ -25,7 +25,7 @@
       — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 넷이 보인다
   P4  지도 탐색이 흐름에서 고른 상권으로 열린다(설계서 5판 §10 C2) — Platform · Page 의 상권 선택 값
   P5  랜딩의 PPPP 네 질문(#how)이 접히지 않고 보인다
-  P6  (2026-10-24) 홈의 새 입구 — 네 단계를 다 마친 홈의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
+  P6  (2026-10-24) 홈의 새 입구 — 계약 전 세 단계를 다 마친 홈(11-22 부터 ④ 는 「개업 후」라 세지 않는다)의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
       보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 넷이 보이고, 그 트랙 화면이
       서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 네 화면으로 간다
   P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 네 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
@@ -61,7 +61,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FLOW_KEY = "placeos.flow.v1"
-PLAN_KEY = "placeos.flow.plan.v1"
+# PLAN_KEY("placeos.flow.plan.v1" · ④ 작게 확인의 검증 계획)는 2026-11-22 에 걷었다 — 홈의 ④ 는 이제 「개업 후」(지도 탐색 Program 입구)라
+# 「다 봤다」를 계약 전 ①~③ 으로만 센다. 그래서 P6 씨앗에 검증 계획을 심을 필요가 없다.
 TRACKS = ["Platform", "Page", "Posting", "Program"]
 # 레일 버튼 → 그 화면이 섰다는 표지(역할 · 접근성 이름). Page(MapShell)만 TrackMapFrame 패널이 아니라 레이어 묶음이다
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
@@ -179,8 +180,8 @@ def main() -> int:
     industry = next((i for i in industries if i.get("model_label")), industries[0] if industries else None)
     flow = {"v": 1, "goal": "start", "industryKey": industry["key"] if industry else None, "districtId": target["id"]}
     seed = f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(flow))})"
-    # P6 — 네 단계를 다 마친 흐름 답. 자리는 그 상권의 실제 빈 자리(건물 id 가 있는 것) 하나다 — 지어낸 건물 id 로는
-    # Page 가 「선택한 건물을 찾지 못했습니다」를 띄워 「고른 건물이 골라진다」를 잴 수 없다
+    # P6 — 계약 전 세 단계(상권·빈 자리·비용)를 다 마친 흐름 답. 자리는 그 상권의 실제 빈 자리(건물 id 가 있는 것) 하나다 — 지어낸
+    # 건물 id 로는 Page 가 「선택한 건물을 찾지 못했습니다」를 띄워 「고른 건물이 골라진다」를 잴 수 없다
     space = first_space(base, target["id"])
     done_seed = None
     if space:
@@ -188,9 +189,7 @@ def main() -> int:
         done = {**flow, "spaceId": space["id"], "spaceLabel": f"{space['name']} {floor}층" if floor and floor >= 1 else space["name"],
                 "spaceAt": {"buildingId": space["building_id"], "name": space["name"], "lat": space["lat"], "lng": space["lng"]},
                 "premium": {"kind": "none"}}
-        plan = {"brief": {}, "plan": {"mode": "popup"}, "at": "2026-10-24"}   # 홈의 네 번째 단계(작게 확인)를 마친 표시만
-        done_seed = (f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(done))});"
-                     f"sessionStorage.setItem('{PLAN_KEY}', {json.dumps(json.dumps(plan))})")
+        done_seed = f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(done))})"
 
     rep = Report()
     errors: list[str] = []

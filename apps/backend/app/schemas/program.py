@@ -24,35 +24,6 @@ class ProgramRegion(BaseModel):
     label: str
 
 
-class SupportItem(BaseModel):
-    source: Literal["kstartup", "gov24", "bizinfo"]
-    source_label: str
-    id: str
-    title: str
-    org: str | None = None
-    region: str | None = None
-    category: str | None = None
-    target: str | None = None
-    start: str | None = None
-    end: str | None = None
-    # 정부24 처럼 신청기한이 자유 문구인 원천 — 날짜로 읽지 않고 원문 그대로 보인다
-    deadline_text: str | None = None
-    url: str | None = None
-    apply_url: str | None = None
-    summary: str | None = None
-    matched: list[str] = Field(default_factory=list)
-
-
-class SupportPrograms(BaseModel):
-    """GET /program/support — 조건이 맞을 수 있는 지원 공고(자격 판정이 아니다)."""
-    district_id: str
-    region: ProgramRegion
-    stage: Literal["pre_founder", "founder"] | None = None
-    industry: str | None = None
-    items: list[SupportItem]
-    total: int
-    sources: list[SourceStatus]
-    note: str
 
 
 class NetworkEvent(BaseModel):

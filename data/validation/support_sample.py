@@ -6,22 +6,16 @@
 공고) 한 건.** 라벨러에게는 두 줄로 섞어서 주고, 어느 쪽인지는 `key.csv` 에만 둔다(`labels.csv` 에 팔·매칭 표시·화면 순서가 없다).
 
 순수 로직(`draw_districts` · `frame` · `build_design` · `write_sample`)은 호출기를 받아 테스트가 가짜로 돌린다.
-라이브 호출은 `--freeze` 일 때만 — `program_support.support_programs` 가 키(K-Startup·정부24 = DATA_GO_KR_SERVICE_KEY ·
-기업마당 = BIZINFO_SUPPORT_API_KEY)를 `app.core.config.settings` 로 읽는다. 키가 없으면 원천이 `no_key` 로 비어 동결하지 않는다.
-
-실행(키가 있는 환경에서 한 번):
-  python -m data.validation.support_sample --freeze
-
-이미 있는 표본 폴더는 **덮어쓰지 않는다**(라벨이 달려 있을 수 있다) — 다시 뽑으려면 폴더를 직접 치우고 새 사전등록을 한다.
+⚠ 2026-11-22: 라이브 동결(`--freeze` — `program_support.support_programs` 로 질의를 채움)은 걷었다. 그 함수와 `GET /program/support` 를
+지웠다(지원 프로그램이 Program 에서 제외 → docs/decision-program-post-opening-2026-11-22.md). 위 순수 로직과 이미 동결한 표본은 남긴다.
+이미 있는 표본 폴더는 **덮어쓰지 않는다**(라벨이 달려 있을 수 있다).
 """
 from __future__ import annotations
 
-import argparse
 import csv
 import json
 import random
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -30,7 +24,6 @@ if hasattr(sys.stdout, "reconfigure"):
 _OUT = Path(__file__).resolve().parent
 _ROOT = _OUT.parents[1]
 
-from data.validation.score_support_labels import KPI_SAMPLE_TAG  # noqa: E402
 
 STAGES = ("pre_founder", "founder")
 STAGE_NAME = {"pre_founder": "예비창업자", "founder": "기창업자(업종 바꾸기·상권 옮기기)"}
@@ -177,52 +170,11 @@ def write_sample(design: dict, out_dir: Path, *, district_labels: dict[str, str]
     return out_dir
 
 
-def _live() -> tuple[dict[str, list[dict]], dict[str, str], list[dict]]:
-    """질의 틀을 라이브 매칭으로 채운다 — 키가 있는 환경에서만 의미가 있다."""
-    sys.path.insert(0, str(_ROOT))
-    sys.path.insert(0, str(_ROOT / "apps" / "backend"))
-    from app.services import program_support as PS
-    from data.config.page_hubs import ACTIVE_HUBS
-
-    seoul = [s for s, h in ACTIVE_HUBS.items() if h.city == "seoul"]
-    districts = draw_districts(seoul)
-    outputs: dict[str, list[dict]] = {}
-    status: dict[str, dict] = {}
-    dlabels: dict[str, str] = {}
-    for q in frame(districts):
-        d, s, i = parse_qid(q)
-        got = PS.support_programs(d, s, i)
-        outputs[q] = (got or {}).get("items", [])
-        if got:
-            dlabels[d] = got["region"]["label"]
-            for st in got.get("sources", []):
-                status[st.get("id") or st.get("source") or str(len(status))] = st
-    return outputs, dlabels, list(status.values())
-
-
 def main() -> None:
-    ap = argparse.ArgumentParser(description="지원 공고 매칭 정밀도 표본 동결")
-    ap.add_argument("--freeze", action="store_true", help="라이브 매칭으로 표본을 뽑아 동결한다")
-    ap.add_argument("--tag", default=KPI_SAMPLE_TAG)
-    args = ap.parse_args()
-    if not args.freeze:
-        raise SystemExit("--freeze 를 줘야 한다 — 라이브 호출로 표본을 뽑는다(키 필요)")
-    out_dir = _OUT / f"support_sample_{args.tag}"
-    if out_dir.exists():
-        raise SystemExit(f"[support-sample] {out_dir} 가 이미 있다 — 덮어쓰지 않는다(라벨이 달려 있을 수 있다)")
-    outputs, dlabels, status = _live()
-    total = sum(len(v) for v in outputs.values())
-    bad = [s for s in status if s.get("status") not in (None, "ok")]
-    print(f"[support-sample] 질의 {len(outputs)} · 매칭 공고 합계 {total} · 원천 상태 {[(s.get('id'), s.get('status')) for s in status]}")
-    if not total:
-        raise SystemExit("[support-sample] 매칭 결과가 하나도 없다 — 키(DATA_GO_KR_SERVICE_KEY 등)가 없거나 원천이 응답하지 않았다. 동결하지 않는다")
-    design = build_design(outputs)
-    frozen_at = datetime.now(timezone.utc).isoformat()
-    write_sample(design, out_dir, district_labels=dlabels, frozen_at=frozen_at, source_status=status)
-    print(f"[support-sample] 동결 → {out_dir} · 짝 {design['n_pairs']} · 버린 짝 {design['n_dropped']} · 비어 있던 질의 {len(design['excluded_queries'])}")
-    if bad:
-        print(f"⚠ 상태가 ok 가 아닌 원천: {[(s.get('id'), s.get('status')) for s in bad]} — 결과 옆에 적는다(사전등록 §5-4)")
-    print("다음: labels.csv 의 라벨 칸을 채운다(사람 몫) → python -m data.validation.score_support_labels")
+    """표본 동결의 라이브 단계는 없다 — 질의를 채우던 `program_support.support_programs`(`GET /program/support`)를 2026-11-22 에 지웠다
+    (Program 에서 지원 프로그램 제외 → docs/decision-program-post-opening-2026-11-22.md). 이미 동결한 표본(support_sample_20261115)과
+    채점기(`score_support_labels.py`)는 기록으로 남는다."""
+    raise SystemExit("[support-sample] 지원 공고 매칭이 Program 에서 제외돼 표본을 새로 뽑지 않는다 — 동결된 표본은 score_support_labels 로 채점한다")
 
 
 if __name__ == "__main__":

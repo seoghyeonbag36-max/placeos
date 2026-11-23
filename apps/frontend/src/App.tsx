@@ -1,6 +1,5 @@
 import VisitorFeedback, { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
-import PpppReportProvider from "@/components/PpppReportProvider";
-import AnalysisReportDialog from "@/components/AnalysisReportDialog";
+import WorkspaceRecordsProvider from "@/components/WorkspaceRecordsProvider";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -26,8 +25,13 @@ import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type P
 import FlowApp from "@/flow/FlowApp";
 import { explorePath, isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
 import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
-import { clearPlan } from "@/flow/plan";
 import "./App.css";
+
+/** 흐름 ④ 「작게 확인」이 이 탭에 남기던 검증 계획(아이템·브리프)의 옛 열쇠. 2026-11-22 그 화면을 뺐지만(Program 범위 축소),
+ *  그 전에 만든 계획이 이 탭 저장소에 남아 있을 수 있어 계정이 바뀔 때는 여전히 지운다(공용 PC — 다음 사람이 앞사람 아이템을 보지 않게). */
+const clearLegacyPlan = () => {
+  try { window.sessionStorage.removeItem("placeos.flow.plan.v1"); } catch { /* 지울 것이 없다 */ }
+};
 
 // 네 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
 // 거리뷰·층 스택·차트 같은 무거운 자식이 있어 청크를 나눈다.
@@ -38,9 +42,9 @@ const loadProgram = () => import("@/pages/CampaignStudio");
 const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
-const ProgramStudio = lazy(loadProgram);
-// 검증 계획(ProgramStudio)·행사 연계·결과 리포트는 2026-11-07 리뉴얼로 Program 허브(pages/CampaignStudio) 안의
-// 「오프라인 마케팅 솔루션」·「가설 검증」 탭으로 옮겼다 — App 은 Program 레일에서 그 모듈 하나만 그린다(PPPP 가드).
+const ProgramHub = lazy(loadProgram);   // pages/CampaignStudio — Program 허브(11-22 전에는 이 이름이 ProgramStudio 였다 · 그 모듈은 지웠다)
+// Program 레일은 Program 허브(pages/CampaignStudio) 모듈 하나만 그린다(PPPP 가드). 2026-11-22 사용자 정의로 허브 안 기능은
+// 「네트워킹」·「오프라인 마케팅 솔루션」 둘만 남았다(계약을 맺고 개업한 자리 기준) — 검증 계획(ProgramStudio)·지원 프로그램은 제외했다.
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -65,7 +69,7 @@ const PRELOAD_DELAY_MS = 1500;
  *   Platform → PlatformConsole  (상권 정체성 + 자리별 업종)
  *   Page     → MapShell         (공실 히트맵 4레이어 + 2D 층 스택·거리뷰)
  *   Posting  → PostingConsole   (3-Tier 비용-효용 + 권리금 입력 계약)
- *   Program  → CampaignStudio   (Program 허브 — 네트워킹·지원 프로그램·오프라인 마케팅 솔루션·가설 검증, 2026-11-07)
+ *   Program  → CampaignStudio   (Program 허브 — 개업한 자리의 네트워킹·오프라인 마케팅 솔루션, 2026-11-22 · 그전 11-07 은 네 기능)
  *
  * 2026-08-29: 상단 네비바를 **좌측 아이콘 레일**로 옮겼다(네이버지도식).
  *
@@ -154,7 +158,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const [view, updateView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
   // 입력 초안은 이번 작업 동안만 보관한다. 지도 표식은 비활성 트랙과 함께 해제한다.
   const [postingDrafts] = useState(() => new Map<string, PostingDraft>());
-  const [reportOpen, setReportOpen] = useState(false);
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
   // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
@@ -198,7 +201,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   };
   // Posting → Program 인계는 상권 변경 시 함께 비운다.
   const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
-  const [reportHandoff, setReportHandoff] = useState<ProgramHandoff>();
+  const [postingResult, setPostingResult] = useState<ProgramHandoff>();
   // 네 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
@@ -207,7 +210,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       postingDrafts.clear();
       setPostingSelection(undefined);
       setProgramHandoff(undefined);
-      setReportHandoff(undefined);
+      setPostingResult(undefined);
     }
     setPageWorkspace((w) => (w.districtId === id ? w
       : { ...w, districtId: id, query: "", status: "all", selectedId: null }));
@@ -226,7 +229,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   // Posting → Program: 인계마다 requestId 를 올려 Program 을 새로 마운트한다(초기값으로만 채운다).
   const makeProgram = useCallback((handoff: ProgramHandoff) => {
     setDistrictId(handoff.districtId);
-    setReportHandoff(handoff);
+    setPostingResult(handoff);
     setProgramHandoff((prev) => ({ ...handoff, requestId: (prev?.requestId ?? 0) + 1 }));
     setView("program", handoff);
   }, [setView, setDistrictId]);
@@ -416,10 +419,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <span>{n.label}</span>
           </button>
         ))}
-        <button type="button" className="rail-btn rail-report" aria-haspopup="dialog" onClick={() => setReportOpen(true)}>
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
-          <span>상권 분석 보고서</span>
-        </button>
         {/* 2026-11-08: 의견 보내기를 오른쪽 아래 떠 있는 버튼에서 레일로 옮겼다 — 지도·패널 글을 가리던 자리다.
             「계정」 바로 위(= 도움·의견은 내비게이션 맨 아래, 의견이 그 위)에 두고, 의견창(VisitorFeedback)은
             OPEN_VISITOR_FEEDBACK 로 같은 창을 연다. 누른 버튼을 실어 보내 닫을 때 초점이 이 버튼으로 돌아온다. */}
@@ -439,8 +438,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       {/* 지도는 앱 수명 동안 **하나**다. 탭이 바뀌어도 언마운트하지 않고 오버레이만
           갈아끼운다 — 그래야 사용자가 맞춰 둔 중심·줌이 탭 왕복에도 남는다. */}
       <MapHost active>
-        <PpppReportProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
-        {reportOpen && <AnalysisReportDialog districtId={districtId} handoff={reportHandoff} onClose={() => setReportOpen(false)} />}
+        <WorkspaceRecordsProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
             <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" onNavigate={navigateStep} />}
@@ -460,7 +458,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
               </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
+                onMakeProgram={makeProgram} onResultChange={setPostingResult} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
@@ -470,18 +468,18 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
           {view === "program" && (
             <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" onNavigate={navigateStep} />}
               footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
-              <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
+              <ProgramHub key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
                 handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal}
+                defaultCategory={customIndustry ?? workIndustry?.input}
                 industryKey={customIndustry ? undefined : workIndustry?.key}
                 industryLabel={customIndustry ?? workIndustry?.label}
-                reportHandoff={reportHandoff?.districtId === districtId ? reportHandoff : undefined} />
+                postingResult={postingResult?.districtId === districtId ? postingResult : undefined} />
             </TrackMapFrame>
           )}
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
-        </PpppReportProvider>
+        </WorkspaceRecordsProvider>
       </MapHost>
       <FounderPlanner selection={postingSelection} />
       {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}
@@ -551,7 +549,7 @@ function AppContent() {
       setToken((prev) => {
         // 계정이 바뀌거나 로그아웃하면 이 브라우저의 흐름 답을 지운다 — 공용 PC 에서 다음 사람이 앞사람의 금액·아이템을
         // 보지 않게. 로그인 전 → 로그인은 지우지 않는다(그때까지 고른 것을 계정으로 옮긴다 · 5판 C5)
-        if (prev && prev !== next) { clearFlow(); clearPlan(); }
+        if (prev && prev !== next) { clearFlow(); clearLegacyPlan(); }
         return next;
       });
     };

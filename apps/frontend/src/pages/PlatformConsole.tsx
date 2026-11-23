@@ -28,7 +28,9 @@ import type { BuildingSelection } from "@/lib/workspaceState";
 import { VACANCY_LABEL } from "@/lib/vacancyLabels";
 import "./PlatformConsole.css";
 import ConsolePages from "@/components/ConsolePages";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useRecordCapture } from "@/lib/workspaceRecords";
+import InstagramPanel from "@/components/InstagramPanel";
+import { instagramSearchNote } from "@/lib/instagram";
 
 /**
  * 고객용 상권 분석 — 상권 요약, 공간 후보, 공실 전망과 추천 업종을 보여준다.
@@ -254,7 +256,7 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prof, districtId, mySite?.label, rankingHere]);
   const sitesHere = openingsHere?.sites ?? null;
-  useReportCapture("platform", hub && (prof?.district_id === districtId || rec?.district_id === districtId || profErr || recErr) ? {
+  useRecordCapture("platform", hub && (prof?.district_id === districtId || rec?.district_id === districtId || profErr || recErr) ? {
     districtId, districtName: hub.name, industry: myIndustry?.label ?? null,
     archetype: prof?.district_id === districtId ? prof.identity?.archetype ?? null : null,
     archetypeRule: prof?.district_id === districtId ? prof.identity?.archetype_rule ?? null : null,
@@ -375,7 +377,8 @@ export default function PlatformConsole({ districtId: sharedDistrict, onDistrict
 
       {prof?.identity && <IdentitySection ident={prof.identity} hub={hub} />}
       {prof?.district_id === districtId && prof.identity && (
-        <KeywordSearchSection words={prof.identity.keywords.words.map((w) => w.word)} districtName={hub?.name ?? districtId} />
+        <KeywordSearchSection words={prof.identity.keywords.words.map((w) => w.word)} districtName={hub?.name ?? districtId}
+          instagramNote={instagramSearchNote(prof.identity.instagram)} />
       )}
       {openingsHere && (
         <OpeningsSection key={districtId} openings={openingsHere} districtName={hub?.name ?? districtId} mySite={mySite}
@@ -572,12 +575,19 @@ function headline({ hub, districtId, prof, profErr, fc, rec, zones }: {
       <>검색 「{t.keyword}」 <b className={`tr-${t.direction}`}>{dirMark(t.direction)} {t.change_pct > 0 ? "+" : ""}{t.change_pct}%</b></>,
     );
   }
+  // 인스타그램(2026-11-22) — 공식 API 로 모은 거점만. 수집 전이면 결론 줄에 아무것도 더하지 않는다(지어내지 않는다)
+  const ig = ident?.instagram?.status === "collected" ? ident.instagram : null;
+  if (ig) {
+    repParts.push(<>인스타 #{ig.hashtag} 최근 24시간 <b>{(ig.recent_24h ?? 0).toLocaleString("ko-KR")}건{ig.recent_capped ? " 이상" : ""}</b>
+      {ig.collected_at ? <small> ({ig.collected_at.slice(0, 10)} 수집 기준)</small> : null}</>);
+  }
   grounds.push({
     label: "밖에서 뭐라고 불리나",
     value: repParts.length ? joinDot(repParts) : <span className="value-absent">블로그 언급 없음</span>,
     source: ident
       ? `네이버 블로그 언급 빈도 — 토큰 ${ident.keywords.scanned}개 중 일반어 ${ident.keywords.dropped}개 표시 제외`
         + `(감성이 아니라 빈도다) · 트렌드 ${trends.length}계열은 네이버 데이터랩 최근 3개월 대 직전 3개월`
+        + (ig ? ` · 인스타그램 공식 API #${ig.hashtag} ${ig.collected_at?.slice(0, 10) ?? ""} 수집(최근 24시간 표본)` : "")
       : undefined,
   });
 
@@ -771,7 +781,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
 
         {/* 밖에서 뭐라고 불리나 */}
         <div className="panel">
-          <h3>밖에서 뭐라고 불리나<small>블로그 언급 · 검색 트렌드</small></h3>
+          <h3>밖에서 뭐라고 불리나<small>블로그 언급 · 검색 트렌드 · 인스타그램</small></h3>
           <div className="kwcloud">
             {keywords.words.map((w) => (
               <span key={w.word} className="kwc"
@@ -784,6 +794,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
             자주 언급되는 단어입니다. 긍정·부정 평가를 뜻하지 않습니다.
           </div>
 
+          {ident.instagram && <InstagramPanel data={ident.instagram} />}
           {ident.collected && <CollectedSection data={ident.collected} />}
           {trends.length > 0 && (
             <div className="trends">
@@ -812,13 +823,13 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
 }
 
 /** 단어마다 외부 검색 링크 — 수치를 만들지 않고 원문으로 내보낸다. */
-function KeywordSearchSection({ words, districtName }: { words: string[]; districtName: string }) {
+function KeywordSearchSection({ words, districtName, instagramNote }: { words: string[]; districtName: string; instagramNote: string }) {
   const q = (word: string) => encodeURIComponent(`${districtName} ${word}`);
   const shown = words.slice(0, 10);
   return (
     <Fold title="이 상권 검색어로 직접 찾아보기" summary={shown.length ? `단어 ${shown.length}개 · 네이버 · 인스타 링크` : "수집된 단어 없음"}>
       <p className="pnote">자주 쓰인 단어입니다. 어떤 단어가 알고리즘에 유리한지는 측정하지 않았습니다.
-        광고 글이 섞여 있을 수 있으니 원문을 읽어 보세요. 인스타그램은 수집하지 않아 수치가 없고 태그 링크만 드립니다.</p>
+        광고 글이 섞여 있을 수 있으니 원문을 읽어 보세요. {instagramNote}</p>
       {shown.length === 0 && <div className="empty">이 상권에서 수집된 단어가 없습니다.</div>}
       <ul className="kwlinks">{shown.map((word) => (
         <li key={word}>

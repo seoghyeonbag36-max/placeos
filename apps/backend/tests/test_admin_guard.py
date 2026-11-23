@@ -31,6 +31,12 @@ ADMIN_ROUTES = sorted(
     r.path for r in app.routes
     if isinstance(r, APIRoute) and r.path.startswith(f"{V1}/admin/")
 )
+# 2026-11-18: 직거래 관리자 창구에 POST 전용 경로(확인·신고·입금 처리)가 생겼다 — GET 으로 두드리면 405 라
+# 가드를 재지 못한다. 경로마다 자기 메서드로 두드린다(가드는 본문 검증보다 먼저 403 을 낸다).
+ADMIN_ROUTE_METHODS = sorted(
+    (r.path, m) for r in app.routes
+    if isinstance(r, APIRoute) and r.path.startswith(f"{V1}/admin/") for m in r.methods
+)
 
 
 def _dependency_calls(route: APIRoute) -> set:
@@ -49,15 +55,15 @@ def test_every_admin_route_depends_on_require_admin():
     assert unguarded == [], f"가드 없는 관리자 라우트: {unguarded}"
 
 
-@pytest.mark.parametrize("path", ADMIN_ROUTES)
-def test_admin_route_rejects_missing_wrong_or_unset_token(path, monkeypatch):
+@pytest.mark.parametrize("path,method", ADMIN_ROUTE_METHODS)
+def test_admin_route_rejects_missing_wrong_or_unset_token(path, method, monkeypatch):
     monkeypatch.setenv("ADMIN_TOKEN", TOKEN)
-    assert client.get(path).status_code == 403
-    assert client.get(path, headers={"X-Admin-Token": "wrong"}).status_code == 403
+    assert client.request(method, path).status_code == 403
+    assert client.request(method, path, headers={"X-Admin-Token": "wrong"}).status_code == 403
 
     monkeypatch.delenv("ADMIN_TOKEN")
     # 미설정이면 맞는 값을 보내도 열리지 않는다(fail-closed).
-    assert client.get(path, headers={"X-Admin-Token": TOKEN}).status_code == 403
+    assert client.request(method, path, headers={"X-Admin-Token": TOKEN}).status_code == 403
 
 
 @pytest.fixture

@@ -231,7 +231,8 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
 
   it("F-02 질문 화면의 제목은 하나이고 물음표로 끝나며, 강한 버튼은 많아야 하나다", async () => {
     stub();
-    for (const path of ["/start", "/startup-order", "/industry", "/rent-cap", "/validate"]) {
+    // 「/validate」(④ 작게 확인 · Q10)는 2026-11-22 Program 범위 축소로 뺐다
+    for (const path of ["/start", "/startup-order", "/industry", "/rent-cap"]) {
       window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", startupOrder: "industry", industryKey: "cafe", districtId: "seongsu" }));
       open(path);
       const { unmount } = render(<FlowApp token={null} />);
@@ -545,10 +546,12 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(within(premium).queryByText(/처음|매달|본전/)).toBeNull();
     expect(screen.getByText(/추정이에요 · 권리금 0원\(모름\) · 건물 전체 기준 · 비싸게 자료 부족/)).toBeTruthy();
     expect(screen.getByRole("radio", { name: /꼭 필요한 것만/ }).getAttribute("aria-checked")).toBe("true");
-    // 검증 계획은 화면이 보여 준 가격대를 이어받는다 — 골라 뒀던 「비싸게」(자료 부족)를 그대로 넘기면 계산하지 않은
-    // 가격대로 계획을 만든다(10-28 리뷰)
-    fireEvent.click(screen.getByRole("button", { name: "작게 먼저 확인하기" }));
+    // 다음 할 일은 입점 희망서다(2026-11-22 · 그전 「작게 먼저 확인하기」 → ④ 검증 계획). 답에는 화면이 보여 준 가격대를 남긴다 —
+    // 골라 뒀던 「비싸게」(자료 부족)를 그대로 두면 계산하지 않은 가격대가 답으로 남는다(10-28 리뷰)
+    expect(screen.queryByRole("button", { name: /작게 먼저/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "입점 희망서 쓰기" }));
     await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY) ?? "{}").tier).toBe("factory"));
+    expect(window.location.hash).toBe("#/brief");
   });
 
   it("F-10 ♡ 를 누르면 그때 로그인 시트가 뜨고, 로그인하면 누르려던 저장을 잇는다", async () => {
@@ -585,22 +588,27 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(api.matching(/\/founder\/costs$/)[0].body).toMatchObject({ budget: 80_000_000, deposit: 30_000_000, maintenance: null, other_monthly: 100_000 });
   });
 
-  it("F-12 검증 계획은 판단선을 먼저 보이고, 기본 예시면 그 사실을 띠로 말한다", async () => {
+  it("F-12 ④ 는 개업 후 Program 이다 — 옛 「작게 확인」 주소는 홈으로 가고, 홈의 ④ 는 지도 탐색 Program 을 그 상권으로 연다(2026-11-22)", async () => {
     const api = stub();
+    // 옛 답(④ 의 검증 방식·아이템·기간)이 남아 있어도 읽지 않는다
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu", mode: "soft_open", item: "말차 라떼", runDays: 7 }));
-    open("/test-budget");
-    const view = render(<FlowApp token={null} />);
-    await screen.findByRole("heading", { level: 1, name: "확인하는 데 얼마까지 쓸 수 있어요?" });
-    pick(/100~300만원/);
-    expect(await screen.findByRole("heading", { name: "검증 계획은 로그인하면 만들어요" })).toBeTruthy();
-    act(() => saveToken("tok"));
-    view.rerender(<FlowApp token="tok" />);
-    expect(await screen.findByRole("heading", { level: 1, name: "이 숫자가 안 나오면 다른 방법을 봐요" })).toBeTruthy();
-    expect(api.count(/\/marketing\/generate$/)).toBe(1);
-    expect(screen.getByText("AI 생성 대신 기본 예시를 보여 드려요.")).toBeTruthy();
-    const decision = screen.getByText("25명 아래면 다른 상권도 봐요");
-    const online = screen.getByText("손님 모으기 1");
-    expect(decision.compareDocumentPosition(online) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    for (const old of ["/validate", "/item", "/period", "/test-budget", "/plan"]) {
+      open(old);
+      const view = render(<FlowApp token={null} />);
+      await waitFor(() => expect(window.location.hash, old).toBe("#/home"));
+      view.unmount();
+    }
+    expect(api.count(/\/marketing\/generate$/)).toBe(0);                 // 검증 계획 생성을 부르지 않는다
+    open("/home");
+    render(<FlowApp token={null} />);
+    const steps = await screen.findByRole("list", { name: "네 단계" });
+    const program = within(steps).getByRole("button", { name: /개업 후/ });
+    expect(program.textContent).toContain("PROGRAM");
+    expect(program.textContent).toContain("열기");
+    expect(within(steps).queryByText(/작게 확인/)).toBeNull();
+    fireEvent.click(program);
+    expect(window.location.hash).toBe("#/explore?track=program&district=seongsu");
+    expect(JSON.parse(window.localStorage.getItem(FLOW_KEY) ?? "{}")).not.toHaveProperty("mode");
   });
 
   it("주소 다툼 — 모르는 흐름 주소만 홈으로 되감고, 흐름 밖 해시와 로그인 전 빈 해시(랜딩)는 App 에 맡긴다", async () => {
@@ -654,15 +662,14 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     await waitFor(() => expect(JSON.parse(window.localStorage.getItem(FLOW_KEY)!).spaceAt?.buildingId).toBe("B2"));
   });
 
-  it("홈 — 네 단계를 다 봤으면 주 버튼이 지도 탐색을 Page 트랙 · 고른 건물로 연다(10-24)", async () => {
+  it("홈 — 계약 전 세 단계를 다 봤으면 주 버튼이 지도 탐색을 Page 트랙 · 고른 건물로 연다(10-24 · 11-22 ④ 는 개업 후라 세지 않는다)", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
       spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", spaceAt: { buildingId: "B1", name: "B1 건물", lat: 37.52, lng: 127.02 },
       premium: { kind: "none" } }));
-    window.sessionStorage.setItem("placeos.flow.plan.v1", JSON.stringify({ brief: {}, plan: { mode: "popup" }, at: "2026-10-24" }));
     open("/home");
     render(<FlowApp token={null} />);
-    expect(await screen.findByRole("heading", { level: 1, name: "네 단계를 다 봤어요" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "계약 전 세 단계를 다 봤어요" })).toBeTruthy();
     expect(screen.getByText("카페·디저트 창업 준비")).toBeTruthy();   // 목적은 캡션으로 내려간다
     fireEvent.click(screen.getByRole("button", { name: "지도에서 내 자리 보기" }));
     expect(window.location.hash).toBe("#/explore?track=page&district=seongsu&building=B1");
@@ -672,13 +679,14 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
       spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층", premium: { kind: "none" } }));
-    window.sessionStorage.setItem("placeos.flow.plan.v1", JSON.stringify({ brief: {}, plan: { mode: "popup" }, at: "2026-10-24" }));
     open("/home");
     const view = render(<FlowApp token={null} />);
     fireEvent.click(await screen.findByRole("button", { name: "지도에서 이 상권 보기" }));
     expect(window.location.hash).toBe("#/explore?track=page&district=seongsu");
     view.unmount();
-    window.sessionStorage.clear();
+    // 비용(③)을 아직 안 봤다 — 계약 전 단계가 남았으니 「이어서」가 주인공이다
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu",
+      spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층" }));
     open("/home");
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "카페·디저트 창업 준비" })).toBeTruthy();

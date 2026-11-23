@@ -639,11 +639,13 @@ export function PivotNext() {
   const label = target?.label ?? "새 업종";
   return (
     <FlowScreen back="/industries" caption={`업종 바꾸기 · ${ro(label)}`} title={`${ro(label)} 바꾼다면, 무엇부터 해 볼까요?`}>
+      {/* 2026-11-22: 「작게 먼저 팔아 볼게요」(④ 작게 확인 · 팝업·가오픈 검증)를 뺐다 — Program 은 개업 후 계약한 자리의 네트워킹·오프라인
+          마케팅이다. 업종 바꾸기는 이미 계약한 지금 자리에서 다시 여는 일이라, 바꾼 뒤 알리기·이웃 잇기(Program)를 그 상권으로 연다. */}
       <ChoiceList label="먼저 할 일" value={null} options={[
-        { value: "validate", title: "작게 먼저 팔아 볼게요", desc: "팝업·가오픈·사전 예약으로 통하는지 확인해요" },
         { value: "spaces", title: "이 상권 빈 자리도 볼게요", desc: "옮겨서 하는 경우와 견줘 봐요" },
+        { value: "program", title: "바꾼 뒤 이웃과 잇고 알릴게요", desc: "지금 자리에서 새 업종으로 다시 열 때 — 네트워킹·오프라인 마케팅" },
       ]} onChoose={(v) => {
-        if (v === "validate") go("/validate");
+        if (v === "program") go(explorePath({ track: "program", district: state.homeDistrictId }));
         else { update((s) => setDistrict(s, s.homeDistrictId!)); go("/rent-cap"); }
       }} />
       <p className="fl-foot">지금 가게 자리로 본전을 계산하는 기능은 아직 없어요.</p>

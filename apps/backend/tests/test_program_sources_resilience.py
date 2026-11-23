@@ -21,7 +21,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services import program_network, program_sources, program_support
+from app.services import program_network, program_sources
 
 client = TestClient(app)
 SECRET = "sk-test-secret-key-value"
@@ -166,7 +166,7 @@ def test_bizinfo_reqerr_is_not_retried(keys, clock, monkeypatch):
         return {"reqErr": "등록되지 않은 IP 입니다."}
 
     monkeypatch.setattr(program_sources, "_fetch_json", reqerr)
-    got = program_sources.bizinfo("support", "서울")
+    got = program_sources.bizinfo("event", "서울")
     assert got.status == "error" and "등록되지 않은 IP" in got.note and len(calls) == 1
 
 
@@ -213,8 +213,6 @@ def _router(broken: str | None = None, exc_factory=None, barrier: threading.Barr
             raise exc_factory()
         if url == program_sources.KSTARTUP_URL:
             return KS_OK
-        if url == program_sources.GOV24_URL:
-            return {"data": [], "matchCount": 0}
         return {"jsonArray": []}
 
     return fake
@@ -223,18 +221,11 @@ def _router(broken: str | None = None, exc_factory=None, barrier: threading.Barr
 def test_truncated_body_is_source_error_not_500(keys, monkeypatch):
     monkeypatch.setattr(program_sources, "_RETRY_PAUSE_S", 0)
     monkeypatch.setattr(program_sources, "_fetch_json",
-                        _router(program_sources.BIZINFO_SUPPORT_URL, lambda: http.client.IncompleteRead(b"{")))
-    r = client.get("/api/v1/program/support", params={"district_id": "garosugil"})
+                        _router(program_sources.BIZINFO_EVENT_URL, lambda: http.client.IncompleteRead(b"{")))
+    r = client.get("/api/v1/program/network", params={"district_id": "garosugil"})
     assert r.status_code == 200, "11-08 까지는 IncompleteRead 를 못 잡아 화면 전체가 500 이었다"
     st = {s["id"]: s["status"] for s in r.json()["sources"]}
-    assert st == {"kstartup": "ok", "bizinfo": "error", "gov24": "ok"}
-
-
-def test_support_sources_are_fetched_concurrently(keys, monkeypatch):
-    monkeypatch.setattr(program_sources, "_fetch_json", _router(barrier=threading.Barrier(3, timeout=5)))
-    out = program_support.support_programs("garosugil", None)
-    assert [s["status"] for s in out["sources"]] == ["ok", "ok", "ok"]
-    assert [s["id"] for s in out["sources"]] == ["kstartup", "bizinfo", "gov24"], "상태 순서는 그대로다"
+    assert st == {"kstartup": "ok", "bizinfo_event": "error"}
 
 
 def test_network_sources_are_fetched_concurrently(keys, monkeypatch):

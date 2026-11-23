@@ -17,6 +17,7 @@ from app.models import feedback as _fb_models  # noqa: E402,F401  — 같은 이
 
 from app.models import visitor_feedback as _visitor_models  # noqa: E402,F401
 from app.models import campaign as _campaign_models  # noqa: E402,F401
+from app.models import direct as _direct_models  # noqa: E402,F401  — 직거래 연결 층(2026-11-18)
 
 config = context.config
 if config.config_file_name is not None:

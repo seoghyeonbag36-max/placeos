@@ -111,21 +111,40 @@ def _served_cities() -> frozenset[str] | None:
     return frozenset(SERVED_CITIES)
 
 
-def _batch_unserved(slug: str) -> bool:
-    """경기 3차 배치 중 **서빙 목록 밖**으로 정한 거점인가(`page_hubs.GYEONGGI_BATCH3_SERVED_HUBS`).
+# 「등록은 노출이 아니다」 — 배치마다 서빙으로 올릴 거점 목록이 따로 있고 `page_hubs.ACTIVE_HUBS` 가 그것으로 거른다.
+# (등록 배치, 그 배치의 서빙 목록, 보고서에 쓸 이름, 근거 문서). 새 배치에 같은 장치를 달면 여기에 한 줄 더한다 —
+# 안 그러면 의도적으로 뺀 거점이 「_is_measured 확인」 결손으로 보고된다(아래 `_batch_unserved`).
+_BATCH_GATES: tuple[tuple[str, str, str, str], ...] = (
+    ("GYEONGGI_BATCH3_HUBS", "GYEONGGI_BATCH3_SERVED_HUBS", "경기 3차", ""),
+    ("GJ_JJ_BATCH2_HUBS", "GJ_JJ_BATCH2_SERVED_HUBS", "광주·전주 2차",
+     "docs/decision-gwangju-jeonju-batch2-2026-11-09.md §5"),
+)
+
+
+def _batch_gate(slug: str) -> tuple[str, str, str] | None:
+    """이 거점이 **서빙 목록 밖**으로 정해진 배치에 속하면 (서빙 목록 이름, 보고 이름, 근거 문서). 아니면 None.
 
     도시 판단(`_served_cities`)·추후 확장 표기(`deferred`)와 같은 축의 **거점 단위** 판단이다. 2026-10-31 화성을 서빙
     도시로 넣자(병점역 1곳) 같은 도시의 봉담이 「Gold 가 섰는데 목록에 없다 — _is_measured 확인」으로 보고됐다. 서빙 도시의
-    다른 미서빙 3차 거점(ganeung·jeongja·skku …)도 그 전부터 그렇게 나왔다(리뷰). 못 읽으면 False — 판정하지 않는다.
-    `slug not in ACTIVE_HUBS` 로 쓰지 않는 이유: 배치 밖 거점의 진짜 결손까지 보류로 삼킨다.
+    다른 미서빙 3차 거점(ganeung·jeongja·skku …)도 그 전부터 그렇게 나왔다(리뷰). 2026-11-20 광주·전주 2차의 제외 6곳
+    (gj-sinyong · gj-usan-buk · jj-jungdong · jj-manseong · gj-imam · jj-deokjin2)도 같은 오보였다 — 2차는 이 장치가 없었다.
+    못 읽으면 None — 판정하지 않는다. `slug not in ACTIVE_HUBS` 로 쓰지 않는 이유: 배치 밖 거점의 진짜 결손까지 보류로 삼킨다.
     """
     try:
         from data.config import page_hubs as ph
     except Exception:
-        return False
-    batch = getattr(ph, "GYEONGGI_BATCH3_HUBS", None) or {}
-    served = getattr(ph, "GYEONGGI_BATCH3_SERVED_HUBS", None) or frozenset()
-    return slug in batch and slug not in served
+        return None
+    for batch_name, served_name, label, doc in _BATCH_GATES:
+        batch = getattr(ph, batch_name, None) or {}
+        served = getattr(ph, served_name, None) or frozenset()
+        if slug in batch and slug not in served:
+            return served_name, label, doc
+    return None
+
+
+def _batch_unserved(slug: str) -> bool:
+    """서빙 목록 밖으로 정한 배치 거점인가 — `_batch_gate` 의 불리언 형."""
+    return _batch_gate(slug) is not None
 
 
 def _city_of(hub) -> tuple[str, str]:
@@ -390,10 +409,15 @@ def stages(slug: str) -> list[dict]:
             add("서빙등재", PAUSED,
                 f"추후 확장 과제({deferred}) — 신규 확장에서 뺐다 (page_hubs.PageHub.deferred)"
                 + ("" if ready else " · Gold 도 아직 안 섰다"))
-        elif _batch_unserved(slug):
+        elif (gate := _batch_gate(slug)) is not None:
+            served_name, label, doc = gate
+            # 앵커 가드레일 밖이라 ready 가 아닌 거점에 「Gold 도 아직 안 섰다」를 달면 틀린 말이다(Gold 는 서 있다).
+            not_ready = ("" if ready else
+                         " · 앵커가 가드레일 밖이다 — 원인 규명 전" if prev.get("앵커") == BLOCKED
+                         else " · Gold 도 아직 안 섰다")
             add("서빙등재", PAUSED,
-                "경기 3차 서빙 목록(page_hubs.GYEONGGI_BATCH3_SERVED_HUBS) 밖 — 제품 판단으로 뺐다"
-                + ("" if ready else " · Gold 도 아직 안 섰다"))
+                f"{label} 서빙 목록(page_hubs.{served_name}) 밖 — 제품 판단으로 뺐다"
+                + (f" (사유: {doc})" if doc else "") + not_ready)
         else:
             add("서빙등재", TODO if ready else BLOCKED,
                 "거점 목록 미등재 (지도·API 목록에 안 뜬다)",
@@ -452,8 +476,9 @@ def main() -> int:
             head += "  막힘: " + ", ".join(r["blocked"])
         if r["serving_paused"]:
             kind = getattr(_hubs().get(r["slug"]), "deferred", "")
+            gate = _batch_gate(r["slug"])
             why = (f"추후 확장 과제({kind})" if kind else
-                   "경기 3차 서빙 목록 밖" if _batch_unserved(r["slug"]) else "서빙 대상 도시 아님")
+                   f"{gate[1]} 서빙 목록 밖" if gate else "서빙 대상 도시 아님")
             head += f"  보류: {why}" + ("" if incl else " (다음 한 수 없음)")
         print(head)
         for s in r["stages"]:

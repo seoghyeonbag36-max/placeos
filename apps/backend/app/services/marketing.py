@@ -1,71 +1,28 @@
-"""Program 생성 서비스 — 검증 프로그램(아이템 단위) → 상권 단위 콘텐츠.
+"""상권 단위 마케팅 서비스 — 상권 컨텍스트(Gold) · 행사 · 온라인 콘텐츠.
 
-## 2026-09-17 대상 재정의
+2026-11-22 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로 **검증 프로그램 생성**
+(`generate_program` · 검증 브리프 → 모객·연계·검증 지표 · LLM/규칙 스텁)과 그 입력 자료(자리 `program_site` · 브리프 `program_brief`)를 지웠다
+→ docs/decision-program-post-opening-2026-11-22.md. 남은 것:
 
-1) **검증 프로그램**: 예비창업자·검증하려는 기창업자가 낸 브리프(`ProgramBrief`)로
-   팝업스토어·가오픈·MVP·정식 개업 검증을 돌릴 온라인(모객)·오프라인(자리·연계)·**검증 지표(판정)**
-   한 벌을 만든다. **로그인한 호출**이고 LLM 키(settings.llm_api_key)가 있으면 Claude
-   실호출, 익명·실패·미설정 시 규칙 기반 스텁 폴백 (source 필드로 구분).
-
-   종전에는 **영업 중인 가게의 리뷰·사진·메뉴**가 입력이었다. 대상이 아직 그 자리에서
-   장사한 적 없는 사람으로 바뀌면서 그 입력은 성립하지 않는다 — 근거는 리뷰가 아니라
-   ①자리·②상권의 수치와 ③브리프의 가설이 맡는다(docs/feature-program.md §0-V).
-   vision(사진 분석)도 함께 빠졌다. 아직 찍을 가게가 없다.
-
-2) **상권 단위**: Platform 수집 정보(상권분석 시계열·감성·블로그 키워드) 기반 —
-   gold/program_content_context 를 검증 프로그램 생성의 컨텍스트로 결합하고,
-   GET /{district_id} 의 온라인 콘텐츠도 같은 Gold 로 생성한다(2026-08-01).
-   행사(events)는 서울열린데이터광장 문화행사 실데이터 — services/events.py 가 서빙한다.
+- **상권 컨텍스트**: Platform 수집 정보(상권분석 시계열·감성·블로그 키워드)를 담은 gold/program_content_context — 실행 카드의 빈 시간대(`context_rows` ·
+  `_gap_band`)와 `GET /marketing/{district_id}` 의 온라인 콘텐츠가 같은 Gold 를 쓴다.
+- **행사**: 서울열린데이터광장 문화행사·전국 행사 실데이터 — services/events.py 가 서빙하고 `get_district_events` 가 출처를 밝힌다(행사 연계 계획 · 지도 칩).
 
 윤리 기준: Humanistic Authority(균형·공생·공감) — 과장·허위·특정 자본 편중 금지.
 """
 from __future__ import annotations
 
 import csv
-import math
 import re
 import time
 from pathlib import Path
 
 from app.core.config import settings
 from app.data.seoul_pages import DISTRICTS_BY_ID
-from app.schemas.marketing import MODE_LABEL, STAGE_LABEL, LLMDistrictContents, LLMProgramPlan
+from app.schemas.marketing import LLMDistrictContents
 from app.services import districts as svc
-from app.services import events, ha_guard, program_brief, program_site
+from app.services import events, ha_guard
 
-# 규칙 기반 스텁이 검증 방식별로 무엇을 재는지 (LLM 폴백).
-# 셋을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다 — 팝업은 짧게 자리를 빌려
-# 유입을 보고, 가오픈은 실제 운영을 축소해 돌려 회전·객단가를 보고, MVP 는 점포 없이
-# 사전 수요만 본다. 같은 지표를 셋에 다 붙이면 셋 중 둘에서 잴 수 없는 값이 된다.
-_MODE_SIGNAL = {
-    "actual_open": ("월 손익·손익분기 달성", "POS 실매출과 임대료·인건비·재료비를 같은 기간으로 기록",
-                    "직접 입력한 비용 기준 손익분기 매출 이상(비용 미입력 시 목표 미설정)",
-                    "실매출이 손익분기 매출 미만이면 비용·가격·운영 조건을 재검토한다"),
-    # 2026-11-07 리뉴얼 — 팝업·가오픈·MVP 의 목표선을 **지어내지 않는다**. 예전 고정값(「일 60명」·「객단가
-    # 12,000원」·「전환율 8%」·「70%/4% 미만 기각」)은 그 자리의 본전과 무관한 숫자였다(KPI 규칙 1 — 임계값을
-    # 발명하지 않는다). 팝업·가오픈은 Posting 하루 손익분기 건수(브리프 break_even_daily)에서 끌어내고,
-    # 없으면 「목표선 미정 — 정하기 전에는 판정하지 않는다」로 둔다(_break_even_target).
-    "popup": ("하루 결제 건수", "결제 건수(POS·간편결제) 일별 기록 — 입장 카운터를 함께 둔다", None, None),
-    "soft_open": ("하루 결제 건수·객단가", "POS 영수증 건수·건당 금액과 시간대별 회전 기록", None, None),
-    "mvp": ("사전 예약·사전주문 전환율", "신청 폼 유입 대비 결제·예약 완료 비율",
-            "목표 전환율 — 시작 전에 정한다(이 화면은 값을 지어내지 않는다)",
-            "시작 전에 정한 목표선과 기각선으로 판정한다 — 기준을 정하기 전에는 판정하지 않는다"),
-}
-
-
-def _break_even_target(brief: dict) -> tuple[str, str]:
-    """팝업·가오픈의 (목표선, 기각 조건) — Posting 하루 손익분기에서만 숫자를 끌어낸다."""
-    n, r = brief.get("break_even_daily"), brief.get("reject_ratio")
-    if not n:
-        return ("목표선 미정 — Posting 세부 업종 계산(단가·영업일·비용)을 하면 하루 손익분기 건수가 목표선이 된다",
-                "목표선과 기각선을 시작 전에 정하기 전에는 판정하지 않는다(결과를 보고 기준을 맞추지 않기 위해)")
-    basis = f"Posting 손익분기 — {brief['break_even_basis']}" if brief.get("break_even_basis") else "Posting 손익분기"
-    goal = f"하루 결제 {int(n):,}건({basis})"
-    if r:
-        cut = math.ceil(int(n) * int(r) / 100)
-        return goal, (f"기간 하루 평균 결제가 {cut:,}건(목표선의 {int(r)}% — 시작 전에 고른 값) 미만이면 "
-                      "이 상권 가설을 기각한다")
-    return goal, "기각선 비율을 시작 전에 정한다(미정) — 정하기 전에는 판정하지 않는다"
 
 # 상권 컨텍스트 결합용 district_id → gold 슬러그 매핑.
 # 2026-08-01: 거점 id 와 gold 슬러그가 같은 54거점이 build_program13_context 로 모두
@@ -80,90 +37,6 @@ _DISTRICT_ALIAS: dict[str, str] = {
 _SLUG_RE = re.compile(r"^[a-z0-9-]{1,40}$")
 
 _GOLD_DIR = Path(__file__).resolve().parents[4] / "data" / "gold"
-
-_SYSTEM_PROMPT = """너는 PlaceOS의 Program(검증 프로그램 설계) 생성기다.
-
-사용자는 **아직 이 자리에서 이 아이템으로 장사해 본 적이 없는 사람**이다. 둘 중 하나다:
-- 예비창업자 — 아직 가게가 없고, 자기 아이템이 어느 상권에서 통할지 모른다.
-- 기창업자 — 사업은 하지만 이 상권·이 아이템은 안 해 봤고, 팝업스토어·가오픈·MVP·정식 개업 검증으로
-  통하는지 확인하려 한다.
-
-그래서 네가 만드는 것은 홍보안이 아니라 **검증 프로그램**이다. 목적은 매출이 아니라
-**"이 아이템이 이 상권에서 통하는가"를 정해진 기간 안에 판정할 수 있게 만드는 것**이다.
-
-검증 방식이 실제 창업(actual_open)이면 정식 임대·업종 사용 조건을 확인하고,
-개업 후 실매출·실비용으로 손익분기 달성과 운영을 검증한다. 단기 팝업으로 바꾸지 않는다.
-비용 입력이 없으면 손익분기 목표 금액을 정하지 말고 측정·입력 항목을 안내한다.
-방식 선택만으로 개업 완료·고객·후기·매출 실적이 확인된 것은 아니다.
-
-입력은 셋이다. 사실의 등급이 다르니 섞어 인용하지 말 것:
-- [자리] 공실 유닛의 건축물대장 사실(면적·층·직전 업종·건물 공실률) — 관측값
-- [상권 컨텍스트] Platform 수집 데이터(업종 분포·블로그 키워드·검색 트렌드·시간대별
-  유동/매출·행사) — 관측값
-- [검증 브리프] 창업자가 적은 아이템·가설·기간·예산·차별점 — **주장과 계획**이다.
-  차별점이 사실인지를 확인하려고 검증을 도는 것이므로, 사실로 단정해 쓰지 말 것.
-
-원칙 (Humanistic Authority — 균형·공생·공감):
-- **있지도 않은 경험을 근거로 삼지 않는다.** 단골·기존 고객·쌓인 방문 후기·입소문은
-  이 자리에 존재하지 않는다. 다만 재방문율·후기 수집을 **앞으로 측정할 지표**로 적는
-  것은 정상이다. 있다고 말하는 것과 재겠다고 말하는 것을 가른다.
-- **입력에 없는 금액을 쓰지 않는다.** 객단가·할인액·쿠폰액을 임의로 정하지 말 것 —
-  얼마를 쓸지·깎을지는 창업자가 정할 몫이다. 예산은 브리프에 적힌 구간에서만 끌어낸다.
-- 과장·허위·검증 불가한 최상급 표현 금지. 상권 공동 활성화(공생)를 해치는 제안
-  (이웃 가게 비방·출혈 경쟁 조장) 금지.
-- **기존 행사의 "인용"과 신규 행사의 "제안"을 가른다.** 둘은 성격이 다르다 —
-  인용은 사실 주장이고 제안은 계획이다. 섞으면 지어낸 행사가 사실처럼 나간다.
-  - `mode="cite"` — 컨텍스트에 실린 행사만. 이름·기간·거리를 **그대로** 인용한다.
-    컨텍스트에 없는 행사를 cite 로 적는 것은 거짓이다.
-    "확인된 예정 행사가 없다"·"연계를 제안하지 말 것"이 적혀 있으면 cite 를 쓰지 않는다.
-  - `mode="propose"` — **새로 열자고 제안**하는 공동 행사·연계. 아직 없는 것이므로 있는
-    것처럼 쓰지 말고 제안임이 드러나게 적는다. rationale 에 **빈 시간대의 격차 수치를
-    그대로 인용**해야 한다(예: "6~11시 유동 19.2 / 매출 10.7 = +8.5%p"). 수치 없이
-    제안하면 "상권 플리마켓 참여" 같은 어느 상권에나 해당하는 말이 된다.
-  - `mode="own"` — 행사가 아닌 **자체 접점**(팝업 부스 운영·입간판·시식·외부 사이니지).
-    협업 주체가 없어도 된다. 행사가 아닌 것을 propose 로 적지 말 것.
-- 특정 플랫폼·자본에 편중되지 않게 채널을 균형 있게 섞는다.
-- **검증 도구는 오늘 바로 쓸 수 있는 가장 가벼운 것으로 고른다.** 앱 출시·카드결제(PG) 연동·
-  알림톡/문자 발송·본인인증·회원가입 시스템을 새로 만들라고 제안하지 않는다 — 심사·계약·보안
-  부담이 커서 검증보다 준비가 길어진다. 대신 신청 폼·계좌이체(송금 QR)·사전 예약·오픈채팅·
-  이메일처럼 준비 없이 쓰는 도구로 수요부터 확인하게 한다. 그런 기능은 가설이 통한 뒤에 붙인다.
-- 각 제안에는 반드시 근거(rationale)를 명시한다. 근거는 자리·상권의 수치(면적·층·직전
-  업종·공실률·유동/매출 격차·업종 분포·검색 트렌드)와 브리프의 가설에서 끌어낸다.
-- ha_check 필드에 위 기준으로 자체 점검한 결과를 1~2문장으로 기술한다.
-
-## 세 출력은 성격이 다르다
-
-**online (모객, 2~3건)**: 창업자가 **혼자 실행**해 검증 기간에 사람을 오게 하는 활동.
-- 검증 기간이 짧다는 것을 전제로 쓴다. 몇 달에 걸쳐 쌓는 제안은 여기에 맞지 않는다.
-- `target` 목표 고객 세그먼트. 상권 수요신호의 연령·성별·시간대에서 끌어낸다.
-- `budget_share` 예산 **배분 비율(%)** 정수. **online 제안들의 합이 100 이 되게** 한다.
-  절대 금액을 쓰지 않는다 — 얼마를 쓸지는 창업자가 정할 몫이다.
-- `kpi` 이 채널 하나의 목표 지표(도달·저장·문의·방문 전환 등).
-
-**offline (자리·상권 연계, 2~3건)**: 창업자 혼자 할 수 없는 일이다. 팝업은 자리를
-빌려야 하고, 상권 행사의 57%가 공공·준공공 주최다. 그래서 "당신이 하세요"가 아니라
-**"누구와 무엇을 제안하세요"**로 쓴다.
-- `channel` 은 채널이 아니라 **형식**이다(팝업 부스·공동 프로모션·야외 매대·공동 배너).
-- `timing` 시기. 검증 기간 **안**이어야 하고, 상권이 비어 있는 시간대(유동이 매출을
-  앞서는 구간)를 우선한다. 3일짜리 검증에 "둘째 달부터"는 말이 안 된다.
-- `actors` 함께할 주체를 **구체적으로**(건물주·상인회·구청·인근 점포·문화재단).
-  공실을 짧게 빌리려면 건물주·관리인이 반드시 들어간다. 최소 1개.
-- `mode` 위 규칙대로 "cite" · "propose" · "own" 중 하나.
-- **offline 이 전부 own 이면 안 된다** — 최소 1건은 상권 주체와 함께하는 cite 또는 propose.
-
-**signals (검증 지표, 2~4건)**: 이 출력의 결론이다. 무엇을 세면 "통했다"고 할 것인가.
-- `name` 지표명 — 이 검증 방식으로 **실제로 잴 수 있는** 것만. 팝업에서 재구매율을
-  재겠다고 하면 기간 안에 잴 수 없다.
-- `method` 측정 방법을 구체적으로(입장 카운터·POS 영수증·신청 폼·설문 문항).
-- `target` 목표선. **숫자를 반드시 넣는다** — "많이 오면"은 지표가 아니다.
-- `decision` 가설을 **기각할** 조건. 검증을 시작하기 전에 적어야 한다. 이게 없으면
-  결과를 보고 나서 성공이었다고 말을 맞추게 된다.
-- 목표선의 숫자는 상권 컨텍스트의 유동·업종 분포에서 끌어내고, 그 출처를 method 나
-  target 에 밝힌다. 금액 목표를 적을 때는 브리프 예산 밖의 금액을 지어내지 않는다.
-- 브리프에 **Posting 하루 손익분기 건수**가 있으면 결제 건수 목표선은 그 값을 쓰고 출처를
-  「Posting 손익분기」로 밝힌다. 브리프에 기각선 비율이 있으면 그 비율로 기각 조건을 쓴다.
-
-한국어로 작성한다."""
 
 
 def _context_path(slug: str) -> Path:
@@ -475,223 +348,6 @@ def _trend_summary(name: str, points: list[tuple[str, float]]) -> str | None:
     change = (recent - prior) / prior
     label = "보합" if abs(change) < _TREND_FLAT_BAND else ("상승" if change > 0 else "하락")
     return f"{name} {label}({prior:.1f}→{recent:.1f}, {change * 100:+.1f}%)"
-
-
-def _site_context(brief: dict) -> str | None:
-    """입력 계약 ①층(자리) — `unit_id` 를 준 요청에만 붙는다 (services/program_site).
-
-    `unit_id` 가 없으면 None 이다. **거점만 주고 대표 유닛을 자동으로 끼워 넣지
-    않는다** — 창업자가 아직 자리를 고르지 않았는데 엉뚱한 공실의 면적·직전 업종이
-    섞이면, 생성물이 그 자리를 검증 무대의 사실인 양 인용한다.
-    """
-    if not brief.get("unit_id"):
-        return None
-    return program_site.site_context(brief.get("district_id"), brief["unit_id"])
-
-
-def program_model_for_org(org_id: str | None) -> str:
-    """이 조직의 검증 프로그램 생성에 쓸 모델 — 기본은 `settings.llm_model`.
-
-    `LLM_PREMIUM_MODEL` 과 `LLM_PREMIUM_ORG_IDS` 가 **둘 다** 있고 조직이 그 목록에 있을 때만
-    상위 모델을 준다(시연·파일럿 조직용 · 2026-11-15). 그 밖에는 전부 기본 모델이라, 설정을
-    비워 두면 동작이 바뀌지 않는다. id 는 하이픈이 섞인 표기도 저장 형식(hex 32자)으로 맞춘다
-    (`kpi_scope.env_excluded_ids` 와 같은 정규화).
-    """
-    premium = settings.llm_premium_model.strip()
-    if not premium or not org_id:
-        return settings.llm_model
-    allowed = {tok.replace("-", "").lower()
-               for tok in re.split(r"[,\s]+", settings.llm_premium_org_ids) if tok.strip()}
-    return premium if str(org_id).replace("-", "").lower() in allowed else settings.llm_model
-
-
-def _call_llm(brief: dict, district_ctx: str | None,
-              site_ctx: str | None = None,
-              brief_ctx: str | None = None,
-              model: str | None = None) -> LLMProgramPlan:
-    """Claude 실호출 — 검증 브리프 + 자리 + 상권 → 구조화 검증 프로그램.
-
-    세 층을 **따로** 싣는 이유는 사실의 등급이 다르기 때문이다: 상권층은 주변의 관측,
-    자리층은 이 자리의 대장 사실, 브리프는 창업자의 계획과 주장이다. 한 덩어리로
-    합치면 생성물이 근거를 뒤섞어 인용한다.
-
-    vision(사진) 입력은 없다 — 아직 찍을 가게가 없다(2026-09-17 대상 재정의).
-    """
-    import anthropic
-
-    mode = MODE_LABEL.get(str(brief.get("mode")), str(brief.get("mode") or ""))
-    stage = STAGE_LABEL.get(str(brief.get("stage")), str(brief.get("stage") or ""))
-    text = (
-        f"아이템: {brief['item']} (업종: {brief['category']})\n"
-        f"검증 방식: {mode} · 단계: {stage}\n"
-        f"자리 주소: {brief.get('address') or '(미정)'}"
-    )
-    if brief_ctx:
-        text += f"\n\n{brief_ctx}"
-    if site_ctx:
-        text += f"\n\n{site_ctx}"
-    if district_ctx:
-        text += f"\n\n[상권 컨텍스트 — Platform 수집 데이터]\n{district_ctx}"
-
-    client = anthropic.Anthropic(api_key=settings.llm_api_key)
-    response = client.messages.parse(
-        model=model or settings.llm_model,
-        max_tokens=8192,
-        thinking={"type": "adaptive"},
-        system=_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": text}],
-        output_format=LLMProgramPlan,
-    )
-    parsed = response.parsed_output
-    if parsed is None:
-        raise ValueError(f"LLM 구조화 출력 파싱 실패 (stop_reason={response.stop_reason})")
-    return parsed
-
-
-def generate_program(brief: dict, *, allow_llm: bool = False,
-                     model: str | None = None) -> dict:
-    """검증 프로그램(모객 · 자리·연계 · 검증 지표) 생성.
-
-    `allow_llm` 이 참이고 LLM 키(settings.llm_api_key)가 있으면 LLM 생성, 그 밖(익명 호출·
-    키 미설정·실패)에는 규칙 기반 스텁.
-
-    **`allow_llm` 의 기본값이 False 인 이유(2026-10-03).** 이 엔드포인트는 호출 1회가 곧
-    Sonnet 1회(max_tokens 8192 + thinking)인데 캐시가 없고, 분석 API 는 공개 데모라
-    익명을 통과시킨다 — 누구든 반복 호출로 크레딧을 태울 수 있었다. 그래서 신원이 확인된
-    호출(JWT·조직 API 키)에만 LLM 을 열고, 호출부가 이 인자를 빠뜨려도 **막히는 쪽**으로
-    떨어지게 했다. 열리는 자리는 `api/v1/marketing.py` 한 곳이다.
-
-    생성 직후 **HA 후처리 검증**(services/ha_guard.py)을 통과해야 응답이 된다.
-    `ha_check` 는 LLM 이 스스로 통과했다고 적은 문장이라 근거가 아니다 — 입력과 대조해
-    거짓이 확정되는 위반(지어낸 금액, 확정 트렌드 역행, 있지도 않은 경험 주장)이면
-    생성물을 버리고 스텁으로 내려간다. 경고 등급은 응답을 살리고 `ha_findings` 로 밝힌다.
-
-    반환: ProgramPlan 스키마 dict.
-    """
-    if allow_llm and settings.llm_api_key:
-        try:
-            ctx = _district_context(brief.get("district_id"))
-            site_ctx = _site_context(brief)
-            brief_ctx = program_brief.brief_context(brief)
-            # `model` 은 기본 모델과 다를 때만 넘긴다(`program_model_for_org`) — 없으면
-            # `_call_llm` 이 settings.llm_model 을 쓴다.
-            parsed = _call_llm(brief, ctx, site_ctx, brief_ctx,
-                               **({"model": model} if model else {}))
-            # HA 검증에도 **자리층을 넣는다.** 빼면 자리의 수치(면적·공실률·직전 업종)를
-            # 정상 인용한 문장이 근거 없는 주장으로 걸린다 — 행사 요금을 컨텍스트에
-            # 넣어야 했던 것(2026-08-06)과 같은 이유다.
-            findings = ha_guard.check_program(
-                parsed, brief, "\n".join(c for c in (ctx, site_ctx) if c) or None)
-            if ha_guard.has_violation(findings):
-                print(f"[marketing] HA 검증 위반 → 생성물 폐기: {ha_guard.summarize(findings)}")
-                return _rule_stub(brief, findings)
-            return {
-                **_identity(brief),
-                "online": [{**p.model_dump(), "kind": "online"} for p in parsed.online],
-                "offline": [{**p.model_dump(), "kind": "offline"} for p in parsed.offline],
-                "signals": [s.model_dump() for s in parsed.signals],
-                "ha_check": parsed.ha_check,
-                "source": "llm",
-                "ha_findings": [f.model_dump() for f in findings],
-            }
-        except Exception as exc:
-            print(f"[marketing] LLM 생성 실패 → 규칙 기반 폴백: {exc}")
-
-    return _rule_stub(brief)
-
-
-def _identity(brief: dict) -> dict:
-    """응답 머리의 네 칸 — 무엇을, 어떤 방식으로, 누가 검증하는가."""
-    return {
-        "item": brief["item"],
-        "category": brief["category"],
-        "mode": brief.get("mode") or "",
-        "stage": brief.get("stage") or "",
-    }
-
-
-def _claim_rationale(brief: dict) -> str | None:
-    """근거를 **창업자가 낸 차별점**에서 만든다 — 리뷰를 대신하는 원천이다.
-
-    주장이라는 것을 문장 안에 남긴다. 스텁이라도 관측값과 주장을 섞어 적지 않는다.
-    """
-    xs = brief.get("differentiators") or []
-    if not xs:
-        return None
-    return ("창업자가 제출한 차별점(" + " · ".join(str(x) for x in xs[:3])
-            + ") 기반 — 검증 대상인 주장이지 확인된 사실이 아니다")
-
-
-def _rule_stub(brief: dict, findings: list | None = None) -> dict:
-    """규칙 기반 스텁 (LLM 미설정/실패/**HA 위반 폐기** 폴백).
-
-    findings 를 받으면 그대로 실어 보낸다 — 스텁이 나온 이유가 "키가 없어서"인지
-    "생성물이 검증에 걸려서"인지 화면이 구분할 수 있어야 한다.
-
-    스텁도 **검증 프로그램의 모양**을 지킨다. 지표 없이 채널안만 내려보내면 화면이
-    "지표는 원래 없는 것"으로 읽고, 이 트랙이 홍보 생성기로 되돌아간다.
-    """
-    mode = str(brief.get("mode") or "popup")
-    mode_label = MODE_LABEL.get(mode, mode)
-    window = program_brief.run_window(brief)
-    period = (f"{window[0].isoformat()}~{window[1].isoformat()}" if window
-              else f"{mode_label} 기간")
-    target = brief.get("target_customer") or "상권 주 이용 연령대"
-
-    online = [
-        {"channel": "인스타그램", "kind": "online",
-         "content": f"{mode_label} 예고 — '{brief['item']}'의 준비 과정과 운영 일정을 "
-                    "릴스로 주 2회 올리고, 마지막 게시물에 위치·기간을 고정한다",
-         "rationale": (_claim_rationale(brief)
-                       or "아직 이 자리에서의 실적이 없다 — 준비 과정 자체를 소재로 삼는다"),
-         "target": target, "budget_share": 60, "kpi": "저장 수·프로필 방문"},
-        {"channel": "네이버 블로그·플레이스", "kind": "online",
-         "content": f"'{brief['category']}' 지역 키워드로 {mode_label} 일정 안내 글을 올리고 "
-                    "지도 검색 동선을 연다",
-         "rationale": "네이버 지도 유입 동선(검색→플레이스) 확보 — 검증 기간이 짧아 "
-                      "검색으로 들어오는 사람을 놓치면 표본이 줄어든다",
-         "target": "지역 검색 유입", "budget_share": 40, "kpi": "검색 노출·클릭"},
-    ]
-    # 오프라인은 혼자 할 수 없으므로 **협업 주체(actors)가 비면 안 된다** — 스텁이라도
-    # "당신이 알아서 하세요"로 내려보내지 않는다. 공실을 짧게 빌리는 일이라 건물주가
-    # 첫 주체다. 스텁은 실제 행사를 모르므로 mode 는 "propose"·"own" 만 쓴다
-    # (cite 는 컨텍스트에 실린 행사에만 쓴다).
-    offline = [
-        {"channel": "단기 임대 협의", "kind": "offline",
-         "content": f"건물주·관리인에게 {mode_label} 단기 사용을 제안한다 — 기간·원상복구·"
-                    "간판 노출 범위를 먼저 문서로 맞춘다",
-         "rationale": "공실을 짧게 빌리는 일이라 소유자 동의 없이는 시작 자체가 안 된다",
-         "timing": period, "actors": ["건물주", "건물 관리인"], "mode": "propose"},
-        {"channel": "자리 앞 접점", "kind": "offline",
-         "content": "입간판·시식(체험)으로 보행 유동을 안으로 들인다",
-         "rationale": "보행 유동 전환 — 과장 없는 실체 기반 소구",
-         "timing": "보행 유동이 많은 시간대", "actors": ["인근 점포"], "mode": "own"},
-    ]
-    if mode == "actual_open":
-        offline[0].update(
-            channel="정식 개업·임대 조건 확인",
-            content="건물주·관리인과 정식 임대 조건, 업종 사용 가능 여부, 시설·간판 범위를 확인한다",
-            rationale="정식 영업을 위한 자리 사용 조건을 사전에 확인한다",
-        )
-    name, method, goal, decision = _MODE_SIGNAL.get(mode, _MODE_SIGNAL["popup"])
-    if mode in ("popup", "soft_open"):
-        goal, decision = _break_even_target(brief)
-    signals = [
-        {"name": name, "method": method, "target": goal, "decision": decision},
-        {"name": "가설 확인 응답", "method": "현장 설문 1문항 — 브리프의 가설을 그대로 묻는다",
-         # 응답 수·긍정 비율도 지어내지 않는다(예전 「응답 50건」·「절반 미만」 — 11-08 같은 원칙으로 걷어냄)
-         "target": "응답 수와 긍정 비율 — 시작 전에 정한다(이 화면은 값을 지어내지 않는다)",
-         "decision": "시작 전에 정한 긍정 비율에 못 미치면 가설을 다시 세운다 — 기준을 정하기 전에는 판정하지 않는다"},
-    ]
-    return {
-        **_identity(brief),
-        "online": online,
-        "offline": offline,
-        "signals": signals,
-        "ha_check": "균형·공생·공감 기준 자체 점검 통과 (규칙 기반 스텁)",
-        "source": "rule-stub",
-        "ha_findings": [f.model_dump() for f in (findings or [])],
-    }
 
 
 _DISTRICT_SYSTEM_PROMPT = """너는 PlaceOS의 Program(상권 단위 마케팅) 온라인 콘텐츠 생성기다.

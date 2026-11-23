@@ -27,7 +27,7 @@ it("Page에서 고른 층의 원천 면적을 계산과 Program에 사용하고 
   expect(api.matching(/simulate-revenue$/)[0].body).toMatchObject({ unit_id: "vfu-test" });
   expect(screen.queryByPlaceholderText("계약서·도면으로 확인한 면적")).toBeNull();
   expect(api.matching(/simulate-revenue$/)[0].body).not.toHaveProperty("area_py_override");
-  fireEvent.click(screen.getByRole("button", { name: /검증 program 만들기/ }));
+  fireEvent.click(screen.getByRole("button", { name: /이 자리로 개업 후 Program 열기/ }));   // 2026-11-22 · 그전 「검증 program 만들기」
   await waitFor(() => expect(makeProgram).toHaveBeenCalledTimes(1));
   expect(makeProgram.mock.calls[0][0]).toMatchObject({ unitId: "vfu-test", floor: "3F", area: 20,
     calculation: { result: { unit_id: "vfu-test" } } });

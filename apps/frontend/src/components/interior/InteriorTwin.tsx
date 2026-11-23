@@ -8,7 +8,7 @@ import InteriorEditor from "./InteriorEditor";
 export default function InteriorTwin({ buildingId, unitId, districtId, floorLabel, keywords, industry, strategy, onSummary }: {
   buildingId?: string | null; unitId?: string | null; districtId?: string | null; floorLabel?: string | null;
   keywords: readonly string[]; industry?: string | null; strategy?: InteriorStrategy | null;
-  /** 배치 요약(좌석 · 집기) — 리포트 · 저장에 싣는다 */
+  /** 배치 요약(좌석 · 집기) — 저장에 싣는다 */
   onSummary?: (lines: string[]) => void;
 }) {
   const id = buildingId ?? unitId ?? null;

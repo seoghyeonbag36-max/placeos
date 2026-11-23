@@ -88,6 +88,9 @@ def test_merge_dedups_and_prefers_seoul_then_sorts_by_distance(gold):
 
 
 def test_outside_seoul_hub_gets_public_source_when_national_covers(gold, monkeypatch):
+    # 기준일을 고정한다 — get_district_events 는 실제 오늘(KST)을 쓰므로, 고정하지 않으면 아래 행사가 끝난 11-21 부터
+    # 「끝난 행사」로 빠져 이 테스트가 날짜에 따라 깨졌다(2026-11-21~ CI·로컬 실패 · 다른 테스트들은 이미 TODAY 를 넘긴다).
+    monkeypatch.setattr(events, "today_kst", lambda: TODAY)
     hub = "suwonst"
     gold(seoul={"as_of": "2026-10-11", "districts": {}},
          national={"as_of": "2026-11-07", "sources": [{"id": "culture-portal"}],

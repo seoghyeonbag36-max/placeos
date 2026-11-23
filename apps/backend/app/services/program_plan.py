@@ -1,7 +1,9 @@
-"""[Program] 오프라인 마케팅 솔루션 — 실행 카드(2026-11-07 리뉴얼).
+"""[Program] 오프라인 마케팅 솔루션 — 실행 카드(2026-11-07 리뉴얼 · 2026-11-22 개업 뒤로 좁힘).
 
-묻는 질문: 「이 상권의 콘텐츠·온라인 데이터로 볼 때, 검증·개업 기간에 언제·어디서·누구와·무엇을 하면 실행할 수 있나?」
-대상은 팝업·가오픈·개업 첫 회차다(결정 D2 (a)) — 영업 중 가게의 일반 마케팅은 09-17 결정대로 범위 밖이다.
+묻는 질문: 「계약을 맺고 개업한 자리에서, 이 상권의 콘텐츠·온라인 데이터로 볼 때 언제·어디서·누구와·무엇을 하면 알릴 수 있나?」
+2026-11-22 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 — 화면은 **actual_open(개업 뒤)** 만 부른다
+(기본값도 actual_open). popup·soft_open·mvp(계약 전 검증)는 Program 에서 제외됐고, 이 API 의 값으로만 남아 옛 호출이 깨지지 않는다
+→ docs/decision-program-post-opening-2026-11-22.md. (그전 결정 D2 (a) 는 팝업·가오픈·개업 첫 회차가 대상이었다.)
 
 카드는 **규칙으로** 만든다(LLM 없음 · 로그인 불필요). 근거가 있는 카드만 낸다:
   event     걸어갈 거리(marketing._WALKABLE_M) 안의, 오늘 기준 끝나지 않은 공공 행사 — 가까운 순 최대 3장
@@ -9,8 +11,8 @@
   neighbor  함께 모이는 업종(관측 lift — 도시 범위) 상위 둘과 교차 쿠폰
   own       매장 자체 접점 — 항상(근거가 없는 거점에서도 할 수 있는 일)
 
-**지어내지 않는 것**: 예산 금액(비율도 — 창업자가 정한다) · 예상 유입·매출 · 주최의 참여 의사.
-카드마다 「무엇으로 잴지」(measure)를 붙여 가설 검증 판정표로 넘긴다.
+**지어내지 않는 것**: 예산 금액(비율도 — 가게가 정한다) · 예상 유입·매출 · 주최의 참여 의사.
+카드마다 「무엇으로 잴지」(measure)를 붙여 같은 탭의 실행 기록(캠페인 원장)에 적게 한다(그전에는 가설 검증 판정표로 넘겼다 — 11-22 제외).
 """
 from __future__ import annotations
 
@@ -64,11 +66,12 @@ def _time_card(rows: list[tuple[str, str, float]], band: str) -> dict:
     }
 
 
-def _neighbor_card(top: list[dict]) -> dict:
+def _neighbor_card(top: list[dict], mode: str) -> dict:
     names = " · ".join(f"{t['label']}(lift {t['lift']})" for t in top)
     return {
         "kind": "neighbor", "title": f"{' · '.join(t['label'] for t in top)} 이웃과 교차 쿠폰",
-        "when": "검증·개업 기간", "where": "같은 거점 안 이웃 가게(네트워킹 탭의 이웃 가게 지도)",
+        "when": "개업 뒤" if mode == "actual_open" else "검증·개업 기간",
+        "where": "같은 거점 안 이웃 가게(네트워킹 탭의 이웃 가게 지도)",
         "who": f"함께 모이는 업종: {names} — 직접 찾아가 제안",
         "what": "서로의 영수증·쿠폰을 상대 가게에서 쓰게 한다 — 조건은 두 가게가 함께 정한다",
         "measure": "가게별 쿠폰 코드 회수 건수",
@@ -79,6 +82,17 @@ def _neighbor_card(top: list[dict]) -> dict:
 
 
 def _own_card(mode: str, has_events: bool) -> dict:
+    basis = [{"label": "근거", "value": "근거 없이도 할 수 있는 기본 접점" if not has_events
+              else "행사 연계와 함께 쓰는 기본 접점"}]
+    if mode == "actual_open":
+        # 개업 뒤(2026-11-22 Program 의 유일한 대상) — 예약을 받는 것이 아니라 지나가는 사람을 첫 방문·다시 방문으로 잇는다
+        return {
+            "kind": "own", "title": "자리 앞 접점 — QR 첫 방문 쿠폰·소식 알림",
+            "when": "개업 뒤", "where": "자리 앞 · 창문", "who": "단독 실행",
+            "what": "입간판·창문 사인에 QR 을 달아 첫 방문 쿠폰과 새 소식 알림 신청을 받는다",
+            "measure": "QR 스캔 수 → 쿠폰 사용·다시 방문 건수",
+            "basis": basis, "caveat": _SIGNAGE_CAVEAT, "link": None,
+        }
     mvp = mode == "mvp"
     return {
         "kind": "own", "title": "자리 앞 접점 — QR 사전 예약" if not mvp else "매대·온라인 사전주문 접점",
@@ -87,14 +101,13 @@ def _own_card(mode: str, has_events: bool) -> dict:
         "what": ("입간판·창문 사인에 QR 을 달아 사전 예약·알림 신청을 받는다" if not mvp else
                  "매대·사전주문 페이지 QR 로 예약을 받고, 결제까지 이어지는지 본다"),
         "measure": "QR 스캔 수 → 예약·결제 전환 건수",
-        "basis": [{"label": "근거", "value": "근거 없이도 할 수 있는 기본 접점" if not has_events
-                   else "행사 연계와 함께 쓰는 기본 접점"}],
+        "basis": basis,
         "caveat": _SIGNAGE_CAVEAT,
         "link": None,
     }
 
 
-def plan(district_id: str, industry_key: str | None = None, mode: str = "popup",
+def plan(district_id: str, industry_key: str | None = None, mode: str = "actual_open",
          *, today: date | None = None) -> dict | None:
     if region_of(district_id) is None:
         return None
@@ -121,7 +134,7 @@ def plan(district_id: str, industry_key: str | None = None, mode: str = "popup",
 
     top = nearby_stores.colocated_top(district_id, industry_key)[:2] if industry_key else []
     if top:
-        cards.append(_neighbor_card(top))
+        cards.append(_neighbor_card(top, mode))
     elif industry_key:
         notes.append("이 도시 범위에서는 이 업종과 함께 모이는 업종을 잴 표본이 부족해요.")
 
@@ -130,6 +143,6 @@ def plan(district_id: str, industry_key: str | None = None, mode: str = "popup",
         "district_id": district_id, "mode": mode, "cards": cards,
         "events_source": events_source,
         "notes": notes,
-        "note": ("근거가 있는 카드만 냈어요. 예산과 목표치는 창업자가 정합니다 — 예상 유입·매출은 내지 않아요. "
-                 "카드의 「측정」은 가설 검증 판정표로 옮겨 시작 전에 고정하세요."),
+        "note": ("근거가 있는 카드만 냈어요. 예산과 목표치는 가게가 정합니다 — 예상 유입·매출은 내지 않아요. "
+                 "카드의 「측정」은 아래 실행 기록에 적어 회차마다 같은 방법으로 재세요."),
     }

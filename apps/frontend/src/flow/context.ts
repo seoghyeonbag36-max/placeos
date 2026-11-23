@@ -1,7 +1,7 @@
 /**
  * 흐름 화면들이 함께 쓰는 것 — 답(FlowState) · 로그인 토큰 · 로그인 요구 · 토스트.
  *
- * 로그인은 **저장·AI 생성에서만** 묻는다(화면설계서 5판 C5). 화면은 `requireLogin(이유, 할 일)` 을
+ * 로그인은 **저장에서만** 묻는다(화면설계서 5판 C5 · AI 검증 계획 생성은 2026-11-22 Program 범위 축소로 뺐다). 화면은 `requireLogin(이유, 할 일)` 을
  * 부르고, 로그인돼 있으면 바로 할 일을 하고, 아니면 로그인 시트를 띄운 뒤 로그인하는 순간 이어서 한다.
  * 네이버·카카오는 페이지를 떠났다 돌아오므로 할 일의 이름을 탭 저장소에 남겨 두고(`rememberResume`),
  * 돌아온 화면이 `useResume` 로 이어받는다.
@@ -11,11 +11,11 @@ import type { SavedResult, SavedResultKind } from "@/lib/api";
 import type { SpaceItem } from "./spaces";
 import type { FlowState } from "./state";
 
-/** 로그인 시트 문구를 가르는 이유 */
-export type LoginReason = "save" | "plan" | "login";
+/** 로그인 시트 문구를 가르는 이유 — 「plan」(검증 계획 만들기)은 2026-11-22 에 ④ 작게 확인과 함께 뺐다 */
+export type LoginReason = "save" | "login";
 
 /** 페이지를 떠났다 돌아와도 이어서 할 일 */
-export type ResumeKind = "save-space" | "save-payback" | "save-budget" | "save-plan" | "make-plan";
+export type ResumeKind = "save-space" | "save-payback" | "save-budget";
 
 export interface FlowCtx {
   state: FlowState;
@@ -88,10 +88,10 @@ export function useResume(kind: ResumeKind, ready: boolean, run: (token: string)
 
 /* ── 로그인 시트 문구 — 얻는 것 세 줄(Baymard 혜택 3~5개 · 토스 가입 실험: 「왜」를 설명한 안만 완료율이 올랐다) ── */
 
+// 2026-11-22: 셋째 줄이 「AI 가 검증 계획을 만들어 줘요」였다 — 그 기능(④ 작게 확인)을 뺐으므로 실제로 로그인이 여는 것(입점 희망서 · 건물주와 주고받는 문의)으로 바꿨다.
 export const LOGIN_BENEFITS: Record<LoginReason, { title: string; lines: string[] }> = {
-  save: { title: "저장하려면 로그인해요", lines: ["고른 자리와 계산을 다른 기기에서도 봐요", "후보를 모아 나란히 견줘요", "AI 가 검증 계획을 만들어 줘요"] },
-  plan: { title: "검증 계획은 로그인하면 만들어요", lines: ["AI 가 상권 자료로 모객·연계 방법을 골라요", "이만큼 안 나오면 접을 판단선을 함께 세워요", "만든 계획을 저장해 두고 다시 봐요"] },
-  login: { title: "로그인", lines: ["고른 자리와 계산을 저장해요", "다른 기기에서 이어서 봐요", "AI 가 검증 계획을 만들어 줘요"] },
+  save: { title: "저장하려면 로그인해요", lines: ["고른 자리와 계산을 다른 기기에서도 봐요", "후보를 모아 나란히 견줘요", "입점 희망서를 쓰고 건물주와 문의를 주고받아요"] },
+  login: { title: "로그인", lines: ["고른 자리와 계산을 저장해요", "다른 기기에서 이어서 봐요", "입점 희망서를 쓰고 건물주와 문의를 주고받아요"] },
 };
 
 export const loginTitle = (r: LoginReason) => LOGIN_BENEFITS[r].title;

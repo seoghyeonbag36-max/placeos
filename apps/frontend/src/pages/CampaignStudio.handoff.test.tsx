@@ -1,48 +1,51 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+/** Program 실행 기록이 Posting 결과를 이어받는다(2026-11-22).
+ *  Program 은 「계약을 맺고 개업한 자리」의 네트워킹·오프라인 마케팅이라, 개업한 그 자리(Posting 에서 따진 자리)의 업종이 실행 기록의
+ *  운영 여건 칸으로 넘어온다. 그전 이 파일은 저장한 Posting 으로 「가설 설정」을 여는 흐름을 봤다 — 가설 설정은 Program 에서 제외됐다. */
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import CampaignStudio from "./CampaignStudio";
-import PpppReportProvider from "@/components/PpppReportProvider";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import WorkspaceRecordsProvider from "@/components/WorkspaceRecordsProvider";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import { saveToken, clearToken } from "@/lib/session";
 import { installFetchStub } from "@/test/fetchStub";
-import { district, simulateResult } from "@/test/fixtures";
 import type { ProgramHandoff } from "@/lib/workspaceState";
 
-// 테스트 전용 합성값. 실제 화면은 저장 결과와 각 단계의 출처 정보를 사용한다.
-const handoff: ProgramHandoff = { districtId: "garosugil", unitId: "saved-u1", unitName: "저장한 후보 자리",
-  area: 24, floor: "2F", rent: 180, lat: 37.5, lng: 127, industry: "한식", strategy: null,
-  inputsSource: { area: "seed", rent: "rone" } };
-function PriorSteps() {
-  useReportCapture("platform", { districtId: "garosugil", districtName: "검토 상권", industry: "한식",
-    archetype: "검토 유형", archetypeRule: null, source: "test-seed", recommendations: [], recommendationSource: null, candidates: [] });
-  useReportCapture("page", { districtId: "garosugil", buildingId: "b1", name: "검토 건물", address: "검토 주소",
-    status: "공실의심", capacity: 3, active: 1, floors: 2, candidates: [] });
+// 테스트 전용 합성값
+const posting: ProgramHandoff = { districtId: "garosugil", unitId: "u1", unitName: "합성 자리",
+  area: 24, floor: "2F", rent: 180, lat: 37.5, lng: 127, industry: "한식", strategy: null };
+function PostingStep({ data }: { data: ProgramHandoff }) {
+  useRecordCapture("posting", data);
   return null;
 }
 afterEach(clearToken);
 
-it("계정에 저장한 Posting을 Program에서 열어 앞선 근거와 함께 가설을 쓰고 탭 왕복에도 유지한다", async () => {
+const stubs = () => installFetchStub([
+  { match: /\/program\/campaigns$/, body: [] },
+  { match: /\/program\/network\?/, body: { district_id: "garosugil", region: { sido: "서울특별시", label: "서울특별시 강남구" },
+    events: [], total_events: 0, sources: [], complements: [], complements_note: null, questions: [], directory: [], note: "" } },
+  { match: /\/program\/plan\?/, body: { district_id: "garosugil", mode: "actual_open", cards: [], events_source: "none", notes: [], note: "" } },
+  { match: /\/marketing\/events\?/, body: { district_id: "garosugil", events_source: "none", events_note: null, events: [] } },
+]);
+
+it("보관소의 Posting 결과로 실행 기록의 업종을 채우고, 확인된 주소가 없으면 실제 영업 주소는 비운다", async () => {
   saveToken("test-token");
-  installFetchStub([
-    { match: /\/commercial-districts$/, body: [district("garosugil")] },
-    { match: /\/auth\/results$/, body: [{ id: "saved-1", kind: "posting", title: "저장 비용", districtId: "garosugil", createdAt: "2026-11-10",
-      payload: { handoff, input: { district_id: "garosugil", unit_id: "saved-u1" }, result: simulateResult("garosugil", "saved-u1") } }] },
-    { match: /\/program\/support\?/, body: { items: [], sources: [], region: { label: "서울" } } },
-  ]);
-  const tree = (visible: boolean) => <PpppReportProvider districtId="garosugil"><PriorSteps />
-    {visible && <CampaignStudio mapDistrictId="garosugil" />}</PpppReportProvider>;
-  const view = render(tree(true));
-  const postingList = (await screen.findByText("저장 비용")).closest("section")!;
-  fireEvent.click(await within(postingList).findByRole("button", { name: "보기" }));
-  fireEvent.click(screen.getByRole("button", { name: "이 저장 내용으로 가설 설정" }));
-  const evidence = await screen.findByRole("region", { name: "가설 설정의 근거" });
-  expect(evidence.textContent).toContain("검토 상권");
-  expect(evidence.textContent).toContain("검토 건물");
-  expect(evidence.textContent).toContain("저장한 후보 자리");
-  expect(evidence.textContent).toContain("rone");
-  fireEvent.change(screen.getByRole("textbox", { name: "검증 가설" }), { target: { value: "직접 작성한 아이템 수요 가설" } });
-  view.rerender(tree(false));
-  view.rerender(tree(true));
-  await waitFor(() => expect((screen.getByRole("textbox", { name: "검증 가설" }) as HTMLTextAreaElement).value).toBe("직접 작성한 아이템 수요 가설"));
-  expect(screen.getByRole("region", { name: "가설 설정의 근거" }).textContent).toContain("저장한 후보 자리");
+  const api = stubs();
+  render(<WorkspaceRecordsProvider districtId="garosugil"><PostingStep data={posting} />
+    <CampaignStudio mapDistrictId="garosugil" /></WorkspaceRecordsProvider>);
+  // 바로 열면 네트워킹부터 — 실행 기록은 오프라인 마케팅 솔루션 탭에 있다
+  fireEvent.click(within(screen.getByRole("navigation", { name: "Program 기능" })).getByRole("button", { name: "오프라인 마케팅 솔루션" }));
+  await screen.findByRole("form", { name: "운영 여건 입력" });
+  expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("한식");
+  expect((screen.getByRole("textbox", { name: "실제 영업 주소 *" }) as HTMLInputElement).value).toBe("");
+  expect(api.count(/\/program\/support/)).toBe(0);                 // 지원 공고는 Program 에서 제외됐다
+});
+
+it("다른 상권의 Posting 결과는 이어받지 않는다", async () => {
+  saveToken("test-token");
+  stubs();
+  render(<WorkspaceRecordsProvider districtId="garosugil"><PostingStep data={{ ...posting, districtId: "yeonnam" }} />
+    <CampaignStudio mapDistrictId="garosugil" defaultCategory="카페" /></WorkspaceRecordsProvider>);
+  fireEvent.click(within(screen.getByRole("navigation", { name: "Program 기능" })).getByRole("button", { name: "오프라인 마케팅 솔루션" }));
+  await screen.findByRole("form", { name: "운영 여건 입력" });
+  expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("카페");   // 내 사업 업종 그대로
 });

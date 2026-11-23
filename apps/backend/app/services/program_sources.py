@@ -1,6 +1,7 @@
-"""[Program] 공고·행사 원천 클라이언트 — K-Startup · 정부24 혜택 · 기업마당(지원사업정보·행사정보).
+"""[Program] 공고·행사 원천 클라이언트 — K-Startup · 기업마당(행사정보).
 
-2026-11-07 Program 리뉴얼의 「지원 프로그램」·「네트워킹」이 쓴다.
+2026-11-07 Program 리뉴얼의 「네트워킹」이 쓴다. 2026-11-22 「지원 프로그램」을 Program 에서 지우면서 그 전용이던 정부24 혜택 원천을 걷었다
+(→ docs/decision-program-post-opening-2026-11-22.md).
 
 **왜 서버에서 부르나.** 공고는 매일 바뀌고 「모집 중」이 핵심인데, 이 저장소는 스케줄러가 돌지 않아
 (Airflow DAG 은 골격뿐) Gold 스냅샷이 금방 낡는다. 그래서 요청 때 부르고 프로세스 메모리에 캐시한다 —
@@ -50,8 +51,6 @@ KSTARTUP_URL = "https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnoun
 # 응답의 detl_pg_url 은 공고 번호 없는 목록 주소다. 아래 형식은 2026-11-07 에 실제 번호(179744)로 열어
 # 그 공고 제목이 있는 것을, 없는 번호(1)로는 제목이 없는 것을 확인했다(docs/renewal-program-2026-11-07.md).
 KSTARTUP_DETAIL = "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn={sn}"
-# 행정안전부 대한민국 공공서비스(혜택)(data.go.kr 15113968) — 같은 공용 키.
-GOV24_URL = "https://api.odcloud.kr/api/gov24/v3/serviceList"
 # 기업마당 — API 가 둘이고 키도 따로 나온다(공식 명세 apiDetail.do?id=bizinfoApi · id=bizinfoEventApi).
 BIZINFO_SUPPORT_URL = "https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do"
 BIZINFO_EVENT_URL = "https://www.bizinfo.go.kr/uss/rss/bizinfoEventApi.do"
@@ -73,7 +72,6 @@ _MAX_PAGES = 10
 
 SOURCE_LABEL = {
     "kstartup": "K-Startup",
-    "gov24": "정부24 혜택",
     "bizinfo": "기업마당",
     "bizinfo_event": "기업마당 행사정보",
 }
@@ -221,29 +219,6 @@ def kstartup_open() -> Fetched:
         return Fetched("ok", rows, _now_iso())
 
     return _cached("kstartup", load)
-
-
-# ── 정부24 공공서비스(혜택) ──────────────────────────────────────────────────
-def gov24_smallbiz() -> Fetched:
-    """사용자구분에 「소상공인」이 든 혜택 전부. 11-07 실측 369건(전체 10,942건 중)."""
-    key = settings.data_go_kr_service_key
-    if not key:
-        return Fetched("no_key", note=NO_KEY_NOTE)   # DATA_GO_KR_SERVICE_KEY
-
-    def load() -> Fetched:
-        started = time.monotonic()
-        rows: list[dict] = []
-        for page in range(1, _MAX_PAGES + 1):
-            j = _get(GOV24_URL, {"serviceKey": key, "page": page, "perPage": 1000,
-                                 "returnType": "JSON", "cond[사용자구분::LIKE]": "소상공인"}, started)
-            data = j.get("data") or []
-            rows += data
-            total = int(j.get("matchCount") or j.get("totalCount") or 0)
-            if not data or len(rows) >= total:
-                break
-        return Fetched("ok", rows, _now_iso())
-
-    return _cached("gov24", load)
 
 
 # ── 기업마당 ───────────────────────────────────────────────────────────────

@@ -35,12 +35,6 @@ def ks(sn, title, regin="서울", enyy="예비창업자,1년미만", clsfc="사�
             "rcrt_prgs_yn": "Y", **kw}
 
 
-def gov(sid, name, typ, org, text="", field="고용·창업"):
-    return {"서비스ID": sid, "서비스명": name, "소관기관유형": typ, "소관기관명": org, "지원대상": text,
-            "서비스분야": field, "신청기한": "상시신청", "상세조회URL": f"https://plus.gov.kr/x?svcId={sid}",
-            "전화문의": "02-111-1111"}
-
-
 KS_ROWS = [
     ks("1001", "서울 예비창업 사업화 지원"),
     ks("1002", "부산 창업 지원", regin="부산"),
@@ -50,25 +44,6 @@ KS_ROWS = [
     ks("1006", "카페 창업 아카데미", regin="전국"),
     ks("1007", "광주 청년 창업", regin="광주"),
 ]
-GOV_ROWS = [
-    gov("g1", "소상공인 창업 자금", "중앙행정기관", "중소벤처기업부", "예비창업자"),
-    gov("g2", "강남구 창업 공간 지원", "시군구", "서울특별시 강남구", "관내 창업자"),
-    gov("g3", "성동구 소상공인 지원", "시군구", "서울특별시 성동구", "창업 예정자"),
-    gov("g4", "경기 광주시 소상공인 지원", "시군구", "경기도 광주시", "창업 예정자"),
-    gov("g5", "광주 동구 창업 지원", "시군구", "광주광역시 동구", "창업 예정자"),
-    gov("g6", "서울 소상공인 경영 개선", "광역시도", "서울특별시", "영업 중 소상공인", field="생활안정"),
-]
-BIZ_SUPPORT = {"jsonArray": [
-    {"pblancId": "PBLN_1", "pblancNm": "서울 창업 바우처", "jrsdInsttNm": "서울특별시", "reqstBeginEndDe": "20261101 ~ 20261215",
-     "pblancUrl": "https://www.bizinfo.go.kr/x?pblancId=PBLN_1", "bsnsSumryCn": "예비 창업자 지원", "hashTags": "서울,창업",
-     "pldirSportRealmLclasCodeNm": "창업"},
-    {"pblancId": "PBLN_2", "pblancNm": "끝난 공고", "reqstBeginEndDe": "20260101 ~ 20260131", "hashTags": "서울"},
-    # 실측 모양(11-08): 해시태그는 17개 시도를 다 단다 — 지역은 소관기관으로 가른다
-    {"pblancId": "PBLN_3", "pblancNm": "전북 창업 지원", "jrsdInsttNm": "전북특별자치도", "reqstBeginEndDe": "20261101 ~ 20261130",
-     "bsnsSumryCn": "도내 창업기업", "hashtags": "서울,부산,경기,전북,창업"},
-    {"pblancId": "PBLN_4", "pblancNm": "예비창업 패키지", "jrsdInsttNm": "중소벤처기업부", "reqstBeginEndDe": "20261101 ~ 20261201",
-     "bsnsSumryCn": "예비 창업자 사업화", "hashtags": "서울,부산,경기,전북,창업"},
-]}
 BIZ_EVENTS = {"jsonArray": [
     {"eventInfoId": "EVEN_1", "nttNm": "서울 창업 세미나", "eventInfoTyNm": "세미나", "eventBeginEndDe": "20261120 ~ 20261120",
      "areaNm": "서울", "originEngnNm": "서울창업허브", "bizinfoUrl": "https://www.bizinfo.go.kr/e?eventInfoId=EVEN_1",
@@ -81,7 +56,7 @@ BIZ_EVENTS = {"jsonArray": [
 
 @pytest.fixture
 def sources(monkeypatch):
-    """원천 넷을 가짜로 — 부른 URL 을 센다."""
+    """원천 둘(K-Startup · 기업마당 행사)을 가짜로 — 부른 URL 을 센다."""
     calls: list[str] = []
 
     def fake(url, params):
@@ -89,17 +64,12 @@ def sources(monkeypatch):
         assert "serviceKey" in params or "crtfcKey" in params
         if url == program_sources.KSTARTUP_URL:
             return {"data": KS_ROWS if params["page"] == 1 else [], "matchCount": len(KS_ROWS)}
-        if url == program_sources.GOV24_URL:
-            return {"data": GOV_ROWS, "matchCount": len(GOV_ROWS)}
-        if url == program_sources.BIZINFO_SUPPORT_URL:
-            return BIZ_SUPPORT
         if url == program_sources.BIZINFO_EVENT_URL:
             return BIZ_EVENTS
         raise AssertionError(url)
 
     s = program_sources.settings
     monkeypatch.setattr(s, "data_go_kr_service_key", SECRET, raising=False)
-    monkeypatch.setattr(s, "bizinfo_support_api_key", SECRET, raising=False)
     monkeypatch.setattr(s, "bizinfo_event_api_key", SECRET, raising=False)
     monkeypatch.setattr(program_sources, "_fetch_json", fake)
     program_sources.clear_cache()
@@ -119,45 +89,6 @@ def test_region_of_seoul_uses_gu_and_outside_uses_city():
 
 
 # ── 지원 프로그램 ──────────────────────────────────────────────────────────
-def test_support_pre_founder_in_seoul(sources):
-    out = program_support.support_programs("garosugil", "pre_founder", "카페·디저트", today=TODAY)
-    ids = [it["id"] for it in out["items"]]
-    assert "ks-1001" in ids and "ks-1006" in ids
-    assert "ks-1002" not in ids, "다른 지역(부산) 공고가 섞였다"
-    assert "ks-1003" not in ids, "예비창업자 대상이 아닌 공고가 섞였다"
-    assert "ks-1004" not in ids, "행사ㆍ네트워크 공고는 네트워킹에서 보인다"
-    assert "ks-1005" not in ids, "끝난 공고가 나왔다"
-    assert {"gov24-g1", "gov24-g2"} <= set(ids) and "gov24-g3" not in ids, "다른 구(성동구) 혜택이 섞였다"
-    assert "gov24-g6" not in ids, "창업 언급 없는 영업 중 혜택은 예비창업자에게 빼야 한다"
-    assert "biz-PBLN_1" in ids and "biz-PBLN_2" not in ids
-    assert "biz-PBLN_3" not in ids, "다른 시도청(전북) 공고가 해시태그만 보고 섞였다"
-    national = next(it for it in out["items"] if it["id"] == "biz-PBLN_4")
-    assert national["region"] == "전국" and national["matched"][0].startswith("전국"), "중앙부처 공고는 전국으로 밝힌다"
-    cafe = next(it for it in out["items"] if it["id"] == "ks-1006")
-    assert any(m.startswith("업종 언급") for m in cafe["matched"])
-    assert cafe["url"] == program_sources.KSTARTUP_DETAIL.format(sn="1006"), "공고 번호 있는 상세 주소"
-    assert [s["status"] for s in out["sources"]] == ["ok", "ok", "ok"]
-
-
-def test_support_founder_includes_operating_benefits(sources):
-    ids = [it["id"] for it in program_support.support_programs("garosugil", "founder", today=TODAY)["items"]]
-    assert "ks-1003" in ids and "gov24-g6" in ids
-
-
-def test_support_gwangju_does_not_take_gyeonggi_gwangju(sources):
-    ids = [it["id"] for it in program_support.support_programs("gj-chungjang", "pre_founder", today=TODAY)["items"]]
-    assert "gov24-g5" in ids and "ks-1007" in ids
-    assert "gov24-g4" not in ids, "경기도 광주시 혜택이 광주(전남광주) 거점에 섞였다"
-    assert "gov24-g2" not in ids
-
-
-def test_support_sorted_narrow_region_first_then_industry_then_deadline(sources):
-    """11-08 실측 — 마감 순으로만 세우자 강남 카페 예비창업자 맨 위에 「청년 어촌창업 공모전」(전국)이 섰다.
-    지역이 좁은 순(시군구 → 시도 → 전국) → 업종 언급 → 마감 순. 걸러 내지 않고 순서만 바꾼다."""
-    items = program_support.support_programs("garosugil", "pre_founder", "카페·디저트", today=TODAY)["items"]
-    assert [it["id"] for it in items] == ["gov24-g2", "ks-1001", "biz-PBLN_1", "ks-1006", "biz-PBLN_4", "gov24-g1"],         "강남구(시군구) → 서울(시도, 마감 순) → 전국(업종 언급 먼저 → 마감 순 → 마감일 없는 혜택은 뒤)"
-
-
 def test_region_rank_reads_each_source_region_chip():
     seoul = program_support.region_of("garosugil")
     rank = lambda **it: program_support.region_rank({"matched": [], **it}, seoul)  # noqa: E731
@@ -178,12 +109,12 @@ def test_region_rank_reads_each_source_region_chip():
 
 def test_missing_keys_are_reported_per_source_without_calls(monkeypatch):
     s = program_sources.settings
-    for k in ("data_go_kr_service_key", "bizinfo_support_api_key", "bizinfo_event_api_key"):
+    for k in ("data_go_kr_service_key", "bizinfo_event_api_key"):
         monkeypatch.setattr(s, k, "", raising=False)
     monkeypatch.setattr(program_sources, "_fetch_json", lambda *a, **k: pytest.fail("키 없이 원천을 불렀다"))
     program_sources.clear_cache()
-    out = program_support.support_programs("garosugil", None, today=TODAY)
-    assert out["items"] == [] and {s["status"] for s in out["sources"]} == {"no_key"}
+    out = program_network.network("garosugil", None, None, None, today=TODAY)
+    assert out["events"] == [] and {s["status"] for s in out["sources"]} == {"no_key"}
     assert all(s["note"] for s in out["sources"])
 
 
@@ -191,14 +122,14 @@ def test_bizinfo_reqerr_is_error_with_reason_and_no_secret(monkeypatch, sources)
     real = program_sources._fetch_json
 
     def ip_block(url, params):
-        if url == program_sources.BIZINFO_SUPPORT_URL:
+        if url == program_sources.BIZINFO_EVENT_URL:
             return {"reqErr": "등록되지 않은 IP 입니다."}
         return real(url, params)
 
     monkeypatch.setattr(program_sources, "_fetch_json", ip_block)
     program_sources.clear_cache()
-    out = program_support.support_programs("garosugil", None, today=TODAY)
-    biz = next(s for s in out["sources"] if s["id"] == "bizinfo")
+    out = program_network.network("garosugil", None, None, None, today=TODAY)
+    biz = next(s for s in out["sources"] if s["id"] == "bizinfo_event")
     assert biz["status"] == "error" and "등록되지 않은 IP" in biz["note"]
     assert SECRET not in json.dumps(out, ensure_ascii=False)
 
@@ -280,6 +211,21 @@ def test_network_without_industry_explains_complements(sources):
     assert out["complements"] == [] and "업종을 고르면" in out["complements_note"]
 
 
+def test_network_is_for_the_opened_space_not_before_contract(sources):
+    """2026-11-22 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 — 계약 전 질문과 지원사업 신청 창구를 싣지 않는다."""
+    out = program_network.network("garosugil", "cafe", "카페·디저트", "founder", today=TODAY)
+    questions = " ".join(out["questions"])
+    for pre_contract in ("권리금", "임대인", "원상복구", "문을 닫거나"):
+        assert pre_contract not in questions, f"계약 전 질문이 남았다: {pre_contract}"
+    assert "상인회" in questions and "교차 쿠폰" in questions, "개업 뒤 이웃·상인 조직과 이야기할 것"
+    urls = {d["url"] for d in out["directory"]}
+    for grant in ("sbiz24.kr", "k-startup.go.kr", "bizinfo.go.kr", "gjsinbo.or.kr"):
+        assert not any(grant in u for u in urls), f"지원사업 신청·보증 창구가 남았다: {grant}"
+    assert "개업한 자리" in out["note"]
+    founder = [e for e in out["events"] if any(m.startswith("단계:") for m in e["matched"])]
+    assert all("기창업자(개업 후)" in " ".join(e["matched"]) for e in founder)
+
+
 # ── 실행 카드 ──────────────────────────────────────────────────────────────
 _MONEY = re.compile(r"\d[\d,]*\s*(원|만원)|예산\s*\d|\d+\s*%")
 
@@ -309,6 +255,25 @@ def test_plan_cards_from_evidence_only(monkeypatch):
     assert "17~21시" in out["cards"][3]["when"]
 
 
+def test_plan_defaults_to_after_opening_and_measures_into_the_ledger(monkeypatch):
+    """2026-11-22 — 화면은 개업 뒤(actual_open)만 부른다. 기본값도 그렇고, 카드의 측정은 없어진 가설 판정표가 아니라 실행 기록으로 간다."""
+    monkeypatch.setattr(events, "for_district", lambda d, today=None: [])
+    monkeypatch.setattr(mkt, "get_district_events", lambda d: {"events_source": "public-open-data"})
+    monkeypatch.setattr(mkt, "_events_unavailable_note", lambda d: None)
+    monkeypatch.setattr(mkt, "context_rows", lambda d: None)
+    monkeypatch.setattr(nearby_stores, "colocated_top", lambda d, ind: [
+        {"key": "bar", "label": "술집", "lift": 1.39, "n_both": 2263}])
+    out = program_plan.plan("garosugil", "cafe")
+    assert out["mode"] == "actual_open"
+    neighbor = next(c for c in out["cards"] if c["kind"] == "neighbor")
+    own = next(c for c in out["cards"] if c["kind"] == "own")
+    assert neighbor["when"] == "개업 뒤" and own["when"] == "개업 뒤"
+    assert "사전 예약" not in own["title"] + own["what"] and "다시 방문" in own["measure"]
+    assert "실행 기록" in out["note"] and "가설" not in out["note"]
+    body = client.get(f"{API}/plan", params={"district_id": "garosugil", "industry": "cafe"}).json()
+    assert body["mode"] == "actual_open", "API 기본값도 개업 뒤"
+
+
 def test_plan_without_evidence_still_gives_own_card_and_says_why(monkeypatch):
     monkeypatch.setattr(mkt, "_events_unavailable_note", lambda d: "행사 자료는 서울만 있어요 — 수원 상권은 수집하지 않았어요.")
     monkeypatch.setattr(mkt, "get_district_events", lambda d: {"events_source": "none"})
@@ -321,14 +286,15 @@ def test_plan_without_evidence_still_gives_own_card_and_says_why(monkeypatch):
 
 # ── API ────────────────────────────────────────────────────────────────────
 def test_routes_shape_and_validation(sources):
-    r = client.get(f"{API}/support", params={"district_id": "garosugil", "stage": "pre_founder", "industry": "카페"})
+    r = client.get(f"{API}/network", params={"district_id": "garosugil", "industry": "cafe", "stage": "founder"})
     assert r.status_code == 200 and r.json()["region"]["label"] == "서울특별시 강남구"
-    assert client.get(f"{API}/support", params={"district_id": "no-such-hub"}).status_code == 404
-    assert client.get(f"{API}/support", params={"district_id": "garosugil", "stage": "x"}).status_code == 422
+    assert client.get(f"{API}/network", params={"district_id": "no-such-hub"}).status_code == 404
+    assert client.get(f"{API}/network", params={"district_id": "garosugil", "stage": "x"}).status_code == 422
     assert client.get(f"{API}/plan", params={"district_id": "garosugil", "mode": "x"}).status_code == 422
     assert client.get(f"{API}/plan", params={"district_id": "garosugil"}).status_code == 200
-    assert client.get(f"{API}/network", params={"district_id": "garosugil"}).status_code == 200
     assert SECRET not in r.text
+    # 2026-11-22 지원 공고(/program/support)는 지웠다 — 경로가 없다
+    assert client.get(f"{API}/support", params={"district_id": "garosugil"}).status_code == 404
 
 
 def test_routes_do_not_shadow_campaigns():

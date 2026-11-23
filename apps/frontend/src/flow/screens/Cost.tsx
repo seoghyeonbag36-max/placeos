@@ -167,7 +167,7 @@ export function Payback() {
     return (
       <FlowScreen back="/premium" right={<CloseButton />} caption={caption}
         title={missing.length ? "계산한 가격대 모두 본전이 안 나와요" : "세 가격대 모두 본전이 안 나와요"}
-        cta={<BottomCTA primary={{ label: "다른 빈 자리 보기", onClick: () => go("/spaces") }} secondary={{ label: "작게 먼저 확인", onClick: () => go("/validate") }} />}>
+        cta={<BottomCTA primary={{ label: "다른 빈 자리 보기", onClick: () => go("/spaces") }} secondary={{ label: "홈으로", onClick: () => go("/home") }} />}>
         <WarnLine>{warn}</WarnLine>
         {r.unviable_note && <p className="fl-note">{r.unviable_note}</p>}
         <ChoiceList label="세 가지 가격대" value={state.tier && tierAvailable(r.scenarios[state.tier]) ? state.tier : null}
@@ -181,13 +181,13 @@ export function Payback() {
   return (
     <FlowScreen wide back="/premium" right={<CloseButton />} caption={caption}
       title={`${tierName(rec[0])} 하면 ${monthsClause(rec[1].roi_months)} 본전이에요`}
-      // 검증 계획은 화면이 보여 준 가격대를 이어받는다 — 골라 둔 가격대가 자료 부족이면 그 값을 추천으로 바꿔 넘긴다
-      // (안 바꾸면 Validate 가 계산하지 않은 「비싸게」로 계획을 만든다 · 10-28 리뷰)
-      cta={<BottomCTA primary={{ label: "작게 먼저 확인하기", onClick: () => { if (state.tier !== chosen[0]) update((s) => ({ ...s, tier: chosen[0] })); go("/validate"); } }}
+      // 다음 할 일은 입점 희망서다(2026-11-22 — Posting = 공실을 본 창업자가 건물주에게 입점 희망서를 전한다). 그전 「작게 먼저 확인하기」(④ 검증
+      // 계획)는 Program 범위 축소로 뺐다. 화면이 보여 준 가격대를 답으로 남긴다 — 골라 둔 가격대가 자료 부족이면 추천으로 바꿔 둔다(10-28 리뷰)
+      cta={<BottomCTA primary={{ label: "입점 희망서 쓰기", onClick: () => { if (state.tier !== chosen[0]) update((s) => ({ ...s, tier: chosen[0] })); go("/brief"); } }}
         secondary={{ label: "저장", onClick: save }} />}>
       <WarnLine>{warn}</WarnLine>
       <ChoiceList label="세 가지 가격대" value={chosen[0]} onChoose={(v) => update((s) => ({ ...s, tier: v }))} options={options} />
-      <p className="fl-note">카드를 누르면 그 가격대로 검증 계획을 만들어요.</p>
+      <p className="fl-note">카드를 누르면 그 가격대의 한 달 매출·비용을 아래에서 볼 수 있어요.</p>
       <Details>
         <ul className="fl-facts">
           <li>{tierName(chosen[0])}: 한 달 매출 {manwon(chosen[1].month_rev)} · 한 달 비용 {manwon(chosen[1].month_cost)}</li>
@@ -358,7 +358,7 @@ export function BudgetCheck() {
   ].join("\n");
   return (
     <FlowScreen back="/fitout" right={<CloseButton />} caption={caption} title={title} sub={sub}
-      cta={<BottomCTA primary={{ label: "작게 먼저 확인하기", onClick: () => go("/validate") }} secondary={{ label: "저장", onClick: save }} />}>
+      cta={<BottomCTA primary={{ label: "입점 희망서 쓰기", onClick: () => go("/brief") }} secondary={{ label: "저장", onClick: save }} />}>
       <dl className="fl-keys is-rows">
         <div><dt>처음 필요한 돈</dt><dd>{required != null ? manwon(required) : "모르는 칸이 있어요"}</dd></div>
         <div><dt>쓸 수 있는 돈</dt><dd>{c.budget != null ? manwon(c.budget) : "아직 몰라요"}</dd></div>
