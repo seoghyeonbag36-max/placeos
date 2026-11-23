@@ -85,6 +85,9 @@ SMALL_SAMPLE: frozenset[str] = frozenset({
     "gj-bia", "gj-dongcheon", "gj-gwangcheon", "gj-hakdong", "gj-heukseok", "gj-jangdeok", "gj-jinwol", "gj-maegok", "gj-munheung",
     "gj-nodae", "gj-pungam", "gj-sanwol", "gj-sinchon", "gj-sotae", "gj-suwan", "gj-wolgok", "jj-dongseohak", "jj-ecocity",
     "jj-hoseong1", "jj-hyoja1", "jj-hyoja2", "jj-hyoja2-south", "jj-hyoja3", "jj-inhu2", "jj-samcheon1", "jj-songcheon2", "jj-yeoui2",
+    # 2026-11-23 고양·파주 도시 전체 17곳 서빙: 시작점 기준선 이하인 15곳에 같은 문구를 단다(11-01 결정 그대로).
+    "goyangdong", "haengsin1dong", "haengsin4dong", "jori", "jugyo", "madu1dong", "munbal", "munsaneup", "pungsan",
+    "samsong2dong", "siksa", "tanhyeon2dong", "unjeong3dong", "wonheung", "wonsin",
 })
 
 # 표본이 작은 까닭이 거점마다 다르면 한 문장을 더한다 — 사실만 적고 수는 적지 않는다(수는 집계에서 읽는다).
