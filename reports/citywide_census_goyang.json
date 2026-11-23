@@ -1,0 +1,818 @@
+{
+  "city": "goyang",
+  "observed_at": "2026-11-23T19:34:28+09:00",
+  "stores": 50083,
+  "stores_without_coordinates": 0,
+  "served_hub_cover": {
+    "stores": 6203,
+    "pct": 12.4
+  },
+  "registered_hub_cover": {
+    "stores": 19613,
+    "pct": 39.2
+  },
+  "hubs": [
+    {
+      "slug": "hwajeong",
+      "name": "화정",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "정확",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 2855,
+      "stores_in_polygon_radius": 2244,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "ilsan",
+      "name": "일산 라페스타",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 1990,
+      "stores_in_polygon_radius": 1459,
+      "radius_m": 250,
+      "stores_radius_m": 350
+    },
+    {
+      "slug": "westerndom",
+      "name": "일산 웨스턴돔",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 1925,
+      "stores_in_polygon_radius": 1612,
+      "radius_m": 250,
+      "stores_radius_m": 350
+    },
+    {
+      "slug": "tanhyeon",
+      "name": "탄현",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "정확",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 1388,
+      "stores_in_polygon_radius": 810,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "bamgasi",
+      "name": "밤가시마을",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 1298,
+      "stores_in_polygon_radius": 831,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "wondang",
+      "name": "원당역",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 941,
+      "stores_in_polygon_radius": 345,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "baekseok",
+      "name": "백석역",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 2186,
+      "stores_in_polygon_radius": 1709,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "daehwa",
+      "name": "대화역",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 766,
+      "stores_in_polygon_radius": 643,
+      "radius_m": 350,
+      "stores_radius_m": 450
+    },
+    {
+      "slug": "haengsin",
+      "name": "행신역",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 1012,
+      "stores_in_polygon_radius": 797,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "madu",
+      "name": "마두역",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 1228,
+      "stores_in_polygon_radius": 920,
+      "radius_m": 250,
+      "stores_radius_m": 350
+    },
+    {
+      "slug": "juyeop",
+      "name": "주엽역",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 2304,
+      "stores_in_polygon_radius": 1718,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "kintex",
+      "name": "킨텍스",
+      "state": "보류(단일시설)",
+      "ceiling_planned_store": "단일시설",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>탄현역",
+      "stores_in_collection_radius": 342,
+      "stores_in_polygon_radius": 253,
+      "radius_m": 350,
+      "stores_radius_m": 450
+    },
+    {
+      "slug": "starfield",
+      "name": "스타필드 고양",
+      "state": "보류(단일시설)",
+      "ceiling_planned_store": "단일시설",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 659,
+      "stores_in_polygon_radius": 562,
+      "radius_m": 300,
+      "stores_radius_m": 400
+    },
+    {
+      "slug": "samsong",
+      "name": "삼송역",
+      "state": "보류(단일시설)",
+      "ceiling_planned_store": "단일시설",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>고양시청",
+      "stores_in_collection_radius": 719,
+      "stores_in_polygon_radius": 400,
+      "radius_m": 300,
+      "stores_radius_m": 400
+    }
+  ],
+  "dongs": [
+    {
+      "dong": "고양시 일산동구 장항2동",
+      "stores": 4854,
+      "served": 0,
+      "registered": 4453,
+      "uncovered_by_served": 4854,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 화전동",
+      "stores": 2417,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 2417,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 흥도동",
+      "stores": 2090,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 2090,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 화정2동",
+      "stores": 1728,
+      "served": 0,
+      "registered": 1529,
+      "uncovered_by_served": 1728,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 송포동",
+      "stores": 1657,
+      "served": 12,
+      "registered": 369,
+      "uncovered_by_served": 1645,
+      "served_pct": 0.7
+    },
+    {
+      "dong": "고양시 일산동구 고봉동",
+      "stores": 1530,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1530,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 창릉동",
+      "stores": 1521,
+      "served": 0,
+      "registered": 699,
+      "uncovered_by_served": 1521,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 화정1동",
+      "stores": 1518,
+      "served": 4,
+      "registered": 1327,
+      "uncovered_by_served": 1514,
+      "served_pct": 0.3
+    },
+    {
+      "dong": "고양시 일산서구 덕이동",
+      "stores": 1407,
+      "served": 0,
+      "registered": 567,
+      "uncovered_by_served": 1407,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 식사동",
+      "stores": 1300,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1300,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 마두1동",
+      "stores": 1213,
+      "served": 0,
+      "registered": 5,
+      "uncovered_by_served": 1213,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 풍산동",
+      "stores": 1210,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1210,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 주엽2동",
+      "stores": 1170,
+      "served": 0,
+      "registered": 1082,
+      "uncovered_by_served": 1170,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 주엽1동",
+      "stores": 1125,
+      "served": 5,
+      "registered": 1072,
+      "uncovered_by_served": 1120,
+      "served_pct": 0.4
+    },
+    {
+      "dong": "고양시 덕양구 삼송1동",
+      "stores": 1114,
+      "served": 0,
+      "registered": 679,
+      "uncovered_by_served": 1114,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 고양동",
+      "stores": 1020,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1020,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 관산동",
+      "stores": 1006,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1006,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 탄현1동",
+      "stores": 996,
+      "served": 0,
+      "registered": 786,
+      "uncovered_by_served": 996,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 일산2동",
+      "stores": 984,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 984,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 대화동",
+      "stores": 1734,
+      "served": 754,
+      "registered": 889,
+      "uncovered_by_served": 980,
+      "served_pct": 43.5
+    },
+    {
+      "dong": "고양시 일산동구 마두2동",
+      "stores": 896,
+      "served": 0,
+      "registered": 688,
+      "uncovered_by_served": 896,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 일산3동",
+      "stores": 922,
+      "served": 62,
+      "registered": 62,
+      "uncovered_by_served": 860,
+      "served_pct": 6.7
+    },
+    {
+      "dong": "고양시 덕양구 행주동",
+      "stores": 828,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 828,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 효자동",
+      "stores": 809,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 809,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 가좌동",
+      "stores": 802,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 802,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 원신동",
+      "stores": 787,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 787,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 중산1동",
+      "stores": 737,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 737,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 장항1동",
+      "stores": 740,
+      "served": 5,
+      "registered": 5,
+      "uncovered_by_served": 735,
+      "served_pct": 0.7
+    },
+    {
+      "dong": "고양시 덕양구 대덕동",
+      "stores": 667,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 667,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 삼송2동",
+      "stores": 592,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 592,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 능곡동",
+      "stores": 580,
+      "served": 0,
+      "registered": 3,
+      "uncovered_by_served": 580,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 행신4동",
+      "stores": 519,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 519,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 주교동",
+      "stores": 518,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 518,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산서구 일산1동",
+      "stores": 509,
+      "served": 0,
+      "registered": 35,
+      "uncovered_by_served": 509,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 성사1동",
+      "stores": 1246,
+      "served": 752,
+      "registered": 752,
+      "uncovered_by_served": 494,
+      "served_pct": 60.4
+    },
+    {
+      "dong": "고양시 덕양구 행신1동",
+      "stores": 485,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 485,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 정발산동",
+      "stores": 1622,
+      "served": 1146,
+      "registered": 1148,
+      "uncovered_by_served": 476,
+      "served_pct": 70.7
+    },
+    {
+      "dong": "고양시 덕양구 행신3동",
+      "stores": 432,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 432,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 일산동구 중산2동",
+      "stores": 493,
+      "served": 85,
+      "registered": 85,
+      "uncovered_by_served": 408,
+      "served_pct": 17.2
+    },
+    {
+      "dong": "고양시 일산동구 백석1동",
+      "stores": 1647,
+      "served": 1336,
+      "registered": 1336,
+      "uncovered_by_served": 311,
+      "served_pct": 81.1
+    },
+    {
+      "dong": "고양시 일산동구 백석2동",
+      "stores": 1064,
+      "served": 845,
+      "registered": 845,
+      "uncovered_by_served": 219,
+      "served_pct": 79.4
+    },
+    {
+      "dong": "고양시 덕양구 행신2동",
+      "stores": 1222,
+      "served": 1012,
+      "registered": 1012,
+      "uncovered_by_served": 210,
+      "served_pct": 82.8
+    },
+    {
+      "dong": "고양시 일산서구 탄현2동",
+      "stores": 144,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 144,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "고양시 덕양구 성사2동",
+      "stores": 228,
+      "served": 185,
+      "registered": 185,
+      "uncovered_by_served": 43,
+      "served_pct": 81.1
+    }
+  ],
+  "candidates": [
+    {
+      "rank": 1,
+      "label": "고양시 덕양구 화전동 (향동동)",
+      "lon": 126.894017700618,
+      "lat": 37.6081521313266,
+      "observed_center_bizes_id": "MA010120220811859842",
+      "stores_500m": 1117,
+      "new_stores_500m": 1117,
+      "buildings": 38,
+      "stores_per_building": 29.39,
+      "top10_pct": 97.0,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 4325
+    },
+    {
+      "rank": 2,
+      "label": "고양시 일산서구 일산2동 (일산동)",
+      "lon": 126.77267018313,
+      "lat": 37.6852039264311,
+      "observed_center_bizes_id": "MA0101202406A0057303",
+      "stores_500m": 1228,
+      "new_stores_500m": 1228,
+      "buildings": 386,
+      "stores_per_building": 3.18,
+      "top10_pct": 23.0,
+      "verdict": "통과",
+      "nearest_registered_m": 1292
+    },
+    {
+      "rank": 3,
+      "label": "고양시 덕양구 삼송2동 (원흥동)",
+      "lon": 126.874173403091,
+      "lat": 37.6498663056741,
+      "observed_center_bizes_id": "MA0101202608A0065349",
+      "stores_500m": 949,
+      "new_stores_500m": 949,
+      "buildings": 118,
+      "stores_per_building": 8.04,
+      "top10_pct": 75.0,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1895
+    },
+    {
+      "rank": 4,
+      "label": "고양시 덕양구 행신1동 (행신동)",
+      "lon": 126.833970751809,
+      "lat": 37.6235078357384,
+      "observed_center_bizes_id": "MA010120220811126166",
+      "stores_500m": 848,
+      "new_stores_500m": 848,
+      "buildings": 129,
+      "stores_per_building": 6.57,
+      "top10_pct": 38.0,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1278
+    },
+    {
+      "rank": 5,
+      "label": "고양시 덕양구 화전동 (향동동)",
+      "lon": 126.892886713263,
+      "lat": 37.5991772512234,
+      "observed_center_bizes_id": "MA0101202409A0091067",
+      "stores_500m": 976,
+      "new_stores_500m": 902,
+      "buildings": 143,
+      "stores_per_building": 6.83,
+      "top10_pct": 51.1,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1001
+    },
+    {
+      "rank": 6,
+      "label": "고양시 일산동구 마두1동 (마두동)",
+      "lon": 126.788874948005,
+      "lat": 37.6557179949371,
+      "observed_center_bizes_id": "MA0106202407A0545185",
+      "stores_500m": 783,
+      "new_stores_500m": 783,
+      "buildings": 77,
+      "stores_per_building": 10.17,
+      "top10_pct": 40.4,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 1067
+    },
+    {
+      "rank": 7,
+      "label": "고양시 덕양구 주교동 (주교동)",
+      "lon": 126.834276792047,
+      "lat": 37.6591241451261,
+      "observed_center_bizes_id": "MA010120220804856230",
+      "stores_500m": 1179,
+      "new_stores_500m": 764,
+      "buildings": 375,
+      "stores_per_building": 3.14,
+      "top10_pct": 16.5,
+      "verdict": "통과",
+      "nearest_registered_m": 1012
+    },
+    {
+      "rank": 8,
+      "label": "고양시 덕양구 효자동 (지축동)",
+      "lon": 126.914594602404,
+      "lat": 37.6487942845152,
+      "observed_center_bizes_id": "MA0101202608A0019957",
+      "stores_500m": 739,
+      "new_stores_500m": 739,
+      "buildings": 123,
+      "stores_per_building": 6.01,
+      "top10_pct": 57.8,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1701
+    },
+    {
+      "rank": 9,
+      "label": "고양시 덕양구 행주동 (토당동)",
+      "lon": 126.821758638035,
+      "lat": 37.6238954645957,
+      "observed_center_bizes_id": "MA0101202210A0094944",
+      "stores_500m": 813,
+      "new_stores_500m": 813,
+      "buildings": 327,
+      "stores_per_building": 2.49,
+      "top10_pct": 20.3,
+      "verdict": "통과",
+      "nearest_registered_m": 1076
+    },
+    {
+      "rank": 10,
+      "label": "고양시 일산서구 일산3동 (일산동)",
+      "lon": 126.764436957691,
+      "lat": 37.6788448951582,
+      "observed_center_bizes_id": "MA010120220806780486",
+      "stores_500m": 793,
+      "new_stores_500m": 678,
+      "buildings": 78,
+      "stores_per_building": 10.17,
+      "top10_pct": 30.6,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 1009
+    },
+    {
+      "rank": 11,
+      "label": "고양시 일산동구 식사동 (식사동)",
+      "lon": 126.811034382436,
+      "lat": 37.676351963674,
+      "observed_center_bizes_id": "MA0101202410A0131826",
+      "stores_500m": 696,
+      "new_stores_500m": 696,
+      "buildings": 125,
+      "stores_per_building": 5.57,
+      "top10_pct": 36.1,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 2801
+    },
+    {
+      "rank": 12,
+      "label": "고양시 일산동구 풍산동 (풍동)",
+      "lon": 126.800135250162,
+      "lat": 37.6657474996802,
+      "observed_center_bizes_id": "MA0101202604A0013923",
+      "stores_500m": 685,
+      "new_stores_500m": 685,
+      "buildings": 133,
+      "stores_per_building": 5.15,
+      "top10_pct": 35.3,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1491
+    },
+    {
+      "rank": 13,
+      "label": "고양시 덕양구 흥도동 (원흥동)",
+      "lon": 126.872542618432,
+      "lat": 37.6360344555168,
+      "observed_center_bizes_id": "MA0101202409A0148098",
+      "stores_500m": 577,
+      "new_stores_500m": 577,
+      "buildings": 63,
+      "stores_per_building": 9.16,
+      "top10_pct": 70.2,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1542
+    },
+    {
+      "rank": 14,
+      "label": "고양시 덕양구 원신동 (신원동)",
+      "lon": 126.890120107389,
+      "lat": 37.6631536976735,
+      "observed_center_bizes_id": "MA0101202306A0072939",
+      "stores_500m": 625,
+      "new_stores_500m": 625,
+      "buildings": 123,
+      "stores_per_building": 5.08,
+      "top10_pct": 37.8,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1199
+    },
+    {
+      "rank": 15,
+      "label": "고양시 덕양구 고양동 (고양동)",
+      "lon": 126.902328705225,
+      "lat": 37.7046724786266,
+      "observed_center_bizes_id": "MA0101202410A0120883",
+      "stores_500m": 537,
+      "new_stores_500m": 537,
+      "buildings": 178,
+      "stores_per_building": 3.02,
+      "top10_pct": 33.0,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 4732
+    },
+    {
+      "rank": 16,
+      "label": "고양시 일산동구 마두1동 (마두동)",
+      "lon": 126.785809091686,
+      "lat": 37.6657223549393,
+      "observed_center_bizes_id": "MA0101202303A0052264",
+      "stores_500m": 576,
+      "new_stores_500m": 554,
+      "buildings": 347,
+      "stores_per_building": 1.66,
+      "top10_pct": 12.0,
+      "verdict": "통과",
+      "nearest_registered_m": 1143
+    },
+    {
+      "rank": 17,
+      "label": "고양시 일산서구 탄현2동 (탄현동)",
+      "lon": 126.776474323282,
+      "lat": 37.6944552048489,
+      "observed_center_bizes_id": "MA0101202410A0121860",
+      "stores_500m": 504,
+      "new_stores_500m": 486,
+      "buildings": 139,
+      "stores_per_building": 3.63,
+      "top10_pct": 34.1,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1080
+    },
+    {
+      "rank": 18,
+      "label": "고양시 덕양구 행신4동 (행신동)",
+      "lon": 126.845057431094,
+      "lat": 37.6195315433003,
+      "observed_center_bizes_id": "MA0101202410A0672333",
+      "stores_500m": 515,
+      "new_stores_500m": 495,
+      "buildings": 157,
+      "stores_per_building": 3.28,
+      "top10_pct": 32.8,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1072
+    },
+    {
+      "rank": 19,
+      "label": "고양시 일산서구 대화동 (대화동)",
+      "lon": 126.754480094571,
+      "lat": 37.6834465961987,
+      "observed_center_bizes_id": "MA010120220801796070",
+      "stores_500m": 403,
+      "new_stores_500m": 329,
+      "buildings": 258,
+      "stores_per_building": 1.56,
+      "top10_pct": 13.2,
+      "verdict": "통과",
+      "nearest_registered_m": 1012
+    }
+  ],
+  "method": {
+    "source": "소상공인 상가정보 storeListInDong divId=signguCd",
+    "cover_rule": "가까운 쪽 거점의 stores_radius_m 안",
+    "candidate_rule": "250m 격자·반경 500m 합 ≥300 · 최종 중심점이 등록 거점·앞선 후보와 ≥1000m · 중심=관측 점포",
+    "verdict_rule": "hub-chain §0 (건물당 점포>10 기각 · top10>25% 주의)",
+    "seed": false
+  },
+  "limitations": [
+    "탐색용 — 상권 경계·대장·앵커 검증 전에는 서빙하지 않는다.",
+    "상가정보는 영업 중 점포 스냅샷이다. 공실·폐업 건물은 대장 단계에서 센다.",
+    "읍면 지역은 점포가 드물어 후보 임계(300점포/500m)에 못 미칠 수 있다 — 그 행정동은 표에서 보인다."
+  ]
+}

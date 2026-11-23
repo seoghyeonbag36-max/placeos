@@ -241,7 +241,8 @@ def test_default_iteration_stays_seoul_only():
     # 배치가 하나 늘 때마다 깨졌다(09-01 에 86 != 74 로 배포가 막혔다).
     batches = (ph.SEOUL_BATCH2_HUBS, ph.SEOUL_BATCH3_HUBS, ph.SEOUL_BATCH4_HUBS,
                ph.GYEONGGI_HUBS, ph.GYEONGGI_BATCH3_HUBS, ph.GWANGJU_HUBS, ph.JEONJU_HUBS,
-               ph.GJ_JJ_BATCH2_HUBS)
+               ph.GJ_JJ_BATCH2_HUBS, ph.GOYANG_PAJU_CITYWIDE_HUBS, ph.GOYANG_PAJU_CEILING_HUBS,
+               ph.GOYANG_PAJU_CAUTION_HUBS)
     assert len(ph.ALL_HUBS) == 54 + sum(len(b) for b in batches)
     for b in batches:
         assert not (set(b) & set(ph.HUBS))

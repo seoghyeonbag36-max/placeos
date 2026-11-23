@@ -1,0 +1,404 @@
+{
+  "city": "paju",
+  "observed_at": "2026-11-23T19:34:29+09:00",
+  "stores": 24550,
+  "stores_without_coordinates": 0,
+  "served_hub_cover": {
+    "stores": 5972,
+    "pct": 24.3
+  },
+  "registered_hub_cover": {
+    "stores": 7498,
+    "pct": 30.5
+  },
+  "hubs": [
+    {
+      "slug": "geumchon",
+      "name": "금촌",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "정확",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 2468,
+      "stores_in_polygon_radius": 1915,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "unjeong",
+      "name": "운정",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 751,
+      "stores_in_polygon_radius": 223,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "yadang",
+      "name": "야당",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 1738,
+      "stores_in_polygon_radius": 1589,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "munsan",
+      "name": "문산역",
+      "state": "서빙",
+      "ceiling_planned_store": "",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 1015,
+      "stores_in_polygon_radius": 750,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "mokdong",
+      "name": "운정 목동",
+      "state": "보류(계획상가)",
+      "ceiling_planned_store": "계획상가",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 1251,
+      "stores_in_polygon_radius": 709,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    },
+    {
+      "slug": "pajuoutlet",
+      "name": "파주 프리미엄아울렛",
+      "state": "보류(단일시설)",
+      "ceiling_planned_store": "단일시설",
+      "ceiling_rone_anchor": "공유",
+      "rone_series": "경기>파주시청",
+      "stores_in_collection_radius": 275,
+      "stores_in_polygon_radius": 222,
+      "radius_m": 500,
+      "stores_radius_m": 700
+    }
+  ],
+  "dongs": [
+    {
+      "dong": "파주시 교하동",
+      "stores": 2000,
+      "served": 0,
+      "registered": 2,
+      "uncovered_by_served": 2000,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 탄현면",
+      "stores": 1811,
+      "served": 0,
+      "registered": 275,
+      "uncovered_by_served": 1811,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 운정5동",
+      "stores": 1772,
+      "served": 0,
+      "registered": 459,
+      "uncovered_by_served": 1772,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 운정1동",
+      "stores": 2246,
+      "served": 492,
+      "registered": 492,
+      "uncovered_by_served": 1754,
+      "served_pct": 21.9
+    },
+    {
+      "dong": "파주시 운정2동",
+      "stores": 1633,
+      "served": 0,
+      "registered": 790,
+      "uncovered_by_served": 1633,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 운정3동",
+      "stores": 2634,
+      "served": 1432,
+      "registered": 1432,
+      "uncovered_by_served": 1202,
+      "served_pct": 54.4
+    },
+    {
+      "dong": "파주시 문산읍",
+      "stores": 2140,
+      "served": 1006,
+      "registered": 1006,
+      "uncovered_by_served": 1134,
+      "served_pct": 47.0
+    },
+    {
+      "dong": "파주시 조리읍",
+      "stores": 1120,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 1120,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 광탄면",
+      "stores": 910,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 910,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 금촌2동",
+      "stores": 1188,
+      "served": 357,
+      "registered": 357,
+      "uncovered_by_served": 831,
+      "served_pct": 30.1
+    },
+    {
+      "dong": "파주시 월롱면",
+      "stores": 675,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 675,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 파주읍",
+      "stores": 662,
+      "served": 9,
+      "registered": 9,
+      "uncovered_by_served": 653,
+      "served_pct": 1.4
+    },
+    {
+      "dong": "파주시 법원읍",
+      "stores": 579,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 579,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 금촌3동",
+      "stores": 532,
+      "served": 2,
+      "registered": 2,
+      "uncovered_by_served": 530,
+      "served_pct": 0.4
+    },
+    {
+      "dong": "파주시 적성면",
+      "stores": 519,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 519,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 운정6동",
+      "stores": 490,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 490,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 운정4동",
+      "stores": 974,
+      "served": 565,
+      "registered": 565,
+      "uncovered_by_served": 409,
+      "served_pct": 58.0
+    },
+    {
+      "dong": "파주시 금촌1동",
+      "stores": 2422,
+      "served": 2109,
+      "registered": 2109,
+      "uncovered_by_served": 313,
+      "served_pct": 87.1
+    },
+    {
+      "dong": "파주시 파평면",
+      "stores": 216,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 216,
+      "served_pct": 0.0
+    },
+    {
+      "dong": "파주시 장단면",
+      "stores": 27,
+      "served": 0,
+      "registered": 0,
+      "uncovered_by_served": 27,
+      "served_pct": 0.0
+    }
+  ],
+  "candidates": [
+    {
+      "rank": 1,
+      "label": "파주시 운정5동 (동패동)",
+      "lon": 126.717748251123,
+      "lat": 37.7255389081319,
+      "observed_center_bizes_id": "MA0101202602A0028096",
+      "stores_500m": 888,
+      "new_stores_500m": 888,
+      "buildings": 97,
+      "stores_per_building": 9.15,
+      "top10_pct": 79.5,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1584
+    },
+    {
+      "rank": 2,
+      "label": "파주시 금촌2동 (금촌동)",
+      "lon": 126.767916852077,
+      "lat": 37.7516502753704,
+      "observed_center_bizes_id": "MA010120220801752318",
+      "stores_500m": 719,
+      "new_stores_500m": 651,
+      "buildings": 43,
+      "stores_per_building": 16.72,
+      "top10_pct": 59.4,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 1071
+    },
+    {
+      "rank": 3,
+      "label": "파주시 운정1동 (와동동)",
+      "lon": 126.75229498504,
+      "lat": 37.7336892388038,
+      "observed_center_bizes_id": "MA0101202410A0689406",
+      "stores_500m": 754,
+      "new_stores_500m": 754,
+      "buildings": 253,
+      "stores_per_building": 2.98,
+      "top10_pct": 25.6,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1701
+    },
+    {
+      "rank": 4,
+      "label": "파주시 운정3동 (동패동)",
+      "lon": 126.74434015298,
+      "lat": 37.7112921651783,
+      "observed_center_bizes_id": "MA0101202412A0009894",
+      "stores_500m": 559,
+      "new_stores_500m": 559,
+      "buildings": 57,
+      "stores_per_building": 9.81,
+      "top10_pct": 57.6,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1514
+    },
+    {
+      "rank": 5,
+      "label": "파주시 운정1동 (와동동)",
+      "lon": 126.764935852482,
+      "lat": 37.7326699998971,
+      "observed_center_bizes_id": "MA0101202504A0113268",
+      "stores_500m": 348,
+      "new_stores_500m": 348,
+      "buildings": 24,
+      "stores_per_building": 14.5,
+      "top10_pct": 77.9,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 1119
+    },
+    {
+      "rank": 6,
+      "label": "파주시 운정2동 (목동동)",
+      "lon": 126.739039717985,
+      "lat": 37.7221913065081,
+      "observed_center_bizes_id": "MA0101202406A0015077",
+      "stores_500m": 544,
+      "new_stores_500m": 544,
+      "buildings": 141,
+      "stores_per_building": 3.86,
+      "top10_pct": 51.8,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1297
+    },
+    {
+      "rank": 7,
+      "label": "파주시 교하동 (문발동)",
+      "lon": 126.693169154568,
+      "lat": 37.7196842693413,
+      "observed_center_bizes_id": "MA0106202402A0813960",
+      "stores_500m": 431,
+      "new_stores_500m": 431,
+      "buildings": 65,
+      "stores_per_building": 6.63,
+      "top10_pct": 74.7,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 2260
+    },
+    {
+      "rank": 8,
+      "label": "파주시 조리읍 (조리읍)",
+      "lon": 126.807958422359,
+      "lat": 37.7438208395907,
+      "observed_center_bizes_id": "MA0101202410A0990738",
+      "stores_500m": 443,
+      "new_stores_500m": 443,
+      "buildings": 198,
+      "stores_per_building": 2.24,
+      "top10_pct": 20.1,
+      "verdict": "통과",
+      "nearest_registered_m": 3489
+    },
+    {
+      "rank": 9,
+      "label": "파주시 문산읍 (문산읍)",
+      "lon": 126.785106798492,
+      "lat": 37.8656179271961,
+      "observed_center_bizes_id": "MA010120220801754758",
+      "stores_500m": 397,
+      "new_stores_500m": 397,
+      "buildings": 69,
+      "stores_per_building": 5.75,
+      "top10_pct": 49.6,
+      "verdict": "주의(지번 집중)",
+      "nearest_registered_m": 1240
+    },
+    {
+      "rank": 10,
+      "label": "파주시 운정6동 (동패동)",
+      "lon": 126.71877307337,
+      "lat": 37.712495313948,
+      "observed_center_bizes_id": "MA010120220804532294",
+      "stores_500m": 384,
+      "new_stores_500m": 384,
+      "buildings": 27,
+      "stores_per_building": 14.22,
+      "top10_pct": 72.4,
+      "verdict": "기각(계획상가 밀집)",
+      "nearest_registered_m": 1451
+    }
+  ],
+  "method": {
+    "source": "소상공인 상가정보 storeListInDong divId=signguCd",
+    "cover_rule": "가까운 쪽 거점의 stores_radius_m 안",
+    "candidate_rule": "250m 격자·반경 500m 합 ≥300 · 최종 중심점이 등록 거점·앞선 후보와 ≥1000m · 중심=관측 점포",
+    "verdict_rule": "hub-chain §0 (건물당 점포>10 기각 · top10>25% 주의)",
+    "seed": false
+  },
+  "limitations": [
+    "탐색용 — 상권 경계·대장·앵커 검증 전에는 서빙하지 않는다.",
+    "상가정보는 영업 중 점포 스냅샷이다. 공실·폐업 건물은 대장 단계에서 센다.",
+    "읍면 지역은 점포가 드물어 후보 임계(300점포/500m)에 못 미칠 수 있다 — 그 행정동은 표에서 보인다."
+  ]
+}
