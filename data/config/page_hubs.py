@@ -721,10 +721,22 @@ GJ_JJ_BATCH2_SERVED_HUBS: frozenset[str] = frozenset({
 
 # 고양·파주 도시 전체 6곳(2026-11-23 등록) — Tier1 · 정밀 커버리지 ≥80% · 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님(scripts/chain_status.py)을
 # 통과한 거점만 넣는다. 빈 집합에서 시작한다 — 대장 수집(쿼터)이 하루에 안 끝나므로 서빙은 그 뒤다.
-GOYANG_PAJU_CITYWIDE_SERVED_HUBS: frozenset[str] = frozenset()
+GOYANG_PAJU_CITYWIDE_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-23 사용자 결정 「우선 전부 다 채택」 — 서빙 게이트(|격차|≤30%p · CI 가드 −20<gap<30)를 넘은 5곳을 올린다.
+    "ilsan2dong", "jugyo", "todang", "madu1dong", "jori",
+    # 못 올린 1곳: daehwadong-ne +31.12%p(가드 밖 · 노출 26동 · 주거 비중 91%) — 등록·수집만 남긴다
+})
 
 # 고양·파주 「주의」 17곳(2026-11-23 등록) — 대장 뒤 판정에서 채택하고 Tier1 · 정밀 커버리지 ≥80% · 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님을 통과한 거점만 넣는다.
-GOYANG_PAJU_CAUTION_SERVED_HUBS: frozenset[str] = frozenset()
+GOYANG_PAJU_CAUTION_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-23 「우선 전부 다 채택」 — 게이트를 넘은 15곳. 채택 판정은 「단일시설로 돌리지 않고 일반 거점으로 둔다」이다.
+    "samsong2dong", "haengsin1dong", "siksa", "pungsan", "wonheung", "wonsin", "goyangdong", "tanhyeon2dong",
+    "haengsin4dong", "unjeong3dong", "munbal", "munsaneup",
+    # 못 올린 5곳(등록·수집만 남긴다): hyangdong-south +30.98%p(가드 밖 · 노출 21동) · jichuk 대표값 미산출(상업층 2동) ·
+    #   waedong · unjeong2dong 행정동 구역 0개(`build_district_zones` — 구역을 세울 표본이 없다 · tests/test_district_zones 가 막는다 · gj-sinyong 과 같은 사유) ·
+    #   unjeong5dong 층 단위 빈 자리 0건(상업층 7동 · 공실 0.0%) — `build_vacant_floor_units` 가 0유닛이면 파일을 안 써서
+    #   「층 단위 매물 산출물이 없는 서빙 거점」 가드(tests/test_floor_vacancies)에 걸린다. 광주·전주 2차 gj-sinyong 과 같은 사유
+})
 
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 # 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.

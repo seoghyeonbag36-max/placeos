@@ -1,0 +1,42 @@
+{
+  "slug": "munsaneup",
+  "hub_name": "문산읍",
+  "tier": "Tier1(대장)",
+  "built_at": "2026-11-23T21:15:44",
+  "shown": 90,
+  "excluded_total": 358,
+  "excluded_unknown": 3,
+  "excluded_non_commercial": 335,
+  "excluded_determined": 20,
+  "coverage_pct": 20.1,
+  "status": {
+    "full": 49,
+    "partial": 17,
+    "high": 5,
+    "empty": 19
+  },
+  "source": {
+    "stores+ledger": 62,
+    "polygon_only": 19,
+    "pip_only": 9
+  },
+  "reference_vacancy_pct": 34.4,
+  "reference_buildings": 33,
+  "reference_coverage_pct": 100.0,
+  "mixed_vacancy_pct": 22.8,
+  "by_capacity_method": {
+    "expos_units": {
+      "buildings": 20,
+      "active": 222,
+      "capacity": 347,
+      "vacancy_pct": 36.0
+    },
+    "floor_ouln": {
+      "buildings": 13,
+      "active": 22,
+      "capacity": 25,
+      "vacancy_pct": 12.0
+    }
+  },
+  "note": "excluded_unknown = 건축물대장에서 capacity 를 얻지 못해 지도에서 뺀 건물. 공개 지도에는 노출하지 않는다(관리자 전용). reference_vacancy_pct = 분모 근거가 정밀한 방법(expos_units·floor_ouln)만 집계한 대표값이며 reference_coverage_pct 가 낮으면 신뢰하지 말 것. mixed_vacancy_pct(구 reference)는 floor_approx 를 섞은 값이라 방법 구성비에 따라 흔들린다 — 하위호환용. excluded_determined = 상가 건물이 아님이 **확정**돼 뺀 건물(표제부 비상업 · 층별개요 지상 상업층 0). 재수집해도 안 바뀌므로 reference_coverage_pct 분모에도 들어가지 않는다 — 이 값이 커지는 것은 수집이 덜 됐다는 뜻이 아니다."
+}

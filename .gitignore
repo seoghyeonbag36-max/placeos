@@ -188,6 +188,11 @@ data/gold/*/*
 !data/gold/gyeonggi_ranking_20261104/
 !data/gold/gyeonggi_ranking_20261104/manifest.json
 !data/gold/gyeonggi_ranking_20261104/*.parquet
+# 2026-11-23 고양·파주 서빙 17곳 — 공개 상권이 59→76곳으로 늘어 같은 버전은 거부되므로(`build_gyeonggi_ranking_gold` 의 매니페스트 검사) 새 버전 경로다.
+# 경기 모델 재학습(`train_gyeonggi_rank --version 20261123`)의 입력이라 학습 재현에 필요하다.
+!data/gold/gyeonggi_ranking_20261123/
+!data/gold/gyeonggi_ranking_20261123/manifest.json
+!data/gold/gyeonggi_ranking_20261123/*.parquet
 !data/gold/research-f32a4fa91c43/
 !data/gold/research-f32a4fa91c43/collected_ledger_evidence.json.gz
 # 예외: 행정동 24시간 생활인구 피처(136행 ~20KB) — train_gnn._adong_hour_block 이
