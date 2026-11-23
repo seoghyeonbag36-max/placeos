@@ -176,6 +176,21 @@ DISTRICT_RONE: dict[str, str] = {
     "mokdong": "경기>파주시청",      # 운정 목동 (4.68km)
     "pajuoutlet": "경기>파주시청",   # 파주 프리미엄아울렛 (6.91km)
     "munsan": "경기>파주시청",       # 문산역 (10.58km) ⚠ 가장 멀다 — 임대 대조가 약하다
+    # ── 고양·파주 도시 전체 6곳(2026-11-23) — 카카오 로컬 실측 좌표(고양시청 126.83198,37.65843 · 탄현역 126.76108,37.69399 ·
+    #    파주시청 126.77988,37.76004)에서 가장 가까운 표본. 괄호는 표본까지 실측 거리 — 이름이 아니라 거리로 골랐다.
+    "ilsan2dong": "경기>탄현역",     # 일산2동 (1.41km)
+    "jugyo": "경기>고양시청",        # 주교동 (0.22km) — 고양시청 소재지. 화정과 같은 표본이라 두 거점의 임대·공실 피처가 같다 → SHARED_RONE
+    "todang": "경기>고양시청",       # 토당동 (3.94km)
+    "madu1dong": "경기>탄현역",      # 마두1동 (3.82km) ⚠ 고양시청 4.15km 와 근소하다 — 표본 선택에 민감
+    "daehwadong-ne": "경기>탄현역",  # 대화동 북동 (1.31km)
+    "jori": "경기>파주시청",         # 조리읍 (3.06km)
+    # 계획상가 밀집 보류 6곳(2026-11-23) — 같은 규칙(실측 거리 · 같은 도시 표본). 전부 공유.
+    "hyangdong": "경기>고양시청",     # 향동 (7.81km) ⚠ 멀다 — 임대 대조가 약하다
+    "madu-east": "경기>고양시청",     # 마두동 동측 (3.81km · 탄현역 4.90km)
+    "ilsan3dong": "경기>탄현역",      # 일산3동 (1.71km)
+    "geumchon2dong": "경기>파주시청", # 금촌2동 (1.41km)
+    "unjeong1dong": "경기>파주시청",  # 운정1동 (3.31km)
+    "unjeong6dong": "경기>파주시청",  # 운정6동 (7.54km) ⚠ 멀다 — 탄현역(고양) 4.25km 는 도시가 달라 빌리지 않는다
     # ── 경기 3차 확장 50거점(2026-10-28) — 앵커 자리 35곳은 정확, 두 번째 거점 15곳은 공유
     # ⚠ 중대형 표에만 있는 앵커(단대오거리역·아주대삼거리·영통역·평택시청·광주광남동·분당역세권)는 소규모 임대 행이 없어
     #   그 앵커를 쓰는 8거점(dandae·ajou·yeongtong·pyeongtaekcity·gwangnam + 공유 yatap·jeongja·maetan)의
@@ -326,6 +341,9 @@ SHARED_RONE: frozenset[str] = frozenset({
     "ilsan",
     "westerndom",
     "yadang",
+    # 고양·파주 도시 전체 6곳(2026-11-23) — 표본이 고양 2·파주 1 뿐이라 전부 공유다(주교동은 고양시청 소재지지만 화정과 같은 표본)
+    "ilsan2dong", "jugyo", "todang", "madu1dong", "daehwadong-ne", "jori",
+    "hyangdong", "madu-east", "ilsan3dong", "geumchon2dong", "unjeong1dong", "unjeong6dong",
     # 2차 확장 13거점 — 전부 공유
     "wondang", "bamgasi", "daehwa", "juyeop", "kintex", "baekseok", "madu",
     "haengsin", "samsong", "starfield", "mokdong", "pajuoutlet", "munsan",

@@ -48,7 +48,13 @@ def save_json(obj: Any, district: str, name: str, date: str | None = None) -> Pa
     path = bronze_dir(district, date) / name
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
     n = f" ({len(obj)}행)" if isinstance(obj, list) else ""
-    print(f"[bronze] {path.relative_to(DATA_ROOT)}{n}")
+    # 원천 루트를 다른 트리로 돌리면(`PLACEOS_BRONZE_ROOT` — worktree) path 가 DATA_ROOT 밖이다. 저장은 이미 끝났으니
+    # 로그 한 줄 때문에 수집이 exit 1 로 끝나지 않게 한다(2026-11-23: 고양·파주 12거점 「점포」 단계가 전부 이 줄에서 실패로 읽혔다).
+    try:
+        shown: Path = path.relative_to(DATA_ROOT)
+    except ValueError:
+        shown = path
+    print(f"[bronze] {shown}{n}")
     return path
 
 

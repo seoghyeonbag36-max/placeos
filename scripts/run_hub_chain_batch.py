@@ -61,6 +61,7 @@
     --batch gg3      경기 3차 50거점(2026-10-28 · 59곳까지)
     --batch gj       광주광역시 13상권(2026-10-30 등록 · 10-31 서빙)
     --batch gjjj2    광주·전주 2차 51곳(2026-11-09 등록 — 서빙은 통과분만 GJ_JJ_BATCH2_SERVED_HUBS)
+    --batch gpcity   고양·파주 도시 전체 6곳(서빙은 통과분만 GOYANG_PAJU_CITYWIDE_SERVED_HUBS) + 계획상가 보류 6곳(2026-11-23 · 통과 6곳이 앞이다)
     --hubs a,b,c     직접 지정
     --skip-ledger    대장을 건너뛴다(쿼터 0 · 점포·폴리곤만)
 """
@@ -69,6 +70,7 @@ from __future__ import annotations
 import argparse
 import ctypes
 import json
+import os
 import subprocess
 import sys
 import time
@@ -254,9 +256,14 @@ def clear_failed(slug: str) -> None:
     _marker(slug).unlink(missing_ok=True)
 
 
+def _bronze_root() -> Path:
+    """수집기(`data.collectors.common.BRONZE`)와 같은 원천 루트 — worktree 처럼 bronze 가 메인 트리에 있을 때 `PLACEOS_BRONZE_ROOT` 로 돌린다."""
+    return Path(os.environ.get("PLACEOS_BRONZE_ROOT") or ROOT / "data" / "bronze")
+
+
 def latest_licensing(slug: str) -> Path | None:
     """거점의 최신 인허가 원본(bronze/{slug}/{날짜}/licensing_biz.json). 날짜 폴더명이 곧 순서다."""
-    found = sorted((ROOT / "data" / "bronze").glob(f"{slug}/*/licensing_biz.json"))
+    found = sorted(_bronze_root().glob(f"{slug}/*/licensing_biz.json"))
     return found[-1] if found else None
 
 
@@ -291,6 +298,9 @@ def hubs_of(batch: str) -> list[str]:
         return list(ph.GWANGJU_HUBS)             # 광주광역시 13상권(2026-10-30)
     if batch == "gjjj2":
         return list(ph.GJ_JJ_BATCH2_HUBS)        # 광주·전주 2차 51곳(2026-11-09 · 조사 위치 승격)
+    if batch == "gpcity":
+        # 통과 6곳이 앞이다 — 건축HUB 쿼터는 먼저 오는 거점이 쓴다. 보류 6곳(계획상가)은 그 뒤에 받는다.
+        return [*ph.GOYANG_PAJU_CITYWIDE_HUBS, *ph.GOYANG_PAJU_CEILING_HUBS]
     raise SystemExit(f"모르는 배치: {batch}")
 
 
@@ -487,7 +497,7 @@ def do_hub(slug: str, skip_ledger: bool, quota_out: bool = False) -> str:
 
 
 def has_stores(slug: str) -> bool:
-    return bool(list((ROOT / "data" / "bronze").glob(f"{slug}/*/stores_raw.json")))
+    return bool(list(_bronze_root().glob(f"{slug}/*/stores_raw.json")))
 
 
 def license_upfront(hubs: list[str]) -> None:
