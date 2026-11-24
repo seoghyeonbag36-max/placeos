@@ -79,7 +79,7 @@ const METHOD: { title: string; body: string }[] = [
 const LIMITS: string[] = [
   `${FACTS.region}만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.`,
   "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
-  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 부동산 중개와 계약 대행은 하지 않습니다 — 건물주와 창업자가 직접 이야기하고 계약합니다.",
+  "임대 시세는 실제 매물 호가와 다를 수 있습니다. 부동산 중개와 계약 대행은 하지 않습니다. 건물주와 창업자가 직접 이야기하고 계약합니다.",
 ];
 
 const QUICK_STEPS = [
@@ -125,7 +125,7 @@ export default function Landing() {
             </div>
             <figure className="lp-hero-art">
               <img src={illustration} width={800} height={800}
-                alt="4층 상가 건물 일러스트 — 1층과 4층은 입주해 있고 2~3층이 비어 있다" />
+                alt="4층 상가 건물 일러스트. 1층과 4층은 입주해 있고 2~3층이 비어 있다" />
             </figure>
           </div>
         </section>
@@ -154,7 +154,7 @@ export default function Landing() {
         <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
             <h2 id="lp-how">네 가지 질문이 한&nbsp;줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 읽고, 빈 자리를 찾고, 입점 희망서로 건물주에게 전하고, 계약하고 개업한 뒤 이웃과 잇고 오프라인으로 알리는 순서입니다 — 창업자와 건물주가 같은 네 단계를 각자의 자리에서 씁니다</p>
+            <p className="lp-sub">상권을 읽고, 빈 자리를 찾고, 입점 희망서로 건물주에게 전하고, 계약하고 개업한 뒤 이웃과 잇고 오프라인으로 알리는 순서입니다. 창업자와 건물주가 같은 네 단계를 각자의 자리에서 씁니다</p>
             <ol className="lp-steps">
               {STEPS.map((s, i) => (
                 <li key={s.track} className="lp-step" data-track={s.track}>
