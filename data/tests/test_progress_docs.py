@@ -70,9 +70,8 @@ def test_status_and_index_link_to_the_new_evidence() -> None:
     index = _read("docs/README.md")
 
     assert "공식 공개 소스를 다시 탐색했지만 적격 후보는 0건" in status
-    # 2026-11-22 Program = 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」 — 검증 브리프·지표 계약 게이트(09-17)는 그 기능이
-    # Program 에서 제외돼 걷었다. 상태 계산기가 지금 계약(두 기능 화면 · 실행 카드 개업 뒤)을 말해야 한다.
-    assert "Program 두 기능 화면" in status
+    # 화면 종료와 남아 있는 실행 카드 계약을 각각 검사한다.
+    assert "Program 화면 종료" in status
     assert "실행 카드 · 개업 뒤(actual_open)" in status
     assert "finding-posting-unit-area-sources-2026-08-29.md" in index
     # 2026-10-19: PMF 는 09-16 재정의로 KPI③ 이다(② = 표면 성능). 번호만 옮겼다.

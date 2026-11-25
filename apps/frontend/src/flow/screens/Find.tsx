@@ -645,14 +645,10 @@ export function PivotNext() {
   const label = target?.label ?? "새 업종";
   return (
     <FlowScreen back="/industries" caption={`업종 바꾸기 · ${ro(label)}`} title={`${ro(label)} 바꾼다면, 무엇부터 해 볼까요?`}>
-      {/* 2026-11-22: 「작게 먼저 팔아 볼게요」(④ 작게 확인 · 팝업·가오픈 검증)를 뺐다 — Program 은 개업 후 계약한 자리의 네트워킹·오프라인
-          마케팅이다. 업종 바꾸기는 이미 계약한 지금 자리에서 다시 여는 일이라, 바꾼 뒤 알리기·이웃 잇기(Program)를 그 상권으로 연다. */}
       <ChoiceList label="먼저 할 일" value={null} options={[
         { value: "spaces", title: "이 상권 빈 자리도 볼게요", desc: "옮겨서 하는 경우와 견줘 봐요" },
-        { value: "program", title: "바꾼 뒤 이웃과 잇고 알릴게요", desc: "지금 자리에서 새 업종으로 다시 열 때 (네트워킹·오프라인 마케팅)" },
-      ]} onChoose={(v) => {
-        if (v === "program") go(explorePath({ track: "program", district: state.homeDistrictId }));
-        else { update((s) => setDistrict(s, s.homeDistrictId!)); go("/rent-cap"); }
+      ]} onChoose={() => {
+        update((s) => setDistrict(s, s.homeDistrictId!)); go("/rent-cap");
       }} />
       <p className="fl-foot">지금 가게 자리로 본전을 계산하는 기능은 아직 없어요.</p>
     </FlowScreen>
@@ -682,13 +678,13 @@ export function DistrictSearch() {
 /** archetype 「카페 중심형」 「음식·카페 복합형」 → 문장 속 말 */
 const archetypePhrase = (a: string) => a.replace(/중심형$/, "중심").replace(/복합형$/, "복합");
 
-/** R2 하단 주 버튼 — PPPP 네 구현 화면으로 바로 간다(2026-11-01 사용자 결정 · 종전 「빈 자리 보기」).
- *  문구는 같은 날 사용자가 고른 안 A — 창업자의 말(「따져 보기」)로 쓰고, 「네 단계」가 무엇인지는 버튼 위 한 줄(PPPP_STEPS)이 밝힌다.
+/** R2 하단 주 버튼 — PPPP 세 구현 화면으로 바로 간다(2026-11-01 사용자 결정 · 종전 「빈 자리 보기」).
+ *  문구는 같은 날 사용자가 고른 안 A — 창업자의 말(「따져 보기」)로 쓰고, 「세 단계」가 무엇인지는 버튼 위 한 줄(PPPP_STEPS)이 밝힌다.
  *  181px 이라 320px 폰(버튼 안 폭 248px)에서도 한 줄이다(Pretendard 17px 실측). 앞서 쓴 「Platform·Page·Posting·Program 보기」(285px)는
  *  320px 에서 「보기」가 다음 줄로 접혔고, 영어 이름만 늘어놓아 안내로 읽히지 않았다 */
-const PPPP_CTA = "이 상권 네 단계로 따져 보기";
-/** 버튼 위 한 줄 — 「네 단계」의 이름. 다음 화면(지도 탐색) 레일의 순서·이름 그대로다 */
-const PPPP_STEPS = "Platform → Page → Posting → Program";
+const PPPP_CTA = "이 상권 세 단계로 따져 보기";
+/** 버튼 위 한 줄 — 「세 단계」의 이름. 다음 화면(지도 탐색) 레일의 순서·이름 그대로다 */
+const PPPP_STEPS = "Platform → Page → Posting";
 
 export function District({ id }: { id: string }) {
   const { state, update } = useFlow();
@@ -715,7 +711,7 @@ export function District({ id }: { id: string }) {
   const gap = demand?.bands?.find((b) => b.band === demand.gap_band)?.label;
   const title = identity?.archetype ? `${eun(name)} ${archetypePhrase(identity.archetype)} 상권이에요` : `${name}을 한눈에 볼게요`;
   const loading = platform.status === "loading" || rent.status === "loading" || floors.status === "loading" || ds.status === "loading";
-  // 하단 주 버튼은 PPPP 네 구현 화면(지도 탐색)으로 바로 간다 — 2026-11-01 사용자 결정. 그전에는 「빈 자리 보기」 → R3 였다.
+  // 하단 주 버튼은 PPPP 세 구현 화면(지도 탐색)으로 바로 간다 — 2026-11-01 사용자 결정. 그전에는 「빈 자리 보기」 → R3 였다.
   // 이 상권 · Platform 트랙으로 연다(홈 지도 미리보기 칩과 같은 길). 흐름의 빈 자리 목록(R3)은 홈의 「빈 자리」 단계가 그대로 연다.
   // ⛔ 이 버튼도 PPPP 화면 입구다 — 다른 곳으로 돌리지 않는다(PPPP 화면 보존 규칙 · 가드 src/ppppScreens.test.tsx).
   const openPppp = () => go(explorePath({ track: "platform", district: id }));

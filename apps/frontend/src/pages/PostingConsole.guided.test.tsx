@@ -101,7 +101,7 @@ describe("단계형 비용 검토", () => {
     fireEvent.click(screen.getByRole("button", { name: "비용 비교 및 결정" }));
     expect(screen.getByText("어떤 비용과 전략으로 입점할까요?")).toBeTruthy();
     // 개업 후 Program 으로 넘기는 칸은 같은 쪽 안 — 따로 된 쪽이 없다(2026-11-22 · 그전 「이 자리로 검증 program 만들기」)
-    expect(screen.getByRole("region", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeNull();
     expect(screen.queryByRole("button", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeNull();
     expect(screen.queryByText(/검증 program|가설 검증/)).toBeNull();
   });

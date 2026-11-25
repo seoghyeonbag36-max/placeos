@@ -22,15 +22,15 @@
   P1  #/explore 를 바로 열면(로그인 없이) 레일에 Platform·Page·Posting·Program 넷이 PPPP 순서로 **보인다**
   P2  네 버튼이 각자 자기 화면을 연다 — 「상권 정체성」 · 「지도 데이터 레이어」 · 「입점 계산」 · 「오프라인 캠페인」이 **보인다**
   P3  흐름의 「지도」 진입로 — 허브 탭(데스크톱 상단 · 휴대폰 하단) · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」
-      — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 넷이 보인다
+      — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 세 트랙이 보인다
   P4  지도 탐색이 흐름에서 고른 상권으로 열린다(설계서 5판 §10 C2) — Platform · Page 의 상권 선택 값
-  P5  랜딩의 PPPP 네 질문(#how)이 접히지 않고 보인다
+  P5  랜딩의 PPPP 세 질문(#how)이 접히지 않고 보인다
   P6  (2026-10-24) 홈의 새 입구 — 계약 전 세 단계를 다 마친 홈(11-22 부터 ④ 는 「개업 후」라 세지 않는다)의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
-      보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 넷이 보이고, 그 트랙 화면이
-      서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 네 화면으로 간다
-  P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 네 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
-      「Platform → Page → Posting → Program」이 보이는지도 잰다) — 데스크톱 ·
-      휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 넷이
+      보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 세 트랙이 보이고, 그 트랙 화면이
+      서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 세 화면으로 간다
+  P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 세 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
+      「Platform → Page → Posting」이 보이는지도 잰다) — 데스크톱 ·
+      휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 세 트랙이
       보이고, Platform 이 현재 트랙이며 Platform 의 상권 선택 값이 그 상권이다. 버튼 글자가 한 줄인지 데스크톱 · 390px · 360px 에서 잰다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
   그건 이 규칙과 무관하다(지도 SDK 는 레일·패널을 가리지 않는다).
@@ -63,15 +63,15 @@ ROOT = Path(__file__).resolve().parents[1]
 FLOW_KEY = "placeos.flow.v1"
 # PLAN_KEY("placeos.flow.plan.v1" · ④ 작게 확인의 검증 계획)는 2026-11-22 에 걷었다 — 홈의 ④ 는 이제 「개업 후」(지도 탐색 Program 입구)라
 # 「다 봤다」를 계약 전 ①~③ 으로만 센다. 그래서 P6 씨앗에 검증 계획을 심을 필요가 없다.
-TRACKS = ["Platform", "Page", "Posting", "Program"]
+TRACKS = ["Platform", "Page", "Posting"]
 # 레일 버튼 → 그 화면이 섰다는 표지(역할 · 접근성 이름). Page(MapShell)만 TrackMapFrame 패널이 아니라 레이어 묶음이다
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
-          ("Posting", "complementary", "입점 계산"), ("Program", "complementary", "오프라인 캠페인")]
+          ("Posting", "complementary", "입점 계산")]
 SETTLE_MS = 2500
 # 상권 소개(R2) 하단 주 버튼(2026-11-01 사용자 결정) — flow/screens/Find.tsx 의 PPPP_CTA 와 같은 글자
-R2_CTA = "이 상권 네 단계로 따져 보기"
-# 그 버튼 위 한 줄 — 「네 단계」의 이름(Find.tsx 의 PPPP_STEPS). 레일 순서와 같아야 한다
-R2_STEPS = "Platform → Page → Posting → Program"
+R2_CTA = "이 상권 세 단계로 따져 보기"
+# 그 버튼 위 한 줄 — 「세 단계」의 이름(Find.tsx 의 PPPP_STEPS). 레일 순서와 같아야 한다
+R2_STEPS = "Platform → Page → Posting"
 # 버튼 글자가 버튼 안에 한 줄로 드는가 — 넘침(scrollWidth > clientWidth)과 줄 수(글자 범위의 줄 사각형 top 개수)
 FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
           "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
@@ -144,7 +144,7 @@ def rail_ok(state: list[list]) -> bool:
 
 
 def settled(page) -> dict:
-    """누른 뒤 SETTLE_MS 기다려도 #/explore 에 머물며 레일 넷이 보이는가 — 10-21 #/explore → #/home 되감기를 잡은 자리"""
+    """누른 뒤 SETTLE_MS 기다려도 #/explore 에 머물며 레일 세 트랙이 보이는가 — 10-21 #/explore → #/home 되감기를 잡은 자리"""
     page.wait_for_timeout(SETTLE_MS)
     return {"hash": page.evaluate("() => location.hash"), "rail": rail(page)}
 
@@ -157,6 +157,7 @@ def main() -> int:
     ap.add_argument("--screens", action="store_true", help="화면마다 PNG 를 남긴다")
     ap.add_argument("--headed", action="store_true", help="브라우저 창을 띄운다 — 사람이 눈으로 따라 볼 때")
     ap.add_argument("--slowmo", type=int, default=0, help="동작마다 멈출 ms(--headed 와 같이 — 눈으로 따라갈 수 있게)")
+    ap.add_argument("--require-map-tiles", action="store_true", help="지도 타일의 실수신과 요청 실패 여부도 검사한다")
     args = ap.parse_args()
 
     try:
@@ -195,10 +196,22 @@ def main() -> int:
     errors: list[str] = []
     bad_api: list[str] = []
 
+    failed_tiles: list[str] = []
+
+    def is_tile(url: str) -> bool:
+        return "/styles/" in url and ".png?" in url and (
+            url.startswith("https://nrbe.pstatic.net/") or url.startswith("http://nrbe.map.naver.net/")
+        )
+
     def watch(page, tag: str):
         page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"[{tag}] console.error: {m.text}") if m.type == "error" else None)
         page.on("response", lambda r: bad_api.append(f"[{tag}] {r.status} {r.url}") if "/api/" in r.url and r.status >= 500 else None)
+        if args.require_map_tiles:
+            page.on("requestfailed", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.failure != "net::ERR_ABORTED" else None)
+            page.on("response", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.status >= 400 else None)
         return page
 
     def shot(page, name: str) -> None:
@@ -219,7 +232,7 @@ def main() -> int:
         pg.goto(base + "/#/explore")
         pg.locator("nav button[data-track]").first.wait_for(timeout=60000)
         state = rail(pg)
-        rep.add("P1 레일 네 트랙 · PPPP 순서 · 보임", rail_ok(state), state)
+        rep.add("P1 레일 세 트랙 · PPPP 순서 · 보임", rail_ok(state), state)
         for name, role, label in PANELS:
             pg.get_by_role("button", name=name, exact=True).click()
             try:
@@ -289,7 +302,7 @@ def main() -> int:
                 {"expected": target["id"], "platform": platform_value, "page": page_value})
         pg.close()
 
-        # P5 — 랜딩의 네 질문
+        # P5 — 랜딩의 세 질문
         pg = watch(clean.new_page(), "landing")
         pg.goto(base + "/")
         pg.locator("#how").wait_for(timeout=60000)
@@ -297,7 +310,7 @@ def main() -> int:
         tracks = [steps.nth(i).get_attribute("data-track") for i in range(steps.count())]
         visible = [steps.nth(i).is_visible() for i in range(steps.count())]
         closed = pg.evaluate("() => [...document.querySelectorAll('#how li[data-track]')].filter(li => li.closest('details:not([open])')).length")
-        rep.add("P5 랜딩 네 질문이 펼쳐져 보임", tracks == ["platform", "page", "posting", "program"] and all(visible) and closed == 0,
+        rep.add("P5 랜딩 세 질문이 펼쳐져 보임", tracks == ["platform", "page", "posting"] and all(visible) and closed == 0,
                 {"tracks": tracks, "visible": visible, "in_closed_details": closed})
         if args.screens:
             pg.locator("#how").screenshot(path=str(out / "p5-landing-how.png"))
@@ -363,7 +376,7 @@ def main() -> int:
             try:
                 btn = page.get_by_role("button", name=R2_CTA, exact=True)
                 btn.wait_for(state="visible", timeout=60000)
-                # 글자가 버튼 안에 한 줄로 들어가는가(넘치거나 두 줄로 접히면 실패) · 네 단계의 이름 한 줄이 보이는가
+                # 글자가 버튼 안에 한 줄로 들어가는가(넘치거나 두 줄로 접히면 실패) · 세 단계의 이름 한 줄이 보이는가
                 fit = btn.evaluate(FIT_JS)
                 steps = page.get_by_text(R2_STEPS, exact=True).first.is_visible()
                 shot(page, f"p7-r2-{ctx_name}")
@@ -383,9 +396,9 @@ def main() -> int:
                 rep.add(cid, False, {"error": str(e).splitlines()[0][:200]})
             shot(page, f"p7-{ctx_name}")
             page.close()
-        # P7 글자 — 320px 휴대폰(버튼 안 폭 280px). 안 A 를 고른 근거가 이 폭이다 — 버튼 글자(181px)와 네 단계 한 줄(244px)이 한 줄로 든다.
+        # P7 글자 — 320px 휴대폰(버튼 안 폭 280px). 안 A 를 고른 근거가 이 폭이다 — 버튼 글자(181px)와 세 단계 한 줄(244px)이 한 줄로 든다.
         # 390px 휴대폰(위 mobile)은 넉넉해 그 회귀를 못 잡는다(리뷰 2026-11-01). 첫 판 글자(285px)는 여기서 두 줄이라 360px 을 쟀었다
-        cid = "P7 상권 소개 주 버튼 · 네 단계 한 줄 — 글자 한 줄(320px 휴대폰)"
+        cid = "P7 상권 소개 주 버튼 · 세 단계 한 줄 — 글자 한 줄(320px 휴대폰)"
         narrow = browser.new_context(viewport={"width": 320, "height": 640}, locale="ko-KR", is_mobile=True, has_touch=True)
         narrow.add_init_script(seed)
         page = watch(narrow.new_page(), cid)
@@ -403,7 +416,7 @@ def main() -> int:
         shot(page, "p7-r2-320")
         page.close()
         narrow.close()
-        # P7 여백 — 글자를 키우면 네 단계 한 줄이 두 줄로 접혀 하단 영역이 커진다. 화면 아래 여백이 그 높이를 따라가야 한다(BottomCTA 가 잰다).
+        # P7 여백 — 글자를 키우면 세 단계 한 줄이 두 줄로 접혀 하단 영역이 커진다. 화면 아래 여백이 그 높이를 따라가야 한다(BottomCTA 가 잰다).
         # 112px 고정이던 때 글자 150% 에서 R2 마지막 링크가 영역 밑에 깔렸고, 기본 글자 크기만 재서 못 잡았다(2026-11-01 검증)
         for width, height, scale in ((360, 780, "150%"), (320, 640, "125%")):
             cid = f"P7 하단 영역이 본문을 가리지 않는다(글자 {scale} · {width}px 휴대폰)"
@@ -425,6 +438,21 @@ def main() -> int:
             shot(page, f"p7-r2-font{scale.rstrip('%')}-{width}")
             page.close()
             big.close()
+        if args.require_map_tiles:
+            page = watch(browser.new_page(viewport={"width": 1280, "height": 900}), "P8")
+            painted = False
+            try:
+                page.goto(base + f"/#/explore?track=page&district={target['id']}")
+                page.wait_for_function("""() => [...document.querySelectorAll('.map-canvas img')]
+                    .some(image => /nrbe\\.(pstatic\\.net|map\\.naver\\.net)\\/styles\\//.test(image.src)
+                        && image.complete && image.naturalWidth > 0)""", timeout=20000)
+                painted = True
+                page.wait_for_timeout(SETTLE_MS)
+            except Exception:
+                pass
+            rep.add("P8 네이버 지도 타일이 표시되고 요청 실패가 없다", painted and not failed_tiles,
+                    {"painted": painted, "failed_tiles": sorted(set(failed_tiles))})
+            page.close()
         browser.close()
 
     result = {

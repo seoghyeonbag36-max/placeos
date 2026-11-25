@@ -364,7 +364,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     const link = screen.queryByRole("button", { name: "파주·고양·서울 손님 흐름에서 보기" });
     expect(!!link).toBe(city === "paju" || city === "goyang");
     expect(screen.getByRole("button", { name: "지도에서 자세히" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "이 상권 네 단계로 따져 보기" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "이 상권 세 단계로 따져 보기" })).toBeTruthy();
     if (link) {
       fireEvent.click(link);
       await waitFor(() => expect(window.location.hash).toBe("#/corridor/paju-goyang-seoul"));
@@ -412,7 +412,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(screen.queryByText(/상권 순위를 아직 못 드려요/)).toBeNull();
   });
 
-  it("상권 소개의 주 버튼은 PPPP 네 화면(그 상권 · Platform)으로 바로 간다 — 2026-11-01, 종전 「빈 자리 보기」", async () => {
+  it("상권 소개의 주 버튼은 PPPP 세 화면(그 상권 · Platform)으로 바로 간다 — 2026-11-01, 종전 「빈 자리 보기」", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
     open("/district/seongsu");
@@ -420,9 +420,9 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(await screen.findByRole("heading", { level: 1, name: "성수동 카페거리는 카페 중심 상권이에요" })).toBeTruthy();
     expect(screen.getByText("14~17시")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "빈 자리 보기" })).toBeNull();
-    // 문구 A(11-01) — 버튼은 창업자의 말, 네 단계의 이름은 버튼 위 한 줄
-    expect(screen.getByText("Platform → Page → Posting → Program")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "이 상권 네 단계로 따져 보기" }));
+    // 문구 A(11-01) — 버튼은 창업자의 말, 세 단계의 이름은 버튼 위 한 줄
+    expect(screen.getByText("Platform → Page → Posting")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "이 상권 세 단계로 따져 보기" }));
     expect(window.location.hash).toBe("#/explore?track=platform&district=seongsu");
   });
 
@@ -431,7 +431,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
     open("/home");
     render(<FlowApp token={null} />);
-    const steps = within(await screen.findByRole("list", { name: "네 단계" }));
+    const steps = within(await screen.findByRole("list", { name: "세 단계" }));
     fireEvent.click(steps.getByRole("button", { name: /빈 자리/ }));
     expect(window.location.hash).toBe("#/rent-cap");
     await screen.findByRole("heading", { name: "월세는 얼마까지 생각하세요?" });
@@ -620,7 +620,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(api.matching(/\/founder\/costs$/)[0].body).toMatchObject({ budget: 80_000_000, deposit: 30_000_000, maintenance: null, other_monthly: 100_000 });
   });
 
-  it("F-12 ④ 는 개업 후 Program 이다 — 옛 「작게 확인」 주소는 홈으로 가고, 홈의 ④ 는 지도 탐색 Program 을 그 상권으로 연다(2026-11-22)", async () => {
+  it("옛 「작게 확인」 주소는 홈으로 가고, 홈은 세 단계만 표시한다", async () => {
     const api = stub();
     // 옛 답(④ 의 검증 방식·아이템·기간)이 남아 있어도 읽지 않는다
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu", mode: "soft_open", item: "말차 라떼", runDays: 7 }));
@@ -633,13 +633,13 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(api.count(/\/marketing\/generate$/)).toBe(0);                 // 검증 계획 생성을 부르지 않는다
     open("/home");
     render(<FlowApp token={null} />);
-    const steps = await screen.findByRole("list", { name: "네 단계" });
-    const program = within(steps).getByRole("button", { name: /개업 후/ });
-    expect(program.textContent).toContain("PROGRAM");
-    expect(program.textContent).toContain("열기");
+    const steps = await screen.findByRole("list", { name: "세 단계" });
+    expect(within(steps).getAllByRole("listitem")).toHaveLength(3);
+
+
     expect(within(steps).queryByText(/작게 확인/)).toBeNull();
-    fireEvent.click(program);
-    expect(window.location.hash).toBe("#/explore?track=program&district=seongsu");
+
+
     expect(JSON.parse(window.localStorage.getItem(FLOW_KEY) ?? "{}")).not.toHaveProperty("mode");
   });
 
@@ -723,7 +723,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "카페·디저트 창업 준비" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^지도에서/ })).toBeNull();
-    expect(within(screen.getByRole("list", { name: "네 단계" })).getByText("이어서")).toBeTruthy();
+    expect(within(screen.getByRole("list", { name: "세 단계" })).getByText("이어서")).toBeTruthy();
   });
 
   it("R1-c 상권 순위에서 두 곳을 담아 나란히 본다 — 입지 점수·빈 층·월세가 같은 줄에, 없는 값은 없다고(10-24)", async () => {
@@ -829,7 +829,6 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
         "#/explore?track=platform&district=seongsu",
         "#/explore?track=page&district=seongsu&building=B1",
         "#/explore?track=posting&district=seongsu&building=B1",
-        "#/explore?track=program&district=seongsu",
       ]);
       await waitFor(() => expect(naver.live().filter((o) => o.kind === "Marker" && o.map === naver.map())).toHaveLength(2));
       expect(naver.map()!.options.draggable).toBe(false);
@@ -841,13 +840,13 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     }
   });
 
-  it("홈은 네 단계 진행을 보이고, 로그인 전에는 저장 대신 로그인 버튼을 둔다", async () => {
+  it("홈은 세 단계 진행을 보이고, 로그인 전에는 저장 대신 로그인 버튼을 둔다", async () => {
     stub();
     window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu", spaceId: "vfu-B1-1", spaceLabel: "B1 건물 1층" }));
     open("/home");
     render(<FlowApp token={null} />);
     expect(await screen.findByRole("heading", { level: 1, name: "카페·디저트 창업 준비" })).toBeTruthy();
-    const steps = screen.getByRole("list", { name: "네 단계" });
+    const steps = screen.getByRole("list", { name: "세 단계" });
     expect(within(steps).getByText("B1 건물 1층")).toBeTruthy();
     expect(within(steps).getByText("이어서")).toBeTruthy();
     expect(screen.getByText("저장하려면 로그인해요.")).toBeTruthy();

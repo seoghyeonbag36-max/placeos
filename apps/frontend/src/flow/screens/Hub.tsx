@@ -1,11 +1,8 @@
 /**
- * 허브 — 화면설계서 5판 §5-5: H 홈(네 단계 진행 · 저장한 것) · M 내 정보 · 로그인 패널(시트와 내 정보가 같이 쓴다).
+ * 허브 — 화면설계서 5판 §5-5: H 홈(세 단계 진행 · 저장한 것) · M 내 정보 · 로그인 패널(시트와 내 정보가 같이 쓴다).
  * 허브 화면만 탭(홈 · 지도 · 내 정보)을 보인다. 질문·결과 화면은 탭을 숨긴다(§4-3).
- * 2026-10-24: 홈에서 지도로 바로 — 네 단계를 다 봤으면 주 버튼이 지도 탐색(PPPP 네 화면)을 고른 건물로 연다 ·
+ * 2026-10-24: 홈에서 지도로 바로 — 세 단계를 다 봤으면 주 버튼이 지도 탐색(PPPP 세 화면)을 고른 건물로 연다 ·
  *   지도 미리보기 · 「상권 나란히 보기」(R1-c). 탭 「지도」는 그대로 `#/explore` 다(PPPP 화면 보존 규칙).
- * 2026-11-22: ④ 는 「작게 확인」(검증 계획)이 아니라 **개업 후** 다 — Program 이 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로
- *   좁혀졌다(→ docs/decision-program-post-opening-2026-11-22.md). 계약 전에 끝낼 일은 ①~③ 이라 「다 봤다」는 셋으로 세고(주 버튼 「지도에서 내 자리
- *   보기」는 그대로), ④ 칸은 계약하고 개업한 뒤 지도 탐색의 Program 을 그 상권으로 여는 입구다.
  */
 import { useEffect, useId, useState } from "react";
 import { CORRIDOR_ID, getAuthProviders, getMe, logoutSession, type AuthMe, type AuthProviders, type SavedResult } from "@/lib/api";
@@ -51,8 +48,7 @@ export function LoginPanel({ reason }: { reason: LoginReason }) {
 
 /* ── H 홈 ────────────────────────────────────────────────────────────────── */
 
-// program = 11-22 전에 저장한 검증 계획(④ 작게 확인). 지금은 만들지 않지만 이미 저장한 것은 목록에 그 이름으로 남는다
-const KIND_LABEL: Record<string, string> = { space: "후보 자리", posting: "비용", program: "검증 계획" };
+const KIND_LABEL: Record<string, string> = { space: "후보 자리", posting: "비용" };
 
 function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: number; onRemove?: (id: string) => void }) {
   const { update } = useFlow();
@@ -77,17 +73,16 @@ function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: n
 
 /* ── 홈의 지도 미리보기(2026-10-24 · §5-5) ────────────────────────────────── */
 
-/** 홈의 네 단계 ↔ 지도 탐색 레일의 네 트랙(1:1) — 칩 하나가 그 트랙을 같은 상권으로 연다 */
+/** 홈의 세 단계 ↔ 지도 탐색 레일의 세 트랙(1:1) — 칩 하나가 그 트랙을 같은 상권으로 연다 */
 const TRACK_CHIPS: { track: ExploreTrack; name: string; en: string }[] = [
   { track: "platform", name: "상권", en: "Platform" },
   { track: "page", name: "빈 자리", en: "Page" },
   { track: "posting", name: "비용", en: "Posting" },
-  { track: "program", name: "개업 후", en: "Program" },
 ];
 
 /**
  * 지도를 찾게 하지 말고 보이게 — 빈 자리를 고른 뒤에만 선다. 고른 자리는 기본 핀, 같은 상권에 저장한 후보는 작은 점이다.
- * ⛔ 카드 전체가 지도 탐색(PPPP 네 화면)으로 가는 **입구**다. 끌 수도 확대할 수도 없는 정지 그림이라 흐름 안 지도로
+ * ⛔ 카드 전체가 지도 탐색(PPPP 세 화면)으로 가는 **입구**다. 끌 수도 확대할 수도 없는 정지 그림이라 흐름 안 지도로
  *   지도 탐색을 대신하지 않는다(10-18 의 `#/spaces/map` 과 다른 점 — PPPP 화면 보존 규칙). 탭 「지도」도 그대로다.
  * 지도 위를 덮는 링크는 마우스·터치용이라 읽어 주지 않고(aria-hidden), 같은 곳으로 가는 「지도에서 이어 보기」가 읽힌다.
  */
@@ -193,19 +188,15 @@ export function Home() {
     { key: "posting", name: "비용", en: "POSTING", value: state.premium ? "본전 시점을 봤어요" : state.costs.budget != null || state.costs.deposit != null ? "예산을 점검했어요" : null,
       done: !!state.premium || state.costs.deposit != null || state.costs.budget != null,
       path: state.premium ? "/payback" : state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : "/spaces" },
-    // ④ 개업 후(2026-11-22) — 계약하고 개업한 뒤에 쓰는 칸이라 흐름 안에서 「마쳤다」가 없다. 지도 탐색의 Program 을 이 상권으로 연다
-    { key: "program", name: "개업 후", en: "PROGRAM", value: "계약하고 개업한 뒤, 이웃과 잇고 오프라인으로 알리기",
-      done: false, path: explorePath({ track: "program", district: state.districtId ?? state.homeDistrictId }) },
   ];
-  const PRE_CONTRACT = 3;   // ①~③ 이 계약 전에 끝낼 일이다 — 「이어서」와 「다 봤다」는 이 셋으로만 센다
-  const nextIdx = stages.findIndex((s, i) => i < PRE_CONTRACT && !s.done);
+  const nextIdx = stages.findIndex((s) => !s.done);
   const resume = (i: number) => {
     const s = stages[i];
     // 마지막으로 연 화면이 이 단계 안이면 거기로(§5-5 「이어서」), 아니면 그 단계의 첫 화면
     go(state.lastPath && stageOf(state.lastPath) === s.key ? state.lastPath : s.path);
   };
   // 계약 전 세 단계를 다 봤으면 다음 할 일은 「이어서」가 아니라 지도다(2026-10-24 · §5-5) — 다 마친 사람은 탭 「지도」를 찾아 누르지
-  // 않았다. 하단 주 버튼이 지도 탐색(PPPP 네 화면)을 Page 트랙 · 고른 건물로 연다. 탭 「지도」는 그대로 `#/explore` 다.
+  // 않았다. 하단 주 버튼이 지도 탐색(PPPP 세 화면)을 Page 트랙 · 고른 건물로 연다. 탭 「지도」는 그대로 `#/explore` 다.
   const allDone = nextIdx === -1;
   const mapDistrict = state.districtId ?? state.homeDistrictId;
   const myBuilding = state.spaceAt?.buildingId ?? null;
@@ -213,15 +204,15 @@ export function Home() {
   return (
     <FlowScreen hub tab="home" caption={allDone ? title : GOAL_LABEL[state.goal]}
       title={allDone ? "계약 전 세 단계를 다 봤어요" : title}
-      sub={allDone ? "고른 자리를 지도에서 주변 빈 자리와 함께 볼 수 있어요. 계약하고 개업한 뒤에는 ④ 개업 후에서 이웃과 잇고 알려요." : undefined}
+      sub={allDone ? "고른 자리를 지도에서 주변 빈 자리와 함께 볼 수 있어요." : undefined}
       cta={allDone ? <BottomCTA primary={{ label: myBuilding ? "지도에서 내 자리 보기" : "지도에서 이 상권 보기", onClick: openMap }} /> : undefined}>
-      <ol className="fl-steps" aria-label="네 단계">
+      <ol className="fl-steps" aria-label="세 단계">
         {stages.map((s, i) => (
           <li key={s.key} className={"fl-step" + (s.done ? " is-done" : "") + (i === nextIdx ? " is-next" : "")}>
             <button type="button" className="fl-step-btn" onClick={() => resume(i)}>
               <span className="fl-step-mark" aria-hidden="true">{s.done ? "✓" : i + 1}</span>
               <span className="fl-step-main"><b>{s.name}</b><span>{s.value ?? "아직이에요"}</span><small>{s.en}</small></span>
-              <span className="fl-step-go">{i === nextIdx ? "이어서" : s.done ? "보기" : i >= PRE_CONTRACT ? "열기" : ""}</span>
+              <span className="fl-step-go">{i === nextIdx ? "이어서" : s.done ? "보기" : ""}</span>
             </button>
           </li>
         ))}
@@ -263,7 +254,6 @@ function stageOf(path: string): string | null {
   if (/^\/(start|industry|home-district|districts|industries|pivot-next|district-search|district\/|compare\/)/.test(path)) return "platform";
   if (/^\/(rent-cap|spaces|space\/)/.test(path)) return "page";
   if (/^\/(premium|payback|budget|contract|fitout|budget-check)/.test(path)) return "posting";
-  // ④ 개업 후(Program)는 흐름 안 화면이 없다 — 늘 지도 탐색의 Program 을 연다(2026-11-22 · 옛 ④ 작게 확인 주소는 모르는 주소)
   return null;
 }
 

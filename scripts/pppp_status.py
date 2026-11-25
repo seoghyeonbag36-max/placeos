@@ -1331,25 +1331,14 @@ def program_track(total: int) -> Track:
     t = Track("Program", "Phase 6-2 (계약·개업한 자리)")
     kinds = _context_kinds()
 
-    # ── 두 기능 화면 — 배선을 코드에서 센다(문구만 고쳐서는 안 올라가게) ──
+    # 2026-11-25 제품에서 Program 화면을 제거했다. 아래 게이트는 남아 있는 API·데이터 계약을 측정한다.
     hub_src = _read("apps/frontend/src/pages/CampaignStudio.tsx")
     app_src = _read("apps/frontend/src/App.tsx")
-    labels = [n for n in ("네트워킹", "오프라인 마케팅 솔루션") if f'label: "{n}"' in hub_src]
-    excluded = [n for n in ("가설 설정", "지원 프로그램") if f'label: "{n}"' in hub_src]
-    # 제외한 기능은 **불러오는 줄**로 본다 — 머리 주석이 그 이름(ProgramStudio 등)을 경위로 적는 것은 괜찮다
-    excluded_imports = [m for m in ('"@/pages/ProgramStudio"', '"@/components/program/SupportPrograms"',
-                                    '"@/components/program/OwnerMarketing"') if m in hub_src]
-    hub_ok = (len(labels) == 2 and not excluded and not excluded_imports
-              and all(c in hub_src for c in ("ConsolePages", "NetworkingPanel", "ExecutionCards", "CampaignLedger"))
-              and 'import("@/pages/CampaignStudio")' in app_src)
+    hub_retired = "pages/CampaignStudio" not in app_src and 'track: "program"' not in app_src
     t.gates.append(Gate(
-        "Program 두 기능 화면 (네트워킹 · 오프라인 마케팅)", 1.0 if hub_ok else 0.0,
-        "Program 허브(pages/CampaignStudio — PPPP 화면 가드가 보는 그 모듈) 안에 네트워킹 · 오프라인 마케팅 솔루션 두 탭만. "
-        "2026-11-22 사용자 정의로 지원 프로그램 · 가설 설정 · 건물주 공실 알리기 보기를 뺐다"
-        "(Program 화면 · 레일 · TrackMapFrame 「오프라인 캠페인」은 그대로)"
-        if hub_ok else
-        "미배선이거나 제외한 기능이 남았다 — 두 탭 · 네트워킹 · 실행 카드 · 캠페인 원장 · App 의 Program 모듈 중 하나가 없거나 "
-        f"제외한 기능이 다시 들어왔다(탭 {'·'.join(excluded) or '—'} · 불러오기 {'·'.join(excluded_imports) or '—'})",
+        "Program 화면 종료", 1.0 if hub_retired else 0.0,
+        "지도 레일에서 Program 화면과 진입점을 제거했다."
+        if hub_retired else "지도 레일에 Program 화면 또는 진입점이 남아 있다.",
     ))
 
     api_src = _read("apps/frontend/src/lib/api.ts")
