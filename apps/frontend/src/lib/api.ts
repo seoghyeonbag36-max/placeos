@@ -645,6 +645,54 @@ export const getFloorVacancies = (
   q.set("limit", String(opt.limit ?? 300));
   return getJSON<FloorVacancyList>(`/commercial-districts/${id}/floor-vacancies?${q}`);
 };
+
+/* ===== 빈 층 창업 가능 등급 · 건물주 등록(Page) — GET /commercial-districts/{id}/startup-fit (2026-11-25) =====
+ * 등급은 **허가 판정이 아니다** — 대장 · 토지이음 기재(입점 점검 규칙 · 일반 창업 6업종)와 Posting 3-Tier 1층 기준 추정
+ * (R-ONE 임대료 × 층 계수 · 실제 호가 아님)이고, 기준선은 서울 같은 가격대 평균 영업이익률(KOSIS)이다.
+ * 건물주 등록은 요청마다 게시 중 · 소유자 확인 매물(L3)을 건물 ID + 층으로 맞춘다.
+ * ⚠ `owner_status` 가 "ready" 가 아니면 `owner` 가 비어 있어도 「등록 없음」이 아니다 — `owner_note` 를 그대로 보인다. */
+export type StartupGrade = "A1" | "A2" | "B" | "C";
+export interface StartupReason {
+  code: string;
+  /** hard = 어려움으로 보낸 사유 · soft = 조건부로 보낸 사유 · ok = 열림 · info = 참고(등급 불변) */
+  tone: "hard" | "soft" | "ok" | "info";
+  text: string;
+}
+export interface OwnerListingBrief {
+  id: string; title?: string; unit_label?: string; area_m2?: number | null;
+  deal_type?: string | null; deposit_manwon?: number | null; monthly_rent_manwon?: number | null;
+}
+export interface StartupFitUnit {
+  id: string; building_id?: string | null; pnu?: string | null; n?: string;
+  floor: number; floor_label: string; certainty: "confirmed" | "probable";
+  area_m2?: number | null; purps?: string;
+  grade: StartupGrade; grade_label?: string;
+  reasons: StartupReason[];
+  open_industries: { key: string; label: string }[];
+  best_tier?: string | null;
+  /** 1층 기준 순익률(월 순익 ÷ 매출) — 「여력 있음」이면 서울 평균을 넘긴 그 가격대 */
+  best_margin_1f?: number | null;
+  seoul_avg?: number | null;
+  owner: OwnerListingBrief[];
+}
+export interface StartupFitList {
+  district_id: string;
+  computed_at: string;
+  owner_status: "ready" | "not_ready" | "unavailable";
+  owner_note: string;
+  counts: Record<StartupGrade, number>;
+  owner_floors: number;
+  note: string;
+  units: StartupFitUnit[];
+}
+/** 빈 층의 창업 가능 등급 + 건물주 등록. `buildingId` 로 건물 하나만, `detail: false` 는 목록 거르기용(이유 없음) */
+export const getStartupFit = (id: string, opt: { buildingId?: string; detail?: boolean } = {}) => {
+  const q = new URLSearchParams();
+  if (opt.buildingId) q.set("building_id", opt.buildingId);
+  if (opt.detail === false) q.set("detail", "false");
+  const qs = q.toString();
+  return getJSON<StartupFitList>(`/commercial-districts/${id}/startup-fit${qs ? `?${qs}` : ""}`);
+};
 /** 거점(상권) 마케팅 — 온라인 콘텐츠는 Gold 기반 생성(Program), 행사는 시드 */
 export const getMarketing = (id: string) => getJSON<Marketing>(`/marketing/${id}`);
 /** 상권 행사만 — LLM 을 부르지 않는다. Program 지도의 오프라인 홍보 장소(2026-09-13).

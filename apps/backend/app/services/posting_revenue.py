@@ -231,6 +231,16 @@ def opex_rate(tier: str) -> float | None:
     return r.get("opex_rate_ex_rent") if r else None
 
 
+def profit_rate(tier: str) -> float | None:
+    """서울 같은 tier 업종의 평균 영업이익률(KOSIS 2024 · 임차료까지 뺀 뒤) — 「서울 평균 가게」 기준선.
+
+    유닛 순익률이 이 값 이상이면 매출 대비 임대료 비중이 서울 평균(`rent_rate`) 이하라는 뜻이다
+    (순익률 = 1 − 비임차비용률 − 임대료/매출, 이 값 = 1 − 비임차비용률 − rent_rate). Page 의 창업 가능 등급이 쓴다.
+    """
+    r = _rates().get(tier)
+    return r.get("profit_rate") if r else None
+
+
 @lru_cache(maxsize=1)
 def _kosis_store_sales() -> dict[str, float]:
     """KOSIS 서울 2024 tier별 **점포당 월매출**(만원) — 절대수준 앵커.

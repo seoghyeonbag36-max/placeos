@@ -1,0 +1,33 @@
+/* Page 건물 상세 — 빈 층 창업 가능 등급 · 건물주 등록(2026-11-25). 색만으로 가르지 않는다 — 기호 + 글자. */
+.b-startup { margin-top: var(--sp-3); padding-top: 10px; border-top: 1px dashed var(--line); }
+.b-startup .sf-live { background: var(--primary-soft); color: var(--primary-pressed); }
+.sf-list { list-style: none; margin: var(--sp-2) 0 0; padding: 0; display: grid; gap: 6px; }
+.sf-item { border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; background: var(--surface); }
+.sf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: var(--fs-caption); }
+.sf-floor { font-weight: 700; min-width: 34px; }
+.sf-floor i { font-style: normal; font-weight: 600; color: var(--note-ink); }
+.sf-grade { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px 1px 2px; border-radius: 999px; font-weight: 700; border: 1px solid transparent; }
+.sf-grade i { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 5px; font-style: normal; font-size: 10px; color: var(--on-accent); }
+.sf-g-A1 { background: var(--source-real-soft); border-color: var(--source-real-line); color: var(--source-real); }
+.sf-g-A1 i { background: var(--success); }
+.sf-g-A2 { background: var(--caution-soft); border-color: var(--caution-line); color: var(--caution-ink); }
+.sf-g-A2 i { background: var(--caution-ink); }
+.sf-g-B { background: var(--note-soft); border-color: var(--note-line); color: var(--note-ink); }
+.sf-g-B i { background: var(--note-ink); }
+.sf-g-C { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger-text); }
+.sf-g-C i { background: var(--danger); }
+.sf-owner { margin-left: auto; color: var(--muted); }
+.sf-owner.is-on { color: var(--primary-pressed); font-weight: 700; }
+.sf-owner.is-unknown { color: var(--note-ink); }
+.sf-why { margin-top: 4px; font-size: var(--fs-caption); }
+.sf-why summary { cursor: pointer; color: var(--muted); }
+.sf-why ul { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 3px; line-height: 1.5; color: var(--sub); }
+.sf-why li b { font-weight: 700; margin-right: 2px; }
+.sf-why .sf-r-hard b { color: var(--danger-text); }
+.sf-why .sf-r-soft b { color: var(--note-ink); }
+.sf-why .sf-r-ok b { color: var(--source-real); }
+.sf-why .sf-r-info b { color: var(--muted); }
+.sf-owner-note { margin: var(--sp-2) 0 0; padding: 6px 8px; border-radius: 8px; background: var(--note-soft); color: var(--note-ink); font-size: var(--fs-caption); line-height: 1.5; }
+.sf-when { margin: 6px 0 0; font-size: var(--fs-caption); color: var(--muted); }
+/* 목록 거르기 칩 아래 한 줄 */
+.startup-filter-note { margin: 4px 0 0; font-size: var(--fs-caption); color: var(--muted); }
