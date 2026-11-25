@@ -63,11 +63,11 @@ export function OwnerHome() {
         ))}
       <RowList label="건물주 도구">
         <Row title="입점 희망서" meta="내 확인 매물 상권을 희망한 창업자 · 내 매물로 먼저 제안" onClick={() => go("/owner/briefs")} />
-        <Row title="지도에서 상권 보기" meta="Platform · Page — 상권의 온라인 데이터와 층별 공실" onClick={() => go(explorePath())} />
+        <Row title="지도에서 상권 보기" meta="Platform · Page: 상권의 온라인 데이터와 층별 공실" onClick={() => go(explorePath())} />
         <Row title="문의함" meta="창업자 문의 · 방문 예약 · 조건 제안" onClick={() => go("/inbox")} />
         <Row title="정액 상품" meta="상단 노출(광고) · 공실 진단 상세 리포트" onClick={() => go("/plans")} />
       </RowList>
-      <p className="fl-note">건물주가 직접 올리는 자리는 2층 이상·지하·오래 빈 자리가 많아요 — 1층 좋은 자리는 대개 중개사무소를 거쳐요. 그런 자리를 찾는 창업자(학원·의원·미용·팝업 등)는 입점 희망서로 조건을 남겨요.</p>
+      <p className="fl-note">건물주가 직접 올리는 자리는 2층 이상·지하·오래 빈 자리가 많아요. 1층 좋은 자리는 대개 중개사무소를 거쳐요. 그런 자리를 찾는 창업자(학원·의원·미용·팝업 등)는 입점 희망서로 조건을 남겨요.</p>
       <DirectNotice />
     </FlowScreen>
   );
@@ -112,7 +112,7 @@ export function OwnerNew() {
       const saved = listingId ? await updateDirectListing(token, listingId, body) : await createDirectListing(token, body);
       setListingId(saved.id);
       await submitDirectListing(token, saved.id, { relation, registry_number: registry.trim(), owner_name: ownerName.trim(), delegation_note: delegation.trim() });
-      toast("제출했어요 — 소유자 확인 뒤 게시돼요");
+      toast("제출했어요. 소유자 확인 뒤 게시돼요");
       go(`/owner/listing/${encodeURIComponent(saved.id)}`);
     } catch (e) {
       const err = e as DirectApiError;
@@ -130,7 +130,7 @@ export function OwnerNew() {
       {meta.status === "error" && <LoadError what="등록 선택지" error={meta.error} onRetry={meta.retry} />}
       <div className="dr-form">
         <h2 className="fl-h2">어느 자리인가요</h2>
-        <Field label="상권" hint="목록에 없으면 비워 두세요 — 주소로 확인해요.">
+        <Field label="상권" hint="목록에 없으면 비워 두세요. 주소로 확인해요.">
           <select value={d.district_id} onChange={(e) => { setPicked(null); setD((s) => ({ ...s, district_id: e.target.value, building_id: "", lat: "", lng: "" })); }}>
             <option value="">선택 안 함</option>
             {districts.status === "ready" && districts.data.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
@@ -143,7 +143,7 @@ export function OwnerNew() {
         )}
         <Field label="소재지(주소)" req><input value={d.address} maxLength={300} onChange={(e) => set("address", e.target.value)} placeholder="도로명 또는 지번 주소" /></Field>
         {picked && picked.floors.length > 0 && (
-          <Field label="이 건물에서 층 고르기" hint="대장에 있는 층이에요 — 고르면 아래 층 칸이 채워져요. 면적은 전용면적을 직접 적어 주세요(대장 층 바닥면적에는 복도·계단 같은 공용이 들어 있어요).">
+          <Field label="이 건물에서 층 고르기" hint="대장에 있는 층이에요. 고르면 아래 층 칸이 채워져요. 면적은 전용면적을 직접 적어 주세요(대장 층 바닥면적에는 복도·계단 같은 공용이 들어 있어요).">
             <select aria-label="이 건물에서 층 고르기" value={picked.floors.find((f) => String(f.lv) === d.floor.trim())?.label ?? ""}
               onChange={(e) => { const f = picked.floors.find((x) => x.label === e.target.value); if (f) set("floor", String(f.lv)); }}>
               <option value="">고르세요</option>
@@ -162,7 +162,7 @@ export function OwnerNew() {
             {meta.status === "ready" && meta.data.use_types.map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
         </Field>
-        <Field label="건축물대장 세부 용도(선택)" hint="알면 고르세요 — 같은 용도·층에서 영업 중인 업종을 보여 드려요.">
+        <Field label="건축물대장 세부 용도(선택)" hint="알면 고르세요. 같은 용도·층에서 영업 중인 업종을 보여 드려요.">
           <select value={d.ledger_use} onChange={(e) => set("ledger_use", e.target.value)}>
             <option value="">모름</option>
             {meta.status === "ready" && meta.data.ledger_uses.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -193,11 +193,11 @@ export function OwnerNew() {
             <Field label="최대 일수"><input inputMode="numeric" value={d.popup_max} onChange={(e) => set("popup_max", e.target.value)} /></Field>
           </div>
         )}
-        <Field label="비어 있기 시작한 날(선택)" hint="6개월이 넘으면 「장기 공실」로 보여요 — 조건을 협의할 창업자가 찾아요.">
+        <Field label="비어 있기 시작한 날(선택)" hint="6개월이 넘으면 「장기 공실」로 보여요. 조건을 협의할 창업자가 찾아요.">
           <input type="date" value={d.vacant_since} onChange={(e) => set("vacant_since", e.target.value)} />
         </Field>
         <h2 className="fl-h2">설비(선택)</h2>
-        <p className="fl-note">창업자의 입점 희망서 「필요 설비」와 맞춰 봐요. 모르면 「모름」으로 두세요 — 「없음」과 다르게 보여요.</p>
+        <p className="fl-note">창업자의 입점 희망서 「필요 설비」와 맞춰 봐요. 모르면 「모름」으로 두세요. 「없음」과 다르게 보여요.</p>
         <div className="dr-grid2">
           <Field label="배기(덕트)">
             <select value={d.exhaust} onChange={(e) => set("exhaust", e.target.value as Tri)}>
@@ -223,7 +223,7 @@ export function OwnerNew() {
             ))}
           </fieldset>
         </>}
-        <Field label="설명(선택)" hint="연락처·외부 링크는 적지 마세요 — 문의는 문의함으로 받아요.">
+        <Field label="설명(선택)" hint="연락처·외부 링크는 적지 마세요. 문의는 문의함으로 받아요.">
           <textarea value={d.description} maxLength={1000} onChange={(e) => set("description", e.target.value)} />
         </Field>
 
@@ -294,7 +294,7 @@ function Diagnosis({ listing }: { listing: DirectOwnerListing }) {
         <h3 className="fl-h2">상세 리포트</h3>
         <ul className="fl-facts">
           {diag.data.detail.nearby_vacant && <li>반경 {diag.data.detail.nearby_vacant.radius_m}m 추정 빈 자리 {diag.data.detail.nearby_vacant.n}곳 · 직전 업종: {diag.data.detail.nearby_vacant.previous_uses.map((u) => `${u.label} ${u.n}`).join(" · ") || "—"}</li>}
-          {diag.data.detail.signals.model.top.length > 0 && <li>위치 모델 상위: {diag.data.detail.signals.model.top.map((m) => m.industry).join(" · ")} — {diag.data.detail.signals.model.caveat}</li>}
+          {diag.data.detail.signals.model.top.length > 0 && <li>위치 모델 상위: {diag.data.detail.signals.model.top.map((m) => m.industry).join(" · ")}. {diag.data.detail.signals.model.caveat}</li>}
           {diag.data.detail.signals.demand.rows.map((r) => <li key={r.industry_key}>최근 문의 수요 · {r.label}: {r.founders ?? "표본 적음"}</li>)}
           {diag.data.detail.history && <li>층 이력 {diag.data.detail.history.events.length}건 · 출처 {diag.data.detail.history.source}</li>}
         </ul>
@@ -346,7 +346,7 @@ export function OwnerListing({ id }: { id: string }) {
       <div className="fl-actions">
         {l.status === "published" && <TextButton onClick={() => !busy && act("pause")}>일시중지</TextButton>}
         {l.status === "paused" && <TextButton onClick={() => !busy && act("resume")}>다시 게시</TextButton>}
-        {l.status !== "closed" && l.status !== "hidden" && <TextButton onClick={() => !busy && act("close")}>거래 끝 — 종료</TextButton>}
+        {l.status !== "closed" && l.status !== "hidden" && <TextButton onClick={() => !busy && act("close")}>거래 끝, 종료</TextButton>}
         <TextButton onClick={() => setConfirmDelete(true)}>삭제</TextButton>
         <TextButton onClick={() => go("/inbox")}>문의함</TextButton>
       </div>
@@ -354,9 +354,9 @@ export function OwnerListing({ id }: { id: string }) {
       {/* 건물주도 Page·Platform 을 쓴다(2026-11-22) — 내 층이 지도에서 어떻게 보이는지, 내 상권의 온라인 데이터가 어떤지 */}
       {l.district_id && (
         <RowList label="지도에서 보기">
-          <Row title="Page — 내 층이 지도에서 보이는 모습" meta="소유자 확인 뒤 게시되면 창업자가 이 층을 찾아볼 수 있어요"
+          <Row title="Page: 내 층이 지도에서 보이는 모습" meta="소유자 확인 뒤 게시되면 창업자가 이 층을 찾아볼 수 있어요"
             onClick={() => go(explorePath({ track: "page", district: l.district_id, building: l.building_id }))} />
-          <Row title="Platform — 이 상권의 온라인 데이터" meta="블로그·카페글·뉴스 언급 · 검색 트렌드 · 어울리는 업종"
+          <Row title="Platform: 이 상권의 온라인 데이터" meta="블로그·카페글·뉴스 언급 · 검색 트렌드 · 어울리는 업종"
             onClick={() => go(explorePath({ track: "platform", district: l.district_id }))} />
         </RowList>
       )}

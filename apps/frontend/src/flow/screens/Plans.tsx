@@ -90,7 +90,7 @@ export function Plans() {
     <FlowScreen back="/me" title="정액 상품" sub="정해진 금액의 상품만 있어요. 성사·중개 수수료는 받지 않아요.">
       {done && (
         <div className="dr-missing" role="status">
-          신청했어요 — {done.title}. {done.instructions.message} {done.instructions.payment}
+          신청했어요: {done.title}. {done.instructions.message} {done.instructions.payment}
         </div>
       )}
       <h2 className="fl-h2">건물주</h2>

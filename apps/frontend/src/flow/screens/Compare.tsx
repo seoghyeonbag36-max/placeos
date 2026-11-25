@@ -77,7 +77,7 @@ export function Compare({ param }: { param: string }) {
       {work && !ranked && <p className="fl-note">{eun(work.label)} 추천 모델이 다루지 않는 업종이라 입지 점수는 나란히 놓지 않았어요.</p>}
       {/* 점수는 잣대(모델)마다, 순위는 묶음(잣대 × 시도)마다 따로다(2026-10-27 · 11-01) — 잣대가 섞이면 점수를 견주지 말라고 밝힌다.
           잣대 단위로 적는다: 경기와 광주는 같은 잣대라 둘만 고르면 이 줄이 서지 않는다 */}
-      {ranked && rulerNames && <WarnLine>{rulerNames.map((names) => `${names.join(" · ")} 점수`).join("와 ")}는 서로 다른 모델로 매겼어요 — 모델이 다른 상권끼리는 점수를 견주지 마세요.</WarnLine>}
+      {ranked && rulerNames && <WarnLine>{rulerNames.map((names) => `${names.join(" · ")} 점수`).join("와 ")}는 서로 다른 모델로 매겼어요. 모델이 다른 상권끼리는 점수를 견주지 마세요.</WarnLine>}
       {cols.filter((c) => c.caveat).map((c) => <WarnLine key={c.id}>{c.name}: {c.caveat}</WarnLine>)}
       {/* 서울시 상권분석(유형·붐비는 때의 재료)은 서울 상권에만 선다 */}
       <p className="fl-source">카카오 플레이스{cols.some((c) => (c.city ?? "seoul") === "seoul") ? " · 서울시 상권분석" : ""}{quarter?.status === "ready" ? ` · R-ONE ${quarter.data.quarter}` : " · R-ONE"} · 건축물대장{ranked ? " · 업종 추천 모델" : ""}</p>
@@ -88,7 +88,7 @@ export function Compare({ param }: { param: string }) {
           <li>빈 층은 건축물대장·상가정보로 센 수예요. 실제 매물인지는 현장에서 꼭 확인해요.</li>
           <li>1층 월세는 R-ONE 표본 평균으로 낸 추정이에요. 호가가 아니고 보증금·권리금·관리비는 빠져 있어요.</li>
           <li>본전 계산 가능한 빈 자리는 건물 단위로 본전 시점을 낼 수 있는 빈 자리 수예요.</li>
-          <li>모두 더한 종합 점수는 없어요 — 무엇을 더 무겁게 볼지는 직접 정해요.</li>
+          <li>모두 더한 종합 점수는 없어요. 무엇을 더 무겁게 볼지는 직접 정해요.</li>
         </ul>
       </Details>
       <Sheet open={switchTo !== null} onClose={() => setSwitchTo(null)} title={switchTo ? `${ro(switchTo.name)} 바꿀까요?` : ""}>

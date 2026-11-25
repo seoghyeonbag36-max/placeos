@@ -291,7 +291,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     fireEvent.click(screen.getByRole("button", { name: "경기" }));
     const gg = within(screen.getByRole("list", { name: "고양·파주 카페·디저트 상권 순위" }));
     expect(gg.getByText("금촌")).toBeTruthy();
-    expect(screen.getByText("순위는 서울 · 고양·파주 묶음마다 따로 매겨요 — 서울 점수와 고양·파주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
+    expect(screen.getByText("순위는 서울 · 고양·파주 묶음마다 따로 매겨요. 서울 점수와 고양·파주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
   });
 
   it("R1 순위는 시도마다 따로 — 같은 잣대의 경기 · 광주도 한 줄에 세우지 않는다(2026-11-01)", async () => {
@@ -324,7 +324,7 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     const gj = within(screen.getByRole("list", { name: "광주 카페·디저트 상권 순위" }));
     expect(gj.getByText("광주 금남로/충장로")).toBeTruthy();
     expect(gj.queryByText("밤가시마을")).toBeNull();
-    expect(screen.getByText("순위는 서울 · 경기 · 광주 묶음마다 따로 매겨요 — 서울 점수와 경기 · 광주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
+    expect(screen.getByText("순위는 서울 · 경기 · 광주 묶음마다 따로 매겨요. 서울 점수와 경기 · 광주 점수는 잣대가 달라 견주지 마세요.")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "왜 이 순서인가요?" }));
     expect(await screen.findByText(/경기 · 광주는 같은 모델이라 점수는 견줄 수 있지만, 순위는 지역마다 따로 세워요\./)).toBeTruthy();
     expect(screen.getByText("광주 평균 입지 점수 14점 · 순위를 매긴 상권 1곳")).toBeTruthy();

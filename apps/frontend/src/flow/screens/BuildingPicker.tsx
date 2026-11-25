@@ -70,7 +70,7 @@ export default function BuildingPicker({ districtId, picked, onPick, onClear }: 
     <div className="dr-picker">
       <label className="dr-field"><span>지도의 건물 찾기(선택)</span>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="건물 이름이나 도로명 주소의 일부" aria-label="지도의 건물 찾기" />
-        <small>고르면 대장 주소와 층 목록을 채워 드려요. 이어 두면 창업자가 지도에서 이 건물을 열었을 때 올린 층이 보여요. 목록에 없으면 비워 두고 주소로 올리세요 — 그땐 지도 건물에 붙지 않아요.</small>
+        <small>고르면 대장 주소와 층 목록을 채워 드려요. 이어 두면 창업자가 지도에서 이 건물을 열었을 때 올린 층이 보여요. 목록에 없으면 비워 두고 주소로 올리세요. 그땐 지도 건물에 붙지 않아요.</small>
       </label>
       {res.status === "loading" && <p className="fl-source" role="status">건물 목록을 불러오는 중…</p>}
       {res.status === "error" && <p className="fl-source">건물 목록을 불러오지 못했어요. 주소로 올려도 돼요.</p>}

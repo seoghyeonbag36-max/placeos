@@ -171,7 +171,7 @@ export function DistrictMap({ districts, matchIds, outlines, colors, description
   return (
     <div className="fl-dmap-map" role="region" aria-label={label}>
       {failed
-        ? <div className="fl-minimap-fallback"><span>지도를 불러오지 못했어요 — 목록에서 골라 주세요</span></div>
+        ? <div className="fl-minimap-fallback"><span>지도를 불러오지 못했어요. 목록에서 골라 주세요</span></div>
         : <div ref={el} className="fl-dmap-canvas" aria-hidden="true" />}
       {!failed && <p className="fl-dmap-hint" aria-hidden="true">색칠된 구역을 누르면 그 상권을 골라요</p>}
       {children}
