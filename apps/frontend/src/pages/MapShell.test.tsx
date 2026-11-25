@@ -63,9 +63,10 @@ function mountClassified() {
 }
 
 /** `withBuildings: false` 면 /heatmap/buildings 가 404 → 화면이 로컬 샘플로 폴백한다. */
-function mount(opts: { withBuildings?: boolean; rent?: RentHeatmap; floorVac?: unknown; onReview?: (selection: { districtId: string; buildingId: string; buildingName: string }) => void } = {}) {
+function mount(opts: { withBuildings?: boolean; rent?: RentHeatmap; floorVac?: unknown; startupFit?: unknown; onReview?: (selection: { districtId: string; buildingId: string; buildingName: string }) => void } = {}) {
   const routes: Route[] = [
     ...(opts.floorVac ? [{ match: /\/api\/v1\/commercial-districts\/garosugil\/floor-vacancies\?/, body: opts.floorVac }] : []),
+    ...(opts.startupFit ? [{ match: /\/api\/v1\/commercial-districts\/garosugil\/startup-fit\?detail=false$/, body: opts.startupFit }] : []),
     { match: /\/api\/v1\/commercial-districts$/, body: HUBS },
     { match: /\/api\/v1\/heatmap\/rent\?district=/, body: opts.rent ?? rentHeatmap("garosugil") },
     {
@@ -386,6 +387,41 @@ describe("MapShell — 임대시세는 금액으로 말한다", () => {
     fireEvent.click(screen.getByRole("button", { name: "조건 초기화" }));
     expect((floorSelect as HTMLSelectElement).value).toBe("all");
     expect(await screen.findByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
+  });
+
+  // 창업 가능 · 건물주 등록(테스트 전용 합성) — g1: 2층 창업 여력 있음(ready 면 건물주 등록 1건) · g3: 1층 어려움. g2 는 빈 층 없음
+  const startupUnit = (pnu: string, floor: number, grade: "A1" | "A2" | "B" | "C", owner: { id: string }[] = []) => ({
+    id: `vfu-${pnu}-${floor}`, building_id: pnu, pnu, floor, floor_label: `${floor}F`, certainty: "confirmed", grade,
+    reasons: [], open_industries: [], owner });
+  const startupFit = (status: "ready" | "not_ready") => ({
+    district_id: "garosugil", computed_at: "2026-11-25T00:00:00+00:00", owner_status: status,
+    owner_note: status === "ready" ? "게시 중이고 소유자 확인을 마친 건물주 매물만 셉니다." : "건물주 직거래 기능을 준비하고 있어요(0 건이 아닙니다).",
+    counts: { A1: 1, A2: 0, B: 0, C: 1 }, owner_floors: status === "ready" ? 1 : 0, note: "허가 판정이 아니에요.",
+    units: [startupUnit("g1", 2, "A1", status === "ready" ? [{ id: "L-1" }] : []), startupUnit("g3", 1, "C")] });
+
+  it("창업 · 건물주 거르기 — 창업 가능 층이 있는 건물만 남고, 건물주 등록을 확인할 수 없으면 거르지 않는다 · 처음 고를 때만 부른다(2026-11-25)", async () => {
+    mount({ startupFit: startupFit("not_ready") });
+    await screen.findByText("가로수 A");
+    expect(api.count(/startup-fit/)).toBe(0);                                  // 첫 화면은 부르지 않는다
+    const sel = screen.getByRole("combobox", { name: "창업 가능 · 건물주 등록 필터" });
+    fireEvent.change(sel, { target: { value: "startup" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 C 카페/ })).toBeNull());
+    expect(screen.getByRole("button", { name: /^가로수 A 카페/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^가로수 B 카페/ })).toBeNull();
+    expect(screen.getByText(/창업 여력 있음 · 가능 층이 있는 건물만/)).toBeTruthy();
+    fireEvent.change(sel, { target: { value: "owner" } });                     // 모르는 것을 없다고 세지 않는다
+    expect(await screen.findByRole("button", { name: /^가로수 B 카페/ })).toBeTruthy();
+    expect(screen.getByText(/건물주 등록을 아직 확인할 수 없어 거르지 않았습니다/)).toBeTruthy();
+    expect(api.count(/startup-fit\?detail=false/)).toBe(1);                   // 한 번만 부른다
+  });
+
+  it("건물주 등록 거르기 — 확인 매물(게시 중)이 있는 층의 건물만 남긴다(2026-11-25)", async () => {
+    mount({ startupFit: startupFit("ready") });
+    await screen.findByText("가로수 A");
+    fireEvent.change(screen.getByRole("combobox", { name: "창업 가능 · 건물주 등록 필터" }), { target: { value: "owner" } });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /^가로수 C 카페/ })).toBeNull());
+    expect(screen.getByRole("button", { name: /^가로수 A 카페/ })).toBeTruthy();
+    expect(screen.getByText(/건물주가 직접 올린 확인 매물\(게시 중\)이 있는 층의 건물만/)).toBeTruthy();
   });
 
   it("층별 공실 자료가 없는 상권은 층으로 거르지 않고 그렇다고 말한다", async () => {

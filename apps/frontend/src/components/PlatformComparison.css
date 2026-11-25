@@ -6,7 +6,7 @@
 .platform-comparison p{margin:var(--sp-2) 0;font-size:var(--fs-caption);line-height:1.65;color:var(--muted);overflow-wrap:anywhere}
 .platform-comparison small{display:block;margin-top:var(--sp-1);font-size:var(--fs-caption);font-weight:400;color:var(--muted);overflow-wrap:anywhere}
 .platform-comparison .platform-comparison-source{color:var(--ink)}
-.platform-comparison-note{padding:var(--sp-3);border-left:3px solid var(--track-platform);background:var(--track-platform-soft)}
+.platform-comparison-note{padding:var(--sp-3);border:1px solid color-mix(in srgb,var(--track-platform) 24%,transparent);border-radius:var(--radius-md);background:var(--track-platform-soft)}
 .platform-comparison-chart{padding:var(--sp-4) 0}
 .platform-comparison-chart ul{list-style:none;margin:var(--sp-2) 0 0;padding:0;display:grid;gap:var(--sp-3)}
 .platform-comparison-axis{display:flex;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-caption);color:var(--muted);font-variant-numeric:tabular-nums}

@@ -12,7 +12,7 @@ import { kakaoMapUrl } from "@/lib/externalMap";
 import { useFlow, useResume, useSaved } from "../context";
 import { MiniMap } from "../MiniMap";
 import { httpStatus, useFlowData, useLoad } from "../data";
-import { floorText, useSpaces, type SpaceItem } from "../spaces";
+import { floorText, REQUIRED_SALES_CITIES, useSpaces, type SpaceItem } from "../spaces";
 import { eun } from "../format";
 import { go, replace } from "../route";
 import { setSpace, type SpaceAt, type SpaceBrowse } from "../state";
@@ -20,7 +20,8 @@ import {
   Badge, BottomCTA, ChoiceList, Details, FlowScreen, LoadError, ResultView, SaveHeart, Sheet,
   SkeletonRows, TextButton, WarnLine,
 } from "../ui";
-import { hasRanking, useDistrictName, useNeed, useWorkIndustry } from "./common";
+import { districtById, hasRanking, useDistricts, useDistrictName, useNeed, useWorkIndustry } from "./common";
+import { RequiredSales } from "../RequiredSales";
 import { UseCheckCard } from "../UseCheckCard";
 import { BuildingDirectCard, DirectSupplyCard } from "./Direct";
 
@@ -225,6 +226,8 @@ export function SpaceDetail({ id }: { id: string }) {
   const ok = useNeed(!!did, "/district-search");
   const spaces = useSpaces(did);
   const name = useDistrictName(did);
+  const districts = useDistricts();
+  const city = districts.status === "ready" ? districtById(districts.data, did)?.city ?? null : null;
   const work = useWorkIndustry();
   const [viewer, setViewer] = useState(false);
   const item = spaces.status === "ready" ? spaces.data.items.find((s) => s.id === id) ?? null : null;
@@ -271,6 +274,8 @@ export function SpaceDetail({ id }: { id: string }) {
         <TextButton onClick={() => go(calculable ? "/premium" : "/budget")}>이 자리 비용 검토</TextButton>
       </div>}
       {!calculable && <div className="fl-actions"><TextButton onClick={() => go("/budget")}>현장 금액으로 예산 점검</TextButton></div>}
+      {city && REQUIRED_SALES_CITIES.includes(city) && item.monthlyRent != null && spaces.status === "ready" &&
+        <RequiredSales key={item.id} rentMan={item.monthlyRent} rentIsShared={spaces.data.rentShared} />}
       <h2 className="fl-h2">이 건물의 층</h2>
       <div className="fl-stack-row">
         <FloorStack big item={item} siblings={spaces.status === "ready" ? spaces.data.items : []} />

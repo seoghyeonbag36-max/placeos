@@ -3,13 +3,17 @@
 거점별 데이터를 백엔드 단일 소스(app/data + app/services/districts)로 제공한다.
 프론트엔드는 이 엔드포인트로 정적 임베드를 대체할 수 있다.
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
 
+from app.core.db import get_db
 from app.schemas.district import DistrictSummary, Posting, Zone
 from app.schemas.floor_vacancy import FloorVacancyList
+from app.schemas.startup_fit import StartupFitList
 from app.schemas.renewal import (DistrictReport, HubOutlines, NearbyStores, RentHistory, ResearchLocations,
                                  SiteRanking)
 from app.services import districts as svc
+from app.services import startup_fit
 from app.services import (district_report, floor_vacancy, hub_outlines, nearby_stores, platform_profile,
                           research_locations, rone_history)
 
@@ -164,6 +168,27 @@ async def get_report(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if out is None:
         raise HTTPException(status_code=404, detail=f"unknown district: {district_id}")
+    return out
+
+
+@router.get("/{district_id}/startup-fit", response_model=StartupFitList)
+def get_startup_fit(
+    district_id: str,
+    building_id: str | None = Query(None, min_length=1, max_length=64),
+    certainty: str | None = Query(None, pattern="^(confirmed|probable)$"),
+    detail: bool = Query(True),
+    db: Session = Depends(get_db),
+) -> dict:
+    """빈 층마다 「창업 가능 등급」과 「건물주 등록」 — Page 건물 상세 · 목록 거르기(2026-11-25).
+
+    등급은 입점 점검(use_check · 일반 창업 6업종) + Posting 3-Tier(1층 기준 · 서울 평균 영업이익률 기준선) + 자리 조건으로
+    정한다 — 허가 판정이 아니다. 건물주 등록은 **요청마다** 게시 중 · 소유자 확인 매물(L3)을 건물 ID + 층으로 맞춘다.
+    직거래 표가 없으면 `owner_status=not_ready`(0 건이 아니다). `detail=false` 는 목록 거르기용으로 이유를 뺀다.
+    404 는 floor-vacancies 와 같이 「이 상권에 층 단위 산출물이 없다」는 뜻이다.
+    """
+    out = startup_fit.for_district(district_id, db, building_id=building_id, certainty=certainty, detail=detail)
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"no floor-level vacancy inventory for district: {district_id}")
     return out
 
 

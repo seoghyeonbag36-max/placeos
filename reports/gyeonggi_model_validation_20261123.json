@@ -1,0 +1,532 @@
+{
+  "skill": {
+    "available": true,
+    "model": "industry-gnn-gyeonggi",
+    "cities": [
+      "anseong",
+      "anyang",
+      "bucheon",
+      "dongducheon",
+      "goyang",
+      "guri",
+      "gwangju-gg",
+      "gwangmyeong",
+      "hanam",
+      "hwaseong",
+      "icheon",
+      "osan",
+      "paju",
+      "pocheon",
+      "pyeongtaek",
+      "seongnam",
+      "siheung",
+      "suwon",
+      "uijeongbu",
+      "yangju",
+      "yeoju",
+      "yongin"
+    ],
+    "clusters": 76,
+    "test_nodes": 9632,
+    "skill_pp_top3": 3.322259136212625,
+    "skill_ci95_pp": [
+      2.8280407429598564,
+      3.867403314917127
+    ],
+    "mcnemar": {
+      "b_model_only": 477,
+      "c_prior_only": 157,
+      "p_two_sided": 1.9936325450894215e-38
+    },
+    "verdict": "실력",
+    "label_level": "group_mapped",
+    "features": 90
+  },
+  "vocabulary": {
+    "verdict": "합격",
+    "checks": {
+      "label_level": {
+        "ok": true,
+        "value": "group_mapped",
+        "want": "group_mapped"
+      },
+      "no_unmapped": {
+        "ok": true,
+        "value": 0
+      },
+      "width": {
+        "ok": true,
+        "value": 6,
+        "want": 6,
+        "of": 7
+      }
+    },
+    "labels": [
+      "병원",
+      "숙박",
+      "약국",
+      "음식점",
+      "카페",
+      "편의점"
+    ],
+    "missing": [
+      "문화시설"
+    ],
+    "outside_vocab": [],
+    "slots": 48154,
+    "top1_lead": {
+      "label": "음식점",
+      "share": 0.9393612160983511
+    }
+  },
+  "other_models_preserved": true,
+  "all_public_hubs_covered": true,
+  "passed": true,
+  "applied": true,
+  "metrics": {
+    "test_top1": 0.7029,
+    "test_top3": 0.9223,
+    "test_macro_f1": 0.2213,
+    "val_select_by": "top1",
+    "val_best": 0.7022,
+    "baseline_major_top1": 0.6808,
+    "baseline_district_prior_top1": 0.6808,
+    "baseline_district_prior_top3": 0.8891,
+    "test_offprior_top3": 0.4466,
+    "offprior_nodes": 1068,
+    "test_top3_paired": {
+      "b_model_only": 477,
+      "c_prior_only": 157,
+      "n": 9632,
+      "by_district": {
+        "ajou": [
+          9,
+          3,
+          187
+        ],
+        "anseong": [
+          8,
+          2,
+          177
+        ],
+        "anyangst": [
+          16,
+          4,
+          231
+        ],
+        "baekseok": [
+          5,
+          2,
+          183
+        ],
+        "bamgasi": [
+          2,
+          0,
+          111
+        ],
+        "bongdam": [
+          6,
+          0,
+          115
+        ],
+        "bucheonst": [
+          14,
+          5,
+          354
+        ],
+        "byeongjeom": [
+          5,
+          1,
+          70
+        ],
+        "cheolsan": [
+          2,
+          1,
+          126
+        ],
+        "daehwa": [
+          9,
+          0,
+          74
+        ],
+        "dandae": [
+          7,
+          5,
+          124
+        ],
+        "deokjeong": [
+          3,
+          1,
+          42
+        ],
+        "dongducheon": [
+          3,
+          1,
+          103
+        ],
+        "ganeung": [
+          9,
+          1,
+          140
+        ],
+        "geumchon": [
+          13,
+          4,
+          209
+        ],
+        "giheung": [
+          0,
+          1,
+          81
+        ],
+        "gimnyangjang": [
+          6,
+          2,
+          163
+        ],
+        "goyangdong": [
+          2,
+          0,
+          45
+        ],
+        "guri": [
+          6,
+          3,
+          244
+        ],
+        "gwangmyeongsa": [
+          13,
+          4,
+          196
+        ],
+        "gwangnam": [
+          4,
+          0,
+          56
+        ],
+        "gyeongan": [
+          7,
+          0,
+          163
+        ],
+        "gyomun": [
+          8,
+          1,
+          104
+        ],
+        "haengsin": [
+          3,
+          2,
+          71
+        ],
+        "haengsin1dong": [
+          1,
+          1,
+          47
+        ],
+        "haengsin4dong": [
+          3,
+          2,
+          51
+        ],
+        "hanam": [
+          6,
+          1,
+          168
+        ],
+        "icheon": [
+          15,
+          2,
+          221
+        ],
+        "ilsan2dong": [
+          10,
+          5,
+          130
+        ],
+        "indeogwon": [
+          5,
+          3,
+          142
+        ],
+        "ingye": [
+          26,
+          11,
+          318
+        ],
+        "jeongja": [
+          4,
+          1,
+          215
+        ],
+        "jori": [
+          2,
+          1,
+          38
+        ],
+        "jugyo": [
+          2,
+          1,
+          25
+        ],
+        "jukjeon": [
+          7,
+          2,
+          109
+        ],
+        "madu1dong": [
+          0,
+          0,
+          36
+        ],
+        "maetan": [
+          6,
+          1,
+          83
+        ],
+        "moran": [
+          5,
+          4,
+          115
+        ],
+        "munbal": [
+          0,
+          0,
+          17
+        ],
+        "munsan": [
+          1,
+          1,
+          95
+        ],
+        "munsaneup": [
+          2,
+          0,
+          38
+        ],
+        "myeonghak": [
+          5,
+          1,
+          117
+        ],
+        "osan": [
+          3,
+          0,
+          116
+        ],
+        "osanst": [
+          15,
+          6,
+          169
+        ],
+        "pajang": [
+          3,
+          6,
+          82
+        ],
+        "paldalmun": [
+          14,
+          4,
+          166
+        ],
+        "pocheon": [
+          4,
+          0,
+          109
+        ],
+        "pungsan": [
+          2,
+          2,
+          60
+        ],
+        "pyeongtaekcity": [
+          6,
+          1,
+          95
+        ],
+        "pyeongtaekst": [
+          12,
+          7,
+          259
+        ],
+        "samsong2dong": [
+          12,
+          0,
+          65
+        ],
+        "siksa": [
+          3,
+          3,
+          60
+        ],
+        "sincheonst": [
+          11,
+          6,
+          222
+        ],
+        "sinheung": [
+          4,
+          2,
+          81
+        ],
+        "sinjungdong": [
+          12,
+          2,
+          306
+        ],
+        "skku": [
+          9,
+          1,
+          125
+        ],
+        "songnae": [
+          4,
+          2,
+          138
+        ],
+        "songtan": [
+          7,
+          0,
+          108
+        ],
+        "songu": [
+          7,
+          4,
+          135
+        ],
+        "suji": [
+          5,
+          0,
+          138
+        ],
+        "sujin": [
+          4,
+          0,
+          57
+        ],
+        "suwonst": [
+          11,
+          2,
+          205
+        ],
+        "taepyeong": [
+          5,
+          2,
+          59
+        ],
+        "tanhyeon2dong": [
+          4,
+          2,
+          29
+        ],
+        "todang": [
+          1,
+          0,
+          59
+        ],
+        "uijeongbust": [
+          22,
+          9,
+          419
+        ],
+        "unjeong": [
+          0,
+          0,
+          35
+        ],
+        "unjeong3dong": [
+          2,
+          2,
+          74
+        ],
+        "wondang": [
+          3,
+          1,
+          77
+        ],
+        "wonheung": [
+          2,
+          0,
+          46
+        ],
+        "wonsin": [
+          1,
+          0,
+          40
+        ],
+        "yadang": [
+          3,
+          0,
+          108
+        ],
+        "yatap": [
+          6,
+          3,
+          171
+        ],
+        "yeoju": [
+          6,
+          2,
+          105
+        ],
+        "yeokgok": [
+          11,
+          3,
+          166
+        ],
+        "yeongtong": [
+          3,
+          5,
+          214
+        ]
+      }
+    },
+    "lift_vs_district_prior_pct": 3.2,
+    "nodes": 48154,
+    "edges_used": 126171,
+    "test_nodes": 9632,
+    "classes": 6,
+    "features": 90,
+    "label_level": "group_mapped",
+    "unmapped_nodes_dropped": 55258,
+    "class_weight": 0,
+    "demand_features": 0,
+    "building_features": 1,
+    "neighbor_label_features": 0,
+    "adong_hour_features": 0,
+    "jipgyegu_features": 0,
+    "edge_types": "all",
+    "cities": [
+      "anseong",
+      "anyang",
+      "bucheon",
+      "dongducheon",
+      "goyang",
+      "guri",
+      "gwangju-gg",
+      "gwangmyeong",
+      "hanam",
+      "hwaseong",
+      "icheon",
+      "osan",
+      "paju",
+      "pocheon",
+      "pyeongtaek",
+      "seongnam",
+      "siheung",
+      "suwon",
+      "uijeongbu",
+      "yangju",
+      "yeoju",
+      "yongin"
+    ]
+  },
+  "training": {
+    "epochs": 600,
+    "patience": 80,
+    "use_demand": false,
+    "use_building": true,
+    "label_level": "group_mapped"
+  },
+  "gold_manifest_sha256": "560078a59cf1faf0c5f0094a35d7b8aeaf7019cce7138b9bdd3f5de3780f9f75"
+}

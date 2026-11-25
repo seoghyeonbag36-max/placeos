@@ -9,7 +9,7 @@ import { CORRIDOR_ID, type DistrictSummary, type IndustryFitRow } from "@/lib/ap
 import { COMPARE_MAX } from "@/lib/districtCompare";
 import { fitGroups, rankText } from "@/lib/fitGroups";
 import { groupName, groupOf, siteRankGroups } from "@/lib/districtMapModel";
-import { showsCrossRegion } from "@/lib/siteScope";
+import { SITE_DEFAULT_REGION, SITE_LABEL, SITE_SCOPE_KEY, showsCrossRegion } from "@/lib/siteScope";
 import { distinctDistrictColors } from "@/lib/districtColors";
 import { DistrictMap } from "../DistrictMap";
 import { useFlow } from "../context";
@@ -289,7 +289,7 @@ const CITY_ORDER = ["서울", "고양", "파주"];
 function cityNames(list: DistrictSummary[]): string {
   const names = [...new Set(list.map((d) => d.city_name).filter(Boolean))];
   names.sort((a, b) => (CITY_ORDER.indexOf(a) + 1 || 99) - (CITY_ORDER.indexOf(b) + 1 || 99));
-  return names.join("·") || "서울";
+  return names.join("·") || SITE_LABEL;
 }
 
 /* ── 상권 고르기 목록 — Q3 · Q4 가 같이 쓴다 ─────────────────────────────── */
@@ -440,13 +440,13 @@ function DistrictRankings() {
   // 순위 모델이 없는 지역도 공개 상권은 보여 준다. 점수·순위를 대신 만들지 않는다.
   const known = publicDistricts.status === "ready" ? publicDistricts.data : [];
   const regionOf = (r: IndustryFitRow | undefined) => {
-    if (!r) return "서울";
+    if (!r) return SITE_DEFAULT_REGION;
     const d = known.find((d) => d.id === r.district_id);
     return d ? groupName(groupOf(d)) : r.rank_group_name === "서울" ? "서울"
       : r.rank_group_name === "광주" ? "광주" : r.rank_group_name === "전주" || r.gu === "전주" ? "전주" : "경기";
   };
   const activeRegion = region ?? (state.goal === "move"
-    ? regionOf(fit.data.districts.find((r) => r.district_id === state.homeDistrictId) ?? fit.data.districts[0]) : "서울");
+    ? regionOf(fit.data.districts.find((r) => r.district_id === state.homeDistrictId) ?? fit.data.districts[0]) : SITE_DEFAULT_REGION);
   const regionalTops = groups.map((g) => ({ g, top: g.rows.filter((r) => regionOf(r) === activeRegion)
     .slice(0, expandedRegion === activeRegion ? undefined : 5) }))
     .filter(({ top }) => top.length > 0);
@@ -511,10 +511,15 @@ function DistrictRankings() {
       sub={regionalTops.length ? `비슷한 자리에 ${iga(ind.label)} 얼마나 들어서 있는지로 매긴 순위예요. 매출 순위는 아니에요.`
         : "입지 점수를 계산할 모델 자료가 없어 순위 없이 보여 드려요. 빈 자리와 월세는 확인할 수 있어요."}>
       {regionPicker}
-      {scope && <p className="fl-note" role="status">
+      {scope && SITE_SCOPE_KEY === "seoul" && <p className="fl-note" role="status">
         {activeRegion} 공개 상권 {scope.public_n}곳 중 {scope.ranked_n}곳을 비교했어요.
         {scope.unranked_n > 0 && ` ${scope.unranked_n}곳은 모델 자료가 없어 순위를 제공하지 않아요.`}
         {scope.ranked_cities.length > 0 && ` 비교 지역: ${scope.ranked_cities.join(" · ")}.`}
+        {" 지역 전체 상권의 전수 순위는 아니에요."}
+      </p>}
+      {/* 일부 도시만 보이는 범위(고양·파주 전용 · 2026-11-23)는 순위가 지역 전체 안에서 매겨진다는 점을 밝힌다 — 보이는 곳만 세면 순위 숫자와 안 맞는다 */}
+      {scope && SITE_SCOPE_KEY !== "seoul" && <p className="fl-note" role="status">
+        {SITE_LABEL} 상권 {regionalCount}곳을 보여 드려요. 순위는 {activeRegion} 공개 상권 {scope.ranked_n}곳 안에서 매긴 거라 번호가 건너뛸 수 있어요.
         {" 지역 전체 상권의 전수 순위는 아니에요."}
       </p>}
       {regionalTops.map(({ g, top: groupTop }) => (

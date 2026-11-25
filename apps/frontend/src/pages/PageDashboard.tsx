@@ -409,7 +409,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
           onClick={() => setLayer("buildings")}>공실 건물</button>
         <button className={layer === "grid" ? "on" : ""} onClick={() => setLayer("grid")}>100m 그리드</button>
         {sel && layer === "buildings" && (
-          <button className="twinbtn" onClick={() => setTwinOpen(true)}>🏢 {sel.name} · 층별 공실 · 공실 이력</button>
+          <button className="twinbtn" onClick={() => setTwinOpen(true)}>{sel.name} · 층별 공실 · 공실 이력</button>
         )}
       </div>
 
@@ -882,7 +882,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                 </div>
               )}
               <div className="insta">
-                {marketing.online_contents.map((c, i) => <div key={i} className="ig">📷 {c}</div>)}
+                {marketing.online_contents.map((c, i) => <div key={i} className="ig">{c}</div>)}
               </div>
             </>
           )}

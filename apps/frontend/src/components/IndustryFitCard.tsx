@@ -10,6 +10,7 @@
  *   어휘(산출물이 정한다)에 없는 업종은 순위를 내지 않는다(가까운 업종 점수로 대신 채우지 않는다).
  */
 import { useEffect, useId, useState } from "react";
+import { SITE_DEFAULT_REGION } from "@/lib/siteScope";
 import {
   getDistrictIndustries, getIndustryFit,
   type DistrictIndustries, type DistrictSummary, type IndustryFit, type IndustryFitRow, type IndustryOption,
@@ -133,7 +134,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
       <h2 id={headId}>
         {ind.label} — {hereName}
         {fit.model_covered && (here?.fit_rank != null
-          ? <> {here.rank_group_name ?? "서울"} {here.rank_n ?? fit.ranked_n}곳 중 <b>{here.fit_rank}위</b></>
+          ? <> {here.rank_group_name ?? SITE_DEFAULT_REGION} {here.rank_n ?? fit.ranked_n}곳 중 <b>{here.fit_rank}위</b></>
           : <> <span className="fit-muted">순위 없음(이 상권은 모델 산출물이 없습니다)</span></>)}
       </h2>
       {!fit.model_covered && (
@@ -148,7 +149,7 @@ function DistrictRankCard({ business, ind, districtId, districts, onDistrictChan
       {home && here && home.district_id !== here.district_id && mixedRulers([home, here]) && (
         <p className="fit-diff">지금 상권({home.name})과 이 상권은 다른 모델로 매긴 점수라 차이를 내지 않습니다.</p>
       )}
-      {here && <Facts row={here} meanFit={meanFit} meanName={group?.name || "서울"} covered={fit.model_covered} />}
+      {here && <Facts row={here} meanFit={meanFit} meanName={group?.name || SITE_DEFAULT_REGION} covered={fit.model_covered} />}
       {/* 적합도·순위를 읽는 법이라 순위가 없으면 싣지 않는다 */}
       {fit.model_covered && <p className="fit-note">{FIT_NOTE}</p>}
 

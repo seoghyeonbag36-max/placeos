@@ -11,6 +11,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
@@ -85,6 +86,16 @@ if _html_dir.exists():
 async def health() -> dict[str, str]:
     """헬스체크 엔드포인트."""
     return {"status": "ok", "service": "placeos-backend", "version": "0.1.0"}
+
+
+# ── 고양·파주 전용 진입로 (2026-11-23 사용자 요청) ───────────────────────────────
+# 사이트는 기본이 서울만 보인다(프론트 `lib/siteScope` · 2026-11-10). 고양·파주만 보이는 범위는 프론트가 주소로 고른다 —
+# 쿼리 `region=goyang-paju`. 사람이 읽는 짧은 주소 `/goyang-paju` 는 여기서 그 쿼리로 보낸다(프론트 정적 마운트보다 먼저 등록돼야
+# 경로 전체를 삼키는 `/` 마운트에 안 가려진다). 앱이 해시 라우팅이라 서버가 아는 경로는 이 하나뿐이다.
+@app.get("/goyang-paju", include_in_schema=False)
+@app.get("/goyang-paju/", include_in_schema=False)
+async def goyang_paju_entry() -> RedirectResponse:
+    return RedirectResponse(url="/?region=goyang-paju", status_code=307)
 
 
 # ── 프론트 정적 서빙 (Cloud Run 단일 컨테이너용, 2026-08-28) ──────────────────

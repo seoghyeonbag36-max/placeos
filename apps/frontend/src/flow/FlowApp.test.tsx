@@ -484,6 +484,8 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect(await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "몇 달이면 본전인지 보기" })).toBeNull();
     expect(screen.getByText(reason)).toBeTruthy();
+    // 요구 판매량은 고양·파주만 먼저 연다 — 같은 사유를 가진 다른 도시 자리에는 아직 붙이지 않는다
+    expect(screen.queryByRole("region", { name: "요구 판매량" })).toBeNull();
     c.unmount();
     // 질문 화면에서는 부르지 않는다
     loadNaverMaps.mockClear();
@@ -491,6 +493,36 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     render(<FlowApp token={null} />);
     await screen.findAllByRole("heading", { level: 1, name: "월세는 얼마까지 생각하세요?" });
     expect(loadNaverMaps).not.toHaveBeenCalled();
+  });
+
+  it("R4 요구 판매량 — 매출 자료가 없는 파주 자리는 월세와 직접 넣은 비용으로 하루 필요 판매량을 낸다(2026-11-23)", async () => {
+    const reason = "파주 상권에는 매출 자료(서울시 상권분석 추정매출)가 없어 본전 시점을 계산하지 않아요.";
+    const noData = { available: false, unavailable_reason: "자료 부족", invest_mn: null, month_cost: null, month_rev: null,
+      month_net: null, roi_months: null, viable: false, recommended: false, basis: null };
+    stub([
+      { match: /\/commercial-districts$/, body: [district("seongsu", { name: "금촌", gu: "파주시", city: "paju", city_name: "파주" })] },
+      { match: /\/seongsu\/postings$/, body: [{ id: "vu-B1", n: "B1", grp: "A", lat: 0, lng: 0, area: 19, rent: 412, prem: 0, floor: "1F", was: "카페", foot: "",
+        scenarios: { premium: tier("premium", noData), value: tier("value", noData), factory: tier("factory", noData) },
+        payback_unavailable_reason: reason }] },
+    ]);
+    window.localStorage.setItem(FLOW_KEY, JSON.stringify({ v: 1, goal: "start", industryKey: "cafe", districtId: "seongsu" }));
+    open("/space/vfu-B1-1");
+    render(<FlowApp token={null} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "B1 건물 1층" })).toBeTruthy();
+    const region = await screen.findByRole("region", { name: "요구 판매량" });
+    // 기본값을 만들지 않는다 — 네 칸이 다 차기 전에는 결과가 없다
+    expect(within(region).queryByRole("term")).toBeNull();
+    const type = (label: RegExp, value: string) => fireEvent.change(within(region).getByLabelText(label), { target: { value } });
+    type(/판매 1건당 평균 금액/, "10000");
+    type(/재료비·수수료/, "40");
+    type(/월 기타 고정비/, "500");
+    expect(within(region).queryByLabelText("요구 판매량 결과")).toBeNull();
+    type(/한 달 영업일/, "26");
+    // (412 + 500) ÷ 0.6 = 1,520만원 → 1,520만 ÷ 10,000원 ÷ 26일 = 58.5 → 하루 59건
+    const result = within(region).getByLabelText("요구 판매량 결과");
+    expect(result.textContent).toContain("1,520만원");
+    expect(result.textContent).toContain("59건");
+    expect(region.textContent).toContain("필요한 양이에요");
   });
 
   it("R4 입점 점검 — 고른 업종으로 이 층을 점검하고, 허가를 단정하지 않는다(2026-11-15)", async () => {
