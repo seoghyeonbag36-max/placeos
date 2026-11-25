@@ -1,8 +1,8 @@
 # AGENTS.md — apps/frontend (React + TypeScript + Vite)
 
 > **2026-11-25 사용자 결정** — Program을 제품 화면에서 제거한다. 화면 보존 규칙과 검증은
-> Platform · Page · Posting, 기존 지도 진입로, 랜딩의 세 질문에 적용한다. 상권 소개 주 버튼은
-> 「이 상권 세 단계로 따져 보기」이며, 위 안내는 「Platform → Page → Posting」이다.
+> Platform · Page · Proposal(기존 Posting), 기존 지도 진입로, 랜딩의 세 질문에 적용한다. 상권 소개 주 버튼은
+> 「이 상권 세 단계로 따져 보기」이며, 위 안내는 「Platform → Page → Proposal」이다.
 
 루트 [AGENTS.md](../../AGENTS.md) 를 먼저 읽는다. 이 문서는 이 디렉터리에만 더 얹는 규칙이다.
 

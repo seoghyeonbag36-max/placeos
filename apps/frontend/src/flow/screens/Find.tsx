@@ -684,7 +684,7 @@ const archetypePhrase = (a: string) => a.replace(/중심형$/, "중심").replace
  *  320px 에서 「보기」가 다음 줄로 접혔고, 영어 이름만 늘어놓아 안내로 읽히지 않았다 */
 const PPPP_CTA = "이 상권 세 단계로 따져 보기";
 /** 버튼 위 한 줄 — 「세 단계」의 이름. 다음 화면(지도 탐색) 레일의 순서·이름 그대로다 */
-const PPPP_STEPS = "Platform → Page → Posting";
+const PPPP_STEPS = "Platform → Page → Proposal";
 
 export function District({ id }: { id: string }) {
   const { state, update } = useFlow();

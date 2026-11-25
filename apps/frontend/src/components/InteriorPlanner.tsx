@@ -66,7 +66,7 @@ export default function InteriorPlanner({ handoff, district, industry }: {
     <h2>인테리어 참고안</h2>
     <p>고른 공실 자리의 3D 디지털 트윈(건물 외곽선 · 대장 층 면적 · 개략 배치도 · 전면 도로)으로 공실 안을 세우고, 키워드로 공간을 구성해 봅니다.
       상권·업종에 어울리는지는 고객 반응으로 검증할 가설입니다.</p>
-    {scenarios && <div className="interior-table"><table><caption>Posting의 세 전략 계산 · 실측 매출·견적 아님</caption>
+    {scenarios && <div className="interior-table"><table><caption>Proposal의 세 전략 계산 · 실측 매출·견적 아님</caption>
       <thead><tr><th>전략</th><th>초기 투자</th><th>월 순익</th><th>회수기간</th></tr></thead>
       <tbody>{STRATEGIES.map(([key, label]) => {
         const t = scenarios[key];
@@ -83,7 +83,7 @@ export default function InteriorPlanner({ handoff, district, industry }: {
           ? <>업종 「{appliedIndustry}」 기본 키워드({preset.label}): {preset.keywords.map((k) => `#${k}`).join(" ")} <small>— 업종 규칙 · 상권 · 고객 자료로 고른 값이 아닙니다</small></>
           : appliedIndustry.trim()
             ? <>업종 「{appliedIndustry}」의 기본 키워드 규칙이 없어 고른 키워드를 그대로 둡니다.</>
-            : <>업종을 정하면(Posting 「업종」 · 아래 「디자인할 업종」) 그 업종의 기본 키워드로 바꾸고 배치도 새로 놓습니다.</>}
+            : <>업종을 정하면(Proposal 「업종」 · 아래 「디자인할 업종」) 그 업종의 기본 키워드로 바꾸고 배치도 새로 놓습니다.</>}
         {preset && !samePreset && <button type="button" onClick={() => setDesign((d) => ({ ...d, keywords: preset.keywords }))}>업종 기본 키워드로</button>}
         {undoKeywords && undoKeywords.industry === appliedIndustry && <button type="button"
           onClick={() => { setDesign((d) => ({ ...d, keywords: undoKeywords.keywords })); setUndoKeywords(null); }}>이전 키워드로 되돌리기</button>}

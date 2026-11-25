@@ -50,7 +50,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     expect(rail.textContent).not.toMatch(/SpaceOS/);
     const tracks = Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent);
     // 레일 순서는 PPPP 프레임워크 순서 그대로다(2026-09-26).
-    expect(tracks).toEqual(["Platform", "Page", "Posting"]);
+    expect(tracks).toEqual(["Platform", "Page", "Proposal"]);
     // 의견 보내기·계정은 트랙 바로 아래(맨 아래)에 있다. 「상권 분석 보고서」 단추는 2026-11-22 에 지웠다(PPPP 보고서는 뺀다).
     const labels = Array.from(rail.querySelectorAll("button")).map((b) => b.textContent);
     expect(labels).toEqual([...tracks, "의견 보내기", "계정"]);
@@ -69,7 +69,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     await screen.findByRole("button", { name: "검토 건물 후보 저장" }, TAB_LOAD);
     const map = naver.map();
     expect(map).not.toBeNull();
-    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Posting", "입점 계산"]] as const) {
+    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Proposal", "입점 계산"]] as const) {
       fireEvent.click(screen.getByRole("button", { name: tab }));
       const aside = await screen.findByRole("complementary", { name: panel }, TAB_LOAD);
       // 패널은 지도 호스트 **안에** 뜬다 — 지도 없는 대시보드로 되돌아가면 여기가 운다.
@@ -87,7 +87,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
       { match: /postings$/, body: [] },
     ]);
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    fireEvent.click(screen.getByRole("button", { name: "Proposal" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     const hub = (await screen.findAllByRole("combobox"))[0] as HTMLSelectElement;
     await waitFor(() => expect(hub.querySelectorAll("option").length).toBeGreaterThan(1));
@@ -129,7 +129,7 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     const api = mount(true);
     expect(await screen.findByText("Platform ▶ Page", {}, TAB_LOAD)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Page · 빈 자리" }));
-    expect(await screen.findByText("Page ▶ Posting", {}, TAB_LOAD)).toBeTruthy();
+    expect(await screen.findByText("Page ▶ Proposal", {}, TAB_LOAD)).toBeTruthy();
     fireEvent.click(await screen.findByRole("button", { name: /^검토 건물 카페/ }, FIRST_LOAD));
     fireEvent.click(screen.getByRole("button", { name: "이 자리 비용 확인 →" }));
     expect(await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD)).toBeTruthy();
@@ -198,7 +198,7 @@ describe("App — Page에서 입점 검토", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Page" }).getAttribute("aria-current")).toBe("page"));
     expect(document.querySelector(".b-detail .b-name")!.textContent).toBe("검토 건물");
     window.history.forward();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Posting" }).getAttribute("aria-current")).toBe("page"));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Proposal" }).getAttribute("aria-current")).toBe("page"));
     expect(naver.map()).toBe(map);
   });
 

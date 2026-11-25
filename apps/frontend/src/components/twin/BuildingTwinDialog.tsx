@@ -162,7 +162,7 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
         {onOpenStreet
           ? <button type="button" className="twin3d-btn" onClick={onOpenStreet}>거리뷰 · 층별 보기</button>
           : <a className="twin3d-btn" href={kakaoRoadviewUrl({ lat: twin.lat, lng: twin.lng })} target="_blank" rel="noopener noreferrer">거리뷰 보기(카카오맵)<span className="sr-only">(새 창)</span></a>}
-        {onReview && <button type="button" className="twin3d-btn is-strong" onClick={() => onReview(floor, twin)}>이 자리로 입점 계산 → Posting</button>}
+        {onReview && <button type="button" className="twin3d-btn is-strong" onClick={() => onReview(floor, twin)}>이 자리로 입점 계산 → Proposal</button>}
         <button type="button" className="twin3d-btn" aria-pressed={saved} onClick={toggleStop}>{saved ? "✓ 답사 목록에 담음" : "답사 목록에 담기"}</button>
       </div>
     </div>

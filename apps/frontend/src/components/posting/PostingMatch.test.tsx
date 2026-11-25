@@ -49,7 +49,7 @@ it("로그인 전 — 흐름 세 단계와 매물은 보이고, 보내기 대신
   vi.spyOn(api, "listDirectListings").mockResolvedValue({ items: [listing("L1")], n: 1, notice: "" });
   const brief = vi.spyOn(api, "getMyBrief");
   render(<PostingMatch districtId="garosugil" districtName="가로수길" />);
-  const steps = screen.getByRole("list", { name: "Posting 흐름" });
+  const steps = screen.getByRole("list", { name: "Proposal 흐름" });
   expect(steps.textContent).toContain("입점 희망서");
   expect(steps.textContent).toContain("건물주에게 전달");
   expect(steps.textContent).toContain("매칭 · 계약 논의");
@@ -136,7 +136,7 @@ it("표가 없는 배포(503) — 흐름 설명은 남고 각 칸은 준비 중�
   vi.spyOn(api, "getMyBrief").mockRejectedValue(new api.DirectApiError(503, null, "x"));
   vi.spyOn(api, "getDirectInbox").mockRejectedValue(new api.DirectApiError(503, null, "x"));
   render(<PostingMatch districtId="garosugil" districtName="가로수길" />);
-  expect(screen.getByRole("list", { name: "Posting 흐름" })).toBeTruthy();
+  expect(screen.getByRole("list", { name: "Proposal 흐름" })).toBeTruthy();
   await waitFor(() => expect(screen.getAllByText(/연결 기능을 준비하고 있어요/).length).toBe(3));
 });
 

@@ -91,7 +91,7 @@ describe("깊은 링크로 연 지도 탐색 — PPPP 세 화면 그대로, 첫 
     expect(screen.getByRole("button", { name: "Page" }).getAttribute("aria-current")).toBe("page");
     // 레일 넷은 그대로다
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
-    expect(Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent)).toEqual(["Platform", "Page", "Posting"]);
+    expect(Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent)).toEqual(["Platform", "Page", "Proposal"]);
   });
 
   it("상권을 싣지 않으면 흐름의 상권으로 · 트랙을 싣지 않거나 모르는 트랙이면 첫 화면 규칙(Platform)대로", async () => {

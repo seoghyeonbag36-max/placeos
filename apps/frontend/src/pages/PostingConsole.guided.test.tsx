@@ -66,7 +66,7 @@ describe("단계형 비용 검토", () => {
     const nav = screen.getByRole("navigation", { name: "비용 검토" });
     expect([...nav.querySelectorAll("button")].map((b) => b.textContent)).toEqual(POSTING_PAGES);
     expect(screen.getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("list", { name: "Posting 흐름" }).textContent).toContain("건물주에게 전달");   // 정의가 첫 화면에 보인다
+    expect(screen.getByRole("list", { name: "Proposal 흐름" }).textContent).toContain("건물주에게 전달");   // 정의가 첫 화면에 보인다
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션 결과" }));
     expect(screen.getByPlaceholderText("만원 — 비우면 0 전제")).toBeTruthy();

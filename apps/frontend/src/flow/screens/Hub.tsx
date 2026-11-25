@@ -77,7 +77,7 @@ function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: n
 const TRACK_CHIPS: { track: ExploreTrack; name: string; en: string }[] = [
   { track: "platform", name: "상권", en: "Platform" },
   { track: "page", name: "빈 자리", en: "Page" },
-  { track: "posting", name: "비용", en: "Posting" },
+  { track: "posting", name: "입점 희망", en: "Proposal" },
 ];
 
 /**
@@ -185,7 +185,7 @@ export function Home() {
       path: state.districtId ? `/district/${encodeURIComponent(state.districtId)}` : state.goal === "pivot" ? "/industries" : !state.industryKey ? "/industry" : "/districts" },
     { key: "page", name: "빈 자리", en: "PAGE", value: state.spaceLabel, done: !!state.spaceId,
       path: state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : state.districtId ? "/rent-cap" : "/district-search" },
-    { key: "posting", name: "비용", en: "POSTING", value: state.premium ? "본전 시점을 봤어요" : state.costs.budget != null || state.costs.deposit != null ? "예산을 점검했어요" : null,
+    { key: "posting", name: "입점 희망서", en: "Proposal", value: state.premium ? "본전 시점을 봤어요" : state.costs.budget != null || state.costs.deposit != null ? "예산을 점검했어요" : null,
       done: !!state.premium || state.costs.deposit != null || state.costs.budget != null,
       path: state.premium ? "/payback" : state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : "/spaces" },
   ];
