@@ -198,7 +198,7 @@ function InquiryForm({ listingId, kind, industryKey, popupDefault, onDone }: {
       </label>
       {kind === "visit" && (
         <fieldset className="dr-form">
-          <legend className="fl-note">보고 싶은 시각(최대 3개) — 건물주가 하나를 골라 확정해요</legend>
+          <legend className="fl-note">보고 싶은 시각(최대 3개): 건물주가 하나를 골라 확정해요</legend>
           {slots.map((v, i) => (
             <label key={i} className="dr-field"><span>희망 시각 {i + 1}</span>
               <input type="datetime-local" value={v} onChange={(e) => setSlots(slots.map((s, j) => (j === i ? e.target.value : s)))} />
@@ -249,7 +249,7 @@ function ReportForm({ listingId, onDone }: { listingId: string; onDone: () => vo
   const [error, setError] = useState<string | null>(null);
   const send = () => requireLogin("login", null, (token) => {
     reportDirectListing(token, listingId, { reason, detail })
-      .then(() => { toast("신고했어요 — 확인 뒤 처리해요"); onDone(); })
+      .then(() => { toast("신고했어요. 확인 뒤 처리해요"); onDone(); })
       .catch((e: DirectApiError) => setError(e.detail ?? "신고하지 못했어요."));
   });
   return (
@@ -295,7 +295,7 @@ export function ListingDetail({ id }: { id: string }) {
   };
   const sent = (threadId: string) => {
     setAsk(null);
-    toast("보냈어요 — 문의함에서 이어서 봐요", { label: "문의함", onClick: () => go(`/inquiry/${encodeURIComponent(threadId)}`) });
+    toast("보냈어요. 문의함에서 이어서 봐요", { label: "문의함", onClick: () => go(`/inquiry/${encodeURIComponent(threadId)}`) });
   };
   return (
     <FlowScreen back="/listings" caption={`건물주 확인 매물 · ${floorText(l.floor)}${l.area_m2 ? ` · ${l.area_m2.toLocaleString("ko-KR")}㎡` : ""}`}
@@ -306,7 +306,7 @@ export function ListingDetail({ id }: { id: string }) {
             primary={{ label: "건물주에게 문의", onClick: () => setAsk("question") }}
             secondary={{ label: "방문 예약 요청", onClick: () => setAsk("visit") }} />}>
       <ListingBadges l={l} />
-      {l.mine && l.status && l.status !== "published" && <p className="dr-missing">지금 상태: {l.status_label} — 다른 사람에게는 보이지 않아요.</p>}
+      {l.mine && l.status && l.status !== "published" && <p className="dr-missing">지금 상태: {l.status_label}. 다른 사람에게는 보이지 않아요.</p>}
       <dl className="fl-keys">
         <div><dt>{l.deal_type === "popup" ? "팝업 하루" : "월세"}</dt><dd>{won(l.deal_type === "popup" ? l.popup_daily_manwon : l.monthly_rent_manwon)}</dd></div>
         <div><dt>보증금</dt><dd>{won(l.deposit_manwon)}</dd></div>
@@ -338,7 +338,7 @@ export function ListingDetail({ id }: { id: string }) {
       </ul>
       <Details summary="이 매물의 근거">
         <ul className="fl-facts">
-          <li>게시자: {l.poster_label || "소유자 확인 완료"} — 등기부등본 고유번호와 소유자 이름으로 확인을 거쳤어요.</li>
+          <li>게시자: {l.poster_label || "소유자 확인 완료"}. 등기부등본 고유번호와 소유자 이름으로 확인을 거쳤어요.</li>
           <li>금액은 건물주가 적은 호가예요. 실제 계약 조건은 건물주와 직접 정해요.</li>
           {l.published_at && <li>게시: {l.published_at.slice(0, 10)}</li>}
         </ul>

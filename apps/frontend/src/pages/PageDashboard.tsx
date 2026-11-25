@@ -136,10 +136,7 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
 
       <div className="grid">
         {summaries.map((s, i) => (
-          <button key={s.id} className="dcard"
-            style={{ borderLeftColor: s.vacancy_rate === null || s.vacancy_rate === undefined
-              ? "var(--line, #d1d5db)" : vacHex(s.vacancy_rate) }}
-            onClick={() => onOpen(s.id)}>
+          <button key={s.id} className="dcard" onClick={() => onOpen(s.id)}>
             <div className="dtop">
               <div className="dord">{i + 1}</div>
               <div className="dname">{s.name}</div>
@@ -153,6 +150,10 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
               : <Bar k="감성" v={s.sentiment} max={100} color={sentHex(s.sentiment)}
                      text={`${s.sentiment.toFixed(1)}pt`} />}
             <div className="dmeta">
+              {/* 공실률은 색 띠가 아니라 점 + 숫자로 — 색만으로는 값을 못 읽고, 실측이 없으면 0 이 아니라 「없음」이다 */}
+              {s.vacancy_rate === null || s.vacancy_rate === undefined
+                ? <span className="value-absent">공실률 실측 없음</span>
+                : <span><i className="vdot" aria-hidden="true" style={{ background: vacHex(s.vacancy_rate) }} />공실률 {s.vacancy_rate.toFixed(1)}%</span>}
               <span>리뷰 {s.reviews === null || s.reviews === undefined
                 ? <span className="value-absent">없음</span> : s.reviews.toLocaleString()}</span>
               <span>공실 {s.vacant_units}개</span>

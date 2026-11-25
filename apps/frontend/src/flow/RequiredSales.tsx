@@ -48,7 +48,7 @@ export function RequiredSales({ rentMan, rentIsShared }: { rentMan: number; rent
         </dl>
       )}
       <p className="fl-source">
-        필요한 양이에요 — 이 상권에서 실제로 팔릴 양이 아니에요(고양·파주는 매출 자료가 없어요). 보증금·권리금·인테리어 회수는 빠져 있어요.
+        필요한 양이에요. 이 상권에서 실제로 팔릴 양이 아니에요(고양·파주는 매출 자료가 없어요). 보증금·권리금·인테리어 회수는 빠져 있어요.
       </p>
     </section>
   );

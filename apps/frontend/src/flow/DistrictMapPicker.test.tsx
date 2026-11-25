@@ -170,7 +170,7 @@ describe("F-21 상권 고르기 지도 — 사용자가 맞춘 지도를 지킨�
       (window.naver as unknown as { maps: unknown }).maps = null;
       window.navermap_authFailure?.();
     });
-    expect(await screen.findByText("지도를 불러오지 못했어요 — 목록에서 골라 주세요")).toBeTruthy();
+    expect(await screen.findByText("지도를 불러오지 못했어요. 목록에서 골라 주세요")).toBeTruthy();
     // 줄은 그대로 눌린다
     fireEvent.mouseEnter(within(document.querySelector<HTMLElement>('[data-district-row="garosugil"]')!).getByRole("button"));
     fireEvent.click(within(document.querySelector<HTMLElement>('[data-district-row="garosugil"]')!).getByRole("button"));

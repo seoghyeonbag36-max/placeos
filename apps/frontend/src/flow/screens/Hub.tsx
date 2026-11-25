@@ -112,7 +112,7 @@ function MapPreview({ districtId, spaceId, spaceLabel, at, results }: {
   return (
     <section className="fl-mapcard" aria-labelledby={titleId}>
       <MiniMap center={center} pins={pins} zoom={16} still lazy
-        label={`${d?.name ?? "상권"} 지도 — ${at ? `고른 자리 ${spaceLabel ?? ""}` : "상권 중심"}${savedHere.length ? ` · 저장한 후보 ${savedHere.length}곳` : ""}`}>
+        label={`${d?.name ?? "상권"} 지도, ${at ? `고른 자리 ${spaceLabel ?? ""}` : "상권 중심"}${savedHere.length ? ` · 저장한 후보 ${savedHere.length}곳` : ""}`}>
         <a className="fl-mapcard-cover" href={href("page")} aria-hidden="true" tabIndex={-1} />
       </MiniMap>
       <div className="fl-mapcard-foot">
@@ -150,7 +150,7 @@ function CompareEntry({ districtId, results }: { districtId: string | null; resu
     <button type="button" className="fl-entry" onClick={() => go(comparePath(candidates))}>
       <span className="fl-entry-main">
         <b>상권 {candidates.length}곳 나란히 보기</b>
-        <span>{candidates.map(nameOf).join(" · ")}{cut > 0 ? ` — 최근 ${candidates.length}곳만(${cut}곳 더 있어요)` : ""}</span>
+        <span>{candidates.map(nameOf).join(" · ")}{cut > 0 ? ` (최근 ${candidates.length}곳만, ${cut}곳 더 있어요)` : ""}</span>
       </span>
       <span className="fl-entry-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
     </button>
@@ -194,7 +194,7 @@ export function Home() {
       done: !!state.premium || state.costs.deposit != null || state.costs.budget != null,
       path: state.premium ? "/payback" : state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : "/spaces" },
     // ④ 개업 후(2026-11-22) — 계약하고 개업한 뒤에 쓰는 칸이라 흐름 안에서 「마쳤다」가 없다. 지도 탐색의 Program 을 이 상권으로 연다
-    { key: "program", name: "개업 후", en: "PROGRAM", value: "계약하고 개업한 뒤 — 이웃과 잇고 오프라인으로 알리기",
+    { key: "program", name: "개업 후", en: "PROGRAM", value: "계약하고 개업한 뒤, 이웃과 잇고 오프라인으로 알리기",
       done: false, path: explorePath({ track: "program", district: state.districtId ?? state.homeDistrictId }) },
   ];
   const PRE_CONTRACT = 3;   // ①~③ 이 계약 전에 끝낼 일이다 — 「이어서」와 「다 봤다」는 이 셋으로만 센다
@@ -304,7 +304,7 @@ export function Me() {
         <Row title="내 입점 희망서(창업자)" meta="원하는 자리 조건을 남기면 건물주가 먼저 제안해요" onClick={() => go("/brief")} />
         <Row title="내 빈 자리(건물주)" meta="빈 자리 직접 올리기 · 소유자 확인 · 공실 진단" onClick={() => go("/owner")} />
         <Row title="입점 희망서 보기(건물주)" meta="내 확인 매물 상권을 희망한 창업자" onClick={() => go("/owner/briefs")} />
-        <Row title="정액 상품" meta="상단 노출 · 리포트 — 성사·중개 수수료 없음" onClick={() => go("/plans")} />
+        <Row title="정액 상품" meta="상단 노출 · 리포트 (성사·중개 수수료 없음)" onClick={() => go("/plans")} />
       </RowList>
       <RowList label="도움">
         <Row title="의견 보내기" meta="후기·오류·개선 요청" onClick={openVisitorFeedback} />

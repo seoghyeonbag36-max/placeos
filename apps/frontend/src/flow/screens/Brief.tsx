@@ -116,7 +116,7 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
   const publish = () => run(async () => {
     await saveMyBrief(token, briefToInput(d));
     return setMyBriefStatus(token, "activate");
-  }, `건물주에게 보이기 시작했어요 — ${meta.ttl_days}일 동안`);
+  }, `건물주에게 보이기 시작했어요 (${meta.ttl_days}일 동안)`);
   const status = (action: "pause" | "close") => run(() => setMyBriefStatus(token, action), action === "pause" ? "잠시 숨겼어요" : "희망서를 끝냈어요");
   const remove = () => {
     setConfirmDelete(false);
@@ -126,7 +126,7 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
   const districtName = (id: string) => districtList.find((x) => x.id === id)?.name ?? id;
   const industryList = industries.status === "ready" ? industries.data.filter((i) => i.key !== "other") : [];
   const cta = active
-    ? <BottomCTA note={missing.length ? `빈 필수 칸: ${missing.map(label).join(" · ")} — 저장하면 건물주에게서 숨겨져요` : "고친 값은 바로 건물주 화면에 반영돼요."}
+    ? <BottomCTA note={missing.length ? `빈 필수 칸: ${missing.map(label).join(" · ")}. 저장하면 건물주에게서 숨겨져요` : "고친 값은 바로 건물주 화면에 반영돼요."}
         primary={{ label: "고친 내용 저장", onClick: save, busy, disabled: busy || problems.length > 0 }}
         secondary={{ label: "잠시 숨기기", onClick: () => status("pause"), disabled: busy }} />
     : <BottomCTA note={missing.length ? `빈 필수 칸: ${missing.map(label).join(" · ")}` : "건물주에게는 이름·이메일 없이 ① 칸만 보여요."}
@@ -139,7 +139,7 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
         <ul className="fl-facts" aria-label="희망서 상태">
           <li>지금 상태: {server.status_label}{server.expired ? " · 게시 기간이 끝나 건물주에게 안 보여요(다시 보이면 기간이 새로 시작해요)" : ""}</li>
           {server.visible && server.expires_at && <li>{server.expires_at.slice(0, 10)}까지 건물주에게 보여요.</li>}
-          <li>희망서를 열어 준 건물주 {server.disclosed_n}명{server.disclosed_n ? " — 대화가 끝나면 저절로 닫혀요" : ""}</li>
+          <li>희망서를 열어 준 건물주 {server.disclosed_n}명{server.disclosed_n ? " (대화가 끝나면 저절로 닫혀요)" : ""}</li>
         </ul>
       )}
       {server && server.disclosures.length > 0 && (
@@ -180,7 +180,7 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
             <label className="dr-check"><input type="checkbox" checked={d.needs_exhaust} onChange={(e) => set("needs_exhaust", e.target.checked)} />배기(덕트)</label>
             <label className="dr-check"><input type="checkbox" checked={d.needs_water} onChange={(e) => set("needs_water", e.target.checked)} />급수·배수</label>
           </fieldset>
-          <Field label="필요 전력(kW · 선택)" hint="모르면 비워 두세요 — 건물주의 계약 전력과 견줘요."><input inputMode="numeric" value={d.power_kw_min} onChange={(e) => set("power_kw_min", e.target.value)} /></Field>
+          <Field label="필요 전력(kW · 선택)" hint="모르면 비워 두세요. 건물주의 계약 전력과 견줘요."><input inputMode="numeric" value={d.power_kw_min} onChange={(e) => set("power_kw_min", e.target.value)} /></Field>
           <div className="dr-grid2">
             <Field label="월세 상한(만원)" req><input inputMode="numeric" value={d.rent_cap} onChange={(e) => set("rent_cap", e.target.value)} /></Field>
             <Field label="보증금 상한(만원)" req><input inputMode="numeric" value={d.deposit_cap} onChange={(e) => set("deposit_cap", e.target.value)} /></Field>
@@ -244,14 +244,14 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
         <ul className="fl-facts">
           <li>업종·면적·층·설비·예산 상한·시기·상권·팝업 여부(① 칸)와 「PlaceOS 가 확인한 것 / 창업자가 적은 것」이 보여요.</li>
           <li>{meta.trust_note}</li>
-          <li>목록은 최근에 올린 순이에요 — 점수나 순위로 줄 세우지 않아요.</li>
+          <li>목록은 최근에 올린 순이에요. 점수나 순위로 줄 세우지 않아요.</li>
         </ul>
       </Details>
       {problems.map((p) => <p key={p} className="dr-error" role="alert">{p}</p>)}
       {error && <p className="dr-error" role="alert">{error}</p>}
       {server && (
         <div className="fl-actions">
-          {server.status !== "closed" && <TextButton onClick={() => !busy && status("close")}>자리를 찾았어요 — 희망서 끝내기</TextButton>}
+          {server.status !== "closed" && <TextButton onClick={() => !busy && status("close")}>자리를 찾았어요. 희망서 끝내기</TextButton>}
           <TextButton onClick={() => setConfirmDelete(true)}>희망서 지우기</TextButton>
           <TextButton onClick={() => go("/listings")}>건물주 확인 매물 보기</TextButton>
         </div>
@@ -269,7 +269,7 @@ function BriefForm({ initial }: { initial: DirectBriefResponse }) {
 
 function fitSummary(l: DirectOwnerBriefListing) {
   const c = l.fit.counts;
-  return `${l.title} — 맞아요 ${c.ok} · 차이 있어요 ${c.gap} · 모름 ${c.unknown}`;
+  return `${l.title}: 맞아요 ${c.ok} · 차이 있어요 ${c.gap} · 모름 ${c.unknown}`;
 }
 
 export function OwnerBriefs() {
@@ -341,7 +341,7 @@ function InviteForm({ briefId, listing, onDone }: { briefId: string; listing: Di
   };
   return (
     <div className="dr-form">
-      <label className="dr-field"><span>{listing.title}로 제안하기 — 창업자에게 남길 말</span>
+      <label className="dr-field"><span>{listing.title}로 제안하기: 창업자에게 남길 말</span>
         <textarea value={body} maxLength={1000} onChange={(e) => setBody(e.target.value)}
           placeholder="예: 2층 66㎡, 배기 덕트 있어요. 평일 오후에 보러 오셔도 돼요." />
       </label>
@@ -370,7 +370,7 @@ export function OwnerBriefDetail({ id }: { id: string }) {
   const b = res.data;
   const sent = (threadId: string) => {
     setInviting(null);
-    toast("제안을 보냈어요 — 문의함에서 이어서 봐요", { label: "문의함", onClick: () => go(`/inquiry/${encodeURIComponent(threadId)}`) });
+    toast("제안을 보냈어요. 문의함에서 이어서 봐요", { label: "문의함", onClick: () => go(`/inquiry/${encodeURIComponent(threadId)}`) });
     res.retry();
   };
   return (
@@ -396,7 +396,7 @@ export function OwnerBriefDetail({ id }: { id: string }) {
           <FitTable fit={l.fit} title={`${l.title}`} />
           <div className="fl-actions">
             {l.open_thread_id
-              ? <TextButton onClick={() => go(`/inquiry/${encodeURIComponent(l.open_thread_id!)}`)}>이 매물로 대화 중 — 이어 가기</TextButton>
+              ? <TextButton onClick={() => go(`/inquiry/${encodeURIComponent(l.open_thread_id!)}`)}>이 매물로 대화 중. 이어 가기</TextButton>
               : b.can_invite
                 ? <TextButton onClick={() => setInviting(l)}>이 매물로 제안하기</TextButton>
                 : <span className="fl-note">이 창업자는 지금 건물주 제안을 받지 않아요.</span>}

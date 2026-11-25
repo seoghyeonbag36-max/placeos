@@ -116,7 +116,7 @@ describe("건물주가 보는 희망서", () => {
     renderFlow(<OwnerBriefs />, { token: "t" });
     expect(await screen.findByText("희망서 ABC123 · 카페·디저트")).toBeTruthy();
     expect(screen.getByText(/점수·순위가 아니에요/)).toBeTruthy();
-    expect(screen.getByText("합성 주소 2층 — 맞아요 5 · 차이 있어요 1 · 모름 2")).toBeTruthy();
+    expect(screen.getByText("합성 주소 2층: 맞아요 5 · 차이 있어요 1 · 모름 2")).toBeTruthy();
     const text = document.body.textContent ?? "";
     expect(text).not.toMatch(/객단가|자기 자금|신용 ?점수 ?\d|등급 ?[A-D]/);
   });

@@ -24,7 +24,7 @@
 
 /* 거점 카드 */
 .pagedash .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;margin-top:var(--sp-3)}
-.pagedash .dcard{font-family:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-left:4px solid #d4dde6;border-radius:13px;padding:var(--sp-3) 13px;transition:.12s;cursor:pointer}
+.pagedash .dcard{font-family:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:var(--sp-3) 13px;transition:.12s;cursor:pointer}
 .pagedash .dcard:hover{box-shadow:0 3px 12px rgba(0,0,0,.09);transform:translateY(-1px)}
 .pagedash .dtop{display:flex;align-items:center;gap:7px;margin-bottom:5px}
 .pagedash .dord{width:24px;height:24px;flex:0 0 24px;border-radius:7px;background:var(--surface-sunken);color:var(--text-secondary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -48,6 +48,7 @@
 .pagedash .dmeta{display:flex;flex-wrap:wrap;gap:var(--sp-1) 10px;font-size: var(--fs-caption);color:var(--sub);margin-top:var(--sp-2)}
 .pagedash .dmeta>*{white-space:nowrap}
 .pagedash .dmeta .risk{color:#c2410c;font-weight:700}
+.pagedash .vdot{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%;vertical-align:baseline}
 .pagedash .pred{font-weight:700;white-space:nowrap}
 /* 지속성 기본(09-28 B안) — 모델 예측이 아니라 현재값 그대로라 색으로 방향을 말하지 않는다 */
 .pagedash .pred-persist{font-weight:600;color:var(--sub);cursor:help}

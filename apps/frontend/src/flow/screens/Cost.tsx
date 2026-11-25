@@ -191,7 +191,7 @@ export function Payback() {
       <Details>
         <ul className="fl-facts">
           <li>{tierName(chosen[0])}: 한 달 매출 {manwon(chosen[1].month_rev)} · 한 달 비용 {manwon(chosen[1].month_cost)}</li>
-          {r.inputs_source && <li>입력 출처 — 면적 {SOURCE_TEXT[r.inputs_source.area] ?? r.inputs_source.area} · 임대료 {SOURCE_TEXT[r.inputs_source.rent] ?? r.inputs_source.rent} · 권리금 {SOURCE_TEXT[r.inputs_source.prem] ?? r.inputs_source.prem} · 유동 {SOURCE_TEXT[r.inputs_source.foot] ?? r.inputs_source.foot}</li>}
+          {r.inputs_source && <li>입력 출처: 면적 {SOURCE_TEXT[r.inputs_source.area] ?? r.inputs_source.area} · 임대료 {SOURCE_TEXT[r.inputs_source.rent] ?? r.inputs_source.rent} · 권리금 {SOURCE_TEXT[r.inputs_source.prem] ?? r.inputs_source.prem} · 유동 {SOURCE_TEXT[r.inputs_source.foot] ?? r.inputs_source.foot}</li>}
           {r.inputs_quarter && <li>기준 분기 {r.inputs_quarter}</li>}
           <li>계산 방식 {chosen[1].basis ? (BASIS_LABEL[chosen[1].basis] ?? chosen[1].basis) : "미상"} · {r.source === "copilot" ? "외부 창업 코파일럿" : "PlaceOS 3-Tier 계산"}{r.source_note ? ` (${r.source_note})` : ""}</li>
           {entries.filter(([, s]) => !tierAvailable(s)).map(([k, s]) => (
@@ -257,7 +257,7 @@ function StackedMoney({ fields, onDone, ctaLast }: {
       {order.map(({ f, i }) => (
         <div key={f.key} className={"fl-stacked" + (i === step ? " is-current" : "")}>
           <MoneyField label={f.label} value={unknown[f.key] ? "" : texts[f.key]} autoFocus={i === step}
-            hint={unknown[f.key] ? "모름 — 총액은 내지 않고 모르는 칸으로 알려 드려요" : f.hint}
+            hint={unknown[f.key] ? "모름. 총액은 내지 않고 모르는 칸으로 알려 드려요" : f.hint}
             onChange={(t) => { setTexts((x) => ({ ...x, [f.key]: t })); setUnknown((u) => ({ ...u, [f.key]: false })); if (i < step) commit(i, parseManwon(t)); }}
             onEnter={() => { if (i === step && canGo) advance(); }} />
           <button type="button" className={"fl-chip fl-unknown" + (unknown[f.key] ? " is-on" : "")} aria-pressed={!!unknown[f.key]}

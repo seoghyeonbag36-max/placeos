@@ -143,7 +143,7 @@ export function InquiryThread({ id }: { id: string }) {
       )}
       {t.role === "founder" && !t.brief_disclosed && !closed && (t.has_brief
         ? <div className="fl-actions">
-            <TextButton onClick={() => run(setBriefDisclosure(token, t.id, true), "이 건물주에게만 희망서를 열었어요 — 대화가 이어지는 동안 보여요")}>이 건물주에게 희망서(조건·사업 개요·자금 계획) 열기</TextButton>
+            <TextButton onClick={() => run(setBriefDisclosure(token, t.id, true), "이 건물주에게만 희망서를 열었어요. 대화가 이어지는 동안 보여요")}>이 건물주에게 희망서(조건·사업 개요·자금 계획) 열기</TextButton>
           </div>
         : <p className="fl-note">입점 희망서를 쓰면 이 건물주에게만 내 조건과 사업 개요를 열어 보일 수 있어요. <TextButton onClick={() => go("/brief")}>입점 희망서 쓰기</TextButton></p>)}
 
@@ -233,7 +233,7 @@ export function InquiryThread({ id }: { id: string }) {
           )}
           {t.role === "founder" && (
             <fieldset className="dr-form">
-              <legend className="fl-note">조건 제안서 · 팝업·단기 신청 — 답을 기다리던 앞 제안은 새 제안으로 바뀌어요</legend>
+              <legend className="fl-note">조건 제안서 · 팝업·단기 신청: 답을 기다리던 앞 제안은 새 제안으로 바뀌어요</legend>
               <div className="fl-actions">
                 {canLease && <TextButton onClick={() => { setOfferKind("offer"); setOffer({}); }}>조건 제안서 쓰기</TextButton>}
                 {canPopup && <TextButton onClick={() => { setOfferKind("popup"); setOffer({}); }}>팝업·단기 신청 쓰기</TextButton>}
