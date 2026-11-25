@@ -1,7 +1,8 @@
 /**
- * 저장 — 후보 자리(♡) · 본전 계산 · 예산 점검 · 검증 계획(화면설계서 5판 C5).
+ * 저장 — 후보 자리(♡) · 본전 계산 · 예산 점검(화면설계서 5판 C5). 검증 계획 저장은 2026-11-22 ④ 작게 확인과 함께 뺐다
+ * (그전에 저장한 `kind: "program"` 은 홈 목록에 「검증 계획」으로 남는다).
  *
- * 저장은 **로그인이 필요한 유일한 일**이다(검증 계획 AI 생성과 함께). 그래서 저장 버튼이 로그인 시트의
+ * 흐름에서 저장은 **로그인이 필요한 유일한 일**이다. 그래서 저장 버튼이 로그인 시트의
  * 입구이고, 로그인하면 누르려던 저장을 이어서 한다. 정본은 백엔드 `/auth/results`(사용자당 30건 · 64KB)다.
  * 자리 저장은 5판에서 `kind: "space"` 로 새로 생겼다.
  */
@@ -19,9 +20,7 @@ export function SavedProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!token) return;
     let alive = true;
-    listSavedResults(token).then((r) => {
-      if (alive) setResults(r.filter((item) => item.kind !== "program"));
-    }, () => { if (alive) setResults([]); });
+    listSavedResults(token).then((r) => { if (alive) setResults(r.filter((item) => item.kind !== "program")); }, () => { if (alive) setResults([]); });
     return () => { alive = false; };
   }, [token]);
   const visible = token ? results : null;

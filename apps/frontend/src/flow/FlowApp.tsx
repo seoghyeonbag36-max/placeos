@@ -8,7 +8,7 @@
  * ⛔ 그 지도 탐색이 PPPP 네 구현 화면이다 — 흐름의 어떤 「지도」도 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙 ·
  *   CLAUDE.md). 10-18 에 흐름 안 지도로 갈아끼웠다가 네 화면으로 가는 길이 UI 에서 사라졌다.
  *
- * 이 컴포넌트가 하는 일: 주소 → 화면 · 답 저장 · 로그인 시트(저장·AI 생성에서만) · 종전 계정 창 · 토스트 ·
+ * 이 컴포넌트가 하는 일: 주소 → 화면 · 답 저장 · 로그인 시트(저장에서만 — AI 검증 계획 생성은 11-22 에 뺐다) · 종전 계정 창 · 토스트 ·
  * 로그인하는 순간 흐름 답을 계정의 「내 사업」으로 옮기기.
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +27,11 @@ import { showsCrossRegion } from "@/lib/siteScope";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion, StartupDistrict } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
+import { ListingDetail, Listings } from "./screens/Direct";
+import { InquiryThread, Inbox } from "./screens/Inbox";
+import { OwnerHome, OwnerListing, OwnerNew } from "./screens/Owner";
+import { Plans } from "./screens/Plans";
+import { MyBrief, OwnerBriefDetail, OwnerBriefs } from "./screens/Brief";
 import "./flow.css";
 
 const Login = lazy(() => import("@/pages/Login"));
@@ -62,6 +67,19 @@ function Screen({ route }: { route: Route }) {
     case "budget-check": return <BudgetCheck />;
     case "home": return <Home />;
     case "me": return <Me />;
+    // 직거래 연결 층(2026-11-18) — 흐름에 더한 화면. PPPP 네 화면(#/explore)은 그대로다
+    case "listings": return <Listings />;
+    case "listing": return <ListingDetail id={route.param!} />;
+    case "owner": return <OwnerHome />;
+    case "owner-new": return <OwnerNew />;
+    case "owner-listing": return <OwnerListing id={route.param!} />;
+    case "inbox": return <Inbox />;
+    case "inquiry": return <InquiryThread id={route.param!} />;
+    case "plans": return <Plans />;
+    // 입점 희망서(2026-11-21) — 창업자 희망서 · 건물주가 보는 희망서. 역시 더한 화면이다
+    case "brief": return <MyBrief />;
+    case "owner-briefs": return <OwnerBriefs />;
+    case "owner-brief": return <OwnerBriefDetail id={route.param!} />;
     default: return null;
   }
 }
@@ -99,7 +117,7 @@ export default function FlowApp({ token }: { token: string | null }) {
     }
   }
 
-  /* ── 로그인 시트 — 저장·AI 생성에서만 ─────────────────────────────────── */
+  /* ── 로그인 시트 — 저장에서만 ─────────────────────────────────────────── */
   const [login, setLogin] = useState<LoginReason | null>(null);
   const pending = useRef<((t: string) => void) | null>(null);
   const [seenToken, setSeenToken] = useState(token);

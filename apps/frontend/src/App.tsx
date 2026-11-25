@@ -1,6 +1,5 @@
 import VisitorFeedback, { OPEN_VISITOR_FEEDBACK } from "@/components/VisitorFeedback";
-import PpppReportProvider from "@/components/PpppReportProvider";
-import AnalysisReportDialog from "@/components/AnalysisReportDialog";
+import WorkspaceRecordsProvider from "@/components/WorkspaceRecordsProvider";
 import { loadToken, clearToken, SESSION_CHANGED_EVENT } from "@/lib/session";
 import Home from "@/pages/Home";
 import SocialCallback from "@/pages/SocialCallback";
@@ -22,12 +21,17 @@ import AccountDialog, { type AccountScreen } from "@/components/AccountDialog";
 import { Button } from "@/design/components/Button";
 import { getBusinessWorkspace, saveBusinessWorkspace, listDistricts, listIndustries, SESSION_EXPIRED_EVENT, type DistrictSummary, type IndustryOption } from "@/lib/api";
 import { businessChipText, customWorkIndustry, findIndustry, workIndustryKey, type BusinessProfile, type BusinessState } from "@/lib/businessProfile";
-import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type ProgramHandoff } from "@/lib/workspaceState";
+import { createPageWorkspace, type PageWorkspace, type BuildingSelection } from "@/lib/workspaceState";
 import FlowApp from "@/flow/FlowApp";
 import { explorePath, isExploreHash, isFlowHash, parseExplore, type ExploreTrack } from "@/flow/route";
 import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
-import { clearPlan } from "@/flow/plan";
 import "./App.css";
+
+/** 흐름 ④ 「작게 확인」이 이 탭에 남기던 검증 계획(아이템·브리프)의 옛 열쇠. 2026-11-22 그 화면을 뺐지만(Program 범위 축소),
+ *  그 전에 만든 계획이 이 탭 저장소에 남아 있을 수 있어 계정이 바뀔 때는 여전히 지운다(공용 PC — 다음 사람이 앞사람 아이템을 보지 않게). */
+const clearLegacyPlan = () => {
+  try { window.sessionStorage.removeItem("placeos.flow.plan.v1"); } catch { /* 지울 것이 없다 */ }
+};
 
 // 세 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
 // 거리뷰·층 스택·차트 같은 무거운 자식이 있어 청크를 나눈다.
@@ -71,7 +75,7 @@ const PRELOAD_DELAY_MS = 1500;
  *     Platform 지도가 이어받았다("이 상권이 어디까지인가"는 Platform 의 질문이다).
  *
  * 2026-09-13: **세 트랙 모두 지도 전체화면이다.** 그전에는 Page 만 지도 위에 살고
- *   Platform·Posting 은 지도가 없는 대시보드였다. 이제 셋 다 같은 지도(MapHost)
+ *   Platform·Posting 은 지도가 없는 대시보드였다. 이제 넷 다 같은 지도(MapHost)
  *   위에 좌측 패널로 뜨고(TrackMapFrame), 각자 자기 답을 지도에 그린다 —
  *   Platform=실측 범위·자리별 추천 / Page=공실·임대시세 / Posting=입점 자리와 월임대료 /
  *   상권 선택도 **세 트랙이 하나를 공유한다.** 같은 place 에 대한 세 질문이라, 탭을 옮길
@@ -80,7 +84,7 @@ const PRELOAD_DELAY_MS = 1500;
  * 2026-11-08: **넓은 화면(≥1200px)은 「머리 / 왼쪽 · 지도 · 오른쪽」 칸 배치다**(사용자 피드백 — 지도가 크고 기능이
  *   작아 쓰기 불편했다). 지도는 여전히 하나(MapHost)이고 가운데 칸에 선다. 트랙 화면은 고르기 덩어리(상권 목록 ·
  *   건물 목록 · 비용 입력 · 기능 메뉴)를 왼쪽 칸에, 답을 오른쪽 칸에 꽂는다(components/mapLayoutContext.ts · MapSlot).
- *   좁은 화면은 예전처럼 지도 위 패널 하나다. 레일 · 네 구현 화면 · 진입로는 그대로다(PPPP 화면 보존 규칙).
+ *   좁은 화면은 예전처럼 지도 위 패널 하나다. 레일 · 세 구현 화면 · 진입로는 그대로다(PPPP 화면 보존 규칙).
  *
  * 2026-09-13(화면설계서 3판): **「내 사업」을 세 트랙이 공유한다.** 주요 고객이 상권을 먼저 고르는
  *   분석가에서 업종·지금 가게에서 출발하는 사업자(창업 · 업종 바꾸기 · 상권 옮기기)로 바뀌었다.
@@ -106,22 +110,22 @@ type View = "platform" | "map" | "posting";
    ⚠ view key 와 track 이름은 하나만 어긋난다 — Page 트랙의 화면 key 는 "map" 이다. */
 const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = [
   // PPPP 세 트랙. 전통 4P 와 1:1 대응한다(2026-09-05 재정의): Place▶Platform · Product▶Page ·
-  // Price▶Posting. 라벨을 되돌리지 말 것.
+  // Price▶Proposal.
   // ⛔ 2026-10-21 PPPP 화면 보존 규칙(사용자 확정 · CLAUDE.md): 세 트랙의 구현 화면은 절대 화면에서 빼지 않는다 —
   //   이 배열에서 빼거나 · 숨기거나 · 다른 화면으로 갈아끼우지 않는다. 가드는 src/ppppScreens.test.tsx.
-  // 2026-09-26: 레일 순서를 **Platform → Page → Posting** 으로 되돌렸다 —
+  // 2026-09-26: 레일 순서를 **Platform → Page → Proposal** 으로 되돌렸다 —
   //   PPPP 프레임워크 순서 그대로다. 그전(2026-09-15)에는 사용자가 밟는 순서를 따라
   //   Page 를 맨 위에 뒀는데, 레일이 프레임워크를 말하지 않는 쪽이 더 헷갈렸다.
   //   첫 화면도 같이 Platform 으로 옮겼다(아래 useState<View>) — 레일 맨 위와 처음 열리는
   //   화면이 어긋나지 않게.
   { key: "platform", label: "Platform", icon: <IconSpark />, track: "platform" },
   { key: "map", label: "Page", icon: <IconPin />, track: "page" },
-  { key: "posting", label: "Posting", icon: <IconKey />, track: "posting" },
+  { key: "posting", label: "Proposal", icon: <IconKey />, track: "posting" },
 ];
 
 /** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면
  *  로그인한 사용자는 홈(흐름)으로 간다.
- *  ⛔ PPPP 네 구현 화면의 입구다. 흐름의 「지도」 진입로(허브 탭 · 상권 소개 · 빈 자리 목록)는 늘 여기로 온다
+ *  ⛔ PPPP 세 구현 화면의 입구다. 흐름의 「지도」 진입로(허브 탭 · 상권 소개 · 빈 자리 목록)는 늘 여기로 온다
  *  (2026-10-21 PPPP 화면 보존 규칙).
  *  2026-10-24: 홈이 트랙·상권·건물을 쿼리로 실어 올 수 있다(`#/explore?track=page&…` — flow/route.explorePath).
  *  그래서 지도 탐색인지는 `===` 가 아니라 `isExploreHash` 로 가른다. */
@@ -147,9 +151,8 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const [view, updateView] = useState<View>(() => (target?.track ? TRACK_VIEW[target.track] : "platform"));
   // 입력 초안은 이번 작업 동안만 보관한다. 지도 표식은 비활성 트랙과 함께 해제한다.
   const [postingDrafts] = useState(() => new Map<string, PostingDraft>());
-  const [reportOpen, setReportOpen] = useState(false);
   // 흐름에서 고른 상권으로 연다(2026-10-21). 그전에는 늘 가로수길로 열려, 흐름에서 「지도」를 누르면 보던 상권이 바뀌었다.
-  // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 네 화면으로 가는 길이
+  // 10-18 PR #141 은 그 문제를 고치려고 흐름의 「지도」를 흐름 자체 지도로 돌렸고, 그 바람에 PPPP 세 화면으로 가는 길이
   // UI 에서 사라졌다 — 문제는 진입로가 아니라 여기서 고친다(PPPP 화면 보존 규칙 · CLAUDE.md).
   // 흐름의 상권 목록도 이 화면과 같은 gold 거점이고, 목록에 없으면 MapShell·PlatformConsole 이 첫 거점으로 물러난다.
   // 쿼리의 상권·건물이 흐름의 상권보다 앞선다(그 주소를 연 화면이 고른 것이다). 건물은 Page 의 선택 건물로 들어가고,
@@ -189,7 +192,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       ? previous : { ...selection, requestId: (previous?.requestId ?? 0) + 1 });
     setView("posting", selection);
   };
-  const [reportHandoff, setReportHandoff] = useState<ProgramHandoff>();
   // 세 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
@@ -197,7 +199,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     if (id !== districtId) {
       postingDrafts.clear();
       setPostingSelection(undefined);
-      setReportHandoff(undefined);
     }
     setPageWorkspace((w) => (w.districtId === id ? w
       : { ...w, districtId: id, query: "", status: "all", selectedId: null }));
@@ -395,10 +396,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
             <span>{n.label}</span>
           </button>
         ))}
-        <button type="button" className="rail-btn rail-report" aria-haspopup="dialog" onClick={() => setReportOpen(true)}>
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
-          <span>상권 분석 보고서</span>
-        </button>
         {/* 2026-11-08: 의견 보내기를 오른쪽 아래 떠 있는 버튼에서 레일로 옮겼다 — 지도·패널 글을 가리던 자리다.
             「계정」 바로 위(= 도움·의견은 내비게이션 맨 아래, 의견이 그 위)에 두고, 의견창(VisitorFeedback)은
             OPEN_VISITOR_FEEDBACK 로 같은 창을 연다. 누른 버튼을 실어 보내 닫을 때 초점이 이 버튼으로 돌아온다. */}
@@ -418,8 +415,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       {/* 지도는 앱 수명 동안 **하나**다. 탭이 바뀌어도 언마운트하지 않고 오버레이만
           갈아끼운다 — 그래야 사용자가 맞춰 둔 중심·줌이 탭 왕복에도 남는다. */}
       <MapHost active>
-        <PpppReportProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
-        {reportOpen && <AnalysisReportDialog districtId={districtId} handoff={reportHandoff} onClose={() => setReportOpen(false)} />}
+        <WorkspaceRecordsProvider key={`${districtId}:${token ?? "anonymous"}`} districtId={districtId}>
         <Suspense fallback={<div className="map-loading">화면 불러오는 중…</div>}>
           {view === "platform" && (
             <TrackMapFrame track="platform" label="상권 정체성" header={<ExploreStepHeader track="platform" onNavigate={navigateStep} />}
@@ -439,7 +435,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
               </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
-                onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
+                defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
             </TrackMapFrame>
@@ -447,7 +443,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
         </Suspense>
         <BusinessSetup state={business} industries={industries} districts={bizDistricts} districtId={districtId}
           open={bizOpen} onOpenChange={setBizOpen} onStart={startBusiness} onBrowse={browse} saving={saving} />
-        </PpppReportProvider>
+        </WorkspaceRecordsProvider>
       </MapHost>
       <FounderPlanner selection={postingSelection} />
       {saving && <p className="session-note" role="status">사업 정보 저장 중…</p>}
@@ -517,7 +513,7 @@ function AppContent() {
       setToken((prev) => {
         // 계정이 바뀌거나 로그아웃하면 이 브라우저의 흐름 답을 지운다 — 공용 PC 에서 다음 사람이 앞사람의 금액·아이템을
         // 보지 않게. 로그인 전 → 로그인은 지우지 않는다(그때까지 고른 것을 계정으로 옮긴다 · 5판 C5)
-        if (prev && prev !== next) { clearFlow(); clearPlan(); }
+        if (prev && prev !== next) { clearFlow(); clearLegacyPlan(); }
         return next;
       });
     };

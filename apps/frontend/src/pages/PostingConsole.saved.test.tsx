@@ -68,7 +68,7 @@ describe("PostingConsole — 결과 저장", () => {
     expect(screen.queryByRole("region", { name: "저장한 결과" })).toBeNull();
   });
 
-  it.each([false, true])("저장한 결과의 자리·입력·계산·출처를 저장하고 비용 화면에서 다시 읽는다 (운영 계산 %s)", async (economics) => {
+  it.each([false, true])("저장한 결과의 자리·입력·계산·출처를 보존하고 비용 화면에서 다시 읽는다 (운영 계산 %s)", async (economics) => {
     saveToken("test-token");
     const api = mount(economics);
     await screen.findByRole("button", { name: "결과 저장" });
@@ -79,7 +79,7 @@ describe("PostingConsole — 결과 저장", () => {
     expect(payload.handoff).toMatchObject({ districtId: "garosugil", unitId: "garosugil-u1" });
     const list = screen.getByRole("region", { name: "저장한 결과" });
     fireEvent.click(await within(list).findByRole("button", { name: "보기" }));
-    expect(within(list).queryByRole("button", { name: "저장한 내용으로 가설 설정 →" })).toBeNull();
+    expect(within(list).queryByRole("button", { name: /Program/ })).toBeNull();
   });
 });
 

@@ -9,6 +9,8 @@
  * 단일 기준은 `python scripts/pppp_status.py` 다. 여기에 **적지 않는** 것 — 정확도·예측 성능·고객 수·가격:
  * 공실 예측(LSTM) 두 축은 아직 확인 대기이고(CLAUDE.md KPI①), 파일럿 실적은 없으며, 요금은 정해지지 않았다.
  */
+import { SITE_SCOPE_KEY } from "@/lib/siteScope";
+
 export const LANDING_HUBS = 81;
 
 /** 보이는 지역 — 2026-10-26 고양·파주를 서빙하며 「서울」에서 늘었고, 10-29 「서울·경기」, 10-31 「서울·경기·광주」, 그 뒤 「서울·경기·광주·전주」(158곳)가 됐다.
@@ -16,5 +18,17 @@ export const LANDING_HUBS = 81;
  *  거점 수와 같이 움직인다(`LANDING_HUBS` = 보이는 도시의 서빙 거점 수 — `tests/test_landing_facts.py`) */
 export const LANDING_REGION = "서울";
 
+/** 고양·파주 범위(`lib/siteScope` 의 `goyang-paju` · 2026-11-23) — 보이는 도시(고양 · 파주)의 서빙 거점 수. 테스트가 같은 방식으로 대조한다 */
+export const LANDING_HUBS_GOYANG_PAJU = 26;
+export const LANDING_REGION_GOYANG_PAJU = "고양·파주";
+
+/** 지금 이 탭의 범위가 말하는 지역 이름과 거점 수 — 기본(서울)은 위 두 상수 그대로다 */
 export const LANDING_HUBS_GWANGJU = 40;
 export const LANDING_REGION_GWANGJU = "광주광역시";
+
+export function landingFacts(): { region: string; hubs: number } {
+  if (SITE_SCOPE_KEY === "gwangju") return { region: LANDING_REGION_GWANGJU, hubs: LANDING_HUBS_GWANGJU };
+  return SITE_SCOPE_KEY === "goyang-paju"
+    ? { region: LANDING_REGION_GOYANG_PAJU, hubs: LANDING_HUBS_GOYANG_PAJU }
+    : { region: LANDING_REGION, hubs: LANDING_HUBS };
+}

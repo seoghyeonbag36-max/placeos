@@ -43,7 +43,7 @@ function fromUnit(u: FloorVacancyUnit, calc: Set<string>): SpaceItem {
 }
 
 /** 한 상권의 빈 자리 전부. 세 응답 중 무엇이 없어도(404) 있는 만큼으로 선다 */
-export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[]; hasRent: boolean; noCalcReason: string | null; rentNote: string | null; quarter: string | null }> & { retry: () => void } {
+export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[]; hasRent: boolean; noCalcReason: string | null; rentNote: string | null; rentShared: boolean; quarter: string | null }> & { retry: () => void } {
   const data = useFlowData();
   const rent = useLoad(districtId ? `rent:${districtId}` : null, () => data.rent(districtId!));
   const floors = useLoad(districtId ? `fu:${districtId}` : null, () => data.floorUnits(districtId!));
@@ -68,7 +68,11 @@ export function useSpaces(districtId: string | null): Load<{ items: SpaceItem[];
     status: "ready", retry, data: {
       items, hasRent: rent.status === "ready", noCalcReason,
       rentNote: rent.status === "ready" ? rent.data.note : null,
+      rentShared: rent.status === "ready" && rent.data.rent_source === "rone-shared",
       quarter: rent.status === "ready" ? rent.data.quarter ?? null : null,
     },
   };
 }
+
+/** 매출 재료가 없어 요구 판매량(`RequiredSales`)을 먼저 여는 도시 — 다른 도시로 넓히는 것은 별도 결정이다(2026-11-23) */
+export const REQUIRED_SALES_CITIES: readonly string[] = ["goyang", "paju"];

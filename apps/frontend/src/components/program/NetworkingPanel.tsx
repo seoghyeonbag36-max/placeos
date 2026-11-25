@@ -3,10 +3,11 @@ import { getProgramNetwork, type ProgramNetwork, type ProgramStage } from "@/lib
 import { readNetworkNotes, saveNetworkNotes, type NetworkNotes } from "@/lib/programSaved";
 import SourceStatusLine from "./SourceStatusLine";
 
-/** 네트워킹 — 이 상권에서 계약 전에 누구에게 묻고, 개업 뒤 누구와 함께할 수 있나(2026-11-07 리뉴얼).
+/** 네트워킹 — 계약을 맺고 개업한 자리가 이 상권에서 누구와 함께할 수 있나(2026-11-22 · 그전 11-07 리뉴얼은 계약 전 질문도 실었다).
  *
- *  1단계 공식 네트워크(행사·네트워크 공고 · 기업마당 행사정보 · 지원기관 누리집)와 2단계 방문형 이웃 가게
- *  (함께 모이는 업종 + 물어볼 질문)만 보인다. PlaceOS 는 가게 연락처를 모으거나 대신 연락하지 않는다
+ *  1단계 공식 네트워크(행사·네트워크 공고 · 기업마당 행사정보 · 교육·상담 기관 누리집)와 2단계 방문형 이웃 가게
+ *  (함께 모이는 업종 + 개업 뒤 이야기할 것)만 보인다. 계약 전 질문·지원사업 신청 창구는 Program 에서 제외됐다
+ *  (→ docs/decision-program-post-opening-2026-11-22.md). PlaceOS 는 가게 연락처를 모으거나 대신 연락하지 않는다
  *  (정보통신망법 제50조 — 영리 목적 광고성 정보는 수신자의 사전 동의). 사용자끼리 잇는 3단계는 파일럿 뒤(결정 D3). */
 export default function NetworkingPanel({ districtId, industryKey, industryLabel, stage }: {
   districtId: string; industryKey?: string; industryLabel?: string; stage?: ProgramStage;
@@ -54,7 +55,7 @@ export default function NetworkingPanel({ districtId, industryKey, industryLabel
           <p className="program-chips">{e.matched.map((m) => <span key={m}>{m}</span>)}</p>
         </li>)}</ol>}
 
-      <h3>이웃 가게 — 직접 찾아가 물어보기</h3>
+      <h3>이웃 가게 — 직접 찾아가 인사하고 함께할 것 찾기</h3>
       {data.complements.length > 0
         ? <p>이 도시에서 {industryLabel ?? "내 업종"}과 함께 모이는 업종:{" "}
           {data.complements.map((c) => <span key={c.key ?? c.label} className="program-chip-inline">{c.label}(lift {c.lift})</span>)}</p>
@@ -62,17 +63,17 @@ export default function NetworkingPanel({ districtId, industryKey, industryLabel
       {data.complements_note && <p className="program-note">{data.complements_note}</p>}
       <p className="program-note">이웃 가게의 위치는 Posting 「주변 업종」 지도와 Page 지도에서 볼 수 있어요(공개 상가정보 — 상호·업종·위치만).</p>
       <fieldset className="program-questions">
-        <legend>계약 전에 물어볼 것 — 확인한 질문에 표시</legend>
+        <legend>개업 뒤 이웃 가게·상인 조직과 이야기할 것 — 나눈 이야기에 표시</legend>
         {data.questions.map((q) => <label key={q}>
           <input type="checkbox" checked={notes.checked.includes(q)} onChange={() => toggleQuestion(q)} /> {q}
         </label>)}
-        <label>들은 내용 메모(이 브라우저에만 저장 · 결과 리포트에 실립니다)
+        <label>들은 내용 메모(이 브라우저에만 저장)
           <textarea rows={3} maxLength={1500} value={notes.memo} onChange={(e) => update({ ...notes, memo: e.target.value })}
-            placeholder="예: 상인회 월 회비 있음 · 권리금은 층마다 다르다고 함" />
+            placeholder="예: 상인회 월 회비 있음 · 토요일 플리마켓에 함께 나가기로 함" />
         </label>
       </fieldset>
 
-      <h3>지원기관</h3>
+      <h3>교육·상담·네트워크 기관</h3>
       <ul className="program-directory">{data.directory.map((d) => <li key={d.url}>
         <a href={d.url} target="_blank" rel="noreferrer">{d.name}</a> <small>{d.role}</small>
       </li>)}</ul>

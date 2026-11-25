@@ -1,7 +1,7 @@
 {
   "source": "R-ONE 소규모상가 임대료(rent_small) + 서울 상권분석 유동인구(flpop)",
   "quarter": "20262",
-  "built_at": "2026-11-14T22:56:36+00:00",
+  "built_at": "2026-11-23T13:13:19+00:00",
   "rent_unit": "천원/㎡·월 (R-ONE 소규모상가, 사실상 1층 기준)",
   "floor_factor": {
     "B2": 0.6,
@@ -431,6 +431,66 @@
       "rent_quarter": "20262"
     },
     "haengsin": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jugyo": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "todang": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "samsong2dong": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "haengsin1dong": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "siksa": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "pungsan": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "wonheung": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "wonsin": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "goyangdong": {
+      "rent_per_m2_krw_thousand": 20.68,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "haengsin4dong": {
       "rent_per_m2_krw_thousand": 20.68,
       "flpop": null,
       "foot": null,
@@ -874,6 +934,24 @@
       "foot": null,
       "rent_quarter": "20262"
     },
+    "ilsan2dong": {
+      "rent_per_m2_krw_thousand": 20.13,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "madu1dong": {
+      "rent_per_m2_krw_thousand": 20.13,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "tanhyeon2dong": {
+      "rent_per_m2_krw_thousand": 20.13,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
     "geumchon": {
       "rent_per_m2_krw_thousand": 23.49,
       "flpop": null,
@@ -893,6 +971,30 @@
       "rent_quarter": "20262"
     },
     "munsan": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "jori": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "unjeong3dong": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "munbal": {
+      "rent_per_m2_krw_thousand": 23.49,
+      "flpop": null,
+      "foot": null,
+      "rent_quarter": "20262"
+    },
+    "munsaneup": {
       "rent_per_m2_krw_thousand": 23.49,
       "flpop": null,
       "foot": null,

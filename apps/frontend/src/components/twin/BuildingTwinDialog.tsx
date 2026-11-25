@@ -14,8 +14,8 @@ import { ledgerNote } from "@/lib/twinLedger";
 import { ENERGY_LINKS, jibunLabel, jibunOfBuilding } from "@/lib/twinEnergy";
 import { STORE_STATE_LABEL, storesNote, unitStoreState } from "@/lib/twinStores";
 import { areaSummary, isVacantStatus, TWIN_STATUS } from "@/lib/twinGeometry";
-import FloorPlan from "./FloorPlan";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import OwnerFloorPlan from "./OwnerFloorPlan";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import HistoryTimeline from "./HistoryTimeline";
 import RoadCheckSection from "./RoadCheckSection";
 import EnergySection from "./EnergySection";
@@ -153,7 +153,7 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
           </table>
         </details>
       )}
-      <FloorPlan twin={twin} floor={floor} />
+      <OwnerFloorPlan twin={twin} floor={floor} />
       <section className="twin3d-sec" aria-label="지번 이력">
         <h4>지번 이력 연대표</h4>
         <HistoryTimeline items={twin.history.items} total={twin.history.items_total} lotBuildings={twin.history.lot_buildings} />
@@ -162,7 +162,7 @@ function FloorDetail({ twin, floor, districtId, onReview, onOpenStreet }: { twin
         {onOpenStreet
           ? <button type="button" className="twin3d-btn" onClick={onOpenStreet}>거리뷰 · 층별 보기</button>
           : <a className="twin3d-btn" href={kakaoRoadviewUrl({ lat: twin.lat, lng: twin.lng })} target="_blank" rel="noopener noreferrer">거리뷰 보기(카카오맵)<span className="sr-only">(새 창)</span></a>}
-        {onReview && <button type="button" className="twin3d-btn is-strong" onClick={() => onReview(floor, twin)}>이 자리로 입점 계산 → Posting</button>}
+        {onReview && <button type="button" className="twin3d-btn is-strong" onClick={() => onReview(floor, twin)}>이 자리로 입점 계산 → Proposal</button>}
         <button type="button" className="twin3d-btn" aria-pressed={saved} onClick={toggleStop}>{saved ? "✓ 답사 목록에 담음" : "답사 목록에 담기"}</button>
       </div>
     </div>
@@ -247,7 +247,7 @@ function BuildingTwinContent({ buildingId, districtId, districtName, fallback, o
 
   const floorByLv = useMemo(() => new Map(twin?.floors.map((f) => [f.lv, f]) ?? []), [twin]);
   const selected = selectedLv !== null ? floorByLv.get(selectedLv) ?? null : null;
-  useReportCapture("pageFloor", selected ? {
+  useRecordCapture("pageFloor", selected ? {
     districtId, buildingId, label: selected.label, area: selected.area_m2, areaSource: selected.area_source,
     status: TWIN_STATUS[selected.status].label, unitId: selected.unit_id,
   } : null);

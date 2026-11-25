@@ -163,7 +163,7 @@ it("그대로 두는 칸 — 디자인 방향 · 공사 범위 · 기존 내부 
   expect(screen.getByRole("heading", { name: "공사 전 체크리스트" })).toBeTruthy();
   fireEvent.change(screen.getByLabelText("공사 범위"), { target: { value: "부분 공사 · 바닥과 천장 유지" } });
   fireEvent.click(screen.getByRole("button", { name: "#포토존" }));
-  fireEvent.click(screen.getByRole("button", { name: "리포트에 인테리어 조건 저장" }));
+  fireEvent.click(screen.getByRole("button", { name: "인테리어 조건 저장" }));
   const saved = JSON.parse(localStorage.getItem("placeos.interior-brief.garosugil")!);
   expect(saved.source).toBe("user_input");
   expect(saved.brief).toContain("부분 공사 · 바닥과 천장 유지");

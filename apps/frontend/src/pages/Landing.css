@@ -97,7 +97,7 @@
  .lp-hero { min-height: calc(100svh - 80px); display: grid; align-items: center; padding-block: var(--space-xl); }
  .lp-hero-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--space-xl); }
  .lp-hero-art { min-height: 520px; }
- .lp-results { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ .lp-results { grid-template-columns: repeat(4, minmax(0, 1fr)); }
  .lp-quick-steps, .lp-cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
  .lp-step { grid-template-columns: 40px minmax(0, 1fr); }
  /* 본문이 두 행에 걸치면(grid-row: 1 / span 2) 4줄짜리의 남는 높이가 「이름」「질문」 두 행에 나뉘어 이름과 질문 사이가 벌어졌다(4번 Program · 960px 에선 3번도).
@@ -136,3 +136,7 @@
  .lp-bar-actions { flex-wrap: wrap; column-gap: var(--space-md); }
  .lp-cta-row { row-gap: var(--space-lg); }
 }
+
+/* 고양·파주 전용 범위(2026-11-23 · lib/siteScope) — 서울 기본 화면에는 나오지 않는다 */
+.lp-scope-note { margin: 0 0 var(--sp-3, 12px); font-size: .875rem; color: var(--text-subtle, #6b7684); }
+.lp-scope-note a { color: inherit; text-decoration: underline; }

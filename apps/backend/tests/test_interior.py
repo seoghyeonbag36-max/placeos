@@ -16,7 +16,7 @@ from app.core.config import settings
 from app.core.db import Base, get_db
 from app.core.security import get_current_user
 from app.schemas.interior import InteriorRequest
-from app.services import interior, interior_quota, program_site, floor_vacancy
+from app.services import interior, interior_quota
 
 BODY = {"district": "가로수길", "industry": "카페", "style": "따뜻함", "strategy": "가성비", "consent": True}
 PNG = b"\x89PNG\r\n\x1a\n" + b"test-only"
@@ -95,15 +95,6 @@ def test_interior_edits_send_reference_bytes_and_no_secrets(monkeypatch):
 def test_interior_invalid_reference_rejected_before_provider():
     with pytest.raises(ValueError):
         interior.decode_reference(base64.b64encode(b"not-an-image").decode(), "image/png")
-
-
-def test_program_floor_site_keeps_floor_area_and_basis(monkeypatch):
-    monkeypatch.setattr(floor_vacancy, "load", lambda _: {"units": [{"id": "vfu-test", "n": "합성 테스트 층",
-        "floor_label": "3F", "area": 18, "was": "", "lat": 37.5, "lng": 127.0}]})
-    context = program_site.site_context("test", "vfu-test")
-    assert "3F" in context and "18평" in context and "층 전체 면적" in context
-    assert "건물 상업면적 ÷ 호실 수" not in context and "현장 미확인" in context
-    assert program_site.site_context("test", "vfu-missing") is None
 
 
 # ── 실패 경로 재현 (2026-11-06) — 공급자를 MockTransport 로 흉내 낸다. 실호출·과금 없음 ──────────

@@ -46,6 +46,11 @@ def _has_social_schema(db: Session) -> bool:
     return inspect(db.connection()).has_table(SocialIdentity.__tablename__)
 
 
+def _has_direct_schema(db: Session) -> bool:
+    """직거래 연결 층 표(2026-11-18 · a7b8c9d0e1f2)가 있는가 — 없으면 탈퇴는 그 표를 건너뛴다."""
+    return inspect(db.connection()).has_table("direct_listings")
+
+
 class ApiKeyNotFound(Exception):
     pass
 
@@ -197,6 +202,44 @@ def delete_account(db: Session, user: User) -> None:
     solo = [oid for oid in org_ids
             if db.execute(select(func.count()).select_from(Membership)
                           .where(Membership.org_id == oid)).scalar_one() == 1]
+
+    # 직거래 연결 층(2026-11-18) — 내 매물(+그 확인·문의·메시지·신고) · 내가 보낸 문의(+메시지) · 내가 쓴 메시지를 지우고,
+    # 신고자 칸은 비우며, 정액 상품 신청은 입금 확인 기록이라 계정 연결(user_id)과 입금자명만 지워 남긴다(L10).
+    # 표가 아직 없는 DB(배포는 자동, 마이그레이션은 수동)에서도 탈퇴가 깨지지 않게 표 존재를 먼저 본다.
+    if _has_direct_schema(db):
+        from app.models.direct import (
+            BriefDisclosure, DirectBrief, DirectInquiry, DirectListing, DirectMessage, DirectOffer, ListingReport,
+            ListingVerification, PurchaseIntent,
+        )
+        from app.services.direct_listings import remove_listing_rows
+
+        # 2026-11-21 입점 희망서 층(b8c9d0e1f2a3) — 표가 없는 DB 에서는 건너뛴다(배포는 자동, 마이그레이션은 수동)
+        tables = inspect(db.connection())
+        has_offers = tables.has_table(DirectOffer.__tablename__)
+        has_briefs = tables.has_table(DirectBrief.__tablename__)
+
+        mine = list(db.execute(select(DirectListing.id).where(DirectListing.owner_user_id == uid)).scalars())
+        remove_listing_rows(db, mine)
+        # 내가 창업자인 대화 — 내가 연 문의와, 건물주가 내 희망서를 보고 보낸 제안(+ 그 조건 제안서·메시지)
+        sent = list(db.execute(select(DirectInquiry.id).where(DirectInquiry.founder_user_id == uid)).scalars())
+        if has_offers:
+            if sent:
+                db.execute(delete(DirectOffer).where(DirectOffer.inquiry_id.in_(sent)))
+            db.execute(delete(DirectOffer).where(DirectOffer.proposer_user_id == uid))
+        if sent:
+            db.execute(delete(DirectMessage).where(DirectMessage.inquiry_id.in_(sent)))
+            db.execute(delete(DirectInquiry).where(DirectInquiry.id.in_(sent)))
+        if has_briefs:
+            # 내 희망서와 그 공개 동의 · 다른 창업자가 나(건물주)에게 열어 준 공개 동의
+            from app.services.direct_briefs import remove_brief_rows
+
+            remove_brief_rows(db, list(db.execute(select(DirectBrief.id).where(DirectBrief.user_id == uid)).scalars()))
+            db.execute(delete(BriefDisclosure).where(BriefDisclosure.owner_user_id == uid))
+        db.execute(delete(DirectMessage).where(DirectMessage.sender_user_id == uid))
+        db.execute(delete(ListingVerification).where(ListingVerification.submitted_by == uid))
+        db.execute(update(ListingReport).where(ListingReport.reporter_user_id == uid).values(reporter_user_id=None))
+        db.execute(update(PurchaseIntent).where(PurchaseIntent.user_id == uid)
+                   .values(user_id=None, depositor_name=""))
 
     from app.models.campaign import Campaign
     db.execute(delete(Campaign).where(Campaign.user_id == uid))

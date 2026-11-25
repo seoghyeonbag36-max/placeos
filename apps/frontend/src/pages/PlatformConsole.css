@@ -290,3 +290,13 @@
 .platconsole .kwlinks li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px}
 .platconsole .kwlinks span{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px}
 .platconsole .kwlinks a{color:var(--ui-blue);text-decoration:underline}
+/* 인스타그램 칸(2026-11-22) — 공식 API 해시태그 집계 */
+.platconsole .ig-panel{margin-top:var(--sp-3)}
+.platconsole .ig-facts{display:grid;grid-template-columns:max-content 1fr;gap:var(--sp-1) var(--sp-3);margin:var(--sp-2) 0 0;font-size:13px}
+.platconsole .ig-facts dt{color:var(--sub)}
+.platconsole .ig-facts dd{margin:0;overflow-wrap:anywhere}
+.platconsole .ig-facts small{color:var(--text-subtle)}
+.platconsole .ig-cotags{display:flex;flex-wrap:wrap;gap:4px 8px;margin:var(--sp-2) 0 0;font-size:13px}
+.platconsole .ig-cotags i{font-style:normal;margin-left:2px;color:var(--text-subtle);font-size:11px}
+.platconsole .ig-link a{display:inline-flex;align-items:center;min-height:36px;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+@media (max-width: 480px){.platconsole .ig-facts{grid-template-columns:1fr}}

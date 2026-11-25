@@ -136,10 +136,7 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
 
       <div className="grid">
         {summaries.map((s, i) => (
-          <button key={s.id} className="dcard"
-            style={{ borderLeftColor: s.vacancy_rate === null || s.vacancy_rate === undefined
-              ? "var(--line, #d1d5db)" : vacHex(s.vacancy_rate) }}
-            onClick={() => onOpen(s.id)}>
+          <button key={s.id} className="dcard" onClick={() => onOpen(s.id)}>
             <div className="dtop">
               <div className="dord">{i + 1}</div>
               <div className="dname">{s.name}</div>
@@ -153,6 +150,10 @@ function Board({ summaries, onOpen }: { summaries: DistrictSummary[]; onOpen: (i
               : <Bar k="감성" v={s.sentiment} max={100} color={sentHex(s.sentiment)}
                      text={`${s.sentiment.toFixed(1)}pt`} />}
             <div className="dmeta">
+              {/* 공실률은 색 띠가 아니라 점 + 숫자로 — 색만으로는 값을 못 읽고, 실측이 없으면 0 이 아니라 「없음」이다 */}
+              {s.vacancy_rate === null || s.vacancy_rate === undefined
+                ? <span className="value-absent">공실률 실측 없음</span>
+                : <span><i className="vdot" aria-hidden="true" style={{ background: vacHex(s.vacancy_rate) }} />공실률 {s.vacancy_rate.toFixed(1)}%</span>}
               <span>리뷰 {s.reviews === null || s.reviews === undefined
                 ? <span className="value-absent">없음</span> : s.reviews.toLocaleString()}</span>
               <span>공실 {s.vacant_units}개</span>
@@ -409,7 +410,7 @@ function VacancyMap({ detail }: { detail: DistrictDetail }) {
           onClick={() => setLayer("buildings")}>공실 건물</button>
         <button className={layer === "grid" ? "on" : ""} onClick={() => setLayer("grid")}>100m 그리드</button>
         {sel && layer === "buildings" && (
-          <button className="twinbtn" onClick={() => setTwinOpen(true)}>🏢 {sel.name} · 층별 공실 · 공실 이력</button>
+          <button className="twinbtn" onClick={() => setTwinOpen(true)}>{sel.name} · 층별 공실 · 공실 이력</button>
         )}
       </div>
 
@@ -719,7 +720,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           {postings && (
             <>
               <h2 className="sec">공실 유닛 · 3-Tier 시나리오 <small>
-                Posting · 비용-효용(월) — 코파일럿 연동 전 폴백.
+                Proposal · 비용-효용(월) — 코파일럿 연동 전 폴백.
                 임대료는 R-ONE 실데이터, 면적·권리금은 아직 추정치다
               </small></h2>
               <div className="units">
@@ -882,7 +883,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
                 </div>
               )}
               <div className="insta">
-                {marketing.online_contents.map((c, i) => <div key={i} className="ig">📷 {c}</div>)}
+                {marketing.online_contents.map((c, i) => <div key={i} className="ig">{c}</div>)}
               </div>
             </>
           )}

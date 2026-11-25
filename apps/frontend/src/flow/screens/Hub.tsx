@@ -22,7 +22,6 @@ import { MiniMap, type MiniMapPin } from "../MiniMap";
 import { clearFlow, emptyFlow, setDistrict, setGoal, type SpaceAt } from "../state";
 import { Badge, BottomCTA, ChoiceList, FlowScreen, Row, RowList, Sheet, TextButton } from "../ui";
 import { GOAL_LABEL, industryOf, useDistrictName, useDistricts, useIndustries } from "./common";
-import { clearPlan } from "../plan";
 
 /* ── 로그인 패널 — 얻는 것 세 줄 + 수단(§5-5 L) ─────────────────────────── */
 
@@ -53,7 +52,7 @@ const KIND_LABEL: Record<string, string> = { space: "후보 자리", posting: "�
 
 function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: number; onRemove?: (id: string) => void }) {
   const { update } = useFlow();
-  const shown = items.slice(0, limit);
+  const shown = limit ? items.slice(0, limit) : items;
   if (!shown.length) return <p className="fl-note">아직 저장한 것이 없어요. 빈 자리의 ♡ 나 결과 화면의 「저장」을 눌러 모아 두세요.</p>;
   return (
     <RowList label="저장한 것">
@@ -78,7 +77,7 @@ function SavedList({ items, limit, onRemove }: { items: SavedResult[]; limit?: n
 const TRACK_CHIPS: { track: ExploreTrack; name: string; en: string }[] = [
   { track: "platform", name: "상권", en: "Platform" },
   { track: "page", name: "빈 자리", en: "Page" },
-  { track: "posting", name: "비용", en: "Posting" },
+  { track: "posting", name: "입점 희망", en: "Proposal" },
 ];
 
 /**
@@ -108,7 +107,7 @@ function MapPreview({ districtId, spaceId, spaceLabel, at, results }: {
   return (
     <section className="fl-mapcard" aria-labelledby={titleId}>
       <MiniMap center={center} pins={pins} zoom={16} still lazy
-        label={`${d?.name ?? "상권"} 지도 — ${at ? `고른 자리 ${spaceLabel ?? ""}` : "상권 중심"}${savedHere.length ? ` · 저장한 후보 ${savedHere.length}곳` : ""}`}>
+        label={`${d?.name ?? "상권"} 지도, ${at ? `고른 자리 ${spaceLabel ?? ""}` : "상권 중심"}${savedHere.length ? ` · 저장한 후보 ${savedHere.length}곳` : ""}`}>
         <a className="fl-mapcard-cover" href={href("page")} aria-hidden="true" tabIndex={-1} />
       </MiniMap>
       <div className="fl-mapcard-foot">
@@ -146,7 +145,7 @@ function CompareEntry({ districtId, results }: { districtId: string | null; resu
     <button type="button" className="fl-entry" onClick={() => go(comparePath(candidates))}>
       <span className="fl-entry-main">
         <b>상권 {candidates.length}곳 나란히 보기</b>
-        <span>{candidates.map(nameOf).join(" · ")}{cut > 0 ? ` — 최근 ${candidates.length}곳만(${cut}곳 더 있어요)` : ""}</span>
+        <span>{candidates.map(nameOf).join(" · ")}{cut > 0 ? ` (최근 ${candidates.length}곳만, ${cut}곳 더 있어요)` : ""}</span>
       </span>
       <span className="fl-entry-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
     </button>
@@ -186,7 +185,7 @@ export function Home() {
       path: state.districtId ? `/district/${encodeURIComponent(state.districtId)}` : state.goal === "pivot" ? "/industries" : !state.industryKey ? "/industry" : "/districts" },
     { key: "page", name: "빈 자리", en: "PAGE", value: state.spaceLabel, done: !!state.spaceId,
       path: state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : state.districtId ? "/rent-cap" : "/district-search" },
-    { key: "posting", name: "비용", en: "POSTING", value: state.premium ? "본전 시점을 봤어요" : state.costs.budget != null || state.costs.deposit != null ? "예산을 점검했어요" : null,
+    { key: "posting", name: "입점 희망서", en: "Proposal", value: state.premium ? "본전 시점을 봤어요" : state.costs.budget != null || state.costs.deposit != null ? "예산을 점검했어요" : null,
       done: !!state.premium || state.costs.deposit != null || state.costs.budget != null,
       path: state.premium ? "/payback" : state.spaceId ? `/space/${encodeURIComponent(state.spaceId)}` : "/spaces" },
   ];
@@ -196,7 +195,7 @@ export function Home() {
     // 마지막으로 연 화면이 이 단계 안이면 거기로(§5-5 「이어서」), 아니면 그 단계의 첫 화면
     go(state.lastPath && stageOf(state.lastPath) === s.key ? state.lastPath : s.path);
   };
-  // 세 단계를 다 봤으면 다음 할 일은 「이어서」가 아니라 지도다(2026-10-24 · §5-5) — 다 마친 사람은 탭 「지도」를 찾아 누르지
+  // 계약 전 세 단계를 다 봤으면 다음 할 일은 「이어서」가 아니라 지도다(2026-10-24 · §5-5) — 다 마친 사람은 탭 「지도」를 찾아 누르지
   // 않았다. 하단 주 버튼이 지도 탐색(PPPP 세 화면)을 Page 트랙 · 고른 건물로 연다. 탭 「지도」는 그대로 `#/explore` 다.
   const allDone = nextIdx === -1;
   const mapDistrict = state.districtId ?? state.homeDistrictId;
@@ -204,7 +203,7 @@ export function Home() {
   const openMap = () => go(explorePath({ track: "page", district: mapDistrict, building: myBuilding }));
   return (
     <FlowScreen hub tab="home" caption={allDone ? title : GOAL_LABEL[state.goal]}
-      title={allDone ? "세 단계를 다 봤어요" : title}
+      title={allDone ? "계약 전 세 단계를 다 봤어요" : title}
       sub={allDone ? "고른 자리를 지도에서 주변 빈 자리와 함께 볼 수 있어요." : undefined}
       cta={allDone ? <BottomCTA primary={{ label: myBuilding ? "지도에서 내 자리 보기" : "지도에서 이 상권 보기", onClick: openMap }} /> : undefined}>
       <ol className="fl-steps" aria-label="세 단계">
@@ -229,13 +228,18 @@ export function Home() {
         : <div className="fl-loginhint"><p>저장하려면 로그인해요.</p><button type="button" className="fl-btn fl-btn-weak" onClick={openLogin}>로그인</button></div>}
       {token && results && <CompareEntry districtId={mapDistrict} results={results} />}
       <div className="fl-actions">
+        <TextButton onClick={() => go("/listings")}>건물주 확인 매물 보기</TextButton>
+        <TextButton onClick={() => go("/brief")}>입점 희망서 쓰기</TextButton>
+        <TextButton onClick={() => go("/owner")}>건물주이신가요? 빈 자리 직접 올리기</TextButton>
+      </div>
+      <div className="fl-actions">
         <TextButton onClick={() => setReset(true)}>처음부터</TextButton>
         <TextButton onClick={openVisitorFeedback}>의견 보내기</TextButton>
       </div>
       <Sheet open={reset} onClose={() => setReset(false)} title="처음부터 다시 할까요?">
         <p>고른 목적·업종·상권·자리와 입력한 금액이 지워져요. 저장한 것은 남아요.</p>
         <button type="button" className="fl-btn fl-btn-strong" onClick={() => {
-          clearFlow(); clearPlan(); update(() => emptyFlow()); setReset(false); go("/start");
+          clearFlow(); update(() => emptyFlow()); setReset(false); go("/start");
         }}>처음부터</button>
       </Sheet>
     </FlowScreen>
@@ -284,6 +288,14 @@ export function Me() {
         <Row title="저장한 것" right={<b>{results?.length ?? "…"}</b>} onClick={() => setShowSaved((v) => !v)} />
       </RowList>
       {showSaved && results && <SavedList items={results} onRemove={removeResult} />}
+      {/* 직거래 연결 층(2026-11-18) — 건물주 확인 매물 · 문의함 · 정액 상품(성사 수수료 없음) */}
+      <RowList label="직거래">
+        <Row title="문의함" meta="건물주와 직접 주고받은 문의·방문 예약·조건 제안" onClick={() => go("/inbox")} />
+        <Row title="내 입점 희망서(창업자)" meta="원하는 자리 조건을 남기면 건물주가 먼저 제안해요" onClick={() => go("/brief")} />
+        <Row title="내 빈 자리(건물주)" meta="빈 자리 직접 올리기 · 소유자 확인 · 공실 진단" onClick={() => go("/owner")} />
+        <Row title="입점 희망서 보기(건물주)" meta="내 확인 매물 상권을 희망한 창업자" onClick={() => go("/owner/briefs")} />
+        <Row title="정액 상품" meta="상단 노출 · 리포트 (성사·중개 수수료 없음)" onClick={() => go("/plans")} />
+      </RowList>
       <RowList label="도움">
         <Row title="의견 보내기" meta="후기·오류·개선 요청" onClick={openVisitorFeedback} />
         <Row title="추천 의향 · 결제 의향 남기기" meta="시범 운영 조직 설문" onClick={() => openAccount("feedback")} />

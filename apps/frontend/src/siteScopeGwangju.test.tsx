@@ -52,6 +52,7 @@ describe("광주광역시 전용 사이트", () => {
     const { default: Landing } = await import("@/pages/Landing");
     render(<Landing />);
     expect(screen.getByText(/광주광역시 40개 상권의 공실/)).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "서울 상권 보기" })[0].getAttribute("href")).toBe("https://placeos.co.kr/?region=seoul");
     const how = document.getElementById("how");
     expect(how?.querySelectorAll("[data-track]").length).toBe(3);
   });

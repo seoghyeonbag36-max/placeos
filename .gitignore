@@ -95,6 +95,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # 재생성: data.collectors.culture_portal · tourapi_festivals → data.pipelines.build_national_events
 !data/gold/platform_events_national.json
 !data/gold/platform_collected_context.json
+# 예외: Platform 인스타그램 해시태그(공식 Graph API · 2026-11-22) — services/instagram_context 가 정적 서빙한다.
+# 수집 전에도 서울 거점별 대표 해시태그와 「pending」을 싣는다(컨테이너에는 data/config 가 없다). 빠지면 Platform 의 인스타 칸이 조용히 사라진다.
+# 재생성: data.collectors.instagram_hashtags → data.pipelines.build_instagram_gold
+!data/gold/platform_instagram.json
 # 예외: Page 유동·밀도 레이어(81KB, 54거점 190상권) — services/footfall_layer 가
 # 정적 서빙한다. 원천은 features/trdar_demand.parquet 이지만 **파케이는 배포에
 # 없다**(pandas·pyarrow 미탑재). 빠지면 유동 레이어가 조용히 비고, 예전처럼
@@ -184,6 +188,11 @@ data/gold/*/*
 !data/gold/gyeonggi_ranking_20261104/
 !data/gold/gyeonggi_ranking_20261104/manifest.json
 !data/gold/gyeonggi_ranking_20261104/*.parquet
+# 2026-11-23 고양·파주 서빙 17곳 — 공개 상권이 59→76곳으로 늘어 같은 버전은 거부되므로(`build_gyeonggi_ranking_gold` 의 매니페스트 검사) 새 버전 경로다.
+# 경기 모델 재학습(`train_gyeonggi_rank --version 20261123`)의 입력이라 학습 재현에 필요하다.
+!data/gold/gyeonggi_ranking_20261123/
+!data/gold/gyeonggi_ranking_20261123/manifest.json
+!data/gold/gyeonggi_ranking_20261123/*.parquet
 !data/gold/research-f32a4fa91c43/
 !data/gold/research-f32a4fa91c43/collected_ledger_evidence.json.gz
 # 예외: 행정동 24시간 생활인구 피처(136행 ~20KB) — train_gnn._adong_hour_block 이

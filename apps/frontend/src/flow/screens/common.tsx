@@ -9,12 +9,6 @@ import type { FlowState } from "../state";
 
 export const GOAL_LABEL: Record<BusinessGoal, string> = { start: "새 가게", pivot: "업종 바꾸기", move: "상권 옮기기" };
 
-/** 업종 타일의 그림 — 장식이다(이름이 읽힌다). 모르는 key 는 가게 그림 */
-export const INDUSTRY_EMOJI: Record<string, string> = {
-  cafe: "☕", restaurant: "🍚", bar: "🍺", beauty: "💇", clinic: "🏥", pharmacy: "💊", convenience: "🏪",
-  fashion: "👕", education: "📚", fitness: "🏋️", lodging: "🛏️", culture: "🎨", other: "✏️",
-};
-
 /** 상권 순위를 낼 수 있는 업종인가 — 모델 라벨이 있고 서빙 어휘 안(사유 없음) */
 export const hasRanking = (o: IndustryOption | null | undefined) => !!o && !!o.model_label && !o.fit_unavailable_reason;
 

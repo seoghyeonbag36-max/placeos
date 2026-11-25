@@ -1,5 +1,3 @@
-export const NAVER_MAP_AUTH_FAILURE_EVENT = "placeos:naver-map-auth-failure";
-
 /** 앱이 실제 사용하는 네이버 SDK 표면. 전체 SDK 구현이나 테스트 스텁의 대체가 아니다. */
 export interface NaverLatLng { lat(): number; lng(): number }
 export interface NaverPoint { x: number; y: number }

@@ -61,7 +61,7 @@ export default function MenuPlanner({ rent, rentSource, scenarios }: {
                   <td className={d >= bep.dailySales ? "is-pos" : "is-neg"}>{d >= bep.dailySales ? "넘는다" : "못 미친다"}</td></tr>); })}</tbody>
             </table></div>}
           </>}
-          <p className="pstep-foot">판매 1건 = 메뉴 1개로 봤습니다. 원가에는 재료비 · 포장재 · 카드수수료처럼 팔 때마다 드는 돈을 넣으세요. 추정 월매출은 상권 평균 매출을 면적에 비례해 계산한 값입니다. 이 메뉴의 실제 수요는 별도로 확인해야 합니다.</p>
+          <p className="pstep-foot">판매 1건 = 메뉴 1개로 봤습니다. 원가에는 재료비 · 포장재 · 카드수수료처럼 팔 때마다 드는 돈을 넣으세요. 추정 월매출은 상권 평균 매출(면적 비례)이라 이 메뉴의 실제 수요가 아닙니다 — 가오픈 · 시험 판매로 확인할 값입니다.</p>
         </div>
       )}
     </section>

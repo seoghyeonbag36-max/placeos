@@ -12,7 +12,7 @@ import { kakaoMapUrl } from "@/lib/externalMap";
 import { useFlow, useResume, useSaved } from "../context";
 import { MiniMap } from "../MiniMap";
 import { httpStatus, useFlowData, useLoad } from "../data";
-import { floorText, useSpaces, type SpaceItem } from "../spaces";
+import { floorText, REQUIRED_SALES_CITIES, useSpaces, type SpaceItem } from "../spaces";
 import { eun } from "../format";
 import { go, replace } from "../route";
 import { setSpace, type SpaceAt, type SpaceBrowse } from "../state";
@@ -20,8 +20,10 @@ import {
   Badge, BottomCTA, ChoiceList, Details, FlowScreen, LoadError, ResultView, SaveHeart, Sheet,
   SkeletonRows, TextButton, WarnLine,
 } from "../ui";
-import { hasRanking, useDistrictName, useNeed, useWorkIndustry } from "./common";
+import { districtById, hasRanking, useDistricts, useDistrictName, useNeed, useWorkIndustry } from "./common";
+import { RequiredSales } from "../RequiredSales";
 import { UseCheckCard } from "../UseCheckCard";
+import { BuildingDirectCard, DirectSupplyCard } from "./Direct";
 
 const BuildingViewer = lazy(() => import("@/components/BuildingViewer"));
 
@@ -151,6 +153,8 @@ export function Spaces() {
     // 「지도」 = PPPP 지도 탐색(#/explore). 흐름 안 지도로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙)
     <FlowScreen wide back={back} caption={caption} titleLive title={title}
       right={<button type="button" className="fl-textbtn" onClick={() => go("/explore")}>지도</button>}>
+      {/* 직거래(2026-11-18) — 건물주가 직접 올린 확인 매물로 가는 카드를 **더한다**. 아래 추정 빈 층 목록·「지도」 진입로는 그대로 */}
+      <DirectSupplyCard districtId={id!} />
       {all.length > 0 && <>
         <div className="fl-chips" role="group" aria-label="걸러 보기">
           {spaces.data.hasRent && (
@@ -222,6 +226,8 @@ export function SpaceDetail({ id }: { id: string }) {
   const ok = useNeed(!!did, "/district-search");
   const spaces = useSpaces(did);
   const name = useDistrictName(did);
+  const districts = useDistricts();
+  const city = districts.status === "ready" ? districtById(districts.data, did)?.city ?? null : null;
   const work = useWorkIndustry();
   const [viewer, setViewer] = useState(false);
   const item = spaces.status === "ready" ? spaces.data.items.find((s) => s.id === id) ?? null : null;
@@ -256,6 +262,7 @@ export function SpaceDetail({ id }: { id: string }) {
             : (spaces.status === "ready" ? spaces.data.noCalcReason : null) ?? "본전 시점은 건물 단위 자리만 계산해요."}
             primary={{ label: saved ? "후보에 저장했어요" : "후보로 저장하기", onClick: () => toggleSaveSpace(item, true, "save-space"), disabled: saved }} />}>
       <SpaceMap lat={item.lat} lng={item.lng} name={item.name} />
+      {item.buildingId && <BuildingDirectCard buildingId={item.buildingId} />}
       <dl className="fl-keys">
         <div><dt>월세 추정</dt><dd>{item.monthlyRent != null ? `${item.monthlyRent.toLocaleString("ko-KR")}만원` : "통계 없음"}</dd></div>
         <div><dt>평당</dt><dd>{item.rentPerPyeong != null ? `${item.rentPerPyeong}만원` : "—"}</dd></div>
@@ -267,6 +274,8 @@ export function SpaceDetail({ id }: { id: string }) {
         <TextButton onClick={() => go(calculable ? "/premium" : "/budget")}>이 자리 비용 검토</TextButton>
       </div>}
       {!calculable && <div className="fl-actions"><TextButton onClick={() => go("/budget")}>현장 금액으로 예산 점검</TextButton></div>}
+      {city && REQUIRED_SALES_CITIES.includes(city) && item.monthlyRent != null && spaces.status === "ready" &&
+        <RequiredSales key={item.id} rentMan={item.monthlyRent} rentIsShared={spaces.data.rentShared} />}
       <h2 className="fl-h2">이 건물의 층</h2>
       <div className="fl-stack-row">
         <FloorStack big item={item} siblings={spaces.status === "ready" ? spaces.data.items : []} />

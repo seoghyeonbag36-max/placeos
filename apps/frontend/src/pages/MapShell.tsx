@@ -20,18 +20,19 @@ import { ExploreStepFooter } from "@/components/ExploreStep";
 import CandidateCompare from "@/components/CandidateCompare";
 import { candidateId, loadCandidates, saveCandidates, type ReviewCandidate } from "@/lib/candidateStore";
 import TransitAccessPanel from "@/components/TransitAccessPanel";
+import StartupFitPanel from "@/components/StartupFitPanel";
 import { DensityPanel, HourlyPanel, RentTrendPanel, SelectedTravel } from "@/components/PageLayerPanels";
 import { createPageWorkspace, type PageWorkspace, type BuildingSelection, type VacancyFilter } from "@/lib/workspaceState";
-import { useReportCapture } from "@/lib/ppppReportContext";
+import { useRecordCapture } from "@/lib/workspaceRecords";
 import DistrictPicker, { CaveatNote } from "@/components/DistrictPicker";
 import { useMapHost } from "@/components/mapHostContext";
 import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 import { DEFAULT_ZOOM } from "@/components/MapHost";
 import { feedbackPanelOpen, isEditableTarget } from "@/lib/keyboard";
-import { getBuildingVacancy, getDensityHeatmap, getFloorVacancies, getFootfallHeatmap, getRentHeatmap, listDistricts, recommendIndustry,
+import { getBuildingVacancy, getDensityHeatmap, getFloorVacancies, getFootfallHeatmap, getRentHeatmap, getStartupFit, listDistricts, recommendIndustry,
   type DensityHeatmap, type DistrictSummary, type FootfallHeatmap, type GeoJSONFC, type IndustryRecommend,
-  type FloorVacancyUnit, type IndustryOption, type RentHeatmap, type RentListing, type TrdarCell, type VacClass } from "@/lib/api";
+  type FloorVacancyUnit, type IndustryOption, type RentHeatmap, type RentListing, type StartupFitList, type TrdarCell, type VacClass } from "@/lib/api";
 import { kakaoRoadviewUrl } from "@/lib/externalMap";
 import { addStop, removeStop } from "@/lib/journeyState";
 import { colors } from "@/design/tokens/colors";
@@ -116,6 +117,12 @@ const FLOOR_FILTERS: { key: Exclude<FloorFilter, "all">; label: string; test: (f
   { key: "1", label: "1층", test: (f) => f === 1 },
   { key: "2", label: "2층", test: (f) => f === 2 },
   { key: "3+", label: "3층 이상", test: (f) => f >= 3 },
+];
+/** 창업 가능 · 건물주 등록 거르기(2026-11-25 사용자 요청) — 근거는 `/startup-fit?detail=false`. 건물주 등록은 부를 때마다 서버가 DB 를 다시 읽는다 */
+type StartupFilter = "all" | "startup" | "owner";
+const STARTUP_FILTERS: { key: Exclude<StartupFilter, "all">; label: string }[] = [
+  { key: "startup", label: "창업 여력 있음 · 가능 층" },
+  { key: "owner", label: "건물주 등록 층" },
 ];
 /** 건물 id(`{PNU}-{동}`) → 지번(PNU). 층 매물은 지번 단위라 한 지번에 동이 여럿이면 함께 걸린다(어느 동인지 모른다) */
 const pnuOf = (id: string) => id.split("-")[0];
@@ -291,6 +298,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const [floorFilter, setFloorFilter] = useState<FloorFilter>("all");
   // 층 매물 목록 — 층별 필터를 처음 고를 때 한 번 부른다(Page 첫 화면 호출을 늘리지 않는다). 404 면 그 상권에 층 산출물이 없다
   const [floorVac, setFloorVac] = useState<{ districtId: string; byPnu: Map<string, FloorVacancyUnit[]> | null } | null>(null);
+  const [startupFilter, setStartupFilter] = useState<StartupFilter>("all");
+  // 빈 층 창업 등급 · 건물주 등록 — 이 거르기를 처음 고를 때 부른다(Page 첫 화면 호출을 늘리지 않는다). 404 면 그 상권에 층 산출물이 없다
+  const [startupIdx, setStartupIdx] = useState<{ districtId: string; data: StartupFitList | null } | null>(null);
   const [hour, setHour] = useState(18);
   const [daytype, setDaytype] = useState<"weekday" | "weekend">("weekday");
   const [twinOpen, setTwinOpen] = useState(false);
@@ -351,7 +361,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     setCandidateState({ items, error });
   };
   const saved = src === "api" ? buildings.filter((b) => savedIds.includes(b.id)) : [];
-  useReportCapture("page", src === "api" && selected ? {
+  useRecordCapture("page", src === "api" && selected ? {
     districtId, buildingId: selected.id, name: selected.name, address: selected.roadAddr ?? null,
     status: selected.vacClass ? VAC_CLASS[selected.vacClass].label : STATUS[selected.status].label,
     capacity: selected.capacity, active: selected.active, floors: selected.floors ?? null,
@@ -383,11 +393,40 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     const test = FLOOR_FILTERS.find((f) => f.key === key)!.test;
     return (currentFloorVac.byPnu.get(pnuOf(b.id)) ?? []).some((u) => test(u.floor));
   }, [src, currentFloorVac]);
+  const startupOn = startupFilter !== "all" && src === "api";
+  const currentStartup = startupIdx?.districtId === districtId ? startupIdx : null;
+  useEffect(() => {
+    if (!startupOn || currentStartup) return;
+    let alive = true;
+    getStartupFit(districtId, { detail: false })
+      .then((data) => { if (alive) setStartupIdx({ districtId, data }); })
+      .catch(() => { if (alive) setStartupIdx({ districtId, data: null }); });
+    return () => { alive = false; };
+  }, [startupOn, currentStartup, districtId]);
+  const startupByPnu = useMemo(() => {
+    const m = new Map<string, { startup: boolean; owner: boolean }>();
+    for (const u of currentStartup?.data?.units ?? []) {
+      const key = u.pnu ?? (u.building_id ? pnuOf(u.building_id) : null);
+      if (!key) continue;
+      const cur = m.get(key) ?? { startup: false, owner: false };
+      m.set(key, { startup: cur.startup || u.grade === "A1" || u.grade === "A2", owner: cur.owner || u.owner.length > 0 });
+    }
+    return m;
+  }, [currentStartup]);
+  // 자료가 없거나(불러오는 중 · 이 상권에 없음) 건물주 등록을 아직 확인할 수 없으면 거르지 않는다 — 모르는 것을 없다고 세지 않는다
+  const startupMatch = useCallback((b: Building, key: StartupFilter): boolean => {
+    if (key === "all" || src !== "api" || !currentStartup?.data) return true;
+    if (key === "owner" && currentStartup.data.owner_status !== "ready") return true;
+    const hit = startupByPnu.get(pnuOf(b.id));
+    return !!hit && (key === "startup" ? hit.startup : hit.owner);
+  }, [src, currentStartup, startupByPnu]);
   const filtered = useMemo(() => buildings.filter((b) => (!q.trim() || b.name.toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())
       || !!b.roadAddr?.includes(q.trim()))
     && matchesStatus(b, workspace.status)
     && floorMatch(b, floorFilter)
-    && (!savedOnly || candidateBuildingIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, candidateBuildingIds, floorFilter, floorMatch]);
+    && startupMatch(b, startupFilter)
+    && (!savedOnly || candidateBuildingIds.includes(b.id))), [buildings, q, workspace.status, savedOnly, candidateBuildingIds, floorFilter, floorMatch,
+    startupFilter, startupMatch]);
 
   // 목록에 실제로 그리는 것. **지도 오버레이는 filtered 를 그대로 쓴다** — 뷰포트로
   // 오버레이까지 거르면 지도를 조금 움직일 때마다 폴리곤을 전부 다시 만들게 되고,
@@ -399,7 +438,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 순서(공실의심 100% → 고공실 67% → 만실 0%)를 따른다. 정렬은 목록에만 — 오버레이 순서는 그대로.
   const listed = useMemo(() => {
     const naver = window.naver;
-    const inView = !viewportOnly || !bounds?.hasLatLng || !naver?.maps ? filtered
+    const inView = !viewportOnly || !bounds?.hasLatLng || !naver ? filtered
       : filtered.filter((b) => bounds.hasLatLng(new naver.maps.LatLng(b.center.lat, b.center.lng)));
     return [...inView].sort(byVacancyFirst);
   }, [filtered, bounds, viewportOnly]);
@@ -519,15 +558,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     const syncBounds = () => setBounds(map.getBounds?.() ?? null);
     sync();
     syncBounds();
-    const events = naver.maps.Event;
-    const h = events.addListener(map, "zoom_changed", sync);
-    const hb = events.addListener(map, "idle", syncBounds);
-    return () => {
-      // 인증이 실패하면 SDK가 maps를 지우므로 내부 정리 API도 호출할 수 없다.
-      if (!window.naver?.maps) return;
-      events.removeListener(h);
-      events.removeListener(hb);
-    };
+    const h = naver.maps.Event.addListener(map, "zoom_changed", sync);
+    const hb = naver.maps.Event.addListener(map, "idle", syncBounds);
+    return () => { naver.maps.Event.removeListener(h); naver.maps.Event.removeListener(hb); };
   }, [ready, map]);
 
   const clearOverlays = () => {
@@ -535,7 +568,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     // 리스너를 **먼저** 뗀다 — 오버레이 참조를 버린 뒤에는 짝을 찾을 자리가 없다.
     listenersRef.current.forEach((h) => naver?.maps?.Event?.removeListener(h));
     listenersRef.current = [];
-    if (naver?.maps) overlaysRef.current.forEach((o) => o.setMap?.(null));
+    overlaysRef.current.forEach((o) => o.setMap?.(null));
     overlaysRef.current = [];
     // 호버 색인도 같이 비운다 — 걷힌 도형을 가리키고 있으면 다음 호버가
     // 지도에 없는 오버레이에 setOptions 를 건다(조용히 아무 일도 안 일어난다).
@@ -549,7 +582,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const focus = (b: Building) => {
     setWorkspace((w) => ({ ...w, selectedId: b.id }));
     const naver = window.naver;
-    if (map && naver?.maps) map.panTo(new naver.maps.LatLng(b.center.lat, b.center.lng));
+    if (map && naver) map.panTo(new naver.maps.LatLng(b.center.lat, b.center.lng));
   };
 
   // 레이어 전환/데이터 변경 → 오버레이 다시 그림 (form follows data)
@@ -668,7 +701,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     const naver = window.naver;
     const clear = () => {
       rentOverlaysRef.current.ls.forEach((h) => naver?.maps?.Event?.removeListener(h));
-      if (naver?.maps) rentOverlaysRef.current.ov.forEach((o) => o.setMap?.(null));
+      rentOverlaysRef.current.ov.forEach((o) => o.setMap?.(null));
       rentOverlaysRef.current = { ov: [], ls: [] };
     };
     clear();
@@ -705,7 +738,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
         add(lat, lng, html, 80, () => {
           // 묶음을 누르면 건물 칩이 보이는 줌으로 들어간다. 줌 리스너가 모드를 바꾼다.
           map.setZoom?.(PIN_MAX_ZOOM + 1);
-          if (naver.maps) map.panTo?.(new naver.maps.LatLng(lat, lng));
+          map.panTo?.(new naver.maps.LatLng(lat, lng));
         });
       }
     } else {
@@ -890,6 +923,15 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
               {f.label}{currentFloorVac?.byPnu ? ` · ${buildings.filter((b) => floorMatch(b, f.key)).length.toLocaleString("ko-KR")}동` : ""}
             </option>)}
           </select></label>
+          <label>창업 · 건물주<select aria-label="창업 가능 · 건물주 등록 필터" value={startupFilter} disabled={src !== "api"}
+            title={src !== "api" ? "샘플 자료에는 창업 가능 등급이 없습니다" : "빈 층의 창업 가능 등급 · 건물주 등록으로 거릅니다(허가 판정 아님)"}
+            onChange={(e) => setStartupFilter(e.target.value as StartupFilter)}>
+            <option value="all">전체</option>
+            {STARTUP_FILTERS.map((f) => <option key={f.key} value={f.key}>
+              {f.label}{currentStartup?.data && (f.key === "startup" || currentStartup.data.owner_status === "ready")
+                ? ` · ${buildings.filter((b) => startupMatch(b, f.key)).length.toLocaleString("ko-KR")}동` : ""}
+            </option>)}
+          </select></label>
           <button type="button" aria-pressed={savedOnly} onClick={() => setSavedOnly((value) => !value)}>저장한 후보 {candidates.length}</button>
           {/* 뷰포트 동기화 스위치(R2). 켜 두는 것이 기본이다 — 화면 밖 매물은 사용자에게
               존재하지 않으므로, 지도를 옮겼는데 목록이 그대로면 둘 다 못 믿게 된다.
@@ -898,13 +940,20 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
             title="지도를 움직이면 목록이 화면에 보이는 범위로 좁혀집니다">
             {viewportOnly ? "지도 범위만" : "거점 전체"}
           </button>
-          {(q || workspace.status !== "all" || savedOnly || floorFilter !== "all") && <button type="button" onClick={() => {
-            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false); setFloorFilter("all");
+          {(q || workspace.status !== "all" || savedOnly || floorFilter !== "all" || startupFilter !== "all") && <button type="button" onClick={() => {
+            setWorkspace((w) => ({ ...w, query: "", status: "all" })); setSavedOnly(false); setFloorFilter("all"); setStartupFilter("all");
           }}>조건 초기화</button>}
           {floorOn && <p className="floor-filter-note" role="status">
             {!currentFloorVac ? "층별 공실을 불러오는 중…"
               : !currentFloorVac.byPnu ? "이 상권은 층별 공실 자료가 없어 층으로 거르지 않았습니다."
               : `${FLOOR_FILTERS.find((f) => f.key === floorFilter)!.label}에 빈 층(확정 · 추정)이 있는 건물만 보입니다 · 같은 지번의 건물은 함께 보입니다.`}
+          </p>}
+          {startupOn && <p className="startup-filter-note" role="status">
+            {!currentStartup ? "창업 가능 등급 · 건물주 등록을 확인하는 중…"
+              : !currentStartup.data ? "이 상권은 층 단위 자료가 없어 창업 가능 등급으로 거르지 않았습니다."
+              : startupFilter === "owner" && currentStartup.data.owner_status !== "ready" ? `건물주 등록을 아직 확인할 수 없어 거르지 않았습니다 — ${currentStartup.data.owner_note}`
+              : startupFilter === "owner" ? "건물주가 직접 올린 확인 매물(게시 중)이 있는 층의 건물만 보입니다 · 같은 지번의 건물은 함께 보입니다."
+              : "창업 여력 있음 · 가능 층이 있는 건물만 보입니다(허가 판정 아님) · 같은 지번의 건물은 함께 보입니다."}
           </p>}
         </div>
         {/* 건수를 **먼저 수로** 말한다 — 네모가 "이 조건의 매물 N건"을 먼저 답하는 것과
@@ -1064,6 +1113,9 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
                 </div>
               </div>
             )}
+
+            {/* 빈 층마다 창업 가능 등급 · 건물주 등록(2026-11-25) — 열 때마다 서버가 건물주 등록을 다시 읽는다 */}
+            {src === "api" && <StartupFitPanel key={`${districtId}:${selected.id}`} districtId={districtId} buildingId={selected.id} />}
 
             {/* GNN 업종 추천 — 스텁(Gold 미적재)·빈 추천은 그리지 않는다.
                 합성값을 실측처럼 보이게 하지 않는 vacancy_source 규칙과 같은 원칙이다. */}

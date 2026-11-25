@@ -645,6 +645,54 @@ export const getFloorVacancies = (
   q.set("limit", String(opt.limit ?? 300));
   return getJSON<FloorVacancyList>(`/commercial-districts/${id}/floor-vacancies?${q}`);
 };
+
+/* ===== 빈 층 창업 가능 등급 · 건물주 등록(Page) — GET /commercial-districts/{id}/startup-fit (2026-11-25) =====
+ * 등급은 **허가 판정이 아니다** — 대장 · 토지이음 기재(입점 점검 규칙 · 일반 창업 6업종)와 Posting 3-Tier 1층 기준 추정
+ * (R-ONE 임대료 × 층 계수 · 실제 호가 아님)이고, 기준선은 서울 같은 가격대 평균 영업이익률(KOSIS)이다.
+ * 건물주 등록은 요청마다 게시 중 · 소유자 확인 매물(L3)을 건물 ID + 층으로 맞춘다.
+ * ⚠ `owner_status` 가 "ready" 가 아니면 `owner` 가 비어 있어도 「등록 없음」이 아니다 — `owner_note` 를 그대로 보인다. */
+export type StartupGrade = "A1" | "A2" | "B" | "C";
+export interface StartupReason {
+  code: string;
+  /** hard = 어려움으로 보낸 사유 · soft = 조건부로 보낸 사유 · ok = 열림 · info = 참고(등급 불변) */
+  tone: "hard" | "soft" | "ok" | "info";
+  text: string;
+}
+export interface OwnerListingBrief {
+  id: string; title?: string; unit_label?: string; area_m2?: number | null;
+  deal_type?: string | null; deposit_manwon?: number | null; monthly_rent_manwon?: number | null;
+}
+export interface StartupFitUnit {
+  id: string; building_id?: string | null; pnu?: string | null; n?: string;
+  floor: number; floor_label: string; certainty: "confirmed" | "probable";
+  area_m2?: number | null; purps?: string;
+  grade: StartupGrade; grade_label?: string;
+  reasons: StartupReason[];
+  open_industries: { key: string; label: string }[];
+  best_tier?: string | null;
+  /** 1층 기준 순익률(월 순익 ÷ 매출) — 「여력 있음」이면 서울 평균을 넘긴 그 가격대 */
+  best_margin_1f?: number | null;
+  seoul_avg?: number | null;
+  owner: OwnerListingBrief[];
+}
+export interface StartupFitList {
+  district_id: string;
+  computed_at: string;
+  owner_status: "ready" | "not_ready" | "unavailable";
+  owner_note: string;
+  counts: Record<StartupGrade, number>;
+  owner_floors: number;
+  note: string;
+  units: StartupFitUnit[];
+}
+/** 빈 층의 창업 가능 등급 + 건물주 등록. `buildingId` 로 건물 하나만, `detail: false` 는 목록 거르기용(이유 없음) */
+export const getStartupFit = (id: string, opt: { buildingId?: string; detail?: boolean } = {}) => {
+  const q = new URLSearchParams();
+  if (opt.buildingId) q.set("building_id", opt.buildingId);
+  if (opt.detail === false) q.set("detail", "false");
+  const qs = q.toString();
+  return getJSON<StartupFitList>(`/commercial-districts/${id}/startup-fit${qs ? `?${qs}` : ""}`);
+};
 /** 거점(상권) 마케팅 — 온라인 콘텐츠는 Gold 기반 생성(Program), 행사는 시드 */
 export const getMarketing = (id: string) => getJSON<Marketing>(`/marketing/${id}`);
 /** 상권 행사만 — LLM 을 부르지 않는다. Program 지도의 오프라인 홍보 장소(2026-09-13).
@@ -769,7 +817,27 @@ export interface PlatformIdentity {
     consumption: { districts: { code: string; name: string; quarter: string; total_won: number | null }[];
       source: string; note: string };
   } | null;
+  /** 인스타그램 해시태그(2026-11-22 · 공식 Graph API) — 수집 전이면 status "pending", Gold 가 없으면 null/없음 */
+  instagram?: InstagramTag | null;
   source: string;
+}
+
+/** 인스타그램 해시태그 집계 — 거점마다 대표 해시태그 하나. **집계만** 온다(계정·본문·링크 없음).
+ *  공식 API 는 해시태그의 전체 게시물 수를 주지 않는다 — `recent_24h` 는 최근 24시간 표본 수다(`recent_capped` 면 「이상」). */
+export interface InstagramTag {
+  hashtag: string;
+  status: "collected" | "pending" | "no_hashtag" | "error";
+  connected: boolean; source: string; built_at: string | null; window: string;
+  stale_after_days: number | null; api_version: string | null;
+  /** 같은 해시태그를 함께 쓰는 거점(slug) — 같은 값이 그 거점에도 실린다 */
+  shared_with: string[];
+  collected_at?: string | null;
+  recent_24h?: number; recent_capped?: boolean;
+  top_n?: number; top_likes_median?: number | null; top_likes_hidden?: number; top_comments_median?: number | null;
+  media_mix?: Record<string, number>;
+  co_tags?: { tag: string; n: number }[];
+  sample_posts?: number;
+  refresh_error?: number | null;
 }
 
 /** "어느 자리에 어떤 업소가 들어오면 좋은가" — 자리는 실측 공실 유닛이다.
@@ -1073,97 +1141,15 @@ export interface DistrictIndustries {
 export const getDistrictIndustries = (districtId: string) =>
   getJSON<DistrictIndustries>(`/ai/district-industries/${encodeURIComponent(districtId)}`);
 
-/* ===== 검증 프로그램(Program) — POST /marketing/generate =====
+/* ===== Program 실행 카드의 방식 값 =====
  *
- * 2026-09-17 대상 재정의. 종전에는 **영업 중인 가게의 리뷰·사진·메뉴**를 보내고 홍보안을
- * 받았다. 지금 대상은 예비창업자와, 팝업·가오픈·MVP 로 아이템을 확인하려는 기창업자다 —
- * 그 자리에서 장사한 적이 없어 리뷰가 존재하지 않는다. 그래서 보내는 것은 과거의 축적이
- * 아니라 **앞으로의 계획**(검증 브리프)이고, 받는 것은 홍보안이 아니라 **검증 프로그램**이다.
- *
- * 함께 사라진 것: 카카오 상호검색(`/places`)·네이버 블로그 스니펫(`/reviews`)·상용 온보딩
- * (`/onboarding/generate`). 특정할 가게도, 받을 점주 원문도 없다.
+ * 2026-11-22 사용자 정의 「Program = 개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로 **검증 프로그램 생성
+ * (POST /marketing/generate · 검증 브리프 → 모객·연계·검증 지표)** 을 부르던 화면(Program 「가설 설정」 · 흐름 ④ 「작게 확인」)을
+ * 뺐다 — 그 함수·타입(ProgramBriefInput · ProgramPlan · ValidationSignal · VALIDATION_MODES …)도 함께 지웠다. 서버 경로는 남았다
+ * (부르는 화면 없음 → docs/decision-program-post-opening-2026-11-22.md). 아래 값은 실행 카드(GET /program/plan)의 mode 로만 남는다 —
+ * 화면은 actual_open(개업 뒤)만 보낸다.
  */
-
-/** 검증 방식. 셋을 가르는 이유는 **판정에 쓸 신호가 다르기 때문**이다 —
- *  팝업은 유입, 가오픈은 객단가·회전, MVP 는 사전 수요를 본다. */
 export type ValidationMode = "popup" | "soft_open" | "mvp" | "actual_open";
-
-/** 누가 묻는가. 예비창업자는 자리부터 찾고, 기창업자는 옮길지를 묻는다. */
-export type FounderStage = "pre_founder" | "founder";
-
-export const VALIDATION_MODES: { key: ValidationMode; label: string; hint: string }[] = [
-  { key: "popup", label: "팝업스토어", hint: "빈 자리를 며칠~몇 주 빌려 유입과 구매를 본다" },
-  { key: "soft_open", label: "가오픈", hint: "운영을 축소해 열고 객단가·회전을 본다" },
-  { key: "actual_open", label: "실제 창업", hint: "정식 개업 후 매출·비용을 기록해 손익과 운영을 검증한다" },
-  { key: "mvp", label: "MVP 테스트", hint: "점포 없이 사전예약·사전주문으로 수요만 본다" },
-];
-
-export const MODE_LABEL: Record<string, string> = {
-  popup: "팝업스토어", soft_open: "가오픈", mvp: "MVP 테스트", actual_open: "실제 창업",
-};
-export const STAGE_LABEL: Record<string, string> = {
-  pre_founder: "예비창업자", founder: "기창업자",
-};
-
-/** 검증 브리프 — Program 의 유일한 입력 계약.
- *  백엔드 schemas/marketing.py::ProgramBrief 와 1:1 대응한다.
- *  ⚠ `budget_krw_min/max` 는 **함께** 보내거나 둘 다 비운다(반쪽은 422). */
-export interface ProgramBriefInput {
-  item: string;
-  category: string;
-  mode: ValidationMode;
-  stage: FounderStage;
-  district_id?: string;
-  unit_id?: string;
-  address?: string;
-  hypothesis?: string;
-  target_customer?: string;
-  /** YYYY-MM-DD */
-  start_date?: string;
-  run_days?: number;
-  budget_krw_min?: number;
-  budget_krw_max?: number;
-  /** 차별점 — 창업자 주장이지 확인된 사실이 아니다. 이게 통하는지가 검증 대상이다 */
-  differentiators?: string[];
-  tier?: string;
-  /** (2026-11-07) Posting 세부 업종 계산에서 끌어낸 하루 손익분기 건수 — 목표선을 지어내지 않고 여기서 끌어낸다 */
-  break_even_daily?: number;
-  break_even_basis?: string;
-  /** 기각선 — 목표선의 몇 %(10~100). 창업자가 시작 전에 고른 값이다 */
-  reject_ratio?: number;
-}
-
-/** 제안 1건 — 채널·실행안·근거. 근거 없는 제안은 만들지 않는 것이 Program 의 원칙이다.
- *
- *  온라인(모객)과 오프라인(자리·연계)은 대칭이 아니라 **주체가 다르다**. 온라인은 창업자
- *  단독이고 오프라인은 건물주·상인회와 함께해야 한다 — 그래서 유효한 필드가 갈린다.
- *  `kind` 로 어느 쪽인지 가른다. */
-export interface ChannelPlan {
-  channel: string;
-  kind: "online" | "offline";
-  content: string;
-  rationale: string;
-  /** 온라인 전용 — 목표 세그먼트 · 예산 배분 비율(%) · 이 채널의 목표 지표.
-   *  budget_share 가 int 퍼센트인 것이 설계다: 절대액이 구조적으로 못 들어간다. */
-  target?: string | null;
-  budget_share?: number | null;
-  kpi?: string | null;
-  /** 오프라인 전용 — 시기 · 협업 주체 · 성격(cite 인용 | propose 신규제안 | own 자체접점) */
-  timing?: string | null;
-  actors?: string[];
-  mode?: string | null;
-}
-
-/** 검증 지표 1건 — **이 트랙의 결론**이다.
- *
- *  `decision`(가설을 기각할 조건)이 요점이다. 목표선만 있고 판정선이 없으면 결과를 보고
- *  사후에 말을 맞추게 된다 — 그건 검증이 아니라 지출이다. */
-export interface ValidationSignal {
-  name: string;
-  method: string;
-  target: string;
-  decision: string;
-}
 
 /** Humanistic Authority 후처리 검증 결과 1건 (백엔드 services/ha_guard.py).
  *
@@ -1175,30 +1161,6 @@ export interface HAFinding {
   severity: "violation" | "warning" | string;
   code: string; message: string; evidence: string | null;
 }
-
-/** 생성 결과. `source` 가 "rule-stub" 이면 LLM 을 못 탄 폴백이라 내용이 일반론이다 —
- *  화면에서 반드시 구분해 보여준다(실호출 결과처럼 읽히면 안 된다). */
-export interface ProgramPlan {
-  item: string;
-  category: string;
-  mode: string;
-  stage: string;
-  online: ChannelPlan[];
-  offline: ChannelPlan[];
-  signals: ValidationSignal[];
-  ha_check: string;
-  source: "llm" | "rule-stub" | string;
-  /** 서버 후처리 검증 결과. rule-stub 인데 violation 이 있으면 **키가 없어서가 아니라
-   *  생성물이 검증에 걸려 폐기된 것**이다 — 화면이 두 경우를 구분해야 한다. */
-  ha_findings?: HAFinding[];
-  /** 스텁인 이유가 **한도**일 때만 온다(2026-10-06): "llm_quota" = 로그인했지만 조직의 24시간 AI 생성 한도를
-   *  넘었다. 실패가 아니므로 "다시 생성해 주세요"라고 하지 않는다. 그 밖의 스텁은 null/없음. */
-  stub_reason?: "llm_quota" | string | null;
-}
-
-/** 검증 프로그램 생성 — 모객 · 자리·연계 · 검증 지표 한 벌 */
-export const generateProgram = (brief: ProgramBriefInput) =>
-  postJSON<ProgramPlan>("/marketing/generate", brief);
 
 /* ===== 계정 — 가입·로그인·조직 API 키 (2026-09-23 B9) =====
  * 계약의 정본은 백엔드다: app/api/v1/auth.py · app/schemas/auth.py. 필드를 여기서 짓지 않는다.
@@ -1951,33 +1913,18 @@ export const getDistrictReport = (id: string, params: {
   getOptional<DistrictReport>(`/commercial-districts/${encodeURIComponent(id)}/report${query(params)}`, signal);
 
 
-/* ===== Program 리뉴얼(2026-11-07) — 지원 프로그램 · 네트워킹 · 오프라인 마케팅 실행 카드 =====
- * 셋 다 공개 분석 API(로그인 없이 열린다)이고 LLM 을 부르지 않는다. 원천마다 상태(ok · no_key · error)를 밝힌다 —
- * 키가 없거나 원천이 실패하면 그 원천만 비고, 지난 목록을 최신처럼 보이지 않는다. */
+/* ===== Program — 네트워킹 · 오프라인 마케팅 실행 카드 (2026-11-07 리뉴얼 · 2026-11-22 두 기능으로 좁힘) =====
+ * 둘 다 공개 분석 API(로그인 없이 열린다)이고 LLM 을 부르지 않는다. 원천마다 상태(ok · no_key · error)를 밝힌다 —
+ * 키가 없거나 원천이 실패하면 그 원천만 비고, 지난 목록을 최신처럼 보이지 않는다.
+ * 지원 공고(GET /program/support)는 2026-11-22 Program 에서 제외돼 부르는 함수를 지웠다(서버 경로는 남았다).
+ * Program 은 계약을 맺고 개업한 자리 기준이라 네트워킹은 단계 founder(기창업자)로 부른다. */
 export type ProgramStage = "pre_founder" | "founder";
-export const stageForGoal = (goal?: string | null): ProgramStage | undefined =>
-  goal === "start" ? "pre_founder" : goal === "pivot" || goal === "move" ? "founder" : undefined;
 
 export interface ProgramSourceStatus {
   id: string; name: string; status: "ok" | "no_key" | "error"; count: number;
   fetched_at?: string | null; note?: string | null;
 }
 export interface ProgramRegion { sido: string; local?: string | null; label: string }
-
-export interface SupportItem {
-  source: "kstartup" | "gov24" | "bizinfo"; source_label: string; id: string; title: string;
-  org?: string | null; region?: string | null; category?: string | null; target?: string | null;
-  start?: string | null; end?: string | null;
-  /** 정부24처럼 신청기한이 자유 문구인 원천 — 날짜로 읽지 않고 원문 그대로 */
-  deadline_text?: string | null;
-  url?: string | null; apply_url?: string | null; summary?: string | null;
-  /** 맞춘 이유(지역·단계·업종 언급) — 자격 판정이 아니다 */
-  matched: string[];
-}
-export interface SupportPrograms {
-  district_id: string; region: ProgramRegion; stage?: ProgramStage | null; industry?: string | null;
-  items: SupportItem[]; total: number; sources: ProgramSourceStatus[]; note: string;
-}
 
 export interface NetworkEvent {
   source: "kstartup" | "bizinfo_event"; source_label: string; id: string; title: string;
@@ -2001,11 +1948,348 @@ export interface ExecutionPlan {
   district_id: string; mode: ValidationMode; cards: ExecutionCard[]; events_source: string; notes: string[]; note: string;
 }
 
-export const getSupportPrograms = (districtId: string, opts: { stage?: ProgramStage; industry?: string } = {}) =>
-  getJSON<SupportPrograms>(`/program/support${query({ district_id: districtId, stage: opts.stage, industry: opts.industry })}`);
 export const getProgramNetwork = (districtId: string,
   opts: { industry?: string; industryLabel?: string; stage?: ProgramStage } = {}) =>
   getJSON<ProgramNetwork>(`/program/network${query({ district_id: districtId, industry: opts.industry,
     industry_label: opts.industryLabel, stage: opts.stage })}`);
 export const getExecutionPlan = (districtId: string, opts: { industry?: string; mode?: ValidationMode } = {}) =>
   getJSON<ExecutionPlan>(`/program/plan${query({ district_id: districtId, industry: opts.industry, mode: opts.mode })}`);
+
+/* ===== 직거래 연결 층 (2026-11-18 · docs/decision-owner-direct-matching-2026-11-18.md) =====
+ * 건물주가 직접 올린 빈 자리(소유자 확인 뒤 게시) · 문의/방문 예약 · 정액 상품.
+ * ⛔ PlaceOS 는 중개하지 않는다 — 성사·중개 수수료가 없고, 문의는 당사자끼리 주고받는다.
+ * 공개 열람은 analysisFetch(로그인해 있으면 토큰을 실어 내 매물이면 소유자 화면을 받는다) · 쓰기는 토큰을 인자로 받는다. */
+
+export type DirectDealType = "lease" | "lease_popup" | "popup";
+export type DirectRelation = "owner" | "agent" | "manager";
+export interface DirectFlags { upper_floor: boolean; basement: boolean; long_vacancy: boolean; vacant_months: number | null; popup_ok: boolean }
+export interface DirectListingCard {
+  id: string; title: string; district_id: string | null; building_id: string | null; address: string;
+  lat: number | null; lng: number | null; floor: number; unit_label: string; area_m2: number; use_type: string; ledger_use: string;
+  deal_type: DirectDealType; deal_label: string; deposit_manwon: number; monthly_rent_manwon: number; maintenance_manwon: number;
+  rent_free_months: number; min_term_months: number | null; available_from: string | null; vacant_since: string | null;
+  popup_min_days: number | null; popup_max_days: number | null; popup_daily_manwon: number | null;
+  preferred_industries: string[]; excluded_industries: string[]; description: string; poster_relation: string; poster_label: string;
+  /** 설비(2026-11-21) — null 은 건물주가 적지 않은 것(모름). 「없음」(false)과 다르다 */
+  facilities?: { exhaust_ok: boolean | null; power_kw: number | null; water_ok: boolean | null };
+  /** 소유자 확인을 거친 매물인가 — 공개 응답은 늘 true(확인 전에는 공개되지 않는다) */
+  verified: boolean;
+  /** 상단 노출(정액 광고) 중 — 화면은 「광고」를 붙인다 */
+  is_ad: boolean;
+  flags: DirectFlags; published_at: string | null;
+  effective_monthly_rent_manwon?: number;
+  /** 창업자 업종을 주면 「이 자리의 이유」 — 점수가 아니라 문장 */
+  reasons?: string[];
+  /** 건물주가 올린 이 층의 실제 배치도 사진(2026-11-22) — 없으면 null · 응답에 칸이 없는 옛 서버면 undefined */
+  floor_plan?: DirectFloorPlanMeta | null;
+}
+/** 층 배치도 사진 메타 — `url` 은 같은 출처의 이미지 주소다(v 는 바꿔 올렸을 때 캐시를 깨는 값). 사진이 실제와 같다는 보증은 아니다(`notice`). */
+export interface DirectFloorPlanMeta { url: string; width: number; height: number; size_bytes: number; updated_at: string | null; notice: string }
+export interface DirectTerms {
+  listing_id: string; deposit_manwon: number; monthly_rent_manwon: number; maintenance_manwon: number; rent_free_months: number;
+  term_months: number; term_assumed: boolean; effective_monthly_rent_manwon: number; monthly_occupancy_manwon: number;
+  first_year_cash_manwon: number; rent_per_m2_thousand: number | null; rent_per_pyeong_manwon: number | null;
+  rone: { rent_per_m2_thousand: number | null; quarter: string | null; ratio: number | null; note: string };
+  peers: { n: number; median_rent_per_m2_thousand: number | null; band: string; note: string };
+  popup: { daily_manwon: number; min_days: number | null; max_days: number | null; min_total_manwon: number | null } | null;
+  notes: string[];
+}
+export interface DirectVerificationInfo { status: "pending" | "verified" | "rejected"; relation: string; registry_masked: string; reviewer_note: string; created_at: string }
+export interface DirectOwnerListing extends DirectListingCard {
+  status: string; status_label: string; missing: string[]; promoted_until: string | null; verification: DirectVerificationInfo | null;
+}
+export interface DirectListingDetail extends DirectListingCard {
+  mine: boolean; notice: string; terms: DirectTerms; reasons: string[];
+  status?: string; status_label?: string; missing?: string[]; promoted_until?: string | null; verification?: DirectVerificationInfo | null;
+}
+export interface DirectMeta {
+  use_types: string[]; deal_types: { key: DirectDealType; label: string }[]; relations: { key: DirectRelation; label: string }[];
+  ledger_uses: string[]; industries: { key: string; label: string }[]; report_reasons: string[]; long_vacancy_months: number;
+  required: Record<string, string>; notice: string;
+  /** 2026-11-21 — 입점 희망서 선택지 · 문의 종류 · 계약 진행 방법 */
+  brief?: DirectBriefMeta;
+  inquiry_kinds?: { key: string; label: string }[];
+  contract_paths?: { key: DirectContractPath; label: string }[];
+}
+export interface DirectProduct {
+  key: string; side: "owner" | "founder"; kind: "free" | "ad" | "report" | "subscription"; title: string; unit: string;
+  /** null = 가격 확정 전 */
+  price_krw: number | null; available: boolean; desc: string;
+}
+export interface DirectProducts { products: DirectProduct[]; payment: string; notice: string }
+export type DirectInquiryKind = "question" | "visit" | "offer" | "popup" | "invite";
+export interface DirectInquirySummary {
+  id: string; role: "owner" | "founder"; kind: DirectInquiryKind; status: "open" | "scheduled" | "closed";
+  listing_id: string; listing_title: string; confirmed_slot: string | null; outcome: string; last_message: string; updated_at: string;
+  /** 2026-11-21 — 화면 이름 · 대화를 연 쪽(founder 문의 / owner 희망서를 보고 보낸 제안) · 마지막 조건 제안 상태 */
+  kind_label?: string; initiated_by?: "founder" | "owner"; latest_offer_status?: DirectOfferStatus | null;
+}
+export interface DirectMessageItem { id: string; mine: boolean; from: "owner" | "founder"; body: string; created_at: string }
+export type DirectOfferStatus = "proposed" | "accepted" | "declined" | "withdrawn" | "superseded";
+export type DirectContractPath = "direct" | "broker";
+/** 창업자가 적은 조건 제안서(lease) · 팝업·단기 신청(popup) — PlaceOS 는 값을 권하지 않는다. 「받음」은 계약이 아니다 */
+export interface DirectOffer {
+  id: string; kind: "lease" | "popup"; status: DirectOfferStatus; status_label: string;
+  rent_manwon: number | null; deposit_manwon: number | null; rent_free_months: number | null; term_months: number | null;
+  start_date: string | null; popup_days: number | null; popup_daily_manwon: number | null; popup_total_manwon: number | null;
+  created_at: string; decided_at: string | null;
+}
+export interface DirectOfferInput {
+  rent_manwon?: number | null; deposit_manwon?: number | null; rent_free_months?: number | null; term_months?: number | null;
+  start_date?: string | null; popup_days?: number | null; popup_daily_manwon?: number | null;
+}
+export interface DirectThread extends DirectInquirySummary {
+  visit_slots: string[]; industry_key: string; messages: DirectMessageItem[]; notice: string;
+  offers?: DirectOffer[]; listing_deal_type?: DirectDealType | null;
+  contract_path?: DirectContractPath | ""; contract_path_label?: string; contract_guide?: string[];
+  brokers?: { name?: string; office?: string; registration_no?: string; contact_url?: string }[]; brokers_note?: string;
+  /** 건물주에게만 — 그 창업자의 희망서 ①(보이는 중일 때) · ②(창업자가 열어 줬을 때) */
+  brief?: DirectBriefForOwner | null;
+  /** 창업자에게만 — 내 희망서가 있나 · 이 건물주에게 ②를 열었나 */
+  has_brief?: boolean; brief_disclosed?: boolean;
+}
+export interface DirectInbox { as_owner: DirectInquirySummary[]; as_founder: DirectInquirySummary[]; notice: string }
+export interface DirectTradeoff {
+  monthly_rent_manwon: number; cut_pct: number; vacancy_months: number; loss_if_cut_12m_manwon: number; loss_if_vacant_manwon: number;
+  cheaper: "cut" | "vacant" | "same"; note: string;
+}
+export interface DirectObserved { basis: string; n: number; top: { industry: string; share: number; n?: number }[]; note: string }
+export interface DirectSignals {
+  observed: DirectObserved | null;
+  model: { top: { industry: string; score?: number }[]; caveat: string };
+  demand: { window_days: number; min_n: number; rows: { industry_key: string; label: string; founders: number | null; suppressed: boolean }[]; note: string };
+  preferences: { preferred: string[]; excluded: string[] };
+  /** 2026-11-21 — 이 상권을 희망한 입점 희망서 묶음(n≥3 만 숫자) */
+  briefs?: DirectDemand | null;
+}
+export interface DirectDiagnosis {
+  listing_id: string; full: boolean; locked_note: string | null;
+  preview: {
+    flags: DirectFlags; terms: DirectTerms; tradeoff: DirectTradeoff; observed_top: { industry: string; share: number; n?: number }[];
+    observed_note: string | null; forecast: { forecast_quarter?: string; direction?: string; delta?: number; caveat: string } | null;
+    suggestions: string[];
+    /** 2026-11-21 — 이 상권을 희망한 입점 희망서 묶음(n≥3 만 숫자) · 계정 경로라 KPI③ 계측에 섞이지 않는다 */
+    brief_demand?: DirectDemand | null;
+  };
+  detail: {
+    signals: DirectSignals;
+    nearby_vacant: { radius_m: number; n: number; previous_uses: { label: string; n: number }[]; note: string } | null;
+    history: { events: Record<string, unknown>[]; source: string; since_year: number | null } | null;
+  } | null;
+}
+export interface DirectPurchase {
+  id: string; product: string; title: string; target_id: string; status: "requested" | "paid" | "fulfilled" | "cancelled";
+  amount_krw: number | null; created_at: string; decided_at: string | null;
+}
+export interface DirectPurchaseResult extends DirectPurchase { instructions: { bank_account: string | null; message: string; payment: string } }
+export interface DirectListingInput {
+  district_id?: string | null; building_id?: string | null; address?: string; lat?: number | null; lng?: number | null; floor?: number;
+  unit_label?: string; area_m2?: number; use_type?: string; ledger_use?: string; deal_type?: DirectDealType;
+  deposit_manwon?: number; monthly_rent_manwon?: number; maintenance_manwon?: number; rent_free_months?: number;
+  min_term_months?: number | null; available_from?: string | null; vacant_since?: string | null;
+  popup_min_days?: number | null; popup_max_days?: number | null; popup_daily_manwon?: number | null;
+  preferred_industries?: string[]; excluded_industries?: string[]; description?: string;
+  exhaust_ok?: boolean | null; power_kw?: number | null; water_ok?: boolean | null;
+}
+export interface DirectVerificationInput { relation: DirectRelation; registry_number: string; owner_name: string; delegation_note?: string }
+
+/** 직거래 쓰기 실패 — 필수 정보 누락(422)이면 `missing` 에 빠진 칸의 키가 온다 */
+export class DirectApiError extends ApiError {
+  readonly missing: string[];
+  constructor(status: number, detail: string | null, message: string, missing: string[] = []) {
+    super(status, detail, message);
+    this.name = "DirectApiError";
+    this.missing = missing;
+  }
+}
+
+async function directRequest<T>(method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", path: string, token: string, body?: unknown): Promise<T> {
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/direct${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    throw new DirectApiError(0, null, `API /direct${path} unreachable`);
+  }
+  if (!res.ok) {
+    let detail: string | null = null;
+    let missing: string[] = [];
+    try {
+      const j = (await res.json()) as { detail?: unknown };
+      if (typeof j?.detail === "string") detail = j.detail;
+      else if (j?.detail && typeof j.detail === "object" && "message" in j.detail) {
+        const d = j.detail as { message?: unknown; missing?: unknown };
+        detail = typeof d.message === "string" ? d.message : null;
+        missing = Array.isArray(d.missing) ? d.missing.filter((m): m is string => typeof m === "string") : [];
+      }
+    } catch { /* 본문이 JSON 이 아니면 상태 코드만으로 문구를 고른다 */ }
+    throw new DirectApiError(res.status, detail, `API /direct${path} failed: ${res.status}`, missing);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
+const directQuery = (q: Record<string, string | number | boolean | null | undefined>) => {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(q)) if (v !== null && v !== undefined && v !== "") p.set(k, String(v));
+  const s = p.toString();
+  return s ? `?${s}` : "";
+};
+
+/* 공개(로그인 없이) */
+export const getDirectMeta = () => getJSON<DirectMeta>("/direct/meta");
+export const getDirectProducts = () => getJSON<DirectProducts>("/direct/products");
+export const listDirectListings = (q: {
+  district_id?: string | null; building_id?: string | null; floor_band?: "first" | "upper" | "basement" | null;
+  popup?: boolean | null; long_vacancy?: boolean | null; max_rent?: number | null; industry?: string | null;
+} = {}) => getJSON<{ items: DirectListingCard[]; n: number; notice: string }>(`/direct/listings${directQuery(q)}`);
+export const getDirectListing = (id: string, industry?: string | null) =>
+  getJSON<DirectListingDetail>(`/direct/listings/${encodeURIComponent(id)}${directQuery({ industry })}`);
+
+/* 계정(토큰 필요) */
+export const createDirectListing = (token: string, body: DirectListingInput) => directRequest<DirectOwnerListing>("POST", "/listings", token, body);
+export const updateDirectListing = (token: string, id: string, body: DirectListingInput) =>
+  directRequest<DirectOwnerListing>("PATCH", `/listings/${encodeURIComponent(id)}`, token, body);
+export const submitDirectListing = (token: string, id: string, body: DirectVerificationInput) =>
+  directRequest<DirectOwnerListing>("POST", `/listings/${encodeURIComponent(id)}/submit`, token, body);
+export const setDirectListingStatus = (token: string, id: string, action: "pause" | "resume" | "close") =>
+  directRequest<DirectOwnerListing>("POST", `/listings/${encodeURIComponent(id)}/status`, token, { action });
+export const deleteDirectListing = (token: string, id: string) => directRequest<void>("DELETE", `/listings/${encodeURIComponent(id)}`, token);
+/** 내 매물(층)의 실제 배치도 사진을 올리거나 바꾼다 — 서버가 촬영 위치·기기 정보를 떼고 저장한다. */
+export const putDirectFloorPlan = (token: string, id: string, body: { mime: "image/jpeg" | "image/png"; data: string }) =>
+  directRequest<DirectFloorPlanMeta>("PUT", `/listings/${encodeURIComponent(id)}/floor-plan`, token, body);
+export const deleteDirectFloorPlan = (token: string, id: string) =>
+  directRequest<void>("DELETE", `/listings/${encodeURIComponent(id)}/floor-plan`, token);
+/** 게시 전 내 사진 미리보기 — `<img>` 는 로그인 헤더를 못 보내서 받아 와 object URL 로 만든다(호출한 쪽이 revoke 한다).
+ *  `planUrl` 은 서버가 준 `floor_plan.url`(바꿔 올리면 `?v=` 가 바뀐다) — 그 주소를 캐시 없이 받는다(바꾼 직후 옛 사진이 보이지 않게 · 11-22 리뷰 반영).
+ *  토큰을 실으므로 우리 API 의 배치도 주소가 아니면 부르지 않는다. */
+export async function fetchMyFloorPlanUrl(token: string, planUrl: string): Promise<string | null> {
+  if (!planUrl.startsWith(`${BASE}/direct/listings/`) || !/\/floor-plan(\?|$)/.test(planUrl)) return null;
+  try {
+    const res = await fetch(planUrl, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+    return res.ok ? URL.createObjectURL(await res.blob()) : null;
+  } catch { return null; }
+}
+export const myDirectListings = (token: string) => directRequest<{ items: DirectOwnerListing[]; notice: string }>("GET", "/me/listings", token);
+export const getDirectDiagnosis = (token: string, id: string, q: { cut_pct?: number; vacancy_months?: number } = {}) =>
+  directRequest<DirectDiagnosis>("GET", `/listings/${encodeURIComponent(id)}/diagnosis${directQuery(q)}`, token);
+export const createDirectInquiry = (token: string, id: string, body: {
+  kind: "question" | "visit" | "offer" | "popup"; body: string; visit_slots?: string[]; industry_key?: string; offer?: DirectOfferInput;
+}) => directRequest<DirectThread>("POST", `/listings/${encodeURIComponent(id)}/inquiries`, token, body);
+export const reportDirectListing = (token: string, id: string, body: { reason: string; detail?: string }) =>
+  directRequest<{ ok: boolean; auto_hidden: boolean }>("POST", `/listings/${encodeURIComponent(id)}/report`, token, body);
+export const getDirectInbox = (token: string) => directRequest<DirectInbox>("GET", "/inbox", token);
+export const getDirectThread = (token: string, id: string) => directRequest<DirectThread>("GET", `/inquiries/${encodeURIComponent(id)}`, token);
+export const sendDirectMessage = (token: string, id: string, body: string) =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(id)}/messages`, token, { body });
+export const directVisit = (token: string, id: string, body: { action: "propose" | "confirm" | "cancel"; slots?: string[]; slot?: string }) =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(id)}/visit`, token, body);
+export const directOutcome = (token: string, id: string, outcome: "contracted" | "not_contracted") =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(id)}/outcome`, token, { outcome });
+export const requestDirectPurchase = (token: string, body: { product: string; target_id: string; depositor_name: string }) =>
+  directRequest<DirectPurchaseResult>("POST", "/purchases", token, body);
+export const myDirectPurchases = (token: string) => directRequest<{ items: DirectPurchase[]; payment: string }>("GET", "/me/purchases", token);
+
+/* ===== 입점 희망서 · 조건 제안서 (2026-11-21 · docs/decision-founder-brief-2026-11-21.md) =====
+ * 단계별 공개: ① 공개(희망 상권에 확인 매물이 있는 건물주 · 이름·이메일 없음) · ② 동의 공개(창업자가 대화 중 직접 연 건물주) ·
+ * ③ 비공개(본인 계산 — 객단가 등). ⛔ 신용 점수·등급·순위는 없다 — 「확인한 것 / 창업자가 적은 것」만 보인다. */
+
+export type DirectFloorBand = "first" | "upper" | "basement";
+export type DirectBusinessStage = "pre" | "registered" | "operating";
+export interface DirectBriefMeta {
+  floor_bands: { key: DirectFloorBand; label: string }[]; business_stages: { key: DirectBusinessStage; label: string }[];
+  required: Record<string, string>; private_labels: Record<string, string>; ttl_days: number; max_districts: number; trust_note: string;
+}
+export interface DirectTrust { checked: string[]; self_declared: string[]; note: string }
+/** ① 공개 칸 */
+export interface DirectBriefPublic {
+  id: string; code: string; industry_key: string; industry_label: string; area_min_m2: number | null; area_max_m2: number | null;
+  floor_bands: DirectFloorBand[]; floor_labels: string[]; needs_exhaust: boolean; needs_water: boolean; power_kw_min: number | null;
+  rent_cap_manwon: number | null; deposit_cap_manwon: number | null; desired_start: string | null;
+  districts: { id: string; name: string }[]; popup_first: boolean; accept_invites: boolean; updated_at: string | null;
+}
+/** ② 동의 공개 칸 */
+export interface DirectBriefConsent {
+  summary: string; business_stage: DirectBusinessStage | ""; business_stage_label: string;
+  funding_total_manwon: number | null; funding_own_manwon: number | null;
+}
+/** ③ 비공개 칸 — 본인에게만 */
+export interface DirectBriefPrivate {
+  unit_price_won: number | null; variable_cost_pct: number | null; other_fixed_manwon: number | null; open_days: number | null;
+  target_daily_units: number | null;
+}
+export interface DirectBriefSelf extends DirectBriefPublic, DirectBriefConsent {
+  desired_start_date: string | null; private: DirectBriefPrivate; status: "draft" | "active" | "paused" | "closed"; status_label: string;
+  missing: string[]; visible: boolean; expired: boolean; expires_at: string | null; disclosed_n: number; trust: DirectTrust; notice: string;
+  /** ② 를 열어 준 건물주 — 신원 대신 두 사람이 이야기한 매물 이름. 대화가 없어도 여기서 거둔다 */
+  disclosures: { id: string; created_at: string; listings: string[]; open_threads: number }[];
+}
+export interface DirectBriefResponse { brief: DirectBriefSelf | null; meta: DirectBriefMeta; notice: string }
+export interface DirectBriefInput {
+  industry_key?: string | null; area_min_m2?: number | null; area_max_m2?: number | null; floor_bands?: DirectFloorBand[] | null;
+  needs_exhaust?: boolean | null; needs_water?: boolean | null; power_kw_min?: number | null; rent_cap_manwon?: number | null;
+  deposit_cap_manwon?: number | null; desired_start?: string | null; district_ids?: string[] | null; popup_first?: boolean | null;
+  accept_invites?: boolean | null; summary?: string | null; business_stage?: DirectBusinessStage | "" | null;
+  funding_total_manwon?: number | null; funding_own_manwon?: number | null; unit_price_won?: number | null;
+  variable_cost_pct?: number | null; other_fixed_manwon?: number | null; open_days?: number | null; target_daily_units?: number | null;
+}
+export type DirectFitStatus = "ok" | "gap" | "unknown" | "info";
+export interface DirectFitRow { key: string; label: string; status: DirectFitStatus; text: string }
+export interface DirectRequiredSales {
+  status: "calculated" | "needs_inputs" | "not_calculable"; missing?: string[]; labels?: string[]; note: string;
+  basis?: "lease" | "popup"; daily_units?: number; monthly_revenue_manwon?: number | null; daily_revenue_manwon?: number;
+  formula?: string; target_daily_units?: number; target_text?: string;
+}
+/** 조건표 — 점수가 아니라 조건마다 견준 표. required_sales 는 창업자 본인에게만 온다 */
+export interface DirectFit {
+  listing_id: string; brief_id: string; rows: DirectFitRow[]; counts: { ok: number; gap: number; unknown: number }; note: string;
+  required_sales?: DirectRequiredSales;
+}
+export interface DirectOwnerBriefListing { listing_id: string; title: string; floor_text: string; fit: DirectFit; open_thread_id: string | null }
+export interface DirectOwnerBriefItem extends DirectBriefPublic { trust: DirectTrust; my_listings: DirectOwnerBriefListing[] }
+export interface DirectOwnerBriefList {
+  items: DirectOwnerBriefItem[]; n: number; districts: { id: string; name: string }[]; order_note: string; trust_note: string; notice: string;
+}
+export interface DirectOwnerBriefDetail extends DirectOwnerBriefItem { disclosed: boolean; consent: DirectBriefConsent | null; can_invite: boolean; notice: string }
+export interface DirectBriefForOwner extends DirectBriefPublic { trust: DirectTrust; disclosed: boolean; consent: DirectBriefConsent | null }
+/** 묶음 수요 — n≥3 만 숫자(그 아래는 null), 3명 미만 업종은 이름도 없다 */
+export interface DirectDemand {
+  district_id: string; district_name: string; min_n: number; total: number | null; suppressed: boolean;
+  by_industry: { industry_key: string; label: string; founders: number }[]; by_floor_band: { band: DirectFloorBand; label: string; founders: number }[];
+  popup_first: number | null; rent_cap_median_manwon: number | null; deposit_cap_median_manwon: number | null; note: string; notice: string;
+  /** 예산 상한 중앙값을 실었나 — 그 상권에 소유자 확인 매물이 있는 건물주 경로(공실 진단)에서만 true */
+  caps_shown?: boolean;
+}
+
+/* 공개 */
+export const getDirectDemand = (districtId: string) => getJSON<DirectDemand>(`/direct/demand${directQuery({ district_id: districtId })}`);
+
+/* 계정 — 창업자 본인 */
+export const getMyBrief = (token: string) => directRequest<DirectBriefResponse>("GET", "/me/brief", token);
+export const saveMyBrief = (token: string, body: DirectBriefInput) => directRequest<DirectBriefResponse>("PATCH", "/me/brief", token, body);
+export const setMyBriefStatus = (token: string, action: "activate" | "pause" | "close") =>
+  directRequest<DirectBriefResponse>("POST", "/me/brief/status", token, { action });
+export const deleteMyBrief = (token: string) => directRequest<void>("DELETE", "/me/brief", token);
+export const revokeBriefDisclosure = (token: string, disclosureId: string) =>
+  directRequest<DirectBriefResponse>("DELETE", `/me/brief/disclosures/${encodeURIComponent(disclosureId)}`, token);
+export const getMyBriefFit = (token: string, listingId: string) =>
+  directRequest<DirectFit & { notice: string }>("GET", `/me/brief/fit/${encodeURIComponent(listingId)}`, token);
+
+/* 계정 — 건물주가 보는 희망서 */
+export const listOwnerBriefs = (token: string, q: { district_id?: string | null; industry?: string | null; popup_first?: boolean | null } = {}) =>
+  directRequest<DirectOwnerBriefList>("GET", `/me/owner/briefs${directQuery(q)}`, token);
+export const getOwnerBrief = (token: string, id: string) =>
+  directRequest<DirectOwnerBriefDetail>("GET", `/me/owner/briefs/${encodeURIComponent(id)}`, token);
+export const inviteFromBrief = (token: string, briefId: string, body: { listing_id: string; body: string }) =>
+  directRequest<DirectThread>("POST", `/me/owner/briefs/${encodeURIComponent(briefId)}/invite`, token, body);
+
+/* 계정 — 대화 안의 조건 제안 · 계약 진행 방법 · 희망서 ② 공개 */
+export const proposeDirectOffer = (token: string, inquiryId: string, body: { kind: "lease" | "popup"; offer: DirectOfferInput }) =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(inquiryId)}/offers`, token, body);
+export const decideDirectOffer = (token: string, inquiryId: string, offerId: string, action: "accept" | "decline" | "withdraw") =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(inquiryId)}/offers/${encodeURIComponent(offerId)}`, token, { action });
+export const setDirectContractPath = (token: string, inquiryId: string, path: DirectContractPath) =>
+  directRequest<DirectThread>("POST", `/inquiries/${encodeURIComponent(inquiryId)}/contract-path`, token, { path });
+export const setBriefDisclosure = (token: string, inquiryId: string, open: boolean) =>
+  directRequest<DirectThread>(open ? "POST" : "DELETE", `/inquiries/${encodeURIComponent(inquiryId)}/disclose`, token);

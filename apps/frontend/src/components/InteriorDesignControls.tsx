@@ -13,7 +13,7 @@ export default function InteriorDesignControls({ value, onChange }: {
       <label>브랜드 색·적용 위치<input value={value.brand} maxLength={80} placeholder="예: 청록색 · 간판과 포인트 벽" onChange={(e) => patch({ brand: e.target.value })} /></label>
     </div>
     <h3>공사 전 체크리스트</h3>
-    <ul><li>출입문·피난·접근 동선과 실제 내부 도면 대조</li><li>전기·급배수·배기와 업종별 설비 확인</li><li>간판 허가·영업신고와 건물주 원상복구 범위 확인</li><li>자재 실물과 조명 아래 상품 색 확인</li><li>업체 실측 견적 확보 · 기존 Posting 투자비와 중복 합산 금지</li></ul>
+    <ul><li>출입문·피난·접근 동선과 실제 내부 도면 대조</li><li>전기·급배수·배기와 업종별 설비 확인</li><li>간판 허가·영업신고와 건물주 원상복구 범위 확인</li><li>자재 실물과 조명 아래 상품 색 확인</li><li>업체 실측 견적 확보 · 기존 Proposal 투자비와 중복 합산 금지</li></ul>
     <button type="button" onClick={() => onChange(defaultInteriorDesign())}>디자인 설정 초기화</button>
   </section>;
 }

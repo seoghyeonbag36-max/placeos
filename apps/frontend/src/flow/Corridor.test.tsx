@@ -89,7 +89,7 @@ describe("상권 흐름 — 파주 → 고양 → 서울", { timeout: 30000 }, (
     stub();
     open("/corridor/paju-goyang-seoul");
     render(<FlowApp token={null} />);
-    expect(await screen.findByText("파주시 사람들이 방문하러 많이 가는 서울 상권 — 연신내")).toBeTruthy();
+    expect(await screen.findByText("파주시 사람들이 방문하러 많이 가는 서울 상권: 연신내")).toBeTruthy();
     expect(screen.getByText("가설")).toBeTruthy();
     expect(screen.getByText(/하루 2,993명/)).toBeTruthy();
     // 방문 카드에는 짝 전체(출근·귀가 포함)의 시각을 붙이지 않는다 — 방문 손님의 때로 읽히기 때문이다(10-27)

@@ -6,9 +6,7 @@
      다른 이메일은 영향이 없고, 성공하면 그 이메일의 실패가 지워진다. 창이 지나면 풀린다.
   ② **새 계정 생성은 전역 한도가 있다.** 비밀번호 가입과 구글 첫 로그인이 **같은** 한도를 쓴다.
      이미 있는 이메일(409)과 기존 계정의 로그인·구글 로그인은 세지도 막지도 않는다.
-  ③ **로그인해도 LLM 은 조직당·전역 한도가 있다.** 넘으면 같은 200 에 스텁이고 `stub_reason: "llm_quota"`.
-     한도를 넘은 호출은 LLM 을 **부르지 않는다**(스텁이 나와도 불렀다면 비용은 이미 나간 것이다).
-     키가 없으면 어차피 LLM 을 안 부르므로 한도를 쓰지 않는다. 익명 스텁에는 이유가 붙지 않는다.
+  ③ (2026-11-22: LLM 생성 조직·전역 한도는 `POST /marketing/generate` 와 함께 지웠다 → docs/decision-program-post-opening-2026-11-22.md.)
   ④ 카운터 표는 키 수가 유한하다 — 넘으면 가장 오래 손대지 않은 키부터 버린다.
 """
 from __future__ import annotations
@@ -23,8 +21,6 @@ from app.core.config import settings
 from app.core.db import Base, get_db
 from app.main import app
 from app.services import google_auth, rate_limit
-from app.services import marketing as mkt
-from tests.test_program_llm_gate import _BRIEF, _fake_plan
 
 client = TestClient(app)
 V1 = "/api/v1"
@@ -156,85 +152,6 @@ def test_google_first_login_shares_signup_cap(db, monkeypatch):
 
 
 # ── ③ LLM 한도 ────────────────────────────────────────────────────────────────
-
-
-@pytest.fixture
-def llm_spy(monkeypatch):
-    monkeypatch.setattr(settings, "llm_api_key", "test-key")
-    calls: list[dict] = []
-
-    def spy(brief, ctx, site=None, brief_ctx=None):
-        calls.append(brief)
-        return _fake_plan()
-
-    monkeypatch.setattr(mkt, "_call_llm", spy)
-    monkeypatch.setattr(mkt, "_district_context", lambda d: None)
-    return calls
-
-
-def _generate(headers: dict[str, str] | None = None) -> dict:
-    r = client.post(f"{V1}/marketing/generate", json=_BRIEF, headers=headers or {})
-    assert r.status_code == 200, r.text
-    return r.json()
-
-
-def test_llm_quota_per_org_falls_back_to_stub_with_reason(db, monkeypatch, llm_spy):
-    monkeypatch.setattr(settings, "llm_daily_quota_per_org", 2)
-    me = _bearer(_signup("founder@example.com"))
-
-    assert _generate(me)["source"] == "llm"
-    assert _generate(me)["source"] == "llm"
-    over = _generate(me)
-    assert over["source"] == "rule-stub"
-    assert over["stub_reason"] == "llm_quota"
-    assert len(llm_spy) == 2, "한도를 넘은 호출이 LLM 을 불렀다 — 스텁이 나와도 비용은 나갔다"
-
-    # 다른 조직은 자기 한도가 따로 있다.
-    other = _bearer(_signup("other@example.com", org="다른 조직"))
-    assert _generate(other)["source"] == "llm"
-
-
-def test_llm_global_cap_spans_orgs(db, monkeypatch, llm_spy):
-    monkeypatch.setattr(settings, "llm_daily_quota_per_org", 10)
-    monkeypatch.setattr(settings, "llm_daily_cap_per_instance", 1)
-    a = _bearer(_signup("a@example.com", org="조직 A"))
-    b = _bearer(_signup("b@example.com", org="조직 B"))
-
-    assert _generate(a)["source"] == "llm"
-    capped = _generate(b)
-    assert capped["source"] == "rule-stub" and capped["stub_reason"] == "llm_quota"
-    assert len(llm_spy) == 1
-
-
-def test_llm_quota_window_expires(db, monkeypatch, llm_spy, clock):
-    monkeypatch.setattr(settings, "llm_daily_quota_per_org", 1)
-    me = _bearer(_signup("founder@example.com"))
-    assert _generate(me)["source"] == "llm"
-    assert _generate(me)["stub_reason"] == "llm_quota"
-
-    clock[0] += rate_limit.LLM_WINDOW_S
-    assert _generate(me)["source"] == "llm"
-
-
-def test_no_llm_key_spends_no_quota(db, monkeypatch, llm_spy):
-    monkeypatch.setattr(settings, "llm_daily_quota_per_org", 1)
-    me = _bearer(_signup("founder@example.com"))
-
-    monkeypatch.setattr(settings, "llm_api_key", "")
-    for _ in range(3):
-        body = _generate(me)
-        assert body["source"] == "rule-stub"
-        assert body["stub_reason"] is None, "키가 없어서 난 스텁을 한도 탓으로 적었다"
-
-    monkeypatch.setattr(settings, "llm_api_key", "test-key")
-    assert _generate(me)["source"] == "llm", "키 없는 호출이 한도를 써 버렸다"
-
-
-def test_anonymous_stub_has_no_quota_reason(llm_spy):
-    body = _generate()
-    assert body["source"] == "rule-stub"
-    assert body["stub_reason"] is None
-    assert llm_spy == []
 
 
 # ── ④ 표 크기 ─────────────────────────────────────────────────────────────────

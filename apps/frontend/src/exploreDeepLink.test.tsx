@@ -2,7 +2,7 @@
  * 지도 탐색 깊은 링크(2026-10-24) — 홈의 「지도에서 내 자리 보기」·지도 미리보기가 트랙·상권·건물을 쿼리로 싣는다.
  *
  * 이 파일은 PPPP 화면 보존 가드(ppppScreens.test.tsx)가 아니다 — 가드는 그대로 두고, 새 진입로가 **같은 세 화면**으로
- * 가는지만 본다. 네 구현 모듈은 가드와 같은 방식(data-pppp-impl 표식)으로 대신 그린다. 보려는 것은 배선이다.
+ * 가는지만 본다. 세 구현 모듈은 가드와 같은 방식(data-pppp-impl 표식)으로 대신 그린다. 보려는 것은 배선이다.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
@@ -91,7 +91,7 @@ describe("깊은 링크로 연 지도 탐색 — PPPP 세 화면 그대로, 첫 
     expect(screen.getByRole("button", { name: "Page" }).getAttribute("aria-current")).toBe("page");
     // 레일 넷은 그대로다
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
-    expect(Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent)).toEqual(["Platform", "Page", "Posting"]);
+    expect(Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent)).toEqual(["Platform", "Page", "Proposal"]);
   });
 
   it("상권을 싣지 않으면 흐름의 상권으로 · 트랙을 싣지 않거나 모르는 트랙이면 첫 화면 규칙(Platform)대로", async () => {
@@ -100,7 +100,6 @@ describe("깊은 링크로 연 지도 탐색 — PPPP 세 화면 그대로, 첫 
     open("#/explore?track=program&building=B1");
     render(<App />);
     expect((await impl("platform")).getAttribute("data-district")).toBe("seongsu");
-    expect(screen.queryByRole("button", { name: "Program" })).toBeNull();
   });
 
   it("Posting 트랙에 건물을 실으면 그 건물의 입점 계산으로 연다 — 이름은 흐름이 적어 둔 건물 이름", async () => {

@@ -3,7 +3,7 @@
 
 ## 왜 필요한가
 
-2026-10-21 사용자 확정 규칙: 「Platform/Page/Posting 의 구현 화면은 절대 화면에서 제외하지 않는다」
+2026-10-21 사용자 확정 규칙: 「Platform/Page/Posting/Program 의 구현 화면은 절대 화면에서 제외하지 않는다」
 (루트 CLAUDE.md 「PPPP 화면 보존 규칙」 · docs/decision-pppp-screens-always-on-2026-10-21.md).
 
 가드 테스트 `apps/frontend/src/ppppScreens.test.tsx` 는 CI 에서 돌고 빨개지면 배포를 막는다. 그런데 jsdom 이라
@@ -19,17 +19,17 @@
 
 ## 무엇을 재는가
 
-  P1  #/explore 를 바로 열면(로그인 없이) 레일에 Platform·Page·Posting이 PPPP 순서로 **보인다**
-  P2  네 버튼이 각자 자기 화면을 연다 — 「상권 정체성」 · 「지도 데이터 레이어」 · 「입점 계산」이 **보인다**
+  P1  #/explore 를 바로 열면(로그인 없이) 레일에 Platform·Page·Proposal 셋이 PPPP 순서로 **보인다**
+  P2  네 버튼이 각자 자기 화면을 연다 — 「상권 정체성」 · 「지도 데이터 레이어」 · 「입점 계산」 · 「오프라인 캠페인」이 **보인다**
   P3  흐름의 「지도」 진입로 — 허브 탭(데스크톱 상단 · 휴대폰 하단) · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」
       — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 세 트랙이 보인다
   P4  지도 탐색이 흐름에서 고른 상권으로 열린다(설계서 5판 §10 C2) — Platform · Page 의 상권 선택 값
   P5  랜딩의 PPPP 세 질문(#how)이 접히지 않고 보인다
-  P6  (2026-10-24) 홈의 새 입구 — 세 단계를 다 마친 홈의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
+  P6  (2026-10-24) 홈의 새 입구 — 계약 전 세 단계를 다 마친 홈(11-22 부터 ④ 는 「개업 후」라 세지 않는다)의 주 버튼 「지도에서 내 자리 보기」 · 지도 미리보기 「지도에서 이어
       보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 세 트랙이 보이고, 그 트랙 화면이
       서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 세 화면으로 간다
   P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 세 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
-      「Platform → Page → Posting」이 보이는지도 잰다) — 데스크톱 ·
+      「Platform → Page → Proposal」이 보이는지도 잰다) — 데스크톱 ·
       휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 세 트랙이
       보이고, Platform 이 현재 트랙이며 Platform 의 상권 선택 값이 그 상권이다. 버튼 글자가 한 줄인지 데스크톱 · 390px · 360px 에서 잰다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
@@ -61,16 +61,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FLOW_KEY = "placeos.flow.v1"
-PLAN_KEY = "placeos.flow.plan.v1"
-TRACKS = ["Platform", "Page", "Posting"]
+# PLAN_KEY("placeos.flow.plan.v1" · ④ 작게 확인의 검증 계획)는 2026-11-22 에 걷었다 — 홈의 ④ 는 이제 「개업 후」(지도 탐색 Program 입구)라
+# 「다 봤다」를 계약 전 ①~③ 으로만 센다. 그래서 P6 씨앗에 검증 계획을 심을 필요가 없다.
+TRACKS = ["Platform", "Page", "Proposal"]
 # 레일 버튼 → 그 화면이 섰다는 표지(역할 · 접근성 이름). Page(MapShell)만 TrackMapFrame 패널이 아니라 레이어 묶음이다
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
-          ("Posting", "complementary", "입점 계산")]
+          ("Proposal", "complementary", "입점 계산")]
 SETTLE_MS = 2500
 # 상권 소개(R2) 하단 주 버튼(2026-11-01 사용자 결정) — flow/screens/Find.tsx 의 PPPP_CTA 와 같은 글자
 R2_CTA = "이 상권 세 단계로 따져 보기"
 # 그 버튼 위 한 줄 — 「세 단계」의 이름(Find.tsx 의 PPPP_STEPS). 레일 순서와 같아야 한다
-R2_STEPS = "Platform → Page → Posting"
+R2_STEPS = "Platform → Page → Proposal"
 # 버튼 글자가 버튼 안에 한 줄로 드는가 — 넘침(scrollWidth > clientWidth)과 줄 수(글자 범위의 줄 사각형 top 개수)
 FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
           "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
@@ -156,6 +157,7 @@ def main() -> int:
     ap.add_argument("--screens", action="store_true", help="화면마다 PNG 를 남긴다")
     ap.add_argument("--headed", action="store_true", help="브라우저 창을 띄운다 — 사람이 눈으로 따라 볼 때")
     ap.add_argument("--slowmo", type=int, default=0, help="동작마다 멈출 ms(--headed 와 같이 — 눈으로 따라갈 수 있게)")
+    ap.add_argument("--require-map-tiles", action="store_true", help="지도 타일의 실수신과 요청 실패 여부도 검사한다")
     args = ap.parse_args()
 
     try:
@@ -179,8 +181,8 @@ def main() -> int:
     industry = next((i for i in industries if i.get("model_label")), industries[0] if industries else None)
     flow = {"v": 1, "goal": "start", "industryKey": industry["key"] if industry else None, "districtId": target["id"]}
     seed = f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(flow))})"
-    # P6 — 세 단계를 다 마친 흐름 답. 자리는 그 상권의 실제 빈 자리(건물 id 가 있는 것) 하나다 — 지어낸 건물 id 로는
-    # Page 가 「선택한 건물을 찾지 못했습니다」를 띄워 「고른 건물이 골라진다」를 잴 수 없다
+    # P6 — 계약 전 세 단계(상권·빈 자리·비용)를 다 마친 흐름 답. 자리는 그 상권의 실제 빈 자리(건물 id 가 있는 것) 하나다 — 지어낸
+    # 건물 id 로는 Page 가 「선택한 건물을 찾지 못했습니다」를 띄워 「고른 건물이 골라진다」를 잴 수 없다
     space = first_space(base, target["id"])
     done_seed = None
     if space:
@@ -188,18 +190,28 @@ def main() -> int:
         done = {**flow, "spaceId": space["id"], "spaceLabel": f"{space['name']} {floor}층" if floor and floor >= 1 else space["name"],
                 "spaceAt": {"buildingId": space["building_id"], "name": space["name"], "lat": space["lat"], "lng": space["lng"]},
                 "premium": {"kind": "none"}}
-        plan = {"brief": {}, "plan": {"mode": "popup"}, "at": "2026-10-24"}   # 홈의 네 번째 단계(작게 확인)를 마친 표시만
-        done_seed = (f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(done))});"
-                     f"sessionStorage.setItem('{PLAN_KEY}', {json.dumps(json.dumps(plan))})")
+        done_seed = f"localStorage.setItem('{FLOW_KEY}', {json.dumps(json.dumps(done))})"
 
     rep = Report()
     errors: list[str] = []
     bad_api: list[str] = []
 
+    failed_tiles: list[str] = []
+
+    def is_tile(url: str) -> bool:
+        return "/styles/" in url and ".png?" in url and (
+            url.startswith("https://nrbe.pstatic.net/") or url.startswith("http://nrbe.map.naver.net/")
+        )
+
     def watch(page, tag: str):
         page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"[{tag}] console.error: {m.text}") if m.type == "error" else None)
         page.on("response", lambda r: bad_api.append(f"[{tag}] {r.status} {r.url}") if "/api/" in r.url and r.status >= 500 else None)
+        if args.require_map_tiles:
+            page.on("requestfailed", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.failure != "net::ERR_ABORTED" else None)
+            page.on("response", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.status >= 400 else None)
         return page
 
     def shot(page, name: str) -> None:
@@ -426,6 +438,21 @@ def main() -> int:
             shot(page, f"p7-r2-font{scale.rstrip('%')}-{width}")
             page.close()
             big.close()
+        if args.require_map_tiles:
+            page = watch(browser.new_page(viewport={"width": 1280, "height": 900}), "P8")
+            painted = False
+            try:
+                page.goto(base + f"/#/explore?track=page&district={target['id']}")
+                page.wait_for_function("""() => [...document.querySelectorAll('.map-canvas img')]
+                    .some(image => /nrbe\\.(pstatic\\.net|map\\.naver\\.net)\\/styles\\//.test(image.src)
+                        && image.complete && image.naturalWidth > 0)""", timeout=20000)
+                painted = True
+                page.wait_for_timeout(SETTLE_MS)
+            except Exception:
+                pass
+            rep.add("P8 네이버 지도 타일이 표시되고 요청 실패가 없다", painted and not failed_tiles,
+                    {"painted": painted, "failed_tiles": sorted(set(failed_tiles))})
+            page.close()
         browser.close()
 
     result = {

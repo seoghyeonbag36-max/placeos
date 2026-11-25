@@ -35,14 +35,19 @@ def _landing_hubs() -> int:
     return int(m.group(1))
 
 
-def _site_cities() -> set[str]:
-    """사이트에 보이는 도시(2026-11-10 사용자 결정: 서울만) — `lib/siteScope.ts` 의 `SITE_CITIES` 를 읽는다."""
+def _scope_cities(const: str) -> set[str]:
+    """범위의 도시 목록 — `lib/siteScope.ts` 의 `const` 줄(`new Set([...])`)을 읽는다."""
     text = _SITE_SCOPE.read_text(encoding="utf-8")
-    m = re.search(r"export\s+const\s+SITE_CITIES\b[^=]*=\s*new\s+Set\(\[([^\]]*)\]\)", text)
-    assert m, f"{_SITE_SCOPE} 에서 SITE_CITIES 를 못 읽었다 — 모양을 바꿨다면 이 테스트도 같이 고친다"
+    m = re.search(r"export\s+const\s+" + const + r"\b[^=]*=\s*new\s+Set\(\[([^\]]*)\]\)", text)
+    assert m, f"{_SITE_SCOPE} 에서 {const} 를 못 읽었다 — 모양을 바꿨다면 이 테스트도 같이 고친다"
     cities = set(re.findall(r"[\"']([a-z0-9-]+)[\"']", m.group(1)))
-    assert cities, "SITE_CITIES 가 비었다 — 사이트에 보이는 도시가 하나도 없다"
+    assert cities, f"{const} 가 비었다 — 그 범위에 보이는 도시가 하나도 없다"
     return cities
+
+
+def _site_cities() -> set[str]:
+    """기본 범위에 보이는 도시(2026-11-10 사용자 결정: 서울만) — `SEOUL_SCOPE_CITIES`."""
+    return _scope_cities("SEOUL_SCOPE_CITIES")
 
 
 def test_landing_hub_count_matches_served_hubs():
@@ -59,15 +64,26 @@ def test_landing_hub_count_matches_served_hubs():
     )
 
 
+def test_landing_hub_count_for_goyang_paju_scope_matches_served_hubs():
+    """고양·파주 전용 범위(2026-11-23)의 랜딩도 같은 규칙이다 — 보이는 도시(고양 · 파주)의 서빙 거점 수."""
+    cities = _scope_cities("GOYANG_PAJU_SCOPE_CITIES")
+    served = sum(1 for h in _active_hubs().values() if h.city in cities)
+    m = re.search(r"export\s+const\s+LANDING_HUBS_GOYANG_PAJU\s*=\s*(\d+)\s*;", _FACTS.read_text(encoding="utf-8"))
+    assert m, f"{_FACTS} 에서 LANDING_HUBS_GOYANG_PAJU 를 못 읽었다"
+    assert int(m.group(1)) == served, (
+        f"고양·파주 랜딩이 「{m.group(1)}개 상권」이라고 말하는데 서빙 거점은 {served}개다 — landingFacts.ts 의 LANDING_HUBS_GOYANG_PAJU 를 고칠 것")
+
+
+def test_gwangju_landing_hub_count_matches_served_hubs():
+    """광주 랜딩의 거점 수를 서빙 목록과 대조한다."""
+    cities = _scope_cities("GWANGJU_SCOPE_CITIES")
+    match = re.search(r"export const LANDING_HUBS_GWANGJU = (\d+);", _FACTS.read_text(encoding="utf-8"))
+    assert match, "광주 랜딩 거점 수 상수가 없다"
+    assert int(match.group(1)) == sum(hub.city in cities for hub in _active_hubs().values())
+
+
 def test_every_served_hub_has_gold_coverage():
     """랜딩의 「모두 건축물대장 기준」 은 서빙 거점마다 Gold 산출물이 있다는 뜻이다 — 없는 거점이 서빙에 끼면 그 문장이 거짓이 된다."""
     gold = _ROOT / "data" / "gold"
     missing = sorted(slug for slug in _active_hubs() if not (gold / slug / "coverage.json").is_file())
     assert not missing, f"서빙 거점인데 Gold coverage.json 이 없다: {missing}"
-
-
-def test_gwangju_landing_hub_count_matches_served_hubs() -> None:
-    """광주 전용 랜딩의 거점 수를 현재 서빙 목록과 대조한다."""
-    match = re.search(r"export const LANDING_HUBS_GWANGJU = (\d+);", _FACTS.read_text(encoding="utf-8"))
-    assert match, "광주 랜딩 거점 수 상수가 없다"
-    assert int(match.group(1)) == sum(hub.city == "gwangju" for hub in _active_hubs().values())

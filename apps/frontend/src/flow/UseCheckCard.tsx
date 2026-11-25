@@ -30,14 +30,14 @@ export function UseCheckCard({ buildingId, districtId, floor, areaM2, purps, ind
       <p className="fl-usecheck-head">{r.headline.startsWith(label) ? r.headline.slice(label.length).replace(/^\s*—\s*/, "") : r.headline}</p>
       {open.length > 0 && (
         <ul className="fl-facts">
-          {open.map((c) => <li key={c.item}><b>{c.item}</b> · {ITEM_LABEL[c.status]} — {c.reason}</li>)}
+          {open.map((c) => <li key={c.item}><b>{c.item}</b> · {ITEM_LABEL[c.status]}: {c.reason}</li>)}
         </ul>
       )}
       <Details summary="점검 항목 전부 · 출처">
         <ul className="fl-facts">
           {r.checks.map((c) => (
             <li key={c.item}>
-              <b>{c.item}</b> · {ITEM_LABEL[c.status]} — {c.reason}{" "}
+              <b>{c.item}</b> · {ITEM_LABEL[c.status]}: {c.reason}{" "}
               <span className="fl-muted">({c.source}{c.source_date ? ` · ${c.source_date}` : ""})</span>
             </li>
           ))}

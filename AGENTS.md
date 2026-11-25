@@ -1,11 +1,10 @@
 # AGENTS.md — PlaceOS 작업 지침 (Codex 등 코딩 에이전트용)
 
-**여기가 작업 루트다.** `.git` 이 이 디렉터리에 있다. 상위 폴더에서는 아무것도 만들지 않는다.
+> **2026-11-25 사용자 결정** — Program을 제품 화면에서 제거한다. 화면 보존 규칙과 검증은
+> Platform · Page · Proposal(기존 Posting), 기존 지도 진입로, 랜딩의 세 질문에 적용한다. 상권 소개 주 버튼은
+> 「이 상권 세 단계로 따져 보기」이며, 위 안내는 「Platform → Page → Proposal」이다.
 
-> **2026-11-25 사용자 결정** — Program은 제품 화면과 진입점에서 제거한다. 아래 PPPP 화면 보존 규칙은
-> Platform · Page · Posting 세 화면과 기존 지도 진입로 및 랜딩의 세 질문에 적용한다.
-> 상권 소개 주 버튼은 「이 상권 세 단계로 따져 보기」, 위 안내는 「Platform → Page → Posting」이다.
-> `ppppScreens.test.tsx`와 `pppp_screens_check.py`는 이 세 화면과 진입로를 검증한다.
+**여기가 작업 루트다.** `.git` 이 이 디렉터리에 있다. 상위 폴더에서는 아무것도 만들지 않는다.
 
 PlaceOS는 물리적 상권의 디지털 트윈 SaaS다. 4대 기능을 **PPPP** 라 부르고, 전통 마케팅 4P 와
 **1:1** 로 대응한다 (2026-09-05 재정의 — 종전엔 Page 가 Product/Price 를 겸하고 Posting·Program 이

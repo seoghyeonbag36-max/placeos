@@ -11,7 +11,12 @@ export type RouteName =
   | "startup-order" | "startup-region" | "startup-district" | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
   | "budget" | "contract" | "fitout" | "budget-check"
-  | "home" | "me" | "explore" | "compare" | "corridor";
+  // ④ 「작게 확인」(validate · item · period · test-budget · plan)은 2026-11-22 Program 범위 축소로 뺐다 — 옛 주소는 모르는 주소(→ 홈)
+  | "home" | "me" | "explore" | "compare" | "corridor"
+  // 직거래 연결 층(2026-11-18) — 건물주 확인 매물 · 건물주 등록·관리 · 문의함 · 정액 상품. PPPP 세 화면을 대신하지 않고 더한다
+  | "listings" | "listing" | "owner" | "owner-new" | "owner-listing" | "inbox" | "inquiry" | "plans"
+  // 입점 희망서(2026-11-21) — 창업자 희망서 · 건물주가 보는 희망서 목록/한 장. 흐름에 더한 화면이다
+  | "brief" | "owner-briefs" | "owner-brief";
 
 export interface Route { name: RouteName; param: string | null; path: string }
 
@@ -23,8 +28,9 @@ const SIMPLE: Record<string, RouteName> = {
   "/start": "start", "/industry": "industry", "/industry/other": "industry-other", "/home-district": "home-district",
   "/districts": "districts", "/industries": "industries", "/pivot-next": "pivot-next", "/district-search": "district-search",
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
-  "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check",
-  "/home": "home", "/me": "me", "/explore": "explore",
+  "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check", "/home": "home", "/me": "me", "/explore": "explore",
+  "/listings": "listings", "/owner": "owner", "/owner/new": "owner-new", "/inbox": "inbox", "/plans": "plans",
+  "/brief": "brief", "/owner/briefs": "owner-briefs",
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다).
@@ -34,9 +40,17 @@ export function parseRoute(hash: string): Route | null {
   if (!hash.startsWith("#/")) return null;
   const path = hash.slice(1).split("?")[0].replace(/\/+$/, "") || "/";
   if (SIMPLE[path]) return { name: SIMPLE[path], param: null, path };
-  const m = /^\/(district|space|compare|corridor)\/([^/]+)$/.exec(path);
+  const m = /^\/(district|space|compare|corridor|listing|inquiry)\/([^/]+)$/.exec(path);
   if (m) {
     try { return { name: m[1] as RouteName, param: decodeURIComponent(m[2]), path }; } catch { return null; }
+  }
+  const owned = /^\/owner\/listing\/([^/]+)$/.exec(path);
+  if (owned) {
+    try { return { name: "owner-listing", param: decodeURIComponent(owned[1]), path }; } catch { return null; }
+  }
+  const brief = /^\/owner\/brief\/([^/]+)$/.exec(path);
+  if (brief) {
+    try { return { name: "owner-brief", param: decodeURIComponent(brief[1]), path }; } catch { return null; }
   }
   return null;
 }
@@ -55,7 +69,7 @@ export const isFlowHash = (hash: string) => hash.startsWith("#/");
  * 다시 찾아야 했다. 쿼리가 붙어도 지도 탐색이다(`isExploreHash`) — App 이 해시를 `===` 로 비교하면 지도 탐색이 흐름으로 샌다.
  * ⛔ 기존 진입로 셋(허브 탭 · R2 「지도에서 자세히」 · R3 「지도」)은 쿼리 없이 `#/explore` 그대로 간다(PPPP 화면 보존 규칙). */
 
-/** 지도 탐색 레일의 트랙 — 흐름 홈의 세 단계(Platform·Page·Posting)와 1:1 */
+/** 지도 탐색 레일의 트랙 — 흐름 홈의 세 단계(PLATFORM·PAGE·POSTING)와 1:1 */
 export type ExploreTrack = "platform" | "page" | "posting";
 export const EXPLORE_TRACKS: readonly ExploreTrack[] = ["platform", "page", "posting"];
 

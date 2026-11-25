@@ -149,7 +149,10 @@ def completed_research(root: Path = ROOT) -> dict:
     return {"complete": complete, "incomplete": incomplete, "source_plan_sha256": digest(plan_path)}
 
 
-def ranking_graph(root: Path = ROOT) -> dict:
+DEFAULT_VERSION = "20261104"
+
+
+def ranking_graph(root: Path = ROOT, version: str = DEFAULT_VERSION) -> dict:
     """공개 경기 전체의 학습 재료를 별도 경로에 산출한다. 모델 추론·교체는 하지 않는다."""
     import pandas as pd
     from app.data.cities import CITIES
@@ -160,7 +163,7 @@ def ranking_graph(root: Path = ROOT) -> dict:
     from ml.training.graph_dedup import one_row_per_store
 
     hubs = {s: h for s, h in ACTIVE_HUBS.items() if CITIES[h.city].sido == "경기도"}
-    out = root / "data/gold/gyeonggi_ranking_20261104"
+    out = root / f"data/gold/gyeonggi_ranking_{version}"
     manifest = out / "manifest.json"
     if manifest.exists():
         previous = read(manifest)
@@ -191,7 +194,7 @@ def ranking_graph(root: Path = ROOT) -> dict:
         if not got:
             raise ValueError(f"정제한 점포 없음: {slug}")
         rows.extend(got)
-    silver = root / "data/silver/gyeonggi_ranking_20261104/store_graph_nodes.parquet"
+    silver = root / f"data/silver/gyeonggi_ranking_{version}/store_graph_nodes.parquet"
     if silver.exists() or out.exists():
         raise ValueError("미완료 산출 경로가 있다. 원인을 확인한 뒤 별도 버전으로 실행할 것")
     silver.parent.mkdir(parents=True, exist_ok=True)
@@ -227,14 +230,19 @@ def ranking_graph(root: Path = ROOT) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--research-only", action="store_true")
+    # 공개 상권 목록이 늘면(2026-11-23 고양·파주 도시 전체 서빙) 같은 버전은 거부된다 — 새 버전 경로로 산출한다.
+    parser.add_argument("--version", default=DEFAULT_VERSION)
+    parser.add_argument("--graph-only", action="store_true", help="조사 후보 대장 근거는 건너뛰고 학습 입력만 산출")
     args = parser.parse_args()
-    result = {"research": completed_research()}
+    result = {"research": completed_research()} if not args.graph_only else {}
     if not args.research_only:
-        result["ranking_graph"] = ranking_graph()
-    report = ROOT / "reports/gyeonggi_ranking_gold_2026-11-04.json"
+        result["ranking_graph"] = ranking_graph(version=args.version)
+    suffix = "2026-11-04" if args.version == DEFAULT_VERSION else args.version
+    report = ROOT / f"reports/gyeonggi_ranking_gold_{suffix}.json"
     report.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"complete_research": result["research"]["complete"],
-                      "incomplete_research": len(result["research"]["incomplete"]),
+    research = result.get("research") or {"complete": [], "incomplete": []}
+    print(json.dumps({"complete_research": research["complete"],
+                      "incomplete_research": len(research["incomplete"]),
                       "ranking_hubs": len(result.get("ranking_graph", {}).get("hubs", []))}, ensure_ascii=False))
 
 

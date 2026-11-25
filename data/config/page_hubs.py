@@ -231,14 +231,17 @@ GYEONGGI_HUBS: dict[str, PageHub] = {
     # 2026-08-30 에는 계획상가 밀집을 밝힌 채 예외 서빙하기로 했다가, 2026-10-26 결정으로
     # 신규 확장에서는 계획상가를 빼고 추후 확장 과제로 돌렸다(deferred). 문구는 그 판단의
     # 근거라 지우지 않는다.
-    "ilsan":     PageHub("ilsan",     "일산 라페스타", 126.768308, 37.661029, 250, 350,
-                          city="goyang",
+    # 2026-11-23 장항2동: 반경 250/350 → 500/700 + 가까운 쪽 귀속(partition_with) — 장항2동 점포 4,854곳 중 401곳이 세 보류 거점(라페스타·웨스턴돔·마두)
+    #   바깥 364~955m 고리에 남아 있었다. 반경을 넓히면 이웃과 겹치므로 겹친 점포·폴리곤은 중심이 더 가까운 거점 한 곳에만 담는다(이중 계수 없음).
+    #   짝은 서로 선언한다(한쪽만 달면 다른 쪽이 겹친 점포를 그대로 갖는다) — 주엽역 · 마두동 동측도 그래서 짝에 들어간다.
+    "ilsan":     PageHub("ilsan",     "일산 라페스타", 126.768308, 37.661029, 500, 700,
+                          city="goyang", partition_with=("westerndom", "madu", "juyeop"),
                           caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다. "
                                  "공실률은 일반건축물 표본에만 근거하므로 다른 거점과 직접 "
                                  "비교하지 말 것.",
                           deferred="계획상가"),
-    "westerndom": PageHub("westerndom", "일산 웨스턴돔", 126.772184, 37.655885, 250, 350,
-                          city="goyang",
+    "westerndom": PageHub("westerndom", "일산 웨스턴돔", 126.772184, 37.655885, 500, 700,
+                          city="goyang", partition_with=("ilsan", "madu"),
                           caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다. "
                                  "공실률은 일반건축물 표본에만 근거하므로 다른 거점과 직접 "
                                  "비교하지 말 것.",
@@ -276,12 +279,15 @@ GYEONGGI_HUBS: dict[str, PageHub] = {
 
     # 계획상가 밀집 — 건물당 점포가 기준(10)을 넘는다. 08-30 에는 라페스타와 같은 예외
     # 채택이었으나 2026-10-26 결정으로 추후 확장 과제로 돌렸다(deferred).
-    "madu":      PageHub("madu",      "마두역",      126.7776, 37.6522, 250, 350, city="goyang",
+    # 2026-11-23 장항2동: 250/350 → 470/670(백석역 서빙 거점의 점포 반경 700 과 닿지 않게 670) + partition_with(ilsan · westerndom · madu-east)
+    "madu":      PageHub("madu",      "마두역",      126.7776, 37.6522, 470, 670, city="goyang",
+                          partition_with=("ilsan", "westerndom", "madu-east"),
                           caveat="계획상가 밀집 — 건물당 점포 17.1개(기준 10 초과). 공실률은 "
                                  "일반건축물만 세므로 이 거점 상업 재고의 일부에만 근거한다. "
                                  "다른 거점과 공실률을 직접 비교하지 말 것.",
                           deferred="계획상가"),
     "juyeop":    PageHub("juyeop",    "주엽역",      126.7613, 37.6701, 500, 700, city="goyang",
+                          partition_with=("ilsan",),  # 2026-11-23 라페스타 반경 확대 짝(1,181m)
                           caveat="계획상가 밀집 — 건물당 점포 22.4개(기준 10 초과). 공실률은 "
                                  "일반건축물만 세므로 이 거점 상업 재고의 일부에만 근거한다. "
                                  "다른 거점과 공실률을 직접 비교하지 말 것.",
@@ -546,6 +552,114 @@ ALIASES: dict[str, str] = {
 }
 
 
+# ── 고양·파주 도시 전체 확장 6곳 (2026-11-23 · **등록만** — 서빙은 Gold·앵커를 통과한 거점만 `GOYANG_PAJU_CITYWIDE_SERVED_HUBS` 로) ──
+# 사용자 결정(11-23 ①): 「Page 부터 도시 전체로 넓힌다」. 근거는 시군구 점포 전수(`scripts/citywide_store_census.py`) —
+# 서빙 거점이 도시 점포의 고양 12.4% · 파주 24.3% 만 덮는다(보류 거점 포함 39.2% · 30.5%).
+# 선정: 덮이지 않은 점포가 모인 자리 순으로 250m 격자·반경 500m 합 ≥300 · 최종 중심점이 등록 거점과 ≥1.0km · 중심은 **관측된 점포 한 곳**.
+# 판정은 hub-chain §0 두 단계 — 건물당 점포 ≤10 · top10 지번 집중도 ≤25% 인 **「통과」 6곳만** 등록했다. 「주의」(지번 집중 >25%)는
+# 대장 확인 뒤에야 판정할 수 있어 등록하지 않았고(고양 11 · 파주 6), 「기각」(건물당 >10)은 계획상가라 3D 트윈 담당 몫이다.
+# 반경은 **이웃 거점의 점포 반경과 겹치지 않게** 줄였다 — `stores_radius_m = 이웃과의 거리 − 이웃의 stores_radius_m`(300~700).
+#   (같은 점포가 두 거점에 이중 계수되지 않게 하는 규칙. 기존 거점은 건드리지 않는다.) 폴리곤 반경은 점포 반경의 0.7배.
+# ⚠ 주교동·마두1동은 이웃(원당역 · 밤가시마을) 때문에 반경이 작다(311m · 485m) — 표본 소형 문구가 붙을 수 있다.
+# ⚠ 등록은 노출이 아니다 — `GOYANG_PAJU_CITYWIDE_SERVED_HUBS` 가 비어 있는 동안 어느 것도 서빙·기본 순회에 오르지 않는다.
+# 임대 앵커는 카카오 로컬 실측 좌표(고양시청 126.83198,37.65843 · 탄현역 126.76108,37.69399 · 파주시청 126.77988,37.76004)에서
+# 가장 가까운 표본이다 → data/config/rone_districts.py. 근거 표 → docs/finding-citywide-census-goyang-paju-2026-11-23.md
+GOYANG_PAJU_CITYWIDE_HUBS: dict[str, PageHub] = {
+    # 고양 일산서구 일산2동(법정동 일산동) · 점포 1,228 · 건물당 3.18 · top10 23.0% · 앵커 탄현역 1.41km
+    "ilsan2dong": PageHub("ilsan2dong", "일산2동", 126.772670, 37.685204, 420, 590, city="goyang"),
+    # 고양 덕양구 주교동 · 점포 1,179 · 건물당 3.14 · top10 16.5% · 고양시청 소재지(0.22km) · 원당역과 1,012m 라 반경 311m
+    "jugyo": PageHub("jugyo", "주교동", 126.834277, 37.659124, 220, 310, city="goyang"),
+    # 고양 덕양구 행주동(법정동 토당동) · 점포 813 · 건물당 2.49 · top10 20.3% · 앵커 고양시청 3.94km
+    "todang": PageHub("todang", "토당동", 126.821759, 37.623895, 500, 700, city="goyang"),
+    # 고양 일산동구 마두1동(마두동) · 점포 576 · 건물당 1.66 · top10 12.0% · 마두역(계획상가 보류)과 다른 구획 · 앵커 탄현역 3.82km(고양시청 4.15km 와 근소)
+    "madu1dong": PageHub("madu1dong", "마두1동", 126.785809, 37.665722, 340, 485, city="goyang"),
+    # 고양 일산서구 대화동 · 점포 403 · 건물당 1.56 · top10 13.2% · 대화역과 1,012m 라 반경 562m · 앵커 탄현역 1.31km
+    "daehwadong-ne": PageHub("daehwadong-ne", "대화동 북동", 126.754480, 37.683447, 400, 560, city="goyang"),
+    # 파주 조리읍 · 점포 443 · 건물당 2.24 · top10 20.1% · 앵커 파주시청 3.06km(읍 지역 — 점포 밀도가 낮다)
+    "jori": PageHub("jori", "조리읍", 126.807958, 37.743821, 500, 700, city="paju"),
+}
+
+# ── 고양·파주 계획상가 밀집 후보 6곳 (2026-11-23 · 보류 · 사용자 결정 「천장 관련 상권·건물도 같이 수집」) ──
+# 시군구 점포 전수에서 건물당 점포 >10 으로 **기각**된 후보(`docs/finding-citywide-census-goyang-paju-2026-11-23.md` §3)다. 서빙하지 않는다 —
+# `deferred="계획상가"` 라 서빙·기본 순회에서 빠지고(`DEFERRED_HUBS`) 등록·수집·Gold 만 남는다(화정 등 기존 보류 11곳과 같은 취급).
+# 3D 디지털 트윈 담당이 재개할 때 쿼터를 다시 태우지 않게 먼저 받아 둔다. 반경은 새 6곳과 같은 규칙(이웃 점포 반경과 겹치지 않게).
+# ⚠ 계획상가 호실 단위 전수(`refetch_truncated_expos --include-capped`)는 하지 않는다 — quota 런북이 금지한 쿼터 소모이고 층·호 매칭이 먼저다.
+GOYANG_PAJU_CEILING_HUBS: dict[str, PageHub] = {
+    # 고양 덕양구 화전동(법정동 향동동) · 점포 1,117 · 건물당 29.4 · top10 97.0% — 지식산업센터 군집으로 읽히나 용도는 대장 뒤 확인 · 앵커 고양시청 7.81km(멀다)
+    "hyangdong": PageHub("hyangdong", "향동", 126.894018, 37.608152, 490, 700, city="goyang",
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 29.4). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+    # 고양 일산동구 마두1동(마두동) · 점포 783 · 건물당 10.17 · top10 40.4% · 앵커 고양시청 3.81km
+    "madu-east": PageHub("madu-east", "마두동 동측", 126.788875, 37.655718, 460, 650, city="goyang",
+                      partition_with=("madu",),  # 2026-11-23 마두역 반경 확대 짝(1,067m)
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 10.2). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+    # 고양 일산서구 일산3동(일산동) · 점포 793 · 건물당 10.17 · top10 30.6% · 주엽역과 1,009m 라 반경 300m · 앵커 탄현역 1.71km
+    "ilsan3dong": PageHub("ilsan3dong", "일산3동", 126.764437, 37.678845, 210, 300, city="goyang",
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 10.2). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+    # 파주 금촌2동 · 점포 719 · 건물당 16.72 · top10 59.4% · 금촌과 1,071m 라 반경 370m · 앵커 파주시청 1.41km
+    "geumchon2dong": PageHub("geumchon2dong", "금촌2동", 126.767917, 37.75165, 260, 370, city="paju",
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 16.7). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+    # 파주 운정1동(와동동) · 점포 348 · 건물당 14.5 · top10 77.9% · 운정과 1,188m 라 반경 480m · 앵커 파주시청 3.31km
+    "unjeong1dong": PageHub("unjeong1dong", "운정1동", 126.764937, 37.73267, 340, 480, city="paju",
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 14.5). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+    # 파주 운정6동(동패동) · 점포 384 · 건물당 14.22 · top10 72.4% · 앵커 파주시청 7.54km — 탄현역(고양)이 4.25km 로 더 가깝지만 도시가 다른 표본은 빌리지 않는다(운정 목동과 같은 규칙) · 임대 대조가 약하다
+    "unjeong6dong": PageHub("unjeong6dong", "운정6동", 126.718773, 37.712495, 490, 700, city="paju",
+                      caveat="계획상가 밀집 — 일반 채택 기준(건물당 점포 10개 이하)을 넘는다(건물당 14.2). 공실률은 일반건축물 표본에만 근거하므로 "
+                                 "다른 거점과 직접 비교하지 말 것.",
+                      deferred="계획상가"),
+}
+
+# ── 고양·파주 「주의」 후보 17곳 (2026-11-23 · **등록만** — 12곳 수집이 끝난 뒤 받는다 · 서빙은 `GOYANG_PAJU_CAUTION_SERVED_HUBS` 로) ──
+# 사용자 결정(11-23): 「주의 17곳 수집을 이번 12곳이 끝난 뒤에 넣을 것」. 시군구 점포 전수 후보 중 hub-chain §0 두 단계에서 **top10 지번 집중도 >25% 라 「주의」**로
+# 판정된 곳이다(건물당 점포 ≤10 이라 계획상가는 아니다). 대장을 받아 집합 비중을 본 뒤에야 채택·기각을 정한다 — 백석역 4.1/38.3% 처럼 두 지표가 갈리는 사례가 있다.
+# 반경은 이웃 점포 반경과 겹치지 않게(300 아래로는 안 줄이고, 250~700). ⚠ 서빙은 판정 뒤 — 집중도가 단일시설(>60%)이면 `deferred="단일시설"`, 계획상가면 `"계획상가"` 로 돌린다.
+# 수집: `python scripts/run_hub_chain_batch.py --batch gpcaution` (통과·보류 12곳(`--batch gpcity`)이 끝난 뒤 · 건축HUB 쿼터는 한 번에 한 거점).
+GOYANG_PAJU_CAUTION_HUBS: dict[str, PageHub] = {
+    # 고양 덕양구 삼송2동 (원흥동) · 점포 949 · 건물당 8.04 · top10 75.0%(주의) · 앵커 고양시청 3.84km
+    "samsong2dong": PageHub("samsong2dong", "삼송2동", 126.874173, 37.649866, 490, 700, city="goyang"),
+    # 고양 덕양구 행신1동 (행신동) · 점포 848 · 건물당 6.57 · top10 38.0%(주의) · 앵커 고양시청 3.88km · 반경 376m(이웃 제한)
+    "haengsin1dong": PageHub("haengsin1dong", "행신1동", 126.833971, 37.623508, 270, 376, city="goyang"),
+    # 고양 덕양구 화전동 (향동동) · 점포 976 · 건물당 6.83 · top10 51.1%(주의) · 앵커 고양시청 8.49km · 반경 301m(이웃 제한)
+    "hyangdong-south": PageHub("hyangdong-south", "향동 남측", 126.892887, 37.599177, 210, 301, city="goyang"),
+    # 고양 덕양구 효자동 (지축동) · 점포 739 · 건물당 6.01 · top10 57.8%(주의) · 앵커 고양시청 7.35km
+    "jichuk": PageHub("jichuk", "지축동", 126.914595, 37.648794, 490, 700, city="goyang"),
+    # 고양 일산동구 식사동 (식사동) · 점포 696 · 건물당 5.57 · top10 36.1%(주의) · 앵커 고양시청 2.71km
+    "siksa": PageHub("siksa", "식사동", 126.811034, 37.676352, 490, 700, city="goyang"),
+    # 고양 일산동구 풍산동 (풍동) · 점포 685 · 건물당 5.15 · top10 35.3%(주의) · 앵커 고양시청 2.92km
+    "pungsan": PageHub("pungsan", "풍산동", 126.800135, 37.665747, 490, 700, city="goyang"),
+    # 고양 덕양구 흥도동 (원흥동) · 점포 577 · 건물당 9.16 · top10 70.2%(주의) · 앵커 고양시청 4.35km
+    "wonheung": PageHub("wonheung", "원흥동", 126.872543, 37.636034, 490, 700, city="goyang"),
+    # 고양 덕양구 원신동 (신원동) · 점포 625 · 건물당 5.08 · top10 37.8%(주의) · 앵커 고양시청 5.15km
+    "wonsin": PageHub("wonsin", "원신동", 126.890120, 37.663154, 490, 700, city="goyang"),
+    # 고양 덕양구 고양동 (고양동) · 점포 537 · 건물당 3.02 · top10 33.0%(주의) · 앵커 고양시청 8.05km
+    "goyangdong": PageHub("goyangdong", "고양동", 126.902329, 37.704672, 490, 700, city="goyang"),
+    # 고양 일산서구 탄현2동 (탄현동) · 점포 504 · 건물당 3.63 · top10 34.1%(주의) · 앵커 탄현역 1.36km · 반경 490m(이웃 제한)
+    "tanhyeon2dong": PageHub("tanhyeon2dong", "탄현2동", 126.776474, 37.694455, 350, 490, city="goyang"),
+    # 고양 덕양구 행신4동 (행신동) · 점포 515 · 건물당 3.28 · top10 32.8%(주의) · 앵커 고양시청 4.47km · 반경 584m(이웃 제한)
+    "haengsin4dong": PageHub("haengsin4dong", "행신4동", 126.845057, 37.619532, 410, 584, city="goyang"),
+    # 파주 운정5동 (동패동) · 점포 888 · 건물당 9.15 · top10 79.5%(주의) · 앵커 파주시청 6.68km
+    "unjeong5dong": PageHub("unjeong5dong", "운정5동", 126.717748, 37.725539, 490, 700, city="paju"),
+    # 파주 운정1동 (와동동) · 점포 754 · 건물당 2.98 · top10 25.6%(주의) · 앵커 파주시청 3.80km · 반경 639m(이웃 제한)
+    "waedong": PageHub("waedong", "와동동", 126.752295, 37.733689, 450, 639, city="paju"),
+    # 파주 운정3동 (동패동) · 점포 559 · 건물당 9.81 · top10 57.6%(주의) · 앵커 파주시청 6.25km
+    "unjeong3dong": PageHub("unjeong3dong", "운정3동", 126.744340, 37.711292, 490, 700, city="paju"),
+    # 파주 운정2동 (목동동) · 점포 544 · 건물당 3.86 · top10 51.8%(주의) · 앵커 파주시청 5.53km · 반경 596m(이웃 제한)
+    "unjeong2dong": PageHub("unjeong2dong", "운정2동", 126.739040, 37.722191, 420, 596, city="paju"),
+    # 파주 교하동 (문발동) · 점포 431 · 건물당 6.63 · top10 74.7%(주의) · 앵커 파주시청 8.85km
+    "munbal": PageHub("munbal", "문발동", 126.693169, 37.719684, 490, 700, city="paju"),
+    # 파주 문산읍 (문산읍) · 점포 397 · 건물당 5.75 · top10 49.6%(주의) · 앵커 파주시청 11.73km · 반경 539m(이웃 제한)
+    "munsaneup": PageHub("munsaneup", "문산읍", 126.785107, 37.865618, 380, 539, city="paju"),
+}
+
 # 명시 지정용 통합 레지스트리 — **순회 대상이 아니다.**
 #
 # `HUBS`(서울 54)는 인자 없이 실행했을 때의 기본 순회 집합으로 그대로 둔다. 경기 거점은
@@ -554,7 +668,9 @@ ALIASES: dict[str, str] = {
 # 그래서 **이름을 대고 부를 때만** 잡히게 한다.
 ALL_HUBS: dict[str, PageHub] = {**HUBS, **SEOUL_BATCH2_HUBS, **SEOUL_BATCH3_HUBS,
                                 **SEOUL_BATCH4_HUBS, **GYEONGGI_HUBS, **GYEONGGI_BATCH3_HUBS,
-                                **GWANGJU_HUBS, **JEONJU_HUBS, **GJ_JJ_BATCH2_HUBS}
+                                **GWANGJU_HUBS, **JEONJU_HUBS, **GJ_JJ_BATCH2_HUBS,
+                                **GOYANG_PAJU_CITYWIDE_HUBS, **GOYANG_PAJU_CEILING_HUBS,
+                                **GOYANG_PAJU_CAUTION_HUBS}
 
 # ── 기본 순회 집합 (2026-09-03) ──────────────────────────────────────────────
 # 위 주석은 "`HUBS`(서울 54)가 기본 순회 집합"이라고 적었는데, 서울 2차 12거점이
@@ -603,6 +719,25 @@ GJ_JJ_BATCH2_SERVED_HUBS: frozenset[str] = frozenset({
     #   gj-sinyong 대표 집계 2동 · 층 매물 0 / jj-jungdong 대표 집계 4동 — 구역·층 목록을 세울 표본이 없다
 })
 
+# 고양·파주 도시 전체 6곳(2026-11-23 등록) — Tier1 · 정밀 커버리지 ≥80% · 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님(scripts/chain_status.py)을
+# 통과한 거점만 넣는다. 빈 집합에서 시작한다 — 대장 수집(쿼터)이 하루에 안 끝나므로 서빙은 그 뒤다.
+GOYANG_PAJU_CITYWIDE_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-23 사용자 결정 「우선 전부 다 채택」 — 서빙 게이트(|격차|≤30%p · CI 가드 −20<gap<30)를 넘은 5곳을 올린다.
+    "ilsan2dong", "jugyo", "todang", "madu1dong", "jori",
+    # 못 올린 1곳: daehwadong-ne +31.12%p(가드 밖 · 노출 26동 · 주거 비중 91%) — 등록·수집만 남긴다
+})
+
+# 고양·파주 「주의」 17곳(2026-11-23 등록) — 대장 뒤 판정에서 채택하고 Tier1 · 정밀 커버리지 ≥80% · 앵커 격차 |gap| ≤ 30%p · 폴백 앵커 아님을 통과한 거점만 넣는다.
+GOYANG_PAJU_CAUTION_SERVED_HUBS: frozenset[str] = frozenset({
+    # 2026-11-23 「우선 전부 다 채택」 — 게이트를 넘은 15곳. 채택 판정은 「단일시설로 돌리지 않고 일반 거점으로 둔다」이다.
+    "samsong2dong", "haengsin1dong", "siksa", "pungsan", "wonheung", "wonsin", "goyangdong", "tanhyeon2dong",
+    "haengsin4dong", "unjeong3dong", "munbal", "munsaneup",
+    # 못 올린 5곳(등록·수집만 남긴다): hyangdong-south +30.98%p(가드 밖 · 노출 21동) · jichuk 대표값 미산출(상업층 2동) ·
+    #   waedong · unjeong2dong 행정동 구역 0개(`build_district_zones` — 구역을 세울 표본이 없다 · tests/test_district_zones 가 막는다 · gj-sinyong 과 같은 사유) ·
+    #   unjeong5dong 층 단위 빈 자리 0건(상업층 7동 · 공실 0.0%) — `build_vacant_floor_units` 가 0유닛이면 파일을 안 써서
+    #   「층 단위 매물 산출물이 없는 서빙 거점」 가드(tests/test_floor_vacancies)에 걸린다. 광주·전주 2차 gj-sinyong 과 같은 사유
+})
+
 # 2026-10-31: 광주 13곳 전부 서빙(사용자 결정) — 13곳 모두 Tier1 · R-ONE 정확 매핑 · 앵커 격차 ±30%p 안.
 # 2026-11-03: 사용자 지시로 검증 완료한 전주 5곳도 모두 공개한다.
 ACTIVE_CITIES: frozenset[str] = frozenset({
@@ -622,6 +757,8 @@ ACTIVE_HUBS: dict[str, PageHub] = {
     if hub.city in ACTIVE_CITIES and not hub.deferred
     and (slug not in GYEONGGI_BATCH3_HUBS or slug in GYEONGGI_BATCH3_SERVED_HUBS)
     and (slug not in GJ_JJ_BATCH2_HUBS or slug in GJ_JJ_BATCH2_SERVED_HUBS)
+    and (slug not in GOYANG_PAJU_CITYWIDE_HUBS or slug in GOYANG_PAJU_CITYWIDE_SERVED_HUBS)
+    and (slug not in GOYANG_PAJU_CAUTION_HUBS or slug in GOYANG_PAJU_CAUTION_SERVED_HUBS)
 }
 
 

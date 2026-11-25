@@ -15,6 +15,7 @@ import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { people, ro } from "../format";
 import { comparePath, go } from "../route";
+import { setDistrict } from "../state";
 import {
   Badge, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet, SkeletonRows, TextButton,
 } from "../ui";
@@ -60,9 +61,9 @@ function borrowedRent(n: CorridorNode): "all" | "some" | null {
   return !shared ? null : shared === rated.length ? "all" : "some";
 }
 
-function Synergy({ s, byId, onCompare }: {
+function Synergy({ s, byId, onCompare, onOpenDistrict }: {
   s: CorridorSynergy; byId: Map<string, CorridorNode>;
-  onCompare: (ids: string[]) => void;
+  onCompare: (ids: string[]) => void; onOpenDistrict: (seoulHub: string) => void;
 }) {
   const g = byId.get(s.node);
   const other = byId.get(s.from === s.node ? s.to : s.from);
@@ -89,20 +90,21 @@ function Synergy({ s, byId, onCompare }: {
   let idea: string;
   switch (s.kind) {
     case "visit_link":
-      title = `${g.name} 사람들이 방문하러 많이 가는 서울 상권 — ${other.name}`;
+      title = `${g.name} 사람들이 방문하러 많이 가는 서울 상권: ${other.name}`;
       fact = `방문하러 가는 사람 하루 ${people(s.visit_per_day)}`;
-      idea = `${other.name}에서 이어지는 손님 흐름을 바탕으로 ${g.name} 쪽에 자리를 잡는 길을 생각해 볼 수 있어요.`;
+      idea = `${other.name}에서 팝업으로 반응을 먼저 보고, 같은 손님이 사는 ${g.name} 쪽에 자리를 잡는 길을 생각해 볼 수 있어요.`;
       break;
     case "inbound":
       title = `${other.name}에서 ${ro(g.name)} 방문하러 오는 사람`;
       fact = `하루 ${people(s.visit_per_day)}`;
-      idea = `서울에서 일부러 찾아오는 흐름이 있어요 — ${other.name} 쪽 사람들에게 ${g.name} 가게를 알리는 방법을 작게 시험해 볼 수 있어요.`;
+      idea = `서울에서 일부러 찾아오는 흐름이 있어요. ${other.name} 쪽 사람들에게 ${g.name} 가게를 알리는 방법을 작게 시험해 볼 수 있어요.`;
       break;
     default:
       title = `${g.name} ↔ ${other.name}, 한 생활권`;
       fact = `양쪽 합쳐 하루 ${people(s.per_day_both ?? s.per_day)} 오가요 · ${when}`;
       idea = "두 곳을 따로 보지 말고 한 생활권으로 나란히 견줘 볼 수 있어요.";
   }
+  const seoulHub = other.segment === "seoul" ? oHub : null;
   return (
     <li className="fl-cor-syn">
       <h3>{title}</h3>
@@ -111,6 +113,8 @@ function Synergy({ s, byId, onCompare }: {
       {rentLine && <p className="fl-cor-fact">{rentLine}</p>}
       <div className="fl-actions">
         {gHub && oHub && <TextButton onClick={() => onCompare([gHub, oHub])}>두 상권 나란히 보기</TextButton>}
+        {/* 2026-11-22: 「…에서 작게 확인하기」(④ 검증 계획)를 뺐다 — Program 범위 축소. 그 서울 상권 소개로 잇는다 */}
+        {seoulHub && s.kind === "visit_link" && <TextButton onClick={() => onOpenDistrict(seoulHub)}>{other.name} 상권 보기</TextButton>}
       </div>
     </li>
   );
@@ -131,7 +135,7 @@ function NodeSheet({ node, byId, districts, industryOn, onClose }: {
       <dl className="fl-facts-list fl-cor-facts">
         <div><dt>어디서 오나요</dt><dd>{shares(node.inflow_share, sourceLabel)}</dd></div>
         <div><dt>무엇 하러 오나요</dt><dd>{shares(node.purpose_group_share, (k) => GROUP_LABEL[k] ?? k)}
-          <span className="fl-dd-sub">「기타」에 비업무 방문 대부분이 들어가요 — 쇼핑으로 바꿔 부르지 않아요.</span></dd></div>
+          <span className="fl-dd-sub">「기타」에 비업무 방문 대부분이 들어가요. 쇼핑으로 바꿔 부르지 않아요.</span></dd></div>
         <div><dt>언제 닿나요</dt><dd>{node.arr_hour_share && node.peak_hours
           ? <><b>{hours(node.peak_hours, 3)}</b><HourBars share={node.arr_hour_share} peaks={node.peak_hours} /></>
           : "자료 없음"}</dd></div>
@@ -155,7 +159,7 @@ function NodeSheet({ node, byId, districts, industryOn, onClose }: {
         })}
       </RowList>
       <p className="fl-note">{node.kind === "sgg"
-        ? "파주·고양은 이동 자료가 시군구 단위로만 있어요 — 같은 시군구의 상권은 같은 흐름 값을 써요."
+        ? "파주·고양은 이동 자료가 시군구 단위로만 있어요. 같은 시군구의 상권은 같은 흐름 값을 써요."
         : "서울 상권 값은 상권이 걸친 행정동 기준이라 상권 손님 수보다 넓어요."}</p>
       {node.hubs.some((h) => h.rent_shared) && <p className="fl-note">* 가까운 상권의 임대료 통계를 빌려 쓴 값이에요.</p>}
     </Sheet>
@@ -172,7 +176,7 @@ export function CorridorClosed() {
 }
 
 export function Corridor({ id }: { id: string }) {
-  const { state } = useFlow();
+  const { state, update } = useFlow();
   const data = useFlowData();
   const list = useIndustries();
   const ds = useDistricts();
@@ -210,6 +214,7 @@ export function Corridor({ id }: { id: string }) {
     ? [focus, ...gyeonggiNodes.map((n) => n.id).filter((x) => x !== focus)] : gyeonggiNodes.map((n) => n.id);
   const synergies = order.flatMap((nid) => c.synergies.filter((s) => s.node === nid && s.kind !== "commute"));
   const compare = (ids: string[]) => go(comparePath(ids));
+  const openDistrict = (hub: string) => { update((s) => setDistrict(s, hub)); go(`/district/${encodeURIComponent(hub)}`); };
   return (
     <FlowScreen wide back="/home" right={<CloseButton />} caption={caption}
       title="파주 → 고양 → 서울, 사람들이 이렇게 오가요"
@@ -246,16 +251,16 @@ export function Corridor({ id }: { id: string }) {
       })}
 
       <h2 className="fl-h2">이렇게 이어 볼 수 있어요</h2>
-      <p className="fl-note">이동 수까지가 측정이에요. 「이렇게 해 볼 수 있다」는 가설이라 매출이나 성공을 약속하지 않아요 — 작게 먼저 확인해 보세요.</p>
+      <p className="fl-note">이동 수까지가 측정이에요. 「이렇게 해 볼 수 있다」는 가설이라 매출이나 성공을 약속하지 않아요.</p>
       <ul className="fl-cor-syns" aria-label="시너지 후보">
-        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} />)}
+        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} onOpenDistrict={openDistrict} />)}
       </ul>
 
       <Details summary="자료와 한계">
         <ul className="fl-facts">{c.caveats.map((t) => <li key={t}>{t}</li>)}</ul>
         <p className="fl-note">역할(출근형·주거형·방문형)은 도착 목적 구성이 흐름 안 중앙값보다 {c.params.role_margin_pp ?? 3}%p 이상 높은 쪽이에요. 넘는 것이 없으면 혼합이에요.</p>
         {/* 묶음은 이 흐름의 상권이 든 것만 온다(2026-11-01). 묶음 = 잣대 × 시도라 「묶음마다 다른 모델」은 아니다 — 순위만 따로라고 말한다 */}
-        {industry && (c.rank_groups?.length ?? 0) > 1 && <p className="fl-note">입지 점수 순위는 {c.rank_groups!.map((g) => g.name).join(" · ")} 묶음마다 따로 매겼어요 — 묶음이 다른 상권끼리는 순위를 견주지 않아요.</p>}
+        {industry && (c.rank_groups?.length ?? 0) > 1 && <p className="fl-note">입지 점수 순위는 {c.rank_groups!.map((g) => g.name).join(" · ")} 묶음마다 따로 매겼어요. 묶음이 다른 상권끼리는 순위를 견주지 않아요.</p>}
         <p className="fl-note mono">{c.source}</p>
       </Details>
 
