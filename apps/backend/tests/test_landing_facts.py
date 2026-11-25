@@ -64,3 +64,10 @@ def test_every_served_hub_has_gold_coverage():
     gold = _ROOT / "data" / "gold"
     missing = sorted(slug for slug in _active_hubs() if not (gold / slug / "coverage.json").is_file())
     assert not missing, f"서빙 거점인데 Gold coverage.json 이 없다: {missing}"
+
+
+def test_gwangju_landing_hub_count_matches_served_hubs() -> None:
+    """광주 전용 랜딩의 거점 수를 현재 서빙 목록과 대조한다."""
+    match = re.search(r"export const LANDING_HUBS_GWANGJU = (\d+);", _FACTS.read_text(encoding="utf-8"))
+    assert match, "광주 랜딩 거점 수 상수가 없다"
+    assert int(match.group(1)) == sum(hub.city == "gwangju" for hub in _active_hubs().values())

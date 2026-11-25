@@ -1,0 +1,665 @@
+{
+  "district": "gj-chungjang",
+  "industry": "cafe",
+  "passed": 22,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "P1 레일 네 트랙 · PPPP 순서 · 보임",
+      "ok": true,
+      "detail": [
+        [
+          "Platform",
+          true
+        ],
+        [
+          "Page",
+          true
+        ],
+        [
+          "Posting",
+          true
+        ],
+        [
+          "Program",
+          true
+        ]
+      ]
+    },
+    {
+      "id": "P2 Platform → 「상권 정체성」",
+      "ok": true,
+      "detail": {
+        "visible": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P2 Page → 「지도 데이터 레이어」",
+      "ok": true,
+      "detail": {
+        "visible": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P2 Posting → 「입점 계산」",
+      "ok": true,
+      "detail": {
+        "visible": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P2 Program → 「오프라인 캠페인」",
+      "ok": true,
+      "detail": {
+        "visible": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P3a 허브 탭 「지도」(데스크톱 · #/home 바로 열기)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ]
+      }
+    },
+    {
+      "id": "P3b 허브 탭 「지도」(휴대폰 · #/home 바로 열기)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ]
+      }
+    },
+    {
+      "id": "P3c 상권 소개 「지도에서 자세히」(#/district/gj-chungjang)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ]
+      }
+    },
+    {
+      "id": "P3d 빈 자리 목록 「지도」(#/spaces)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ]
+      }
+    },
+    {
+      "id": "P4 흐름 상권으로 연다(Platform · Page)",
+      "ok": true,
+      "detail": {
+        "expected": "gj-chungjang",
+        "platform": "gj-chungjang",
+        "page": "gj-chungjang"
+      }
+    },
+    {
+      "id": "P5 랜딩 네 질문이 펼쳐져 보임",
+      "ok": true,
+      "detail": {
+        "tracks": [
+          "platform",
+          "page",
+          "posting",
+          "program"
+        ],
+        "visible": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "in_closed_details": 0
+      }
+    },
+    {
+      "id": "P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=page&district=gj-chungjang&building=1221012800100310001-1",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page",
+        "building_selected": true
+      }
+    },
+    {
+      "id": "P6b 지도 미리보기 「지도에서 이어 보기」(desktop)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=page&district=gj-chungjang&building=1221012800100310001-1",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page",
+        "building_selected": true
+      }
+    },
+    {
+      "id": "P6c 지도 미리보기 칩 「상권 Platform」(desktop)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=platform&district=gj-chungjang",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P6a 홈 주 버튼 「지도에서 내 자리 보기」(mobile)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=page&district=gj-chungjang&building=1221012800100310001-1",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page",
+        "building_selected": true
+      }
+    },
+    {
+      "id": "P6b 지도 미리보기 「지도에서 이어 보기」(mobile)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=page&district=gj-chungjang&building=1221012800100310001-1",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page",
+        "building_selected": true
+      }
+    },
+    {
+      "id": "P6c 지도 미리보기 칩 「상권 Platform」(mobile)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=platform&district=gj-chungjang",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "panel": true,
+        "aria-current": "page"
+      }
+    },
+    {
+      "id": "P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(desktop · #/district/gj-chungjang)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=platform&district=gj-chungjang",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "aria-current": "page",
+        "platform_district": "gj-chungjang",
+        "button": {
+          "sw": 520,
+          "cw": 520,
+          "lines": 1
+        },
+        "steps_line": true
+      }
+    },
+    {
+      "id": "P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(mobile · #/district/gj-chungjang)",
+      "ok": true,
+      "detail": {
+        "hash": "#/explore?track=platform&district=gj-chungjang",
+        "rail": [
+          [
+            "Platform",
+            true
+          ],
+          [
+            "Page",
+            true
+          ],
+          [
+            "Posting",
+            true
+          ],
+          [
+            "Program",
+            true
+          ]
+        ],
+        "aria-current": "page",
+        "platform_district": "gj-chungjang",
+        "button": {
+          "sw": 350,
+          "cw": 350,
+          "lines": 1
+        },
+        "steps_line": true
+      }
+    },
+    {
+      "id": "P7 상권 소개 주 버튼 · 네 단계 한 줄 — 글자 한 줄(320px 휴대폰)",
+      "ok": true,
+      "detail": {
+        "button": {
+          "sw": 280,
+          "cw": 280,
+          "lines": 1
+        },
+        "steps_line": {
+          "sw": 280,
+          "cw": 280,
+          "lines": 1
+        }
+      }
+    },
+    {
+      "id": "P7 하단 영역이 본문을 가리지 않는다(글자 150% · 360px 휴대폰)",
+      "ok": true,
+      "detail": {
+        "cta_h": 167,
+        "gap": 41,
+        "last": "지도에서 자세히",
+        "last_hit_cta": false
+      }
+    },
+    {
+      "id": "P7 하단 영역이 본문을 가리지 않는다(글자 125% · 320px 휴대폰)",
+      "ok": true,
+      "detail": {
+        "cta_h": 157,
+        "gap": 41,
+        "last": "지도에서 자세히",
+        "last_hit_cta": false
+      }
+    }
+  ],
+  "console_errors": [
+    "[explore] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[explore] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3a 허브 탭 「지도」(데스크톱 · #/home 바로 열기)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3a 허브 탭 「지도」(데스크톱 · #/home 바로 열기)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3b 허브 탭 「지도」(휴대폰 · #/home 바로 열기)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3b 허브 탭 「지도」(휴대폰 · #/home 바로 열기)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3d 빈 자리 목록 「지도」(#/spaces)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P3d 빈 자리 목록 「지도」(#/spaces)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[c2] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[c2] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25388.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6a 홈 주 버튼 「지도에서 내 자리 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25388.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55870/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25926.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25924.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25925.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55873/25923.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55871/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55872/25927.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6b 지도 미리보기 「지도에서 이어 보기」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25390.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25389.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25388.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55888/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55892/25387.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55890/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/16/55889/25391.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27936/12963.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27936/12961.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27936/12962.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27936/12960.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27937/12960.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27937/12963.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27935/12960.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27935/12961.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27934/12961.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27934/12963.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27938/12963.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27935/12962.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27937/12961.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27934/12962.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27938/12961.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27934/12960.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27937/12962.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27938/12962.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27938/12960.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27938/12964.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Access to image at 'http://nrbe.map.naver.net/styles/basic/1794536282/15/27935/12963.png?mt=bg.ol.sw.ar.lko' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(desktop)] console.error: Failed to load resource: net::ERR_FAILED",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(mobile)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P6c 지도 미리보기 칩 「상권 Platform」(mobile)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(desktop · #/district/gj-chungjang)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(desktop · #/district/gj-chungjang)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(mobile · #/district/gj-chungjang)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[P7 상권 소개 주 버튼 「이 상권 네 단계로 따져 보기」(mobile · #/district/gj-chungjang)] console.error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "api_5xx": []
+}

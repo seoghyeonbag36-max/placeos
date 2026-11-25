@@ -36,11 +36,12 @@ describe("랜딩 — 말하는 것", () => {
     expect(screen.getByText(/새로 창업 · 지금 상권에서 업종 바꾸기 · 같은 업종으로 상권 옮기기/)).toBeTruthy();
   });
 
-  it("네 질문이 PPPP 순서(Platform → Page → Posting → Program)로 이어진다", () => {
+  it("세 질문이 PPPP 순서(Platform → Page → Posting)로 이어진다", () => {
     render(<Landing />);
     // 숨김을 허용하는 { hidden: true } 는 붙이지 않는다(10-17 절을 접으며 붙었고 10-21 에 걷었다). 접힘 자체는 src/ppppScreens.test.tsx 가 본다
     const steps = within(document.getElementById("how")!).getAllByRole("listitem");
-    expect(steps.map((li) => li.getAttribute("data-track"))).toEqual(["platform", "page", "posting", "program"]);
+    expect(steps.map((li) => li.getAttribute("data-track"))).toEqual(["platform", "page", "posting"]);
+    expect(screen.queryByText("시험 운영 계획")).toBeNull();
   });
 
   it("「아직 못 하는 것」 절이 있고, 공실 예측을 약속하지 않는다", () => {
@@ -49,18 +50,18 @@ describe("랜딩 — 말하는 것", () => {
     expect(text()).toContain("앞날을 맞힌다는 약속은 하지 않습니다");
   });
 
-  it("영업 중인 가게 마케팅이 아니라는 것을 분명히 한다(Program 의 대상 — 2026-09-17)", () => {
+  it("고객센터에서 Program 안내를 표시하지 않는다", () => {
     render(<Help />);
-    expect(text()).toContain("이미 영업 중인 가게의 홍보는 다루지 않습니다");
+    expect(screen.queryByText("영업 중인 가게의 마케팅도 도와주나요?")).toBeNull();
   });
 });
 
 describe("랜딩 — 말하지 않는 것", () => {
   it("숫자는 거점 수 하나뿐이다 — 정확도·고객 수·요금 같은 근거 없는 숫자가 없다", () => {
     render(<Landing />);
-    // 단계 번호(1~4)와 거점 수 말고는 숫자가 없어야 한다. 새 숫자를 쓰려면 lib/landingFacts 에 출처와 함께 두고 여기 허용한다.
+    // 단계 번호(1~3)와 거점 수 말고는 숫자가 없어야 한다. 새 숫자를 쓰려면 lib/landingFacts 에 출처와 함께 두고 여기 허용한다.
     const digits = (text().match(/\d[\d,.]*/g) ?? []).map((d) => d.replace(/[.,]$/, ""));
-    const allowed = new Set([String(LANDING_HUBS), "1", "2", "3", "4"]);
+    const allowed = new Set([String(LANDING_HUBS), "1", "2", "3"]);
     expect(digits.filter((d) => !allowed.has(d))).toEqual([]);
     expect(text()).toContain(`${LANDING_REGION} ${LANDING_HUBS}개 상권`);
   });

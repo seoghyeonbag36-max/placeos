@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 export type RouteName =
   | "startup-order" | "startup-region" | "startup-district" | "start" | "industry" | "industry-other" | "home-district" | "districts" | "industries" | "pivot-next"
   | "district-search" | "district" | "rent-cap" | "spaces" | "space" | "premium" | "payback"
-  | "budget" | "contract" | "fitout" | "budget-check" | "validate" | "item" | "period" | "test-budget" | "plan"
+  | "budget" | "contract" | "fitout" | "budget-check"
   | "home" | "me" | "explore" | "compare" | "corridor";
 
 export interface Route { name: RouteName; param: string | null; path: string }
@@ -23,8 +23,8 @@ const SIMPLE: Record<string, RouteName> = {
   "/start": "start", "/industry": "industry", "/industry/other": "industry-other", "/home-district": "home-district",
   "/districts": "districts", "/industries": "industries", "/pivot-next": "pivot-next", "/district-search": "district-search",
   "/rent-cap": "rent-cap", "/spaces": "spaces", "/premium": "premium", "/payback": "payback", "/budget": "budget",
-  "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check", "/validate": "validate", "/item": "item",
-  "/period": "period", "/test-budget": "test-budget", "/plan": "plan", "/home": "home", "/me": "me", "/explore": "explore",
+  "/contract": "contract", "/fitout": "fitout", "/budget-check": "budget-check",
+  "/home": "home", "/me": "me", "/explore": "explore",
 };
 
 /** `#/space/vfu-1` → { name: "space", param: "vfu-1" }. 모르는 주소는 null(호출부가 홈으로 돌린다).
@@ -51,13 +51,13 @@ export const isFlowHash = (hash: string) => hash.startsWith("#/");
 
 /* ── 지도 탐색으로 가는 주소 ──────────────────────────────────────────────
  * 2026-10-24: 흐름이 지도 탐색을 **어느 트랙 · 어느 상권 · 어느 건물**로 열지 쿼리로 싣는다(홈의 「지도에서 내 자리 보기」 ·
- * 지도 미리보기). 그전에는 늘 Platform 첫 화면에 아무것도 고르지 않은 채 열려, 네 단계를 다 마친 사람이 고른 자리를 지도에서
+ * 지도 미리보기). 그전에는 늘 Platform 첫 화면에 아무것도 고르지 않은 채 열려, 세 단계를 다 마친 사람이 고른 자리를 지도에서
  * 다시 찾아야 했다. 쿼리가 붙어도 지도 탐색이다(`isExploreHash`) — App 이 해시를 `===` 로 비교하면 지도 탐색이 흐름으로 샌다.
  * ⛔ 기존 진입로 셋(허브 탭 · R2 「지도에서 자세히」 · R3 「지도」)은 쿼리 없이 `#/explore` 그대로 간다(PPPP 화면 보존 규칙). */
 
-/** 지도 탐색 레일의 트랙 — 흐름 홈의 네 단계(PLATFORM·PAGE·POSTING·PROGRAM)와 1:1 */
-export type ExploreTrack = "platform" | "page" | "posting" | "program";
-export const EXPLORE_TRACKS: readonly ExploreTrack[] = ["platform", "page", "posting", "program"];
+/** 지도 탐색 레일의 트랙 — 흐름 홈의 세 단계(Platform·Page·Posting)와 1:1 */
+export type ExploreTrack = "platform" | "page" | "posting";
+export const EXPLORE_TRACKS: readonly ExploreTrack[] = ["platform", "page", "posting"];
 
 export interface ExploreTarget { track: ExploreTrack | null; district: string | null; building: string | null }
 

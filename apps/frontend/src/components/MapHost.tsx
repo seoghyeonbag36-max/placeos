@@ -1,5 +1,5 @@
 import { MapHostCtx } from "./mapHostContext";
-import type { NaverMap } from "@/lib/naverTypes";
+import { NAVER_MAP_AUTH_FAILURE_EVENT, type NaverMap } from "@/lib/naverTypes";
 /**
  * MapHost — 앱 전체가 공유하는 **단 하나의** 네이버 지도.
  *
@@ -127,6 +127,13 @@ export default function MapHost({ active, children }: { active: boolean; childre
     // KPI② 계측 — "지도 탭을 연 시점"부터 잰다. 여기가 사용자가 기다리기 시작하는
     // 지점이고, SDK 내려받기까지 포함해야 체감 시간이 된다(→ lib/clientTiming.ts).
     startTiming("map_ready");
+    const onAuthFailure = () => {
+      mapRef.current = null;
+      setMap(null);
+      setReady(false);
+      setError(describeNaverMapError(null));
+    };
+    window.addEventListener(NAVER_MAP_AUTH_FAILURE_EVENT, onAuthFailure);
     loadNaverMaps()
       .then(() => {
         if (!alive || !elRef.current || mapRef.current) return;
@@ -141,7 +148,10 @@ export default function MapHost({ active, children }: { active: boolean; childre
         endTiming("map_ready");
       })
       .catch((e) => alive && setError(describeNaverMapError(e)));
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+      window.removeEventListener(NAVER_MAP_AUTH_FAILURE_EVENT, onAuthFailure);
+    };
   }, [everActive]);
 
   const cls = ["maphost", active ? "" : "is-hidden", collapsed ? "is-collapsed" : "",

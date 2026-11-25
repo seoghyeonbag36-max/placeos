@@ -1,14 +1,14 @@
 /** 리뉴얼 인계 계약. 상호·층·금액은 테스트용 합성값이다. */
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import PostingConsole from "./PostingConsole";
 import { district, postings } from "@/test/fixtures";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 
 afterEach(cleanup);
 
-it("Page에서 고른 층의 원천 면적을 계산과 Program에 사용하고 내부면적 입력은 받지 않는다", async () => {
-  const makeProgram = vi.fn();
+it("Page에서 고른 층의 원천 면적을 계산과 보고서에 사용하고 내부면적 입력은 받지 않는다", async () => {
+  const reportChange = vi.fn();
   const unit = postings("garosugil", 1)[0];
   const api = installFetchStub([
     { match: /commercial-districts$/, body: [district("garosugil")] },
@@ -22,13 +22,13 @@ it("Page에서 고른 층의 원천 면적을 계산과 Program에 사용하고 
       inputs_source: { area: (call.body as { area_py_override?: number }).area_py_override ? "user_input" : "flr_ouln", rent: "rone", prem: "absent", foot: "flpop+jipgyegu" },
     }) },
   ]);
-  render(<PostingConsole selection={{ districtId: "garosugil", buildingId: "b1", buildingName: "합성 건물", unitId: "vfu-test", requestId: 1 }} onMakeProgram={makeProgram} />);
+  render(<PostingConsole selection={{ districtId: "garosugil", buildingId: "b1", buildingName: "합성 건물", unitId: "vfu-test", requestId: 1 }} onReportChange={reportChange} />);
   await screen.findByText("전제(0)");
   expect(api.matching(/simulate-revenue$/)[0].body).toMatchObject({ unit_id: "vfu-test" });
   expect(screen.queryByPlaceholderText("계약서·도면으로 확인한 면적")).toBeNull();
   expect(api.matching(/simulate-revenue$/)[0].body).not.toHaveProperty("area_py_override");
-  fireEvent.click(screen.getByRole("button", { name: /검증 program 만들기/ }));
-  await waitFor(() => expect(makeProgram).toHaveBeenCalledTimes(1));
-  expect(makeProgram.mock.calls[0][0]).toMatchObject({ unitId: "vfu-test", floor: "3F", area: 20,
-    calculation: { result: { unit_id: "vfu-test" } } });
+  await waitFor(() => expect(reportChange.mock.lastCall?.[0]).toMatchObject({
+    unitId: "vfu-test", floor: "3F", area: 20,
+    calculation: { result: { unit_id: "vfu-test" } },
+  }));
 });

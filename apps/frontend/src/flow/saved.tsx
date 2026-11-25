@@ -19,7 +19,9 @@ export function SavedProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!token) return;
     let alive = true;
-    listSavedResults(token).then((r) => { if (alive) setResults(r); }, () => { if (alive) setResults([]); });
+    listSavedResults(token).then((r) => {
+      if (alive) setResults(r.filter((item) => item.kind !== "program"));
+    }, () => { if (alive) setResults([]); });
     return () => { alive = false; };
   }, [token]);
   const visible = token ? results : null;

@@ -4,7 +4,7 @@ import "./PpppReport.css";
 
 const PpppReport = lazy(() => import("./PpppReport"));
 
-/** 네 트랙의 작업을 유지한 채 창업자용 요약과 다운로드를 연다. */
+/** 세 트랙의 작업을 유지한 채 창업자용 요약과 다운로드를 연다. */
 export default function AnalysisReportDialog({ districtId, handoff, onClose }: {
   districtId: string; handoff?: ProgramHandoff; onClose: () => void;
 }) {
@@ -19,7 +19,7 @@ export default function AnalysisReportDialog({ districtId, handoff, onClose }: {
     onCancel={event => { event.preventDefault(); onClose(); }}>
     <button type="button" className="analysis-report-close" onClick={onClose}>보고서 창 닫기</button>
     <Suspense fallback={<p role="status">보고서를 불러오는 중…</p>}>
-      <PpppReport districtId={districtId} handoff={handoff} />
+      <PpppReport districtId={districtId} handoff={handoff} includeProgram={false} />
     </Suspense>
   </dialog>;
 }

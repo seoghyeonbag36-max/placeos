@@ -399,7 +399,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   // 순서(공실의심 100% → 고공실 67% → 만실 0%)를 따른다. 정렬은 목록에만 — 오버레이 순서는 그대로.
   const listed = useMemo(() => {
     const naver = window.naver;
-    const inView = !viewportOnly || !bounds?.hasLatLng || !naver ? filtered
+    const inView = !viewportOnly || !bounds?.hasLatLng || !naver?.maps ? filtered
       : filtered.filter((b) => bounds.hasLatLng(new naver.maps.LatLng(b.center.lat, b.center.lng)));
     return [...inView].sort(byVacancyFirst);
   }, [filtered, bounds, viewportOnly]);
@@ -519,9 +519,15 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     const syncBounds = () => setBounds(map.getBounds?.() ?? null);
     sync();
     syncBounds();
-    const h = naver.maps.Event.addListener(map, "zoom_changed", sync);
-    const hb = naver.maps.Event.addListener(map, "idle", syncBounds);
-    return () => { naver.maps.Event.removeListener(h); naver.maps.Event.removeListener(hb); };
+    const events = naver.maps.Event;
+    const h = events.addListener(map, "zoom_changed", sync);
+    const hb = events.addListener(map, "idle", syncBounds);
+    return () => {
+      // 인증이 실패하면 SDK가 maps를 지우므로 내부 정리 API도 호출할 수 없다.
+      if (!window.naver?.maps) return;
+      events.removeListener(h);
+      events.removeListener(hb);
+    };
   }, [ready, map]);
 
   const clearOverlays = () => {
@@ -529,7 +535,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     // 리스너를 **먼저** 뗀다 — 오버레이 참조를 버린 뒤에는 짝을 찾을 자리가 없다.
     listenersRef.current.forEach((h) => naver?.maps?.Event?.removeListener(h));
     listenersRef.current = [];
-    overlaysRef.current.forEach((o) => o.setMap?.(null));
+    if (naver?.maps) overlaysRef.current.forEach((o) => o.setMap?.(null));
     overlaysRef.current = [];
     // 호버 색인도 같이 비운다 — 걷힌 도형을 가리키고 있으면 다음 호버가
     // 지도에 없는 오버레이에 setOptions 를 건다(조용히 아무 일도 안 일어난다).
@@ -543,7 +549,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
   const focus = (b: Building) => {
     setWorkspace((w) => ({ ...w, selectedId: b.id }));
     const naver = window.naver;
-    if (map && naver) map.panTo(new naver.maps.LatLng(b.center.lat, b.center.lng));
+    if (map && naver?.maps) map.panTo(new naver.maps.LatLng(b.center.lat, b.center.lng));
   };
 
   // 레이어 전환/데이터 변경 → 오버레이 다시 그림 (form follows data)
@@ -662,7 +668,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
     const naver = window.naver;
     const clear = () => {
       rentOverlaysRef.current.ls.forEach((h) => naver?.maps?.Event?.removeListener(h));
-      rentOverlaysRef.current.ov.forEach((o) => o.setMap?.(null));
+      if (naver?.maps) rentOverlaysRef.current.ov.forEach((o) => o.setMap?.(null));
       rentOverlaysRef.current = { ov: [], ls: [] };
     };
     clear();
@@ -699,7 +705,7 @@ export default function MapShell({ workspace: externalWorkspace, onWorkspaceChan
         add(lat, lng, html, 80, () => {
           // 묶음을 누르면 건물 칩이 보이는 줌으로 들어간다. 줌 리스너가 모드를 바꾼다.
           map.setZoom?.(PIN_MAX_ZOOM + 1);
-          map.panTo?.(new naver.maps.LatLng(lat, lng));
+          if (naver.maps) map.panTo?.(new naver.maps.LatLng(lat, lng));
         });
       }
     } else {

@@ -97,8 +97,8 @@ describe("단계형 비용 검토", () => {
     expect(menu.getByRole("table", { name: /추정 월매출/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "비용 비교 및 결정" }));
     expect(screen.getByText("어떤 비용과 전략으로 입점할까요?")).toBeTruthy();
-    // 검증 program 만들기는 같은 쪽 안 — 따로 된 쪽이 없다
-    expect(screen.getByRole("region", { name: "이 자리로 검증 program 만들기" })).toBeTruthy();
+    // Program 진입점은 비용 비교 화면에 없다
+    expect(screen.queryByRole("region", { name: "이 자리로 검증 program 만들기" })).toBeNull();
     expect(screen.queryByRole("button", { name: "이 자리로 검증 program 만들기" })).toBeNull();
   });
 

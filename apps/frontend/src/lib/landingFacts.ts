@@ -15,3 +15,6 @@ export const LANDING_HUBS = 81;
  *  2026-11-10 사용자 결정으로 사이트는 **서울만** 보인다(`lib/siteScope`) — 서울 밖 데이터는 그대로 있지만 화면에 안 나오니 랜딩도 서울 거점 수만 말한다.
  *  거점 수와 같이 움직인다(`LANDING_HUBS` = 보이는 도시의 서빙 거점 수 — `tests/test_landing_facts.py`) */
 export const LANDING_REGION = "서울";
+
+export const LANDING_HUBS_GWANGJU = 40;
+export const LANDING_REGION_GWANGJU = "광주광역시";

@@ -6,7 +6,7 @@
  *   - 저장한 결과를 목록에서 다시 볼 때 세 가격대가 안 그려지는 것
  *   - 익명에게 저장 UI 가 뜨는 것(서버도 로그인한 사용자만 받는다)
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import PostingConsole from "@/pages/PostingConsole";
 import { clearToken, saveToken } from "@/lib/session";
@@ -15,7 +15,7 @@ import { district, postings, simulateResult } from "@/test/fixtures";
 
 afterEach(() => clearToken());
 
-function mount(onMakeProgram?: NonNullable<Parameters<typeof PostingConsole>[0]>["onMakeProgram"], economics = false) {
+function mount(economics = false) {
   const store: Array<Record<string, unknown>> = [];
   const api = installFetchStub([
     { match: /\/api\/v1\/commercial-districts$/, body: [district("garosugil", { name: "가로수길" })] },
@@ -32,7 +32,7 @@ function mount(onMakeProgram?: NonNullable<Parameters<typeof PostingConsole>[0]>
       return item;
     } },
   ]);
-  render(<PostingConsole onMakeProgram={onMakeProgram} />);
+  render(<PostingConsole />);
   return api;
 }
 
@@ -68,10 +68,9 @@ describe("PostingConsole — 결과 저장", () => {
     expect(screen.queryByRole("region", { name: "저장한 결과" })).toBeNull();
   });
 
-  it.each([false, true])("저장한 결과의 자리·입력·계산·출처를 그대로 Program에 넘긴다 (운영 계산 %s)", async (economics) => {
+  it.each([false, true])("저장한 결과의 자리·입력·계산·출처를 저장하고 비용 화면에서 다시 읽는다 (운영 계산 %s)", async (economics) => {
     saveToken("test-token");
-    const next = vi.fn();
-    const api = mount(next, economics);
+    const api = mount(economics);
     await screen.findByRole("button", { name: "결과 저장" });
     fireEvent.click(screen.getByRole("button", { name: "결과 저장" }));
     await screen.findByText(/저장했습니다/);
@@ -80,8 +79,7 @@ describe("PostingConsole — 결과 저장", () => {
     expect(payload.handoff).toMatchObject({ districtId: "garosugil", unitId: "garosugil-u1" });
     const list = screen.getByRole("region", { name: "저장한 결과" });
     fireEvent.click(await within(list).findByRole("button", { name: "보기" }));
-    fireEvent.click(within(list).getByRole("button", { name: "저장한 내용으로 가설 설정 →" }));
-    expect(next).toHaveBeenCalledWith({ ...payload.handoff, calculation: { input: payload.input, result: payload.result } });
+    expect(within(list).queryByRole("button", { name: "저장한 내용으로 가설 설정 →" })).toBeNull();
   });
 });
 

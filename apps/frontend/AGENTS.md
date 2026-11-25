@@ -1,5 +1,8 @@
 # AGENTS.md — apps/frontend (React + TypeScript + Vite)
 
+2026-11-25 사용자 결정으로 Program은 제품 화면에서 제거했다. 아래 화면 보존 규칙은
+Platform · Page · Posting과 기존 지도 진입로에 적용한다. 랜딩과 홈은 세 단계를 표시한다.
+
 루트 [AGENTS.md](../../AGENTS.md) 를 먼저 읽는다. 이 문서는 이 디렉터리에만 더 얹는 규칙이다.
 
 ## 구조

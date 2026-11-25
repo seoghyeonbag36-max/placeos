@@ -56,7 +56,6 @@
 .appshell .rail-btn[data-track="platform"] { --rail-accent: var(--track-platform); --rail-soft: var(--track-platform-soft); }
 .appshell .rail-btn[data-track="page"]     { --rail-accent: var(--track-page);     --rail-soft: var(--track-page-soft); }
 .appshell .rail-btn[data-track="posting"]  { --rail-accent: var(--track-posting);  --rail-soft: var(--track-posting-soft); }
-.appshell .rail-btn[data-track="program"]  { --rail-accent: var(--track-program);  --rail-soft: var(--track-program-soft); }
 /* 비활성 hover 도 트랙 색으로 미리 말해 준다 — 누르기 전에 무슨 색인지 보인다.
    base 는 자기 soft 위에서 AA 4.5:1 을 넘으므로 라벨이 흐려지지 않는다. */
 .appshell .rail-btn[data-track]:hover { background: var(--rail-soft); color: var(--rail-accent); }

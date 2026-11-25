@@ -10,8 +10,8 @@ import { readEventLink, type EventLink } from "@/lib/eventLink";
 import { readNetworkNotes, readSavedSupport, type NetworkNotes, type SavedSupport } from "@/lib/programSaved";
 
 /** 현재 작업의 입력과 결과만 모은다. 빈 단계는 평가 점수로 대체하지 않는다. */
-export default function PpppReport({ handoff: suppliedHandoff, campaign: suppliedCampaign, plan: suppliedPlan, districtId }: {
-  handoff?: ProgramHandoff; campaign?: Campaign; plan?: ProgramPlan; districtId?: string;
+export default function PpppReport({ handoff: suppliedHandoff, campaign: suppliedCampaign, plan: suppliedPlan, districtId, includeProgram = true }: {
+  handoff?: ProgramHandoff; campaign?: Campaign; plan?: ProgramPlan; districtId?: string; includeProgram?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pdfState, setPdfState] = useState<"idle" | "busy" | "error">("idle");
@@ -41,16 +41,16 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
   const plan = data.program?.plan;
   const calculationInput = handoff?.calculation?.input;
   const usedInputs = calculationInput && typeof calculationInput === "object" && !Array.isArray(calculationInput) ? calculationInput as Record<string, unknown> : null;
-  const summary = summarizePpppReport(data);
+  const summary = summarizePpppReport(data, includeProgram);
   const page = data.page;
   const pageFloor = data.pageFloor && (!page || data.pageFloor.buildingId === page.buildingId) ? data.pageFloor : undefined;
   function generate() {
     setOpen(true);
     setSnapshot(currentData);
     const district = scope;
-    setEventLink(district ? readEventLink(district) : null);
-    setSavedSupport(district ? readSavedSupport(district) : []);
-    setNetworkNotes(district ? readNetworkNotes(district) : null);
+    setEventLink(includeProgram && district ? readEventLink(district) : null);
+    setSavedSupport(includeProgram && district ? readSavedSupport(district) : []);
+    setNetworkNotes(includeProgram && district ? readNetworkNotes(district) : null);
     setInteriorBrief(null);
     try {
       const saved = JSON.parse(localStorage.getItem(`placeos.interior-brief.${district ?? ""}`) ?? "null");
@@ -81,13 +81,13 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
   }
   return <section className="pppp-report-tool" aria-label="상권 분석 보고서">
     <h2>상권 분석 보고서</h2>
-    <p>창업자를 위한 상권·자리·비용·아이템 가설 요약</p>
+    <p>창업자를 위한 상권·자리·비용{includeProgram && "·아이템 가설"} 요약</p>
     <section className="analysis-report-summary" aria-label="상권 분석 약식 보고서">
       <h3>{data.platform?.districtName ?? handoff?.districtName ?? "선택 상권"}</h3>
       <ol>{summary.stages.map(stage => <li key={stage.name}><strong>{stage.name}</strong><span>{stage.result}</span></li>)}</ol>
       <p>{summary.costResult}</p><p>{summary.conclusion}</p>
     </section>
-    <p>이번 작업의 상권 검토·자리 선택·비용 계산·검증 계획과 실행 기록을 연결합니다. 미작성 단계는 보완 사항으로 남깁니다. 단계를 수정했다면 다시 만들어 최신 결과를 반영하세요.</p>
+    <p>이번 작업의 상권 검토·자리 선택·비용 계산{includeProgram && "·검증 계획과 실행 기록"}을 연결합니다. 미작성 단계는 보완 사항으로 남깁니다. 단계를 수정했다면 다시 만들어 최신 결과를 반영하세요.</p>
     <button type="button" onClick={generate}>{open ? "최신 내용으로 보고서 갱신" : "상권 분석 보고서 만들기"}</button>
     {open && <>
       <div className="pppp-report-actions"><button type="button" onClick={download}>보고서 내려받기</button>
@@ -99,7 +99,7 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
         <h1>PlaceOS 상권 분석 보고서</h1>
         <p>작성일: {new Date().toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}</p>
         <p>의사결정 참고용 · 점주 입력과 조건부 계산을 포함합니다.</p>
-        <section aria-label="네 단계 종합 결과"><h2>종합 결과</h2><p>{summary.conclusion}</p>
+        <section aria-label={includeProgram ? "네 단계 종합 결과" : "세 단계 종합 결과"}><h2>종합 결과</h2><p>{summary.conclusion}</p>
           <ol>{summary.stages.map(stage => <li key={stage.name}><strong>{stage.name}</strong> · {stage.result} · {stage.recorded ? "기록 있음" : "보완 필요"}</li>)}</ol>
           <p>{summary.costResult}</p>
         </section>
@@ -151,7 +151,7 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
             </section>}
           </> : <p>입점 계산 결과: {missing}</p>}
         </section>
-        <section><h2>4. Program · 실행과 결과</h2>
+        {includeProgram && <><section><h2>4. Program · 실행과 결과</h2>
           {data.program && <section><h3>작성한 검증 브리프</h3>
             {data.program.linkedDistrictId === null && <p>이 계획은 상권 데이터 결합 없이 작성했습니다.</p>}
             <dl>{Object.entries({ 아이템: data.program.item, 업종: data.program.category, 가설: data.program.hypothesis,
@@ -183,8 +183,9 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
           {eventLink ? <><p>출처: 사용자 입력 · 이 브라우저에 저장한 계획 · 실행 성과 미확인</p>
             <dl>{Object.entries({ 행사명: eventLink.name, 일정: eventLink.when, 출처: eventLink.evidence, 온라인: eventLink.online, 오프라인: eventLink.offline }).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value || missing}</dd></div>)}</dl></> : <p>{missing}</p>}
         </section>
-        <section><h2>6. Posting · 인테리어 조건</h2><p>출처: 사용자 입력 · 설계·시공 검증 전</p>{interiorBrief ? <pre>{interiorBrief}</pre> : <p>{missing}</p>}</section>
-        <section><h2>7. Program · 네트워킹 — 계약 전에 물어본 것</h2>
+        </>}
+        <section><h2>{includeProgram ? 6 : 4}. Posting · 인테리어 조건</h2><p>출처: 사용자 입력 · 설계·시공 검증 전</p>{interiorBrief ? <pre>{interiorBrief}</pre> : <p>{missing}</p>}</section>
+        {includeProgram && <><section><h2>7. Program · 네트워킹 — 계약 전에 물어본 것</h2>
           {networkNotes && (networkNotes.checked.length > 0 || networkNotes.memo) ? <>
             <p>출처: 사용자 입력 · 이 브라우저에 저장한 메모 · 들은 말은 확인된 사실이 아닙니다.</p>
             {networkNotes.checked.length > 0 && <ul>{networkNotes.checked.map((q) => <li key={q}>확인함 · {q}</li>)}</ul>}
@@ -198,7 +199,8 @@ export default function PpppReport({ handoff: suppliedHandoff, campaign: supplie
               {" "}· 신청 {it.end ? `~ ${it.end}` : it.deadline_text ?? "기한 원문 확인"}{it.url && /^https?:\/\//i.test(it.url) ? ` · ${it.url}` : ""}</li>)}</ul>
           </> : <p>{missing}</p>}
         </section>
-        <section><h2>추가 확인 사항</h2>{summary.issues.length > 0 && <ul>{summary.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}<p>미입력 자료와 증빙을 보완하고 계약 면적·임대 조건·운영 비용을 확인하세요. 검증 계획과 실제 실행 성과는 별도로 판단합니다.</p></section>
+        </>}
+        <section><h2>추가 확인 사항</h2>{summary.issues.length > 0 && <ul>{summary.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}<p>미입력 자료와 증빙을 보완하고 계약 면적·임대 조건·운영 비용을 확인하세요. {includeProgram && "검증 계획과 실제 실행 성과는 별도로 판단합니다."}</p></section>
       </article>
     </>}
   </section>;

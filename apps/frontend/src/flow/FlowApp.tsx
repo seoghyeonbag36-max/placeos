@@ -3,7 +3,7 @@
  *
  * 3·4판은 지도를 배경으로 깔고 네 트랙 패널을 띄웠다. 처음 온 사람은 로그인부터 했고, 한 패널에 질문이
  * 4~6개 겹쳐 있었다. 5판은 PPPP 순서 그대로 **한 화면에 한 질문씩** 묻는다:
- *   ① 상권(어떤 플랫폼인가) → ② 빈 자리(어떤 page) → ③ 비용(어느 가격대로 posting) → ④ 작게 확인(어떤 program)
+ *   ① 상권(어떤 플랫폼인가) → ② 빈 자리(어떤 page) → ③ 비용(어느 가격대로 posting)
  * 종전 지도 화면은 지우지 않고 「지도」 탭(#/explore)으로 남는다(App.tsx).
  * ⛔ 그 지도 탐색이 PPPP 네 구현 화면이다 — 흐름의 어떤 「지도」도 다른 곳으로 돌리지 않는다(2026-10-21 PPPP 화면 보존 규칙 ·
  *   CLAUDE.md). 10-18 에 흐름 안 지도로 갈아끼웠다가 네 화면으로 가는 길이 UI 에서 사라졌다.
@@ -27,7 +27,6 @@ import { showsCrossRegion } from "@/lib/siteScope";
 import { District, Districts, DistrictSearch, HomeDistrict, Industries, Industry, IndustryOther, PivotNext, Start, StartupOrder, StartupRegion, StartupDistrict } from "./screens/Find";
 import { Home, LoginPanel, Me } from "./screens/Hub";
 import { RentCap, SpaceDetail, Spaces } from "./screens/Space";
-import { Item, Period, Plan, TestBudgetQ, ValidateMode } from "./screens/Validate";
 import "./flow.css";
 
 const Login = lazy(() => import("@/pages/Login"));
@@ -61,11 +60,6 @@ function Screen({ route }: { route: Route }) {
     case "contract": return <Contract />;
     case "fitout": return <Fitout />;
     case "budget-check": return <BudgetCheck />;
-    case "validate": return <ValidateMode />;
-    case "item": return <Item />;
-    case "period": return <Period />;
-    case "test-budget": return <TestBudgetQ />;
-    case "plan": return <Plan />;
     case "home": return <Home />;
     case "me": return <Me />;
     default: return null;

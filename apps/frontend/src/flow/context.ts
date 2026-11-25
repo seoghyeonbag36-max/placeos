@@ -89,9 +89,9 @@ export function useResume(kind: ResumeKind, ready: boolean, run: (token: string)
 /* ── 로그인 시트 문구 — 얻는 것 세 줄(Baymard 혜택 3~5개 · 토스 가입 실험: 「왜」를 설명한 안만 완료율이 올랐다) ── */
 
 export const LOGIN_BENEFITS: Record<LoginReason, { title: string; lines: string[] }> = {
-  save: { title: "저장하려면 로그인해요", lines: ["고른 자리와 계산을 다른 기기에서도 봐요", "후보를 모아 나란히 견줘요", "AI 가 검증 계획을 만들어 줘요"] },
+  save: { title: "저장하려면 로그인해요", lines: ["고른 자리와 계산을 다른 기기에서도 봐요", "후보를 모아 나란히 견줘요"] },
   plan: { title: "검증 계획은 로그인하면 만들어요", lines: ["AI 가 상권 자료로 모객·연계 방법을 골라요", "이만큼 안 나오면 접을 판단선을 함께 세워요", "만든 계획을 저장해 두고 다시 봐요"] },
-  login: { title: "로그인", lines: ["고른 자리와 계산을 저장해요", "다른 기기에서 이어서 봐요", "AI 가 검증 계획을 만들어 줘요"] },
+  login: { title: "로그인", lines: ["고른 자리와 계산을 저장해요", "다른 기기에서 이어서 봐요"] },
 };
 
 export const loginTitle = (r: LoginReason) => LOGIN_BENEFITS[r].title;

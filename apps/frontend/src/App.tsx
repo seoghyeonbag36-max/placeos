@@ -7,7 +7,7 @@ import SocialCallback from "@/pages/SocialCallback";
 import { hasSocialCallback } from "@/lib/socialLogin";
 import Landing from "@/pages/Landing";
 import Help from "@/pages/Help";
-import { IconFeedback, IconKey, IconMegaphone, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
+import { IconFeedback, IconKey, IconPin, IconSpark, IconUser } from "@/components/TrackIcons";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ExploreStepHeader, ExploreStepFooter } from "@/components/ExploreStep";
 import type { PostingDraft } from "@/pages/PostingConsole";
@@ -29,18 +29,14 @@ import { clearFlow, flowToBusiness, loadFlow } from "@/flow/state";
 import { clearPlan } from "@/flow/plan";
 import "./App.css";
 
-// 네 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
+// 세 트랙 화면은 전부 지도 위 오버레이다. 지도 SDK 는 MapHost 가 받지만, 화면마다
 // 거리뷰·층 스택·차트 같은 무거운 자식이 있어 청크를 나눈다.
 const loadMapShell = () => import("@/pages/MapShell");
 const loadPlatform = () => import("@/pages/PlatformConsole");
 const loadPosting = () => import("@/pages/PostingConsole");
-const loadProgram = () => import("@/pages/CampaignStudio");
 const MapShell = lazy(loadMapShell);
 const PlatformConsole = lazy(loadPlatform);
 const PostingConsole = lazy(loadPosting);
-const ProgramStudio = lazy(loadProgram);
-// 검증 계획(ProgramStudio)·행사 연계·결과 리포트는 2026-11-07 리뉴얼로 Program 허브(pages/CampaignStudio) 안의
-// 「오프라인 마케팅 솔루션」·「가설 검증」 탭으로 옮겼다 — App 은 Program 레일에서 그 모듈 하나만 그린다(PPPP 가드).
 // 계정 화면 3종(B9)은 누를 때만 받는다 — 첫 화면(지도) 번들에 싣지 않는다.
 const Login = lazy(() => import("@/pages/Login"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -59,28 +55,26 @@ const PRELOAD_DELAY_MS = 1500;
 
 /**
  * PlaceOS 프론트엔드 진입점.
- * TODO: react-router 도입 시 /platform, /page, /posting, /program 으로 분리.
+ * TODO: react-router 도입 시 /platform, /page, /posting 으로 분리.
  *
- * 2026-08-29: **PPPP 네 트랙이 각자 화면을 갖는다.**
+ * 2026-08-29: **PPPP 세 트랙이 각자 화면을 갖는다.**
  *   Platform → PlatformConsole  (상권 정체성 + 자리별 업종)
  *   Page     → MapShell         (공실 히트맵 4레이어 + 2D 층 스택·거리뷰)
  *   Posting  → PostingConsole   (3-Tier 비용-효용 + 권리금 입력 계약)
- *   Program  → CampaignStudio   (Program 허브 — 네트워킹·지원 프로그램·오프라인 마케팅 솔루션·가설 검증, 2026-11-07)
  *
  * 2026-08-29: 상단 네비바를 **좌측 아이콘 레일**로 옮겼다(네이버지도식).
  *
- * 2026-09-13: 레일에서 **서울·거점 두 탭을 뺐다.** 레일에는 PPPP 네 트랙만 남는다.
- *   · 서울(SeoulDashboard) — 25구 로드맵 표. 거점 선택은 이미 네 트랙 화면마다 있는
+ * 2026-09-13: 레일에서 **서울·거점 두 탭을 뺐다.** 레일에는 PPPP 세 트랙만 남는다.
+ *   · 서울(SeoulDashboard) — 25구 로드맵 표. 거점 선택은 이미 세 트랙 화면마다 있는
  *     상권 선택기가 하고 있어 따로 둘 이유가 없었다.
  *   · 거점(HubExplorer) — 거점 목록 + 실측 범위 경계. 경계 그리기(`lib/hubBoundary`)는
  *     Platform 지도가 이어받았다("이 상권이 어디까지인가"는 Platform 의 질문이다).
  *
- * 2026-09-13: **네 트랙 모두 지도 전체화면이다.** 그전에는 Page 만 지도 위에 살고
- *   Platform·Posting·Program 은 지도가 없는 대시보드였다. 이제 넷 다 같은 지도(MapHost)
+ * 2026-09-13: **세 트랙 모두 지도 전체화면이다.** 그전에는 Page 만 지도 위에 살고
+ *   Platform·Posting 은 지도가 없는 대시보드였다. 이제 셋 다 같은 지도(MapHost)
  *   위에 좌측 패널로 뜨고(TrackMapFrame), 각자 자기 답을 지도에 그린다 —
  *   Platform=실측 범위·자리별 추천 / Page=공실·임대시세 / Posting=입점 자리와 월임대료 /
- *   Program=검증할 자리·오프라인 연계 행사.
- *   상권 선택도 **네 트랙이 하나를 공유한다.** 같은 place 에 대한 네 질문이라, 탭을 옮길
+ *   상권 선택도 **세 트랙이 하나를 공유한다.** 같은 place 에 대한 세 질문이라, 탭을 옮길
  *   때마다 상권을 다시 고르게 하면 흐름이 끊긴다.
  *
  * 2026-11-08: **넓은 화면(≥1200px)은 「머리 / 왼쪽 · 지도 · 오른쪽」 칸 배치다**(사용자 피드백 — 지도가 크고 기능이
@@ -88,7 +82,7 @@ const PRELOAD_DELAY_MS = 1500;
  *   건물 목록 · 비용 입력 · 기능 메뉴)를 왼쪽 칸에, 답을 오른쪽 칸에 꽂는다(components/mapLayoutContext.ts · MapSlot).
  *   좁은 화면은 예전처럼 지도 위 패널 하나다. 레일 · 네 구현 화면 · 진입로는 그대로다(PPPP 화면 보존 규칙).
  *
- * 2026-09-13(화면설계서 3판): **「내 사업」을 네 트랙이 공유한다.** 주요 고객이 상권을 먼저 고르는
+ * 2026-09-13(화면설계서 3판): **「내 사업」을 세 트랙이 공유한다.** 주요 고객이 상권을 먼저 고르는
  *   분석가에서 업종·지금 가게에서 출발하는 사업자(창업 · 업종 바꾸기 · 상권 옮기기)로 바뀌었다.
  *   상권과 같은 급의 공유 값이라 여기 둔다 — 처음 방문이면 카드를 펴고, 「시작」하면
  *   Platform 의 「내 업종으로 본 상권」부터 답한다(2026-09-26 부터 첫 화면이 Platform 이라
@@ -105,17 +99,17 @@ const PRELOAD_DELAY_MS = 1500;
  * 지도에서 제외된 건물 수는 공개 대상이 아니다(2026-07-26). 데이터 자체도
  * X-Admin-Token 이 있어야 오므로 해시를 안다고 값이 보이지는 않는다.
  */
-type View = "platform" | "map" | "posting" | "program";
+type View = "platform" | "map" | "posting";
 
 /* 레일이 **어느 트랙인지 색으로** 말한다(2026-09-06). 값은 CSS 가 --track-* 토큰에서
    가져오고(App.css), 여기서는 **이름만** 넘긴다(색 하드코딩 금지 — design skill 규칙).
    ⚠ view key 와 track 이름은 하나만 어긋난다 — Page 트랙의 화면 key 는 "map" 이다. */
 const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = [
-  // PPPP 네 트랙. 전통 4P 와 1:1 대응한다(2026-09-05 재정의): Place▶Platform · Product▶Page ·
-  // Price▶Posting · Promotion▶Program. 라벨을 되돌리지 말 것.
-  // ⛔ 2026-10-21 PPPP 화면 보존 규칙(사용자 확정 · CLAUDE.md): 네 트랙의 구현 화면은 절대 화면에서 빼지 않는다 —
+  // PPPP 세 트랙. 전통 4P 와 1:1 대응한다(2026-09-05 재정의): Place▶Platform · Product▶Page ·
+  // Price▶Posting. 라벨을 되돌리지 말 것.
+  // ⛔ 2026-10-21 PPPP 화면 보존 규칙(사용자 확정 · CLAUDE.md): 세 트랙의 구현 화면은 절대 화면에서 빼지 않는다 —
   //   이 배열에서 빼거나 · 숨기거나 · 다른 화면으로 갈아끼우지 않는다. 가드는 src/ppppScreens.test.tsx.
-  // 2026-09-26: 레일 순서를 **Platform → Page → Posting → Program** 으로 되돌렸다 —
+  // 2026-09-26: 레일 순서를 **Platform → Page → Posting** 으로 되돌렸다 —
   //   PPPP 프레임워크 순서 그대로다. 그전(2026-09-15)에는 사용자가 밟는 순서를 따라
   //   Page 를 맨 위에 뒀는데, 레일이 프레임워크를 말하지 않는 쪽이 더 헷갈렸다.
   //   첫 화면도 같이 Platform 으로 옮겼다(아래 useState<View>) — 레일 맨 위와 처음 열리는
@@ -123,7 +117,6 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
   { key: "platform", label: "Platform", icon: <IconSpark />, track: "platform" },
   { key: "map", label: "Page", icon: <IconPin />, track: "page" },
   { key: "posting", label: "Posting", icon: <IconKey />, track: "posting" },
-  { key: "program", label: "Program", icon: <IconMegaphone />, track: "program" },
 ];
 
 /** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면
@@ -135,10 +128,10 @@ const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = 
 export const EXPLORE_HASH = "#/explore";
 
 /** 쿼리의 트랙 → 레일 화면 key(Page 트랙의 화면 key 만 "map" 이다 — 위 NAV 주석) */
-const TRACK_VIEW: Record<ExploreTrack, View> = { platform: "platform", page: "map", posting: "posting", program: "program" };
+const TRACK_VIEW: Record<ExploreTrack, View> = { platform: "platform", page: "map", posting: "posting" };
 
 /**
- * 지도 탐색 — 3·4판의 지도 + 네 트랙 화면(5판 §10). 5판부터 **로그인 없이도** 연다(token = null).
+ * 지도 탐색 — 3·4판의 지도 + 세 트랙 화면(5판 §10). 5판부터 **로그인 없이도** 연다(token = null).
  * 로그인 전에는 「내 사업」을 흐름의 답에서 받아 쓰고 서버에 저장하지 않는다.
  */
 export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: BusinessState; token: string | null }) {
@@ -196,17 +189,14 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
       ? previous : { ...selection, requestId: (previous?.requestId ?? 0) + 1 });
     setView("posting", selection);
   };
-  // Posting → Program 인계는 상권 변경 시 함께 비운다.
-  const [programHandoff, setProgramHandoff] = useState<(ProgramHandoff & { requestId: number; dismissed?: boolean })>();
   const [reportHandoff, setReportHandoff] = useState<ProgramHandoff>();
-  // 네 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
+  // 세 트랙이 공유하는 상권. 단일 출처는 Page 작업공간이다 — 거점을 바꾸면 Page 의
   // 검색·선택이 비워지는 규칙(MapShell setDistrictId)을 다른 트랙에서 바꿔도 똑같이 지킨다.
   const districtId = pageWorkspace.districtId;
   const setDistrictId = useCallback((id: string) => {
     if (id !== districtId) {
       postingDrafts.clear();
       setPostingSelection(undefined);
-      setProgramHandoff(undefined);
       setReportHandoff(undefined);
     }
     setPageWorkspace((w) => (w.districtId === id ? w
@@ -223,17 +213,6 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
     }));
     setView("map", selection);
   }, [setView]);
-  // Posting → Program: 인계마다 requestId 를 올려 Program 을 새로 마운트한다(초기값으로만 채운다).
-  const makeProgram = useCallback((handoff: ProgramHandoff) => {
-    setDistrictId(handoff.districtId);
-    setReportHandoff(handoff);
-    setProgramHandoff((prev) => ({ ...handoff, requestId: (prev?.requestId ?? 0) + 1 }));
-    setView("program", handoff);
-  }, [setView, setDistrictId]);
-  // 「비우기」 등으로 안내를 걷으면 표시만 끈다. key(requestId)는 그대로 둬 지금 화면을 다시 마운트하지 않는다.
-  const dismissArrival = useCallback(() => {
-    setProgramHandoff((h) => (h && !h.dismissed ? { ...h, dismissed: true } : h));
-  }, []);
   // 핸들러 수명을 고정한다. 입력·건물 선택마다 목록 조회 이펙트를 재시작하지 않는다.
   const changePageWorkspace = useCallback((update: React.SetStateAction<PageWorkspace>) => {
     const next = typeof update === "function" ? update(pageWorkspaceRef.current) : update;
@@ -301,7 +280,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const industryList = Array.isArray(industries) ? industries : null;
   // 「내 업종」 — 지금 가게의 업종(바꾸기) 또는 할 업종(창업·옮기기). Page 강조·Platform 순위의 기준이다.
   const myIndustry = findIndustry(industryList, profile?.industryKey);
-  // Posting·Program 의 업종 **기본값** — 해 볼 업종이다. 바꾸기면 바꿀 업종(없으면 빈칸)이고, 지금(버릴) 업종이
+  // Posting 의 업종 **기본값** — 해 볼 업종이다. 바꾸기면 바꿀 업종(없으면 빈칸)이고, 지금(버릴) 업종이
   // 아니다(2026-10-06 · docs/finding-project-review-4roles-2026-10-06.md §2-1).
   const workIndustry = findIndustry(industryList, workIndustryKey(profile));
   const customIndustry = customWorkIndustry(profile);
@@ -310,7 +289,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   const tryIndustry = useCallback((input: string) => {
     setPostingIndustry((prev) => ({ input, requestId: (prev?.requestId ?? 0) + 1 }));
     setView("posting");
-    // 바꾸기: 순위표에서 고른 업종을 「바꿀 업종」으로 남긴다 — 다음에 Posting·Program 에 바로 들어와도 그 업종으로
+    // 바꾸기: 순위표에서 고른 업종을 「바꿀 업종」으로 남긴다 — 다음에 Posting 에 바로 들어와도 그 업종으로
     // 시작한다. 저장이 실패해도 이번 방문 동안은 메모리 값으로 돈다(인계 자체는 이미 끝났다).
     const picked = industryList?.find((i) => i.input === input);
     if (profile?.goal === "pivot" && picked && picked.key !== profile.industryKey
@@ -323,7 +302,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   useEffect(() => {
     const t = window.setTimeout(() => {
       // 실패해도 조용히 넘어간다 — 그 탭을 누를 때 lazy 가 다시 받는다.
-      for (const load of [loadMapShell, loadPlatform, loadPosting, loadProgram]) load().catch(() => {});
+      for (const load of [loadMapShell, loadPlatform, loadPosting]) load().catch(() => {});
     }, PRELOAD_DELAY_MS);
     return () => window.clearTimeout(t);
   }, []);
@@ -390,7 +369,7 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
   if (isBoard) return <PageDashboard />;
 
   return (
-    // 네 트랙 모두 지도 뷰라 셸은 늘 문서 스크롤을 잠근다(패널이 스스로 스크롤한다).
+    // 세 트랙 모두 지도 뷰라 셸은 늘 문서 스크롤을 잠근다(패널이 스스로 스크롤한다).
     <div className="appshell is-map">
       <nav className="rail" aria-label="주요 화면">
         {/* 2026-09-13: 로고 자리를 "S" 한 글자에서 **PlaceOS** 워드마크로 바꿨다.
@@ -460,22 +439,9 @@ export function WorkspaceApp({ initialBusiness, token }: { initialBusiness: Busi
                 <Button onClick={() => setView("map")}>지도에서 후보 찾기</Button>
                 <Button variant="ghost" onClick={() => setBizOpen(true)}>업종 수정</Button>
               </div> : <PostingConsole guided drafts={postingDrafts} selection={postingSelection?.districtId === districtId ? postingSelection : undefined} districtId={districtId} onDistrictChange={setDistrictId}
-                onMakeProgram={makeProgram} onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
+                onReportChange={setReportHandoff} defaultIndustry={workIndustry?.input}
                 defaultDetailKey={(profile?.goal === "pivot" ? profile.targetIndustryDetailKey : profile?.industryDetailKey) ?? undefined}
                 industryRequest={postingIndustry} />}
-            </TrackMapFrame>
-          )}
-          {/* 패널 이름표는 「오프라인 캠페인」 그대로다 — 사용자 결정(2026-11-08: 「오프라인 캠페인은 오프라인 캠페인으로」).
-              실화면 검사(scripts/pppp_screens_check.py P2)가 Program 화면을 이 이름으로 찾는다 → docs/feature-program.md §0-W */}
-          {view === "program" && (
-            <TrackMapFrame track="program" label="오프라인 캠페인" header={<ExploreStepHeader track="program" onNavigate={navigateStep} />}
-              footer={<ExploreStepFooter onPrevious={() => setView("posting")} />}>
-              <ProgramStudio key={programHandoff?.requestId ?? "direct"} mapDistrictId={districtId}
-                handoff={programHandoff?.dismissed ? undefined : programHandoff} onArrivalDismiss={dismissArrival}
-                defaultCategory={customIndustry ?? workIndustry?.input} businessGoal={profile?.goal}
-                industryKey={customIndustry ? undefined : workIndustry?.key}
-                industryLabel={customIndustry ?? workIndustry?.label}
-                reportHandoff={reportHandoff?.districtId === districtId ? reportHandoff : undefined} />
             </TrackMapFrame>
           )}
         </Suspense>

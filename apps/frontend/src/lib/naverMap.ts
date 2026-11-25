@@ -7,7 +7,7 @@
 //   브라우저 없이 확인하는 법 — result 면 통과, errorCode 200 이면 그 origin 이 미등록이다:
 //     curl "https://oapi.map.naver.com/v3/auth?ncpKeyId=<KEY>&url=<encoded origin>&time=<ms>&callback=cb"
 
-import type { NaverSDK } from "./naverTypes";
+import { NAVER_MAP_AUTH_FAILURE_EVENT, type NaverSDK } from "./naverTypes";
 
 declare global {
   interface Window { naver?: NaverSDK; navermap_authFailure?: () => void }
@@ -50,6 +50,7 @@ export function loadNaverMaps(): Promise<void> {
       _authFailed = true;
       _loading = null;              // 도메인을 등록한 뒤 새로고침하면 다시 시도할 수 있게
       reject(new Error(authFailMessage()));
+      window.dispatchEvent(new Event(NAVER_MAP_AUTH_FAILURE_EVENT));
     };
     const s = document.createElement('script');
     // submodules 는 **한 번에** 받는다. SDK 는 첫 로드의 submodule 집합을 그대로 굳히므로,

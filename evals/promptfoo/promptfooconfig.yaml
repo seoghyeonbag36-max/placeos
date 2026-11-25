@@ -1,0 +1,61 @@
+# services/marketing.py LLM 호출 점검 (2026-11-24)
+#
+# 실행 (라이브 호출 = 크레딧 소모 · 키가 있는 셸에서만):
+#   $env:PROMPTFOO_PYTHON = (py -3.11 -c "import sys;print(sys.executable)")
+#   cd evals/promptfoo ; npx promptfoo@latest eval -c promptfooconfig.yaml --repeat 3
+#
+# 검사는 전부 결정적이다(LLM 심판 없음): 프로덕션 ha_guard 가 위반을 내면 실패.
+# 케이스 1건 = LLM 1회(max_tokens 8192·thinking) × --repeat. 먼저 --repeat 1 로 본다.
+description: "marketing.py LLM 호출 — 프로덕션 HA 후처리 검증 통과율"
+
+prompts:
+  - "{{target}}:{{district_id}}"   # 프롬프트는 provider 가 프로덕션 시스템 프롬프트로 조립한다
+
+providers:
+  - id: file://marketing_provider.py
+    label: marketing-callsites
+
+defaultTest:
+  assert:
+    - type: is-json
+    - type: javascript
+      value: "JSON.parse(output).has_violation === false"
+      metric: ha_guard_no_violation
+
+tests:
+  # ── 상권 온라인 카피 (_call_district_llm) ──
+  - description: "압구정로데오 — 검색 트렌드가 '하락'인데 상승 서술을 하지 않는가"
+    vars: { target: district, district_id: apgujeong-rodeo }
+    assert:
+      - type: javascript
+        metric: copy_shape
+        # 프롬프트 계약: 2~4건 · 한 줄에 해시태그 정확히 2개 · 금액 금지
+        value: |
+          const c = JSON.parse(output).contents;
+          return c.length >= 2 && c.length <= 4
+            && c.every(s => (s.match(/#\S+/g) || []).length === 2)
+            && !c.some(s => /\d\s*(만\s*)?원/.test(s));
+      - type: javascript
+        metric: no_rising_claim_on_falling_trend
+        value: "!JSON.parse(output).contents.some(s => /다시 늘|급증|부활|재조명|상승세/.test(s))"
+  - description: "가로수길"
+    vars: { target: district, district_id: garosugil }
+  - description: "홍대"
+    vars: { target: district, district_id: hongdae }
+  - description: "익선동"
+    vars: { target: district, district_id: ikseon }
+
+  # ── 검증 프로그램 (_call_llm) — 11-22 Program 재정의로 서버 경로가 정리 중이면 이 케이스를 뺀다 ──
+  - description: "프로그램 생성 — 압구정로데오 가오픈 브리프"
+    vars:
+      target: program
+      district_id: apgujeong-rodeo
+      brief: >-
+        {"item":"제철 해산물 오마카세 가오픈","category":"F&B","mode":"soft_open",
+         "stage":"founder","district_id":"apgujeong-rodeo",
+         "hypothesis":"저녁 수요가 객단가 5만원대를 받아준다",
+         "start_date":"2026-12-05","run_days":14}
+    assert:
+      - type: javascript
+        metric: program_nonempty
+        value: "JSON.parse(output).contents.length >= 2"

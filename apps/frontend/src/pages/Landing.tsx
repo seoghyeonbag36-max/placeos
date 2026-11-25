@@ -12,21 +12,25 @@
  *   2. 적지 않는 것: 공실 예측 정확도(LSTM 두 축은 확인 대기) · 업종 추천 적중률 · 고객 수·파일럿 실적 · 요금.
  *   3. 「못 하는 것」 절을 빼지 않는다. 시범 운영 단계에서 가장 믿을 만한 문장이 거기에 있다.
  *   4. 금지 표현: AI 기반 · 혁신적인 · 원스톱 · 올인원 · 차세대 · 최적의 · 완벽한 (tests/Landing.test.tsx 가 잠근다).
- *   5. PPPP 네 질문(#how) 절을 빼거나 접지 않는다 — 2026-10-21 PPPP 화면 보존 규칙(src/ppppScreens.test.tsx 가 잠근다).
+ *   5. PPPP 세 질문(#how) 절을 빼거나 접지 않는다 — 2026-10-21 PPPP 화면 보존 규칙(src/ppppScreens.test.tsx 가 잠근다).
  *
  * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). 「시작하기」는 질문 흐름의 첫 질문(`#/start`, 화면설계서 5판 —
  * 로그인 없이 끝까지 간다), 「로그인」은 `#login`(App 이 Home 을 낸다).
  */
 import illustration from "@/design/assets/iso-commercial-building.svg";
-import { IconKey, IconMegaphone, IconPin, IconSpark } from "@/components/TrackIcons";
+import { IconKey, IconPin, IconSpark } from "@/components/TrackIcons";
 import { GOALS } from "@/lib/businessProfile";
-import { LANDING_HUBS, LANDING_REGION } from "@/lib/landingFacts";
+import { LANDING_HUBS, LANDING_HUBS_GWANGJU, LANDING_REGION, LANDING_REGION_GWANGJU } from "@/lib/landingFacts";
+import { IS_GWANGJU_SITE } from "@/lib/siteScope";
 import { PRIVACY_POLICY_PATH } from "@/lib/privacyPolicy";
 import "./Landing.css";
 
-type Track = "platform" | "page" | "posting" | "program";
+const region = IS_GWANGJU_SITE ? LANDING_REGION_GWANGJU : LANDING_REGION;
+const hubCount = IS_GWANGJU_SITE ? LANDING_HUBS_GWANGJU : LANDING_HUBS;
 
-/** 네 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program). 순서를 바꾸지 말 것. */
+type Track = "platform" | "page" | "posting";
+
+/** 세 질문 — 전통 4P 기준 (Place▶Platform · Product▶Page · Price▶Posting). 순서를 바꾸지 말 것. */
 const STEPS: { track: Track; name: string; question: string; body: string; icon: JSX.Element }[] = [
   {
     track: "platform", name: "Platform", icon: <IconSpark />,
@@ -43,19 +47,12 @@ const STEPS: { track: Track; name: string; question: string; body: string; icon:
     question: "얼마짜리 자리가 맞지?",
     body: "고급화 · 가성비 · 기능중심, 세 가지 가격대로 비용과 회수 기간을 계산합니다. 임대료와 회수 기간이 곧 가격대 판단입니다.",
   },
-  {
-    track: "program", name: "Program", icon: <IconMegaphone />,
-    question: "계약하기 전에, 작게 먼저 어떻게 확인하지?",
-    // 2026-11-07 리뉴얼(결정 D1) — 네 기능: 네트워킹 · 지원 프로그램 · 오프라인 마케팅 솔루션 · 가설 검증
-    // 2026-11-15 질문 개정(결정 ② 승인 → docs/decision-confirm-before-contract-2026-11-15.md): 「계약 전에 어떻게 작게 확인하나」
-    body: "계약하기 전에 팝업스토어 · 가오픈 · 시험 판매로 통하는지 확인할 계획을 세웁니다. Posting 손익분기에서 끌어낸 목표선과 「이 숫자가 안 나오면 접는다」는 기각 조건까지 적습니다. 그 지역의 창업 행사·지원기관과 물어볼 이웃 가게, 지금 신청할 수 있는 지원 공고를 함께 보고, 개업 뒤에는 지역 행사와 시간대로 짠 실행 카드를 씁니다.",
-  },
 ];
 
 const METHOD: { title: string; body: string }[] = [
   {
     title: "건물을 하나씩 셉니다",
-    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. ${LANDING_REGION} ${LANDING_HUBS}개 상권이 모두 이 방식입니다.`,
+    body: `건축물대장(국토교통부 건축HUB)과 상가 정보(소상공인시장진흥공단)를 맞춰, 상권 안의 건물을 층 단위로 셉니다. ${region} ${hubCount}개 상권이 모두 이 방식입니다.`,
   },
   {
     title: "공식 통계와 나란히 놓습니다",
@@ -63,12 +60,12 @@ const METHOD: { title: string; body: string }[] = [
   },
   {
     title: "근거 없는 말은 하지 않습니다",
-    body: "화면의 수치에는 출처가 붙습니다. 생성한 검증 계획은 입력에 없는 금액이나 경험을 지어내지 않았는지 한 번 더 검사하고, 업종 추천은 「그 상권에서 가장 흔한 업종을 고르는」 단순한 방법과 비교합니다.",
+    body: "화면의 수치에는 출처가 붙습니다. 업종 추천은 「그 상권에서 가장 흔한 업종을 고르는」 단순한 방법과 비교합니다.",
   },
 ];
 
 const LIMITS: string[] = [
-  "서울만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.",
+  `${region}만 제공하며, 시범 운영 중이라 화면과 수치가 바뀔 수 있습니다.`,
   "공실 예측은 검증 중입니다. 앞날을 맞힌다는 약속은 하지 않습니다.",
   "임대 시세는 실제 매물 호가와 다를 수 있습니다. 중개·계약·건물주 연결은 하지 않습니다.",
 ];
@@ -86,7 +83,7 @@ export default function Landing() {
         <div className="lp-wrap lp-bar-row">
           <a className="lp-logo" href="#" aria-label="PlaceOS 처음으로">
             <span className="lp-logo-mark" aria-hidden>P</span>
-            <span>PlaceOS</span>
+            <span>{IS_GWANGJU_SITE ? "PlaceOS 광주" : "PlaceOS"}</span>
           </a>
           <nav className="lp-bar-actions" aria-label="이용 안내 및 계정">
             <a className="lp-textlink" href="#help">고객센터</a>
@@ -102,8 +99,8 @@ export default function Landing() {
             <div className="lp-hero-copy">
               <h1 id="lp-h1">계약하기 전에,<br />어느 건물 몇 층이 비었는지<br />먼저 봅니다</h1>
               <p className="lp-lede">
-                창업자 전용 부동산 앱. {LANDING_REGION} {LANDING_HUBS}개 상권의 공실을 건물·층 단위로 살펴봅니다.
-                고른 자리의 비용과 회수 기간, 시험 운영 계획까지 이어서 검토합니다.
+                창업자 전용 부동산 앱. {region} {hubCount}개 상권의 공실을 건물·층 단위로 살펴봅니다.
+                고른 자리의 비용과 회수 기간을 이어서 검토합니다.
               </p>
               <div className="lp-cta-row">
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
@@ -122,7 +119,7 @@ export default function Landing() {
           <div className="lp-wrap">
             <h2 id="lp-results">살펴보고 얻는 것</h2>
             <ul className="lp-results">
-              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>시험 운영 계획</li>
+              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li>
             </ul>
             {/* 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다. 10-17 간소화가 <details> 로 접었다(「보기」 토글 → 정적 라벨). */}
             <div className="lp-quick">
@@ -137,12 +134,12 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* ⛔ PPPP 네 질문은 접지 않는다(2026-10-21 PPPP 화면 보존 규칙). 10-17 간소화가 이 절을 「기능 자세히 보기」
-            <details> 안에 넣어 첫 화면에서 Platform·Page·Posting·Program 이 사라졌고, 10-21 에 되돌렸다. */}
+        {/* ⛔ PPPP 세 질문은 접지 않는다(2026-10-21 PPPP 화면 보존 규칙). 10-17 간소화가 이 절을 「기능 자세히 보기」
+            <details> 안에 넣어 첫 화면에서 Platform·Page·Posting이 사라졌고, 10-21 에 되돌렸다. */}
         <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
-            <h2 id="lp-how">네 가지 질문이 한&nbsp;줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 하나의 플랫폼으로 읽는 데서 출발해, 자리를 찾고, 가격대를 정하고, 통하는지 확인하는 순서입니다</p>
+            <h2 id="lp-how">세 가지 질문이 한&nbsp;줄로 이어집니다</h2>
+            <p className="lp-sub">상권을 살펴보고, 자리를 찾고, 입점 비용을 비교하는 순서입니다.</p>
             <ol className="lp-steps">
               {STEPS.map((s, i) => (
                 <li key={s.track} className="lp-step" data-track={s.track}>

@@ -15,7 +15,6 @@ import { useFlow } from "../context";
 import { httpStatus, useFlowData, useLoad } from "../data";
 import { people, ro } from "../format";
 import { comparePath, go } from "../route";
-import { setDistrict } from "../state";
 import {
   Badge, CloseButton, Details, FlowScreen, LoadError, ResultView, Row, RowList, Sheet, SkeletonRows, TextButton,
 } from "../ui";
@@ -61,9 +60,9 @@ function borrowedRent(n: CorridorNode): "all" | "some" | null {
   return !shared ? null : shared === rated.length ? "all" : "some";
 }
 
-function Synergy({ s, byId, onCompare, onValidate }: {
+function Synergy({ s, byId, onCompare }: {
   s: CorridorSynergy; byId: Map<string, CorridorNode>;
-  onCompare: (ids: string[]) => void; onValidate: (seoulHub: string) => void;
+  onCompare: (ids: string[]) => void;
 }) {
   const g = byId.get(s.node);
   const other = byId.get(s.from === s.node ? s.to : s.from);
@@ -92,7 +91,7 @@ function Synergy({ s, byId, onCompare, onValidate }: {
     case "visit_link":
       title = `${g.name} 사람들이 방문하러 많이 가는 서울 상권 — ${other.name}`;
       fact = `방문하러 가는 사람 하루 ${people(s.visit_per_day)}`;
-      idea = `${other.name}에서 팝업으로 반응을 먼저 보고, 같은 손님이 사는 ${g.name} 쪽에 자리를 잡는 길을 생각해 볼 수 있어요.`;
+      idea = `${other.name}에서 이어지는 손님 흐름을 바탕으로 ${g.name} 쪽에 자리를 잡는 길을 생각해 볼 수 있어요.`;
       break;
     case "inbound":
       title = `${other.name}에서 ${ro(g.name)} 방문하러 오는 사람`;
@@ -104,7 +103,6 @@ function Synergy({ s, byId, onCompare, onValidate }: {
       fact = `양쪽 합쳐 하루 ${people(s.per_day_both ?? s.per_day)} 오가요 · ${when}`;
       idea = "두 곳을 따로 보지 말고 한 생활권으로 나란히 견줘 볼 수 있어요.";
   }
-  const seoulHub = other.segment === "seoul" ? oHub : null;
   return (
     <li className="fl-cor-syn">
       <h3>{title}</h3>
@@ -113,7 +111,6 @@ function Synergy({ s, byId, onCompare, onValidate }: {
       {rentLine && <p className="fl-cor-fact">{rentLine}</p>}
       <div className="fl-actions">
         {gHub && oHub && <TextButton onClick={() => onCompare([gHub, oHub])}>두 상권 나란히 보기</TextButton>}
-        {seoulHub && s.kind === "visit_link" && <TextButton onClick={() => onValidate(seoulHub)}>{other.name}에서 작게 확인하기</TextButton>}
       </div>
     </li>
   );
@@ -175,7 +172,7 @@ export function CorridorClosed() {
 }
 
 export function Corridor({ id }: { id: string }) {
-  const { state, update } = useFlow();
+  const { state } = useFlow();
   const data = useFlowData();
   const list = useIndustries();
   const ds = useDistricts();
@@ -213,7 +210,6 @@ export function Corridor({ id }: { id: string }) {
     ? [focus, ...gyeonggiNodes.map((n) => n.id).filter((x) => x !== focus)] : gyeonggiNodes.map((n) => n.id);
   const synergies = order.flatMap((nid) => c.synergies.filter((s) => s.node === nid && s.kind !== "commute"));
   const compare = (ids: string[]) => go(comparePath(ids));
-  const validate = (hub: string) => { update((s) => setDistrict(s, hub)); go("/validate"); };
   return (
     <FlowScreen wide back="/home" right={<CloseButton />} caption={caption}
       title="파주 → 고양 → 서울, 사람들이 이렇게 오가요"
@@ -252,7 +248,7 @@ export function Corridor({ id }: { id: string }) {
       <h2 className="fl-h2">이렇게 이어 볼 수 있어요</h2>
       <p className="fl-note">이동 수까지가 측정이에요. 「이렇게 해 볼 수 있다」는 가설이라 매출이나 성공을 약속하지 않아요 — 작게 먼저 확인해 보세요.</p>
       <ul className="fl-cor-syns" aria-label="시너지 후보">
-        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} onValidate={validate} />)}
+        {synergies.map((s) => <Synergy key={`${s.kind}|${s.node}|${s.from}|${s.to}`} s={s} byId={byId} onCompare={compare} />)}
       </ul>
 
       <Details summary="자료와 한계">

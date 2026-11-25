@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { BottomCTA } from "@/flow/ui";
 
-const LABEL = "이 상권 네 단계로 따져 보기";
-const NOTE = "Platform → Page → Posting → Program";
+const LABEL = "이 상권 세 단계로 따져 보기";
+const NOTE = "Platform → Page → Posting";
 
 function mount(note?: string) {
   return render(
@@ -14,7 +14,7 @@ function mount(note?: string) {
 }
 
 describe("BottomCTA — 하단 고정 버튼", () => {
-  it("위 한 줄(note)은 주 버튼의 설명으로 묶인다(aria-describedby) — 버튼만 건너뛰며 들어도 「네 단계」를 듣는다", () => {
+  it("위 한 줄(note)은 주 버튼의 설명으로 묶인다(aria-describedby) — 버튼만 건너뛰며 들어도 「세 단계」를 듣는다", () => {
     const { getByRole } = mount(NOTE);
     const id = getByRole("button", { name: LABEL }).getAttribute("aria-describedby");
     expect(id).toBeTruthy();
@@ -42,7 +42,7 @@ describe("BottomCTA — 하단 고정 버튼", () => {
     const { container, unmount } = mount(NOTE);
     const screenEl = container.querySelector<HTMLElement>(".fl-screen");
     expect(screenEl?.style.getPropertyValue("--fl-cta-h")).toBe("125px");
-    height = 167;                       // 글자 150% — 네 단계 한 줄이 두 줄로 접혔다
+    height = 167;                       // 글자 150% — 세 단계 한 줄이 두 줄로 접혔다
     observers[0].onResize();
     expect(screenEl?.style.getPropertyValue("--fl-cta-h")).toBe("167px");
     unmount();
