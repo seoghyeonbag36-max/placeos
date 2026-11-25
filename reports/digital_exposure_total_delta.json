@@ -1,0 +1,34 @@
+{
+ "dates": [
+  "2026-11-17",
+  "2026-11-24"
+ ],
+ "n_snapshots": 2,
+ "n_intervals": 1,
+ "preregistered": {
+  "min_snapshots": 4,
+  "G1_max_negative_share": 0.05,
+  "G2_min_rank_persistence": 0.7,
+  "precision_min": 0.5,
+  "min_primary_hubs": 20,
+  "bootstrap": {
+   "B": 2000,
+   "seed": 20261117
+  },
+  "baseline_rho_rate_vs_datalab": {
+   "all_81": 0.365,
+   "precision_filtered_45": 0.403
+  }
+ },
+ "G1_negative": {
+  "n": 162,
+  "negative": 45,
+  "zero": 1,
+  "share_negative": 0.2778
+ },
+ "G2_rank_persistence": null,
+ "verdict": "표본부족",
+ "reason": "스냅샷 2개 < 4개 — 증가분 3구간(약 3~4주)이 쌓이면 판정한다",
+ "computed_at": "2026-11-24",
+ "datalab_source": "naver_datalab_hub_trend_long.json"
+}

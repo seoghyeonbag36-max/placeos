@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { SITE_SCOPE_KEY } from "@/lib/siteScope";
 import { canonicalRedirect } from "@/lib/canonicalHost";
 // 전역 리셋·토큰. MapShell 에서만 임포트하던 탓에 실제 화면에는 로드되지 않아
 // body 기본 여백이 남아 있었다(2026-07-24 스크롤바 2개 증상).
@@ -12,6 +13,7 @@ const moveTo = canonicalRedirect(window.location);
 if (moveTo) {
   window.location.replace(moveTo);
 } else {
+  if (SITE_SCOPE_KEY === "gwangju") document.title = "PlaceOS 광주광역시 - 창업자와 건물주를 잇는 부동산 앱";
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <App />

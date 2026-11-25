@@ -1,3 +1,5 @@
+import { SITE_SCOPE_KEY } from "@/lib/siteScope";
+
 /** Page의 탐색 조건과 후보는 앱 메모리에서만 유지한다. 서버 자료를 별도로 저장하지 않는다. */
 export type VacancyFilter = "all" | "full" | "partial" | "high" | "empty" | "confirmed" | "probable" | "unknown";
 
@@ -13,7 +15,7 @@ export interface PageWorkspace {
 }
 
 export const createPageWorkspace = (): PageWorkspace => ({
-  districtId: "garosugil", query: "", status: "all", selectedId: null,
+  districtId: SITE_SCOPE_KEY === "gwangju" ? "gj-chungjang" : "garosugil", query: "", status: "all", selectedId: null,
   savedIds: {}, notes: {},
 });
 

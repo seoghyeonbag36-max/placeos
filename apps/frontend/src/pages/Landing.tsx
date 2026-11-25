@@ -87,7 +87,7 @@ export default function Landing() {
         <div className="lp-wrap lp-bar-row">
           <a className="lp-logo" href="#" aria-label="PlaceOS 처음으로">
             <span className="lp-logo-mark" aria-hidden>P</span>
-            <span>PlaceOS</span>
+            <span>{SITE_SCOPE_KEY === "gwangju" ? "PlaceOS 광주" : "PlaceOS"}</span>
           </a>
           <nav className="lp-bar-actions" aria-label="이용 안내 및 계정">
             <a className="lp-textlink" href="#help">고객센터</a>

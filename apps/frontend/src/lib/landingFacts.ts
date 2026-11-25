@@ -23,7 +23,11 @@ export const LANDING_HUBS_GOYANG_PAJU = 26;
 export const LANDING_REGION_GOYANG_PAJU = "고양·파주";
 
 /** 지금 이 탭의 범위가 말하는 지역 이름과 거점 수 — 기본(서울)은 위 두 상수 그대로다 */
+export const LANDING_HUBS_GWANGJU = 40;
+export const LANDING_REGION_GWANGJU = "광주광역시";
+
 export function landingFacts(): { region: string; hubs: number } {
+  if (SITE_SCOPE_KEY === "gwangju") return { region: LANDING_REGION_GWANGJU, hubs: LANDING_HUBS_GWANGJU };
   return SITE_SCOPE_KEY === "goyang-paju"
     ? { region: LANDING_REGION_GOYANG_PAJU, hubs: LANDING_HUBS_GOYANG_PAJU }
     : { region: LANDING_REGION, hubs: LANDING_HUBS };

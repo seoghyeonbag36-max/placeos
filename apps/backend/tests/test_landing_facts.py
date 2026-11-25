@@ -74,6 +74,14 @@ def test_landing_hub_count_for_goyang_paju_scope_matches_served_hubs():
         f"고양·파주 랜딩이 「{m.group(1)}개 상권」이라고 말하는데 서빙 거점은 {served}개다 — landingFacts.ts 의 LANDING_HUBS_GOYANG_PAJU 를 고칠 것")
 
 
+def test_gwangju_landing_hub_count_matches_served_hubs():
+    """광주 랜딩의 거점 수를 서빙 목록과 대조한다."""
+    cities = _scope_cities("GWANGJU_SCOPE_CITIES")
+    match = re.search(r"export const LANDING_HUBS_GWANGJU = (\d+);", _FACTS.read_text(encoding="utf-8"))
+    assert match, "광주 랜딩 거점 수 상수가 없다"
+    assert int(match.group(1)) == sum(hub.city in cities for hub in _active_hubs().values())
+
+
 def test_every_served_hub_has_gold_coverage():
     """랜딩의 「모두 건축물대장 기준」 은 서빙 거점마다 Gold 산출물이 있다는 뜻이다 — 없는 거점이 서빙에 끼면 그 문장이 거짓이 된다."""
     gold = _ROOT / "data" / "gold"

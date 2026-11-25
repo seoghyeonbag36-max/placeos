@@ -17,12 +17,25 @@
  * (목록 모양을 바꾸면 그 정규식도 고친다).
  */
 
-export type SiteScopeKey = "seoul" | "goyang-paju";
+import { CANONICAL_ORIGIN } from "@/lib/canonicalHost";
+
+export type SiteScopeKey = "seoul" | "goyang-paju" | "gwangju";
+
+/** 광주 전용 Hosting 주소와 로컬 미리보기에서 광주 범위를 선택한다. */
+export function isGwangjuSite(hostname: string, pathname: string): boolean {
+  const host = hostname.toLowerCase().replace(/\.$/, "");
+  return host === "gwangju.placeos.co.kr"
+    || host === "placeos-gwangju.web.app"
+    || host === "placeos-gwangju.firebaseapp.com"
+    || ((host === "localhost" || host === "127.0.0.1") && /^\/gwangju(?:\/|$)/.test(pathname));
+}
 
 /** 서울 범위의 도시(`DistrictSummary.city`) — 테스트가 이 줄을 읽는다 */
 export const SEOUL_SCOPE_CITIES: ReadonlySet<string> = new Set(["seoul"]);
 /** 고양·파주 범위의 도시 — 테스트가 이 줄을 읽는다 */
 export const GOYANG_PAJU_SCOPE_CITIES: ReadonlySet<string> = new Set(["goyang", "paju"]);
+
+export const GWANGJU_SCOPE_CITIES: ReadonlySet<string> = new Set(["gwangju"]);
 
 interface ScopeDef {
   label: string;                       // 화면에 쓰는 이름
@@ -33,6 +46,7 @@ interface ScopeDef {
 }
 
 const SCOPES: Record<SiteScopeKey, ScopeDef> = {
+  gwangju: { label: "광주광역시", cities: GWANGJU_SCOPE_CITIES, sido: new Set(["전남광주통합특별시"]), regionNames: ["광주"], crossRegion: false },
   seoul: { label: "서울", cities: SEOUL_SCOPE_CITIES, sido: new Set(["서울특별시"]), regionNames: ["서울"], crossRegion: false },
   // 상권 흐름(파주 → 고양 → 서울)은 서울을 잇는 화면이라 이 범위에서도 닫아 둔다 — 「고양·파주만」이 요청이다
   "goyang-paju": { label: "고양·파주", cities: GOYANG_PAJU_SCOPE_CITIES, sido: new Set(["경기도"]), regionNames: ["경기"], crossRegion: false },
@@ -42,7 +56,7 @@ const SCOPES: Record<SiteScopeKey, ScopeDef> = {
 export const SCOPE_PARAM = "region";
 const SCOPE_STORE = "placeos.scope.v1";
 /** 경로 단축 주소 — 백엔드가 `/goyang-paju` 를 `/?region=goyang-paju` 로 보낸다(로컬 Vite 는 경로 그대로도 받는다) */
-export const SCOPE_PATH: Record<Exclude<SiteScopeKey, "seoul">, string> = { "goyang-paju": "/goyang-paju" };
+export const SCOPE_PATH: Record<"goyang-paju", string> = { "goyang-paju": "/goyang-paju" };
 
 /** 주소 · 저장된 선택으로 범위를 정한다 — 순수 함수(테스트용). 쿼리 > 경로 > 이 탭에서 이미 고른 값 > 서울 */
 export function detectScopeKey(pathname: string, search: string, stored: string | null): { key: SiteScopeKey; explicit: boolean } {
@@ -55,6 +69,8 @@ export function detectScopeKey(pathname: string, search: string, stored: string 
 
 function resolveScope(): SiteScopeKey {
   if (typeof window === "undefined") return "seoul";
+  if ((import.meta.env.DEV && import.meta.env.MODE === "gwangju")
+    || isGwangjuSite(window.location.hostname, window.location.pathname)) return "gwangju";
   let stored: string | null = null;
   try { stored = window.sessionStorage.getItem(SCOPE_STORE); } catch { /* 저장소가 막힌 환경 — 주소만 본다 */ }
   const { key, explicit } = detectScopeKey(window.location.pathname, window.location.search, stored);
@@ -96,4 +112,7 @@ export function isSiteRankGroup(key: string | null | undefined, name?: string | 
 export const showsCrossRegion = (): boolean => CROSS_REGION;
 
 /** 다른 범위로 가는 주소 — 새로 열어야 범위가 바뀐다(범위는 화면 안에서 바뀌지 않는다) */
-export const scopeHref = (key: SiteScopeKey): string => `/?${SCOPE_PARAM}=${key}`;
+export function scopeHref(key: Exclude<SiteScopeKey, "gwangju">): string {
+  const origin = SITE_SCOPE_KEY === "gwangju" ? CANONICAL_ORIGIN : "";
+  return `${origin}/?${SCOPE_PARAM}=${key}`;
+}
