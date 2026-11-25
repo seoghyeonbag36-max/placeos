@@ -10,7 +10,7 @@
  *   ② 네 버튼이 각자 **자기 구현 모듈**을 그린다 — 같은 패널 이름표를 단 빈 대체 화면으로 갈아끼우면 여기서 걸린다
  *   ③ 흐름(5판)의 「지도」 진입로 셋 — 허브 탭 · 상권 소개 · 빈 자리 목록 — 이 그 화면으로 간다
  *      (2026-11-01 사용자 결정으로 입구 하나를 더 잠근다 — 상권 소개 하단 주 버튼 「이 상권 세 단계로 따져 보기」(버튼 위
- *       「Platform → Page → Posting」 · 같은 날 문구 A)가 그 상권 · Platform 트랙으로 간다. 그전 이 버튼은
+ *       「Platform → Page → Proposal」 · 같은 날 문구 A)가 그 상권 · Platform 트랙으로 간다. 그전 이 버튼은
  *       「빈 자리 보기」 → 흐름의 빈 자리 목록이었다)
  *   ④ 랜딩이 PPPP 세 질문을 접지 않고 보인다
  *   ⑤ 그 화면이 흐름에서 고른 상권으로 열린다(우회할 이유를 남기지 않는다 — 아래 10-18 참조)
@@ -64,7 +64,7 @@ vi.mock("@/pages/PostingConsole", async () => {
 });
 
 /** 레일의 세 트랙 — PPPP 프레임워크 순서(Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program) */
-const PPPP = [["platform", "Platform"], ["page", "Page"], ["posting", "Posting"]];
+const PPPP = [["platform", "Platform"], ["page", "Page"], ["posting", "Proposal"]];
 
 /** lazy 청크·지도 셸을 거치는 첫 대기. 이 파일은 배포를 막는 가드라 느린 CI 에서 헛실패하지 않게 넉넉히 둔다 */
 const LOAD = { timeout: 10000 };
@@ -122,7 +122,7 @@ afterEach(() => {
 });
 
 describe("PPPP 화면 보존 규칙 (2026-10-21) — 세 구현 화면", { timeout: 60000 }, () => {
-  it("지도 탐색(#/explore)은 로그인 없이도 레일에 Platform·Page·Posting 세 트랙을 PPPP 순서로 보인다", async () => {
+  it("지도 탐색(#/explore)은 로그인 없이도 레일에 Platform·Page·Proposal 세 트랙을 PPPP 순서로 보인다", async () => {
     stub();
     open("#/explore");
     render(<App />);

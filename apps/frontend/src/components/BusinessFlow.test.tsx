@@ -68,7 +68,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
     await waitFor(() => expect(savedBusiness).toMatchObject({ status: "set", profile: { industryKey: "other", customIndustry: "도자기 공방" } }));
     expect(await screen.findByText("도자기 공방 · 직접 입력 업종", {}, TAB_LOAD)).toBeTruthy();
     expect(screen.getByRole("button", { name: /도자기 공방 창업/ })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    fireEvent.click(screen.getByRole("button", { name: "Proposal" }));
     expect(await screen.findByText(/매출·순익·회수기간 자동 계산은 미지원/, {}, TAB_LOAD)).toBeTruthy();
     saveToken("test-token");
   });
@@ -153,7 +153,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
   it("(2026-10-06) 업종 바꾸기인데 바꿀 업종을 아직 안 정했으면 Posting 업종칸에 지금 업종을 넣지 않는다", async () => {
     savedBusiness = { status: "set", profile: { goal: "pivot", industryKey: "restaurant", homeDistrictId: "garosugil" } };
     mount();
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    fireEvent.click(screen.getByRole("button", { name: "Proposal" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     const posting = await screen.findByPlaceholderText(/예: 카페 \(비우면/) as HTMLInputElement;
     expect(posting.value, "버릴 업종(음식점)이 기본값으로 채워졌다").toBe("");
@@ -167,7 +167,7 @@ describe("「내 사업」 — 화면설계서 3판", { timeout: 60000 }, () => 
       profile: { goal: "pivot", industryKey: "cafe", homeDistrictId: "garosugil", targetIndustryKey: "restaurant" } };
     mount();
     expect(await screen.findByRole("button", { name: /가로수길 · 카페·디저트에서 음식점으로 바꾸기/ }, TAB_LOAD)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
+    fireEvent.click(screen.getByRole("button", { name: "Proposal" }));
     await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
     expect((await screen.findByPlaceholderText(/예: 카페 \(비우면/) as HTMLInputElement).value).toBe("음식점");
     expect(screen.getByText(/내 사업 기준으로 채웠습니다/)).toBeTruthy();

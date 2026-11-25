@@ -576,7 +576,7 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
           <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
         { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요.", content: <div className="pstep">
           <Verdict
-            eyebrow="PlaceOS · Posting" conversion="PRICE ▶ POSTING"
+            eyebrow="PlaceOS · Proposal" conversion="PRICE ▶ PROPOSAL"
             question="어떤 비용과 전략으로 입점할까요?"
             verdict={head.verdict} grounds={head.grounds.slice(0, 3).map(({ label, value }) => ({ label, value }))}
           />

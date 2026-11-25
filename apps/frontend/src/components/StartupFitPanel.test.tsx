@@ -7,7 +7,7 @@ import { installFetchStub } from "@/test/fetchStub";
 import StartupFitPanel from "./StartupFitPanel";
 import type { StartupFitList } from "@/lib/api";
 
-const NOTE = "허가 판정이 아니에요. 법·용도는 건축물대장 · 토지이음 기재(대장 용도코드는 용도명으로 근사), 수지는 Posting 3-Tier 의 1층 기준 추정(R-ONE 임대료 × 층 계수 · 실제 호가 아님)이에요.";
+const NOTE = "허가 판정이 아니에요. 법·용도는 건축물대장 · 토지이음 기재(대장 용도코드는 용도명으로 근사), 수지는 Proposal 3-Tier 의 1층 기준 추정(R-ONE 임대료 × 층 계수 · 실제 호가 아님)이에요.";
 
 function body(status: StartupFitList["owner_status"], ownerOn2F: boolean): StartupFitList {
   return {

@@ -31,7 +31,7 @@ const FACTS = landingFacts();
 
 type Track = "platform" | "page" | "posting";
 
-/** 세 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting). 순서를 바꾸지 말 것.
+/** 세 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Proposal). 순서를 바꾸지 말 것.
  *  2026-11-22 사용자 정의로 문구를 옮겼다 — 창업자와 건물주가 같은 세 단계를 각자의 자리에서 쓴다(docs/decision-pppp-owner-founder-2026-11-22.md).
  *  본문에 적는 것은 화면에 **있는** 것뿐이다 — 인스타그램은 수집하지 않고 검색 링크만 있어 적지 않는다(PlatformConsole). */
 const STEPS: { track: Track; name: string; question: string; body: string; icon: JSX.Element }[] = [
@@ -46,7 +46,7 @@ const STEPS: { track: Track; name: string; question: string; body: string; icon:
     body: "건물주가 자기 건물의 빈 층 정보와 층별 배치도 사진을 올리면, 공공데이터로 그린 개략 배치도가 건물주가 올린 실제 배치도로 바뀝니다. 창업자는 공실 히트맵과 건물·층별 목록에서 비어 있는 자리를 찾아봅니다.",
   },
   {
-    track: "posting", name: "Posting", icon: <IconKey />,
+    track: "posting", name: "Proposal", icon: <IconKey />,
     question: "이 자리, 어떤 조건으로 건물주에게 전하지?",
     body: "고른 층의 비용과 회수 기간을 계산한 뒤, 입점 희망서(업종·면적·층·예산)를 건물주에게 전합니다. 건물주와 창업자는 문의·방문 예약·조건 제안을 주고받고, 계약은 두 사람이 직접 합니다. PlaceOS 는 중개하지 않고 수수료를 받지 않습니다.",
   },

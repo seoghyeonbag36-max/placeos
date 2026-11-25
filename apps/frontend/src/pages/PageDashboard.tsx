@@ -720,7 +720,7 @@ function DistrictDeep({ summary, onBack }: { summary: DistrictSummary; onBack: (
           {postings && (
             <>
               <h2 className="sec">공실 유닛 · 3-Tier 시나리오 <small>
-                Posting · 비용-효용(월) — 코파일럿 연동 전 폴백.
+                Proposal · 비용-효용(월) — 코파일럿 연동 전 폴백.
                 임대료는 R-ONE 실데이터, 면적·권리금은 아직 추정치다
               </small></h2>
               <div className="units">

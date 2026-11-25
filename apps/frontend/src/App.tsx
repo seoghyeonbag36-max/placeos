@@ -110,17 +110,17 @@ type View = "platform" | "map" | "posting";
    ⚠ view key 와 track 이름은 하나만 어긋난다 — Page 트랙의 화면 key 는 "map" 이다. */
 const NAV: { key: View; label: string; icon: JSX.Element; track: TrackKey }[] = [
   // PPPP 세 트랙. 전통 4P 와 1:1 대응한다(2026-09-05 재정의): Place▶Platform · Product▶Page ·
-  // Price▶Posting. 라벨을 되돌리지 말 것.
+  // Price▶Proposal.
   // ⛔ 2026-10-21 PPPP 화면 보존 규칙(사용자 확정 · CLAUDE.md): 세 트랙의 구현 화면은 절대 화면에서 빼지 않는다 —
   //   이 배열에서 빼거나 · 숨기거나 · 다른 화면으로 갈아끼우지 않는다. 가드는 src/ppppScreens.test.tsx.
-  // 2026-09-26: 레일 순서를 **Platform → Page → Posting** 으로 되돌렸다 —
+  // 2026-09-26: 레일 순서를 **Platform → Page → Proposal** 으로 되돌렸다 —
   //   PPPP 프레임워크 순서 그대로다. 그전(2026-09-15)에는 사용자가 밟는 순서를 따라
   //   Page 를 맨 위에 뒀는데, 레일이 프레임워크를 말하지 않는 쪽이 더 헷갈렸다.
   //   첫 화면도 같이 Platform 으로 옮겼다(아래 useState<View>) — 레일 맨 위와 처음 열리는
   //   화면이 어긋나지 않게.
   { key: "platform", label: "Platform", icon: <IconSpark />, track: "platform" },
   { key: "map", label: "Page", icon: <IconPin />, track: "page" },
-  { key: "posting", label: "Posting", icon: <IconKey />, track: "posting" },
+  { key: "posting", label: "Proposal", icon: <IconKey />, track: "posting" },
 ];
 
 /** 지도 탐색이 여는 해시(2026-10-13 · 화면설계서 5판 §10). 계정 창을 닫으면 여기로 돌아온다 — 해시를 비우면

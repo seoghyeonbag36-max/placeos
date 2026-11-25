@@ -1,8 +1,8 @@
 # AGENTS.md — PlaceOS 작업 지침 (Codex 등 코딩 에이전트용)
 
 > **2026-11-25 사용자 결정** — Program을 제품 화면에서 제거한다. 화면 보존 규칙과 검증은
-> Platform · Page · Posting, 기존 지도 진입로, 랜딩의 세 질문에 적용한다. 상권 소개 주 버튼은
-> 「이 상권 세 단계로 따져 보기」이며, 위 안내는 「Platform → Page → Posting」이다.
+> Platform · Page · Proposal(기존 Posting), 기존 지도 진입로, 랜딩의 세 질문에 적용한다. 상권 소개 주 버튼은
+> 「이 상권 세 단계로 따져 보기」이며, 위 안내는 「Platform → Page → Proposal」이다.
 
 **여기가 작업 루트다.** `.git` 이 이 디렉터리에 있다. 상위 폴더에서는 아무것도 만들지 않는다.
 

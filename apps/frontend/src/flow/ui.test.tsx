@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { BottomCTA } from "@/flow/ui";
 
 const LABEL = "이 상권 세 단계로 따져 보기";
-const NOTE = "Platform → Page → Posting";
+const NOTE = "Platform → Page → Proposal";
 
 function mount(note?: string) {
   return render(

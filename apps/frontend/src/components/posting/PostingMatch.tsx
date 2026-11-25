@@ -269,7 +269,7 @@ export default function PostingMatch({ districtId, districtName, buildingId = nu
   const [sentN, setSentN] = useState(0);
   return (
     <section className="pmatch" aria-label="입점 희망서 · 매칭 · 계약">
-      <ol className="pm-steps" aria-label="Posting 흐름">
+      <ol className="pm-steps" aria-label="Proposal 흐름">
         <li><b>입점 희망서</b><span>업종·면적·층·예산을 남겨요 — 이름·연락처는 건물주에게 보이지 않아요</span></li>
         <li><b>건물주에게 전달</b><span>이 상권 건물주가 올린 빈 자리에 보내거나, 희망 상권의 건물주가 보고 먼저 제안해요</span></li>
         <li><b>매칭 · 계약 논의</b><span>조건표로 맞춰 보고 문의·방문·조건 제안을 주고받아요 — 계약은 두 사람이 직접</span></li>

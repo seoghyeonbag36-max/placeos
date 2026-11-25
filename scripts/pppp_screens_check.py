@@ -19,7 +19,7 @@
 
 ## 무엇을 재는가
 
-  P1  #/explore 를 바로 열면(로그인 없이) 레일에 Platform·Page·Posting·Program 넷이 PPPP 순서로 **보인다**
+  P1  #/explore 를 바로 열면(로그인 없이) 레일에 Platform·Page·Proposal 셋이 PPPP 순서로 **보인다**
   P2  네 버튼이 각자 자기 화면을 연다 — 「상권 정체성」 · 「지도 데이터 레이어」 · 「입점 계산」 · 「오프라인 캠페인」이 **보인다**
   P3  흐름의 「지도」 진입로 — 허브 탭(데스크톱 상단 · 휴대폰 하단) · 상권 소개 「지도에서 자세히」 · 빈 자리 목록 「지도」
       — 을 누르고 2.5초 뒤에도 #/explore 에 머물며 레일 세 트랙이 보인다
@@ -29,7 +29,7 @@
       보기」 · 칩 「상권 Platform」 — 를 누르고 2.5초 뒤에도 #/explore?track=… 에 머물며 레일 세 트랙이 보이고, 그 트랙 화면이
       서며(Page 면 고른 건물이 골라져 「← 건물 목록」이 보인다) 레일의 현재 트랙이 맞다. 새 입구는 같은 세 화면으로 간다
   P7  (2026-11-01) 상권 소개(R2) 하단 주 버튼 「이 상권 세 단계로 따져 보기」(그전 「빈 자리 보기」 · 버튼 위 한 줄
-      「Platform → Page → Posting」이 보이는지도 잰다) — 데스크톱 ·
+      「Platform → Page → Proposal」이 보이는지도 잰다) — 데스크톱 ·
       휴대폰에서 #/district/{상권} 을 바로 열고 누르면 2.5초 뒤에도 #/explore?track=platform&district={상권} 에 머물며 레일 세 트랙이
       보이고, Platform 이 현재 트랙이며 Platform 의 상권 선택 값이 그 상권이다. 버튼 글자가 한 줄인지 데스크톱 · 390px · 360px 에서 잰다
   (기록만) 콘솔 에러 · API 5xx — 지도 키(.env)가 없는 로컬에서는 지도 칸이 「지도를 불러오지 못했습니다」로 선다.
@@ -63,15 +63,15 @@ ROOT = Path(__file__).resolve().parents[1]
 FLOW_KEY = "placeos.flow.v1"
 # PLAN_KEY("placeos.flow.plan.v1" · ④ 작게 확인의 검증 계획)는 2026-11-22 에 걷었다 — 홈의 ④ 는 이제 「개업 후」(지도 탐색 Program 입구)라
 # 「다 봤다」를 계약 전 ①~③ 으로만 센다. 그래서 P6 씨앗에 검증 계획을 심을 필요가 없다.
-TRACKS = ["Platform", "Page", "Posting"]
+TRACKS = ["Platform", "Page", "Proposal"]
 # 레일 버튼 → 그 화면이 섰다는 표지(역할 · 접근성 이름). Page(MapShell)만 TrackMapFrame 패널이 아니라 레이어 묶음이다
 PANELS = [("Platform", "complementary", "상권 정체성"), ("Page", "group", "지도 데이터 레이어"),
-          ("Posting", "complementary", "입점 계산")]
+          ("Proposal", "complementary", "입점 계산")]
 SETTLE_MS = 2500
 # 상권 소개(R2) 하단 주 버튼(2026-11-01 사용자 결정) — flow/screens/Find.tsx 의 PPPP_CTA 와 같은 글자
 R2_CTA = "이 상권 세 단계로 따져 보기"
 # 그 버튼 위 한 줄 — 「세 단계」의 이름(Find.tsx 의 PPPP_STEPS). 레일 순서와 같아야 한다
-R2_STEPS = "Platform → Page → Posting"
+R2_STEPS = "Platform → Page → Proposal"
 # 버튼 글자가 버튼 안에 한 줄로 드는가 — 넘침(scrollWidth > clientWidth)과 줄 수(글자 범위의 줄 사각형 top 개수)
 FIT_JS = ("b => { const r = document.createRange(); r.selectNodeContents(b); "
           "const tops = new Set([...r.getClientRects()].map((x) => Math.round(x.top))); "
