@@ -16,6 +16,28 @@ declare global {
 let _loading: Promise<void> | null = null;
 let _authFailed = false;
 
+type Jsonp = (url: string, options?: unknown) => unknown;
+type SdkUtil = { jsonp?: Jsonp };
+const refreshedUtils = new WeakSet<SdkUtil>();
+
+/** JSONP 콜백별 CDN 캐시가 만료된 타일 버전을 돌려준 경우를 피한다. */
+function refreshStyleMetadata(maps: NaverSDK["maps"] | undefined) {
+  const util = (maps as (NaverSDK["maps"] & { Util?: SdkUtil }) | undefined)?.Util;
+  if (typeof util?.jsonp !== "function" || refreshedUtils.has(util)) return;
+  const pageVersion = Date.now().toString(36);
+  const styleMetadata = /^https?:\/\/(?:nrbe\.pstatic\.net|nrbe\.map\.naver\.net)\/styles\/(?:basic|terrain|satellite)\.json\?/;
+  // Proxy는 SDK가 JSONP 콜백 이름에 사용하는 함수 속성(id)을 유지한다.
+  util.jsonp = new Proxy(util.jsonp, {
+    apply(target, receiver, args: Parameters<Jsonp>) {
+      if (typeof args[0] === "string" && styleMetadata.test(args[0])) {
+        args[0] += `&placeos_style_fresh=${pageVersion}`;
+      }
+      return Reflect.apply(target, receiver, args);
+    },
+  });
+  refreshedUtils.add(util);
+}
+
 /** 미등록 도메인일 때 보여줄 문구 — 원인과 조치가 한 줄에 같이 있어야 한다. */
 function authFailMessage(): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '(unknown)';
@@ -39,7 +61,10 @@ export function describeNaverMapError(e: unknown): string {
 
 /** 네이버 지도 JS SDK 동적 로드 (중복 로드 방지) */
 export function loadNaverMaps(): Promise<void> {
-  if (window.naver?.maps) return Promise.resolve();
+  if (window.naver?.maps) {
+    refreshStyleMetadata(window.naver.maps);
+    return Promise.resolve();
+  }
   if (_loading) return _loading;
   _loading = new Promise<void>((resolve, reject) => {
     // 환경변수에 BOM(U+FEFF)·공백이 섞이면 네이버 인증이 실패하므로 반드시 제거한다.
@@ -59,7 +84,11 @@ export function loadNaverMaps(): Promise<void> {
     //                  포함이고, 인증도 지금 지도와 같은 도메인 화이트리스트를 쓴다.
     s.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${keyId}&submodules=visualization,panorama`;
     s.async = true;
-    s.onload = () => (_authFailed ? reject(new Error(authFailMessage())) : resolve());
+    s.onload = () => {
+      if (_authFailed) return reject(new Error(authFailMessage()));
+      refreshStyleMetadata(window.naver?.maps);
+      resolve();
+    };
     s.onerror = () => reject(new Error('네이버 지도 SDK 로드 실패 — 네트워크/차단 확인'));
     document.head.appendChild(s);
   });

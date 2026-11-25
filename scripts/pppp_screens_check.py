@@ -196,10 +196,22 @@ def main() -> int:
     errors: list[str] = []
     bad_api: list[str] = []
 
+    failed_tiles: list[str] = []
+
+    def is_tile(url: str) -> bool:
+        return "/styles/" in url and ".png?" in url and (
+            url.startswith("https://nrbe.pstatic.net/") or url.startswith("http://nrbe.map.naver.net/")
+        )
+
     def watch(page, tag: str):
         page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"[{tag}] console.error: {m.text}") if m.type == "error" else None)
         page.on("response", lambda r: bad_api.append(f"[{tag}] {r.status} {r.url}") if "/api/" in r.url and r.status >= 500 else None)
+        if args.require_map_tiles:
+            page.on("requestfailed", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.failure != "net::ERR_ABORTED" else None)
+            page.on("response", lambda r: failed_tiles.append(f"[{tag}] {r.url}") if
+                    is_tile(r.url) and r.status >= 400 else None)
         return page
 
     def shot(page, name: str) -> None:
@@ -428,17 +440,6 @@ def main() -> int:
             big.close()
         if args.require_map_tiles:
             page = watch(browser.new_page(viewport={"width": 1280, "height": 900}), "P8")
-            failed_tiles: list[str] = []
-
-            def is_tile(url: str) -> bool:
-                return "/styles/" in url and ".png?" in url and (
-                    url.startswith("https://nrbe.pstatic.net/") or url.startswith("http://nrbe.map.naver.net/")
-                )
-
-            page.on("requestfailed", lambda request: failed_tiles.append(request.url) if
-                    is_tile(request.url) and request.failure != "net::ERR_ABORTED" else None)
-            page.on("response", lambda response: failed_tiles.append(response.url) if
-                    is_tile(response.url) and response.status >= 400 else None)
             painted = False
             try:
                 page.goto(base + f"/#/explore?track=page&district={target['id']}")
