@@ -5,7 +5,7 @@
  * 가입부터 요구받았다. 이 페이지가 그 앞에서 「무엇을 하고, 무엇을 못 하고, 가입하면 무엇을 받는지」를 말한다.
  *
  * 독자는 **창업자**다(2026-09-13 주요 고객 재정의 — 업종이 정해진 창업자 · 업종을 바꾸거나 상권을 옮기려는 사업자).
- * 2026-11-22: **건물주**가 PPPP 네 단계의 두 번째 사용자가 됐다(사용자 정의 → docs/decision-pppp-owner-founder-2026-11-22.md).
+ * 2026-11-22: **건물주**가 PPPP 세 단계의 두 번째 사용자가 됐다(사용자 정의 → docs/decision-pppp-owner-founder-2026-11-22.md).
  * 투자자를 독자로 못 박은 docs/prd-landing.md(09-07)와 다르다 → docs/spec-landing-founders-2026-10-08.md.
  *
  * 규칙 (어기면 거짓 광고가 된다)
@@ -13,13 +13,13 @@
  *   2. 적지 않는 것: 공실 예측 정확도(LSTM 두 축은 확인 대기) · 업종 추천 적중률 · 고객 수·파일럿 실적 · 요금.
  *   3. 「못 하는 것」 절을 빼지 않는다. 시범 운영 단계에서 가장 믿을 만한 문장이 거기에 있다.
  *   4. 금지 표현: AI 기반 · 혁신적인 · 원스톱 · 올인원 · 차세대 · 최적의 · 완벽한 (tests/Landing.test.tsx 가 잠근다).
- *   5. PPPP 네 질문(#how) 절을 빼거나 접지 않는다 — 2026-10-21 PPPP 화면 보존 규칙(src/ppppScreens.test.tsx 가 잠근다).
+ *   5. PPPP 세 질문(#how) 절을 빼거나 접지 않는다 — 2026-10-21 PPPP 화면 보존 규칙(src/ppppScreens.test.tsx 가 잠근다).
  *
  * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). 「시작하기」는 질문 흐름의 첫 질문(`#/start`, 화면설계서 5판 —
  * 로그인 없이 끝까지 간다), 「로그인」은 `#login`(App 이 Home 을 낸다).
  */
 import illustration from "@/design/assets/iso-commercial-building.svg";
-import { IconKey, IconMegaphone, IconPin, IconSpark } from "@/components/TrackIcons";
+import { IconKey, IconPin, IconSpark } from "@/components/TrackIcons";
 import { GOALS } from "@/lib/businessProfile";
 import { landingFacts } from "@/lib/landingFacts";
 import { SITE_SCOPE_KEY, scopeHref } from "@/lib/siteScope";
@@ -29,10 +29,10 @@ import "./Landing.css";
 // 이 탭의 범위(서울 기본 · 고양·파주 전용 — lib/siteScope)가 말하는 지역 이름과 거점 수. 모듈이 불릴 때 한 번 정해진다.
 const FACTS = landingFacts();
 
-type Track = "platform" | "page" | "posting" | "program";
+type Track = "platform" | "page" | "posting";
 
-/** 네 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program). 순서를 바꾸지 말 것.
- *  2026-11-22 사용자 정의로 문구를 옮겼다 — 창업자와 건물주가 같은 네 단계를 각자의 자리에서 쓴다(docs/decision-pppp-owner-founder-2026-11-22.md).
+/** 세 질문 — 전통 4P 와 1:1 (Place▶Platform · Product▶Page · Price▶Posting). 순서를 바꾸지 말 것.
+ *  2026-11-22 사용자 정의로 문구를 옮겼다 — 창업자와 건물주가 같은 세 단계를 각자의 자리에서 쓴다(docs/decision-pppp-owner-founder-2026-11-22.md).
  *  본문에 적는 것은 화면에 **있는** 것뿐이다 — 인스타그램은 수집하지 않고 검색 링크만 있어 적지 않는다(PlatformConsole). */
 const STEPS: { track: Track; name: string; question: string; body: string; icon: JSX.Element }[] = [
   {
@@ -49,14 +49,6 @@ const STEPS: { track: Track; name: string; question: string; body: string; icon:
     track: "posting", name: "Posting", icon: <IconKey />,
     question: "이 자리, 어떤 조건으로 건물주에게 전하지?",
     body: "고른 층의 비용과 회수 기간을 계산한 뒤, 입점 희망서(업종·면적·층·예산)를 건물주에게 전합니다. 건물주와 창업자는 문의·방문 예약·조건 제안을 주고받고, 계약은 두 사람이 직접 합니다. PlaceOS 는 중개하지 않고 수수료를 받지 않습니다.",
-  },
-  {
-    track: "program", name: "Program", icon: <IconMegaphone />,
-    question: "개업한 뒤, 이 자리를 누구와 잇고 어떻게 알리지?",
-    // 2026-11-07 리뉴얼(결정 D1) 네 기능 → 2026-11-15 질문 개정(「계약 전에 어떻게 작게 확인하나」) → 2026-11-22 사용자 정의 두 번:
-    // 건물주·창업자 대상 오프라인 마케팅 → 같은 날 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」으로만 좁혔다
-    // (지원 프로그램 · 가설 설정 · 건물주 공실 알리기 제외 → docs/decision-program-post-opening-2026-11-22.md).
-    body: "계약을 맺고 개업한 자리를 위한 네트워킹과 오프라인 마케팅입니다. 이 지역의 공식 행사·네트워크와 함께 모이는 이웃 업종을 보고, 지역 행사·시간대·이웃 업종으로 짠 실행 카드와 행사 연계 계획, 실행 기록을 씁니다. PlaceOS 가 대신 홍보하거나 행사를 열지는 않습니다.",
   },
 ];
 
@@ -134,7 +126,7 @@ export default function Landing() {
           <div className="lp-wrap">
             <h2 id="lp-results">살펴보고 얻는 것</h2>
             <ul className="lp-results">
-              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>입점 희망서</li><li>개업 후 네트워킹·오프라인 마케팅</li>
+              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>입점 희망서</li>
             </ul>
             {/* 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다. 10-17 간소화가 <details> 로 접었다(「보기」 토글 → 정적 라벨). */}
             <div className="lp-quick">
@@ -149,12 +141,12 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* ⛔ PPPP 네 질문은 접지 않는다(2026-10-21 PPPP 화면 보존 규칙). 10-17 간소화가 이 절을 「기능 자세히 보기」
+        {/* ⛔ PPPP 세 질문은 접지 않는다(2026-10-21 PPPP 화면 보존 규칙). 10-17 간소화가 이 절을 「기능 자세히 보기」
             <details> 안에 넣어 첫 화면에서 Platform·Page·Posting·Program 이 사라졌고, 10-21 에 되돌렸다. */}
         <section className="lp-section lp-section-alt" id="how" aria-labelledby="lp-how">
           <div className="lp-wrap">
-            <h2 id="lp-how">네 가지 질문이 한&nbsp;줄로 이어집니다</h2>
-            <p className="lp-sub">상권을 읽고, 빈 자리를 찾고, 입점 희망서로 건물주에게 전하고, 계약하고 개업한 뒤 이웃과 잇고 오프라인으로 알리는 순서입니다. 창업자와 건물주가 같은 네 단계를 각자의 자리에서 씁니다</p>
+            <h2 id="lp-how">세 가지 질문이 한&nbsp;줄로 이어집니다</h2>
+            <p className="lp-sub">상권을 읽고, 빈 자리를 찾고, 입점 희망서로 건물주에게 전하는 순서입니다. 창업자와 건물주가 같은 세 단계를 각자의 자리에서 씁니다</p>
             <ol className="lp-steps">
               {STEPS.map((s, i) => (
                 <li key={s.track} className="lp-step" data-track={s.track}>
@@ -170,7 +162,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* 직거래 연결 층(2026-11-18) — 건물주 소개를 **더한다**. 위 #how 의 PPPP 네 질문은 그대로 펼쳐 둔다(PPPP 화면 보존 규칙). */}
+        {/* 직거래 연결 층(2026-11-18) — 건물주 소개를 **더한다**. 위 #how 의 PPPP 세 질문은 그대로 펼쳐 둔다(PPPP 화면 보존 규칙). */}
         <section className="lp-section" id="owners" aria-labelledby="lp-owners">
           <div className="lp-wrap">
             <h2 id="lp-owners">건물주이신가요? 빈 자리를 직접 올리세요</h2>

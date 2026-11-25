@@ -39,18 +39,18 @@ const FIRST_LOAD = { timeout: 5000 };
 // 끼어든다. 부하가 걸린 PC 에서 5초를 넘겨 폴백("화면 불러오는 중…")이 떠 있는 채 실패했다(09-13 실측).
 const TAB_LOAD = { timeout: 20000 };
 // 여러 트랙 청크를 한 테스트에서 차례로 여는 묶음은 테스트 한도도 그만큼 준다. 기다림(TAB_LOAD)은
-// 20초인데 테스트 기본 한도가 5초라, 네 화면을 연달아 여는 테스트가 판정 전에 잘렸다(09-13).
+// 20초인데 테스트 기본 한도가 5초라, 세 화면을 연달아 여는 테스트가 판정 전에 잘렸다(09-13).
 const MULTI_TAB = { timeout: 60000 };
 
 describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
-  it("레일에는 PlaceOS 로고와 PPPP 네 트랙, 맨 아래 「의견 보내기」·「계정」이 있다 — 서울·거점 탭도 보고서 단추도 없다", async () => {
+  it("레일에는 PlaceOS 로고와 PPPP 세 트랙, 맨 아래 「의견 보내기」·「계정」이 있다 — 서울·거점 탭도 보고서 단추도 없다", async () => {
     mount(true);
     const rail = screen.getByRole("navigation", { name: "주요 화면" });
     expect(rail.textContent).toContain("PlaceOS");
     expect(rail.textContent).not.toMatch(/SpaceOS/);
     const tracks = Array.from(rail.querySelectorAll("button[data-track]")).map((b) => b.textContent);
     // 레일 순서는 PPPP 프레임워크 순서 그대로다(2026-09-26).
-    expect(tracks).toEqual(["Platform", "Page", "Posting", "Program"]);
+    expect(tracks).toEqual(["Platform", "Page", "Posting"]);
     // 의견 보내기·계정은 트랙 바로 아래(맨 아래)에 있다. 「상권 분석 보고서」 단추는 2026-11-22 에 지웠다(PPPP 보고서는 뺀다).
     const labels = Array.from(rail.querySelectorAll("button")).map((b) => b.textContent);
     expect(labels).toEqual([...tracks, "의견 보내기", "계정"]);
@@ -69,7 +69,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
     await screen.findByRole("button", { name: "검토 건물 후보 저장" }, TAB_LOAD);
     const map = naver.map();
     expect(map).not.toBeNull();
-    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Posting", "입점 계산"], ["Program", "오프라인 캠페인"]] as const) {
+    for (const [tab, panel] of [["Platform", "상권 정체성"], ["Posting", "입점 계산"]] as const) {
       fireEvent.click(screen.getByRole("button", { name: tab }));
       const aside = await screen.findByRole("complementary", { name: panel }, TAB_LOAD);
       // 패널은 지도 호스트 **안에** 뜬다 — 지도 없는 대시보드로 되돌아가면 여기가 운다.
@@ -123,7 +123,7 @@ describe("App — 레일과 지도 셸 (2026-09-13)", MULTI_TAB, () => {
   });
 });
 
-/** 화면설계서 2판 인계 표 — PL-05(Platform → Page) · PS-06 · PR-07(Posting → Program). */
+/** 화면설계서 2판 인계 표 — PL-05(Platform → Page) · PS-06 · PR-07(Posting). */
 describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
   it("상단 기능 구조에서 Platform → Page로 이동하고 자리 선택을 Posting에 인계한다", async () => {
     const api = mount(true);
@@ -132,7 +132,7 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     expect(await screen.findByText("Page ▶ Posting", {}, TAB_LOAD)).toBeTruthy();
     fireEvent.click(await screen.findByRole("button", { name: /^검토 건물 카페/ }, FIRST_LOAD));
     fireEvent.click(screen.getByRole("button", { name: "이 자리 비용 확인 →" }));
-    expect(await screen.findByText("Posting ▶ Program", {}, TAB_LOAD)).toBeTruthy();
+    expect(await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD)).toBeTruthy();
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     expect(api.matching(/simulate-revenue$/)[0].body).toMatchObject({ district_id: "garosugil", unit_id: "vu-g1" });
     fireEvent.click(screen.getByRole("button", { name: "Page · 빈 자리" }));
@@ -166,32 +166,6 @@ describe("App — 트랙 간 인계 (화면설계서 2판)", MULTI_TAB, () => {
     expect(document.querySelector(".b-detail .b-name")!.textContent).toBe("검토 건물");
   });
 
-  it("Posting 인계는 캠페인 업종을 채우되 공실 이름을 실제 영업 주소로 쓰지 않는다", async () => {
-    const api = mount(true);
-    fireEvent.click(screen.getByRole("button", { name: "Posting" }));
-    await screen.findByRole("complementary", { name: "입점 계산" }, TAB_LOAD);
-    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
-    // Posting 오른쪽 칸 순서 — 2026-11-22 사용자 정의로 첫 화면은 「입점 희망서 · 계약」(그전 11-10 은 「시뮬레이션 결과」),
-    // 「이 자리로 개업 후 Program 열기」(11-22 전 「검증 program 만들기」)는 「비용 비교 및 결정」 안
-    const pages = screen.getByRole("navigation", { name: "비용 검토" });
-    expect(within(pages).getAllByRole("button").map((b) => b.textContent)).toEqual(["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어",
-      "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"]);
-    expect(within(pages).getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
-    fireEvent.click(within(pages).getByRole("button", { name: "비용 비교 및 결정" }));
-    fireEvent.click(await screen.findByRole("button", { name: "이 자리로 개업 후 Program 열기 →" }));
-
-    // 2026-11-22 — Program 은 「개업 후 계약을 맺은 공실에 대한 네트워킹·오프라인 마케팅」이다. 인계는 그 자리로 실행 기록을 시작하는
-    // 「오프라인 마케팅 솔루션」부터 연다(그전 11-07 리뉴얼은 「가설 설정」부터 — 가설 설정은 Program 에서 제외됐다).
-    const program = await screen.findByRole("navigation", { name: "Program 기능" }, TAB_LOAD);
-    expect(within(program).getAllByRole("button")).toHaveLength(2);         // 네트워킹 · 오프라인 마케팅 솔루션 둘뿐
-    expect(within(program).getByRole("button", { name: "네트워킹" })).toBeTruthy();
-    expect(within(program).getByRole("button", { name: "오프라인 마케팅 솔루션" }).getAttribute("aria-current")).toBe("page");
-    await screen.findByRole("form", { name: "운영 여건 입력" }, TAB_LOAD);
-    expect((screen.getByRole("textbox", { name: "업종 *" }) as HTMLInputElement).value).toBe("카페");
-    expect((screen.getByRole("textbox", { name: "실제 영업 주소 *" }) as HTMLInputElement).value).toBe("");
-    expect(screen.getByText(/실제 영업 매장의 주소를 입력해야/)).toBeTruthy();
-    expect(api.count(/program\/campaigns$/)).toBe(1);
-  });
 });
 
 describe("App — Page에서 입점 검토", () => {

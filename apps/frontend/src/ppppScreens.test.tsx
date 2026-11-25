@@ -1,22 +1,22 @@
 /**
  * ⛔ PPPP 화면 보존 규칙 — 가드 (2026-10-21 · 사용자 확정)
  *
- *   「Platform/Page/Posting/Program 의 구현 화면은 절대 화면에서 제외하지 않는다.」
+ *   「Platform/Page/Posting 의 구현 화면은 절대 화면에서 제외하지 않는다.」
  *
- * 구현 화면 = 지도 탐색(#/explore · App.tsx 의 WorkspaceApp)의 네 트랙 —
- *   Platform → PlatformConsole · Page → MapShell · Posting → PostingConsole · Program → CampaignStudio.
+ * 구현 화면 = 지도 탐색(#/explore · App.tsx 의 WorkspaceApp)의 세 트랙 —
+ *   Platform → PlatformConsole · Page → MapShell · Posting → PostingConsole.
  * 이 파일이 잠그는 것:
- *   ① 레일에 네 트랙이 PPPP 순서로 늘 있다(로그인 없이도)
+ *   ① 레일에 세 트랙이 PPPP 순서로 늘 있다(로그인 없이도)
  *   ② 네 버튼이 각자 **자기 구현 모듈**을 그린다 — 같은 패널 이름표를 단 빈 대체 화면으로 갈아끼우면 여기서 걸린다
  *   ③ 흐름(5판)의 「지도」 진입로 셋 — 허브 탭 · 상권 소개 · 빈 자리 목록 — 이 그 화면으로 간다
- *      (2026-11-01 사용자 결정으로 입구 하나를 더 잠근다 — 상권 소개 하단 주 버튼 「이 상권 네 단계로 따져 보기」(버튼 위
- *       「Platform → Page → Posting → Program」 · 같은 날 문구 A)가 그 상권 · Platform 트랙으로 간다. 그전 이 버튼은
+ *      (2026-11-01 사용자 결정으로 입구 하나를 더 잠근다 — 상권 소개 하단 주 버튼 「이 상권 세 단계로 따져 보기」(버튼 위
+ *       「Platform → Page → Posting」 · 같은 날 문구 A)가 그 상권 · Platform 트랙으로 간다. 그전 이 버튼은
  *       「빈 자리 보기」 → 흐름의 빈 자리 목록이었다)
- *   ④ 랜딩이 PPPP 네 질문을 접지 않고 보인다
+ *   ④ 랜딩이 PPPP 세 질문을 접지 않고 보인다
  *   ⑤ 그 화면이 흐름에서 고른 상권으로 열린다(우회할 이유를 남기지 않는다 — 아래 10-18 참조)
  *   ⑥ 흐름 앱이 #/explore 로 바뀐 주소를 홈으로 되감지 않는다(아래 10-21 참조)
  *
- * 네 구현 모듈은 이 파일에서 가벼운 표식(data-pppp-impl · data-district)으로 대신 그린다. 보려는 것이 「App 이 그 트랙에서
+ * 세 구현 모듈은 이 파일에서 가벼운 표식(data-pppp-impl · data-district)으로 대신 그린다. 보려는 것이 「App 이 그 트랙에서
  * 바로 그 모듈을 그리는가」(배선)이기 때문이다. 실제 화면이 서는지는 App.test.tsx 와 각 화면의 테스트가 본다.
  * (10-21 첫 판은 실제 네 청크를 열었다 — 무거워서 같이 도는 테스트를 1초 대기 밖으로 밀어내는 것으로 보였고, 패널 이름표는
  *  App 이 붙이므로 대체 화면도 못 잡았다.)
@@ -28,9 +28,9 @@
  * ⚠ jsdom 이 못 보는 것(CSS 파일로 숨김 · 브라우저가 낸 이벤트의 순서)은 실화면 검사 몫이다 → 결정 문서 §4.
  *
  * 실제로 일어난 회귀(그래서 이 가드가 생겼다):
- *   - 10-17 랜딩 간소화(691c7fd)가 네 질문을 접힌 <details> 안에 넣었고, 테스트는 { hidden: true } 로 바뀌어 통과했다
+ *   - 10-17 랜딩 간소화(691c7fd)가 세 질문을 접힌 <details> 안에 넣었고, 테스트는 { hidden: true } 로 바뀌어 통과했다
  *   - 10-18 PR #141 이 「지도」가 늘 가로수길·Platform 으로 열리던 문제를 고치려고 흐름의 진입로 셋을 흐름 자체 지도
- *     (#/spaces/map)로 돌렸다 — 네 화면으로 가는 UI 길이 0 이 됐고, 주소창에 #/explore 를 쳐야만 열렸다
+ *     (#/spaces/map)로 돌렸다 — 세 화면으로 가는 UI 길이 0 이 됐고, 주소창에 #/explore 를 쳐야만 열렸다
  *   - 10-21 실화면: 흐름을 주소로 바로 열면(새로고침 · 로그인 사용자의 첫 화면) 허브 탭 「지도」(<a href>)가 #/explore →
  *     #/home 으로 튕겼다. 브라우저가 낸 hashchange 는 리스너 사이마다 렌더가 끼는데, 흐름 앱 리스너가 먼저 등록돼 있으면
  *     흐름 앱이 #/explore 를 「모르는 주소」로 보고 홈으로 되감았다(jsdom 은 이 경합을 재현하지 않아 ⑥ 은 흐름 앱만 그려 본다)
@@ -49,7 +49,7 @@ import { district, rentHeatmap, rentListing } from "@/test/fixtures";
 
 vi.mock("@/lib/naverMap", () => ({ loadNaverMaps: () => Promise.resolve(), describeNaverMapError: String }));
 
-/* 네 구현 모듈의 표식 — 트랙(data-pppp-impl)과 그 모듈이 받은 상권(data-district). App 은 이 넷을 lazy 로만 부른다 */
+/* 세 구현 모듈의 표식 — 트랙(data-pppp-impl)과 그 모듈이 받은 상권(data-district). App 은 이 넷을 lazy 로만 부른다 */
 vi.mock("@/pages/PlatformConsole", async () => {
   const { createElement } = await import("react");
   return { default: ({ districtId }: { districtId?: string }) => createElement("div", { "data-pppp-impl": "platform", "data-district": districtId }) };
@@ -62,13 +62,9 @@ vi.mock("@/pages/PostingConsole", async () => {
   const { createElement } = await import("react");
   return { default: ({ districtId }: { districtId?: string }) => createElement("div", { "data-pppp-impl": "posting", "data-district": districtId }) };
 });
-vi.mock("@/pages/CampaignStudio", async () => {
-  const { createElement } = await import("react");
-  return { default: ({ mapDistrictId }: { mapDistrictId?: string }) => createElement("div", { "data-pppp-impl": "program", "data-district": mapDistrictId }) };
-});
 
-/** 레일의 네 트랙 — PPPP 프레임워크 순서(Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program) */
-const PPPP = [["platform", "Platform"], ["page", "Page"], ["posting", "Posting"], ["program", "Program"]];
+/** 레일의 세 트랙 — PPPP 프레임워크 순서(Place▶Platform · Product▶Page · Price▶Posting · Promotion▶Program) */
+const PPPP = [["platform", "Platform"], ["page", "Page"], ["posting", "Posting"]];
 
 /** lazy 청크·지도 셸을 거치는 첫 대기. 이 파일은 배포를 막는 가드라 느린 CI 에서 헛실패하지 않게 넉넉히 둔다 */
 const LOAD = { timeout: 10000 };
@@ -81,7 +77,7 @@ const unit = (buildingId: string, floor: number): FloorVacancyUnit => ({
   fit: { basis: "purps_floor", n: 312, top: [{ industry: "카페", share: 0.41, n: 128 }], note: "관측" },
 });
 
-/** 흐름 화면(상권 소개 · 빈 자리 목록 · 허브)이 부르는 것만 — 네 구현 모듈은 위에서 표식으로 바꿨다 */
+/** 흐름 화면(상권 소개 · 빈 자리 목록 · 허브)이 부르는 것만 — 세 구현 모듈은 위에서 표식으로 바꿨다 */
 function stub(): FetchStub {
   return installFetchStub([
     { match: /\/ai\/industries$/, body: { industries: INDUSTRIES } },
@@ -125,15 +121,15 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
-describe("PPPP 화면 보존 규칙 (2026-10-21) — 네 구현 화면", { timeout: 60000 }, () => {
-  it("지도 탐색(#/explore)은 로그인 없이도 레일에 Platform·Page·Posting·Program 네 트랙을 PPPP 순서로 보인다", async () => {
+describe("PPPP 화면 보존 규칙 (2026-10-21) — 세 구현 화면", { timeout: 60000 }, () => {
+  it("지도 탐색(#/explore)은 로그인 없이도 레일에 Platform·Page·Posting 세 트랙을 PPPP 순서로 보인다", async () => {
     stub();
     open("#/explore");
     render(<App />);
     expect(await railTracks()).toEqual(PPPP);
   });
 
-  it("레일의 네 버튼은 각자 자기 구현 모듈을 그린다 — 빈 화면·대체 화면으로 바꾸지 않는다", async () => {
+  it("레일의 세 버튼은 각자 자기 구현 모듈을 그린다 — 빈 화면·대체 화면으로 바꾸지 않는다", async () => {
     stub();
     open("#/explore");
     render(<App />);
@@ -182,7 +178,7 @@ describe("PPPP 화면 보존 규칙 (2026-10-21) — 흐름(5판)에서 가는 �
     startFlow();                                   // 흐름의 상권은 seongsu — 버튼이 보던 상권(garosugil)을 싣는지 본다
     open("#/district/garosugil");
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "이 상권 네 단계로 따져 보기" }, LOAD));
+    fireEvent.click(await screen.findByRole("button", { name: "이 상권 세 단계로 따져 보기" }, LOAD));
     expect(window.location.hash).toBe("#/explore?track=platform&district=garosugil");
     expect(await railTracks()).toEqual(PPPP);
     expect((await impl("platform")).getAttribute("data-district")).toBe("garosugil");
@@ -228,7 +224,7 @@ describe("PPPP 화면 보존 규칙 (2026-10-21) — 흐름(5판)에서 가는 �
 });
 
 describe("PPPP 화면 보존 규칙 (2026-10-21) — 랜딩", () => {
-  it("PPPP 네 질문을 접지 않고 보인다 — 접힌 <details> 안에 넣지 않는다", () => {
+  it("PPPP 세 질문을 접지 않고 보인다 — 접힌 <details> 안에 넣지 않는다", () => {
     render(<Landing />);
     const how = document.getElementById("how")!;
     // { hidden: true } 없이 찾고, 접힌 <details> 안인지는 직접 본다 — jsdom 은 접힌 details 의 내용을 숨김으로 치지 않아

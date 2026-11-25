@@ -115,8 +115,6 @@
 @media (max-width: 600px) { .postconsole { padding: var(--sp-3); } .postconsole .tiers { grid-template-columns: 1fr; } }
 
 /* Posting → Program 인계(2026-09-13, 화면설계서 2판) — 결과 위, 자리가 있으면 켜진다 */
-.postconsole .posting-to-program{width:100%;min-height:44px;margin-bottom:var(--sp-3);border:1px solid var(--track-program);color:var(--track-program);background:var(--surface);font-weight:700}
-.postconsole button.posting-to-program:hover:not(:disabled){background:var(--track-program-soft)}
 
 /* 고객 화면 — 핵심 요약과 상세의 서열을 정리하고 내부 전환 표식은 생략한다. */
 .postconsole .verdict { padding: var(--sp-5); margin-bottom: var(--sp-4); border-radius: var(--radius-md); }
