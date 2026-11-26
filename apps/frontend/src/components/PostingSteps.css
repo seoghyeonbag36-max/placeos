@@ -35,3 +35,4 @@
 .pstep .is-pos{color:var(--source-real);font-weight:700} .pstep .is-neg{color:var(--danger);font-weight:700}
 .pstep-pointer{margin:0;font-size:12.5px;background:var(--surface-sunken);border-radius:var(--radius-md);padding:var(--sp-2) var(--sp-3)}
 @media (max-width:420px){.pstep-fields{grid-template-columns:minmax(0,1fr)}}
+.pstep-next{margin:0;display:flex;justify-content:flex-end}

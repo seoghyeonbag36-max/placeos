@@ -30,6 +30,9 @@ export default function ConsolePages({ label, pages, enabled = true, activeId, o
   const layout = useMapLayout();
   if (!enabled) return <>{pages.map((page) => <div key={page.id}>{page.content}</div>)}</>;
   const current = pages.find((page) => page.id === (activeId ?? active)) ?? pages[0];
+  // 쪽 안의 버튼으로(activeId) 연 쪽도 「연 쪽」이다 — 메뉴로 연 쪽처럼 왕복해도 입력 · 조회 결과를 보존한다
+  // (2026-11-26 Proposal 「입점 희망서 제출」 — 그전에는 메뉴로 다른 쪽에 갔다 오면 버튼으로 연 쪽이 처음부터 다시 그려졌다)
+  if (!visited.has(current.id)) setVisited((previous) => new Set([...previous, current.id]));
   const side = !!navSlot && !!layout;
   const nav = <nav className={"console-pages-nav" + (side ? " is-side" : "")} aria-label={label}>
     {pages.map((page) => <button key={page.id} type="button"

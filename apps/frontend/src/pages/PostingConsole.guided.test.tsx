@@ -4,9 +4,10 @@ import PostingConsole, { type PostingDraft } from "./PostingConsole";
 import { installFetchStub, type ApiCall } from "@/test/fetchStub";
 import { district, postings, simulateResult } from "@/test/fixtures";
 
-// 오른쪽 칸 순서 — 2026-11-22 사용자 정의(Posting = 입점 희망서를 건물주에게 전달 → 매칭·계약 논의)로 「입점 희망서 · 계약」이 맨 앞이다
-// (그전 11-10 사용자 요청은 「시뮬레이션 결과」가 첫 화면이었다). 왼쪽 입력 칸은 그대로다. 개업 후 Program 열기(그전 검증 program 만들기)는 「비용 비교 및 결정」 안에 있다
-const POSTING_PAGES = ["입점 희망서 · 계약", "시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정"];
+// 오른쪽 칸 순서 — 2026-11-26 사용자 지시 「Proposal 입점 희망서에 맞는 Proposal 순서 수정」: 첫 쪽은 「매칭 · 계약 현황」, 희망서 쓰기 · 보내기는
+// 계산(시뮬레이션 결과 → … → 비용 비교 및 결정)을 마친 뒤 마지막 쪽 「입점 희망서 제출」에서 한다. 그전 11-22 에는 「입점 희망서 · 계약」이 맨 앞에서
+// 쓰기 · 보내기까지 했고, 11-10 사용자 요청은 「시뮬레이션 결과」가 첫 화면이었다. 왼쪽 입력 칸은 그대로다
+const POSTING_PAGES = ["매칭 · 계약 현황", "시뮬레이션 결과", "상권 맞춤 인테리어", "주변 업종 지도", "찾아오는 길", "위험 확인", "메뉴 설정", "비용 비교 및 결정", "입점 희망서 제출"];
 
 // 테스트 전용 합성 응답 — 실제는 /travel/access 의 카카오 Local · TMAP 보행 경로 · 서울 열린데이터
 const ACCESS = {
@@ -60,13 +61,15 @@ describe("단계형 비용 검토", () => {
     expect(await screen.findByText("전제(0)")).toBeTruthy();
   });
 
-  it("오른쪽 쪽 순서는 입점 희망서 · 계약 → 시뮬레이션 결과 → … → 비용 비교 및 결정이고, 첫 화면은 「입점 희망서 · 계약」이다(계산은 뒤에서 그대로 돈다)", async () => {
+  it("오른쪽 쪽 순서는 매칭 · 계약 현황 → 시뮬레이션 결과 → … → 비용 비교 및 결정 → 입점 희망서 제출이고, 첫 화면은 「매칭 · 계약 현황」이다(계산은 뒤에서 그대로 돈다)", async () => {
     const api = installApi();
     render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
     const nav = screen.getByRole("navigation", { name: "비용 검토" });
     expect([...nav.querySelectorAll("button")].map((b) => b.textContent)).toEqual(POSTING_PAGES);
-    expect(screen.getByRole("button", { name: "입점 희망서 · 계약" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("button", { name: "매칭 · 계약 현황" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("list", { name: "Proposal 흐름" }).textContent).toContain("건물주에게 전달");   // 정의가 첫 화면에 보인다
+    // 첫 쪽은 현황만 — 건물주 매물 목록(보낼 곳)은 마지막 쪽을 열 때 부른다
+    expect(api.count(/\/direct\/listings/)).toBe(0);
     await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
     fireEvent.click(screen.getByRole("button", { name: "시뮬레이션 결과" }));
     expect(screen.getByPlaceholderText("만원 — 비우면 0 전제")).toBeTruthy();
@@ -104,6 +107,26 @@ describe("단계형 비용 검토", () => {
     expect(screen.queryByRole("region", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeNull();
     expect(screen.queryByRole("button", { name: "계약하고 개업하면 — 이 자리로 Program" })).toBeNull();
     expect(screen.queryByText(/검증 program|가설 검증/)).toBeNull();
+  });
+
+  it("「비용 비교 및 결정」 다음은 마지막 쪽 「입점 희망서 제출」 — 계산한 자리를 참고로 잇고, 보낼 곳을 그때 부른다 · 첫 쪽에서도 그리로 간다", async () => {
+    const api = installApi();
+    render(<PostingConsole guided drafts={new Map()} districtId="garosugil" />);
+    fireEvent.click(screen.getByRole("button", { name: "입점 희망서 제출로 →" }));     // 첫 쪽(현황)에서 마지막 쪽으로
+    expect(screen.getByRole("button", { name: "입점 희망서 제출" }).getAttribute("aria-current")).toBe("page");
+    fireEvent.click(screen.getByRole("button", { name: "시뮬레이션 결과" }));
+    await waitFor(() => expect(api.count(/simulate-revenue$/)).toBe(1));
+    await screen.findByText("전제(0)");
+    fireEvent.click(screen.getByRole("button", { name: "비용 비교 및 결정" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 자리로 입점 희망서 제출 →" }));
+    expect(screen.getByRole("button", { name: "입점 희망서 제출" }).getAttribute("aria-current")).toBe("page");
+    const here = screen.getByRole("group", { name: "이 자리" });
+    expect(here.textContent).toContain("garosugil 1번 자리");                  // 픽스처 첫 자리 — 시뮬레이션에서 고른 그 자리
+    expect(here.textContent).toContain("R-ONE 임대료 × 층 계수로 본 추정 · 실제 호가 아님");
+    expect(here.textContent).toContain("희망서에 저절로 들어가지 않아요");
+    await waitFor(() => expect(api.count(/\/direct\/listings/)).toBe(1));
+    fireEvent.click(screen.getByRole("button", { name: "매칭 · 계약 현황 보기 →" }));
+    expect(screen.getByRole("button", { name: "매칭 · 계약 현황" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("Posting 「업종」을 바꾸면 상권 맞춤 인테리어의 공간 키워드가 그 업종 기본값으로 바뀐다", async () => {

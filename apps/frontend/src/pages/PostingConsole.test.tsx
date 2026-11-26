@@ -51,7 +51,7 @@ describe("PostingConsole — API 경로", () => {
   it("마운트하면 목록 → 그 거점의 실측 자리 → 시뮬레이션 순으로 부른다", async () => {
     await waitFor(() => expect(api.count(/\/ai\/simulate-revenue$/)).toBe(1));
 
-    // 업종 메타데이터와 첫 쪽 「입점 희망서 · 계약」의 건물주 매물(/direct/ · 2026-11-22)은 독립 호출이다. 자리 계산의 의존 순서만 고정한다.
+    // 업종 메타데이터와 마지막 쪽 「입점 희망서 제출」의 건물주 매물(/direct/ · 2026-11-22 · 11-26 순서)은 독립 호출이다. 자리 계산의 의존 순서만 고정한다.
     expect(api.urls().filter((u) => !u.endsWith("/ai/industry-details") && !u.includes("/api/v1/direct/")).slice(0, 2)).toEqual([
       "GET /api/v1/commercial-districts",
       "GET /api/v1/commercial-districts/garosugil/postings",
