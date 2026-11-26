@@ -1,4 +1,4 @@
-/* Posting › 「입점 희망서 · 계약」(2026-11-22) — 토큰만 쓴다(Tailwind 없음). */
+/* Proposal › 첫 쪽 「매칭 · 계약 현황」 · 마지막 쪽 「입점 희망서 제출」(2026-11-22 · 11-26 순서) — 토큰만 쓴다(Tailwind 없음). */
 .pmatch { display: grid; gap: var(--sp-3); min-width: 0; font-size: 14px; line-height: var(--lh-body); color: var(--ink); }
 .pmatch a { color: var(--track-posting); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .pmatch h4 { margin: 0 0 var(--sp-2); font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
@@ -48,3 +48,9 @@
 .pm-thread { display: grid; gap: 2px; }
 .pm-notice { padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-md); background: var(--caution-soft, var(--surface)); border: 1px solid var(--caution-line, var(--line));
   color: var(--sub); font-size: var(--fs-caption); line-height: var(--lh-caption, 1.5); }
+
+/* 「입점 희망서 제출」 A. 이 자리 — 앞 단계에서 계산한 값(참고) */
+.pm-facts { margin: 0; display: grid; gap: 4px; }
+.pm-facts > div { display: grid; grid-template-columns: 76px 1fr; gap: var(--sp-2); align-items: baseline; min-width: 0; }
+.pm-facts dt { color: var(--sub); font-size: var(--fs-caption); }
+.pm-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }

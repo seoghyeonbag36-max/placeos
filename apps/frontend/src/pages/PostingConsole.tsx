@@ -24,7 +24,8 @@ import { IndustryDetailSelect, IndustryOperatingFields, IndustryEconomicsResult,
 import { useFitMap, useMapMarkers, type MapMarkerItem } from "@/components/useMapMarkers";
 import "./PostingConsole.css";
 import ConsolePages from "@/components/ConsolePages";
-import PostingMatch from "@/components/posting/PostingMatch";
+import { BriefSubmit, MatchStatus, type ProposalPlace } from "@/components/posting/PostingMatch";
+import { floorNumber } from "@/components/posting/floorNumber";
 import MapSlot from "@/components/MapSlot";
 import { useMapLayout } from "@/components/mapLayoutContext";
 
@@ -114,10 +115,22 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   // 자리 · 비용 입력은 늘 그려 둔다(keepMounted) — 지도 탐색에서는 왼쪽 칸에 서 있어 어느 쪽을 보면서도 자리를 바꿀 수 있다
   // 2026-11-22 사용자 정의 — Posting = 「공실을 확인한 창업자가 건물주에게 입점 희망서를 전달하고, 건물주와 매칭·계약을 논의한다」.
   // 사용자 지적(「Posting 이 화면에 구현되지 않은 것으로 보인다」)으로 첫 화면을 「입점 희망서 · 계약」으로 옮겼다(위 11-10 순서를 대신한다).
+  // 2026-11-26 사용자 지시 「Proposal 입점 희망서에 맞는 Proposal 순서 수정」 — 첫 쪽에서 희망서를 쓰면 그 숫자(면적 · 층 · 월세 상한 ·
+  // 요구 판매량)를 계산하기 전에 쓰게 된다. 그래서 첫 쪽은 「매칭 · 계약 현황」(희망서 상태 · 건물주와의 대화)으로 두고, 쓰고 보내는 일은
+  // 계산을 마친 뒤 마지막 쪽 「입점 희망서 제출」로 옮겼다 → docs/decision-proposal-brief-last-2026-11-26.md. 쪽 id 「match」는 그대로다(저장한 초안 호환).
   // Page 에서 「이 자리로 입점 계산」으로 넘어오면(선택 인계) 종전처럼 「시뮬레이션 결과」를 연다(아래 인계 처리).
   // 저장된 초안이 이미 없어진 계산 탭(「계산 결과」 등)을 열고 있었으면 그 계산을 이어 보게 「시뮬레이션 결과」로 연다.
   const [page, setPage] = useState(() => (draft?.page ? (RETIRED_PAGES.has(draft.page) ? "input" : draft.page)
     : selection ? "input" : "match"));
+  // 마지막 쪽에서 희망서를 보낼 때마다 오른다 — 첫 쪽 「매칭 · 계약 현황」이 희망서 상태 · 문의함을 다시 받는다
+  const [sentN, setSentN] = useState(0);
+  const top = useRef<HTMLDivElement>(null);
+  /** 쪽 안의 버튼으로 다른 쪽을 열 때 — 쪽 메뉴를 누른 것처럼 맨 위부터 보이게 한다(ConsolePages 의 메뉴 클릭과 같은 스크롤 칸) */
+  function goTo(id: string) {
+    setPage(id);
+    const scroll = top.current?.closest(".trackmap-scroll");
+    if (scroll) scroll.scrollTop = 0;
+  }
   const layout = useMapLayout();
   const restored = useRef(!!draft?.calculation);
   const [districts, setDistricts] = useState<DistrictSummary[]>([]);
@@ -372,12 +385,21 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
   }, [onResultChange, resultSnapshot]);
   const tiers = result ? Object.entries(result.scenarios) : [];
 
+  // 마지막 쪽 「입점 희망서 제출」에 잇는 이 자리(2026-11-26) — 계산한 값을 **참고로만** 보인다. 희망서 칸에 넣지 않는다(직거래 규칙 L16).
+  // 층은 실측일 때만 견준다(층 단위 자리 vfu- · 층별개요 flr_ouln) — 「1층 가정」인 자리를 그 층 매물과 맞추면 없는 일치를 만든다.
+  const floorSource = effectiveUnit?.inputs_source?.floor;
+  const floorMeasured = !!effectiveUnit && (effectiveUnit.id.startsWith("vfu-") || floorSource === "flr_ouln");
+  const place: ProposalPlace | null = effectiveUnit ? {
+    name: effectiveUnit.n, floorLabel: `${effectiveUnit.floor}${floorSource && floorSource !== "flr_ouln" ? "(1층 가정)" : ""}`,
+    areaPy: effectiveUnit.area, rentManwon: effectiveUnit.rent, rentNote: rentNote(effectiveUnit.inputs_source?.rent),
+    industry: industry.trim() || null,
+  } : null;
 
   // 지도 탐색의 칸 배치 안인가(MapHost) — 입력이 왼쪽 칸으로 가면 안내 문구도 그 자리를 가리킨다
   const inSlots = layout !== null;
 
   return (
-    <div className="postconsole"><div className="wrap">
+    <div className="postconsole" ref={top}><div className="wrap">
       {err && (
         <div className="err">
           <strong>계산에 실패했습니다.</strong>
@@ -388,9 +410,8 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
       )}
 
       <ConsolePages enabled={guided} label="비용 검토" activeId={page} onChange={setPage} keepMounted={["input"]} pages={[
-        { id: "match", label: "입점 희망서 · 계약", description: "공실을 확인했다면 건물주에게 입점 희망서를 보내고, 조건표로 맞춰 본 뒤 문의·방문·조건 제안으로 매칭·계약을 논의하세요.",
-          content: <PostingMatch districtId={districtId} districtName={districts.find((d) => d.id === districtId)?.name ?? districtId}
-            buildingId={unit?.id.startsWith("vu-") ? unit.id.slice(3) : null} /> },
+        { id: "match", label: "매칭 · 계약 현황", description: "보낸 입점 희망서와 건물주와의 문의 · 방문 · 조건 제안이 어디까지 왔는지 봅니다. 희망서 쓰기 · 보내기는 자리와 비용을 계산한 뒤 마지막 단계 「입점 희망서 제출」에서 합니다.",
+          content: <MatchStatus refresh={sentN} onWrite={() => goTo("submit")} /> },
         { id: "input", label: "시뮬레이션 결과", description: inSlots
           ? "왼쪽에서 자리와 비용 조건을 고르고 「시뮬레이션」을 누르면 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 여기에 나옵니다."
           : "조건을 입력하면 바로 아래에 세 가격대(고급화 · 가성비 · 기능중심)의 비용과 회수기간이 나옵니다.", content: <>
@@ -572,8 +593,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         { id: "risk", label: "위험 확인", description: "이 자리를 떨어뜨릴 이유가 있는지, 계약 전에 더 확인할 것은 무엇인지 시뮬레이션 결과와 입력의 출처로 가릅니다.", content:
           <PostingRiskCheck result={result} strategy={calculation?.input.strategy} industry={calculation?.input.industry_type ?? industry}
             busy={busy} stale={!!changedInput} /> },
-        { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
-          <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
+        { id: "menu", label: "메뉴 설정", description: "업종 평균(출처 포함)을 참고해 대표 메뉴의 판매가 · 원가(재료값) · 장비값 · 영업 조건을 넣고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
+          <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null}
+            industry={industry} detailKey={detailKey} /> },
         { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요.", content: <div className="pstep">
           <Verdict
             eyebrow="PlaceOS · Proposal" conversion="PRICE ▶ PROPOSAL"
@@ -594,7 +616,16 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
               districtId, payload: { input: calculation.input, result, unitName: unit?.n ?? null, handoff: postingResult } })} />}
           <SavedResults kind="posting" refreshKey={savedTick} render={(it) => <SavedPostingView item={it} />} />
           {inSlots && <p className="pstep-pointer">후보를 3곳까지 담아 계약 조건 · 답사 체크리스트로 비교하려면 화면 오른쪽 위 「입점 준비」를 쓰세요.</p>}
+          {/* 2026-11-26 — 결정했으면 마지막 단계에서 그 자리 건물주에게 입점 희망서를 보낸다 */}
+          <p className="pstep-next"><Button type="button" onClick={() => goTo("submit")}>이 자리로 입점 희망서 제출 →</Button></p>
         </div> },
+        // 2026-11-26 사용자 지시 — 계산(시뮬레이션 → … → 비용 비교 및 결정)을 마친 뒤 마지막에 희망서를 쓰고 이 층 → 같은 건물 → 같은 상권 순으로 보낸다.
+        // 건물은 Program 인계와 같은 키(postingResult.buildingId — Page 층 선택 vfu- 도 그 건물)로 본다
+        { id: "submit", label: "입점 희망서 제출", description: "계산을 마쳤다면 입점 희망서를 쓰고 이 자리의 건물주에게 보내세요. 보내는 순간 그 건물주에게만 희망서가 보이고, 수수료는 없습니다.",
+          content: <BriefSubmit districtId={districtId} districtName={districts.find((d) => d.id === districtId)?.name ?? districtId}
+            buildingId={postingResult?.buildingId ?? null} floor={floorMeasured ? floorNumber(effectiveUnit?.floor) : null}
+            place={place}
+            onSent={() => setSentN((n) => n + 1)} onShowStatus={() => goTo("match")} onPick={() => goTo("input")} /> },
       ]} />
     </div></div>
   );
@@ -806,6 +837,13 @@ function postingHeadline({ districtName, unit, unitCount, unitsLoaded, result, p
     ],
     sources,
   };
+}
+
+/** 「입점 희망서 제출」 A. 이 자리의 월 임대료 출처 — 추정을 실제 호가처럼 읽지 않게(StartupFitPanel NOTE 와 같은 말) */
+function rentNote(v: string | undefined): string {
+  if (v === "rone") return "R-ONE 임대료 × 층 계수로 본 추정 · 실제 호가 아님";
+  if (v === "contract" || v === "user_input") return "직접 입력한 값";
+  return "추정 · 실제 호가 아님";
 }
 
 function srcLabel(v: string | undefined): string {

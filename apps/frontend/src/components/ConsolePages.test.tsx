@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import ConsolePages from "./ConsolePages";
@@ -27,6 +28,27 @@ describe("기능 안의 독립 본문", () => {
     expect(screen.getByRole("region", { name: "둘째 쪽" })).toBeTruthy();
     expect(screen.queryByText("첫 쪽 본문")).toBeNull();
     expect(mounted).toBe(0);
+  });
+
+  it("쪽 안의 버튼으로(activeId) 연 쪽도 메뉴로 다른 쪽에 갔다 와도 입력을 보존한다 (2026-11-26)", () => {
+    const pages = [
+      { id: "status", label: "현황", description: "현황 설명", content: <p>현황 본문</p> },
+      { id: "submit", label: "제출", description: "제출 설명", content: <input aria-label="남길 말" /> },
+    ];
+    function Host() {
+      const [page, setPage] = useState("status");
+      return <>
+        <button type="button" onClick={() => setPage("submit")}>제출로 가기</button>
+        <ConsolePages label="검토할 내용" activeId={page} onChange={setPage} pages={pages} />
+      </>;
+    }
+    render(<Host />);
+    fireEvent.click(screen.getByRole("button", { name: "제출로 가기" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "남길 말" }), { target: { value: "합성 메시지" } });
+    fireEvent.click(screen.getByRole("button", { name: "현황" }));
+    expect(screen.queryByRole("textbox", { name: "남길 말" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "제출" }));
+    expect((screen.getByRole("textbox", { name: "남길 말" }) as HTMLInputElement).value).toBe("합성 메시지");
   });
 
   it("keepMounted 쪽은 다른 쪽이 먼저 열려도 숨긴 채 그려 둔다", () => {
