@@ -772,6 +772,26 @@ export interface IndustryCompetition {
   note: string | null; source_url: string | null;
 }
 export const listIndustryDetails = () => getJSON<{ details: IndustryDetail[] }>("/ai/industry-details").then((r) => r.details);
+
+/* ===== Proposal 「메뉴 설정」 업종 기준값 — GET /ai/menu-benchmarks (2026-11-26) =====
+ * 출처가 있는 업종 평균만 온다(KOSIS 서비스업조사 서울 2024 · 농식품부 외식업체 경영실태 조사 2025).
+ * 개인사업 · 가맹점 구분은 연결 전이라 `ownership_split.available=false` — 화면은 「전체 평균」이라고 적는다. */
+export interface MenuBenchmarkValue {
+  key: "open_days" | "avg_ticket" | "sales" | "labor" | "rent" | "labor_rate" | "rent_rate" | "profit_rate" | string;
+  label: string; value: number; raw: number | null; unit: "만원" | "원" | "일" | "%" | string;
+  source: string; detail: string; conversion: string;
+}
+export interface MenuBenchmarkCategory {
+  key: string; label: string; values: MenuBenchmarkValue[];
+  missing: { key: string; label: string; reason: string }[]; notes: string[];
+}
+export interface MenuBenchmarks {
+  categories: MenuBenchmarkCategory[];
+  sources: Record<string, { title: string; org: string; url: string; geography: string; period: string; population: string }>;
+  ownership_split: { available: boolean; reason: string };
+  note: string;
+}
+export const getMenuBenchmarks = () => getJSON<MenuBenchmarks>("/ai/menu-benchmarks");
 export const getIndustryCompetition = (district: string, detail: string) =>
   getJSON<IndustryCompetition>(`/ai/industry-competition?district_id=${encodeURIComponent(district)}&detail_key=${encodeURIComponent(detail)}`);
 

@@ -593,8 +593,9 @@ function PostingSession({ selection, districtId: sharedDistrict, onDistrictChang
         { id: "risk", label: "위험 확인", description: "이 자리를 떨어뜨릴 이유가 있는지, 계약 전에 더 확인할 것은 무엇인지 시뮬레이션 결과와 입력의 출처로 가릅니다.", content:
           <PostingRiskCheck result={result} strategy={calculation?.input.strategy} industry={calculation?.input.industry_type ?? industry}
             busy={busy} stale={!!changedInput} /> },
-        { id: "menu", label: "메뉴 설정", description: "대표 메뉴의 가격 · 원가로 객단가를 잡고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
-          <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null} /> },
+        { id: "menu", label: "메뉴 설정", description: "업종 평균(출처 포함)을 참고해 대표 메뉴의 판매가 · 원가(재료값) · 장비값 · 영업 조건을 넣고, 하루 몇 개를 팔아야 본전인지 계산합니다.", content:
+          <MenuPlanner rent={effectiveUnit?.rent ?? null} rentSource={effectiveUnit?.inputs_source?.rent ?? null} scenarios={result?.scenarios ?? null}
+            industry={industry} detailKey={detailKey} /> },
         { id: "decide", label: "비용 비교 및 결정", description: "이 자리의 결론을 보고, 계산을 저장해 다른 자리 · 조건과 나란히 비교한 뒤 정하세요.", content: <div className="pstep">
           <Verdict
             eyebrow="PlaceOS · Proposal" conversion="PRICE ▶ PROPOSAL"

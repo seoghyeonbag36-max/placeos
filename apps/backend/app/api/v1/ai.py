@@ -14,6 +14,7 @@ from app.services import business_fit as fit_svc
 from app.services import industry_recommend as industry_svc
 from app.services import posting as posting_svc
 from app.services import industry_detail as detail_svc
+from app.services import menu_benchmarks as menu_bench_svc
 from app.services import vacancy_forecast as vacancy_svc
 
 router = APIRouter()
@@ -158,6 +159,12 @@ async def industry_fit_by_district(industry: str) -> dict[str, object]:
 async def industry_details() -> dict[str, object]:
     """세부 업종 선택과 운영 입력 계약. 추천 가능 여부와 분리한다."""
     return {"details": detail_svc.options()}
+
+
+@router.get("/menu-benchmarks")
+async def menu_benchmarks() -> dict[str, object]:
+    """Proposal 「메뉴 설정」 업종 기준값(2026-11-26) — 출처가 있는 업종 평균만. 개인사업 · 가맹점 구분은 연결 전이라 그렇다고 밝힌다."""
+    return menu_bench_svc.payload()
 
 
 @router.get("/industry-competition")

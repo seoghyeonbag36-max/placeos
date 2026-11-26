@@ -96,6 +96,9 @@ describe("단계형 비용 검토", () => {
     fireEvent.change(menu.getByLabelText("메뉴 1 판매가"), { target: { value: "5000" } });
     fireEvent.change(menu.getByLabelText("메뉴 1 원가"), { target: { value: "1500" } });
     fireEvent.change(menu.getByLabelText(/월 영업일/), { target: { value: "25" } });
+    // 고정비는 세 칸(인건비 · 관리비·공과금 · 기타)을 모두 채워야 계산한다 — 빈칸을 0 으로 보지 않는다(2026-11-26)
+    fireEvent.change(menu.getByLabelText(/^인건비/), { target: { value: "0" } });
+    fireEvent.change(menu.getByLabelText(/관리비/), { target: { value: "0" } });
     fireEvent.change(menu.getByLabelText(/기타 월 고정비/), { target: { value: "0" } });
     expect(screen.getByRole("region", { name: "메뉴로 본 손익분기" }).textContent).toContain("평균 객단가 5,000원 · 평균 원가율 30.0%");
     // 임대료(픽스처 자리) ÷ (1 − 30%) ÷ 5,000원 ÷ 25일 — 본전 판매 개수와 세 가격대 추정 매출 대조표가 나온다
