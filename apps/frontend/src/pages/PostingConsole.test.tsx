@@ -79,7 +79,9 @@ describe("PostingConsole — API 경로", () => {
 describe("PostingConsole — 거점 전환", () => {
   it("거점을 바꾸면 새 거점의 자리를 부르고 이전 거점의 자리가 남지 않는다", async () => {
     await waitFor(() => expect(api.count(/garosugil\/postings$/)).toBe(1));
-    expect(within(unitSelect()).getByText(/garosugil 1번 자리/)).toBeTruthy();
+    // 요청 수가 아니라 **그려진 목록**을 기다린다 — 요청은 부르는 순간 세지고 응답 처리 · 렌더는 그 뒤다.
+    // 2026-11-26 main CI 에서 이 줄이 바로 읽다 깨졌다(쪽이 늘어 한 번 그리는 일이 무거워진 뒤 · 응답 50ms 지연으로 재현).
+    await waitFor(() => expect(within(unitSelect()).getByText(/garosugil 1번 자리/)).toBeTruthy());
 
     fireEvent.change(hubSelect(), { target: { value: "yeonnam" } });
 
@@ -139,12 +141,14 @@ describe("PostingConsole — 결과 패널", () => {
     fireEvent.change(hubSelect(), { target: { value: "banpo" } });
 
     await waitFor(() => expect(api.count(/banpo\/postings$/)).toBe(1));
-    await waitFor(() => expect(screen.getByText("자리를 고르면 계산한다.")).toBeTruthy());
+    // 0곳 응답이 **처리된 뒤**의 화면(머리의 「자리가 없다」)을 기다린다 — 「자리를 고르면 계산한다」는 응답 전에도 뜬다.
+    // 비지도(쪽 나눔 없이 전부 그리는) 렌더가 무거워 바쁜 CI 러너에서 기본 1초를 넘긴 적이 있다(2026-11-26) — 여유를 둔다
+    await waitFor(() => expect(screen.getByText(/계산할 실측 공실 자리가 없다/)).toBeTruthy(), { timeout: 3000 });
+    expect(screen.getByText("자리를 고르면 계산한다.")).toBeTruthy();
     expect(tierPanel()).toBeNull();
     expect(unitSelect().disabled).toBe(true);
     expect(screen.getByText(/실측 0곳/)).toBeTruthy();
-    // 화면설계서 2판 상태표: 0곳을 "불러오는 중"으로 남기지 않는다.
-    expect(screen.getByText(/계산할 실측 공실 자리가 없다/)).toBeTruthy();
+    // 화면설계서 2판 상태표: 0곳을 "불러오는 중"으로 남기지 않는다(위에서 기다린 문장).
     // 자리가 없으면 시뮬레이션을 부르지 않는다 — 부르면 없는 자리로 값을 만들어 낸다.
     expect(api.count(/\/ai\/simulate-revenue$/)).toBe(0);
   });
