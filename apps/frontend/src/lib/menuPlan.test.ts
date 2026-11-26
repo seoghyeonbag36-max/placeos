@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dailyFromRevenue, equipmentPlan, ingredientCost, ingredientsTotal, menuBep, menuCategoryOf, menuMix, perHour } from "./menuPlan";
+import { dailyFromRevenue, equipmentPlan, ingredientCost, ingredientsTotal, menuBep, menuCategoryOf, menuMix, menuRowsFromBenchmark, mergeIntoBlanks, perHour } from "./menuPlan";
 
 const row = (price: string, cost: string, share = "") => ({ name: "", price, cost, share });
 
@@ -68,5 +68,26 @@ describe("메뉴 설정 — 재료값 · 장비값 · 영업 시간 (2026-11-26)
     expect(menuCategoryOf("음식점", null, known)).toBeNull();
     expect(menuCategoryOf("치킨", null, ["cafe_coffee"])).toBeNull();          // 기준값에 없는 업종이면 고르지 않는다
     expect(menuCategoryOf("", "", known)).toBeNull();
+  });
+});
+
+describe("메뉴 설정 — 업종 평균에서 채우기 (2026-11-26)", () => {
+  it("대표메뉴 → 메뉴 줄: 원가 = 판매가 × 식재료비 비율, 비중 = 응답 수 비중(합 100 · 최대 나머지)", () => {
+    const rows = menuRowsFromBenchmark([{ name: "커피", n: 530, price: 4118 }, { name: "음료", n: 73, price: 5017 },
+      { name: "차류", n: 52, price: 4868 }, { name: "빵", n: 0, price: 6000 }], 39.1, 4);
+    expect(rows.map((r) => r.name)).toEqual(["커피", "음료", "차류"]);                 // 응답 0 인 메뉴는 뺀다
+    expect(rows[0]).toEqual({ name: "커피", price: "4118", cost: "1610", share: "81" });
+    expect(rows.reduce((t, r) => t + Number(r.share), 0)).toBe(100);
+    expect(menuRowsFromBenchmark([{ name: "a", n: 1, price: 1000 }], 100, 4)).toEqual([]);   // 비율이 범위 밖이면 만들지 않는다
+    expect(menuRowsFromBenchmark([], 40, 4)).toEqual([]);
+  });
+
+  it("빈 줄에 먼저 채우고 모자라면 붙인다 · 이미 적은 줄과 같은 이름은 건드리지 않는다 · 최대 줄 수", () => {
+    type R = { name: string };
+    const blank = (r: R) => !r.name;
+    const key = (r: R) => r.name;
+    expect(mergeIntoBlanks<R>([{ name: "커피" }, { name: "" }], [{ name: "커피" }, { name: "음료" }, { name: "빵" }], blank, key, 8))
+      .toEqual([{ name: "커피" }, { name: "음료" }, { name: "빵" }]);
+    expect(mergeIntoBlanks<R>([{ name: "a" }], [{ name: "b" }, { name: "c" }], blank, key, 2)).toEqual([{ name: "a" }, { name: "b" }]);
   });
 });

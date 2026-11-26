@@ -104,3 +104,33 @@ export function menuCategoryOf(industry: string | null | undefined, detailKey: s
   const hit = MENU_WORDS.find(([key, re]) => known.includes(key) && re.test(text));
   return hit ? hit[0] : null;
 }
+
+/* ── 업종 평균에서 채우기(2026-11-26 · 농식품부 2025 외식업체 경영실태 조사) ─────────────── */
+
+/** 대표메뉴(응답 수 순) → 메뉴 표 줄. 원가 = 판매가 × 업종 식재료비 비율(추정) · 비중 = 고른 메뉴들의 **응답 수** 비중(판매 비중 아님 ·
+ *  최대 나머지 방식으로 합 100). 응답 수나 가격이 0 이하인 메뉴는 빼고 앞에서 `take` 개만 */
+export function menuRowsFromBenchmark(items: { name: string; n: number; price: number }[], costRatePct: number, take: number): MenuRow[] {
+  const chosen = items.filter((i) => i.price > 0 && i.n > 0).slice(0, Math.max(0, take));
+  const total = chosen.reduce((t, i) => t + i.n, 0);
+  if (!chosen.length || !total || !Number.isFinite(costRatePct) || costRatePct < 0 || costRatePct >= 100) return [];
+  const exact = chosen.map((i) => (i.n / total) * 100);
+  const shares = exact.map(Math.floor);
+  const order = exact.map((v, k) => [v - Math.floor(v), k] as const).sort((a, b) => b[0] - a[0]);
+  for (let r = 100 - shares.reduce((a, b) => a + b, 0), j = 0; r > 0; r--, j++) shares[order[j % order.length][1]] += 1;
+  return chosen.map((i, k) => ({ name: i.name, price: String(i.price), cost: String(Math.round((i.price * costRatePct) / 100)), share: String(shares[k]) }));
+}
+
+/** 들어온 줄을 빈 줄에 먼저 채우고 모자라면 뒤에 붙인다(최대 `max` 줄). 이미 적은 줄은 건드리지 않고, 같은 이름은 다시 넣지 않는다 */
+export function mergeIntoBlanks<T>(rows: T[], incoming: T[], isBlank: (r: T) => boolean, key: (r: T) => string, max: number): T[] {
+  const out = [...rows];
+  const have = new Set(rows.filter((r) => !isBlank(r)).map(key));
+  for (const item of incoming) {
+    if (have.has(key(item))) continue;
+    const slot = out.findIndex(isBlank);
+    if (slot >= 0) out[slot] = item;
+    else if (out.length < max) out.push(item);
+    else break;
+    have.add(key(item));
+  }
+  return out;
+}

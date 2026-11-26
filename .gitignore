@@ -87,6 +87,10 @@ apps/frontend/tsconfig.tsbuildinfo
 # 기각한 바로 그 모델이다. area_basis() 가 "ftc" → "rent" 로 바뀌므로 조용하지는
 # 않지만, 아무도 안 보면 조용한 것과 같다.
 !data/gold/platform_posting_store_area.json
+# 예외: Proposal 「메뉴 설정」 업종 평균(~67KB · 2026-11-26) — 농식품부 2025 외식업체 경영실태 조사 통계보고서에서
+# build_mafra_dining_2025.py 가 뽑은 표(대표메뉴 가격 · 영업일 · 영업시간 · 식재료비 · 투자비 · 운영형태별). services/menu_benchmarks 가
+# 읽는다. 원문 PDF 는 이 클라우드 환경에서 받을 수 없어(해외 접속 차단) 다시 만들기 어렵다 — 빠지면 배포에서 메뉴 기준값이 KOSIS 서울 값만 남는다.
+!data/gold/mafra_dining_2025.json
 # 예외: Program 상권 행사(~480KB, 52거점 785건) — services/events.py 가 정적 서빙.
 # 빠지면 배포 환경에서 events_source 가 "seed" 로 떨어져 지어낸 행사가 지도에 다시 찍힌다.
 !data/gold/platform_events.json

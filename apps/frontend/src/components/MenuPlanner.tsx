@@ -1,7 +1,10 @@
 import { Fragment, useEffect, useId, useState } from "react";
-import { getMenuBenchmarks, tierAvailable, type MenuBenchmarkCategory, type MenuBenchmarks, type TierScenario } from "@/lib/api";
 import {
-  dailyFromRevenue, emptyEquipment, emptyIngredient, emptyMenuRow, equipmentPlan, ingredientsTotal, menuBep, menuCategoryOf, menuMix, perHour,
+  getMenuBenchmarks, tierAvailable, type MenuBenchmarkCategory, type MenuBenchmarks, type MenuBenchmarkValue, type MenuOwnershipGroup, type TierScenario,
+} from "@/lib/api";
+import {
+  dailyFromRevenue, emptyEquipment, emptyIngredient, emptyMenuRow, equipmentPlan, ingredientsTotal, menuBep, menuCategoryOf, menuMix, menuRowsFromBenchmark,
+  mergeIntoBlanks, perHour,
   type EquipmentRow, type IngredientRow, type MenuRow,
 } from "@/lib/menuPlan";
 import "./PostingSteps.css";
@@ -9,6 +12,8 @@ import "./PostingSteps.css";
 const TIER_NAME: Record<string, string> = { premium: "고급화", value: "가성비", factory: "기능중심" };
 const MAX_ROWS = 8;
 const MAX_SUB = 10;
+/** 대표메뉴로 채울 때 넣는 메뉴 수 */
+const MENU_FILL = 4;
 const n0 = (v: number) => Math.round(v).toLocaleString("ko-KR");
 const n1 = (v: number) => (Math.round(v * 10) / 10).toLocaleString("ko-KR");
 const digits = (v: string) => v.replace(/[^\d.]/g, "");
@@ -17,6 +22,14 @@ type Own = "independent" | "franchise";
 type Row = MenuRow & { id: number; ingredients: IngredientRow[] };
 let nextId = 1;
 const newRow = (): Row => ({ ...emptyMenuRow(), id: nextId++, ingredients: [emptyIngredient()] });
+const blankRow = (r: MenuRow) => ![r.name, r.price, r.cost, r.share].some((v) => v.trim());
+const blankEquip = (e: EquipmentRow) => ![e.name, e.price, e.years].some((v) => v.trim());
+/** 빈칸 채우기가 다루는 칸 — 같은 값 키를 업종 평균 · 운영형태 평균 어느 쪽에서든 읽는다 */
+const FILL_FIELDS = [
+  { key: "open_days", label: "월 영업일", fmt: (v: number) => String(Math.round(v)) },
+  { key: "open_hours", label: "하루 영업 시간", fmt: (v: number) => String(v) },
+  { key: "labor_month", label: "인건비", fmt: (v: number) => String(Math.round(v)) },
+] as const;
 
 /**
  * Posting 「메뉴 설정」(2026-11-10) — 대표 메뉴로 객단가 · 원가율을 잡고 하루 손익분기 판매 개수를 낸다. 계산은 `lib/menuPlan`.
@@ -24,8 +37,9 @@ const newRow = (): Row => ({ ...emptyMenuRow(), id: nextId++, ingredients: [empt
  * 2026-11-26 사용자 요청 「선택한 업종을 (개인사업, 가맹점)에 맞는 메뉴, 판매가, 원가, 비중 평균값 제시 및 재료값, 장비값 예시 설정란 제공,
  * 월 영업일, 영업 시간, 고정비 예시」:
  *   · 운영 형태(개인사업 · 가맹점) — 가맹점이면 로열티(매출의 %) · 광고분담금 칸이 더해진다
- *   · 업종 평균(`GET /ai/menu-benchmarks`) — 출처가 있는 값만 보이고, 「평균으로 빈칸 채우기」를 누를 때만 비어 있는 칸에 넣는다.
- *     개인사업 · 가맹점을 나눈 평균과 메뉴별 평균은 아직 연결 전이라 그렇다고 적는다(같은 값을 둘로 나눠 보이지 않는다)
+ *   · 업종 평균(`GET /ai/menu-benchmarks` — 농식품부 2025 외식업체 경영실태 조사 + KOSIS 서울) — 출처가 있는 값만 보이고, 누를 때만 빈칸에 넣는다:
+ *     「대표메뉴로 메뉴 표 채우기」(판매가 = 대표메뉴 평균 가격 · 원가 = 판매가 × 업종 식재료비 비율 추정 · 비중 = 응답 수 비중, 판매 비중 아님) ·
+ *     「업종 평균으로 빈칸 채우기」 · 「개인사업/가맹점 평균으로 빈칸 채우기」(외식업 전체 — 보고서에 업종 × 운영형태 교차가 없다) · 「업종 평균 장비값 넣기」
  *   · 재료값 — 메뉴마다 재료로 1개 원가를 계산해 「원가 칸에 넣기」 · 장비값 — 구입가 ÷ 쓸 햇수 ÷ 12 를 월 고정비에 더한다
  *   · 월 영업일 · 하루 영업 시간 · 고정비(인건비 · 관리비 · 기타) — 예시는 칸 안의 흐린 글씨(placeholder)로만, 출처가 있는 평균이면 그 값으로
  */
@@ -79,13 +93,32 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
   const setEquip = (i: number, k: keyof EquipmentRow, v: string) => setEquipment((es) => es.map((e, j) => (j === i ? { ...e, [k]: k === "name" ? v : digits(v) } : e)));
   const tiers = Object.entries(scenarios ?? {}).filter(([, s]) => tierAvailable(s));
 
-  // 「평균으로 빈칸 채우기」 — 출처가 있는 평균이 있고 칸이 비어 있을 때만(기존 입력은 그대로 둔다)
-  const fillable = [
-    { key: "open_days", label: "월 영업일", blank: !days.trim(), put: setDays },
-    { key: "labor", label: "인건비", blank: !labor.trim(), put: setLabor },
-  ].filter((f) => f.blank && valueOf(f.key));
+  // 빈칸 채우기 — 출처가 있는 평균이 있고 칸이 비어 있을 때만(기존 입력은 그대로 둔다)
+  const fieldState: Record<(typeof FILL_FIELDS)[number]["key"], [string, (v: string) => void]> = {
+    open_days: [days, setDays], open_hours: [hours, setHours], labor_month: [labor, setLabor],
+  };
+  const fillablesFrom = (values: MenuBenchmarkValue[] | undefined) => FILL_FIELDS
+    .map((f) => ({ ...f, v: values?.find((x) => x.key === f.key) }))
+    .filter((f) => f.v && !fieldState[f.key][0].trim());
+  const fillFrom = (list: ReturnType<typeof fillablesFrom>) => { for (const f of list) fieldState[f.key][1](f.fmt(f.v!.value)); };
+  const ownGroup = bench?.ownership.groups.find((g) => g.key === own) ?? null;
+  const industryFill = fillablesFrom(category?.values);
+  const ownershipFill = fillablesFrom(ownGroup?.values);
   const daysHint = valueOf("open_days");
-  const laborHint = valueOf("labor");
+  const hoursHint = valueOf("open_hours");
+  const laborHint = valueOf("labor_month");
+  const menus = category?.menus ?? null;
+  const menuIncoming = menus ? menuRowsFromBenchmark(menus.items, menus.cost_rate.value, MENU_FILL) : [];
+  const menuFillable = menuIncoming.some((m) => !rows.some((r) => !blankRow(r) && r.name.trim() === m.name)) && (rows.some(blankRow) || rows.length < MAX_ROWS);
+  const fillMenus = () => setRows((rs) => mergeIntoBlanks<Row>(rs, menuIncoming.map((m) => ({ ...newRow(), ...m })), blankRow, (r) => r.name.trim(), MAX_ROWS));
+  const kitchen = valueOf("invest_kitchen");
+  const hall = valueOf("invest_hall");
+  const equipIncoming: EquipmentRow[] = [
+    kitchen && { name: "주방 관련(업종 평균)", price: String(kitchen.value), years: "" },
+    hall && { name: "홀 관련(업종 평균)", price: String(hall.value), years: "" },
+  ].filter(Boolean) as EquipmentRow[];
+  const equipFillable = equipIncoming.some((e) => !equipment.some((x) => x.name.trim() === e.name)) && (equipment.some(blankEquip) || equipment.length < MAX_SUB);
+  const fillEquipment = () => setEquipment((es) => mergeIntoBlanks(es, equipIncoming, blankEquip, (e) => e.name.trim(), MAX_SUB));
 
   const missingInputs = [
     !days.trim() && "월 영업일(1~31)", !labor.trim() && "인건비", !utilities.trim() && "관리비 · 공과금", !other.trim() && "기타 월 고정비",
@@ -105,9 +138,10 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
         ))}
       </div>
 
-      <BenchmarkCard bench={bench} failed={benchFailed} category={category} categoryKey={categoryKey} onPick={setPicked} franchise={franchise}
-        fillLabel={fillable.map((f) => f.label).join(" · ")}
-        onFill={fillable.length ? () => { for (const f of fillable) f.put(String(valueOf(f.key)!.value)); } : undefined} />
+      <BenchmarkCard bench={bench} failed={benchFailed} category={category} categoryKey={categoryKey} onPick={setPicked} own={own}
+        industryFill={industryFill.length ? { label: industryFill.map((f) => f.label).join(" · "), run: () => fillFrom(industryFill) } : undefined}
+        ownershipFill={ownershipFill.length && ownGroup ? { label: ownershipFill.map((f) => f.label).join(" · "), run: () => fillFrom(ownershipFill) } : undefined}
+        menuFill={menuFillable ? fillMenus : undefined} equipFill={equipFillable ? fillEquipment : undefined} />
 
       <h3 className="pstep-h">메뉴 <small>{franchise ? "가맹본부 정보공개서 · 가맹계약서의 판매가 · 공급가(원가)를 넣으세요" : "대표 메뉴 3~5개면 충분해요"}</small></h3>
       <div className="pstep-table">
@@ -173,7 +207,7 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
       <p className="pstep-ingr-foot">
         {equipment.length < MAX_SUB && <button type="button" className="pstep-add" onClick={() => setEquipment((es) => [...es, emptyEquipment()])}>+ 장비 더하기</button>}
         {equip ? <span>장비값 합계 <b>{n0(equip.total)}만원</b> · 한 달 감가상각 <b>{n1(equip.monthly)}만원</b> <small>장비 {equip.n}개</small></span>
-          : <span className="pstep-sub">계산 예) 1,200만원짜리 장비를 5년 쓰면 한 달 20만원이에요. 장비가 없으면 비워 두세요.</span>}
+          : <span className="pstep-sub">계산 예) 1,200만원짜리 장비를 5년 쓰면 한 달 20만원이에요. 쓸 햇수까지 넣어야 계산해요 · 장비가 없으면 비워 두세요.</span>}
       </p>
 
       <h3 className="pstep-h">영업 조건 · 고정비 <small>흐린 글씨는 예시예요 — 출처가 있는 평균이면 그 값을 적었어요</small></h3>
@@ -182,10 +216,11 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
           <input id={`${id}-days`} inputMode="numeric" value={days} onChange={(e) => setDays(e.target.value.replace(/[^\d]/g, ""))}
             placeholder={daysHint ? `예: ${daysHint.value} (${category!.label} 평균)` : "예: 주 1회 쉬면 26"} /></label>
         <label htmlFor={`${id}-hours`}><span>하루 영업 시간 <small>시간</small></span>
-          <input id={`${id}-hours`} inputMode="numeric" value={hours} onChange={(e) => setHours(digits(e.target.value))} placeholder="예: 11시~21시면 10" /></label>
+          <input id={`${id}-hours`} inputMode="decimal" value={hours} onChange={(e) => setHours(digits(e.target.value))}
+            placeholder={hoursHint ? `예: ${hoursHint.value} (${category!.label} 평균)` : "예: 11시~21시면 10"} /></label>
         <label htmlFor={`${id}-labor`}><span>인건비 <small>만원 · 직원 급여 · 4대보험</small></span>
           <input id={`${id}-labor`} inputMode="numeric" value={labor} onChange={(e) => setLabor(digits(e.target.value))}
-            placeholder={laborHint ? `예: ${n0(laborHint.value)} (${category!.label} 서울 평균)` : "없으면 0"} /></label>
+            placeholder={laborHint ? `예: ${n0(laborHint.value)} (${category!.label} 평균 · 직원 몫)` : "없으면 0"} /></label>
         <label htmlFor={`${id}-util`}><span>관리비 · 공과금 <small>만원 · 전기 · 가스 · 수도</small></span>
           <input id={`${id}-util`} inputMode="numeric" value={utilities} onChange={(e) => setUtilities(digits(e.target.value))} placeholder="없으면 0" /></label>
         <label htmlFor={`${id}-other`}><span>기타 월 고정비 <small>만원 · 통신 · 보험 · 소모품 등, 임대료 제외</small></span>
@@ -225,14 +260,24 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
   );
 }
 
-/** 업종 평균 · 출처 — 확인한 값만 보이고, 없는 값은 왜 없는지 적는다. 개인사업 · 가맹점 구분이 없으면 「전체 평균」이라고 밝힌다 */
-function BenchmarkCard({ bench, failed, category, categoryKey, onPick, onFill, fillLabel, franchise }: {
+const OWN_KEYS = ["open_days", "open_hours", "avg_ticket", "food_cost_rate", "sales_month", "labor_month", "rent_month", "invest_total", "invest_kitchen", "invest_hall"];
+const fmtValue = (v: MenuBenchmarkValue) => (v.unit === "%" ? `${v.value}%` : `${v.value.toLocaleString("ko-KR")}${v.unit}`);
+
+/** 업종 평균 · 출처 — 확인한 값만 보이고, 누를 때만 빈칸에 넣는다. 개인사업 · 가맹점 비교는 외식업 전체 값이라고 밝힌다(업종 × 운영형태 교차 없음) */
+function BenchmarkCard({ bench, failed, category, categoryKey, onPick, own, industryFill, ownershipFill, menuFill, equipFill }: {
   bench: MenuBenchmarks | null; failed: boolean; category: MenuBenchmarkCategory | null; categoryKey: string | null;
-  onPick: (key: string | null) => void; onFill?: () => void; fillLabel: string; franchise: boolean;
+  onPick: (key: string | null) => void; own: Own;
+  industryFill?: { label: string; run: () => void }; ownershipFill?: { label: string; run: () => void };
+  menuFill?: () => void; equipFill?: () => void;
 }) {
   const selectId = useId();
   if (failed) return <p className="pstep-empty" role="status">업종 평균을 불러오지 못했어요. 메뉴와 비용은 직접 넣어 계산할 수 있어요.</p>;
   if (!bench) return <p className="pstep-empty" role="status">업종 평균을 불러오는 중…</p>;
+  const menus = category?.menus ?? null;
+  const menuTotal = menus ? menus.items.reduce((t, i) => t + i.n, 0) : 0;
+  const groups = bench.ownership.groups;
+  const ownLabel = groups.find((g) => g.key === own)?.label ?? "";
+  const cell = (g: MenuOwnershipGroup, key: string) => { const v = g.values.find((x) => x.key === key); return v ? fmtValue(v) : "—"; };
   return (
     <div className="pstep-bench" role="group" aria-label="업종 평균">
       <label htmlFor={selectId} className="pstep-bench-pick"><span>업종 평균</span>
@@ -241,22 +286,47 @@ function BenchmarkCard({ bench, failed, category, categoryKey, onPick, onFill, f
           {bench.categories.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
       </label>
-      {!category ? <p className="pstep-sub">업종을 고르면 그 업종의 공식 통계 평균(출처 포함)을 보여 줘요.</p> : <>
+      {!category ? <p className="pstep-sub">업종을 고르면 그 업종의 대표메뉴 가격과 공식 통계 평균(출처 포함)을 보여 줘요.</p> : <>
+        {menus && <div className="pstep-bench-menus" role="group" aria-label="대표메뉴 평균 가격">
+          <h4>대표메뉴 평균 가격 <small>표 {menus.table} · {menus.page}쪽 · 응답 {menus.total.n.toLocaleString("ko-KR")}건</small></h4>
+          <div className="pstep-table"><table>
+            <thead><tr><th scope="col">메뉴</th><th scope="col">평균 판매가</th><th scope="col">추정 원가</th><th scope="col">응답 수(비중)</th></tr></thead>
+            <tbody>{menus.items.map((it) => (
+              <tr key={it.name}><th scope="row">{it.name}</th><td>{it.price.toLocaleString("ko-KR")}원</td>
+                <td>{Math.round((it.price * menus.cost_rate.value) / 100).toLocaleString("ko-KR")}원</td>
+                <td>{it.n.toLocaleString("ko-KR")}건 ({menuTotal ? Math.round((it.n / menuTotal) * 100) : 0}%)</td></tr>))}</tbody>
+          </table></div>
+          <p className="pstep-foot">추정 원가 = 판매가 × 이 업종 식재료비 비율 {menus.cost_rate.value}%({menus.cost_rate.detail}). {menus.note}</p>
+          {menuFill && <button type="button" className="pstep-mini is-strong" onClick={menuFill}>대표메뉴로 메뉴 표 채우기 (앞 {MENU_FILL}개)</button>}
+        </div>}
         {category.values.length > 0 && <ul className="pstep-bench-list">{category.values.map((v) => {
           const src = bench.sources[v.source];
-          return <li key={v.key}><b>{v.label}</b> <span>{v.unit === "%" ? `${v.value}%` : `${v.value.toLocaleString("ko-KR")}${v.unit}`}
+          return <li key={v.key}><b>{v.label}</b> <span>{fmtValue(v)}
             {v.raw != null && v.raw !== v.value && <small> (원문 {v.raw.toLocaleString("ko-KR")}{v.unit})</small>}</span>
             <small>{src ? `${src.org} ${src.title} · ` : ""}{v.detail}</small></li>;
         })}</ul>}
         {category.notes.map((n) => <p key={n} className="pstep-note">{n}</p>)}
-        {(!bench.ownership_split.available || franchise) && <p className="pstep-note">{bench.ownership_split.available ? "" : bench.ownership_split.reason}
-          {franchise ? " 가맹점은 가맹본부가 메뉴 · 판매가 · 공급가를 정하니 정보공개서 · 가맹계약서의 값을 넣으세요." : ""}</p>}
         {category.missing.length > 0 && <details className="pstep-bench-missing"><summary>아직 없는 값 {category.missing.length}개</summary>
           <ul>{category.missing.map((m) => <li key={m.key}><b>{m.label}</b> — {m.reason}</li>)}</ul>
         </details>}
-        {onFill && <button type="button" className="pstep-mini is-strong" onClick={onFill}>평균으로 빈칸 채우기 ({fillLabel})</button>}
-        <p className="pstep-foot">{bench.note} 출처: {Object.values(bench.sources).map((s, i) => <span key={s.url}>{i > 0 && " · "}<a href={s.url} target="_blank" rel="noreferrer">{s.org} {s.title}</a> ({s.geography} · {s.period} · {s.population})</span>)}</p>
+        <p className="pstep-bench-actions">
+          {industryFill && <button type="button" className="pstep-mini is-strong" onClick={industryFill.run}>업종 평균으로 빈칸 채우기 ({industryFill.label})</button>}
+          {equipFill && <button type="button" className="pstep-mini" onClick={equipFill}>업종 평균 장비값 넣기 (주방 · 홀)</button>}
+        </p>
       </>}
+      {bench.ownership.available && <div className="pstep-bench-own" role="group" aria-label="운영 형태별 평균">
+        <h4>개인사업 · 가맹점 평균 <small>{bench.ownership.scope}</small></h4>
+        <div className="pstep-table"><table>
+          <thead><tr><th scope="col">항목</th>{groups.map((g) => <th key={g.key} scope="col" className={g.key === own ? "is-on" : undefined}
+            aria-current={g.key === own ? "true" : undefined}>{g.label}<small> {g.n.toLocaleString("ko-KR")}곳</small></th>)}</tr></thead>
+          <tbody>{OWN_KEYS.filter((k) => groups[0]?.values.some((v) => v.key === k)).map((k) => (
+            <tr key={k}><th scope="row">{groups[0].values.find((v) => v.key === k)!.label}</th>
+              {groups.map((g) => <td key={g.key} className={g.key === own ? "is-on" : undefined}>{cell(g, k)}</td>)}</tr>))}</tbody>
+        </table></div>
+        <p className="pstep-foot">{groups.map((g) => `${g.label} = ${g.detail}`).join(" · ")}. {bench.ownership.note}</p>
+        {ownershipFill && <button type="button" className="pstep-mini" onClick={ownershipFill.run}>{ownLabel} 평균으로 빈칸 채우기 ({ownershipFill.label})</button>}
+      </div>}
+      <p className="pstep-foot">{bench.note} 출처: {Object.values(bench.sources).map((s, i) => <span key={s.url}>{i > 0 && " · "}<a href={s.url} target="_blank" rel="noreferrer">{s.org} {s.title}</a> ({s.geography} · {s.period} · {s.population})</span>)}</p>
     </div>
   );
 }
