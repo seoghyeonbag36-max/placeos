@@ -66,3 +66,10 @@
 .pstep-sub{color:var(--text-subtle);font-size:var(--fs-caption)}
 @media (max-width:420px){.pstep-own{grid-template-columns:minmax(0,1fr)}}
 
+/* 메뉴 설정 — 대표메뉴 · 개인사업/가맹점 비교(2026-11-26 · 농식품부 2025 외식업체 경영실태 조사) */
+.pstep-bench h4{margin:0;font-size:13px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-2)}
+.pstep-bench h4 small{font-size:var(--fs-caption);font-weight:400;color:var(--text-subtle)}
+.pstep-bench-menus,.pstep-bench-own{display:grid;gap:6px;padding-top:var(--sp-2);border-top:1px solid var(--line-alt)}
+.pstep-bench-own th.is-on,.pstep-bench-own td.is-on{background:var(--track-posting-soft,var(--surface-sunken));color:var(--ink-alt);font-weight:700}
+.pstep-bench-own thead th small{font-weight:400;color:var(--text-subtle)}
+.pstep-bench-actions{margin:0;display:flex;flex-wrap:wrap;gap:var(--sp-2)}

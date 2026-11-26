@@ -774,21 +774,32 @@ export interface IndustryCompetition {
 export const listIndustryDetails = () => getJSON<{ details: IndustryDetail[] }>("/ai/industry-details").then((r) => r.details);
 
 /* ===== Proposal 「메뉴 설정」 업종 기준값 — GET /ai/menu-benchmarks (2026-11-26) =====
- * 출처가 있는 업종 평균만 온다(KOSIS 서비스업조사 서울 2024 · 농식품부 외식업체 경영실태 조사 2025).
- * 개인사업 · 가맹점 구분은 연결 전이라 `ownership_split.available=false` — 화면은 「전체 평균」이라고 적는다. */
+ * 출처가 있는 값만 온다 — 농식품부 2025 외식업체 경영실태 조사(전국 · 업종별 · 운영형태별) + KOSIS 서비스업조사(서울 2024 · seoul_* 키).
+ * ⚠ 보고서는 업종 × 운영형태 교차를 공표하지 않는다 — 개인사업/가맹점 비교(`ownership`)는 외식업 전체 값이다. */
 export interface MenuBenchmarkValue {
-  key: "open_days" | "avg_ticket" | "sales" | "labor" | "rent" | "labor_rate" | "rent_rate" | "profit_rate" | string;
-  label: string; value: number; raw: number | null; unit: "만원" | "원" | "일" | "%" | string;
+  key: "open_days" | "open_hours" | "avg_ticket" | "food_cost_rate" | "sales_month" | "labor_month" | "rent_month" | "owner_pay_month"
+    | "invest_total" | "invest_kitchen" | "invest_hall" | "invest_interior" | "seoul_sales_month" | "seoul_labor_month" | "seoul_rent_month"
+    | "seoul_profit_rate" | string;
+  label: string; value: number; raw: number | null; unit: "만원" | "원" | "일" | "시간" | "%" | string;
   source: string; detail: string; conversion: string;
 }
+/** 업종별 대표메뉴 평균 가격(보고서 표 68~86). `n` 은 그 메뉴를 대표메뉴로 꼽은 응답 수 — 판매 비중이 아니다 */
+export interface MenuBenchmarkMenus {
+  table: number; page: number; title: string; total: { n: number; price: number };
+  items: { name: string; n: number; price: number }[];
+  /** 그 업종의 식재료비 ÷ 매출액(%) — 메뉴 원가 추정에 쓴다 */
+  cost_rate: { value: number; detail: string };
+  note: string;
+}
 export interface MenuBenchmarkCategory {
-  key: string; label: string; values: MenuBenchmarkValue[];
+  key: string; label: string; values: MenuBenchmarkValue[]; menus: MenuBenchmarkMenus | null;
   missing: { key: string; label: string; reason: string }[]; notes: string[];
 }
+export interface MenuOwnershipGroup { key: "independent" | "franchise"; label: string; detail: string; n: number; values: MenuBenchmarkValue[] }
 export interface MenuBenchmarks {
   categories: MenuBenchmarkCategory[];
+  ownership: { available: boolean; scope: string; note: string; groups: MenuOwnershipGroup[] };
   sources: Record<string, { title: string; org: string; url: string; geography: string; period: string; population: string }>;
-  ownership_split: { available: boolean; reason: string };
   note: string;
 }
 export const getMenuBenchmarks = () => getJSON<MenuBenchmarks>("/ai/menu-benchmarks");
