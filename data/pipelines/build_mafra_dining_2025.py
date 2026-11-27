@@ -14,6 +14,8 @@
 - 운영형태: 「비프랜차이즈」 = 독립운영(개인경영권), 「프랜차이즈」 = 가맹점 + 본사직영(표 30 — 본사직영은 전체의 1.8%).
 - 표 24 영업시간 · 25 월 영업일 · 31~34 개업 투자비(전체 · 인테리어 · 주방 · 홀) · 67 객단가 · 95~104 매출과 비용 항목.
 - 표 68~86 대표메뉴별 가격(업종별) — 메뉴 · 응답 수(사례수) · 평균 가격. 응답 수는 「그 메뉴를 대표메뉴로 꼽은 업체 수」지 판매 비중이 아니다.
+- 표 105 품목별 식재료비 비중(평균 · %) — 쌀 · 곡류 · 채소 · 과일 · 육류 · 수산물 · 가공식품 · 기타 · 주류(2026-11-27 · 메뉴 설정 「식재료비」 칸).
+  행마다 합이 100 에 가까워야 한다(±1.5 · 반올림).
 
 ## 단위 — 매출 · 비용(표 95~104)은 연간으로 읽는다
 매출액 구간이 「1억~5억 원 미만」 71.6% · 「5억 원 이상」 8.2%라 월 기준일 수 없다. 화면은 ÷12 로 월을 낸다.
@@ -48,6 +50,8 @@ MENU_TABLES = {69: "한식", 70: "중식 음식점업", 71: "일식 음식점업
                77: "피자·햄버거·샌드위치", 78: "치킨 전문점", 79: "김밥 및 기타 간이음식점업", 80: "간이 음식 포장 판매 전문점",
                83: "생맥주 전문점", 84: "기타 주점업", 85: "커피 전문점", 86: "기타 비알코올 음료점업"}
 COST_PARTS = ["food_cost", "labor", "rent", "tax", "family_labor", "owner_pay", "other_cost"]
+FOOD_MIX_TABLE = 105
+FOOD_MIX_COLUMNS = ["쌀", "곡류(쌀 제외)", "채소", "과일", "육류", "수산물", "가공식품(공산품)", "기타", "주류"]
 NUM = r"-?[\d,]+(?:\.\d+)?"
 SEG = re.compile(r"([^\d\s][^\d]*?)\s+(\d[\d,]*)\s+(\d[\d,]*)(?=\s|$)")
 
@@ -79,6 +83,24 @@ def _index(pages: list[str]) -> dict[int, list[tuple[int, str, int]]]:
         for m in re.finditer(r"<표 (\d+)>\s*([^\n]*)", text):
             idx.setdefault(int(m.group(1)), []).append((i, m.group(2).strip(), int(printed[-1]) if printed else 0))
     return idx
+
+
+def _row_all(lines: list[str], label: str) -> list[float] | None:
+    """그 행의 수 전부(사례수 다음 칸들). 「피자·햄버거·샌드위치」는 수가 가운데 「음식점」 줄에 있다."""
+    if label == "피자·햄버거·샌드위치":
+        for i, ln in enumerate(lines):
+            if label in ln:
+                for nxt in lines[i:i + 3]:
+                    m = re.search(r"음식점\s+(" + NUM + r"(?:\s+" + NUM + r")+)\s*$", nxt)
+                    if m:
+                        return [_num(x) for x in re.findall(NUM, m.group(1))]
+        return None
+    pat = (r"(?<!비)" if label == "프랜차이즈" else "") + re.escape(label) + r"\s+(" + NUM + r"(?:\s+" + NUM + r")+)\s*$"
+    for ln in lines:
+        m = re.search(pat, ln)
+        if m and not re.search(re.escape(label) + r"\s+\S*[가-힣]", ln):
+            return [_num(x) for x in re.findall(NUM, m.group(1))]
+    return None
 
 
 def _row(lines: list[str], label: str) -> tuple[float, float] | None:
@@ -131,6 +153,20 @@ def build(pdf: Path) -> dict:
                         "total": {"n": int(total.group(1).replace(",", "")), "price": int(total.group(2).replace(",", ""))},
                         "items": sorted(items.values(), key=lambda it: (-it["n"], it["name"]))}
 
+    # 표 105 — 품목별 식재료비 비중(%) · 행마다 9칸
+    pdf_page, title, printed = idx[FOOD_MIX_TABLE][0]
+    lines = pages[pdf_page - 1].splitlines()
+    mix_rows = {}
+    for label in ROWS:
+        got = _row_all(lines, label)
+        if got is None or len(got) != 1 + len(FOOD_MIX_COLUMNS):
+            raise SystemExit(f"표 {FOOD_MIX_TABLE} 「{label}」 행을 읽지 못했다: {got}")
+        values = got[1:]
+        if abs(sum(values) - 100) > 1.5:
+            raise SystemExit(f"표 {FOOD_MIX_TABLE} 「{label}」 합 {sum(values):.1f}% — 100 에서 너무 멀다")
+        mix_rows[label] = {"n": int(got[0]), "values": values}
+    food_mix = {"table": FOOD_MIX_TABLE, "title": title, "page": printed, "unit": "%", "columns": FOOD_MIX_COLUMNS, "rows": mix_rows}
+
     # 검산 — 행마다 회계 항등식
     worst = 0.0
     for label in ROWS:
@@ -154,6 +190,7 @@ def build(pdf: Path) -> dict:
         "checks": {"accounting_identity_max_gap_manwon": round(worst, 2)},
         "tables": tables,
         "menus": menus,
+        "food_mix": food_mix,
     }
 
 
@@ -162,7 +199,8 @@ def main() -> None:
         raise SystemExit(__doc__)
     out = build(Path(sys.argv[1]))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(f"→ {OUT.relative_to(ROOT)} · 표 {len(out['tables'])}개 · 메뉴표 {len(out['menus'])}개 · 검산 최대 차 {out['checks']['accounting_identity_max_gap_manwon']}만원")
+    print(f"→ {OUT.relative_to(ROOT)} · 표 {len(out['tables'])}개 · 메뉴표 {len(out['menus'])}개 · 식재료 구성 {len(out['food_mix']['rows'])}행"
+          f" · 검산 최대 차 {out['checks']['accounting_identity_max_gap_manwon']}만원")
 
 
 if __name__ == "__main__":

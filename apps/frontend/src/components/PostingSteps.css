@@ -73,3 +73,11 @@
 .pstep-bench-own th.is-on,.pstep-bench-own td.is-on{background:var(--track-posting-soft,var(--surface-sunken));color:var(--ink-alt);font-weight:700}
 .pstep-bench-own thead th small{font-weight:400;color:var(--text-subtle)}
 .pstep-bench-actions{margin:0;display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+/* 메뉴 설정 — 식재료비 칸(2026-11-27) */
+.pstep-num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.pstep-food-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--sp-2)}
+.pstep-food-foot > span{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.pstep-chip{display:inline-flex;align-items:center;padding:1px 8px;border:1px solid var(--line-alt);border-radius:11px;font-size:12px;font-weight:700;background:var(--surface)}
+.pstep-food-ref b{color:var(--ink-alt)}
+
+.pstep-table td select{min-width:112px;max-width:180px;text-overflow:ellipsis}

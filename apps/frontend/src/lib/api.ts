@@ -791,11 +791,15 @@ export interface MenuBenchmarkMenus {
   cost_rate: { value: number; detail: string };
   note: string;
 }
+/** 표 105 품목별 식재료비 비중(%) — 큰 순(2026-11-27 「식재료비」 칸의 참고값) */
+export interface MenuFoodMix { table: number; page: number; title: string; n: number; items: { label: string; value: number }[]; note: string }
 export interface MenuBenchmarkCategory {
-  key: string; label: string; values: MenuBenchmarkValue[]; menus: MenuBenchmarkMenus | null;
+  key: string; label: string; values: MenuBenchmarkValue[]; menus: MenuBenchmarkMenus | null; food_mix?: MenuFoodMix | null;
   missing: { key: string; label: string; reason: string }[]; notes: string[];
 }
-export interface MenuOwnershipGroup { key: "independent" | "franchise"; label: string; detail: string; n: number; values: MenuBenchmarkValue[] }
+export interface MenuOwnershipGroup {
+  key: "independent" | "franchise"; label: string; detail: string; n: number; values: MenuBenchmarkValue[]; food_mix?: MenuFoodMix | null;
+}
 export interface MenuBenchmarks {
   categories: MenuBenchmarkCategory[];
   ownership: { available: boolean; scope: string; note: string; groups: MenuOwnershipGroup[] };

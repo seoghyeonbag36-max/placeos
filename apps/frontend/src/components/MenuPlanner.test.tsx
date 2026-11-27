@@ -19,7 +19,9 @@ const BENCH: MenuBenchmarks = {
         val("seoul_labor_month", "서울 점포당 월 인건비", 407, "만원", "k")],
       menus: { table: 69, page: 136, title: "합성 표", total: { n: 1000, price: 15000 },
         items: [{ name: "국밥", n: 60, price: 10000 }, { name: "국수", n: 30, price: 8000 }, { name: "칼국수", n: 10, price: 9000 }],
-        cost_rate: { value: 40, detail: "합성 비율" }, note: "비중은 대표메뉴 응답 수의 비중이라 판매 비중이 아니에요." } },
+        cost_rate: { value: 40, detail: "합성 비율" }, note: "비중은 대표메뉴 응답 수의 비중이라 판매 비중이 아니에요." },
+      food_mix: { table: 105, page: 184, title: "합성 표", n: 1091, note: "합성 참고값이에요.",
+        items: [{ label: "육류", value: 27.7 }, { label: "채소", value: 14.8 }, { label: "과일", value: 0.5 }] } },
     { key: "cafe_coffee", label: "커피·음료", notes: [], missing: [{ key: "all", label: "업종 평균", reason: "합성 사유" }], values: [], menus: null },
   ],
   ownership: { available: true, scope: "외식업 전체(전국)", note: "업종 안에서 나눈 평균은 없어 외식업 전체 값이에요.",
@@ -191,5 +193,62 @@ describe("메뉴 설정 — 재료값 · 장비값 · 고정비 · 영업 시간
     // (300 + 300) ÷ (1 − 0.3 − 0.1) = 1,000만원 → 하루 80개
     expect(region().getByText(/팔면 본전/).textContent).toContain("하루 80개");
     expect(region().getByText(/월 손익분기 매출/).textContent).toContain("− 로열티");
+  });
+});
+
+describe("메뉴 설정 — 식재료비 칸 (2026-11-27)", () => {
+  const food = () => within(region().getByRole("group", { name: "식재료비" }));
+
+  it("메뉴마다 한 줄로 시작하고, 재료 1개 값을 계산해 「메뉴 원가 칸에 넣기」를 누를 때만 원가에 넣는다", async () => {
+    mount();
+    await screen.findByRole("group", { name: "업종 평균" });
+    expect(food().getAllByRole("row")).toHaveLength(1 + 3);                    // 머리 + 메뉴 3줄
+    type("메뉴 1 이름", "아메리카노");
+    expect((food().getByLabelText("식재료 1 쓰는 메뉴") as HTMLSelectElement).selectedOptions[0].textContent).toBe("아메리카노");
+    fireEvent.change(food().getByLabelText("식재료 1 이름"), { target: { value: "원두" } });
+    fireEvent.change(food().getByLabelText("식재료 1 산 값"), { target: { value: "25000" } });
+    fireEvent.change(food().getByLabelText("식재료 1 산 양"), { target: { value: "1000" } });
+    fireEvent.change(food().getByLabelText("식재료 1 1개에 쓰는 양"), { target: { value: "20" } });
+    expect(food().getAllByRole("row")[1].textContent).toContain("500원");
+    expect(region().getByText("아메리카노 500원")).toBeTruthy();
+    expect(valueOf("메뉴 1 원가")).toBe("");                                   // 저절로 넣지 않는다
+    fireEvent.click(region().getByRole("button", { name: "메뉴 원가 칸에 넣기" }));
+    expect(valueOf("메뉴 1 원가")).toBe("500");
+    expect(region().queryByRole("button", { name: "메뉴 원가 칸에 넣기" })).toBeNull();
+    // 메뉴 줄의 「재료값」과 같은 값이다 — 한쪽에서 적으면 다른 쪽에도 보인다
+    fireEvent.click(region().getByRole("button", { name: "메뉴 1 재료값으로 원가 계산" }));
+    expect((region().getByLabelText("메뉴 1 재료 1 이름") as HTMLInputElement).value).toBe("원두");
+  });
+
+  it("쓰는 메뉴를 바꾸면 그 메뉴로 옮기고, 식재료를 더하거나 뺄 수 있다", async () => {
+    mount();
+    await screen.findByRole("group", { name: "업종 평균" });
+    fireEvent.change(food().getByLabelText("식재료 1 이름"), { target: { value: "컵" } });
+    fireEvent.change(food().getByLabelText("식재료 1 산 값"), { target: { value: "5000" } });
+    fireEvent.change(food().getByLabelText("식재료 1 산 양"), { target: { value: "50" } });
+    fireEvent.change(food().getByLabelText("식재료 1 1개에 쓰는 양"), { target: { value: "1" } });
+    const menu2 = (food().getByLabelText("식재료 1 쓰는 메뉴") as HTMLSelectElement).options[1].value;
+    fireEvent.change(food().getByLabelText("식재료 1 쓰는 메뉴"), { target: { value: menu2 } });
+    expect(region().getByText("메뉴 2 100원")).toBeTruthy();                   // 메뉴 2 로 옮겨 갔다
+    expect(region().queryByText(/메뉴 1 100원/)).toBeNull();
+    const before = food().getAllByRole("row").length;
+    fireEvent.click(region().getByRole("button", { name: "+ 식재료 더하기" }));
+    expect(food().getAllByRole("row")).toHaveLength(before + 1);
+    expect((food().getByLabelText(`식재료 ${before} 이름`) as HTMLInputElement).value).toBe("");   // 새 줄은 맨 아래 빈 줄
+    fireEvent.click(food().getByRole("button", { name: `식재료 ${before} 지우기` }));
+    expect(food().getAllByRole("row")).toHaveLength(before);
+  });
+
+  it("업종 평균 식재료비 비율과 품목 구성(표 105)을 참고로 보이고, 1% 미만 품목은 줄인다", async () => {
+    mount();
+    await screen.findByRole("group", { name: "업종 평균" });
+    const ref = region().getByLabelText("업종 평균 식재료비");
+    expect(ref.textContent).toContain("업종 평균 식재료비 비율 41.2%");
+    expect(ref.textContent).toContain("식재료비 구성(한식 · 표 105 184쪽 · 사례 1,091곳)");
+    expect(ref.textContent).toContain("육류 27.7% · 채소 14.8%");
+    expect(ref.textContent).not.toContain("과일 0.5%");
+    type("메뉴 1 판매가", "10000");
+    type("메뉴 1 원가", "4000");
+    expect(region().getByLabelText("업종 평균 식재료비").textContent).toContain("내 메뉴 평균 원가율 40.0%");
   });
 });
