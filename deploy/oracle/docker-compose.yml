@@ -1,0 +1,68 @@
+# PlaceOS — Oracle Cloud VM(Always Free A1 · aarch64) 배포. Cloud Run 대체(2026-11-27).
+# 순서·함정은 docs/runbook-oracle-migration-2026-11-27.md. 평소엔 deploy.sh 가 이 파일을 돌린다.
+#
+# 구성: caddy(80/443 · 인증서 자동) → web(저장소 루트 Dockerfile **그대로** · 8080)
+# Dockerfile 을 고치지 않았다 — Cloud Run 때와 같은 이미지가 VM 의 CPU(arm64)로 새로 빌드될 뿐이다.
+#
+# 직접 칠 때(저장소 루트에서):
+#   docker compose --env-file /opt/placeos/build.env -f deploy/oracle/docker-compose.yml up -d --build
+name: placeos
+
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        # 네이버 지도 키는 **빌드 타임** 변수(Vite 가 번들에 인라인 · 공개 클라이언트 키).
+        # 비면 Dockerfile 이 빌드를 막는다. 값은 /opt/placeos/build.env 에 둔다.
+        VITE_NAVER_MAPS_KEY_ID: ${VITE_NAVER_MAPS_KEY_ID:?/opt/placeos/build.env 에 VITE_NAVER_MAPS_KEY_ID 가 없다}
+    image: placeos-web:${IMAGE_TAG:-local}
+    restart: unless-stopped
+    # 런타임 비밀값 17개 — 저장소 밖 파일. Cloud Run 환경변수를 그대로 내보낸 것이다(KEY=값 한 줄씩 · BOM 없음 · LF).
+    # ⚠ compose 는 env_file 값의 `$` · 따옴표를 해석한다. 내보낼 때 17개 값 모두 그런 문자가 없음을 확인했다.
+    #   값을 새로 넣을 때 `$` 가 들어가면 `$$` 로 적어야 한다.
+    env_file: /opt/placeos/placeos.env
+    environment:
+      PORT: "8080"
+      # Caddy 가 붙이는 X-Forwarded-Proto 를 uvicorn 이 믿는다 — 안 믿으면 앱이 만드는 리다이렉트가 http:// 로 나갈 수 있다.
+      # 8080 은 호스트 루프백과 compose 내부망에만 열려 있어(아래 ports) 밖에서 위조할 길이 없다.
+      FORWARDED_ALLOW_IPS: "*"
+    ports:
+      - "127.0.0.1:8080:8080"    # 배포 검증·점검용(루프백 전용). 외부는 caddy 만 연다.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Cloud Run 은 1GiB 에서 사용률 p99 93% 였다(2026-11-26 실측). VM 은 12GB 라 넉넉히 두되 폭주는 막는다.
+    mem_limit: 4g
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data      # 인증서 — 지워도 다시 발급된다(Let's Encrypt 발급 한도만 주의)
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

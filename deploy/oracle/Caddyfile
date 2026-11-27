@@ -1,0 +1,26 @@
+# PlaceOS — Caddy (인증서 자동 발급 · 리버스 프록시). Firebase Hosting 이 하던 일을 대신한다.
+#
+# Firebase Hosting 이 하던 것 → 여기서:
+#   · 사용자 도메인 + HTTPS  → Let's Encrypt 자동(DNS 가 이 VM 을 가리켜야 발급된다 — 런북 §DNS)
+#   · www → 본 주소 301      → 아래 www 블록
+#   · 모든 요청을 앱으로      → reverse_proxy (프론트도 앱이 낸다 — 단일 출처)
+#   · 압축                   → encode (앱에 GZip 미들웨어가 없다 — 2026-11-27 main.py 확인)
+# 보안 헤더·Cache-Control 은 앱이 직접 낸다(core/security_headers · FrontendFiles) — 여기서 더하지 않는다.
+#
+# 접속 로그는 켜지 않았다(받는 개인정보를 늘리지 않는다 — PrivacyNote). 필요하면 사이트 블록에 `log` 를 더한다.
+# ACME 만료 알림 메일을 받으려면 아래 전역 블록에 `email 주소` 를 더한다.
+{
+	# HTTP/3(UDP 443)는 열지 않는다 — Oracle VCN 규칙이 하나 줄어든다.
+	servers {
+		protocols h1 h2
+	}
+}
+
+www.placeos.co.kr {
+	redir https://placeos.co.kr{uri} permanent
+}
+
+placeos.co.kr {
+	encode zstd gzip
+	reverse_proxy web:8080
+}
