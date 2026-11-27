@@ -110,3 +110,15 @@ def test_half_up_rounding_matches_the_report_reading():
     franchise = next(g for g in mb.ownership()["groups"] if g["key"] == "franchise")
     days = _v(franchise["values"], "open_days")
     assert days["raw"] == 28.5 and days["value"] == 29                     # 가맹점 월 영업일 28.5일 → 29일
+
+
+def test_food_mix_is_the_table_105_row_sorted_and_close_to_100():
+    coffee = _cat("cafe_coffee")["food_mix"]
+    row = GOLD["food_mix"]["rows"]["커피 전문점"]["values"]
+    assert coffee["table"] == 105 and coffee["page"] == GOLD["food_mix"]["page"]
+    assert sorted(i["value"] for i in coffee["items"]) == sorted(row)
+    assert [i["value"] for i in coffee["items"]] == sorted(row, reverse=True)
+    assert abs(sum(i["value"] for i in coffee["items"]) - 100) <= 1.5
+    assert _cat("restaurant_other")["food_mix"] is None                       # 원천 행이 없으면 비운다
+    franchise = next(g for g in mb.ownership()["groups"] if g["key"] == "franchise")
+    assert sorted(i["value"] for i in franchise["food_mix"]["items"]) == sorted(GOLD["food_mix"]["rows"]["프랜차이즈"]["values"])

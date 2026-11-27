@@ -3,7 +3,7 @@ import {
   getMenuBenchmarks, tierAvailable, type MenuBenchmarkCategory, type MenuBenchmarks, type MenuBenchmarkValue, type MenuOwnershipGroup, type TierScenario,
 } from "@/lib/api";
 import {
-  dailyFromRevenue, emptyEquipment, emptyIngredient, emptyMenuRow, equipmentPlan, ingredientsTotal, menuBep, menuCategoryOf, menuMix, menuRowsFromBenchmark,
+  dailyFromRevenue, emptyEquipment, emptyIngredient, emptyMenuRow, equipmentPlan, ingredientCost, ingredientsTotal, menuBep, menuCategoryOf, menuMix, menuRowsFromBenchmark,
   mergeIntoBlanks, perHour,
   type EquipmentRow, type IngredientRow, type MenuRow,
 } from "@/lib/menuPlan";
@@ -120,6 +120,28 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
   const equipFillable = equipIncoming.some((e) => !equipment.some((x) => x.name.trim() === e.name)) && (equipment.some(blankEquip) || equipment.length < MAX_SUB);
   const fillEquipment = () => setEquipment((es) => mergeIntoBlanks(es, equipIncoming, blankEquip, (e) => e.name.trim(), MAX_SUB));
 
+  // 식재료비(2026-11-27) — 메뉴 줄마다 들어 있는 재료(rows[].ingredients)를 한 표로 펼친다. 메뉴 줄의 「재료값」과 **같은 값**을 고친다
+  const menuName = (r: Row, i: number) => r.name.trim() || `메뉴 ${i + 1}`;
+  const foodLines = rows.flatMap((r, i) => r.ingredients.map((g, j) => ({ rowId: r.id, menuIndex: i, j, g })));
+  const moveIngredient = (fromId: number, j: number, toId: number) => setRows((rs) => {
+    const item = rs.find((x) => x.id === fromId)?.ingredients[j];
+    const target = rs.find((x) => x.id === toId);
+    if (!item || fromId === toId || !target || target.ingredients.length >= MAX_SUB) return rs;
+    return rs.map((x) => (x.id === fromId ? { ...x, ingredients: x.ingredients.filter((_, k) => k !== j) }
+      : x.id === toId ? { ...x, ingredients: [...x.ingredients, item] } : x));
+  });
+  const removeIngredient = (rowId: number, j: number) =>
+    setRows((rs) => rs.map((x) => (x.id !== rowId ? x : { ...x, ingredients: x.ingredients.filter((_, k) => k !== j) })));
+  // 새 줄은 표 맨 아래에 — 재료가 있는 마지막 메뉴 묶음 뒤에 붙인다(다른 메뉴 것이면 「쓰는 메뉴」로 옮긴다)
+  const addFoodTarget = [...rows].reverse().find((r) => r.ingredients.length > 0 && r.ingredients.length < MAX_SUB)
+    ?? rows.find((r) => r.ingredients.length < MAX_SUB);
+  const addFoodLine = () => { if (addFoodTarget) setRows((rs) => rs.map((x) => (x.id !== addFoodTarget.id ? x : { ...x, ingredients: [...x.ingredients, emptyIngredient()] }))); };
+  const perMenuFood = rows.map((r, i) => ({ r, i, sub: ingredientsTotal(r.ingredients) })).filter((x) => x.sub);
+  const foodToCostPending = perMenuFood.some(({ r, sub }) => r.cost.trim() !== String(Math.round(sub!.total)));
+  const putFoodIntoCosts = () => setRows((rs) => rs.map((r) => { const sub = ingredientsTotal(r.ingredients); return sub ? { ...r, cost: String(Math.round(sub.total)) } : r; }));
+  const foodMix = category?.food_mix ?? null;
+  const foodRate = valueOf("food_cost_rate");
+
   const missingInputs = [
     !days.trim() && "월 영업일(1~31)", !labor.trim() && "인건비", !utilities.trim() && "관리비 · 공과금", !other.trim() && "기타 월 고정비",
     franchise && !royalty.trim() && "로열티", franchise && !adFee.trim() && "광고분담금",
@@ -190,6 +212,39 @@ export default function MenuPlanner({ rent, rentSource, scenarios, industry, det
         </table>
       </div>
       {rows.length < MAX_ROWS && <button type="button" className="pstep-add" onClick={() => setRows((rs) => [...rs, newRow()])}>+ 메뉴 더하기</button>}
+
+      <h3 className="pstep-h">식재료비 <small>메뉴마다 1개에 쓰는 재료를 적으면 메뉴 1개 재료값(원가)을 계산해요 · 산 양과 쓰는 양은 같은 단위(g · ml · 개)</small></h3>
+      <div className="pstep-table" role="group" aria-label="식재료비">
+        <table>
+          <thead><tr><th scope="col">식재료</th><th scope="col">쓰는 메뉴</th><th scope="col">산 값(원)</th><th scope="col">산 양</th><th scope="col">1개에 쓰는 양</th><th scope="col">1개 재료값</th><th scope="col"><span className="sr-only">삭제</span></th></tr></thead>
+          <tbody>{foodLines.map(({ rowId, menuIndex, j, g }, k) => {
+            const one = ingredientCost(g);
+            return (
+              <tr key={`${rowId}-${j}`}>
+                <td><input aria-label={`식재료 ${k + 1} 이름`} value={g.name} onChange={(e) => setIngredient(rowId, j, "name", e.target.value)} placeholder="예: 원두 · 우유 · 컵" /></td>
+                <td><select aria-label={`식재료 ${k + 1} 쓰는 메뉴`} value={rowId} onChange={(e) => moveIngredient(rowId, j, Number(e.target.value))}>
+                  {rows.map((r, i) => <option key={r.id} value={r.id}>{menuName(r, i)}</option>)}
+                </select></td>
+                <td><input aria-label={`식재료 ${k + 1} 산 값`} inputMode="numeric" value={g.price} onChange={(e) => setIngredient(rowId, j, "price", e.target.value)} placeholder="원" /></td>
+                <td><input aria-label={`식재료 ${k + 1} 산 양`} inputMode="numeric" value={g.pack} onChange={(e) => setIngredient(rowId, j, "pack", e.target.value)} placeholder="g · ml · 개" /></td>
+                <td><input aria-label={`식재료 ${k + 1} 1개에 쓰는 양`} inputMode="numeric" value={g.use} onChange={(e) => setIngredient(rowId, j, "use", e.target.value)} placeholder="같은 단위" /></td>
+                <td className="pstep-num">{one == null ? "—" : `${n0(one)}원`}</td>
+                <td><button type="button" className="pstep-x" aria-label={`식재료 ${k + 1} 지우기`} title={`${menuName(rows[menuIndex], menuIndex)}에서 빼기`} onClick={() => removeIngredient(rowId, j)}>×</button></td>
+              </tr>);
+          })}</tbody>
+        </table>
+      </div>
+      <div className="pstep-ingr-foot pstep-food-foot">
+        {addFoodTarget && <button type="button" className="pstep-add" onClick={addFoodLine}>+ 식재료 더하기</button>}
+        {perMenuFood.length > 0 ? <>
+          <span>메뉴 1개 재료값 {perMenuFood.map(({ r, i, sub }) => <b key={r.id} className="pstep-chip">{menuName(r, i)} {n0(sub!.total)}원</b>)}</span>
+          {foodToCostPending && <button type="button" className="pstep-mini is-strong" onClick={putFoodIntoCosts}>메뉴 원가 칸에 넣기</button>}
+        </> : <span className="pstep-sub">계산 예) 원두 1,000g을 25,000원에 사서 한 잔에 20g 쓰면 500원 — 컵 · 뚜껑처럼 팔 때마다 드는 것도 적어요.</span>}
+      </div>
+      {(foodRate || foodMix) && <p className="pstep-foot pstep-food-ref" aria-label="업종 평균 식재료비">
+        {foodRate && <>업종 평균 식재료비 비율 <b>{foodRate.value}%</b>{mix ? <> · 내 메뉴 평균 원가율 <b>{(mix.costRate * 100).toFixed(1)}%</b></> : null}. </>}
+        {foodMix && <>식재료비 구성({category!.label} · 표 {foodMix.table} {foodMix.page}쪽 · 사례 {foodMix.n.toLocaleString("ko-KR")}곳): {foodMix.items.filter((it) => it.value >= 1).map((it) => `${it.label} ${it.value}%`).join(" · ")}. {foodMix.note}</>}
+      </p>}
 
       <h3 className="pstep-h">장비값 <small>구입가 ÷ 쓸 햇수 ÷ 12 를 한 달 고정비에 더해 계산해요</small></h3>
       <div className="pstep-table" role="group" aria-label="장비값">

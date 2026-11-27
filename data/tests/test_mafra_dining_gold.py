@@ -49,3 +49,13 @@ def test_menu_tables_are_sorted_by_answers_and_carry_their_table_numbers():
         assert 68 < m["table"] <= 86 and m["page"] > 0
         assert all(i["price"] > 0 for i in m["items"])
     assert GOLD["menus"]["커피 전문점"]["items"][0]["name"] == "커피"
+
+
+def test_food_mix_rows_cover_every_row_and_sum_to_about_100():
+    fm = GOLD["food_mix"]
+    assert fm["table"] == 105 and len(fm["columns"]) == 9
+    assert set(fm["rows"]) == set(T["open_days"]["rows"])
+    for row, r in fm["rows"].items():
+        assert len(r["values"]) == 9 and all(0 <= x <= 100 for x in r["values"]), row
+        assert abs(sum(r["values"]) - 100) <= 1.5, row
+    assert fm["rows"]["한식"]["n"] == T["open_days"]["rows"]["한식"]["n"]

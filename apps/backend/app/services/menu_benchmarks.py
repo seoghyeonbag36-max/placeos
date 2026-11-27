@@ -137,6 +137,17 @@ def _menus(row: str) -> dict[str, Any] | None:
                       "비중은 그 메뉴를 대표메뉴로 꼽은 응답 수의 비중이라 판매 비중이 아니에요 — 내 가게 값으로 고치세요."))
 
 
+def _food_mix(row: str) -> dict[str, Any] | None:
+    """표 105 품목별 식재료비 비중(%) — 큰 순. 그 업종 업체들이 식재료비를 어디에 쓰는지 보는 참고값이다(2026-11-27 「식재료비」 칸)."""
+    fm = _mafra().get("food_mix") or {}
+    r = (fm.get("rows") or {}).get(row)
+    if not r:
+        return None
+    items = sorted(({"label": c, "value": float(v)} for c, v in zip(fm["columns"], r["values"])), key=lambda it: -it["value"])
+    return dict(table=fm["table"], page=fm["page"], title=fm["title"], n=int(r["n"]), items=items,
+                note="응답 업체가 적은 품목별 식재료비 비중의 평균이에요 — 내 메뉴의 재료 구성과 견줘 보는 참고값이에요.")
+
+
 def _per_store_month(total_mn: float | None, estab: float | None) -> float | None:
     """KOSIS 연간 합계(백만원) → 점포당 월평균(만원). 백만원 × 100 = 만원."""
     if total_mn is None or not estab:
@@ -176,7 +187,8 @@ def categories() -> list[dict[str, Any]]:
         if not values:
             missing.append(dict(key="all", label="업종 평균",
                                 reason="이 업종에 대응하는 공식 통계 행이 없어 평균을 보일 수 없어요. 직접 넣어 주세요."))
-        out.append(dict(key=key, label=spec["label"], values=values, menus=_menus(row) if row else None, notes=notes, missing=missing))
+        out.append(dict(key=key, label=spec["label"], values=values, menus=_menus(row) if row else None,
+                        food_mix=_food_mix(row) if row else None, notes=notes, missing=missing))
     return out
 
 
@@ -186,7 +198,8 @@ def ownership() -> dict[str, Any]:
         values = _mafra_values(row)
         if values:
             n = int(_mafra()["tables"]["open_days"]["rows"][row]["n"])
-            groups.append(dict(key=key, label=label, detail=f"{detail} · 보고서 「{row}」 행 · 사례 {n:,}곳", n=n, values=values))
+            groups.append(dict(key=key, label=label, detail=f"{detail} · 보고서 「{row}」 행 · 사례 {n:,}곳", n=n, values=values,
+                               food_mix=_food_mix(row)))
     return dict(available=len(groups) == 2, scope="외식업 전체(전국)", note=OWNERSHIP_NOTE, groups=groups)
 
 
