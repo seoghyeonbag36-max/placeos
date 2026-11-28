@@ -396,5 +396,6 @@ describe("PlatformConsole — 내 업종 자리 순서(site-ranking)", () => {
     render(<PlatformConsole />);
     expect(await screen.findByText(/인스타그램은 공식 API 연결 전이라/)).toBeTruthy();
     expect(screen.queryByText(/인스타 #가로수길 최근 24시간/)).toBeNull();               // 수집 전 — 결론 줄에 지어 넣지 않는다
+    expect(screen.queryByRole("region", { name: "인스타그램" })).toBeNull();            // 연결 전 — 빈 인스타그램 카드를 그리지 않는다(11-28)
   });
 });

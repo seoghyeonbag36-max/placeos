@@ -794,7 +794,9 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
             자주 언급되는 단어입니다. 긍정·부정 평가를 뜻하지 않습니다.
           </div>
 
-          {ident.instagram && <InstagramPanel data={ident.instagram} />}
+          {/* 2026-11-28 사용자 지시: 공식 API 연결 전(connected=false)이면 인스타그램 카드를 그리지 않는다 — 수치가 없는 빈 카드였다.
+              연결된 뒤(수집됨·대기·실패)에는 그대로 그린다. */}
+          {ident.instagram?.connected && <InstagramPanel data={ident.instagram} />}
           {ident.collected && <CollectedSection data={ident.collected} />}
           {trends.length > 0 && (
             <div className="trends">

@@ -44,6 +44,8 @@ export function Start() {
       <ChoiceList label="준비하는 일" value={state.goal} options={GOALS}
         onChoose={(g) => { update((s) => setGoal(s, g)); go(g === "start" ? "/startup-order" : "/industry"); }} />
       <p className="fl-foot">로그인 없이 끝까지 볼 수 있어요. 저장할 때만 로그인해요.</p>
+      {/* 2026-11-28: 시작 질문은 창업자 세 가지뿐이라 건물주가 들어올 문이 없었다. 창업자 흐름은 그대로 두고 조용한 링크만 더한다. */}
+      <p className="fl-foot"><TextButton onClick={() => go("/owner")}>건물주이신가요? 빈 자리 올리기</TextButton></p>
     </FlowScreen>
   );
 }

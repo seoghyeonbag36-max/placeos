@@ -31,6 +31,13 @@ describe("랜딩 — 말하는 것", () => {
     expect(screen.getByRole("link", { name: "이미 계정이 있어요" }).getAttribute("href")).toBe("#login");
   });
 
+  it("건물주는 첫 화면에서 건물주 소개로 가고, 그 절의 주 버튼이 올리기로 간다(11-28)", () => {
+    render(<Landing />);
+    expect(screen.getByRole("link", { name: "빈 자리 올리는 방법 보기" }).getAttribute("href")).toBe("#owners");
+    expect(document.getElementById("owners")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "빈 자리 직접 올리기" }).getAttribute("href")).toBe("#/owner");
+  });
+
   it("앱이 시작 카드에서 쓰는 세 가지 목적 문구를 그대로 쓴다(GOALS 가 단일 출처)", () => {
     render(<Landing />);
     expect(screen.getByText(/새로 창업 · 지금 상권에서 업종 바꾸기 · 같은 업종으로 상권 옮기기/)).toBeTruthy();
