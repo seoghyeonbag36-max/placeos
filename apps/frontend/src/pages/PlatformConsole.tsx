@@ -825,7 +825,7 @@ function IdentitySection({ ident, hub }: { ident: NonNullable<PlatformProfile["i
 }
 
 /** 단어마다 외부 검색 링크 — 수치를 만들지 않고 원문으로 내보낸다. */
-function KeywordSearchSection({ words, districtName, instagramNote }: { words: string[]; districtName: string; instagramNote: string }) {
+function KeywordSearchSection({ words, districtName, instagramNote }: { words: string[]; districtName: string; instagramNote: string | null }) {
   const q = (word: string) => encodeURIComponent(`${districtName} ${word}`);
   const shown = words.slice(0, 10);
   return (

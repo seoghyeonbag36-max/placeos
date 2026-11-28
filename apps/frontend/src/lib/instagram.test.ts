@@ -9,9 +9,10 @@ const tag = (over: Partial<InstagramTag>): InstagramTag => ({
 });
 
 describe("instagramSearchNote", () => {
-  it("인스타 칸이 없거나 연결 전이면 연결 전이라고 말한다", () => {
-    expect(instagramSearchNote(undefined)).toContain("공식 API 연결 전");
-    expect(instagramSearchNote(tag({}))).toContain("공식 API 연결 전");
+  it("인스타 칸이 없거나 연결 전이면 안내를 하지 않는다(11-28 사용자 지시)", () => {
+    expect(instagramSearchNote(undefined)).toBeNull();
+    expect(instagramSearchNote(null)).toBeNull();
+    expect(instagramSearchNote(tag({}))).toBeNull();
   });
 
   it("연결된 뒤 차례를 기다리는 상권에는 「연결 전」이라고 하지 않는다", () => {

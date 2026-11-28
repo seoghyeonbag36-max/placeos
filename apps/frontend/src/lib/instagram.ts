@@ -13,13 +13,14 @@ export function instagramPendingReason(d: InstagramTag): string | null {
   return "공식 API 는 7일에 해시태그 30개만 검색할 수 있어 상권을 차례로 모으고 있어요 — 이 상권은 아직 차례가 오지 않았어요.";
 }
 
-/** 검색어 링크 칸의 한 문장 — 인스타 칸이 없으면(Gold 없음) 연결 전으로 말한다 */
-export function instagramSearchNote(d: InstagramTag | null | undefined): string {
+/** 검색어 링크 칸의 한 문장 — 연결 전이면(인스타 칸이 없거나 connected=false) 안내를 하지 않는다 null.
+ *  2026-11-28 사용자 지시: 「인스타그램은 공식 API 연결 전이라 …」 한 줄을 지웠다(수치가 없는 이유를 방문자에게 말하지 않는다). */
+export function instagramSearchNote(d: InstagramTag | null | undefined): string | null {
   if (d?.status === "collected") {
     return "인스타그램 수치는 「상권 특성 자세히 보기」의 인스타그램 칸에 있어요(공식 API · 대표 해시태그 하나 기준) — 아래 인스타 링크는 단어별 태그 페이지예요.";
   }
   if (d?.connected) {
     return `인스타그램은 대표 해시태그(#${d.hashtag}) 하나만 공식 API 로 모아요 — ${instagramPendingReason(d)} 아래는 단어별 태그 링크예요.`;
   }
-  return "인스타그램은 공식 API 연결 전이라 단어별 수치가 없고 태그 링크만 드립니다.";
+  return null;
 }
