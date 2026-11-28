@@ -369,7 +369,7 @@ describe("PlatformConsole — 내 업종 자리 순서(site-ranking)", () => {
     expect(await screen.findByText(/어떤 단어가 알고리즘에 유리한지는 측정하지 않았습니다/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "인스타 태그" }).getAttribute("href")).toContain("/explore/tags/");
     expect(screen.getByRole("link", { name: "네이버 블로그" }).getAttribute("href")).toContain(encodeURIComponent("가로수길 맛집"));
-    expect(screen.getByText(/인스타그램은 공식 API 연결 전이라 단어별 수치가 없고/)).toBeTruthy();   // 인스타 칸이 없거나 수집 전
+    expect(screen.queryByText(/연결 전이라/)).toBeNull();   // 인스타 칸이 없거나 연결 전 — 「연결 전」 안내를 하지 않는다(11-28 사용자 지시)
   });
 
   it("인스타그램(2026-11-22) — 수집된 상권만 결론 줄에 최근 24시간 표본을 더하고, 수집 전이면 아무것도 더하지 않는다", async () => {
@@ -394,7 +394,8 @@ describe("PlatformConsole — 내 업종 자리 순서(site-ranking)", () => {
       { match: /\/garosugil\/platform$/, body: withIg({ ...ig, connected: false, status: "pending" }) },
     ]);
     render(<PlatformConsole />);
-    expect(await screen.findByText(/인스타그램은 공식 API 연결 전이라/)).toBeTruthy();
+    expect(await screen.findByRole("link", { name: "인스타 태그" })).toBeTruthy();       // 화면이 그려진 뒤에 본다(검색어 링크 칸)
+    expect(screen.queryByText(/연결 전이라/)).toBeNull();                                // 연결 전 — 카드에도 검색어 칸에도 「연결 전」 안내가 없다(11-28)
     expect(screen.queryByText(/인스타 #가로수길 최근 24시간/)).toBeNull();               // 수집 전 — 결론 줄에 지어 넣지 않는다
     expect(screen.queryByRole("region", { name: "인스타그램" })).toBeNull();            // 연결 전 — 빈 인스타그램 카드를 그리지 않는다(11-28)
   });
