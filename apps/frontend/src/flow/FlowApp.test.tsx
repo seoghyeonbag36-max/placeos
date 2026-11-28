@@ -106,6 +106,16 @@ describe("화면설계서 5판 흐름", { timeout: 30000 }, () => {
     expect((screen.getByRole("combobox", { name: "정렬" }) as HTMLSelectElement).value).toBe("area");
   });
 
+  it("시작 질문에 건물주 입구가 있다 — 창업자 세 질문은 그대로고 링크만 더해졌다(11-28)", () => {
+    stub();
+    open("/start");
+    render(<FlowApp token={null} />);
+    expect(h1().textContent).toBe("어떤 준비를 하고 계세요?");
+    expect(screen.getAllByRole("radio").length).toBe(3);
+    fireEvent.click(screen.getByRole("button", { name: "건물주이신가요? 빈 자리 올리기" }));
+    expect(window.location.hash).toBe("#/owner");
+  });
+
   it("F-01·F-03 업종별 창업은 업종을 고르면 지역을 묻지 않고 로그인 없이 상권 순위를 본다", async () => {
     const api = stub();
     open("/start");

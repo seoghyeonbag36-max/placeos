@@ -113,6 +113,8 @@ export default function Landing() {
                 <a className="lp-btn lp-btn-primary" href="#/start">시작하기</a>
                 <a className="lp-btn lp-btn-ghost" href="#login">이미 계정이 있어요</a>
               </div>
+              {/* 2026-11-28: 문은 하나인데 손님이 둘이었다 — 건물주는 네 번째 절에서야 만났다. 첫 화면에서 건물주 소개로 바로 간다. */}
+              <p className="lp-owner-hint">건물주이신가요? <a href="#owners">빈 자리 올리는 방법 보기</a></p>
               <p className="lp-fine"><span>시범 운영 중</span><span>지금은 결제 없이 사용</span><span>로그인 없이 끝까지, 저장할 때만 가입</span></p>
             </div>
             <figure className="lp-hero-art">
@@ -124,10 +126,9 @@ export default function Landing() {
 
         <section className="lp-section lp-overview" aria-labelledby="lp-results">
           <div className="lp-wrap">
-            <h2 id="lp-results">살펴보고 얻는 것</h2>
-            <ul className="lp-results">
-              <li>상권 비교</li><li>층별 공실 확인</li><li>비용과 회수 기간 검토</li><li>입점 희망서</li>
-            </ul>
+            {/* 2026-11-28 디자인 정리: 단어 네 개짜리 「살펴보고 얻는 것」 목록을 걷었다 — 바로 아래 이용 순서와 아래 세 질문이 같은 이야기를 이미 한다.
+                제목은 이어지는 이용 순서에 맞췄다(라벨 「주요 이용 순서」와 목록은 Help.test 가 잠근다). */}
+            <h2 id="lp-results">이렇게 이용합니다</h2>
             {/* 2026-11-19 사용자 결정(랜딩 점검 #3): 이용 순서는 접지 않고 펼쳐 둔다. 10-17 간소화가 <details> 로 접었다(「보기」 토글 → 정적 라벨). */}
             <div className="lp-quick">
               <p className="lp-quick-label" id="lp-quick-label">주요 이용 순서</p>
@@ -166,14 +167,15 @@ export default function Landing() {
         <section className="lp-section" id="owners" aria-labelledby="lp-owners">
           <div className="lp-wrap">
             <h2 id="lp-owners">건물주이신가요? 빈 자리를 직접 올리세요</h2>
+            {/* 2026-11-28: 다섯 줄 한 덩어리를 둘로 나눴다(문장은 그대로) — 건물주가 얻는 것 / PlaceOS 가 하지 않는 것. 주 버튼은 건물주의 첫 행동 하나. */}
             <p className="lp-sub">
               소유자 확인을 거친 매물만 창업자에게 보이고, 창업자의 문의·방문 예약·조건 제안을 직접 받습니다. 오래 비어 있는 자리 · 2층 이상 · 팝업(단기 사용)도 올릴 수 있고,
               층별 배치도 사진을 올리면 지도의 개략 배치도가 실제 배치도로 바뀝니다. 등록·게시는 무료입니다.
               창업자가 남긴 입점 희망서(업종·면적·층·예산)를 보고 내 매물로 먼저 제안할 수도 있습니다.
-              PlaceOS 는 부동산 중개를 하지 않으며 중개보수·성사 수수료를 받지 않습니다.
             </p>
+            <p className="lp-sub">PlaceOS 는 부동산 중개를 하지 않으며 중개보수·성사 수수료를 받지 않습니다.</p>
             <div className="lp-cta-row">
-              <a className="lp-btn lp-btn-ghost" href="#/owner">빈 자리 직접 올리기</a>
+              <a className="lp-btn lp-btn-primary" href="#/owner">빈 자리 직접 올리기</a>
               <a className="lp-btn lp-btn-ghost" href="#/listings">건물주 확인 매물 보기</a>
               <a className="lp-btn lp-btn-ghost" href="#/brief">입점 희망서 쓰기(창업자)</a>
             </div>

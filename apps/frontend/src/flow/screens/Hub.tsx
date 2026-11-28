@@ -172,6 +172,8 @@ export function Home() {
         <div className="fl-actions">
           {/* 상권 흐름(2026-10-26) — 업종을 고르기 전에도 볼 수 있다. 서울만 보일 때는 닫는다(2026-11-10 · lib/siteScope) */}
           {showsCrossRegion() && <TextButton onClick={() => go(corridorPath(CORRIDOR_ID))}>파주 → 고양 → 서울 손님 흐름 보기</TextButton>}
+          {/* 2026-11-28: 시작 질문은 창업자 세 가지뿐이라 건물주가 들어올 문이 없었다. 창업자 흐름은 그대로 두고 조용한 링크만 더한다. */}
+          <TextButton onClick={() => go("/owner")}>건물주이신가요? 빈 자리 올리기</TextButton>
           {!token && <TextButton onClick={openLogin}>로그인</TextButton>}
         </div>
       </FlowScreen>

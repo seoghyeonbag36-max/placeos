@@ -43,9 +43,9 @@
 .lp h3 { font-size: var(--text-title); line-height: 1.4; font-weight: var(--fw-semibold); }
 .lp-sub { margin-top: var(--space-lg) !important; max-width: 48em; color: var(--color-ink-2); }
 .lp-overview { border-top: 1px solid var(--color-rule); }
-.lp-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); margin-top: var(--space-xl) !important; font-size: var(--text-lead); font-weight: var(--fw-semibold); }
-.lp-results li { padding-block: var(--space-md); border-bottom: 1px solid var(--color-rule); }
-.lp-quick { margin-top: var(--space-2xl); }
+.lp-owner-hint { margin-top: var(--space-md) !important; font-size: var(--text-sm); color: var(--color-ink-2); }
+.lp-owner-hint a { font-weight: var(--fw-semibold); }
+.lp-quick { margin-top: var(--space-xl); }
 .lp-quick-label { min-height: 52px; padding-block: var(--space-lg); border-block: 1px solid var(--color-rule); font-weight: var(--fw-semibold); }
 .lp-quick-steps { display: grid; gap: var(--space-lg); margin-top: var(--space-lg) !important; counter-reset: quick; }
 .lp-quick-steps li { counter-increment: quick; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--space-md); }
@@ -97,7 +97,6 @@
  .lp-hero { min-height: calc(100svh - 80px); display: grid; align-items: center; padding-block: var(--space-xl); }
  .lp-hero-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--space-xl); }
  .lp-hero-art { min-height: 520px; }
- .lp-results { grid-template-columns: repeat(4, minmax(0, 1fr)); }
  .lp-quick-steps, .lp-cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
  .lp-step { grid-template-columns: 40px minmax(0, 1fr); }
  /* 본문이 두 행에 걸치면(grid-row: 1 / span 2) 4줄짜리의 남는 높이가 「이름」「질문」 두 행에 나뉘어 이름과 질문 사이가 벌어졌다(4번 Program · 960px 에선 3번도).
