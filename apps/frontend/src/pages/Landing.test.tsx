@@ -97,9 +97,12 @@ describe("랜딩 — 법·접근성 최소선", () => {
     expect(screen.getByRole("link", { name: "문의" }).getAttribute("href")).toMatch(/^mailto:/);
   });
 
-  it("일러스트에 대체 텍스트가 있고, 문서 구조(header·main·footer)가 선다", () => {
+  it("제품 화면에 대체 텍스트와 설명이 있고, 문서 구조(header·main·footer)가 선다", () => {
     render(<Landing />);
-    expect(screen.getByRole("img").getAttribute("alt")).toMatch(/2~3층이 비어 있다/);
+    // 11-28: 일러스트 대신 실제 화면(빈 자리 상세의 층 그림)이다. 월세가 추정이라는 말이 그림 곁에 늘 붙어 있어야 한다
+    expect(screen.getByRole("img").getAttribute("alt")).toMatch(/1층·3층·4층이 비어 있고/);
+    expect(screen.getByRole("img").getAttribute("alt")).toMatch(/호가가 아닌 추정/);
+    expect(screen.getByText(/실제 화면입니다\. 건물 정보는 가렸고, 월세는 호가가 아닌 추정입니다/)).toBeTruthy();
     expect(screen.getByRole("banner")).toBeTruthy();
     expect(screen.getByRole("main")).toBeTruthy();
     expect(screen.getByRole("contentinfo")).toBeTruthy();

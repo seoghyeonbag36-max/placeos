@@ -18,7 +18,7 @@
  * 이동은 해시다 — 앱 전체가 해시 라우팅이다(App.tsx). 「시작하기」는 질문 흐름의 첫 질문(`#/start`, 화면설계서 5판 —
  * 로그인 없이 끝까지 간다), 「로그인」은 `#login`(App 이 Home 을 낸다).
  */
-import illustration from "@/design/assets/iso-commercial-building.svg";
+import productShot from "@/design/assets/product-floor-stack.png";
 import { IconKey, IconPin, IconSpark } from "@/components/TrackIcons";
 import { GOALS } from "@/lib/businessProfile";
 import { landingFacts } from "@/lib/landingFacts";
@@ -117,9 +117,13 @@ export default function Landing() {
               <p className="lp-owner-hint">건물주이신가요? <a href="#owners">빈 자리 올리는 방법 보기</a></p>
               <p className="lp-fine"><span>시범 운영 중</span><span>지금은 결제 없이 사용</span><span>로그인 없이 끝까지, 저장할 때만 가입</span></p>
             </div>
+            {/* 2026-11-28: 일러스트 대신 실제 화면이다 — 빈 자리 상세의 「이 건물의 층」(불광 · 실데이터 · 로컬 백엔드 캡처).
+                건물 이름·주소·지도는 잘라 건물이 특정되지 않게 했고, 월세 줄과 「호가가 아닌 추정」 안내는 그대로 남겼다.
+                화면이 바뀌면 이 그림도 낡는다 — 다시 찍는 법은 scripts/capture_landing_product_shot.py 머리말. */}
             <figure className="lp-hero-art">
-              <img src={illustration} width={800} height={800}
-                alt="4층 상가 건물 일러스트. 1층과 4층은 입주해 있고 2~3층이 비어 있다" />
+              <img src={productShot} width={750} height={734}
+                alt="빈 자리 상세 화면의 이 건물의 층. 5층 건물에서 1층·3층·4층이 비어 있고 2층은 영업 중이며 5층은 상가가 아니거나 알 수 없다. 월세는 호가가 아닌 추정이라는 안내가 함께 나온다" />
+              <figcaption className="lp-hero-cap">실제 화면입니다. 건물 정보는 가렸고, 월세는 호가가 아닌 추정입니다.</figcaption>
             </figure>
           </div>
         </section>
